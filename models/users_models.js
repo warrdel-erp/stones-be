@@ -4,23 +4,27 @@ const Sechma = mongoose.Schema
 const userSechma = new Sechma({
     username: {
         type: String,
-        default: null
+        default: null,
+        required: [true, 'User Name is required.'],
     },
     userid: {
         type: String,
-        default: null
+        default: null,
     },
     password: {
         type: String,
-        default: null
+        default: null,
+        required: [true, 'Password is required.'],
     },
     phone: {
         type: String,
-        default: null
+        default: null,
+        required: [true, 'Phone No is required.'],
     },
     email: {
         type: String,
-        default: null
+        unique: true,
+        required: [true, 'Email is required.'],
     },
 })
 

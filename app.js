@@ -36,6 +36,8 @@ app.use("/inventorysuppliers", require("./router/inventorysuppliers"))
 app.use("/prepurchaserequest", require("./router/prepurchaserequest"))
 app.use("/purchaseorder", require("./router/purchaseorder"))
 app.use("/users", require("./router/users"))
+app.use("/register", require("./router/auth/register"))
+app.use("/login", require("./router/auth/login"))
 
 //server init
 app.listen(port, () => { console.log(`Api Running on http://localhost:${port}`) })
