@@ -1,5 +1,11 @@
 export const secretKey = 'wardellsolutionprivatelimited'
 
+export const country = ['Vietnam', 'Angola','Brazil','Canada','China','Greece','India','Italy','Norway','Saudi Arabia','South Africa','Spain','Ukraine'];
+
+export const language = ['English', 'French','Spanish','Italian'];
+
+export const supplierType = ['National', 'International'];
+
 export const statusCode = {
     SUCCESS :200,
     CREATED : 201,

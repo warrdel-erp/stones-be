@@ -54,3 +54,43 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- supplier
+
+CREATE TABLE IF NOT EXISTS suppliers (
+    supplier_id SERIAL PRIMARY KEY,
+    supplier_name VARCHAR(255) NOT NULL UNIQUE,
+    code VARCHAR(255),
+    supplier_type ENUM('National', 'International'),
+    contact_name VARCHAR(255),
+    parent_location VARCHAR(255) NOT NULL,
+    print_name VARCHAR(255) NOT NULL,
+    language ENUM('English', 'French', 'Spanish', 'Italian'),
+    parent_supplier VARCHAR(255),
+    supplier_since DATE,
+    port VARCHAR(255),
+    markup_multiplier FLOAT,
+    discount FLOAT,
+    primary_phone_no VARCHAR(255) NOT NULL,
+    secondary_phone_no VARCHAR(255),
+    landline_no VARCHAR(255),
+    email VARCHAR(255),
+    accounting_email VARCHAR(255),
+    remit_address VARCHAR(255),
+    remit_suite VARCHAR(255),
+    remit_city VARCHAR(255),
+    remit_state VARCHAR(255),
+    remit_zip INTEGER,
+    remit_country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+    shipping_address VARCHAR(255),
+    shipping_suite VARCHAR(255),
+    shipping_city VARCHAR(255),
+    shipping_state VARCHAR(255),
+    shipping_zip INTEGER,
+    shipping_country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+    delivery_notes VARCHAR(255),
+    internal_notes VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
