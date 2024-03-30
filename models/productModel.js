@@ -1,6 +1,6 @@
 import sequelize from "../database/sequelizeConfig.js"
 import { DataTypes } from 'sequelize';
-
+import { productKindEnum,productAssignedBinEnum,productCategoryEnum,productColoursEnum,productOriginEnum,productPriceRangeEnum,productTypeEnum,productUomEnum} from '../constant.js'; 
 export default sequelize.define(
   'products',
   {
@@ -17,20 +17,20 @@ export default sequelize.define(
         field: 'product_name'
     },
     type: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.ENUM(...productTypeEnum),
+        allowNull: false,
     },
     baseColor: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(...productColoursEnum),
         allowNull: true,
         field: 'base_color'
     },
     origin :{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(...productOriginEnum),
         allowNull: true
     },
     category :{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(...productCategoryEnum),
         allowNull: true
     },
     alternativeName :{
@@ -39,8 +39,8 @@ export default sequelize.define(
         field: 'alternative_name'
     },
     kind :{
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.ENUM(...productKindEnum),
+        allowNull: false,
     },
     subCategory:{
         type: DataTypes.STRING,
@@ -66,8 +66,8 @@ export default sequelize.define(
         field:'serial_name'
     },
     uomGroup:{
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: DataTypes.ENUM(...productUomEnum),
+        allowNull: false,
         field:'uom_group'
     },
     weight:{
@@ -76,7 +76,7 @@ export default sequelize.define(
     },
     singleSlab:{
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
         field:'single_slab'
     },
     bundle:{
@@ -84,7 +84,7 @@ export default sequelize.define(
         allowNull: true
     },
     priceRange:{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(...productPriceRangeEnum),
         allowNull: true,
         field: 'price_range'
     },
@@ -119,7 +119,7 @@ export default sequelize.define(
         field:'lead_time'
     },
     assignedTime:{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM(...productAssignedBinEnum),
         allowNull: true,
         field:'assigned_time'
     },
@@ -182,13 +182,13 @@ export default sequelize.define(
     },
     deletedAt: {
         type: DataTypes.TIME,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
-        field:'deleted_at'
+        allowNull: true,
+        field:'deleted_at',
     },
 },  
 {
     tableName: 'products',
     timestamps: true,
+    paranoid:true,
 }
 )
