@@ -2,10 +2,10 @@ import * as settingsService from "../services/settingsService.js";
 
 export const getAllSelectBoxData = async (req, res) => {
   try {
-    let { slug } = req.query;
-    slug = slug || "all";
+    let { settingstype } = req.query;
+    settingstype = settingstype || "all";
 
-    const result = await settingsService.getAllSelectBoxData(slug);
+    const result = await settingsService.getAllSelectBoxData(settingstype);
     console.log("result", result.length);
 
     if (result.length > 0) {
@@ -16,7 +16,7 @@ export const getAllSelectBoxData = async (req, res) => {
       });
     } else {
       return res.status(401).json({
-        message:`No Data Found for ${slug}`,
+        message:`No Data Found for ${settingstype}`,
         status: false,
       });
     }

@@ -1,5 +1,5 @@
 import * as settingsRepository from '../repository/settingsRepository.js'
 
-export async function getAllSelectBoxData(slug){
-    return await settingsRepository.getSelectBoxData(slug)
+export async function getAllSelectBoxData(settingstype){
+    return await settingsRepository.getSelectBoxData(settingstype)
 }
