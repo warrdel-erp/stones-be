@@ -94,3 +94,28 @@ CREATE TABLE IF NOT EXISTS suppliers (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
 );
+
+-- settings Table (Master)
+
+CREATE TABLE IF NOT EXISTS settings (
+    setting_id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(255) NOT NULL UNIQUE,
+    setting_value JSON NOT NULL,
+    setting_type VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- setting Table (Master Data Insert)
+
+    INSERT INTO settings (setting_key, setting_value, setting_type) VALUES 
+    ('country', '["Vietnam", "Angola", "Brazil", "Canada", "China", "Greece", "India", "Italy", "Norway", "Saudi Arabia", "South Africa", "Spain", "Ukraine"]', 'generic'),
+    ('language', '["English", "French", "Spanish", "Italian"]', 'generic'),
+    ('supplierType', '["National", "International"]', 'supplier'),
+    ('productTypeEnum', '["Slab", "Pavers", "Bench", "Table", "Sink", "Mirror"]', 'product'),
+    ('productCategoryEnum', '["GRANITE", "LIMESTONE", "MARBLE", "QUARTZ", "QUARTZITE", "SOAPSTONE"]', 'product'),
+    ('productColoursEnum', '["Black", "Beige", "Blue", "Dark Blue", "Brown", "Pink", "Gold", "Gray", "Crimson", "Red", "Dark Red", "Mute Red", "White", "Yellow", "Green", "Sea Green", "Mute sea green", "light Green"]', 'product'),
+    ('productOriginEnum', '["Vietnam", "Angola", "Brazil", "Canada", "China", "Greece", "India", "Italy", "Norway", "Saudi Arabia", "South Africa", "Spain", "Ukraine"]', 'product'),
+    ('productUomEnum', '["lb", "in", "CF", "CM", "SF", "Kg", "SQM", "CBM", "EA"]', 'product'),
+    ('productPriceRangeEnum', '["low", "mid", "high", "very high"]', 'product'),
+    ('productAssignedBinEnum', '["A1", "A2", "A3", "B1", "B2", "B3"]', 'product');
