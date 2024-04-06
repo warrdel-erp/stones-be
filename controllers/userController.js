@@ -33,7 +33,6 @@ export const register = async (req, res) => {
 // login
 
 export const login = async (req, res) => {
-  let token;
   try {
     let { email, password } = req.body;
     const existingEmail = await userRepository.findEmailByEmail(email);
@@ -51,16 +50,16 @@ export const login = async (req, res) => {
       return res.status(400).send("Incorrect password");
     }
 
-    token = jwt.sign({ email: existingEmail.email }, secretKey, {
-      expiresIn: "1h",
-    });
-  } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).send("Internal server error");
-  }
-  res.status(200).json({
+   const token = jwt.sign({ email: existingEmail.email }, secretKey,{ expiresIn: '60000' });
+   res.cookie("token", token);
+   res.status(200).json({
     status: true,
     message: "User logged in successfully",
     token,
   });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).send("Internal server error");
+  }
+ 
 };
