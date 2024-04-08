@@ -35,3 +35,5 @@ export const productUomEnum = ['lb', 'in','CF','CM','SF','Kg','SQM','CBM','EA'];
 export const productPriceRangeEnum = ['low', 'mid','high','very high'];
 
 export const productAssignedBinEnum = ['A1', 'A2','A3','B1','B2','B3'];
+
+export const status = ['ACTIVE','INACTIVE'];

@@ -1,6 +1,6 @@
 import sequelize from "../database/sequelizeConfig.js"
 import { DataTypes } from 'sequelize';
-import { country,language,supplierType } from '../constant.js'; 
+import { country,language,supplierType,status } from '../constant.js'; 
 
 export default sequelize.define(
   'suppliers',
@@ -179,7 +179,21 @@ export default sequelize.define(
         allowNull: true,
         field:'deleted_at',
     },
-},  
+    status: {
+        type: DataTypes.ENUM(...status),
+        allowNull: false,
+        defaultValue: 'ACTIVE' // Default value is 'active'
+    },
+    paymentTerm: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "payment_term"
+    },
+    currency: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+},
 {
     tableName: 'suppliers',
     timestamps: true,

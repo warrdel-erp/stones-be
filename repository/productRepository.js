@@ -10,10 +10,10 @@ export async function addProduct(data) {
     }
 }
 
-export async function getAllProductName() {
+export async function getAllProduct() {
     try {
         const result = await model.productModel.findAll({
-            attributes: ['productName']
+            attributes: ['productName','type','kind','category','subCategory','origin','groupsAll','priceRange','supplierSku']
         });
         return result;
     } catch (error) {

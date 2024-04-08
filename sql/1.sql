@@ -119,3 +119,22 @@ CREATE TABLE IF NOT EXISTS settings (
     ('productUomEnum', '["lb", "in", "CF", "CM", "SF", "Kg", "SQM", "CBM", "EA"]', 'product'),
     ('productPriceRangeEnum', '["low", "mid", "high", "very high"]', 'product'),
     ('productAssignedBinEnum', '["A1", "A2", "A3", "B1", "B2", "B3"]', 'product');
+
+-- add column in suppliers
+
+ALTER TABLE suppliers ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
+
+ALTER TABLE suppliers ADD COLUMN payment_term INTEGER;
+
+ALTER TABLE suppliers ADD COLUMN currency VARCHAR(255);
+
+-- add payment_terms in settings
+
+INSERT INTO settings (setting_key, setting_value, setting_type) VALUES 
+    ('payment_terms', '[30, 45, 60, 90, 120]', 'generic');
+
+-- change value in country settings table 
+
+delete from settings where setting_key ='country';
+INSERT INTO settings (setting_key, setting_value, setting_type) VALUES 
+    ('country', '[{"name": "Vietnam", "currency": "VND"}, {"name": "Angola", "currency": "AOA"}, {"name": "Brazil", "currency": "BRL"}, {"name": "Canada", "currency": "CAD"}, {"name": "China", "currency": "CNY"}, {"name": "Greece", "currency": "EUR"}, {"name": "India", "currency": "INR"}, {"name": "Italy", "currency": "EUR"}, {"name": "Norway", "currency": "NOK"}, {"name": "Saudi Arabia", "currency": "SAR"}, {"name": "South Africa", "currency": "ZAR"}, {"name": "Spain", "currency": "EUR"}, {"name": "Ukraine", "currency": "UAH"}]', 'generic');
