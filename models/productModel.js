@@ -1,6 +1,8 @@
 import sequelize from "../database/sequelizeConfig.js"
 import { DataTypes } from 'sequelize';
-import { productKindEnum,productAssignedBinEnum,productCategoryEnum,productColoursEnum,productOriginEnum,productPriceRangeEnum,productTypeEnum,productUomEnum} from '../constant.js'; 
+import { productKindEnum,productAssignedBinEnum,productCategoryEnum,productColoursEnum,productOriginEnum,productPriceRangeEnum,productTypeEnum,productUomEnum,status} from '../constant.js'; 
+import Supplier from '../models/supplierModel.js'
+
 export default sequelize.define(
   'products',
   {
@@ -184,6 +186,20 @@ export default sequelize.define(
         type: DataTypes.TIME,
         allowNull: true,
         field:'deleted_at',
+    },
+    supplierId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'supplier_id',
+        references: {
+            model: Supplier,
+            key: 'supplierId'
+        }
+    },
+    status: {
+        type: DataTypes.ENUM(...status),
+        allowNull: false,
+        defaultValue: 'ACTIVE' // Default value is 'active'
     },
 },  
 {

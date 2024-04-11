@@ -4,8 +4,8 @@ export async function addSupplier(info){
     return await supplierRepository.addSupplier(info)
 }
 
-export async function getAllSupplier(){
-    return await supplierRepository.getAllSupplierName()
+export async function getAllSupplier(search){
+    return await supplierRepository.getAllSupplierName(search)
 }
 
 export async function getSingleSupplierDetails(productName){

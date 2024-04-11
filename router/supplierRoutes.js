@@ -8,7 +8,7 @@ router.post('/', addSupplier)
 
 router.get('/all', getAllSupplier)
 
-router.get('/:supplierName', getSingleSupplierDetails)
+router.get('/', getSingleSupplierDetails)
 
 router.patch('/:supplierName', updateSupplier)
 

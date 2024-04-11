@@ -1,4 +1,6 @@
 import * as model from '../models/index.js'
+import { Op } from 'sequelize';
+
 
 export async function addSupplier(data) {
     try {
@@ -10,12 +12,23 @@ export async function addSupplier(data) {
     }
 }
 
-export async function getAllSupplierName() {
+export async function getAllSupplierName(supplierName) {
+    let result;
     try {
-        const result = await model.supplierModel.findAll();
+        if (supplierName !== 'all') {
+            result = await model.supplierModel.findAll({
+                where: {
+                    supplier_name: {
+                        [Op.like]: `%${supplierName}%`
+                    }
+                },
+            });
+        } else {
+            result = await model.supplierModel.findAll();
+        }
         return result;
     } catch (error) {
-        console.error("Error in getAllSupplier:", error);
+        console.error(`Error in getting supplier name${supplierName}:`, error);
         throw error;
     }
 }

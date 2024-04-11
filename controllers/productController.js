@@ -14,8 +14,10 @@ export const addProduct = async (req,res) => {
 
 // 2. get all product name
 export const getAllProducts = async (req,res) => {
+    let {search} = req.query
+     search = search || 'all' 
     try {
-        const result = await productService.getAllProducts();
+        const result = await productService.getAllProducts(search);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting products name:", error);
@@ -25,7 +27,7 @@ export const getAllProducts = async (req,res) => {
 
 // 3. get single product details
 export const getSingleProductDetails = async (req,res) => {
-    const productName = req.body.productName || req.query.productName || req.headers["x-productName"];
+    const productName = req.query.productName;
     try {
         if (!productName){
             res.status(400).send("productName is required");

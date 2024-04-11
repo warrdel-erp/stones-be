@@ -4,8 +4,8 @@ export async function addProducts(info){
     return await productRepository.addProduct(info)
 }
 
-export async function getAllProducts(){
-    return await productRepository.getAllProduct()
+export async function getAllProducts(search){
+    return await productRepository.getAllProduct(search)
 }
 
 export async function getSingleProductDetails(productName){

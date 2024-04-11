@@ -8,7 +8,7 @@ router.post('/', addProduct)
 
 router.get('/all', getAllProducts)
 
-router.get('/:productName', getSingleProductDetails)
+router.get('/', getSingleProductDetails)
 
 router.patch('/:productName', updateProduct)
 

@@ -138,3 +138,13 @@ INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
 delete from settings where setting_key ='country';
 INSERT INTO settings (setting_key, setting_value, setting_type) VALUES 
     ('country', '[{"name": "Vietnam", "currency": "VND"}, {"name": "Angola", "currency": "AOA"}, {"name": "Brazil", "currency": "BRL"}, {"name": "Canada", "currency": "CAD"}, {"name": "China", "currency": "CNY"}, {"name": "Greece", "currency": "EUR"}, {"name": "India", "currency": "INR"}, {"name": "Italy", "currency": "EUR"}, {"name": "Norway", "currency": "NOK"}, {"name": "Saudi Arabia", "currency": "SAR"}, {"name": "South Africa", "currency": "ZAR"}, {"name": "Spain", "currency": "EUR"}, {"name": "Ukraine", "currency": "UAH"}]', 'generic');
+
+-- add  new fields FOREIGN KEY & status in products table
+
+ALTER TABLE products
+ADD COLUMN supplier_id INTEGER NOT NULL,
+ADD CONSTRAINT fk_supplierId
+FOREIGN KEY (supplier_id)
+REFERENCES suppliers(supplier_id);
+
+ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
