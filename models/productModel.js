@@ -171,19 +171,19 @@ export default sequelize.define(
         allowNull: true
     },
     createdAt: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: false,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
         field:'created_at'
     },
     updatedAt: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: false,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
         field:'updated_at'
     },
     deletedAt: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
         field:'deleted_at',
     },

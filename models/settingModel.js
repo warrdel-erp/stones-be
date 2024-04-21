@@ -24,7 +24,6 @@ export default sequelize.define(
     settingType :{
         type: DataTypes.STRING,
         allowNull: false,
-        unique:true,
         field: 'setting_type'
     },
     createdAt: {
@@ -38,8 +37,7 @@ export default sequelize.define(
         allowNull: false,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
         field:'updated_at',
-    },
-    
+    }
 },  
 {
     tableName: 'settings',
