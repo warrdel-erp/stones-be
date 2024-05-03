@@ -63,3 +63,18 @@ export async function updateProduct(productName, data) {
         throw error; 
     }
 }
+
+// get single product details by id
+export async function getProductByProductId(productId) {
+    try {
+        const result = await model.productModel.findOne({
+            where: {
+                product_id: productId
+            }
+        });
+        return result;
+    } catch (error) {
+        console.error(`Error in getting product${productId}:`, error);
+        throw error;
+    }
+}

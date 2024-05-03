@@ -36,3 +36,28 @@ export async function checksettingType() {
     );
     return settingTypes;
 }
+
+// all location 
+export async function getLocation() {
+    try {
+        return await model.locationModel.findAll();
+    } catch (error) {
+        console.error(`Error in Location:`, error);
+        throw error;
+    }
+}
+
+// single  location
+export async function getLocationByLocation(locationId) {
+    try {
+        const result = await model.locationModel.findOne({
+            where: {
+                locationId: locationId
+            }
+        });
+        return result;
+    } catch (error) {
+        console.error(`Error in getting location${locationId}:`, error);
+        throw error;
+    }
+}

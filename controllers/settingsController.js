@@ -25,3 +25,15 @@ export const getAllSelectBoxData = async (req, res) => {
     return res.status(500).send("Internal Server Error");
   }
 };
+
+// location
+
+export const getLocation = async (req,res) => {
+  try {
+      const result = await settingsService.getLocation();
+      res.status(200).send(result);
+  } catch (error) {
+      console.error(`Error in getting Location:`, error);
+      res.status(500).send("Internal Server Error");
+  }
+};

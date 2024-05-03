@@ -193,7 +193,7 @@ export default sequelize.define(
         field: 'supplier_id',
         references: {
             model: Supplier,
-            key: 'supplierId'
+            key: 'supplier_id'
         }
     },
     status: {

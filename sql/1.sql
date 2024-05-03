@@ -1,7 +1,7 @@
 -- products
 
 CREATE TABLE IF NOT EXISTS products (
-    product_id SERIAL PRIMARY KEY,
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(255) NOT NULL UNIQUE,
     type ENUM('Slab', 'Pavers', 'Bench', 'Table', 'Sink', 'Mirror') NOT NULL,
     base_color ENUM('Black', 'Beige', 'Blue', 'Dark Blue', 'Brown', 'Pink', 'Gold', 'Gray', 'Crimson', 'Red', 'Dark Red', 'Mute Red', 'White', 'Yellow', 'Green', 'Sea Green', 'Mute sea green', 'light Green'),
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS products (
 -- users
 
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     userid VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- supplier
 
 CREATE TABLE IF NOT EXISTS suppliers (
-    supplier_id SERIAL PRIMARY KEY,
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
     supplier_name VARCHAR(255) NOT NULL UNIQUE,
     code VARCHAR(255),
     supplier_type ENUM('National', 'International'),
@@ -148,3 +148,186 @@ FOREIGN KEY (supplier_id)
 REFERENCES suppliers(supplier_id);
 
 ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
+
+-- location table
+
+CREATE TABLE IF NOT EXISTS locations (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    location VARCHAR(255) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    suite VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zip INTEGER NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    purchase_location BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIME NULL
+);
+
+-- purchase table 
+
+CREATE TABLE IF NOT EXISTS purchase_orders (
+    purchase_order_id INT AUTO_INCREMENT PRIMARY KEY,
+    po INTEGER NOT NULL UNIQUE,
+    po_date DATE NOT NULL,
+    supplier_so VARCHAR(255),
+    required_ship_date DATE,
+    eta_date DATE,
+    po_expire_date DATE,
+    container VARCHAR(255),
+    delivery_date ENUM('Pickup', 'Delivery', 'Other'),
+    shipment_terms ENUM('Prepaid', 'Prepaid & Add', 'Collect', 'Prepaid & COD', 'Add & COD', 'Collect & COD', 'Credit 45', 'CAD', 'Consignment'),
+    payment_term INTEGER NOT NULL,
+    freight_forwarder ENUM('Ace Drayage', 'Airlift (USA) Inc', 'AJ Worldwide services Inc', 'Avenger Logistics', 'CMA CGM (AMERICA) LLC', 'Crystal Granite (Ocean Freight)', 'DahNAY Logistics', 'Del Corona', 'Edmund Freight', 'Eurybia Logistics Inc', 'Ever Concord Logistics Inc', 'Fortuna Global Logistics LLC', 'Freight Experts Inc', 'General Noli USA Inc', 'Global Logistics & Customs of Charleston', 'Gramazini Freight', 'Heavy Weight Transport, Inc', 'Howard Sheppard, Inc', 'Interglobog', 'LAM USA International Transport, LLC', 'Leonardi & Co. USA Inc', 'Optimal Container Logistics', 'Pacific Granites Inc', 'Pacific Quartz (Freight)', 'Patagon Logistics LLC', 'PKD Logistics', 'Savannah River Logistics, LLC', 'SBB Shipping USA Inc', 'Surfaces by Pacific (Freight)', 'Total Quality Logistics (TQL)', 'Tova Trucking, Inc', 'Trans-World Shipping Service, Inc', 'Trident Freight', 'U.S. Customs and Border Protection', 'Western Overseas Corp', 'World-Wide Transportation', 'Worldwide Express Inc', 'Xpress Logistic Solution LLP'),
+    vessel VARCHAR(255),
+    air_bill INTEGER,
+    planned_ex_factorydate DATE,
+    ex_factorydate DATE,
+    departure_port VARCHAR(255),
+    etd_port DATE NOT NULL,
+    arrival_port VARCHAR(255),
+    eta_port DATE,
+    discharge_port VARCHAR(255),
+    wiring_instruction VARCHAR(255),
+    printed_notes VARCHAR(255),
+    internal_notes VARCHAR(255),
+    special_instruction VARCHAR(255),
+    po_term_select VARCHAR(255),
+    notes VARCHAR(255),
+    other_charges ENUM('Consignment Payable', 'Delivery', 'Fabrication & Installation', 'FINANCE CHARGE', 'Insurance', 'Pre-migration Return/Pruchase', 'Vendor Credit'),
+    account_number VARCHAR(255),
+    description VARCHAR(255),
+    charge FLOAT,
+    status ENUM('OPEN', 'CLOSE', 'UNAPPROVED') NOT NULL DEFAULT 'OPEN',
+    supplier_id INT NOT NULL,
+    purchase_location_id INT NOT NULL,
+    location_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
+    FOREIGN KEY (purchase_location_id) REFERENCES Locations(location_id),
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id)
+);
+
+-- Purchase order products
+
+CREATE TABLE IF NOT EXISTS purchase_order_products (
+    purchase_order_product_id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(purchase_order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Pre Purchase Order
+CREATE TABLE IF NOT EXISTS pre_purchase_orders (
+    pre_purchase_order_id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_order_product_id INT NOT NULL,
+    description VARCHAR(255),
+    supplier_note VARCHAR(255),
+    purchase_quantity INT,
+    purchase_uom VARCHAR(255),
+    unit_price FLOAT,
+    minimum_length FLOAT,
+    minimum_width FLOAT,
+    bundles INT,
+    slab_bundles INT,
+    slabs INT,
+    quantity INT,
+    final_unit_price FLOAT,
+    total_price FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (purchase_order_product_id) REFERENCES purchase_order_products(purchase_order_product_id)
+);
+
+
+INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
+    ('delivery_type', '["Pickup", "Delivery", "Other"]', 'purchase'),
+    ('shipment_term', '["Prepaid", "Prepaid & Add", "Collect", "Prepaid & COD", "Add & COD", "Collect & COD", "Credit 45", "CAD", "Consigment"]', 'purchase'),
+    ('freight_forwarder', '["Ace Drayage", "Airlift (USA) Inc", "AJ Worldwide services Inc", "Avenger Logistics", "CMA CGM (AMERICA) LLC", "Crystal Granite (Ocean Freight)", "DahNAY Logistics", "Del Corona", "Edmund Freight", "Eurybia Logistics Inc", "Ever Concord Logistics Inc", "Fortuna Global Logistics LLC", "Freight Experts Inc", "General Noli USA Inc", "Global Logistics & Customs of Charleston", "Gramazini Freight", "Heavy Weight Transport, Inc", "Howard Sheppard, Inc", "Interglobog", "LAM USA International Transport, LLC", "Leonardi & Co. USA Inc", "Optimal Container Logistics", "Pacific Granites Inc", "Pacific Quartz (Freight)", "Patagon Logistics LLC", "PKD Logistics", "Savannah River Logistics, LLC", "SBB Shipping USA Inc", "Surfaces by Pacific (Freight)", "Total Quality Logistics (TQL)", "Tova Trucking, Inc", "Trans-World Shipping Service, Inc", "Trident Freight", "U.S. Customs and Border Protection", "Western Overseas Corp", "World-Wide Transportation", "Worldwide Express Inc", "Xpress Logistic Solution LLP"]', 'purchase'),
+    ('other_charges', '["Consignment Payable","Delivery","Fabrication & Installation","FINANCE CHARGE","Insurance","Pre-migration Return/Pruchase","Vendor Credit"]','purchase');
+
+-- Supplier Invoice Mapper table
+
+CREATE TABLE IF NOT EXISTS po_supplier_invoice_mapper (
+    po_supplier_invoice_mapper_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    purchase_order_id INTEGER NOT NULL,
+    total_product_charges FLOAT,
+    other_charges_total FLOAT,
+    final_total_charges FLOAT,
+    transaction VARCHAR(255),
+    invoice VARCHAR(255),
+    invoice_date DATE NOT NULL,
+    ship_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    status ENUM('ACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(purchase_order_id)
+);
+
+-- Supplier Invoice table
+
+CREATE TABLE IF NOT EXISTS po_supplier_invoices (
+    po_supplier_invoice_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    po_supplier_invoice_mapper_id INTEGER NOT NULL,
+    purchase_order_product_id INTEGER NOT NULL,
+    product_sku VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    supplier_notes VARCHAR(255),
+    slab INTEGER,
+    sqm FLOAT,
+    uom FLOAT,
+    quantity FLOAT,
+    unit_price FLOAT,
+    total_per_unit FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id),
+    FOREIGN KEY (purchase_order_product_id) REFERENCES purchase_order_products(purchase_order_product_id)
+);
+
+-- slab Details
+
+CREATE TABLE IF NOT EXISTS po_slab_details (
+    po_slab_detail_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    po_supplier_invoice_id INTEGER NOT NULL,
+    po_supplier_invoice_mapper_id INTEGER NOT NULL,
+    serial_number VARCHAR(255) NOT NULL,
+    entry_unit VARCHAR(255),
+    package_length FLOAT,
+    package_width FLOAT,
+    receving_length FLOAT,
+    receving_width FLOAT,
+    block INTEGER,
+    lot INTEGER,
+    slab INTEGER,
+    bin ENUM('A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6') NOT NULL,
+    notes VARCHAR(255),
+    slab_counter INTEGER NOT NULL,
+    barcode VARCHAR(255),
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (po_supplier_invoice_id) REFERENCES po_supplier_invoices(po_supplier_invoice_id),
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id)
+);
+
+INSERT INTO settings (setting_key, setting_value, setting_type) VALUES ('slab_bin', '["A1", "A2","A3","A4", "A5","A6","B1","B2","B3","B4","B5","B6"]','purchase');
+
+-- ALTER TABLE `purchase_order_products` ADD UNIQUE `unique_index`(`product_id`, `purchase_order_id`);

@@ -60,3 +60,18 @@ export async function updateSupplier(supplierName, data) {
         throw error; 
     }
 }
+
+// get single supplier details by id
+export async function getSupplerBySupplierId(supplierId) {
+    try {
+        const result = await model.supplierModel.findOne({
+            where: {
+                supplierId: supplierId
+            }
+        });
+        return result;
+    } catch (error) {
+        console.error(`Error in getting supplier${supplierId}:`, error);
+        throw error;
+    }
+}

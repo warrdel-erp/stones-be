@@ -7,6 +7,7 @@ import addProductRouter from './router/productRoutes.js';
 import userRouter from './router/adminauth/userRouter.js'
 import supplier from './router/supplierRoutes.js'
 import setting from './router/settingsRoutes.js'
+import purchaseOrder from './router/purchaseOrderRoutes.js'
 
 // middleware
 app.use(json())
@@ -18,6 +19,7 @@ app.use("/product", addProductRouter);
 app.use("/user", userRouter)
 app.use("/supplier", supplier)
 app.use("/setting", setting)
+app.use('/purchaseOrder', purchaseOrder)
 
 
 app.listen(PORT, () => {
