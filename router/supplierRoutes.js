@@ -13,7 +13,7 @@ router.post("/", userAuth, addSupplier);
 
 router.get("/all", getAllSupplier);
 
-router.get("/", getSingleSupplierDetails);
+router.get('/', getSingleSupplierDetails)
 
 router.patch("/:supplierName", updateSupplier);
 
