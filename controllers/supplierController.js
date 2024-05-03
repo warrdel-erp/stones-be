@@ -25,7 +25,7 @@ export const getAllSupplier = async (req,res) => {
 
 // 3. get single supplier details
 export const getSingleSupplierDetails = async (req,res) => {
-    const supplierName =req.query.supplierName;
+    const supplierName = req.query.supplierName;
     try {
         if (!supplierName){
             res.status(400).send("supplierName is required");
