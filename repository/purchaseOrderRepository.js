@@ -283,3 +283,25 @@ export async function latestSlapSerialNumber(poSupplierInvoiceMapperId) {
     throw error;
   }
 }
+
+// update invoice mapper false to true
+
+export async function updateReceivingInventory(poSupplierInvoiceMapperId) {
+
+  try {
+    const poSupplierInvoiceMapperRecord = await model.poSupplierInvoiceMapperModel.findOne({
+      where: { poSupplierInvoiceMappperId : poSupplierInvoiceMapperId }
+    });
+
+    // If no record found, throw an error
+    if (!poSupplierInvoiceMapperRecord) {
+      throw new Error('Record with the provided ID not found');
+    }
+    poSupplierInvoiceMapperRecord.receivingInventory = true;
+    const result = await poSupplierInvoiceMapperRecord.save();
+    return result;
+  } catch (error) {
+    console.error("Error occurred while updating receiving inventory:", error);
+    throw error;
+  }
+}

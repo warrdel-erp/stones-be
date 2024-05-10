@@ -1,6 +1,7 @@
 import sequelize from '../database/sequelizeConfig.js';
 import * as purchaseOrderRepository from '../repository/purchaseOrderRepository.js'
 import * as slabpurchaseOrderRepository from '../repository/supplierInvoiceMapperRepository.js'
+import * as productInventory from '../repository/productInventoryRespository.js'
 
 export async function createOrder(info){
     return await purchaseOrderRepository.createOrder(info)
@@ -183,4 +184,53 @@ export async function singleSlabDetails(poNumber,poSupplierInvoiceMappperId) {
         } catch (error) {
         throw new Error(`Failed to fetch slab Details ${poNumber} && ${poSupplierInvoiceMappperId}: ${error.message}`);
     }
+}
+
+// add product inventory 
+export async function addProductInventory(dataArray) {
+    const transaction = await sequelize.transaction();
+    try {
+        const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(dataArray.poSupplierInvoiceMapperId)
+        const values = inventoryDetails.supplierInvoice.map(item => ({
+            productId: item.supplierPurchaseProduct.product_id,
+            slab: item.slab,
+            quantity: item.quantity,
+            po_supplier_invoice_id: item.dataValues.po_supplier_invoice_id,
+        }));
+        const results = [];
+        for (const data of values) {
+           const productDetails =  await productInventory.getProductDetailsOfProductInventory(data.productId) // product Inventory
+            let result;
+            result = await purchaseOrderRepository.updateReceivingInventory(dataArray.poSupplierInvoiceMapperId, transaction);
+            if (productDetails) {
+                const { slabInStock: productSlabInStock, quantityInStock: productQuantityInStock } = productDetails.dataValues;
+                const { slab: newSlabInStock, quantity: newQuantityInStock } = data;
+                const updateData = { 
+                    slabInStock: productSlabInStock + newSlabInStock, 
+                    quantityInStock: productQuantityInStock + newQuantityInStock, 
+                    productId: data.productId 
+                };
+                result = await productInventory.updateProductInventory(updateData, transaction)
+            }else{
+                const info = {...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId};
+                result = await productInventory.addProductInventory(info, transaction);
+                const productInventoryId  = result.get('productInventoryId')
+                const inventoryData = {poSupplierInvoiceId:data.po_supplier_invoice_id,productInventoryId:productInventoryId}
+                result = await productInventory.addInventoryInvoice(inventoryData, transaction)
+            }
+            results.push(result);
+        }
+        // Commit the transaction if all inserts succeed
+        await transaction.commit();
+        return { success: true, message: 'Data inserted successfully', results };
+    } catch (error) {
+        // Rollback the transaction if any error occurs
+        await transaction.rollback();
+        console.error('Error inserting data:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getProductInventory(){
+    return await productInventory.getInventoryList()
 }

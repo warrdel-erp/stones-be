@@ -59,6 +59,12 @@ export default sequelize.define(
         allowNull:false,
         field : 'due_date'
     },
+    receivingInventory:{
+        type:DataTypes.BOOLEAN,
+        allowNull:false,
+        defaultValue: false,
+        field : 'receiving_inventory'
+    },
     status: {
         type: DataTypes.ENUM(...status),
         allowNull: false,

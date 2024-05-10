@@ -330,4 +330,31 @@ CREATE TABLE IF NOT EXISTS po_slab_details (
 
 INSERT INTO settings (setting_key, setting_value, setting_type) VALUES ('slab_bin', '["A1", "A2","A3","A4", "A5","A6","B1","B2","B3","B4","B5","B6"]','purchase');
 
--- ALTER TABLE `purchase_order_products` ADD UNIQUE `unique_index`(`product_id`, `purchase_order_id`);
+ALTER TABLE `purchase_order_products` ADD UNIQUE `unique_index`(`product_id`, `purchase_order_id`);
+
+ALTER TABLE po_supplier_invoice_mapper ADD COLUMN receiving_inventory BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS product_inventory (
+    product_inventory_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    product_id INTEGER NOT NULL,
+    slab_in_stock FLOAT,
+    quantity_in_stock FLOAT,
+    slab_available ENUM('Available'),
+    quantity_available ENUM('Available'),
+    status ENUM('ACTIVE', 'INACTIVE'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+CREATE TABLE IF NOT EXISTS inventory_invoice_mapper (
+    inventory_invoice_mapper_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    product_inventory_id INTEGER NOT NULL,
+    po_supplier_invoice_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (product_inventory_id) REFERENCES product_inventory(product_inventory_id),
+    FOREIGN KEY (po_supplier_invoice_id) REFERENCES po_supplier_invoices(po_supplier_invoice_id)
+);

@@ -142,3 +142,31 @@ export const singleSlabDetails = async (req,res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+// 10. add Product Inventory
+
+export const addProductInventory = async (req,res) => {
+    try {
+        const data = req.body
+        const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
+        if (!(poSupplierInvoiceMapperId)) {
+            res.status(400).send("po Supplier Invoice Mapper Id  is required for add product Inventory");
+        }
+        const result = await purchaseOrderService.addProductInventory(data);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add product Inventory: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+// 11. get inventory product data
+export const getProductInventory = async (req,res) => { 
+    try {
+        const result = await purchaseOrderService.getProductInventory();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting Product Inventory:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
