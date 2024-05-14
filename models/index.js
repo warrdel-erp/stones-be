@@ -1,3 +1,7 @@
+
+import customerModel from './customerModel.js' 
+
+
 import productModel from './productModel.js';
 import userModel from './userModel.js';
 import supplierModel from './supplierModel.js';
@@ -53,5 +57,5 @@ inventoryInvoiceMapper.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice
 
 
 export {
-	productModel,userModel,supplierModel,settingModel,purchaseModel,prePurchaseModel,purchaseProductModel,locationModel,poSupplierInvoiceModel,poSupplierInvoiceMapperModel,poSlabDetails,productInventoryModel,inventoryInvoiceMapper
+	productModel,userModel,supplierModel,settingModel,purchaseModel,prePurchaseModel,purchaseProductModel,locationModel,poSupplierInvoiceModel,poSupplierInvoiceMapperModel,poSlabDetails,productInventoryModel,inventoryInvoiceMapper,customerModel
 }

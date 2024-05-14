@@ -4,6 +4,7 @@ import * as productService from '../services/productServices.js'
 export const addProduct = async (req,res) => {
     try {
         const info = req.body
+        console.log(info)
         const result = await productService.addProducts(info);
         res.status(200).send(result);
     } catch (error) {

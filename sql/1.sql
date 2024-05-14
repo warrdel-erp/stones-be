@@ -1,4 +1,4 @@
--- products
+    -- products
 
 CREATE TABLE IF NOT EXISTS products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -149,6 +149,43 @@ REFERENCES suppliers(supplier_id);
 
 ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
 
+--Create customer table in your database
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(255) NOT NULL,
+    customer_type VARCHAR(255),
+    contact_name VARCHAR(255),
+    print_name VARCHAR(255),
+    parent_customer VARCHAR(255),
+    primary_phone_number VARCHAR(255),
+    secondary_phone_number VARCHAR(255),
+    landline_number VARCHAR(255),
+    acc_email VARCHAR(255),
+    emails VARCHAR(255),
+    address VARCHAR(255),
+    suite VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    zip VARCHAR(255),
+    s_address VARCHAR(255),
+    s_unit VARCHAR(255),
+    s_city VARCHAR(255),
+    s_zip VARCHAR(255),
+    s_state VARCHAR(255),
+    p_sales_person VARCHAR(255),
+    price_level VARCHAR(255),
+    tax_exempt VARCHAR(255),
+    sales_tax VARCHAR(255),
+    payment_terms VARCHAR(255),
+    exempt_certi VARCHAR(255),
+    exempt_exipry VARCHAR(255),
+    internal_notes VARCHAR(255),
+    delivery_notes VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE'
+);
 -- location table
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -358,3 +395,83 @@ CREATE TABLE IF NOT EXISTS inventory_invoice_mapper (
     FOREIGN KEY (product_inventory_id) REFERENCES product_inventory(product_inventory_id),
     FOREIGN KEY (po_supplier_invoice_id) REFERENCES po_supplier_invoices(po_supplier_invoice_id)
 );
+
+
+--Adding data to setting api for customer table dropdown
+
+INSERT INTO settings (setting_key, setting_value, setting_type) 
+VALUES ('price_level', '["Single Slab", "Bundle", "Standard"]', 'customer');
+INSERT INTO settings (setting_key, setting_value, setting_type) 
+VALUES ('reason', '["Reseller"]', 'customer');
+
+INSERT INTO settings (setting_key, setting_value, setting_type) 
+VALUES ('customer_type', '["Homeowner", "Architect", "KB Dealer", "Designer", "Fabricator", "Builder"]', 'customer');
+INSERT INTO settings (setting_key, setting_value, setting_type) 
+VALUES ('docs_type', '["Fax", "Email", "Mail", "Text"]', 'customer');
+
+
+INSERT INTO settings (setting_key, setting_value, setting_type) 
+VALUES 
+('sales_tax', 
+'["GW - Georgia State, Gwinnett County - 6%",
+"FR - Georgia State, Forsyth County - 7%",
+"EX - Tax Exempt - 0%",
+"FUL-ATL - Georgia State, FUL, City of Atlanta - 8.9%",
+"FUL - Georgia State, Fulton County - 7.75%",
+"COB - Georgia State, Cobb County - 6%",
+"DAW - Georgia State, Dawson County - 7%",
+"DEK - Georgia State, Dekalb County - 8%",
+"DEK-ATL - Georgia State, DEK, City of Atlanta - 8.9%",
+"DOU - Georgia State, Douglas County - 7%",
+"COW - Georgia State, Coweta County Tax - 7%",
+"CHE - Georgia State, Cherokee County Tax - 6%",
+"CLAY - Georgia State, Clayton County Tax - 8%",
+"HEN - Georgia Sate, Henry County Tax - 8%",
+"FAY - Georgia State, Fayette County Tax - 7%",
+"HAL - Georgia State, Hall County Tax - 7%",
+"GRN - South Carolina State, Greenville County - 6%",
+"PAU - Georgia State, Paulding County - 7%",
+"FLOY - Georgia State, Floyd County - 7%",
+"BAR - Georgia State, Bartow County - 7%",
+"ROC - Georgia State, Rockdale County - 6%",
+"LOW - Georgia State, Lowndes County - 8%",
+"BARW - Georgia State, Barrow County - 8%",
+"NEW - Georgia State, Newton County - 7%",
+"JAC - Georgia State, Jackson County - 7%",
+"ELB - Georgia State, Elbert County - 8%",
+"DOD - Georgia State, Dodge County - 8%",
+"ALMA - Alabama State, Madison County - 5.5%",
+"BIB - Georgia State, Bibb County - 8%",
+"WHF - Georgia State, Whitfield County - 7%",
+"ALCH - Alabama State, Chambers County - 9%",
+"TNHA - Tennessee State, Hamilton County - 9.25%",
+"GOR - Georgia State, Gordon County - 7%",
+"SCOC - South Carolina State, Oconee County - 6%",
+"TWNS - Georgia State, Towns County - 8%",
+"THOM - Georgia State, Thomas County - 7%",
+"STE - Georgia State, Stephens County - 7%",
+"TUR - Georgia State, Turner County - 8%",
+"JAC-NC - North Carolina State , Jackson County - 7%",
+"UNI - Georgia State, Union County - 7%",
+"GIL - Georgia State, Gilmer County - 7%",
+"OGL - Georgia State, Oglethorpe County - 8%",
+"MSCG - Georgia State, Muscogee County - 9%",
+"ALMO - Alabama State, Montgomery County - 10%"]', 
+'customer');
+
+--Altering customer table to add extra attribute
+
+ALTER TABLE customers
+  ADD COLUMN po_required BOOLEAN,
+  ADD COLUMN apply_finance_charges BOOLEAN,
+  ADD COLUMN preferred_way_docs VARCHAR(255),
+  ADD COLUMN days_grace VARCHAR(255),
+  ADD COLUMN days_hold VARCHAR(255),
+  ADD COLUMN customerSince DATE,
+  ADD COLUMN ein_number VARCHAR(255);
+  ADD COLUMN country VARCHAR(255);
+  ADD COLUMN s_country VARCHAR(255)
+ALTER TABLE customers
+
+--Changes customer type from enum to string 
+MODIFY COLUMN customer_type VARCHAR(255); 

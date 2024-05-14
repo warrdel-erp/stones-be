@@ -1,0 +1,15 @@
+import { addCustomer ,getAllCustomers,getSingleCustomerDetails,getCustomerID} from "../controllers/customerController.js"
+
+// router
+import {Router} from  'express'
+const router =  Router();
+
+router.post('/', addCustomer)
+
+router.get('/all', getAllCustomers)
+
+router.get('/', getSingleCustomerDetails)
+
+router.get('/getCustomerID', getCustomerID)
+
+export default router

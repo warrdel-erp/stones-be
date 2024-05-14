@@ -1,5 +1,5 @@
-const express = require("express")
-const morgan = require("morgan")
+const express = require("express");
+const morgan = require("morgan");
 const dotenv = require("dotenv").config()
 const cors = require("cors")
 const path = require("path")
