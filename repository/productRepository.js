@@ -14,7 +14,7 @@ export async function addProduct(data) {
 export async function getAllProduct(productName) {
     let result;
     try {
-        const attributes = ['productName', 'type', 'kind', 'category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku'];
+        const attributes = ['productName', 'type', 'kind', 'productId','alternativeName','category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku'];
         if (productName !== 'all') {
             result = await model.productModel.findAll({
                 attributes: attributes,

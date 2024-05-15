@@ -1,6 +1,7 @@
 import sequelize from "../database/sequelizeConfig.js";
 import { DataTypes } from 'sequelize';
-const customerTypeEnum = ['individual', 'business', 'organization'];
+import {country, customerType, paymentTerms, priceLevel, reasons, wayOfDocsSend} from  '../constant.js';
+
 
 
 export default sequelize.define(
@@ -18,7 +19,7 @@ export default sequelize.define(
       field: 'customer_name'
     },
     customerType: {
-      type: DataTypes.STRING,
+      type:DataTypes.ENUM(...customerType),
       allowNull: true,
       field: 'customer_type'
     },
@@ -82,7 +83,7 @@ export default sequelize.define(
       allowNull: true
     },
     country:{
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...country),
       allowNull: true
     },
     sAddress: {
@@ -111,7 +112,7 @@ export default sequelize.define(
       field: 's_state'
     },
     sSountry:{
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...country),
       allowNull: true,
       field: 's_country'
     },
@@ -122,7 +123,7 @@ export default sequelize.define(
       field: 'p_sales_person'
     },
     priceLevel: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...priceLevel),
       allowNull: true,
       field: 'price_level'
     },
@@ -137,7 +138,7 @@ export default sequelize.define(
       field: 'sales_tax'
     },
     paymentTerms: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...paymentTerms),
       allowNull: true,
       field: 'payment_terms'
     },
@@ -172,7 +173,7 @@ export default sequelize.define(
       field: 'apply_finance_charges'
     },
     preferredDocSend:{
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...wayOfDocsSend),
       allowNull: true,
       field: 'preferred_way_docs'
     },
@@ -195,6 +196,11 @@ export default sequelize.define(
       type:DataTypes.STRING,
       allowNull:true,
       field:'ein_number'
+    },
+    reason:{
+      type:DataTypes.ENUM(...reasons),
+      allowNull:true,
+      field:'reason'
     },
     createdAt: {
       type: DataTypes.DATE,

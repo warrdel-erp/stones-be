@@ -149,43 +149,6 @@ REFERENCES suppliers(supplier_id);
 
 ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
 
---Create customer table in your database
-CREATE TABLE IF NOT EXISTS customers (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(255) NOT NULL,
-    customer_type VARCHAR(255),
-    contact_name VARCHAR(255),
-    print_name VARCHAR(255),
-    parent_customer VARCHAR(255),
-    primary_phone_number VARCHAR(255),
-    secondary_phone_number VARCHAR(255),
-    landline_number VARCHAR(255),
-    acc_email VARCHAR(255),
-    emails VARCHAR(255),
-    address VARCHAR(255),
-    suite VARCHAR(255),
-    city VARCHAR(255),
-    state VARCHAR(255),
-    zip VARCHAR(255),
-    s_address VARCHAR(255),
-    s_unit VARCHAR(255),
-    s_city VARCHAR(255),
-    s_zip VARCHAR(255),
-    s_state VARCHAR(255),
-    p_sales_person VARCHAR(255),
-    price_level VARCHAR(255),
-    tax_exempt VARCHAR(255),
-    sales_tax VARCHAR(255),
-    payment_terms VARCHAR(255),
-    exempt_certi VARCHAR(255),
-    exempt_exipry VARCHAR(255),
-    internal_notes VARCHAR(255),
-    delivery_notes VARCHAR(255),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
-    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE'
-);
 -- location table
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -459,19 +422,53 @@ VALUES
 "ALMO - Alabama State, Montgomery County - 10%"]', 
 'customer');
 
---Altering customer table to add extra attribute
+--Create customer table in your database
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(255) NOT NULL,
+    contact_name VARCHAR(255),
+    print_name VARCHAR(255),
+    parent_customer VARCHAR(255),
+    primary_phone_number VARCHAR(255),
+    secondary_phone_number VARCHAR(255),
+    landline_number VARCHAR(255),
+    acc_email VARCHAR(255),
+    emails VARCHAR(255),
+    address VARCHAR(255),
+    suite VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    zip VARCHAR(255),
+    s_address VARCHAR(255),
+    s_unit VARCHAR(255),
+    s_city VARCHAR(255),
+    s_zip VARCHAR(255),
+    s_state VARCHAR(255),
+    p_sales_person VARCHAR(255),
+    tax_exempt VARCHAR(255),
+    sales_tax VARCHAR(255),
+    exempt_certi VARCHAR(255),
+    exempt_exipry VARCHAR(255),
+    internal_notes VARCHAR(255),
+    delivery_notes VARCHAR(255),
+    po_required BOOLEAN,
+    apply_finance_charges BOOLEAN,
+    preferred_way_docs ENUM('Fax', 'Email','Mail', 'Text'),
+    days_grace VARCHAR(255),
+    days_hold VARCHAR(255),
+    customerSince DATE,
+    ein_number VARCHAR(255),
+     country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+     s_country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+     customer_type ENUM('Homeowner', 'Architect', 'KB Dealer', 'Designer', 'Fabricator', 'Builder'),
+     payment_terms ENUM('30', '45', '60', '90', '120'),
+     reason ENUM('Reseller'),
+     price_level ENUM('Single Slab','Bundle', 'Standard'),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE'
+);
 
-ALTER TABLE customers
-  ADD COLUMN po_required BOOLEAN,
-  ADD COLUMN apply_finance_charges BOOLEAN,
-  ADD COLUMN preferred_way_docs VARCHAR(255),
-  ADD COLUMN days_grace VARCHAR(255),
-  ADD COLUMN days_hold VARCHAR(255),
-  ADD COLUMN customerSince DATE,
-  ADD COLUMN ein_number VARCHAR(255);
-  ADD COLUMN country VARCHAR(255);
-  ADD COLUMN s_country VARCHAR(255)
-ALTER TABLE customers
 
---Changes customer type from enum to string 
-MODIFY COLUMN customer_type VARCHAR(255); 
+
