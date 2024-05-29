@@ -1,0 +1,268 @@
+import * as model from "../models/index.js";
+import { Op } from "sequelize";
+
+export async function createOrder(data) {
+  try {
+    const result = await model.salesOrderModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in create order:", error);
+    throw error;
+  }
+}
+
+export async function updateOrder(salesOrdersId, data) {
+  try {
+    const result = await model.salesOrderModel.update(data, {
+      where: {
+        salesOrdersId: salesOrdersId
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in updating sales order:", error);
+    throw error;
+  }
+}
+
+export async function findSoNumber(soNumber) {
+    const result = await model.salesOrderModel.findOne({
+      where: {
+        so: {
+          [Op.eq]: soNumber
+        }
+      }
+    })
+    return result;
+  }
+
+export async function latestPoNumber() {
+  try {
+    const attributes = ['so'];
+    const result = await model.salesOrderModel.findOne({
+      attributes: attributes,
+      order: [['created_at', 'DESC']],
+      limit: 1,
+    });
+    return result;
+  } catch (error) {
+    console.log("Error getting SO Number: ", error);
+    throw error;
+  }
+}
+
+export async function getSingleSalesOrder(soNumber) {
+    try {
+      const result = await model.salesOrderModel.findOne({
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        include: [
+          {
+            model: model.customerModel,
+            as: "customers",
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+          },
+          {
+            model: model.salesOrderInventoryModel,
+            as: 'salesInventory',
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+            include: [
+              {
+                model: model.poSlabDetails,
+                as: 'slabDetails',
+                attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] }
+              },
+              {
+                model:model.productInventoryModel,
+                as:'salesProduct',
+                attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+                include:[
+                  {
+                    model:model.productModel,
+                    as:'salesProductDetails',
+                    attributes: ['productName']
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: model.soLoadingOrderModel,
+            as: 'loadingOrders',
+            attributes: { exclude: ['updatedAt', 'deletedAt','status'] },
+          },
+        ],
+        where:{
+          so:soNumber
+        },
+      });
+      return result;
+    } catch (error) {
+      console.error(`Error in getting sales order Id :-${soNumber}:`, error);
+      throw error;
+    }
+}
+
+export async function getsalestax(salesOrderId) {
+  const result = await model.salesOrderModel.findOne({
+    where: {
+      salesOrdersId: salesOrderId,
+    },
+    attributes: ['salesTax']
+  });
+  const salesTaxString = result ? result.salesTax : null;
+  let salesTaxPercentage = null;
+
+  if (salesTaxString) {
+    const match = salesTaxString.match(/(\d+)%/);
+    if (match) {
+      salesTaxPercentage = match[0]; // Extracts the integer part as a string
+    }
+  }
+  return salesTaxPercentage;
+};
+
+export async function addProduct(data) {
+  try {
+    const result = await model.salesOrderInventoryModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add product:", error);
+    throw error;
+  }
+}
+
+export async function createLoadingOrder(data) {
+  try {
+    const result = await model.soLoadingOrderModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in create loading order:", error);
+    throw error;
+  }
+}
+
+export async function updateSalesOrderInventory(salesOrdersInventoryId, data) {
+  try {
+    const result = await model.salesOrderInventoryModel.update(data, {
+      where: {
+        salesOrdersInventoryId: salesOrdersInventoryId
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in updating sales order Inventory:", error);
+    throw error;
+  }
+}
+
+// get all sales order
+
+export async function getAllSalesOrder(searchText) {
+  let result;
+  try {
+    if (searchText) {
+      result = await model.salesOrderModel.findAll({
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        where: {
+          so: {
+            [Op.like]: `%${searchText}%`
+          }
+        },
+        include: [
+          {
+            model: model.customerModel,
+            as: 'customers',
+            where: {
+              customer_name: {
+                [Op.like]: `%${searchText}%`
+              }
+            }
+          },
+        ],
+        order: [['createdAt', 'DESC']]
+      });
+    } else {
+      result = await model.salesOrderModel.findAll({
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        include: [
+          {
+            model: model.customerModel,
+            as: 'customers',
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+          },
+          {
+            model: model.salesOrderInventoryModel,
+            as: 'salesInventory',
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] }
+          },
+        ],
+        order: [['createdAt', 'DESC']]
+      });
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error in getting sales Order ${searchText}:`, error);
+    throw error;
+  }
+};
+
+// get the sales Order Inventory by sales Orders Inventory Id for update sale Status and product Inventory Inactive
+
+export async function findSalesOrdersInventory(soLoadingOrderId) {
+  try {
+    const result = await model.salesOrderInventoryModel.findAll({
+      attributes: ['salesOrdersInventoryId', 'productInventoryId', 'poSlabDetailId','soLoadingOrderId','salesStatus'], 
+      where: {
+        soLoadingOrderId: soLoadingOrderId 
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error('Error fetching sales order inventory:', error);
+    throw error; 
+  }
+};
+
+// update sale Status and return the updated sales status
+
+export async function updateSalesStatus(salesOrdersInventoryId, data) {
+  try {
+    // Update the sales order inventory
+    const result = await model.salesOrderInventoryModel.update(data, {
+      where: {
+        salesOrdersInventoryId: salesOrdersInventoryId
+      }
+    });
+    // If update was successful, fetch the updated record
+    if (result[0] === 1) { 
+      const updatedRecord = await model.salesOrderInventoryModel.findOne({
+        where: {
+          salesOrdersInventoryId: salesOrdersInventoryId
+        },
+        attributes: ['Sales_status'] 
+      });
+      return updatedRecord.dataValues.Sales_status;
+    } else {
+      throw new Error('Update failed or no rows affected');
+    }
+  } catch (error) {
+    console.error("Error updating Sales Status in sales order inventory:", error);
+    throw error;
+  }
+};
+
+// update  sales Status in both table sales order Inventory and so loading order 
+
+export async function updateSalesStatusLoadingOrder(soLoadingOrderId, data) {
+  try {
+      const result = await model.soLoadingOrderModel.update(data, {
+          where: {
+            soLoadingOrderId: soLoadingOrderId
+          }
+      });
+   return result; 
+  } catch (error) {
+      console.error("Error updating sales status in so loading order:", error);
+      throw error; 
+  }
+}

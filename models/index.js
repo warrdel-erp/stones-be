@@ -1,7 +1,4 @@
-
-import customerModel from './customerModel.js' 
-
-
+import customerModel from './customerModel.js';
 import productModel from './productModel.js';
 import userModel from './userModel.js';
 import supplierModel from './supplierModel.js';
@@ -14,7 +11,10 @@ import poSupplierInvoiceModel from './poSupplierInvoiceModel.js';
 import poSupplierInvoiceMapperModel from './poSupplierInvoiceMapperModel.js';
 import poSlabDetails from './poSlabDetailModel.js';
 import productInventoryModel from './productInventoryModel.js';
-import inventoryInvoiceMapper from './inventoryInvoiceMapper.js'
+import inventoryInvoiceMapper from './inventoryInvoiceMapper.js';
+import salesOrderModel from './salesOrderModel.js';
+import soLoadingOrderModel from './soLoadingOrderModel.js';
+import salesOrderInventoryModel from './salesOrdersInventoryModel.js';
 
 supplierModel.hasMany(purchaseModel, { foreignKey: 'supplier_id' });
 purchaseModel.belongsTo(supplierModel, { foreignKey: 'supplier_id',as: "suppliers"});
@@ -55,7 +55,40 @@ inventoryInvoiceMapper.belongsTo(poSupplierInvoiceModel, { foreignKey: 'po_suppl
 poSlabDetails.belongsTo(inventoryInvoiceMapper, { foreignKey: 'po_supplier_invoice_id',as:'invoiceSlabDetails'});
 inventoryInvoiceMapper.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id',as:'invoiceSlabDetails'});
 
+customerModel.hasMany(salesOrderModel, { foreignKey: 'customer_id' });
+salesOrderModel.belongsTo(customerModel, { foreignKey: 'customer_id',as: "customers"});
+
+soLoadingOrderModel.belongsTo(salesOrderModel, { foreignKey: 'sales_orders_id' });
+salesOrderModel.hasMany(soLoadingOrderModel, { foreignKey: 'sales_orders_id',as: "loadingOrders"});
+
+salesOrderInventoryModel.belongsTo(salesOrderModel, { foreignKey: 'sales_orders_id' });
+salesOrderModel.hasMany(salesOrderInventoryModel, { foreignKey: 'sales_orders_id', as: "salesInventory"});
+
+salesOrderInventoryModel.belongsTo(poSlabDetails, { foreignKey: 'po_slab_detail_id' ,as: "slabDetails"});
+poSlabDetails.hasOne(salesOrderInventoryModel, { foreignKey: 'po_slab_detail_id', as: "slabDetails"});
+
+salesOrderInventoryModel.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: "salesProduct"});
+productInventoryModel.hasOne(salesOrderInventoryModel, { foreignKey: 'product_inventory_id', as: "salesProduct"});
+
+productModel.hasOne(productInventoryModel, { foreignKey: 'product_id', as: "salesProductDetails"});
+productInventoryModel.belongsTo(productModel, { foreignKey: 'product_id', as: "salesProductDetails"});
 
 export {
-	productModel,userModel,supplierModel,settingModel,purchaseModel,prePurchaseModel,purchaseProductModel,locationModel,poSupplierInvoiceModel,poSupplierInvoiceMapperModel,poSlabDetails,productInventoryModel,inventoryInvoiceMapper,customerModel
-}
+	productModel,
+	userModel,
+	supplierModel,
+	settingModel,
+	purchaseModel,
+	prePurchaseModel,
+	purchaseProductModel,
+	locationModel,
+	poSupplierInvoiceModel,
+	poSupplierInvoiceMapperModel,
+	poSlabDetails,
+	productInventoryModel,
+	inventoryInvoiceMapper,
+	customerModel,
+	salesOrderModel,
+	soLoadingOrderModel,
+	salesOrderInventoryModel,
+  };

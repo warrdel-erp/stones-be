@@ -14,7 +14,7 @@ export async function addCustomer(data) {
 export async function getAllCustomers(customerName) {
     let result;
     try {
-        const attributes = ['customerName','customerId', 'customerType', 'primaryPhoneNumber', 'accEmail', 'address', 'city', 'state', 'zip', 'pSalesPerson', 'priceLevel', 'taxExempt', 'salesTax', 'paymentTerms', 'exemptCerti', 'exemptExipry', 'internalNotes', 'deliveryNotes'];
+        const attributes = ['customerName','customerId','primaryPhoneNumber','country', 'customerType', 'primaryPhoneNumber', 'accEmail', 'address', 'city', 'state', 'zip', 'pSalesPerson', 'priceLevel', 'sAddress','sUnit','sCity','sState','sZip', 'taxExempt', 'salesTax', 'paymentTerms', 'exemptCerti', 'exemptExipry', 'internalNotes', 'deliveryNotes'];
         if (customerName !== 'all') {
             result = await model.customerModel.findAll({
                 attributes: attributes,

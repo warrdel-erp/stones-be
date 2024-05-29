@@ -134,10 +134,25 @@ export async function getInventoryList() {
         },
       ],
     });
-    console.log(`>>>>getInventoryList>>>>>>436>>>>>>>>>>`, result);
     return result;
   } catch (error) {
     console.error("Error in getInventoryList:", error);
     throw error;
+  }
+}
+
+// after sales_orders_inventory table sale status change to Invoice then It become Inactive
+
+export async function updateProductInventoryInactive(productInventoryId, data) {
+  try {
+      const result = await model.productInventoryModel.update(data, {
+          where: {
+            productInventoryId: productInventoryId
+          }
+      });
+   return result; 
+  } catch (error) {
+      console.error("Error updating product Inventory INACTIVE:", error);
+      throw error; 
   }
 }

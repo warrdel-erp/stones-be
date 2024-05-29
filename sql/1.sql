@@ -470,5 +470,60 @@ CREATE TABLE IF NOT EXISTS customers (
     status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE'
 );
 
+CREATE TABLE sales_orders (
+    sales_orders_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    customer_id INTEGER NOT NULL,
+    so INTEGER NOT NULL UNIQUE,
+    so_date DATE NOT NULL,
+    customer_po VARCHAR(255),
+    location VARCHAR(255),
+    ship_to ENUM('DELIVERY', 'PICKUP') NOT NULL,
+    special_instruction VARCHAR(255),
+    internal_notes VARCHAR(255),
+    printed_notes VARCHAR(255),
+    sub_total FLOAT,
+    tax FLOAT,
+    total FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
 
+CREATE TABLE sales_orders_inventory (
+    sales_orders_inventory_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    sales_orders_id INTEGER NOT NULL,
+    product_inventory_id INTEGER NOT NULL,
+    po_slab_detail_id INTEGER NOT NULL,
+    so_loading_order_id INTEGER,
+    unit_price FLOAT,
+    sales_status ENUM('INITIATED','LOADING ORDER', 'PACKING LIST', 'INVOICE') NOT NULL DEFAULT 'INITIATED',
+    remeasure_length FLOAT,
+    remeasure_width FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (sales_orders_id) REFERENCES sales_orders(sales_orders_id),
+    FOREIGN KEY (product_inventory_id) REFERENCES product_inventory(product_inventory_id),
+    FOREIGN KEY (po_slab_detail_id) REFERENCES po_slab_details(po_slab_detail_id),
+    FOREIGN KEY (so_loading_order_id) REFERENCES so_loading_order(so_loading_order_id)
+);
 
+CREATE TABLE so_loading_order (
+    so_loading_order_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    sales_orders_id INTEGER NOT NULL,
+    sub_total FLOAT,
+    tax FLOAT,
+    total FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (sales_orders_id) REFERENCES sales_orders(sales_orders_id)
+);
+
+ALTER TABLE sales_orders ADD COLUMN sales_tax VARCHAR(255);
+
+ALTER TABLE so_loading_order ADD COLUMN sales_status ENUM('INITIATED', 'LOADING ORDER', 'PACKING LIST', 'INVOICE') NOT NULL DEFAULT 'INITIATED';

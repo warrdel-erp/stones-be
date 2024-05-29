@@ -9,6 +9,7 @@ import supplier from './router/supplierRoutes.js'
 import setting from './router/settingsRoutes.js'
 import customer from './router/customerRoutes.js'
 import purchaseOrder from './router/purchaseOrderRoutes.js'
+import salesOrder from './router/salesOrderRoutes.js'
 
 // middleware
 app.use(json())
@@ -22,6 +23,7 @@ app.use("/supplier", supplier)
 app.use("/setting", setting)
 app.use("/customer", customer);
 app.use('/purchaseOrder', purchaseOrder)
+app.use("/salesOrder",salesOrder)
 
 
 app.listen(PORT, () => {

@@ -57,4 +57,8 @@ export const otherCharges = ['Consignment Payable', 'Delivery', 'Fabrication & I
 
 export const slabBinEnum = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6'];
 
-export const inventoryStock = ['Available']
+export const inventoryStock = ['Available'];
+
+export const deliveryTypeSales = ['DELIVERY','PICKUP'];
+
+export const salesStatus = ['INITIATED','LOADING ORDER','PACKING LIST','INVOICE']
