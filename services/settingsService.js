@@ -1,7 +1,13 @@
 import * as settingsRepository from '../repository/settingsRepository.js'
 
 export async function getAllSelectBoxData(settingstype){
-    return await settingsRepository.getSelectBoxData(settingstype)
+    const settings = await settingsRepository.getSelectBoxData(settingstype);
+    return settings.map(s => {
+        return {
+            ...s.dataValues,
+            settingValue: typeof s.dataValues.settingValue === 'object' ? s.dataValues.settingValue : JSON.parse(s.dataValues.settingValue)     
+        }
+    });
 }
 
 // location
