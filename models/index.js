@@ -15,6 +15,9 @@ import inventoryInvoiceMapper from './inventoryInvoiceMapper.js';
 import salesOrderModel from './salesOrderModel.js';
 import soLoadingOrderModel from './soLoadingOrderModel.js';
 import salesOrderInventoryModel from './salesOrdersInventoryModel.js';
+import accountsModel from './accountsModel.js';
+import accountTypesModel from './accountTypesModel.js';
+import subAccountTypesModel from './subAccountTypesModel.js';
 
 supplierModel.hasMany(purchaseModel, { foreignKey: 'supplier_id' });
 purchaseModel.belongsTo(supplierModel, { foreignKey: 'supplier_id',as: "suppliers"});
@@ -73,6 +76,19 @@ productInventoryModel.hasOne(salesOrderInventoryModel, { foreignKey: 'product_in
 productModel.hasOne(productInventoryModel, { foreignKey: 'product_id', as: "salesProductDetails"});
 productInventoryModel.belongsTo(productModel, { foreignKey: 'product_id', as: "salesProductDetails"});
 
+subAccountTypesModel.belongsTo(accountTypesModel, { foreignKey: 'account_types_id',as:'accountTypeSubtype'});
+accountTypesModel.hasMany(subAccountTypesModel, { foreignKey: 'account_types_id',as:'accountTypeSubtype'});
+
+subAccountTypesModel.belongsTo(accountTypesModel, { foreignKey: 'account_types_id',as:'accountTypes'});
+accountTypesModel.hasMany(subAccountTypesModel, { foreignKey: 'account_types_id',as:'accountTypes'});
+
+accountsModel.belongsTo(subAccountTypesModel, { foreignKey: 'sub_account_types_id',as:'accountSubtype'});
+subAccountTypesModel.hasMany(accountsModel, { foreignKey: 'sub_account_types_id',as:'accountSubtype'});
+
+// accountsModel.belongsTo(accountTypesModel, { foreignKey: 'account_types_id',as:'accountTypes'});
+// accountTypesModel.hasOne(accountsModel, { foreignKey: 'account_types_id',as:'accountTypes'});
+
+
 export {
 	productModel,
 	userModel,
@@ -91,4 +107,7 @@ export {
 	salesOrderModel,
 	soLoadingOrderModel,
 	salesOrderInventoryModel,
+	accountsModel,
+	subAccountTypesModel,
+	accountTypesModel,
   };

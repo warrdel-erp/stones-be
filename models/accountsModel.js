@@ -1,0 +1,77 @@
+import sequelize from "../database/sequelizeConfig.js";
+import { DataTypes } from 'sequelize';
+import {status} from '../constant.js'; 
+import subAccountTypes from "./subAccountTypesModel.js";
+import accountTypes from "./accountTypesModel.js";
+
+export default sequelize.define(
+    'accounts',
+    {
+        accountsId: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+            field: 'accounts_id'
+        },
+        subAccountTypesId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: 'sub_account_types_id',
+            references: {
+                model: subAccountTypes,
+                key: 'sub_account_types_id'
+            }
+        },
+        accountTypesId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'account_types_id',
+            references: {
+                model: accountTypes,
+                key: 'account_types_id'
+            }
+        },
+        accountName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            field: 'account_name'
+        },
+        openingBalanceDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            field: 'opening_balance_date'  
+        },
+        accountBalance: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            field: 'account_balance'
+        },
+        status: {
+            type: DataTypes.ENUM(...status),
+            allowNull: true,
+            defaultValue: 'ACTIVE'
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+            field: 'created_at'
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+            field: 'updated_at'
+        },
+        deletedAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            field: 'deleted_at'
+        },
+    },
+    {
+        tableName: 'accounts',
+        timestamps: true,
+        paranoid: true
+    }
+);

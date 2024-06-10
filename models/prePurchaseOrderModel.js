@@ -31,7 +31,7 @@ export default sequelize.define(
         field: 'supplier_note',
     },
     purchaseQuantity:{
-        type:DataTypes.INTEGER,
+        type:DataTypes.FLOAT,
         allowNull:true,
         field:'purchase_quantity'
     },

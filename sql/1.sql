@@ -527,3 +527,79 @@ CREATE TABLE so_loading_order (
 ALTER TABLE sales_orders ADD COLUMN sales_tax VARCHAR(255);
 
 ALTER TABLE so_loading_order ADD COLUMN sales_status ENUM('INITIATED', 'LOADING ORDER', 'PACKING LIST', 'INVOICE') NOT NULL DEFAULT 'INITIATED';
+
+-- charts of account three table 
+
+CREATE TABLE account_types (
+  account_types_id INT PRIMARY KEY AUTO_INCREMENT,
+  account_type ENUM('Assets','Liabilities','Revenue','Expenses', 'Equity Including Portion Attributable to Noncontrolling Interest','Other (Non-Operating) Income and Expenses','Intercompany and Related Party Accounts') NOT NULL,
+  status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME
+);
+
+CREATE TABLE sub_account_types (
+  sub_account_types_id INT PRIMARY KEY AUTO_INCREMENT,
+  account_types_id INT NOT NULL,
+  sub_account_type ENUM('Cash and Financial Assets', 'Receivables and Contracts', 'Inventory', 'Accruals and Additional Assets', 'Property, Plant and Equipment','Intangible Assets (Excluding Goodwill)', 'Goodwill', 'Payables', 'Accruals, Deferrals and Other Liabilities', 'Financial Labilities', 'Commitments and Contingencies', 'Equity, Attributable to Parent', 'Retained Earnings (Accumulated Deficit)', 'Accumulated Other Comprehensive Income (Loss)', 'Other Equity Items', 'Equity, Attributable to Noncontrolling Interest' ,'Recognized Point Of Time', 'Recognized Over Time', 'Adjustments', 'Expenses Classified By Nature', 'Expenses Classified By Function', 'Other Revenue and Expenses', 'Gains and Losses', 'Taxes (Other Than Income and Payroll) and Fees', 'Income Tax Expense (Benefit)', 'Intercompany and Related Party Assets', 'Intercompany and Related Party Liabilities', 'Intercompany and Related Party Income and Expense') NOT NULL,
+  status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  FOREIGN KEY (account_types_id) REFERENCES account_types(account_types_id)
+);
+
+CREATE TABLE accounts (
+  accounts_id INT PRIMARY KEY AUTO_INCREMENT,
+  sub_account_types_id INT NOT NULL,
+  account_types_id INT,
+  account_name VARCHAR(255) NOT NULL,
+  opening_balance_date DATE,
+  account_balance FLOAT,
+  status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  FOREIGN KEY (sub_account_types_id) REFERENCES sub_account_types(sub_account_types_id),
+  FOREIGN KEY (account_types_id) REFERENCES account_types(account_types_id)
+);
+
+-- insert query for chart of account in account_type table . 
+
+INSERT INTO account_types (account_type) VALUES ('Assets'), ('Liabilities'), ('Equity Including Portion Attributable to Noncontrolling Interest'), ('Revenue'), ('Expenses'), ('Other (Non-Operating) Income and Expenses'), ('Intercompany and Related Party Accounts');
+
+-- insert query for chart of account in sub_account_types table . 
+
+INSERT INTO sub_account_types (account_types_id, sub_account_type)
+VALUES (1, 'Cash and Financial Assets'),
+       (1, 'Receivables and Contracts'),
+       (1, 'Inventory'),
+       (1, 'Accruals and Additional Assets'),
+       (1, 'Property, Plant and Equipment'),
+       (1, 'Intangible Assets (Excluding Goodwill)'),
+       (1, 'Goodwill'),
+       (2, 'Payables'),
+       (2, 'Accruals, Deferrals and Other Liabilities'),
+       (2, 'Financial Labilities'),
+       (2, 'Commitments and Contingencies'),
+       (3, 'Equity, Attributable to Parent'),
+       (3, 'Retained Earnings (Accumulated Deficit)'),
+       (3, 'Accumulated Other Comprehensive Income (Loss)'),
+       (3, 'Other Equity Items'),
+       (3, 'Equity, Attributable to Noncontrolling Interest'),
+       (4, 'Recognized Point Of Time'),
+       (4, 'Recognized Over Time'),
+       (4, 'Adjustments'),
+       (5, 'Expenses Classified By Nature'),
+       (5, 'Expenses Classified By Function'),
+       (6, 'Other Revenue and Expenses'),
+       (6, 'Gains and Losses'),
+       (6, 'Taxes (Other Than Income and Payroll) and Fees'),
+       (6, 'Income Tax Expense (Benefit)'),
+       (7, 'Intercompany and Related Party Assets'),
+       (7, 'Intercompany and Related Party Liabilities'),
+       (7, 'Intercompany and Related Party Income and Expense');
+
+
+ALTER TABLE pre_purchase_orders MODIFY COLUMN purchase_quantity FLOAT;

@@ -62,3 +62,7 @@ export const inventoryStock = ['Available'];
 export const deliveryTypeSales = ['DELIVERY','PICKUP'];
 
 export const salesStatus = ['INITIATED','LOADING ORDER','PACKING LIST','INVOICE']
+
+export const accountType = ['Assets','Liabilities','Revenue','Expenses', 'Equity Including Portion Attributable to Noncontrolling Interest','Other (Non-Operating) Income and Expenses','Intercompany and Related Party Accounts']
+
+export const subAccountType = ['Cash and Financial Assets', 'Receivables and Contracts', 'Inventory', 'Accruals and Additional Assets', 'Property, Plant and Equipment','Intangible Assets (Excluding Goodwill)', 'Goodwill', 'Payables', 'Accruals, Deferrals and Other Liabilities', 'Financial Labilities', 'Commitments and Contingencies', 'Equity, Attributable to Parent', 'Retained Earnings (Accumulated Deficit)', 'Accumulated Other Comprehensive Income (Loss)', 'Other Equity Items', 'Equity, Attributable to Noncontrolling Interest' ,'Recognized Point Of Time', 'Recognized Over Time', 'Adjustments', 'Expenses Classified By Nature', 'Expenses Classified By Function', 'Other Revenue and Expenses', 'Gains and Losses', 'Taxes (Other Than Income and Payroll) and Fees', 'Income Tax Expense (Benefit)', 'Intercompany and Related Party Assets', 'Intercompany and Related Party Liabilities', 'Intercompany and Related Party Income and Expense']
