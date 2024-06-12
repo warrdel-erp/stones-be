@@ -88,3 +88,41 @@ export async function getAllAccounts(searchText) {
         throw error;
     }
 };
+
+export async function updateAccount(accountsId, data) {
+    try {
+        const result = await model.accountsModel.update(data, {
+            where: {
+                accountsId: accountsId
+            }
+        });
+     return result; 
+    } catch (error) {
+        console.error(`Error updating account ${accountsId} :`, error);
+        throw error; 
+    }
+}
+
+export async function deleteAccount (accountsId) {
+    try {
+        const result = await model.accountsModel.destroy({
+            where: { accountsId },
+            individualHooks: true
+        });
+        return { message: 'Account deleted successfully' };
+    } catch (error) {
+        console.error('Error during soft delete:', error);
+        throw new Error('Unable to soft delete account');
+    }
+};
+
+export async function findAccountNumber(accountId) {
+    const result = await model.accountsModel.findOne({
+      where: {
+        accountsId: {
+          [Op.eq]: accountId
+        }
+      }
+    })
+    return result;
+  };

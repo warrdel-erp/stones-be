@@ -603,3 +603,7 @@ VALUES (1, 'Cash and Financial Assets'),
 
 
 ALTER TABLE pre_purchase_orders MODIFY COLUMN purchase_quantity FLOAT;
+
+ALTER TABLE accounts DROP COLUMN status;
+
+ALTER TABLE accounts ADD COLUMN can_delete BOOLEAN NOT NULL DEFAULT FALSE;

@@ -23,3 +23,24 @@ export async function getAllAccountsTypeAndSubTypes() {
         throw error;
     }
 }
+
+export async function updateAccount(accountsId, info){
+    return await accountsRepository.updateAccount(accountsId, info)
+}
+
+export async function deleteAccount(accountsId) {
+    try {
+        const accountDetails = await accountsRepository.findAccountNumber(accountsId);
+        const canDelete = accountDetails.dataValues.canDelete;
+
+        if (!canDelete) {
+            await accountsRepository.deleteAccount(accountsId);
+            return { message: 'Account deleted successfully' };
+        } else {
+            return { message: 'This account cannot be deleted because it is a permanent account' };
+        }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        return { message: 'An error occurred while trying to delete the account', error: error.message };
+    }
+}

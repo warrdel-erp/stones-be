@@ -46,10 +46,11 @@ export default sequelize.define(
             allowNull: true,
             field: 'account_balance'
         },
-        status: {
-            type: DataTypes.ENUM(...status),
-            allowNull: true,
-            defaultValue: 'ACTIVE'
+        canDelete: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false, 
+            field:'can_delete', 
+            defaultValue: false  // Default value for this field is FALSE
         },
         createdAt: {
             type: DataTypes.DATE,
