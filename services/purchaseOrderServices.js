@@ -188,35 +188,51 @@ export async function singleSlabDetails(poNumber,poSupplierInvoiceMappperId) {
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
+    console.log('dataarray>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',dataArray);
     const transaction = await sequelize.transaction();
     try {
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(dataArray.poSupplierInvoiceMapperId)
+        console.log('inventoryDetails>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',inventoryDetails);
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
             slab: item.slab,
             quantity: item.quantity,
             po_supplier_invoice_id: item.dataValues.po_supplier_invoice_id,
         }));
+        console.log('values>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',values);
         const results = [];
         for (const data of values) {
            const productDetails =  await productInventory.getProductDetailsOfProductInventory(data.productId) // product Inventory
+           console.log('productDetails>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',productDetails);
             let result;
             result = await purchaseOrderRepository.updateReceivingInventory(dataArray.poSupplierInvoiceMapperId, transaction);
+            console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 209',result);
             if (productDetails) {
-                const { slabInStock: productSlabInStock, quantityInStock: productQuantityInStock } = productDetails.dataValues;
+                console.log('vikas saqssasa cvdsdsvbsd chsdgcbjbsd cyisd cbjdgchsdb vhyasdb sxz')
+                const { slabInStock: productSlabInStock, quantityInStock: productQuantityInStock, productInventoryId } = productDetails.dataValues;
                 const { slab: newSlabInStock, quantity: newQuantityInStock } = data;
                 const updateData = { 
                     slabInStock: productSlabInStock + newSlabInStock, 
                     quantityInStock: productQuantityInStock + newQuantityInStock, 
                     productId: data.productId 
                 };
+                console.log('updateData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',updateData);
                 result = await productInventory.updateProductInventory(updateData, transaction)
+                console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 220',result);
+                const inventoryData = {poSupplierInvoiceId:data.po_supplier_invoice_id,productInventoryId}
+                console.log('inventoryData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 222',inventoryData);
+                result = await productInventory.addInventoryInvoice(inventoryData, transaction)
+                console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 224',result);
             }else{
+                console.log('kuldeep saqssasa cvdsdsvbsd chsdgcbjbsd cyisd cbjdgchsdb vhyasdb sxz')
                 const info = {...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId};
                 result = await productInventory.addProductInventory(info, transaction);
+                console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 228',result);
                 const productInventoryId  = result.get('productInventoryId')
                 const inventoryData = {poSupplierInvoiceId:data.po_supplier_invoice_id,productInventoryId:productInventoryId}
+                console.log('inventoryData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>line 230',inventoryData);
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
+                console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> line 232',result);
             }
             results.push(result);
         }
@@ -231,6 +247,27 @@ export async function addProductInventory(dataArray) {
     }
 }
 
-export async function getProductInventory(){
-    return await productInventory.getInventoryList()
-}
+// export async function getProductInventory(page, limit){
+//     return await productInventory.getInventoryList(page, limit)
+// }
+export async function getProductInventory(page, limit) {
+    let result = [];
+    const data = await productInventory.getInventoryList(page, limit);
+    for (const abc of data) {
+      const  abcd = abc.toJSON();
+       console.log('abc>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',abc.toJSON());
+        const slabData = [].concat(...abcd.productInventoryInvoiceMapper.map(pim => {
+         //   console.log('slabdata>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',slabData);
+            return pim.productInventoryInvoice.slabDetails;
+        }))
+        const productDetails = abcd.productInventoryInvoiceMapper[0].productInventoryInvoice.supplierPurchaseProduct.products;
+        console.log('productDetails>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',productDetails);
+        const { slabDetails, supplierPurchaseProduct, ...productInventoryInvoice } = abcd.productInventoryInvoiceMapper[0].productInventoryInvoice;
+
+        delete abcd.productInventoryInvoiceMapper;
+        result.push({
+            ...abcd, slabData, productDetails, productInventoryInvoice
+        });
+    }
+    return result;
+};

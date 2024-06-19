@@ -163,7 +163,9 @@ export const addProductInventory = async (req,res) => {
 // 11. get inventory product data
 export const getProductInventory = async (req,res) => { 
     try {
-        const result = await purchaseOrderService.getProductInventory();
+        const page = parseInt(req.query.page) || 0;  // Default to page 0 if not provided
+        const limit = 10;  // Fixed limit of 10 items per page
+        const result = await purchaseOrderService.getProductInventory(page, limit);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting Product Inventory:", error);

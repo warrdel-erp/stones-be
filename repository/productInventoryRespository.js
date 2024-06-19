@@ -21,7 +21,7 @@ export async function updateProductInventory(data) {
 export async function getProductDetailsOfProductInventory(productId) {
   try {
     const result = await model.productInventoryModel.findOne({
-      attributes: ["slabInStock", "quantityInStock"],
+      attributes: ["slabInStock", "quantityInStock", "productInventoryId"],
       where: {
         productId: productId,
       },
@@ -48,12 +48,17 @@ export async function addProductInventory(data) {
 
 export async function addInventoryInvoice(data) {
   try {
+    const productinventory = await model.inventoryInvoiceMapper.findOne({
+      where: data,
+    });
+    if(!productinventory){
     const result = await model.inventoryInvoiceMapper.create(data);
     return result;
+    }
   } catch (error) {
     console.error("Error in add Inventory Invoice:", error);
     throw error;
-  }
+   } 
 }
 
 export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInvoiceMappperId) {
@@ -92,10 +97,14 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
     throw error;
   }
 }
-
-export async function getInventoryList() {
+  export async function getInventoryList(page, limit) {
   try {
+    const offset = page * limit;
+    console.log(`Fetching inventory with limit: ${limit}, offset: ${offset}`);
+
     const result = await model.productInventoryModel.findAll({
+      offset :offset,
+      limit:limit,
       include: [
         {
           model: model.inventoryInvoiceMapper,
@@ -134,6 +143,7 @@ export async function getInventoryList() {
         },
       ],
     });
+    console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
   } catch (error) {
     console.error("Error in getInventoryList:", error);
