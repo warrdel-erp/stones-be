@@ -11,6 +11,7 @@ import customer from './router/customerRoutes.js'
 import purchaseOrder from './router/purchaseOrderRoutes.js'
 import salesOrder from './router/salesOrderRoutes.js'
 import accounts from './router/accountsRoutes.js'
+import dashboard from './router/dashboardRoutes.js'
 
 // middleware
 app.use(json())
@@ -26,6 +27,7 @@ app.use("/customer", customer);
 app.use('/purchaseOrder', purchaseOrder);
 app.use("/salesOrder",salesOrder);
 app.use("/accounts", accounts);
+app.use("/dashboard", dashboard);
 
 
 app.listen(PORT, () => {
