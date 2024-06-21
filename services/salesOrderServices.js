@@ -86,12 +86,14 @@ export async function loadingOrder(info) {
     const transaction = await sequelize.transaction();
     try {
         let soLoadingOrderId, updateResults = [];
+        let totalSubTotal = 0;
+        let totalTax = 0;
+        let totalAmount = 0;
 
-        // Loop through inventories to handle tax calculations, create loading orders, and update sales order inventory
+        // Loop through inventories 
         for (const inventory of info.selectedInventory) {
-            let tax;
-            let total;
-            let result;
+            let tax = 0;
+            let total = 0;
 
             if (inventory.isTax) {
                 const salesTax = await salesOrderRepository.getsalestax(info.salesOrdersId, { transaction });
@@ -100,22 +102,37 @@ export async function loadingOrder(info) {
                 total = inventory.subTotal + tax;
             } else {
                 tax = 0;
-                total = inventory.total;
+                total = inventory.subTotal;
             }
+            totalSubTotal += inventory.subTotal;
+            totalTax += tax;
+            totalAmount += total;
+        };
 
-            const data = { subTotal: inventory.subTotal, total: total, tax: tax, salesOrdersId: info.salesOrdersId, salesStatus: 'LOADING ORDER' };
-            result = await salesOrderRepository.createLoadingOrder(data, { transaction });
-            soLoadingOrderId = result.get('soLoadingOrderId');
+        // Create a single loading order 
+        const data = {
+            subTotal: totalSubTotal,
+            total: totalAmount,
+            tax: totalTax,
+            salesOrdersId: info.salesOrdersId,
+            salesStatus: 'LOADING ORDER'
+        };
+        const result = await salesOrderRepository.createLoadingOrder(data, { transaction });
+        soLoadingOrderId = result.get('soLoadingOrderId');
 
-            const updateData = {
-                remeasureLength: inventory.remeasureLength,
-                remeasureWidth: inventory.remeasureWidth,
-                soLoadingOrderId: soLoadingOrderId,
-                salesStatus: 'LOADING ORDER'
+        // Update each inventory item with the soLoadingOrderId
+        for (const inventory of info.selectedInventory) {
+            for(const slab of inventory.slabData){
+                const updateData = {
+                    remeasureLength: slab.remeasureLength,
+                    remeasureWidth: slab.remeasureWidth,
+                    soLoadingOrderId: soLoadingOrderId,
+                    salesStatus: 'LOADING ORDER'
+                };
+                const updateResult = await salesOrderRepository.updateSalesOrderInventory(slab.salesOrdersInventoryId, updateData, { transaction });
+                updateResults.push(updateResult);
             };
-            const updateResult = await salesOrderRepository.updateSalesOrderInventory(inventory.salesOrdersInventoryId, updateData, { transaction });
-            updateResults.push(updateResult);
-        }
+        };
 
         // Commit the transaction if all operations succeed
         await transaction.commit();
