@@ -85,28 +85,28 @@ export async function addProduct(info) {
 export async function loadingOrder(info) {
     const transaction = await sequelize.transaction();
     try {
-        let result, soLoadingOrderId, updateResults = [];
-        let tax;
-        let total;
+        let soLoadingOrderId, updateResults = [];
 
-        // Handle tax calculations and loading order creation
-        const salesOrderId = info.salesOrdersId;
-        if (info.isTax) {
-            const salesTax = await salesOrderRepository.getsalestax(salesOrderId, { transaction });
-            const taxPercentage = parseFloat(salesTax) / 100;
-            tax = info.subTotal * taxPercentage;
-            total = info.subTotal + tax;
-            const data = { subTotal: info.subTotal, total: total, tax: tax, salesOrdersId: salesOrderId ,salesStatus: 'LOADING ORDER'};
-            result = await salesOrderRepository.createLoadingOrder(data, { transaction });
-            soLoadingOrderId = result.get('soLoadingOrderId');
-        }else{
-            const data = { subTotal: info.subTotal, total: info.total, salesOrdersId: salesOrderId ,salesStatus: 'LOADING ORDER'};
-            result = await salesOrderRepository.createLoadingOrder(data, { transaction });
-            soLoadingOrderId = result.get('soLoadingOrderId');
-        }
-
-        // Loop through inventories to update sales order inventory
+        // Loop through inventories to handle tax calculations, create loading orders, and update sales order inventory
         for (const inventory of info.selectedInventory) {
+            let tax;
+            let total;
+            let result;
+
+            if (inventory.isTax) {
+                const salesTax = await salesOrderRepository.getsalestax(info.salesOrdersId, { transaction });
+                const taxPercentage = parseFloat(salesTax) / 100;
+                tax = inventory.subTotal * taxPercentage;
+                total = inventory.subTotal + tax;
+            } else {
+                tax = 0;
+                total = inventory.total;
+            }
+
+            const data = { subTotal: inventory.subTotal, total: total, tax: tax, salesOrdersId: info.salesOrdersId, salesStatus: 'LOADING ORDER' };
+            result = await salesOrderRepository.createLoadingOrder(data, { transaction });
+            soLoadingOrderId = result.get('soLoadingOrderId');
+
             const updateData = {
                 remeasureLength: inventory.remeasureLength,
                 remeasureWidth: inventory.remeasureWidth,
@@ -135,8 +135,8 @@ export async function getAllSo(search) {
     } catch (error) {
         console.error('Error fetching sales orders:', error);
         throw error;
-    }
-}
+    };
+};
 
 export async function updateStatus(soLoadingOrderId) {
     const transaction = await sequelize.transaction();
@@ -147,7 +147,7 @@ export async function updateStatus(soLoadingOrderId) {
             console.log(`No sales order inventory found with id ${soLoadingOrderId}`);
             await transaction.rollback();
             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
-        }
+        };
 
         const statusMapping = {
             'INITIATED': 'LOADING ORDER',
@@ -162,7 +162,7 @@ export async function updateStatus(soLoadingOrderId) {
                 productInventoryId: salesOrderInventories.dataValues.productInventoryId,
                 status: salesOrderInventories.dataValues.salesStatus,
             }
-        }
+        };
 
         const currentStatus = data.status;
         const productInventoryId = data.productInventoryId;
@@ -179,7 +179,7 @@ export async function updateStatus(soLoadingOrderId) {
             if (newStatus === 'INVOICE') {
                 productInventoryUpdateResult = await updateProductInventoryInactive(productInventoryId, { status: 'INACTIVE' }, { transaction });
                 console.log(`Product inventory with id ${productInventoryId} set to INACTIVE`);
-            }
+            };
 
             // Commit the transaction if all operations succeed
             await transaction.commit();
@@ -193,12 +193,12 @@ export async function updateStatus(soLoadingOrderId) {
             console.log(`No update required for status: ${currentStatus}`);
             await transaction.rollback();
             return { message: `No update required because the current status value is: ${currentStatus}` };
-        }
+        };
 
     } catch (error) {
         // Rollback the transaction if any error occurs
         await transaction.rollback();
         console.error('Error updating status:', error);
         return { success: false, error: error.message };
-    }
+    };
 };

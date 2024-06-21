@@ -1,3 +1,4 @@
+import { lowStockQuantity } from '../constant.js';
 import * as model from '../models/index.js';
 import { Op } from "sequelize";
 
@@ -85,4 +86,124 @@ export async function poNotes(fromDate, toDate){
             }
     });
     return result
+};
+
+export async function stockInventory(fromDate, toDate){
+    const attributes = ['productId','slabInStock','quantityInStock'];
+    const endDate = new Date(toDate);
+    endDate.setHours(23, 59, 59, 999);
+    const result = await model.productInventoryModel.findAll({
+        attributes:attributes,
+        where: {
+            created_at: {
+                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
+                }
+            },
+            include: [
+                {
+                    model: model.productModel,
+                    as: "salesProductDetails",
+                    attributes: ['productName'],
+                },
+            ],    
+    });
+    return result
+};
+
+
+export async function lowStock(fromDate, toDate) {
+    const attributes = ['productId', 'slabInStock', 'quantityInStock'];
+
+    const endDate = new Date(toDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    const result = await model.productInventoryModel.findAll({
+        attributes: attributes,
+        where: {
+            created_at: {
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
+            },
+            quantityInStock: {
+                [Op.gt]: lowStockQuantity  //  quantityInStock is greater than 500
+            }
+        },
+        include: [
+            {
+                model: model.productModel,
+                as: "salesProductDetails",
+                attributes: ['productName'],
+            },
+        ],
+    });
+
+    return result;
+}
+
+// calender complete month Data
+
+export async function getCalenderMonthData(fromDate, toDate){
+    const endDate = new Date(toDate);
+    endDate.setHours(23, 59, 59, 999);
+    const attributes = ['po','etaDate','purchaseOrderId'];
+    const result = await model.purchaseModel.findAll({
+        attributes:attributes,
+        where: {
+            eta_date: {
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
+            }
+            }
+    });
+    return result
+};
+
+// single Date Data
+
+export async function getCalenderDateData(date) {
+        const targetDate = new Date(date);
+
+    const startDate = new Date(targetDate.setHours(0, 0, 0, 0));
+    const endDate = new Date(targetDate.setHours(23, 59, 59, 999));
+
+    let result;
+    const attributes = ['po','poDate', 'etaDate', 'purchaseOrderId'];
+     result = await model.purchaseModel.findAll({
+        attributes: attributes,
+        where: {
+            eta_date: {
+                [Op.between]: [startDate, endDate]
+            }
+        },
+        include: [
+            {
+                model: model.supplierModel,
+                as: "suppliers",
+                attributes: ['supplierName'],
+            },
+            {
+                model: model.locationModel,
+                as: "location",
+                foreignKey: "location_id",
+                attributes: ['location'] ,
+            },
+            {
+                model: model.locationModel,
+                as: "purchaseLocation",
+                foreignKey: "purchase_location_id",
+                attributes: ['location'] ,
+            },
+            {
+                model: model.purchaseProductModel,
+                as:'purchaseProduct',
+                attributes: ['productId'],
+                include: [
+                    {
+                        model: model.productModel,
+                        as:'products',
+                        attributes: ['productName']
+                    }
+                ]
+            },
+        ]
+    });
+    return result;
 };
