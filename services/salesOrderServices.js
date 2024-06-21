@@ -34,26 +34,27 @@ export async function singleSoDetails(soNumber) {
 export async function addProduct(info) {
     const transaction = await sequelize.transaction();
     try {
+        
         let results = [];
-        let tax;
-        let total;
 
-        // Handle tax calculations and order update
         const salesOrderId = info.salesOrdersId;
+
         for (const inventory of info.selectedInventory) {
-            tax = inventory.isTax // this is true false if true then calculate 
-            if (tax) {
+            let { subTotal } = inventory;
+            let total = subTotal;
+            let tax = 0;
+
+            if (inventory.isTax) {
                 const salesTax = await salesOrderRepository.getsalestax(salesOrderId, { transaction });
                 const taxPercentage = parseFloat(salesTax) / 100;
-                tax = info.subTotal * taxPercentage;
-                total = info.subTotal + tax;
-                const data = { subTotal: info.subTotal, total: total, tax: tax };
-                await salesOrderRepository.updateOrder(salesOrderId, data, { transaction });
-            }else{
-                const data = { subTotal: info.subTotal, total: info.total};
-                await salesOrderRepository.updateOrder(salesOrderId, data, { transaction });
+                tax = subTotal * taxPercentage;
+                total += tax;
             }
+
+            const data = { subTotal, total, tax };
+            await salesOrderRepository.updateOrder(salesOrderId, data, { transaction });
         }
+
 
         // Loop through inventories and slabs to add products
         for (const inventory of info.selectedInventory) {
