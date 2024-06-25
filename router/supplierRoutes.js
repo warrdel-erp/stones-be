@@ -11,10 +11,10 @@ import { userAuth } from "../middleware/authUser.js";
 
 router.post("/", userAuth, addSupplier);
 
-router.get("/all", getAllSupplier);
+router.get("/all",userAuth, getAllSupplier);
 
-router.get('/', getSingleSupplierDetails)
+router.get('/',userAuth, getSingleSupplierDetails)
 
-router.patch("/:supplierName", updateSupplier);
+router.patch("/:supplierName", userAuth, updateSupplier);
 
-export default router;
+export default router;  
