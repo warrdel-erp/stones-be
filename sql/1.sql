@@ -119,3 +119,7 @@ CREATE TABLE IF NOT EXISTS settings (
     ('productUomEnum', '["lb", "in", "CF", "CM", "SF", "Kg", "SQM", "CBM", "EA"]', 'product'),
     ('productPriceRangeEnum', '["low", "mid", "high", "very high"]', 'product'),
     ('productAssignedBinEnum', '["A1", "A2", "A3", "B1", "B2", "B3"]', 'product');
+
+ALTER TABLE suppliers
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
