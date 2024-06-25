@@ -50,7 +50,7 @@ export const login = async (req, res) => {
       return res.status(400).send("Incorrect password");
     }
 
-   const token = jwt.sign({ email: existingEmail.email }, secretKey,{ expiresIn: '60000' });
+   const token = jwt.sign({ email: existingEmail.email }, secretKey,{ expiresIn: '600000' });
    res.cookie("token", token);
    res.status(200).json({
     status: true,
