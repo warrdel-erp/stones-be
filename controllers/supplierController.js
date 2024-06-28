@@ -3,8 +3,11 @@ import * as supplierService from '../services/supplierServices.js'
 // 1. create supplier
 export const addSupplier = async (req,res) => {
     try {
+        const user = req.user
+        const createdBy = user.dataValues.id
         const info = req.body
-        const result = await supplierService.addSupplier(info);
+
+        const result = await supplierService.addSupplier({...info,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addSupplier:", error);
@@ -49,7 +52,9 @@ export const updateSupplier = async (req,res) => {
         if (!supplierName){
             res.status(400).send("supplierName is required");
         }
-        const result = await supplierService.updateSupplier(supplierName, info);
+        const user = req.user
+        const updatedBy = user.dataValues.id
+        const result = await supplierService.updateSupplier(supplierName, {...info,updatedBy});
         res.status(200).send(result);
     } catch (error) {
         console.error(`Error in updating ${supplierName}:`, error);

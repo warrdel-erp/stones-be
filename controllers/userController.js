@@ -9,7 +9,6 @@ export const register = async (req, res) => {
   try {
     const { email, password, username, phone } = req.body;
     const existingEmail = await userRepository.findEmailByEmail(email);
-    console.log(">>>>>existingEmail", existingEmail);
 
     // Check if all required fields are provided
 
@@ -34,28 +33,33 @@ export const register = async (req, res) => {
 // login
 
 export const login = async (req, res) => {
-    try {
-        let { email, password } = req.body;
-        const existingEmail = await userRepository.findEmailByEmail(email);
-    
-        if (!existingEmail) {
-            return res.status(400).send("Email does not exist");
-        }
-    
-        const isPasswordCorrect = await bcrypt.compare(password, existingEmail.password);
-    
-        if (!isPasswordCorrect) {
-            return res.status(400).send("Incorrect password");
-        }
-        
-        const token = jwt.sign({ email: existingEmail.email}, secretKey);
-        res.status(200).json({
-            status: true,
-            message: "User logged in successfully",
-            token
-        });
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).send("Internal server error");
+  try {
+    let { email, password } = req.body;
+    const existingEmail = await userRepository.findEmailByEmail(email);
+
+    if (!existingEmail) {
+      return res.status(400).send("Email does not exist");
     }
-}; 
+
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingEmail.password
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(400).send("Incorrect password");
+    }
+
+   const token = jwt.sign({ email: existingEmail.email }, secretKey,{ expiresIn: '600000' });
+   res.cookie("token", token);
+   res.status(200).json({
+    status: true,
+    message: "User logged in successfully",
+    token,
+  });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).send("Internal server error");
+  }
+ 
+};

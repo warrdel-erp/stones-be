@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS settings (
     ('productPriceRangeEnum', '["low", "mid", "high", "very high"]', 'product'),
     ('productAssignedBinEnum', '["A1", "A2", "A3", "B1", "B2", "B3"]', 'product');
 
+
 -- add column in suppliers
 
 ALTER TABLE suppliers ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
@@ -607,3 +608,8 @@ ALTER TABLE pre_purchase_orders MODIFY COLUMN purchase_quantity FLOAT;
 ALTER TABLE accounts DROP COLUMN status;
 
 ALTER TABLE accounts ADD COLUMN can_delete BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE suppliers
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
+
