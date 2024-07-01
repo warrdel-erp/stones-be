@@ -103,6 +103,9 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
     console.log(`Fetching inventory with limit: ${limit}, offset: ${offset}`);
 
     const result = await model.productInventoryModel.findAll({
+      where: {
+        status: 'ACTIVE'
+      },
       offset :offset,
       limit:limit,
       include: [

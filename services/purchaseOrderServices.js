@@ -66,7 +66,7 @@ export async function singlePoDetails(poNumber) {
     } catch (error) {
         throw new Error(`Failed to fetch purchase ${poNumber} order details: ${error.message}`);
     }
-}
+};
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
