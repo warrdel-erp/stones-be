@@ -104,3 +104,38 @@ VALUES
 (28, 7, 'Intercompany and Related Party Income', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (28, 7, 'Intercompany and Related Party Expenses', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (28, 7, 'Income (Loss) From Equity Method Investments', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
+    ('paymentMethod', '["Cash", "Check", "Debit Card","CC-Amex","CC-Master","CC-Visa","CC-Discover","Wire","ACH","AutoPay","Other"]', 'payment'),
+    ('accountNumber', '["70270-61-Kuldeep-Yadav"]', 'payment');
+
+CREATE TABLE purchase_payment (
+    purchase_payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    po_supplier_invoice_mapper_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    cash_account VARCHAR(255) NOT NULL,
+    payment_date DATE,
+    payment_method ENUM('Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other') NOT NULL,
+    `check` INT,
+    date_on_check DATE,
+    address VARCHAR(255),
+    suite VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    zip INT,
+    memo VARCHAR(255),
+    miscellaneous VARCHAR(255),
+    description VARCHAR(255),
+    amount FLOAT,
+    amountOn_check FLOAT NOT NULL,
+    amount_applied FLOAT NOT NULL,
+    unapplied_balance FLOAT NOT NULL,
+    internal_notes VARCHAR(255),
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id),
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
+);

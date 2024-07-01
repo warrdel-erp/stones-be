@@ -172,3 +172,69 @@ export const getProductInventory = async (req,res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+// 12 add payment of slab
+
+export const addPayment = async (req,res) => {
+    try {
+        const data = req.body
+        const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
+        if (!(poSupplierInvoiceMapperId)) {
+            res.status(400).send("po Supplier Invoice Mapper Id  is required for make payment");
+        }
+        const result = await purchaseOrderService.addPayment(data);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add payment: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+// 13 get payment details
+
+export const getPaymentDetails = async (req,res) => {
+    const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
+    try {
+        if (!poSupplierInvoiceMappperId){
+            res.status(400).send("po Supplier Invoice Mappper Id is required");
+        }
+        const result = await purchaseOrderService.getPaymentDetails(poSupplierInvoiceMappperId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(`Error in getting  payment detail for poSupplierInvoiceMappperId :-${poSupplierInvoiceMappperId} :`, error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+// 14 add container Details
+
+export const addContainer = async (req,res) => {
+    try {
+        const data = req.body
+        const {poSupplierInvoiceMapperId,containerNumber,receivedBy} = req.body;
+        if (!(poSupplierInvoiceMapperId && containerNumber && receivedBy)) {
+            res.status(400).send("po Supplier Invoice Mapper,containerNumber and receivedBy Id  is required for make payment");
+        }
+        const result = await purchaseOrderService.addContainer(data);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add container: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+//15 get container details
+
+export const getContainerDetails = async (req,res) => {
+    const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
+    try {
+        if (!poSupplierInvoiceMappperId){
+            res.status(400).send("po Supplier Invoice Mappper Id is required");
+        }
+        const result = await purchaseOrderService.getContainerDetails(poSupplierInvoiceMappperId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(`Error in getting  container detail for poSupplierInvoiceMappperId :-${poSupplierInvoiceMappperId} :`, error);
+        res.status(500).send("Internal Server Error");
+    }
+};

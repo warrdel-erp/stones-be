@@ -184,7 +184,7 @@ export async function singleSlabDetails(poNumber,poSupplierInvoiceMappperId) {
         } catch (error) {
         throw new Error(`Failed to fetch slab Details ${poNumber} && ${poSupplierInvoiceMappperId}: ${error.message}`);
     }
-}
+};
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
@@ -251,4 +251,28 @@ export async function getProductInventory(page, limit) {
         });
     }
     return result;
+};
+
+// add payment
+
+export async function addPayment(info){
+    return await purchaseOrderRepository.addPayment(info)
+};
+
+// get payment details 
+
+export async function getPaymentDetails(poSupplierInvoiceMappperId){
+    return await purchaseOrderRepository.getPaymentDetails(poSupplierInvoiceMappperId)
+};
+
+// add container
+
+export async function addContainer(info){
+    return await purchaseOrderRepository.addContainer(info)
+};
+
+// get container details 
+
+export async function getContainerDetails(poSupplierInvoiceMappperId){
+    return await purchaseOrderRepository.getContainerDetails(poSupplierInvoiceMappperId)
 };

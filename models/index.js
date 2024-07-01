@@ -18,6 +18,8 @@ import salesOrderInventoryModel from './salesOrdersInventoryModel.js';
 import accountsModel from './accountsModel.js';
 import accountTypesModel from './accountTypesModel.js';
 import subAccountTypesModel from './subAccountTypesModel.js';
+import purchasePaymentModel from './purchasePaymentModel.js';
+import containerModel from './containerModel.js';
 
 supplierModel.hasMany(purchaseModel, { foreignKey: 'supplier_id' });
 purchaseModel.belongsTo(supplierModel, { foreignKey: 'supplier_id',as: "suppliers"});
@@ -85,9 +87,8 @@ accountTypesModel.hasMany(subAccountTypesModel, { foreignKey: 'account_types_id'
 accountsModel.belongsTo(subAccountTypesModel, { foreignKey: 'sub_account_types_id',as:'accountSubtype'});
 subAccountTypesModel.hasMany(accountsModel, { foreignKey: 'sub_account_types_id',as:'accountSubtype'});
 
-// accountsModel.belongsTo(accountTypesModel, { foreignKey: 'account_types_id',as:'accountTypes'});
-// accountTypesModel.hasOne(accountsModel, { foreignKey: 'account_types_id',as:'accountTypes'});
-
+purchasePaymentModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id',as:'purchaseInvoice'});
+poSupplierInvoiceMapperModel.hasMany(purchasePaymentModel, { foreignKey: 'po_supplier_invoice_mapper_id',as:'purchaseInvoice'});
 
 export {
 	productModel,
@@ -110,4 +111,6 @@ export {
 	accountsModel,
 	subAccountTypesModel,
 	accountTypesModel,
+	purchasePaymentModel,
+	containerModel,
   };

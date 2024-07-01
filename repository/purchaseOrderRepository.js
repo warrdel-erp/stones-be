@@ -304,4 +304,70 @@ export async function updateReceivingInventory(poSupplierInvoiceMapperId) {
     console.error("Error occurred while updating receiving inventory:", error);
     throw error;
   }
-}
+};
+
+// add payment 
+
+export async function addPayment(data) {
+  try {
+    const result = await model.purchasePaymentModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add paymentr:", error);
+    throw error;
+  }
+};
+
+// get Payment Details
+
+export async function getPaymentDetails(poSupplierInvoiceMapperId) {
+  try {
+    console.log(`Fetching payment details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`);
+
+    const result = await model.purchasePaymentModel.findOne({
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+      },
+      include: [{
+        model: model.poSupplierInvoiceMapperModel,
+        as:"purchaseInvoice",
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      }],
+    });
+    return result;
+  } catch (error) {
+    console.error(`Error in getting payment details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`, error);
+    throw error;
+  }
+};
+
+// add container 
+
+export async function addContainer(data) {
+  try {
+    const result = await model.containerModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add container:", error);
+    throw error;
+  }
+};
+
+// get Payment Details
+
+export async function getContainerDetails(poSupplierInvoiceMapperId) {
+  try {
+    console.log(`Fetching container details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`);
+    const result = await model.containerModel.findOne({
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error(`Error in getting container details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`, error);
+    throw error;
+  }
+};
