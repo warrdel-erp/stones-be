@@ -4,6 +4,8 @@ import * as salesOrderService from '../services/salesOrderServices.js'
 // 1. create order
 export const createOrder = async (req,res) => {
     try {
+        const user = req.user
+        const createdBy = user.dataValues.id
         const info = req.body
         const {so,soDate,salesTax} = req.body
         const soDetails = await findSoNumber(so);
@@ -13,7 +15,7 @@ export const createOrder = async (req,res) => {
         }else if(soDetails){
             res.status(400).send("SO Number can't Be Same");
         }else {
-            const result = await salesOrderService.createOrder(info);
+            const result = await salesOrderService.createOrder({...info,createdBy});
             res.status(200).send(result);
         }
     } catch (error) {

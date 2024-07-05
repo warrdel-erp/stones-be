@@ -3,9 +3,11 @@ import * as productService from '../services/productServices.js'
 // 1. create product
 export const addProduct = async (req,res) => {
     try {
+        const user = req.user
+        const createdBy = user.dataValues.id
         const info = req.body
         console.log(info)
-        const result = await productService.addProducts(info);
+        const result = await productService.addProducts({...info,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addProduct:", error);

@@ -6,13 +6,16 @@ export const createOrder = async (req,res) => {
     try {
         const info = req.body
         const {po,poDate} = req.body
+        const user = req.user
+        const createdBy = user.dataValues.id
+        console.log(info,'informationare');
         const poDetails = await findPoNumber(po);
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
         }else if(poDetails){
             res.status(400).send("PO Number can't Be Same");
         }else {
-            const result = await purchaseOrderService.createOrder(info);
+            const result = await purchaseOrderService.createOrder({...info,createdBy});
             res.status(200).send(result);
         }
     } catch (error) {

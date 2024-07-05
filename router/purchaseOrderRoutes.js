@@ -1,31 +1,34 @@
 import {Router} from  'express'
+import { userAuth } from '../middleware/authUser.js'; 
 const router =  Router();
 
 import { createOrder,getPoNumber,updateOrder,addPurchaseOrderProduct,singlePoDetails,addSuplierInvoice,getAllOpenPo,
     addSlabDetails,singleSlabDetails,addProductInventory,getProductInventory,addPayment,getPaymentDetails,addContainer,getContainerDetails
 } from "../controllers/purchaseOrderControllers.js"
 
-router.post('/', createOrder);
+router.post('/',userAuth, createOrder);
 
-router.get('/', getPoNumber);
+router.get('/',userAuth, getPoNumber);
 
-router.patch('/:po', updateOrder);
+router.patch('/:po', userAuth, updateOrder);
 
-router.post('/addPurchaseProduct', addPurchaseOrderProduct);
+router.post('/addPurchaseProduct',userAuth, addPurchaseOrderProduct);
 
-router.get('/poNumber', singlePoDetails);
+router.get('/poNumber',userAuth, singlePoDetails);
 
-router.post('/addSuplierInvoice', addSuplierInvoice);
+router.post('/addSuplierInvoice', userAuth,addSuplierInvoice);
 
-router.get('/allPo', getAllOpenPo);
+router.get('/allPo',userAuth, getAllOpenPo);
 
-router.post('/addSlabDetails', addSlabDetails);
+router.post('/addSlabDetails',userAuth, addSlabDetails);
 
-router.get('/slabDetails', singleSlabDetails);
+router.get('/slabDetails',userAuth, singleSlabDetails);
 
-router.post('/productInventory',addProductInventory);
 
-router.get('/productInventory',getProductInventory);
+router.post('/productInventory',userAuth,addProductInventory)
+
+
+router.get('/productInventory',userAuth,getProductInventory);
 
 router.post('/addPayment',addPayment);
 

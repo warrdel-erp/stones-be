@@ -1,11 +1,12 @@
 import {Router} from  'express';
 const router =  Router();
 import {getDashBoardData,getCalenderMonth,getCalenderDate} from '../controllers/dashboardController.js';
+import { userAuth } from '../middleware/authUser.js';
 
-router.get('/all', getDashBoardData);
+router.get('/all', userAuth, getDashBoardData);
 
-router.get('/calenderMonth', getCalenderMonth);
+router.get('/calenderMonth',userAuth, getCalenderMonth);
 
-router.get('/calenderDate', getCalenderDate);
+router.get('/calenderDate',userAuth, getCalenderDate);
 
 export default router;

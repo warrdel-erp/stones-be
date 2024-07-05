@@ -1,20 +1,20 @@
 import {Router} from  'express';
 const router =  Router();
-
+import { userAuth } from '../middleware/authUser.js';
 import { createOrder,getSoNumber,singleSoDetails,addProduct,loadingOrder,getAllOpenSo,updateStatus} from "../controllers/salesOrderController.js";
 
-router.post('/', createOrder);
+router.post('/',userAuth, createOrder);
 
-router.get('/', getSoNumber);
+router.get('/', userAuth,getSoNumber);
 
-router.get('/soNumber', singleSoDetails);
+router.get('/soNumber',userAuth, singleSoDetails);
 
-router.post('/addProduct', addProduct);
+router.post('/addProduct', userAuth,addProduct);
 
-router.post('/loadingOrder', loadingOrder);
+router.post('/loadingOrder',userAuth, loadingOrder);
 
-router.get('/allPo', getAllOpenSo);
+router.get('/allPo',userAuth, getAllOpenSo);
 
-router.patch('/:soLoadingOrderId', updateStatus);
+router.patch('/:soLoadingOrderId',userAuth, updateStatus);
 
 export default router;
