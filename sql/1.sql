@@ -613,3 +613,14 @@ ALTER TABLE suppliers
 ADD COLUMN created_by INT ,
 ADD COLUMN updated_by INT;
 
+ALTER TABLE purchase_orders
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE sales_orders
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE products
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
