@@ -624,3 +624,6 @@ ADD COLUMN updated_by INT;
 ALTER TABLE products
 ADD COLUMN created_by INT ,
 ADD COLUMN updated_by INT;
+
+ALTER TABLE products
+DROP COLUMN supplier_id;
