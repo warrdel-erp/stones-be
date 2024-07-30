@@ -8,6 +8,7 @@ export default sequelize.define(
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+
     },
     username: {
         type: DataTypes.STRING,
@@ -15,7 +16,7 @@ export default sequelize.define(
     },
     userid: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     password: {
         type: DataTypes.STRING,

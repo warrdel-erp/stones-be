@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    deleted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (userid)
 );
 
 -- supplier
@@ -142,11 +143,15 @@ INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
 
 -- add  new fields FOREIGN KEY & status in products table
 
+-- ALTER TABLE products
+-- ADD COLUMN supplier_id INTEGER NOT NULL,
+-- ADD CONSTRAINT fk_supplierId
+-- FOREIGN KEY (supplier_id)
+-- REFERENCES suppliers(supplier_id);
 ALTER TABLE products
-ADD COLUMN supplier_id INTEGER NOT NULL,
-ADD CONSTRAINT fk_supplierId
-FOREIGN KEY (supplier_id)
-REFERENCES suppliers(supplier_id);
+DROP CONSTRAINT fk_supplierId;
+ALTER TABLE products
+DROP COLUMN supplier_id;
 
 ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
 
@@ -557,7 +562,7 @@ CREATE TABLE accounts (
   account_types_id INT,
   account_name VARCHAR(255) NOT NULL,
   opening_balance_date DATE,
-  account_balance FLOAT,
+  account_balance VARCHAR(255),
   status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -609,6 +614,7 @@ ALTER TABLE accounts DROP COLUMN status;
 
 ALTER TABLE accounts ADD COLUMN can_delete BOOLEAN NOT NULL DEFAULT FALSE;
 
+-- To add creation of data by whom
 ALTER TABLE suppliers
 ADD COLUMN created_by INT ,
 ADD COLUMN updated_by INT;
@@ -625,5 +631,51 @@ ALTER TABLE products
 ADD COLUMN created_by INT ,
 ADD COLUMN updated_by INT;
 
+-- alter table product to remove 
+
+ALTER TABLE products
+DROP CONSTRAINT fk_supplierId;
 ALTER TABLE products
 DROP COLUMN supplier_id;
+
+-- role table create 
+CREATE TABLE roles (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(255) UNIQUE NOT NULL,
+    role_description TEXT
+);
+
+ --permission table creation
+  CREATE TABLE permissions (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    permission_name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    module VARCHAR(255)
+  );
+  
+-- user-role table creation 
+CREATE TABLE user_roles (
+    user_role_id INT AUTO_INCREMENT PRIMARY KEY ,
+    user_id INT,
+    role_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(role_id)
+  );
+  
+-- role and permission table creation
+ CREATE TABLE role_permissions (
+	role_permission_id INT PRIMARY KEY,
+    role_id INT,
+    permission_id INT,
+    FOREIGN KEY (role_id) REFERENCES roles(role_id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
+  );
+
+
+INSERT INTO Roles (role_name, role_description)
+VALUES ('Super Admin', 'Has full access to all modules and permissions including editing roles');
+ALTER TABLE products
+DROP COLUMN supplier_id;
+
+
+

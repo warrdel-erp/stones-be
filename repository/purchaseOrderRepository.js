@@ -114,57 +114,57 @@ export async function createSupplierInvoice(data) {
 export async function getSinglePurchaseOrder(poNumber) {
   try {
     const result = await model.purchaseModel.findOne({
-      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       include: [
         {
           model: model.supplierModel,
           as: "suppliers",
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.locationModel,
           as: "location",
           foreignKey: "location_id",
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.locationModel,
           as: "purchaseLocation",
           foreignKey: "purchase_location_id",
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.poSupplierInvoiceMapperModel,
           as: "invoiceMapper",
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-          include:[
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+          include: [
             {
               model: model.poSupplierInvoiceModel,
               as: "supplierInvoice",
-              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
           ]
         },
         {
           model: model.purchaseProductModel,
           as: "purchaseProduct",
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-          include:[
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+          include: [
             {
               model: model.productModel,
               as: "products",
-              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
             {
               model: model.prePurchaseModel,
               as: "prePurchase",
-              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
           ]
         },
       ],
-      where:{
-        po:poNumber
+      where: {
+        po: poNumber
       },
     });
     return result;
@@ -181,7 +181,7 @@ export async function getAllPurchaseOrder(searchText) {
   try {
     if (searchText) {
       result = await model.purchaseModel.findAll({
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         where: {
           po: {
             [Op.like]: `%${searchText}%`
@@ -211,7 +211,7 @@ export async function getAllPurchaseOrder(searchText) {
       });
     } else {
       result = await model.purchaseModel.findAll({
-        attributes: ['po', 'poDate','requiredShipDate','supplierSo','container','paymentTerm','status','purchaseLocationId'],
+        attributes: ['po', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
         include: [
           {
             model: model.supplierModel,
@@ -221,7 +221,7 @@ export async function getAllPurchaseOrder(searchText) {
           {
             model: model.locationModel,
             as: 'location',
-            attributes: ['location','purchaseLocation']
+            attributes: ['location', 'purchaseLocation']
           },
         ],
         order: [['createdAt', 'DESC']]
@@ -290,7 +290,7 @@ export async function updateReceivingInventory(poSupplierInvoiceMapperId) {
 
   try {
     const poSupplierInvoiceMapperRecord = await model.poSupplierInvoiceMapperModel.findOne({
-      where: { poSupplierInvoiceMappperId : poSupplierInvoiceMapperId }
+      where: { poSupplierInvoiceMappperId: poSupplierInvoiceMapperId }
     });
 
     // If no record found, throw an error
@@ -331,7 +331,7 @@ export async function getPaymentDetails(poSupplierInvoiceMapperId) {
       },
       include: [{
         model: model.poSupplierInvoiceMapperModel,
-        as:"purchaseInvoice",
+        as: "purchaseInvoice",
         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       }],
     });
@@ -371,3 +371,69 @@ export async function getContainerDetails(poSupplierInvoiceMapperId) {
     throw error;
   }
 };
+
+
+export async function purchaseAccountTransaction(data) {
+  try {
+    const result = await model.accountTransactionModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add paymentr:", error);
+    throw error;
+  }
+};
+
+
+export async function getCOATransactionDetails() {
+  try {
+    const result = await model.accountsModel.findAll({
+      attributes: ['accountName', 'accountsId','accountBalance'],
+      include: [
+        {
+          model: model.accountTransactionModel,
+          attributes:['accountTransactionId','poSupplierInvoiceMapperId','purchaseOrderId','soLoadingOrderId','so','transactionOf','transactionAmount','transactionAmountDate','transactionAmountType','accountsId','entryType','paymentMethod'],
+          include:[    {
+            model: model.poSupplierInvoiceMapperModel,
+            attributes: ['poSupplierInvoiceMappperId', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+            as: 'poSupplierInvoice'
+          },
+          {
+            model: model.purchaseModel,
+            attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+            as: 'purchaseOrder',
+            include: [
+              {
+                model: model.supplierModel,
+                as: 'suppliers',
+                attributes: ['supplierName', 'supplierId']
+  
+              }
+            ]
+          },
+          {
+            model:model.soLoadingOrderModel,
+            as:'soLoadingOrders',
+          attributes:{exclude:['createdAt','updatedAt','deletedAt']},  
+            include: [
+                  {
+                    model: model.salesOrderModel,
+                    attributes: ['salesOrdersId', 'customerId', 'location'],
+                    include: [
+                      {
+                        model: model.customerModel,
+                        as: 'customers', attributes: ['customerId', 'customerName']
+                      }
+                    ]
+                  }
+                ]
+          }
+        ]
+        },
+      ],
+    });;
+    return result;
+  } catch (error) {
+    console.error("Error fetching transaction data:", error);
+    throw new Error('Failed to fetch transaction data');
+  }
+}

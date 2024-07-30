@@ -139,3 +139,53 @@ CREATE TABLE purchase_payment (
     FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
 );
+
+ALTER TABLE accounts
+ADD COLUMN customer_id INT,
+ADD CONSTRAINT fk_customer_id
+FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
+
+ALTER TABLE customers
+ADD COLUMN accounts_id INT,
+ADD CONSTRAINT fk_accounts_id
+FOREIGN KEY (accounts_id) REFERENCES accounts(accounts_id);
+
+CREATE TABLE account_transaction (
+    account_transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    po_supplier_invoice_mapper_id INT,
+    purchase_order_id INT,
+    supplier_id INT,
+    so_loading_order_id INT,
+    so INT,
+    transaction_of ENUM('sales','purchase') NOT NULL,
+    transaction_amount FLOAT,
+    transaction_amount_date DATE,
+    transaction_amount_type ENUM('debit', 'credit') NOT NULL,
+    accounts_id INT NOT NULL,
+    entry_type ENUM('dr', 'cr') NOT NULL,
+    payment_method ENUM('Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other') NOT NULL,
+    `check` INT,
+    address VARCHAR(255),
+    suite VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    zip INT,
+    memo VARCHAR(255),
+    miscellaneous VARCHAR(255),
+    description VARCHAR(255),
+    amount FLOAT,
+    amountOn_check FLOAT,
+    amount_applied FLOAT,
+    unapplied_balance FLOAT,
+    internal_notes VARCHAR(255),
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id), 
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(purchase_order_id),
+    FOREIGN KEY (accounts_id) REFERENCES accounts(accounts_id),
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id),
+    FOREIGN KEY (so_loading_order_id) REFERENCES so_loading_order(so_loading_order_id), 
+    FOREIGN KEY (so) REFERENCES sales_orders(so),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
+);

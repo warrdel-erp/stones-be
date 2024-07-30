@@ -2,12 +2,13 @@ import * as salesOrderRepository from '../repository/salesOrderRepository.js';
 import moment from 'moment';
 import sequelize from '../database/sequelizeConfig.js';
 import { updateProductInventoryInactive } from '../repository/productInventoryRespository.js';
+import { purchaseAccountTransaction } from '../repository/purchaseOrderRepository.js';
 
-export async function createOrder(info){
+export async function createOrder(info) {
     return await salesOrderRepository.createOrder(info)
 }
 
-export async function getSoNumber(){
+export async function getSoNumber() {
     const result = await salesOrderRepository.latestPoNumber()
     let newSo; // declare newSo outside the if-else blocks
     if (!result) {
@@ -17,7 +18,7 @@ export async function getSoNumber(){
         newSo = String(lastPo + 1).padStart(4, '0');
     }
     const todayDate = moment().format('YYYY-MM-DD');
-    return {newSo, todayDate};
+    return { newSo, todayDate };
 }
 
 // single so complete details  page
@@ -34,7 +35,7 @@ export async function singleSoDetails(soNumber) {
 export async function addProduct(info) {
     const transaction = await sequelize.transaction();
     try {
-        
+
         let results = [];
 
         const salesOrderId = info.salesOrdersId;
@@ -122,7 +123,7 @@ export async function loadingOrder(info) {
 
         // Update each inventory item with the soLoadingOrderId
         for (const inventory of info.selectedInventory) {
-            for(const slab of inventory.slabData){
+            for (const slab of inventory.slabData) {
                 const updateData = {
                     remeasureLength: slab.remeasureLength,
                     remeasureWidth: slab.remeasureWidth,
@@ -155,67 +156,180 @@ export async function getAllSo(search) {
     };
 };
 
-export async function updateStatus(soLoadingOrderId) {
+export async function updateStatus(transactionData) {
+    console.log('Received transaction data:', JSON.stringify(transactionData));
+    const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
     try {
         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
-
         if (salesOrderInventory.length === 0) {
             console.log(`No sales order inventory found with id ${soLoadingOrderId}`);
             await transaction.rollback();
             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
-        };
+        }
 
         const statusMapping = {
             'INITIATED': 'LOADING ORDER',
             'LOADING ORDER': 'PACKING LIST',
             'PACKING LIST': 'INVOICE'
         };
-        
+
         let data = {};
-        for (const salesOrderInventories of salesOrderInventory) {
+        for (const inventory of salesOrderInventory) {
             data = {
-                salesOrdersInventoryId: salesOrderInventories.dataValues.salesOrdersInventoryId,
-                productInventoryId: salesOrderInventories.dataValues.productInventoryId,
-                status: salesOrderInventories.dataValues.salesStatus,
-            }
-        };
+                salesOrdersInventoryId: inventory.dataValues.salesOrdersInventoryId,
+                productInventoryId: inventory.dataValues.productInventoryId,
+                status: inventory.dataValues.salesStatus,
+            };
+        }
 
         const currentStatus = data.status;
-        const productInventoryId = data.productInventoryId;
         const newStatus = statusMapping[currentStatus];
 
         if (newStatus) {
-            const updateResult = await salesOrderRepository.updateSalesStatus(data.salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
-            console.log(`Status updated in sales order inventory and new status is: ${newStatus}`);
-
+            await salesOrderRepository.updateSalesStatus(data.salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
             await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
-            console.log(`Status updated in so loading order and new status is: ${newStatus}`);
 
-            let productInventoryUpdateResult = null;
+            console.log(`Status updated to ${newStatus} for inventory ID ${data.salesOrdersInventoryId}`);
             if (newStatus === 'INVOICE') {
-                productInventoryUpdateResult = await updateProductInventoryInactive(productInventoryId, { status: 'INACTIVE' }, { transaction });
-                console.log(`Product inventory with id ${productInventoryId} set to INACTIVE`);
-            };
+                // Static account details for INVOICE status
+                const accountDetails = [
+                    { accountsId: 4, entryType: 'dr' },
+                    { accountsId: 63, entryType: 'cr' }
+                ];
 
-            // Commit the transaction if all operations succeed
-            await transaction.commit();
-            return {
-                success: true,
-                salesOrderUpdateResult: updateResult,
-                productInventoryUpdateResult: productInventoryUpdateResult
-            };
+                for (const accountDetail of accountDetails) {
+                    const transactionDataWithAccount = {
+                        ...transactionData,
+                        accountsId: accountDetail.accountsId,
+                        entryType: accountDetail.entryType,
+                        transactionOf: 'sales',
+                        transactionAmountType: 'debit'
+                    };
+                    await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
+                    console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+                }
 
+                const productInventoryUpdateResult = await updateProductInventoryInactive(data.productInventoryId, { status: 'INACTIVE' }, { transaction });
+                console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
+
+                await transaction.commit();
+                return {
+                    success: true,
+                    salesOrderUpdateResult: true,
+                    productInventoryUpdateResult
+                };
+            } else {
+                await transaction.commit();
+                return { success: true, message: 'Status updated successfully' };
+            }
         } else {
             console.log(`No update required for status: ${currentStatus}`);
             await transaction.rollback();
-            return { message: `No update required because the current status value is: ${currentStatus}` };
-        };
-
+            return { success: false, message: `No update required because the current status value is: ${currentStatus}` };
+        }
     } catch (error) {
-        // Rollback the transaction if any error occurs
-        await transaction.rollback();
         console.error('Error updating status:', error);
+        await transaction.rollback();
         return { success: false, error: error.message };
-    };
+    }
+}
+
+
+
+
+export async function addPayment(info) {
+    return await salesOrderRepository.addPayment(info)
 };
+
+
+export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
+    return await salesOrderRepository.getPaymentDetails(soLoadingOrderId, salesOrderId)
+};
+
+export async function createSalesAccountTransaction(data) {
+    const transaction = await sequelize.transaction();
+   try {
+        let accountDetails = [];
+
+        if (data.transactionAmountType === 'credit') {
+            accountDetails = [
+                { accountsId: 4, entryType: 'cr' },
+                { accountsId: 63, entryType: 'dr' }
+            ];
+
+            for (const accountDetail of accountDetails) {
+                const transactionDataWithAccount = {
+                    ...data,
+                    accountsId: accountDetail.accountsId,
+                    entryType: accountDetail.entryType,
+                    transactionOf: 'sales',
+                    transactionAmountType: 'credit'
+                };
+                await purchaseAccountTransaction(transactionDataWithAccount, { transaction });
+            }
+        } else {
+            await purchaseAccountTransaction(data, transaction);
+        }
+
+        await transaction.commit();
+        return { success: true };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+}
+
+export async function getCustomersListOnCOA(customerId) {
+    return await salesOrderRepository.getCustomersListOnCOA(customerId);
+};
+
+
+export async function getTransactionDataBasedAccountId() {
+    const transactionData = await salesOrderRepository.getTransactionDataBasedAccountId();
+    const processedData = transactionData.map(transaction => {
+        const { dataValues } = transaction;
+        const accountName = dataValues.account?.dataValues?.accountName || 'Unknown Account';
+        const customerName = dataValues.soLoadingOrder?.sales_order?.customers?.customerName;
+        const amount = dataValues?.creditAmount || dataValues?.debitAmount;
+        const entryType = dataValues.entryType === 'cr' ? 'Credit' : 'Debit';
+        return {
+            salesAccountId: dataValues.salesAccountId,
+            soLoadingOrderId: `INV#${dataValues.soLoadingOrderId}`,
+            salesOrderId: dataValues.salesOrderId,
+            amount: amount,
+            amountDate: dataValues.creditAmountDate || dataValues.debitAmountDate,
+            transactionType: dataValues.transactionType,
+            accountsId: dataValues.accountsId,
+            entryType: entryType,
+            accountName,
+            customerName
+        };
+    });
+
+    const groupedData = processedData.reduce((acc, transaction) => {
+        const { accountName, soLoadingOrderId, entryType, amount } = transaction;
+
+        if (!acc[accountName]) {
+            acc[accountName] = { transactions: {}, totalDebitAmount: 0, totalCreditAmount: 0 };
+        }
+
+        if (!acc[accountName].transactions[soLoadingOrderId]) {
+            acc[accountName].transactions[soLoadingOrderId] = { transactions: [], totalDebitAmount: 0, totalCreditAmount: 0 };
+        }
+
+        acc[accountName].transactions[soLoadingOrderId].transactions.push(transaction);
+        if (entryType === 'Debit') {
+            acc[accountName].transactions[soLoadingOrderId].totalDebitAmount += amount;
+            acc[accountName].totalDebitAmount += amount;
+        } else {
+            acc[accountName].transactions[soLoadingOrderId].totalCreditAmount += amount;
+            acc[accountName].totalCreditAmount += amount;
+        }
+
+        return acc;
+    }, {});
+
+    return { transactionData, groupedData };
+};
+

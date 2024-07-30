@@ -1,21 +1,21 @@
-import { findSoNumber,findSalesOrdersInventory } from '../repository/salesOrderRepository.js';
+import { findSoNumber, findSalesOrdersInventory } from '../repository/salesOrderRepository.js';
 import * as salesOrderService from '../services/salesOrderServices.js'
 
 // 1. create order
-export const createOrder = async (req,res) => {
+export const createOrder = async (req, res) => {
     try {
         const user = req.user
         const createdBy = user.dataValues.id
         const info = req.body
-        const {so,soDate,salesTax} = req.body
+        const { so, soDate, salesTax } = req.body
         const soDetails = await findSoNumber(so);
-        console.log(`>>>>>>>>>>soDetails>>>>>>`,soDetails);
+        console.log(`>>>>>>>>>>soDetails>>>>>>`, soDetails);
         if (!(so && soDate && salesTax)) {
             res.status(400).send("SO Number,SO Date and sales Tax is required");
-        }else if(soDetails){
+        } else if (soDetails) {
             res.status(400).send("SO Number can't Be Same");
-        }else {
-            const result = await salesOrderService.createOrder({...info,createdBy});
+        } else {
+            const result = await salesOrderService.createOrder({ ...info, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
@@ -25,7 +25,7 @@ export const createOrder = async (req,res) => {
 };
 
 // 2. get so Number 
-export const getSoNumber = async (req,res) => { 
+export const getSoNumber = async (req, res) => {
     try {
         const result = await salesOrderService.getSoNumber();
         res.status(200).send(result);
@@ -37,10 +37,10 @@ export const getSoNumber = async (req,res) => {
 
 // 3. get single sales order details
 
-export const singleSoDetails = async (req,res) => {
+export const singleSoDetails = async (req, res) => {
     const soNumber = req.query.so;
     try {
-        if (!soNumber){
+        if (!soNumber) {
             res.status(400).send("sales order number is required");
         }
         const result = await salesOrderService.singleSoDetails(soNumber);
@@ -53,13 +53,13 @@ export const singleSoDetails = async (req,res) => {
 
 // 4 add product 
 
-export const addProduct = async (req,res) => {
+export const addProduct = async (req, res) => {
     try {
         const info = req.body
-        const {salesOrdersId} = req.body
+        const { salesOrdersId } = req.body
         if (!(salesOrdersId)) {
             res.status(400).send("Sales orders Id is required");
-        }else {
+        } else {
             const result = await salesOrderService.addProduct(info);
             res.status(200).send(result);
         }
@@ -71,13 +71,13 @@ export const addProduct = async (req,res) => {
 
 // create loading order
 
-export const loadingOrder = async (req,res) => {
+export const loadingOrder = async (req, res) => {
     try {
         const info = req.body
-        const {salesOrdersId} = req.body
-        if (!(salesOrdersId )) {
+        const { salesOrdersId } = req.body
+        if (!(salesOrdersId)) {
             res.status(400).send("Sales orders Id is required");
-        }else {
+        } else {
             const result = await salesOrderService.loadingOrder(info);
             res.status(200).send(result);
         }
@@ -88,8 +88,8 @@ export const loadingOrder = async (req,res) => {
 };
 
 //  get all Sales Order
-export const getAllOpenSo = async (req,res) => {
-    let {search} = req.query
+export const getAllOpenSo = async (req, res) => {
+    let { search } = req.query
     try {
         const result = await salesOrderService.getAllSo(search);
         res.status(200).send(result);
@@ -101,16 +101,18 @@ export const getAllOpenSo = async (req,res) => {
 
 // update Status 
 
-export const updateStatus = async (req,res) => {
+export const updateStatus = async (req, res) => {
     const soLoadingOrderId = req.body.soLoadingOrderId;
     const soLoadingOrder = await findSalesOrdersInventory(soLoadingOrderId);
+    const requestBodyTransaction = req.body
+    console.log(soLoadingOrder,'jskjnwdiehiwuh');
     try {
-        if (!soLoadingOrderId){
+        if (!soLoadingOrderId) {
             res.status(400).send("so Loading Order Id Id is required");
-        }else if(!soLoadingOrder){
+        } else if (!soLoadingOrder) {
             res.status(400).send("so Loading Order Id Not exist");
-        }else{
-            const result = await salesOrderService.updateStatus(soLoadingOrderId);
+        } else {
+            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId});
             res.status(200).send(result);
         }
     } catch (error) {
@@ -118,3 +120,35 @@ export const updateStatus = async (req,res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+//add payment in salesOrder
+export const addPayment = async (req, res) => {
+    try {
+        const data = req.body
+        const soLoadingOrderId = req.body.soLoadingOrderId;
+        if (!(soLoadingOrderId)) {
+            res.status(400).send("sales ordeer is required to make payment");
+        }
+        const result = await salesOrderService.addPayment(data);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add payment: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+
+// create sales account transaction 
+export const createSalesAccountTransaction = async (req, res) => {
+    const transactionData = req.body;
+    console.log(transactionData,'ssssssssssssss');
+    try {
+        const result = await salesOrderService.createSalesAccountTransaction({...transactionData});
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+

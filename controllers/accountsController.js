@@ -72,3 +72,40 @@ export const deleteAccount = async (req,res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+//get cash and financial asset list
+
+export const getCashFinancialAssestOptions = async (req,res) => {
+    try {
+        const result = await accountsService.getCashFinancialAssestOptions();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting all sub accounts type :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+//find grouped accounts list
+export const getGroupedAccountList = async (req,res) => {
+    try {
+        const result = await accountsService.getGroupedAccountList();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting all grouped list accounts type :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+//get account id by account name
+
+export const getAccountIdByAccountName = async (req,res) => {
+    try {
+        const result = await accountsService.getAccountIdByAccountName();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting all grouped list accounts type :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

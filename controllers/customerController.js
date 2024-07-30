@@ -4,7 +4,7 @@ import * as customerService from '../services/customerServices.js';
 export const addCustomer = async (req, res) => {
     try {
         const info = req.body;
-        console.log(info);
+
         const result = await customerService.addCustomer(info);
         res.status(200).send(result);
     } catch (error) {

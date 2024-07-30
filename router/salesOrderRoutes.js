@@ -1,7 +1,7 @@
 import {Router} from  'express';
 const router =  Router();
 import { userAuth } from '../middleware/authUser.js';
-import { createOrder,getSoNumber,singleSoDetails,addProduct,loadingOrder,getAllOpenSo,updateStatus} from "../controllers/salesOrderController.js";
+import { createOrder,getSoNumber,singleSoDetails,addProduct,loadingOrder,getAllOpenSo,updateStatus, addPayment, createSalesAccountTransaction} from "../controllers/salesOrderController.js";
 
 router.post('/',userAuth, createOrder);
 
@@ -15,6 +15,12 @@ router.post('/loadingOrder',userAuth, loadingOrder);
 
 router.get('/allPo',userAuth, getAllOpenSo);
 
-router.patch('/:soLoadingOrderId',userAuth, updateStatus);
+router.patch('/:soLoadingOrderId', updateStatus);
+
+router.post('/addPayment',addPayment);
+
+router.post('/salesAccountTransaction',createSalesAccountTransaction);
+
+
 
 export default router;

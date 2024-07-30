@@ -26,15 +26,15 @@ export async function updateOrder(salesOrdersId, data) {
 }
 
 export async function findSoNumber(soNumber) {
-    const result = await model.salesOrderModel.findOne({
-      where: {
-        so: {
-          [Op.eq]: soNumber
-        }
+  const result = await model.salesOrderModel.findOne({
+    where: {
+      so: {
+        [Op.eq]: soNumber
       }
-    })
-    return result;
-  }
+    }
+  })
+  return result;
+}
 
 export async function latestPoNumber() {
   try {
@@ -52,54 +52,54 @@ export async function latestPoNumber() {
 }
 
 export async function getSingleSalesOrder(soNumber) {
-    try {
-      const result = await model.salesOrderModel.findOne({
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-        include: [
-          {
-            model: model.customerModel,
-            as: "customers",
-            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-          },
-          {
-            model: model.salesOrderInventoryModel,
-            as: 'salesInventory',
-            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-            include: [
-              {
-                model: model.poSlabDetails,
-                as: 'slabDetails',
-                attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] }
-              },
-              {
-                model:model.productInventoryModel,
-                as:'salesProduct',
-                attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
-                include:[
-                  {
-                    model:model.productModel,
-                    as:'salesProductDetails',
-                    attributes: ['productName']
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            model: model.soLoadingOrderModel,
-            as: 'loadingOrders',
-            attributes: { exclude: ['updatedAt', 'deletedAt','status'] },
-          },
-        ],
-        where:{
-          so:soNumber
+  try {
+    const result = await model.salesOrderModel.findOne({
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      include: [
+        {
+          model: model.customerModel,
+          as: "customers",
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
-      });
-      return result;
-    } catch (error) {
-      console.error(`Error in getting sales order Id :-${soNumber}:`, error);
-      throw error;
-    }
+        {
+          model: model.salesOrderInventoryModel,
+          as: 'salesInventory',
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+          include: [
+            {
+              model: model.poSlabDetails,
+              as: 'slabDetails',
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+            },
+            {
+              model: model.productInventoryModel,
+              as: 'salesProduct',
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+              include: [
+                {
+                  model: model.productModel,
+                  as: 'salesProductDetails',
+                  attributes: ['productName']
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: model.soLoadingOrderModel,
+          as: 'loadingOrders',
+          attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
+        },
+      ],
+      where: {
+        so: soNumber
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error(`Error in getting sales order Id :-${soNumber}:`, error);
+    throw error;
+  }
 }
 
 export async function getsalestax(salesOrderId) {
@@ -162,7 +162,7 @@ export async function getAllSalesOrder(searchText) {
   try {
     if (searchText) {
       result = await model.salesOrderModel.findAll({
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         where: {
           so: {
             [Op.like]: `%${searchText}%`
@@ -183,17 +183,17 @@ export async function getAllSalesOrder(searchText) {
       });
     } else {
       result = await model.salesOrderModel.findAll({
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         include: [
           {
             model: model.customerModel,
             as: 'customers',
-            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
           },
           {
             model: model.salesOrderInventoryModel,
             as: 'salesInventory',
-            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] }
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
           },
         ],
         order: [['createdAt', 'DESC']]
@@ -211,15 +211,15 @@ export async function getAllSalesOrder(searchText) {
 export async function findSalesOrdersInventory(soLoadingOrderId) {
   try {
     const result = await model.salesOrderInventoryModel.findAll({
-      attributes: ['salesOrdersInventoryId', 'productInventoryId', 'poSlabDetailId','soLoadingOrderId','salesStatus'], 
+      attributes: ['salesOrdersInventoryId', 'productInventoryId', 'poSlabDetailId', 'soLoadingOrderId', 'salesStatus'],
       where: {
-        soLoadingOrderId: soLoadingOrderId 
+        soLoadingOrderId: soLoadingOrderId
       }
     });
     return result;
   } catch (error) {
     console.error('Error fetching sales order inventory:', error);
-    throw error; 
+    throw error;
   }
 };
 
@@ -234,12 +234,12 @@ export async function updateSalesStatus(salesOrdersInventoryId, data) {
       }
     });
     // If update was successful, fetch the updated record
-    if (result[0] === 1) { 
+    if (result[0] === 1) {
       const updatedRecord = await model.salesOrderInventoryModel.findOne({
         where: {
           salesOrdersInventoryId: salesOrdersInventoryId
         },
-        attributes: ['Sales_status'] 
+        attributes: ['Sales_status']
       });
       return updatedRecord.dataValues.Sales_status;
     } else {
@@ -255,14 +255,98 @@ export async function updateSalesStatus(salesOrdersInventoryId, data) {
 
 export async function updateSalesStatusLoadingOrder(soLoadingOrderId, data) {
   try {
-      const result = await model.soLoadingOrderModel.update(data, {
-          where: {
-            soLoadingOrderId: soLoadingOrderId
-          }
-      });
-   return result; 
+    const result = await model.soLoadingOrderModel.update(data, {
+      where: {
+        soLoadingOrderId: soLoadingOrderId
+      }
+    });
+    return result;
   } catch (error) {
-      console.error("Error updating sales status in so loading order:", error);
-      throw error; 
+    console.error("Error updating sales status in so loading order:", error);
+    throw error;
   }
 }
+
+
+//create add payemnt for salesOrder 
+export async function addPayment(data) {
+  try {
+    const result = await model.salesPaymentModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add paymentr:", error);
+    throw error;
+  }
+};
+
+// Get payment details of sales order
+export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
+  try {
+    console.log(`Fetching payment details for soloadingOrderId: ${soLoadingOrderId} and salesOrderId: ${salesOrderId}`);
+
+    const result = await model.salesPaymentModel.findOne({
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      where: {
+        soLoadingOrderId: soLoadingOrderId,
+        salesOrderId: salesOrderId
+      },
+      include: [{
+        model: model.soLoadingOrderModel,
+        as: "so_loading_order",
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      }],
+    });
+
+    if (!result) {
+      return { message: `No data found for soLoadingOrderId: ${soLoadingOrderId} and salesOrderId: ${salesOrderId}` };
+    }
+
+    return result;
+  } catch (error) {
+    console.error(`Error in getting payment details for soLoadingOrderId: ${soLoadingOrderId} and salesOrderId: ${salesOrderId}`, error.message);
+    return { error: error.message };
+  }
+};
+
+
+// Get customer data of sales payment 
+export async function getSalesPaymenetDataOfCustomer() {
+  try {
+    const result = await model.salesOrderModel.findAll({
+      include: [
+        {
+          model: model.customerModel,
+          as: 'customers',
+          attributes: ['customer_name', 'customer_id']
+        },
+        {
+          model: model.soLoadingOrderModel,
+          as: 'loadingOrders',
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+        },
+        {
+          model: model.salesPaymentModel,
+          as: 'salesOrderPaymentDetails',
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+        }
+      ]
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in getting sales payment data:", error);
+    throw error;
+  }
+};
+
+
+
+//create credit transaction for sales account
+export async function createTransactionAccountSales(data) {
+  try {
+    const result = await model.salesCreditTransactionModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in add paymentr:", error);
+    return error
+  }
+};

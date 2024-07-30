@@ -44,3 +44,37 @@ export async function deleteAccount(accountsId) {
         return { message: 'An error occurred while trying to delete the account', error: error.message };
     }
 }
+
+
+
+export async function getCashFinancialAssestOptions() {
+    try {
+        const subAccountDetails = await accountsRepository.getCashFinancialAssestOptions();
+        return subAccountDetails;
+    } catch (error) {
+        console.error('Error fetching accounts Type Sub Types:', error);
+        throw error;
+    }
+}
+
+
+export async function getGroupedAccountList() {
+    try {
+        const subAccountDetails = await accountsRepository.getGroupedAccountList();
+        return subAccountDetails;
+    } catch (error) {
+        console.error('Error fetching accounts Type Sub Types:', error);
+        throw error;
+    }
+}
+
+
+export async function getAccountIdByAccountName(data) {
+    try {
+        const accountDetails = await accountsRepository.getAccountIdByAccountName(data);
+        return accountDetails;
+    } catch (error) {
+        console.error('Error fetching accounts Type Sub Types:', error);
+        throw error;
+    }
+}

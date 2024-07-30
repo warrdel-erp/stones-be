@@ -40,9 +40,9 @@ export async function getAllAccounts(searchText) {
         if (searchText) {
             result = await model.accountsModel.findAll({
                 attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
-                  where: {
+                where: {
                     accountName: { [Op.like]: `%${searchText}%` },
-                  },
+                },
                 include: [
                     {
                         model: model.subAccountTypesModel,
@@ -64,7 +64,6 @@ export async function getAllAccounts(searchText) {
                 order: [['createdAt', 'DESC']]
             });
         } else {
-            console.log('No search text provided');
             result = await model.accountsModel.findAll({
                 attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                 include: [
@@ -96,14 +95,14 @@ export async function updateAccount(accountsId, data) {
                 accountsId: accountsId
             }
         });
-     return result; 
+        return result;
     } catch (error) {
         console.error(`Error updating account ${accountsId} :`, error);
-        throw error; 
+        throw error;
     }
 }
 
-export async function deleteAccount (accountsId) {
+export async function deleteAccount(accountsId) {
     try {
         const result = await model.accountsModel.destroy({
             where: { accountsId },
@@ -118,11 +117,75 @@ export async function deleteAccount (accountsId) {
 
 export async function findAccountNumber(accountId) {
     const result = await model.accountsModel.findOne({
-      where: {
-        accountsId: {
-          [Op.eq]: accountId
+        where: {
+            accountsId: {
+                [Op.eq]: accountId
+            }
         }
-      }
     })
     return result;
-  };
+};
+
+
+
+
+
+export async function getCashFinancialAssestOptions() {
+    const result = await model.subAccountTypesModel.findAll({
+        where: {
+            subAccountType: 'Cash and Financial Assets',   
+        },
+        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
+        include:[
+            {
+                model:model.accountsModel,
+                as:'accountSubtype',
+                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance']
+            }
+        ]
+    })
+    return result;
+};
+
+export async function getGroupedAccountList() {
+    const result = await model.subAccountTypesModel.findAll({
+        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
+        include:[
+            {
+                model:model.accountsModel,
+                as:'accountSubtype',
+                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance'],
+            },
+            {
+                model:model.accountTypesModel,
+                as:'accountTypeSubtype',
+                attributes:['accountType','accountTypesId']
+            }
+        ]
+    })
+    return result;
+};
+
+
+
+export async function getAccountIdByAccountName(data) {
+    const result = await model.subAccountTypesModel.findAll({
+        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
+        include:[
+            {
+                model:model.accountsModel,
+                as:'accountSubtype',
+                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance'],
+            },
+            {
+                model:model.accountTypesModel,
+                as:'accountTypeSubtype',
+                attributes:['accountType','accountTypesId']
+            }
+        ]
+    })
+    return result;
+};
+
+// getAccountIdByAccountName(data);
+

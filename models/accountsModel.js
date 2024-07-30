@@ -42,7 +42,7 @@ export default sequelize.define(
             field: 'opening_balance_date'  
         },
         accountBalance: {
-            type: DataTypes.FLOAT,
+            type: DataTypes.STRING,
             allowNull: true,
             field: 'account_balance'
         },
@@ -50,7 +50,7 @@ export default sequelize.define(
             type: DataTypes.BOOLEAN,
             allowNull: false, 
             field:'can_delete', 
-            defaultValue: false  // Default value for this field is FALSE
+            defaultValue: false
         },
         createdAt: {
             type: DataTypes.DATE,

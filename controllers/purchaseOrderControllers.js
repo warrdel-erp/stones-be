@@ -8,7 +8,6 @@ export const createOrder = async (req,res) => {
         const {po,poDate} = req.body
         const user = req.user
         const createdBy = user.dataValues.id
-        console.log(info,'informationare');
         const poDetails = await findPoNumber(po);
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
@@ -241,3 +240,30 @@ export const getContainerDetails = async (req,res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+//16. purchase account transaction
+
+export const purchaseAccountTransaction = async (req,res) => {
+    const transactionData = req.body;
+    try {
+        const result = await purchaseOrderService.purchaseAccountTransaction({...transactionData});
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+//get coa transaction details
+
+export const getCOATransactionDetails= async(req,res)=>{
+    try {
+        const transactionData= await purchaseOrderService.getCOATransactionDetails();
+        res.status(200).send(transactionData);
+    } catch (error) {
+         res.status(500).send("Internal Server Error");
+    
+    }
+}

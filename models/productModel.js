@@ -197,6 +197,15 @@ export default sequelize.define(
         allowNull: true,
         field:'deleted_at',
     },
+    // supplierId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: true,
+    //     field: 'supplier_id',
+    //     references: {
+    //         model: Supplier,
+    //         key: 'supplier_id'
+    //     }
+    // },
     status: {
         type: DataTypes.ENUM(...status),
         allowNull: false,
