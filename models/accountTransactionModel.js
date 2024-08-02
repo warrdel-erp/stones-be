@@ -36,6 +36,15 @@ export default sequelize.define('account_transaction', {
         },
         field: 'supplier_id'
     },
+    customerId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'customers',
+            key: 'customer_id'
+        },
+        field: 'customer_id'
+    },
     soLoadingOrderId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -89,7 +98,7 @@ export default sequelize.define('account_transaction', {
         field: 'entry_type'
     },
     paymentMethod: {
-        type: DataTypes.ENUM(...paymentMethod),
+        type: DataTypes.STRING,
         allowNull: true,
         field: 'payment_method'
     },
@@ -192,9 +201,9 @@ export default sequelize.define('account_transaction', {
     timestamps: true,
     paranoid: true
 },
-{
-    tableName: 'account_transaction',
-    timestamps: true,
-    paranoid: true, 
-});
+    {
+        tableName: 'account_transaction',
+        timestamps: true,
+        paranoid: true,
+    });
 

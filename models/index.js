@@ -119,21 +119,6 @@ salesPaymentModel.belongsTo(salesOrderModel,{foreignKey:'sales_orders_id',as:'sa
 salesOrderModel.hasMany(salesPaymentModel,{foreignKey:'sales_orders_id',as:'salesOrderPaymentDetails'});
 
 
-// soLoadingOrderModel.belongsTo(customerModel,{foreignKey:'so_loading_order_id'});
-// customerModel.hasMany(soLoadingOrderModel,{foreignKey:'so_loading_order_id',as:'so_loading_order'});
-
-// salesAccountTransactionModel.belongsTo(customerModel,{foreignKey:'sales_account_id'});
-// customerModel.hasMany(salesAccountTransactionModel,{foreignKey:'sales_account_id',as:'salesAccountTransaction'});
-
-// salesAccountTransactionModel.belongsTo(salesOrderModel,{foreignKey:'sales_account_id'})
-// salesOrderModel.hasMany(salesAccountTransactionModel,{foreignKey:'sales_account_id',as:'salesAccountTransaction'});
-
-
-// salesAccountTransactionModel.belongsTo(accountsModel,{foreignKey:'accounts_id'});
-// accountsModel.hasMany(salesAccountTransactionModel,{foreignKey:'accounts_id'});
-
-// salesAccountTransactionModel.belongsTo(soLoadingOrderModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrder'})
-// soLoadingOrderModel.hasMany(salesAccountTransactionModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrder'});
 
 //common table for transaction
 accountTransactionModel.belongsTo(accountsModel,{foreignKey:'accounts_id'})

@@ -180,7 +180,8 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
         const dueDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].dueDate
         const shipDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].shipDate
         const paymentTerm = allDetailsPurchaseOrderId.dataValues.paymentTerm
-        const allSlabDetails = { slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm };
+        const supplierId = allDetailsPurchaseOrderId.dataValues.supplierId
+        const allSlabDetails = { slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId };
         return allSlabDetails;
     } catch (error) {
         throw new Error(`Failed to fetch slab Details ${poNumber} && ${poSupplierInvoiceMappperId}: ${error.message}`);
@@ -190,15 +191,15 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 // add product inventory 
 export async function addProductInventory(dataArray) {
     const transaction = await sequelize.transaction();
-    const accNames={creditAccountName:'Trade Payables',debitAccountName:'Cost Of Sales'}
-    const transactionAccontId = await getAccountIdByAccountName(accNames)
+    const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
     try {
+        const transactionAccontId = await getAccountIdByAccountName(accNames);
+        console.log(transactionAccontId, 'transactionAccontId');
         if (dataArray.transactionAmountType = 'debit') {
             const accountDetails = [
-                { accountsId: 74, entryType: 'dr' },
-                { accountsId: 30, entryType: 'cr' }
+                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
             ];
-
             for (const accountDetail of accountDetails) {
                 const transactionDataWithAccount = {
                     ...dataArray,
@@ -211,6 +212,7 @@ export async function addProductInventory(dataArray) {
             }
         }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(dataArray.poSupplierInvoiceMapperId)
+        console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
             slab: item.slab,
@@ -300,13 +302,15 @@ export async function getContainerDetails(poSupplierInvoiceMappperId) {
 //purchase account transaction
 export async function purchaseAccountTransaction(transactionData) {
     const transaction = await sequelize.transaction();
+    const accNames = { debitAccountName: 'Trade Payables', creditAccountName: 'Cost Of Sales' }
     try {
         if (transactionData.transactionAmountType === 'credit') {
+            const transactionAccontId = await getAccountIdByAccountName(accNames);
+            console.log(transactionAccontId, 'transactionAccontId');
             const accountDetails = [
-                { accountsId: 74, entryType: 'cr' },
-                { accountsId: 30, entryType: 'dr' }
+                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
             ];
-
             for (const accountDetail of accountDetails) {
                 const transactionDataWithAccount = {
                     ...transactionData,
@@ -331,11 +335,13 @@ export async function purchaseAccountTransaction(transactionData) {
     }
 }
 
-
-
-export async function getCOATransactionDetails() {
-    const transactionData = await purchaseOrderRepository.getCOATransactionDetails();
-
+export async function getCOATransactionDetails(queryParams) {
+    let transactionData;
+    if (queryParams) {
+        transactionData = await purchaseOrderRepository.getCOATransactionDetails(queryParams);
+    } else {
+        transactionData = await purchaseOrderRepository.getCOATransactionDetails();
+    }
     const filterAccountsWithTransactions = (data) => {
         return data.filter(account => account.account_transactions && account.account_transactions.length > 0);
     };
@@ -359,13 +365,14 @@ export async function getCOATransactionDetails() {
         return {
             accountName: account.accountName,
             accountsId: account.accountsId,
-            accountBalance:account.accountBalance,
+            accountBalance: account.accountBalance,
             debitAmount: debit,
             creditAmount: credit,
             balance: balance,
             account_transactions: account.account_transactions
         };
     });
+
     return processedAccounts;
 }
 

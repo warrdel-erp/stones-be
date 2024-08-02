@@ -2,19 +2,19 @@ import { findPoNumber } from '../repository/purchaseOrderRepository.js';
 import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 
 // 1. create order
-export const createOrder = async (req,res) => {
+export const createOrder = async (req, res) => {
     try {
         const info = req.body
-        const {po,poDate} = req.body
+        const { po, poDate } = req.body
         const user = req.user
         const createdBy = user.dataValues.id
         const poDetails = await findPoNumber(po);
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
-        }else if(poDetails){
+        } else if (poDetails) {
             res.status(400).send("PO Number can't Be Same");
-        }else {
-            const result = await purchaseOrderService.createOrder({...info,createdBy});
+        } else {
+            const result = await purchaseOrderService.createOrder({ ...info, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
@@ -24,7 +24,7 @@ export const createOrder = async (req,res) => {
 };
 
 // 2. get po Number 
-export const getPoNumber = async (req,res) => { 
+export const getPoNumber = async (req, res) => {
     try {
         const result = await purchaseOrderService.getPoNumber();
         res.status(200).send(result);
@@ -35,16 +35,16 @@ export const getPoNumber = async (req,res) => {
 };
 
 // 3. update order 
-export const updateOrder = async (req,res) => {
+export const updateOrder = async (req, res) => {
     const poNumber = req.body.po;
     const info = req.body;
     const poDetails = await findPoNumber(poNumber);
     try {
-        if (!poNumber){
+        if (!poNumber) {
             res.status(400).send("Po Number is required");
-        }else if(!poDetails){
+        } else if (!poDetails) {
             res.status(400).send("Po Number Not exist");
-        }else{
+        } else {
             const result = await purchaseOrderService.updateOrder(poNumber, info);
             res.status(200).send(result);
         }
@@ -55,7 +55,7 @@ export const updateOrder = async (req,res) => {
 };
 
 // 4. add purchase order product 
-export const addPurchaseOrderProduct = async (req,res) => {
+export const addPurchaseOrderProduct = async (req, res) => {
     try {
         const data = req.body
         const result = await purchaseOrderService.addPurchaseOrderProduct(data);
@@ -67,8 +67,8 @@ export const addPurchaseOrderProduct = async (req,res) => {
 };
 
 // 5. get all Purchase Order
-export const getAllOpenPo = async (req,res) => {
-    let {search} = req.query
+export const getAllOpenPo = async (req, res) => {
+    let { search } = req.query
     try {
         const result = await purchaseOrderService.getAllPo(search);
         res.status(200).send(result);
@@ -80,10 +80,10 @@ export const getAllOpenPo = async (req,res) => {
 
 // 6. get single purchase order details
 
-export const singlePoDetails = async (req,res) => {
+export const singlePoDetails = async (req, res) => {
     const poNumber = req.query.po;
     try {
-        if (!poNumber){
+        if (!poNumber) {
             res.status(400).send("purchase order number is required");
         }
         const result = await purchaseOrderService.singlePoDetails(poNumber);
@@ -95,7 +95,7 @@ export const singlePoDetails = async (req,res) => {
 };
 
 // 7. add Supplier Invoice 
-export const addSuplierInvoice = async (req,res) => {
+export const addSuplierInvoice = async (req, res) => {
     try {
         const data = req.body
         const poNumber = req.body.po;
@@ -113,7 +113,7 @@ export const addSuplierInvoice = async (req,res) => {
 
 // 8 add Slab Details
 
-export const addSlabDetails = async (req,res) => {
+export const addSlabDetails = async (req, res) => {
     try {
         const data = req.body
         const po = req.body.po;
@@ -130,14 +130,14 @@ export const addSlabDetails = async (req,res) => {
 
 // 9. get Slab details
 
-export const singleSlabDetails = async (req,res) => {
+export const singleSlabDetails = async (req, res) => {
     const poNumber = req.query.po;
     const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
     try {
-        if (!poNumber && poSupplierInvoiceMappperId){
+        if (!poNumber && poSupplierInvoiceMappperId) {
             res.status(400).send("purchase order number and po Supplier Invoice Mappper Id is required");
         }
-        const result = await purchaseOrderService.singleSlabDetails(poNumber,poSupplierInvoiceMappperId);
+        const result = await purchaseOrderService.singleSlabDetails(poNumber, poSupplierInvoiceMappperId);
         res.status(200).send(result);
     } catch (error) {
         console.error(`Error in getting ${poNumber} details:`, error);
@@ -147,7 +147,7 @@ export const singleSlabDetails = async (req,res) => {
 
 // 10. add Product Inventory
 
-export const addProductInventory = async (req,res) => {
+export const addProductInventory = async (req, res) => {
     try {
         const data = req.body
         const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
@@ -163,7 +163,7 @@ export const addProductInventory = async (req,res) => {
 };
 
 // 11. get inventory product data
-export const getProductInventory = async (req,res) => { 
+export const getProductInventory = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 0;  // Default to page 0 if not provided
         const limit = 10;  // Fixed limit of 10 items per page
@@ -177,7 +177,7 @@ export const getProductInventory = async (req,res) => {
 
 // 12 add payment of slab
 
-export const addPayment = async (req,res) => {
+export const addPayment = async (req, res) => {
     try {
         const data = req.body
         const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
@@ -194,10 +194,10 @@ export const addPayment = async (req,res) => {
 
 // 13 get payment details
 
-export const getPaymentDetails = async (req,res) => {
+export const getPaymentDetails = async (req, res) => {
     const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
     try {
-        if (!poSupplierInvoiceMappperId){
+        if (!poSupplierInvoiceMappperId) {
             res.status(400).send("po Supplier Invoice Mappper Id is required");
         }
         const result = await purchaseOrderService.getPaymentDetails(poSupplierInvoiceMappperId);
@@ -210,10 +210,10 @@ export const getPaymentDetails = async (req,res) => {
 
 // 14 add container Details
 
-export const addContainer = async (req,res) => {
+export const addContainer = async (req, res) => {
     try {
         const data = req.body
-        const {poSupplierInvoiceMapperId,containerNumber,receivedBy} = req.body;
+        const { poSupplierInvoiceMapperId, containerNumber, receivedBy } = req.body;
         if (!(poSupplierInvoiceMapperId && containerNumber && receivedBy)) {
             res.status(400).send("po Supplier Invoice Mapper,containerNumber and receivedBy Id  is required for make payment");
         }
@@ -227,10 +227,10 @@ export const addContainer = async (req,res) => {
 
 //15 get container details
 
-export const getContainerDetails = async (req,res) => {
+export const getContainerDetails = async (req, res) => {
     const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
     try {
-        if (!poSupplierInvoiceMappperId){
+        if (!poSupplierInvoiceMappperId) {
             res.status(400).send("po Supplier Invoice Mappper Id is required");
         }
         const result = await purchaseOrderService.getContainerDetails(poSupplierInvoiceMappperId);
@@ -244,10 +244,10 @@ export const getContainerDetails = async (req,res) => {
 
 //16. purchase account transaction
 
-export const purchaseAccountTransaction = async (req,res) => {
+export const purchaseAccountTransaction = async (req, res) => {
     const transactionData = req.body;
     try {
-        const result = await purchaseOrderService.purchaseAccountTransaction({...transactionData});
+        const result = await purchaseOrderService.purchaseAccountTransaction({ ...transactionData });
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
@@ -257,13 +257,33 @@ export const purchaseAccountTransaction = async (req,res) => {
 
 
 //get coa transaction details
-
-export const getCOATransactionDetails= async(req,res)=>{
+export const getCOATransactionDetails = async (req, res) => {
     try {
-        const transactionData= await purchaseOrderService.getCOATransactionDetails();
+        const { soLoadingOrderId, poSupplierId,poSupplierInvoiceMapperId, customerId, accountsId, supplierId,so} = req.query;
+        const queryParams = {
+            soLoadingOrderId,
+            poSupplierId,
+            poSupplierInvoiceMapperId,
+            customerId,
+            accountsId,
+            supplierId,
+            so
+        };
+        Object.keys(queryParams).forEach(key => {
+            if (queryParams[key] === undefined) {
+                delete queryParams[key];
+            }
+        });
+        let transactionData;
+        if (Object.keys(queryParams).length > 0) {
+            transactionData = await purchaseOrderService.getCOATransactionDetails(queryParams);
+        } else {
+            transactionData = await purchaseOrderService.getCOATransactionDetails();
+        }
         res.status(200).send(transactionData);
     } catch (error) {
-         res.status(500).send("Internal Server Error");
-    
+        console.error('Error fetching COA transaction details:', error);
+        res.status(500).send("Internal Server Error");
     }
 }
+

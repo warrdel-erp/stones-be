@@ -133,14 +133,14 @@ export async function findAccountNumber(accountId) {
 export async function getCashFinancialAssestOptions() {
     const result = await model.subAccountTypesModel.findAll({
         where: {
-            subAccountType: 'Cash and Financial Assets',   
+            subAccountType: 'Cash and Financial Assets',
         },
-        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
-        include:[
+        attributes: ['subAccountType', 'subAccountTypesId', 'accountTypesId'],
+        include: [
             {
-                model:model.accountsModel,
-                as:'accountSubtype',
-                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance']
+                model: model.accountsModel,
+                as: 'accountSubtype',
+                attributes: ['accountsId', 'subAccountTypesId', 'accountName', 'accountTypesId', 'accountBalance']
             }
         ]
     })
@@ -149,17 +149,17 @@ export async function getCashFinancialAssestOptions() {
 
 export async function getGroupedAccountList() {
     const result = await model.subAccountTypesModel.findAll({
-        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
-        include:[
+        attributes: ['subAccountType', 'subAccountTypesId', 'accountTypesId'],
+        include: [
             {
-                model:model.accountsModel,
-                as:'accountSubtype',
-                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance'],
+                model: model.accountsModel,
+                as: 'accountSubtype',
+                attributes: ['accountsId', 'subAccountTypesId', 'accountName', 'accountTypesId', 'accountBalance'],
             },
             {
-                model:model.accountTypesModel,
-                as:'accountTypeSubtype',
-                attributes:['accountType','accountTypesId']
+                model: model.accountTypesModel,
+                as: 'accountTypeSubtype',
+                attributes: ['accountType', 'accountTypesId']
             }
         ]
     })
@@ -169,23 +169,39 @@ export async function getGroupedAccountList() {
 
 
 export async function getAccountIdByAccountName(data) {
-    const result = await model.subAccountTypesModel.findAll({
-        attributes:['subAccountType','subAccountTypesId','accountTypesId'],
-        include:[
-            {
-                model:model.accountsModel,
-                as:'accountSubtype',
-                attributes:['accountsId','subAccountTypesId','accountName','accountTypesId','accountBalance'],
-            },
-            {
-                model:model.accountTypesModel,
-                as:'accountTypeSubtype',
-                attributes:['accountType','accountTypesId']
-            }
-        ]
-    })
-    return result;
-};
+    const { creditAccountName, debitAccountName } = data;
+    console.log(data, 'accnames');
 
-// getAccountIdByAccountName(data);
+    try {
+        const result = await model.accountsModel.findAll({
+            where: {
+                accountName: {
+                    [Op.in]: [creditAccountName, debitAccountName]
+                }
+            },
+            attributes: ['accountsId', 'accountName']
+        });
+
+        const accountDetails = result.reduce((acc, account) => {
+            if (account.accountName === creditAccountName) {
+                acc.creditAccount = {
+                    accountId: account.accountsId,
+                    accountName: account.accountName
+                };
+            } else if (account.accountName === debitAccountName) {
+                acc.debitAccount = {
+                    accountId: account.accountsId,
+                    accountName: account.accountName
+                };
+            }
+            return acc;
+        }, {});
+
+        return accountDetails;
+
+    } catch (error) {
+        console.error('Error fetching account IDs:', error);
+        throw new Error('Unable to fetch account IDs');
+    }
+}
 

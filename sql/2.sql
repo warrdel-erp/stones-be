@@ -189,3 +189,12 @@ CREATE TABLE account_transaction (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL
 );
+
+ALTER TABLE account_transaction 
+MODIFY COLUMN payment_method VARCHAR(50);
+
+
+ALTER TABLE account_transaction 
+ADD COLUMN customer_id INT,
+ADD FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
+

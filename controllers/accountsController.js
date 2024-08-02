@@ -102,7 +102,9 @@ export const getGroupedAccountList = async (req,res) => {
 
 export const getAccountIdByAccountName = async (req,res) => {
     try {
-        const result = await accountsService.getAccountIdByAccountName();
+        const requestData= req.body
+        console.log(requestData,'jkasa');
+        const result = await accountsService.getAccountIdByAccountName(requestData);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all grouped list accounts type :", error);

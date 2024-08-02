@@ -71,6 +71,24 @@ export async function createPrePurchaseOrder(data) {
   }
 }
 
+export async function getPrePurchaseOrder(data) {
+  try {
+    const result = await model.prePurchaseModel.findOne({
+      where: {
+        purchaseOrderProductId: {
+          [Op.eq]: data
+        }
+      }
+    });
+    console.log(result, 'kjasdkas');
+    return result;
+  } catch (error) {
+    console.error("Error in create pre purchase order:", error);
+    throw error;
+  }
+}
+getPrePurchaseOrder();
+
 export async function singlePoDetails(poNumber) {
   try {
     const result = await model.purchaseModel.findOne({
@@ -384,15 +402,25 @@ export async function purchaseAccountTransaction(data) {
 };
 
 
-export async function getCOATransactionDetails() {
+export async function getCOATransactionDetails(queryParams = {}) {
   try {
     const result = await model.accountsModel.findAll({
-      attributes: ['accountName', 'accountsId','accountBalance'],
+      attributes: ['accountName', 'accountsId', 'accountBalance'],
       include: [
         {
           model: model.accountTransactionModel,
-          attributes:['accountTransactionId','poSupplierInvoiceMapperId','purchaseOrderId','soLoadingOrderId','so','transactionOf','transactionAmount','transactionAmountDate','transactionAmountType','accountsId','entryType','paymentMethod'],
-          include:[    {
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod'],
+          where: {
+            ...(queryParams.customerId && { customerId: queryParams.customerId }),
+            ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),
+            ...(queryParams.poSupplierInvoiceMapperId && { poSupplierInvoiceMapperId: queryParams.poSupplierInvoiceMapperId }),
+            ...(queryParams.purchaseOrderId && { purchaseOrderId: queryParams.purchaseOrderIds }),
+            ...(queryParams.soLoadingOrderId && { soLoadingOrderId: queryParams.soLoadingOrderId }),
+            ...(queryParams.so && { so: queryParams.so }),
+            ...(queryParams.accountsId && { accountsId: queryParams.accountsId }),
+
+          },
+          include: [{
             model: model.poSupplierInvoiceMapperModel,
             attributes: ['poSupplierInvoiceMappperId', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
             as: 'poSupplierInvoice'
@@ -406,28 +434,28 @@ export async function getCOATransactionDetails() {
                 model: model.supplierModel,
                 as: 'suppliers',
                 attributes: ['supplierName', 'supplierId']
-  
+
               }
             ]
           },
           {
-            model:model.soLoadingOrderModel,
-            as:'soLoadingOrders',
-          attributes:{exclude:['createdAt','updatedAt','deletedAt']},  
+            model: model.soLoadingOrderModel,
+            as: 'soLoadingOrders',
+            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
             include: [
+              {
+                model: model.salesOrderModel,
+                attributes: ['salesOrdersId', 'customerId', 'location'],
+                include: [
                   {
-                    model: model.salesOrderModel,
-                    attributes: ['salesOrdersId', 'customerId', 'location'],
-                    include: [
-                      {
-                        model: model.customerModel,
-                        as: 'customers', attributes: ['customerId', 'customerName']
-                      }
-                    ]
+                    model: model.customerModel,
+                    as: 'customers', attributes: ['customerId', 'customerName']
                   }
                 ]
+              }
+            ]
           }
-        ]
+          ]
         },
       ],
     });;

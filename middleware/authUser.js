@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { secretKey } from "../constant.js";
 import * as userRepository from "../repository/userRepository.js";
 
-const tokenExpiryTime = '1h';
+const tokenExpiryTime = '2d';
 
 async function verifyAndExtendToken(token) {
   const decoded = jwt.verify(token, secretKey);
@@ -17,12 +17,9 @@ async function verifyAndExtendToken(token) {
   if (!user) {
     throw new Error("Invalid token");
   }
-  // const userRole = await userRepository.findRoleByUserId(user.id);
   
-  const newToken = jwt.sign({ email: user.email }, secretKey, {
-    expiresIn: tokenExpiryTime,
-  });
-  console.log(newToken,'newtoken');
+  const newToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: tokenExpiryTime });
+  console.log(newToken, 'newtoken');
 
   return { user, newToken };
 }

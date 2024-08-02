@@ -3,6 +3,7 @@ import moment from 'moment';
 import sequelize from '../database/sequelizeConfig.js';
 import { updateProductInventoryInactive } from '../repository/productInventoryRespository.js';
 import { purchaseAccountTransaction } from '../repository/purchaseOrderRepository.js';
+import { getAccountIdByAccountName } from './accountsServices.js';
 
 export async function createOrder(info) {
     return await salesOrderRepository.createOrder(info)
@@ -193,11 +194,15 @@ export async function updateStatus(transactionData) {
             console.log(`Status updated to ${newStatus} for inventory ID ${data.salesOrdersInventoryId}`);
             if (newStatus === 'INVOICE') {
                 // Static account details for INVOICE status
-                const accountDetails = [
-                    { accountsId: 4, entryType: 'dr' },
-                    { accountsId: 63, entryType: 'cr' }
-                ];
 
+                const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' }
+
+                const transactionAccontId = await getAccountIdByAccountName(accNames);
+                console.log(transactionAccontId, 'transactionAccontId');
+                const accountDetails = [
+                    { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+                    { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+                ];
                 for (const accountDetail of accountDetails) {
                     const transactionDataWithAccount = {
                         ...transactionData,
@@ -249,13 +254,14 @@ export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
 
 export async function createSalesAccountTransaction(data) {
     const transaction = await sequelize.transaction();
-   try {
-        let accountDetails = [];
-
+    const accNames = { debitAccountName: 'Goods', creditAccountName: 'Accounts, Notes and Loans Receivable' }
+    try {
         if (data.transactionAmountType === 'credit') {
-            accountDetails = [
-                { accountsId: 4, entryType: 'cr' },
-                { accountsId: 63, entryType: 'dr' }
+            const transactionAccontId = await getAccountIdByAccountName(accNames);
+            console.log(transactionAccontId, 'transactionAccontId');
+            const accountDetails = [
+                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
             ];
 
             for (const accountDetail of accountDetails) {
