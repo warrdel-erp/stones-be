@@ -64,14 +64,14 @@ prePurchaseModel.belongsTo(purchaseProductModel, { foreignKey: 'purchase_order_p
 poSupplierInvoiceMapperModel.belongsTo(purchaseModel, { foreignKey: 'purchase_order_id' });
 purchaseModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'purchase_order_id', as: 'invoiceMapper' });
 
-poSupplierInvoiceModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id' });
+poSupplierInvoiceModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id',as:'transactionData' });
 poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'supplierInvoice' });
 
 poSlabDetails.belongsTo(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_id' });
 poSupplierInvoiceModel.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id', as: 'slabDetails' });
 
-inventoryInvoiceMapper.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
-productInventoryModel.hasMany(inventoryInvoiceMapper, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
+inventoryInvoiceMapper.belongsTo(productInventoryModel, { foreignKey: 'inventory_invoice_mapper_id', as: 'productInventoryInvoiceMapper' });
+productInventoryModel.hasMany(inventoryInvoiceMapper, { foreignKey: 'inventory_invoice_mapper_id', as: 'productInventoryInvoiceMapper' });
 
 purchaseProductModel.hasOne(poSupplierInvoiceModel, { foreignKey: 'purchase_order_product_id', as: 'supplierPurchaseProduct' });
 poSupplierInvoiceModel.belongsTo(purchaseProductModel, { foreignKey: 'purchase_order_product_id', as: 'supplierPurchaseProduct' });

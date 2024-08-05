@@ -10,7 +10,7 @@ export async function createOrder(info) {
 
 export async function getPoNumber() {
     const result = await purchaseOrderRepository.latestPoNumber()
-    let newPo; // declare newPo outside the if-else blocks
+    let newPo; 
     if (!result) {
         newPo = "0001";
     } else {
@@ -190,6 +190,8 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
+    // console.log(dataArray,'dataarray');
+    const poMapperId= parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
     try {
@@ -208,10 +210,10 @@ export async function addProductInventory(dataArray) {
                     transactionOf: 'purchase',
                     transactionAmountType: 'debit'
                 };
-                await purchaseAccountTransaction(transactionDataWithAccount, { transaction });
+                await purchaseAccountTransaction(transactionDataWithAccount,  transaction );
             }
         }
-        const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(dataArray.poSupplierInvoiceMapperId)
+        const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
         console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
@@ -223,7 +225,7 @@ export async function addProductInventory(dataArray) {
         for (const data of values) {
             const productDetails = await productInventory.getProductDetailsOfProductInventory(data.productId) // product Inventory
             let result;
-            result = await purchaseOrderRepository.updateReceivingInventory(dataArray.poSupplierInvoiceMapperId, transaction);
+            result = await purchaseOrderRepository.updateReceivingInventory(poMapperId, transaction);
             if (productDetails) {
                 const { slabInStock: productSlabInStock, quantityInStock: productQuantityInStock, productInventoryId } = productDetails.dataValues;
                 const { slab: newSlabInStock, quantity: newQuantityInStock } = data;
@@ -235,6 +237,8 @@ export async function addProductInventory(dataArray) {
                 result = await productInventory.updateProductInventory(updateData, transaction)
                 const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
+                const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
+                result = await productInventory.addProductInventory(info, transaction);
             } else {
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 result = await productInventory.addProductInventory(info, transaction);
@@ -254,7 +258,7 @@ export async function addProductInventory(dataArray) {
         return { success: false, error: error.message };
     };
 };
-addProductInventory()
+
 export async function getProductInventory(page, limit) {
     let result = [];
     const data = await productInventory.getInventoryList(page, limit);
@@ -306,7 +310,6 @@ export async function purchaseAccountTransaction(transactionData) {
     try {
         if (transactionData.transactionAmountType === 'credit') {
             const transactionAccontId = await getAccountIdByAccountName(accNames);
-            console.log(transactionAccontId, 'transactionAccontId');
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
                 { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
@@ -319,9 +322,7 @@ export async function purchaseAccountTransaction(transactionData) {
                     transactionOf: 'purchase',
                     transactionAmountType: 'credit'
                 };
-                console.log(transactionDataWithAccount, 'transactionDataWithAccountss');
                 await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, { transaction });
-                console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
             }
         }
         else {

@@ -215,7 +215,7 @@ export async function updateStatus(transactionData) {
                     console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
                 }
 
-                const productInventoryUpdateResult = await updateProductInventoryInactive(data.productInventoryId, { status: 'INACTIVE' }, { transaction });
+                // const productInventoryUpdateResult = await updateProductInventoryInactive(data.productInventoryId, { status: 'INACTIVE' }, { transaction });
                 console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
 
                 await transaction.commit();

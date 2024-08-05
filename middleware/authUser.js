@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { secretKey } from "../constant.js";
 import * as userRepository from "../repository/userRepository.js";
 
-const tokenExpiryTime = '2d';
+const tokenExpiryTime = '60000000';
 
 async function verifyAndExtendToken(token) {
   const decoded = jwt.verify(token, secretKey);
@@ -19,7 +19,6 @@ async function verifyAndExtendToken(token) {
   }
   
   const newToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: tokenExpiryTime });
-  console.log(newToken, 'newtoken');
 
   return { user, newToken };
 }
@@ -33,9 +32,7 @@ export async function userAuth(req, res, next) {
     }
 
     const token = authHeader.split(" ")[1];
-
     const { user, newToken } = await verifyAndExtendToken(token);
-
     req.user = user;
     res.setHeader('Authorization', `Bearer ${newToken}`);
 

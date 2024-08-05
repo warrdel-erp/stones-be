@@ -51,14 +51,14 @@ export async function addInventoryInvoice(data) {
     const productinventory = await model.inventoryInvoiceMapper.findOne({
       where: data,
     });
-    if(!productinventory){
-    const result = await model.inventoryInvoiceMapper.create(data);
-    return result;
+    if (!productinventory) {
+      const result = await model.inventoryInvoiceMapper.create(data);
+      return result;
     }
   } catch (error) {
     console.error("Error in add Inventory Invoice:", error);
     throw error;
-   } 
+  }
 }
 
 export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInvoiceMappperId) {
@@ -97,7 +97,7 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
     throw error;
   }
 }
-  export async function getInventoryList(page, limit) {
+export async function getInventoryList(page, limit) {
   try {
     const offset = page * limit;
     console.log(`Fetching inventory with limit: ${limit}, offset: ${offset}`);
@@ -106,8 +106,8 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
       where: {
         status: 'ACTIVE'
       },
-      offset :offset,
-      limit:limit,
+      offset,
+      limit,
       include: [
         {
           model: model.inventoryInvoiceMapper,
@@ -122,9 +122,16 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
               },
               include: [
                 {
+                  model: model.poSupplierInvoiceMapperModel,
+                  attributes: {
+                    exclude: ["createdAt", "updatedAt", "deletedAt", "status"],
+                  },
+                  as: 'transactionData',
+                },
+                {
                   model: model.poSlabDetails,
                   as: "slabDetails",
-                  attributes: {exclude: ["createdAt", "updatedAt", "deletedAt", "status"]},
+                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                 },
                 {
                   model: model.purchaseProductModel,
@@ -136,7 +143,7 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
                     {
                       model: model.productModel,
                       as: "products",
-                      attributes: {exclude: ["createdAt", "updatedAt", "deletedAt", "status"]},
+                      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                     },
                   ],
                 },
@@ -158,14 +165,14 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
 
 export async function updateProductInventoryInactive(productInventoryId, data) {
   try {
-      const result = await model.productInventoryModel.update(data, {
-          where: {
-            productInventoryId: productInventoryId
-          }
-      });
-   return result; 
+    const result = await model.productInventoryModel.update(data, {
+      where: {
+        productInventoryId: productInventoryId
+      }
+    });
+    return result;
   } catch (error) {
-      console.error("Error updating product Inventory INACTIVE:", error);
-      throw error; 
+    console.error("Error updating product Inventory INACTIVE:", error);
+    throw error;
   }
 }
