@@ -106,8 +106,8 @@ export async function getInventoryList(page, limit) {
       where: {
         status: 'ACTIVE'
       },
-      offset,
-      limit,
+      offset: offset,
+      limit: limit,
       include: [
         {
           model: model.inventoryInvoiceMapper,
@@ -153,6 +153,7 @@ export async function getInventoryList(page, limit) {
         },
       ],
     });
+    console.log(JSON.stringify(result),'invet');
     console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
   } catch (error) {

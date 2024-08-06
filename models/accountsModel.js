@@ -69,6 +69,11 @@ export default sequelize.define(
             allowNull: true,
             field: 'deleted_at'
         },
+        coaCode: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'coa_code'
+        },
     },
     {
         tableName: 'accounts',

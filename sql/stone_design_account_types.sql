@@ -1,0 +1,3 @@
+
+INSERT INTO `account_types` VALUES (1,'Assets','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(2,'Liabilities','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(3,'Equity Including Portion Attributable to Noncontrolling Interest','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(4,'Revenue','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(5,'Expenses','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(6,'Other (Non-Operating) Income and Expenses','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL),(7,'Intercompany and Related Party Accounts','ACTIVE','2024-07-12 15:03:17','2024-07-12 15:03:17',NULL);
+

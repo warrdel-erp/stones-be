@@ -405,7 +405,7 @@ export async function purchaseAccountTransaction(data) {
 export async function getCOATransactionDetails(queryParams = {}) {
   try {
     const result = await model.accountsModel.findAll({
-      attributes: ['accountName', 'accountsId', 'accountBalance'],
+      attributes: ['accountName', 'accountsId', 'accountBalance','coaCode'],
       include: [
         {
           model: model.accountTransactionModel,

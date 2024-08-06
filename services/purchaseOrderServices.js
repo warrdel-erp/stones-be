@@ -255,7 +255,7 @@ export async function addProductInventory(dataArray) {
         // Rollback the transaction if any error occurs
         await transaction.rollback();
         console.error('Error inserting data:', error);
-        return { success: false, error: error.message };
+        throw error;
     };
 };
 
@@ -366,11 +366,12 @@ export async function getCOATransactionDetails(queryParams) {
         return {
             accountName: account.accountName,
             accountsId: account.accountsId,
+            coaCode:account.coaCode,
             accountBalance: account.accountBalance,
             debitAmount: debit,
             creditAmount: credit,
             balance: balance,
-            account_transactions: account.account_transactions
+            account_transactions: account.account_transactions,
         };
     });
 

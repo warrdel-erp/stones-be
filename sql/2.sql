@@ -198,3 +198,8 @@ ALTER TABLE account_transaction
 ADD COLUMN customer_id INT,
 ADD FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
 
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS coa_code VARCHAR(50) NULL;
+
+
+
+
