@@ -409,7 +409,7 @@ export async function getCOATransactionDetails(queryParams = {}) {
       include: [
         {
           model: model.accountTransactionModel,
-          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod'],
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod','createdAt'],
           where: {
             ...(queryParams.customerId && { customerId: queryParams.customerId }),
             ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),

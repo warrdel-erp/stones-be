@@ -253,6 +253,8 @@ export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
 };
 
 export async function createSalesAccountTransaction(data) {
+    console.log(data,'data');
+    
     const transaction = await sequelize.transaction();
     const accNames = { debitAccountName: 'Goods', creditAccountName: 'Accounts, Notes and Loans Receivable' }
     try {

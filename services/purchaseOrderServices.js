@@ -10,7 +10,7 @@ export async function createOrder(info) {
 
 export async function getPoNumber() {
     const result = await purchaseOrderRepository.latestPoNumber()
-    let newPo; 
+    let newPo;
     if (!result) {
         newPo = "0001";
     } else {
@@ -191,7 +191,7 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 // add product inventory 
 export async function addProductInventory(dataArray) {
     // console.log(dataArray,'dataarray');
-    const poMapperId= parseInt(dataArray.poSupplierInvoiceMapperId);
+    const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
     try {
@@ -210,7 +210,7 @@ export async function addProductInventory(dataArray) {
                     transactionOf: 'purchase',
                     transactionAmountType: 'debit'
                 };
-                await purchaseAccountTransaction(transactionDataWithAccount,  transaction );
+                await purchaseAccountTransaction(transactionDataWithAccount, transaction);
             }
         }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
@@ -262,19 +262,37 @@ export async function addProductInventory(dataArray) {
 export async function getProductInventory(page, limit) {
     let result = [];
     const data = await productInventory.getInventoryList(page, limit);
+    console.log(JSON.stringify(data, null, 2), 'datatat');
     for (const abc of data) {
         const abcd = abc.toJSON();
-        const slabData = [].concat(...abcd.productInventoryInvoiceMapper.map(pim => {
-            return pim.productInventoryInvoice.slabDetails;
-        }))
-        const productDetails = abcd.productInventoryInvoiceMapper[0].productInventoryInvoice.supplierPurchaseProduct.products;
-        const { slabDetails, supplierPurchaseProduct, ...productInventoryInvoice } = abcd.productInventoryInvoiceMapper[0].productInventoryInvoice;
-
-        delete abcd.productInventoryInvoiceMapper;
-        result.push({
-            ...abcd, slabData, productDetails, productInventoryInvoice
-        });
+        const slabData = [].concat(...abcd?.productInventoryInvoiceMapper?.map(pim => {
+            return pim?.productInventoryInvoice?.slabDetails || [];
+        }));
+        console.log(JSON.stringify(slabData, null, 2), 'slabData');
+        const productDetails = abcd?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.supplierPurchaseProduct?.products;
+        console.log(productDetails, 'prodycs');
+        const firstMapper = abcd?.productInventoryInvoiceMapper?.[0];
+        const productInventoryInvoice = firstMapper?.productInventoryInvoice;
+        if (productInventoryInvoice) {
+            const { slabDetails, supplierPurchaseProduct, ...restProductInventoryInvoice } = productInventoryInvoice;
+            delete abcd.productInventoryInvoiceMapper;
+            result.push({
+                ...abcd,
+                slabData,
+                productDetails,
+                productInventoryInvoice: restProductInventoryInvoice,
+            });
+        } else {
+            delete abcd.productInventoryInvoiceMapper;
+            result.push({
+                ...abcd,
+                slabData,
+                productDetails,
+                productInventoryInvoice: null,
+            });
+        }
     }
+
     return result;
 };
 
@@ -366,7 +384,7 @@ export async function getCOATransactionDetails(queryParams) {
         return {
             accountName: account.accountName,
             accountsId: account.accountsId,
-            coaCode:account.coaCode,
+            coaCode: account.coaCode,
             accountBalance: account.accountBalance,
             debitAmount: debit,
             creditAmount: credit,
