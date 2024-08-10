@@ -283,6 +283,23 @@ export async function addSlabDetails(data) {
   }
 }
 
+//update Slab details
+
+export async function updateSlabDetails(data) {
+  try {
+    const result = await model.poSlabDetails.update(data, {
+      where: {
+        poSlabDetailId:data.poSlabDetailId
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in update Slab Details:", error);
+    throw error;
+  }
+}
+
+
 // get latest transcation number
 
 export async function latestSlapSerialNumber(poSupplierInvoiceMapperId) {

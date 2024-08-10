@@ -97,7 +97,7 @@ poSlabDetails.hasOne(salesOrderInventoryModel, { foreignKey: 'po_slab_detail_id'
 salesOrderInventoryModel.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: "salesProduct" });
 productInventoryModel.hasOne(salesOrderInventoryModel, { foreignKey: 'product_inventory_id', as: "salesProduct" });
 
-productModel.hasOne(productInventoryModel, { foreignKey: 'product_id', as: "salesProductDetails" });
+productModel.hasMany(productInventoryModel, { foreignKey: 'product_id', as: "salesProductDetails" });
 productInventoryModel.belongsTo(productModel, { foreignKey: 'product_id', as: "salesProductDetails" });
 
 subAccountTypesModel.belongsTo(accountTypesModel, { foreignKey: 'account_types_id', as: 'accountTypeSubtype' });
@@ -133,6 +133,30 @@ purchaseModel.hasMany(accountTransactionModel,{foreignKey:'purchase_order_id',as
 accountTransactionModel.belongsTo(soLoadingOrderModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrders'});
 soLoadingOrderModel.hasMany(accountTransactionModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrders'});
 
+
+//changes for inventory
+
+inventoryInvoiceMapper.belongsTo(productInventoryModel,{foreignKey:'product_inventory_id'})
+productInventoryModel.hasMany(inventoryInvoiceMapper,{foreignKey:'product_inventory_id',as:'productInventory'});
+
+poSupplierInvoiceModel.belongsTo(productModel,{  foreignKey: 'productSku', targetKey: 'productName',as:'supplierInvoices'});
+productModel.hasMany(poSupplierInvoiceModel,{  foreignKey: 'productSku',sourceKey: 'productName',as:'supplierInvoices'});
+
+poSupplierInvoiceMapperModel.belongsTo(productModel,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplData'});
+productModel.hasMany(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplData'});
+
+poSlabDetails.belongsTo(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id'});
+poSupplierInvoiceMapperModel.hasMany(poSlabDetails,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplSlabDetails'});
+
+poSupplierInvoiceMapperModel.belongsTo(poSlabDetails,{foreignKey:'po_supplier_invoice_mapper_id'});
+poSlabDetails.hasMany(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplSlabDetails'});
+
+poSupplierInvoiceMapperModel.belongsTo(poSupplierInvoiceModel,{ foreignKey: 'po_supplier_invoice_mapper_id'})
+poSupplierInvoiceModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'supplierInvoicess' });
+
+
+poSupplierInvoiceModel.belongsTo(poSupplierInvoiceMapperModel,{ foreignKey: 'po_supplier_invoice_mapper_id'})
+poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'supplierInvoicess' });
 
 export {
 	productModel,

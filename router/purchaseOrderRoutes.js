@@ -5,8 +5,13 @@ const router =  Router();
 import { createOrder,getPoNumber,updateOrder,addPurchaseOrderProduct,singlePoDetails,addSuplierInvoice,getAllOpenPo,
     addSlabDetails,singleSlabDetails,addProductInventory,getProductInventory,addPayment,getPaymentDetails,addContainer,getContainerDetails,
     purchaseAccountTransaction,
-    getCOATransactionDetails
+    getCOATransactionDetails,
+    getInventoryListBasedOnSipl,
+    updateSlabDetails,
+    
 } from "../controllers/purchaseOrderControllers.js"
+
+router.patch('/slabDetails',updateSlabDetails);
 
 router.post('/',userAuth, createOrder);
 
@@ -41,5 +46,7 @@ router.get('/containerDetails',getContainerDetails);
 router.post('/purchaseAccountTransaction',purchaseAccountTransaction)
 
 router.get('/transactionDetailsCOA',getCOATransactionDetails);
+
+router.get('/inventoryDetailsBasedOnSipl',getInventoryListBasedOnSipl);
 
 export default router

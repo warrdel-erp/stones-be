@@ -287,3 +287,27 @@ export const getCOATransactionDetails = async (req, res) => {
     }
 }
 
+
+
+export const getInventoryListBasedOnSipl = async (req, res) => {
+    try {
+        const result = await purchaseOrderService.getInventoryListBasedOnSipl();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting Product Inventory:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+export const updateSlabDetails = async (req, res) => {  
+    try {
+        const data = req.body;
+        console.log(data,'updateSlabDetails');
+        const result = await purchaseOrderService.updateSlabDetails(data);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add Slab Details: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

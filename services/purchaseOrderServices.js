@@ -118,10 +118,12 @@ export async function addSuplierInvoice(data) {
 
 export async function addSlabDetails(info) {
     try {
-        const { slabCounter, po, isBlockIncreament, iisLotIncreament, isSlabIncreament, block, lot, poSupplierInvoiceMapperId, slab, ...slabInfo } = info;
+        const { slabCounter, po, isBlockIncreament, iisLotIncreament, isSlabIncreament, block, lot, poSupplierInvoiceMapperId, slab, siplNumber, ...slabInfo } = info;
 
         const slabDetails = [];
 
+        const siplNumberMatch = siplNumber.match(/-\s*(\d+)/);
+        const siplNumberAfterHyphen = siplNumberMatch ? parseInt(siplNumberMatch[1], 10) : null;
         let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId)
         let serialCounter;
         if (latestSerialNumber) {
@@ -129,6 +131,7 @@ export async function addSlabDetails(info) {
             const splitLatestNumber = SerialNumberParts.split('-');
             serialCounter = parseInt(splitLatestNumber[1]); // Increment the counter
         }
+
         for (let i = 1; i <= slabCounter; i++) {
 
             let dynamicBlock = block;
@@ -141,7 +144,9 @@ export async function addSlabDetails(info) {
             if (isSlabIncreament) dynamicSlab += i - 1;
 
             // Generate a dynamic po convert to serial Number
-            const dynamicPo = serialCounter ? `${po}-${serialCounter + i}` : `${po}-${i}`;
+            const dynamicPo = serialCounter ? `${po}- ${siplNumberAfterHyphen}-${serialCounter + i}` : `${po}-${i}`;
+            console.log(dynamicPo, 'dynamicPO');
+
             // Create a new slab
             const slabDetail = await purchaseOrderRepository.addSlabDetails({
                 ...slabInfo,
@@ -190,31 +195,30 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
-    // console.log(dataArray,'dataarray');
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
-    const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
+    // const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
     try {
-        const transactionAccontId = await getAccountIdByAccountName(accNames);
-        console.log(transactionAccontId, 'transactionAccontId');
-        if (dataArray.transactionAmountType = 'debit') {
-            const accountDetails = [
-                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
-            ];
-            for (const accountDetail of accountDetails) {
-                const transactionDataWithAccount = {
-                    ...dataArray,
-                    accountsId: accountDetail.accountsId,
-                    entryType: accountDetail.entryType,
-                    transactionOf: 'purchase',
-                    transactionAmountType: 'debit'
-                };
-                await purchaseAccountTransaction(transactionDataWithAccount, transaction);
-            }
-        }
+        // const transactionAccontId = await getAccountIdByAccountName(accNames);
+        // console.log(transactionAccontId, 'transactionAccontId');
+        // if (dataArray.transactionAmountType = 'debit') {
+        //     const accountDetails = [
+        //         { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+        //         { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+        //     ];
+        //     for (const accountDetail of accountDetails) {
+        //         const transactionDataWithAccount = {
+        //             ...dataArray,
+        //             accountsId: accountDetail.accountsId,
+        //             entryType: accountDetail.entryType,
+        //             transactionOf: 'purchase',
+        //             transactionAmountType: 'debit'
+        //         };
+        //         await purchaseAccountTransaction(transactionDataWithAccount, transaction);
+        //     }
+        // }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
-        console.log(inventoryDetails, 'inventorydetails');
+        // console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
             slab: item.slab,
@@ -238,7 +242,7 @@ export async function addProductInventory(dataArray) {
                 const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
-                result = await productInventory.addProductInventory(info, transaction);
+                // result = await productInventory.addProductInventory(info, transaction);
             } else {
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 result = await productInventory.addProductInventory(info, transaction);
@@ -262,15 +266,12 @@ export async function addProductInventory(dataArray) {
 export async function getProductInventory(page, limit) {
     let result = [];
     const data = await productInventory.getInventoryList(page, limit);
-    console.log(JSON.stringify(data, null, 2), 'datatat');
     for (const abc of data) {
         const abcd = abc.toJSON();
         const slabData = [].concat(...abcd?.productInventoryInvoiceMapper?.map(pim => {
             return pim?.productInventoryInvoice?.slabDetails || [];
         }));
-        console.log(JSON.stringify(slabData, null, 2), 'slabData');
         const productDetails = abcd?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.supplierPurchaseProduct?.products;
-        console.log(productDetails, 'prodycs');
         const firstMapper = abcd?.productInventoryInvoiceMapper?.[0];
         const productInventoryInvoice = firstMapper?.productInventoryInvoice;
         if (productInventoryInvoice) {
@@ -395,4 +396,79 @@ export async function getCOATransactionDetails(queryParams) {
 
     return processedAccounts;
 }
+export async function getInventoryListBasedOnSipl() {
+    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
 
+    if (Array.isArray(inventoryJsonData)) {
+        const flattenedInventoryData = inventoryJsonData.map((product) => {
+            const basicInfo = {
+                productName: product.dataValues.productName,
+                type: product.dataValues.type,
+                baseColor: product.dataValues.baseColor,
+                origin: product.dataValues.origin,
+                kind: product.dataValues.kind,
+            };
+
+            // Flatten the salesProductDetails and their nested arrays
+            const flattenedDetails = product.dataValues.salesProductDetails.map((detail) => {
+                const inventoryInfo = {
+                    slabInStock: detail.slabInStock,
+                    quantityInStock: detail.quantityInStock,
+                    slabAvailable: detail.slabAvailable,
+                    quantityAvailable: detail.quantityAvailable,
+                };
+
+                const transactions = detail.productInventory.flatMap((inventory) => {
+                    const transactionInfo = inventory.productInventoryInvoice.supplierInvoicess.map((invoice) => {
+                        return {
+                            transaction: invoice.transaction,
+                            invoice: invoice.invoice,
+                            invoiceDate: invoice.invoiceDate,
+                            shipDate: invoice.shipDate,
+                            dueDate: invoice.dueDate,
+                            receivingInventory: invoice.receivingInventory,
+                            siplSlabDetails: invoice.siplSlabDetails.map((slabDetail) => ({
+                                poSlabDetailId: slabDetail.poSlabDetailId,
+                                serialNumber: slabDetail.serialNumber,
+                                entryUnit: slabDetail.entryUnit,
+                                packageLength: slabDetail.packageLength,
+                                packageWidth: slabDetail.packageWidth,
+                                recevingLength: slabDetail.recevingLength,
+                                recevingWidth: slabDetail.recevingWidth,
+                                block: slabDetail.block,
+                                lot: slabDetail.lot,
+                                slab: slabDetail.slab,
+                                bin: slabDetail.bin,
+                                notes: slabDetail.notes,
+                                slabCounter: slabDetail.slabCounter,
+                                barcode: slabDetail.barcode,
+                            })),
+                        };
+                    });
+                    return transactionInfo;
+                });
+
+                return { ...basicInfo, ...inventoryInfo, transactions };
+            });
+
+            return flattenedDetails;
+        });
+        const result = flattenedInventoryData.flat();
+        console.log('Flattened Inventory Data:', result);
+        return result;
+    } else {
+        console.log('Unexpected data structure:', inventoryJsonData);
+        return []; 
+    }
+}
+
+
+
+export async function updateSlabDetails(data) {
+    const results = await Promise.all(
+        data.slabs.map(async (slab) => {
+            return await purchaseOrderRepository.updateSlabDetails(slab);
+        })
+    );
+    return results;
+}

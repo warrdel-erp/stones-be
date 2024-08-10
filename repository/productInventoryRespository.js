@@ -153,7 +153,7 @@ export async function getInventoryList(page, limit) {
         },
       ],
     });
-    console.log(JSON.stringify(result),'invet');
+    console.log(JSON.stringify(result), 'invet');
     console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
   } catch (error) {
@@ -162,6 +162,59 @@ export async function getInventoryList(page, limit) {
   }
 }
 
+export async function getInventoryListBasedOnSipl() {
+  try {
+    const result = await model.productModel.findAll({
+      include: [
+        {
+          model: model.productInventoryModel,
+          as: "salesProductDetails",
+          required: true,
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "deletedAt", "status"]
+          },
+          include: [
+            {
+              model: model.inventoryInvoiceMapper,
+              as: "productInventory",
+              required: true,
+              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+              include: [
+                {
+                  model: model.poSupplierInvoiceModel,
+                  as: 'productInventoryInvoice',
+                  required: true,
+                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
+                  include: [
+                    {
+                      model: model.poSupplierInvoiceMapperModel,
+                      as: 'supplierInvoicess',
+                      required: true,
+                      include: [
+                        {
+                          model: model.poSlabDetails,
+                          as: 'siplSlabDetails',
+                          required: true,
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+          ]
+
+        },
+
+      ],
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error in getInventoryList:", error);
+    throw error;
+  }
+}
 // after sales_orders_inventory table sale status change to Invoice then It become Inactive
 
 export async function updateProductInventoryInactive(productInventoryId, data) {
