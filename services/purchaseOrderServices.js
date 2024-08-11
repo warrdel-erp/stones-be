@@ -373,72 +373,7 @@ export async function getCOATransactionDetails(queryParams) {
 }
 export async function getInventoryListBasedOnSipl() {
     const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
-    console.log({inventoryJsonData: JSON.stringify(inventoryJsonData)});
-    
-    const transactions = [];
-
     return inventoryJsonData;
-    if (Array.isArray(inventoryJsonData)) {
-        const flattenedInventoryData = inventoryJsonData.map((product) => {
-            const basicInfo = {
-                productName: product.dataValues.productName,
-                type: product.dataValues.type,
-                baseColor: product.dataValues.baseColor,
-                origin: product.dataValues.origin,
-                kind: product.dataValues.kind,
-            };
-
-            // Flatten the salesProductDetails and their nested arrays
-            const flattenedDetails = product.dataValues.salesProductDetails.map((detail) => {
-                const inventoryInfo = {
-                    slabInStock: detail.slabInStock,
-                    quantityInStock: detail.quantityInStock,
-                    slabAvailable: detail.slabAvailable,
-                    quantityAvailable: detail.quantityAvailable,
-                };
-
-                const transactions = detail.productInventory.flatMap((inventory) => {
-                    const transactionInfo = inventory.productInventoryInvoice.supplierInvoicess.map((invoice) => {
-                        return {
-                            transaction: invoice.transaction,
-                            invoice: invoice.invoice,
-                            invoiceDate: invoice.invoiceDate,
-                            shipDate: invoice.shipDate,
-                            dueDate: invoice.dueDate,
-                            receivingInventory: invoice.receivingInventory,
-                            siplSlabDetails: invoice.siplSlabDetails.map((slabDetail) => ({
-                                poSlabDetailId: slabDetail.poSlabDetailId,
-                                serialNumber: slabDetail.serialNumber,
-                                entryUnit: slabDetail.entryUnit,
-                                packageLength: slabDetail.packageLength,
-                                packageWidth: slabDetail.packageWidth,
-                                recevingLength: slabDetail.recevingLength,
-                                recevingWidth: slabDetail.recevingWidth,
-                                block: slabDetail.block,
-                                lot: slabDetail.lot,
-                                slab: slabDetail.slab,
-                                bin: slabDetail.bin,
-                                notes: slabDetail.notes,
-                                slabCounter: slabDetail.slabCounter,
-                                barcode: slabDetail.barcode,
-                            })),
-                        };
-                    });
-                    return transactionInfo;
-                });
-
-                return { ...basicInfo, ...inventoryInfo, transactions };
-            });
-
-            return flattenedDetails;
-        });
-        const result = flattenedInventoryData.flat();
-        console.log('Flattened Inventory Data:', result);
-        return result;
-    } else {
-        console.log('Unexpected data structure:', inventoryJsonData);
-        return []; 
-    }
 }
 
 
