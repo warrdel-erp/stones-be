@@ -197,26 +197,26 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 export async function addProductInventory(dataArray) {
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
-    // const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
+    const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
     try {
-        // const transactionAccontId = await getAccountIdByAccountName(accNames);
-        // console.log(transactionAccontId, 'transactionAccontId');
-        // if (dataArray.transactionAmountType = 'debit') {
-        //     const accountDetails = [
-        //         { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-        //         { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
-        //     ];
-        //     for (const accountDetail of accountDetails) {
-        //         const transactionDataWithAccount = {
-        //             ...dataArray,
-        //             accountsId: accountDetail.accountsId,
-        //             entryType: accountDetail.entryType,
-        //             transactionOf: 'purchase',
-        //             transactionAmountType: 'debit'
-        //         };
-        //         await purchaseAccountTransaction(transactionDataWithAccount, transaction);
-        //     }
-        // }
+        const transactionAccontId = await getAccountIdByAccountName(accNames);
+        console.log(transactionAccontId, 'transactionAccontId');
+        if (dataArray.transactionAmountType = 'debit') {
+            const accountDetails = [
+                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+            ];
+            for (const accountDetail of accountDetails) {
+                const transactionDataWithAccount = {
+                    ...dataArray,
+                    accountsId: accountDetail.accountsId,
+                    entryType: accountDetail.entryType,
+                    transactionOf: 'purchase',
+                    transactionAmountType: 'debit'
+                };
+                await purchaseAccountTransaction(transactionDataWithAccount, transaction);
+            }
+        }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
         // console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
