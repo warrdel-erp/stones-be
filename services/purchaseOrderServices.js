@@ -125,7 +125,7 @@ export async function addSlabDetails(info) {
         const siplNumberMatch = siplNumber.match(/-\s*(\d+)/);
         const siplNumberAfterHyphen = siplNumberMatch ? parseInt(siplNumberMatch[1], 10) : null;
         let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId)
-        let serialCounter;
+        let serialCounter = 1;
         if (latestSerialNumber) {
             const SerialNumberParts = latestSerialNumber.dataValues.serialNumber
             const splitLatestNumber = SerialNumberParts.split('-');
