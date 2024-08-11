@@ -106,8 +106,8 @@ export async function getInventoryList(page, limit) {
       where: {
         status: 'ACTIVE'
       },
-      offset: offset,
-      limit: limit,
+      // offset: offset,
+      // limit: limit,
       include: [
         {
           model: model.inventoryInvoiceMapper,
@@ -164,53 +164,49 @@ export async function getInventoryList(page, limit) {
 
 export async function getInventoryListBasedOnSipl() {
   try {
-    const result = await model.productModel.findAll({
+    const result = await model.productInventoryModel.findAll({
+      where: {
+        status: 'ACTIVE'
+      },
+      attributes: ["slabInStock", "quantityInStock", "slabAvailable", "quantityAvailable"],
       include: [
         {
-          model: model.productInventoryModel,
-          as: "salesProductDetails",
-          required: true,
-          attributes: {
-            exclude: ["createdAt", "updatedAt", "deletedAt", "status"]
-          },
+          model: model.inventoryInvoiceMapper,
+          as: "productInventoryInvoiceMapper",
+          attributes: ["inventoryInvoiceMapperId"],
           include: [
             {
-              model: model.inventoryInvoiceMapper,
-              as: "productInventory",
-              required: true,
-              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+              model: model.poSupplierInvoiceModel,
+              as: "productInventoryInvoice",
+              attributes: ["poSupplierInvoiceId"],
               include: [
                 {
-                  model: model.poSupplierInvoiceModel,
-                  as: 'productInventoryInvoice',
-                  required: true,
+                  model: model.poSlabDetails,
+                  as: "slabDetails",
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
-                  include: [
-                    {
-                      model: model.poSupplierInvoiceMapperModel,
-                      as: 'supplierInvoicess',
-                      required: true,
-                      include: [
-                        {
-                          model: model.poSlabDetails,
-                          as: 'siplSlabDetails',
-                          required: true,
-                        }
-                      ]
-                    }
-                  ]
+                }, 
+                {
+                  model: model.poSupplierInvoiceMapperModel,
+                  as: "transactionData",
+                  attributes: {
+                    exclude: ["createdAt", "updatedAt", "deletedAt", "status"],
+                  }
                 }
               ]
             },
-          ]
-
+          ],
         },
-
+        {
+          model: model.productModel,
+          as: "salesProductDetails",
+          attributes: ["productName", "type", "baseColor", "origin", "kind"]
+        }
       ],
     });
-
+    console.log(JSON.stringify(result), 'invet');
+    console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
-  } catch (error) {
+    } catch (error) {
     console.error("Error in getInventoryList:", error);
     throw error;
   }

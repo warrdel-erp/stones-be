@@ -70,8 +70,8 @@ poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_s
 poSlabDetails.belongsTo(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_id' });
 poSupplierInvoiceModel.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id', as: 'slabDetails' });
 
-inventoryInvoiceMapper.belongsTo(productInventoryModel, { foreignKey: 'inventory_invoice_mapper_id', as: 'productInventoryInvoiceMapper' });
-productInventoryModel.hasMany(inventoryInvoiceMapper, { foreignKey: 'inventory_invoice_mapper_id', as: 'productInventoryInvoiceMapper' });
+inventoryInvoiceMapper.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
+productInventoryModel.hasMany(inventoryInvoiceMapper, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
 
 purchaseProductModel.hasOne(poSupplierInvoiceModel, { foreignKey: 'purchase_order_product_id', as: 'supplierPurchaseProduct' });
 poSupplierInvoiceModel.belongsTo(purchaseProductModel, { foreignKey: 'purchase_order_product_id', as: 'supplierPurchaseProduct' });
@@ -79,8 +79,8 @@ poSupplierInvoiceModel.belongsTo(purchaseProductModel, { foreignKey: 'purchase_o
 poSupplierInvoiceModel.hasOne(inventoryInvoiceMapper, { foreignKey: 'po_supplier_invoice_id', as: 'productInventoryInvoice' });
 inventoryInvoiceMapper.belongsTo(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_id', as: 'productInventoryInvoice' });
 
-poSlabDetails.belongsTo(inventoryInvoiceMapper, { foreignKey: 'po_supplier_invoice_id', as: 'invoiceSlabDetails' });
-inventoryInvoiceMapper.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id', as: 'invoiceSlabDetails' });
+// poSlabDetails.belongsTo(inventoryInvoiceMapper, { foreignKey: 'po_supplier_invoice_id', as: 'invoiceSlabDetails' });
+// inventoryInvoiceMapper.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id', as: 'invoiceSlabDetails' });
 
 customerModel.hasMany(salesOrderModel, { foreignKey: 'customer_id' });
 salesOrderModel.belongsTo(customerModel, { foreignKey: 'customer_id', as: "customers" });
@@ -148,8 +148,8 @@ productModel.hasMany(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoi
 poSlabDetails.belongsTo(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id'});
 poSupplierInvoiceMapperModel.hasMany(poSlabDetails,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplSlabDetails'});
 
-poSupplierInvoiceMapperModel.belongsTo(poSlabDetails,{foreignKey:'po_supplier_invoice_mapper_id'});
-poSlabDetails.hasMany(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplSlabDetails'});
+// poSupplierInvoiceMapperModel.belongsTo(poSlabDetails,{foreignKey:'po_supplier_invoice_mapper_id'});
+// poSlabDetails.hasMany(poSupplierInvoiceMapperModel,{foreignKey:'po_supplier_invoice_mapper_id',as:'siplSlabDetails'});
 
 poSupplierInvoiceMapperModel.belongsTo(poSupplierInvoiceModel,{ foreignKey: 'po_supplier_invoice_mapper_id'})
 poSupplierInvoiceModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'supplierInvoicess' });

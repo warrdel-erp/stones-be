@@ -266,33 +266,8 @@ export async function addProductInventory(dataArray) {
 export async function getProductInventory(page, limit) {
     let result = [];
     const data = await productInventory.getInventoryList(page, limit);
-    for (const abc of data) {
-        const abcd = abc.toJSON();
-        const slabData = [].concat(...abcd?.productInventoryInvoiceMapper?.map(pim => {
-            return pim?.productInventoryInvoice?.slabDetails || [];
-        }));
-        const productDetails = abcd?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.supplierPurchaseProduct?.products;
-        const firstMapper = abcd?.productInventoryInvoiceMapper?.[0];
-        const productInventoryInvoice = firstMapper?.productInventoryInvoice;
-        if (productInventoryInvoice) {
-            const { slabDetails, supplierPurchaseProduct, ...restProductInventoryInvoice } = productInventoryInvoice;
-            delete abcd.productInventoryInvoiceMapper;
-            result.push({
-                ...abcd,
-                slabData,
-                productDetails,
-                productInventoryInvoice: restProductInventoryInvoice,
-            });
-        } else {
-            delete abcd.productInventoryInvoiceMapper;
-            result.push({
-                ...abcd,
-                slabData,
-                productDetails,
-                productInventoryInvoice: null,
-            });
-        }
-    }
+    console.log({data: JSON.stringify(data)});
+    return data;
 
     return result;
 };
@@ -398,7 +373,11 @@ export async function getCOATransactionDetails(queryParams) {
 }
 export async function getInventoryListBasedOnSipl() {
     const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
+    console.log({inventoryJsonData: JSON.stringify(inventoryJsonData)});
+    
+    const transactions = [];
 
+    return inventoryJsonData;
     if (Array.isArray(inventoryJsonData)) {
         const flattenedInventoryData = inventoryJsonData.map((product) => {
             const basicInfo = {
