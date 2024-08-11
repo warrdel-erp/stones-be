@@ -1,21 +1,7 @@
--- MySQL Workbench Forward Engineering
 -- -----------------------------------------------------
--- Schema mydb
+-- Table `locations`
 -- -----------------------------------------------------
--- -----------------------------------------------------
--- Schema stone_design
--- -----------------------------------------------------
-
--- -----------------------------------------------------
--- Schema stone_design
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `stone_design` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
-USE `stone_design` ;
-
--- -----------------------------------------------------
--- Table `stone_design`.`locations`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`locations` (
+CREATE TABLE IF NOT EXISTS `locations` (
   `location_id` INT NOT NULL AUTO_INCREMENT,
   `location` VARCHAR(255) NOT NULL,
   `address` VARCHAR(255) NOT NULL,
@@ -48,17 +34,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`locations` (
   UNIQUE INDEX `location_16` (`location` ASC) VISIBLE,
   UNIQUE INDEX `location_17` (`location` ASC) VISIBLE,
   UNIQUE INDEX `location_18` (`location` ASC) VISIBLE,
-  UNIQUE INDEX `location_19` (`location` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 6
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `location_19` (`location` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`purchase_orders`
+-- Table `purchase_orders`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_orders` (
+CREATE TABLE IF NOT EXISTS `purchase_orders` (
   `purchase_order_id` INT NOT NULL AUTO_INCREMENT,
   `po` INT NOT NULL,
   `po_date` DATETIME NOT NULL,
@@ -116,20 +99,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_orders` (
   INDEX `location_id` (`location_id` ASC) VISIBLE,
   CONSTRAINT `purchase_orders_ibfk_2`
     FOREIGN KEY (`purchase_location_id`)
-    REFERENCES `stone_design`.`locations` (`location_id`),
+    REFERENCES `locations` (`location_id`),
   CONSTRAINT `purchase_orders_ibfk_3`
     FOREIGN KEY (`location_id`)
-    REFERENCES `stone_design`.`locations` (`location_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 65
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `locations` (`location_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`po_supplier_invoice_mapper`
+-- Table `po_supplier_invoice_mapper`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`po_supplier_invoice_mapper` (
+CREATE TABLE IF NOT EXISTS `po_supplier_invoice_mapper` (
   `po_supplier_invoice_mapper_id` INT NOT NULL AUTO_INCREMENT,
   `purchase_order_id` INT NOT NULL,
   `total_product_charges` FLOAT NULL DEFAULT NULL,
@@ -149,34 +129,28 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`po_supplier_invoice_mapper` (
   INDEX `purchase_order_id` (`purchase_order_id` ASC) VISIBLE,
   CONSTRAINT `po_supplier_invoice_mapper_ibfk_1`
     FOREIGN KEY (`purchase_order_id`)
-    REFERENCES `stone_design`.`purchase_orders` (`purchase_order_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 107
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `purchase_orders` (`purchase_order_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`account_types`
+-- Table `account_types`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`account_types` (
+CREATE TABLE IF NOT EXISTS `account_types` (
   `account_types_id` INT NOT NULL AUTO_INCREMENT,
   `account_type` ENUM('Assets', 'Liabilities', 'Revenue', 'Expenses', 'Equity Including Portion Attributable to Noncontrolling Interest', 'Other (Non-Operating) Income and Expenses', 'Intercompany and Related Party Accounts') NOT NULL,
   `status` ENUM('ACTIVE', 'INACTIVE') NULL DEFAULT 'ACTIVE',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` DATETIME NULL DEFAULT NULL,
-  PRIMARY KEY (`account_types_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 8
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`account_types_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sub_account_types`
+-- Table `sub_account_types`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sub_account_types` (
+CREATE TABLE IF NOT EXISTS `sub_account_types` (
   `sub_account_types_id` INT NOT NULL AUTO_INCREMENT,
   `account_types_id` INT NULL DEFAULT NULL,
   `sub_account_type` ENUM('Cash and Financial Assets', 'Receivables and Contracts', 'Inventory', 'Accruals and Additional Assets', 'Property, Plant and Equipment', 'Intangible Assets (Excluding Goodwill)', 'Goodwill', 'Payables', 'Accruals, Deferrals and Other Liabilities', 'Financial Labilities', 'Commitments and Contingencies', 'Equity, Attributable to Parent', 'Retained Earnings (Accumulated Deficit)', 'Accumulated Other Comprehensive Income (Loss)', 'Other Equity Items', 'Equity, Attributable to Noncontrolling Interest', 'Recognized Point Of Time', 'Recognized Over Time', 'Adjustments', 'Expenses Classified By Nature', 'Expenses Classified By Function', 'Other Revenue and Expenses', 'Gains and Losses', 'Taxes (Other Than Income and Payroll) and Fees', 'Income Tax Expense (Benefit)', 'Intercompany and Related Party Assets', 'Intercompany and Related Party Liabilities', 'Intercompany and Related Party Income and Expense') NOT NULL,
@@ -188,19 +162,16 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sub_account_types` (
   INDEX `account_types_id` (`account_types_id` ASC) VISIBLE,
   CONSTRAINT `sub_account_types_ibfk_1`
     FOREIGN KEY (`account_types_id`)
-    REFERENCES `stone_design`.`account_types` (`account_types_id`)
+    REFERENCES `account_types` (`account_types_id`)
     ON DELETE SET NULL
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 57
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    ON UPDATE CASCADE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`customers`
+-- Table `customers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`customers` (
+CREATE TABLE IF NOT EXISTS `customers` (
   `customer_id` INT NOT NULL AUTO_INCREMENT,
   `customer_name` VARCHAR(255) NOT NULL,
   `contact_name` VARCHAR(255) NULL DEFAULT NULL,
@@ -245,17 +216,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`customers` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` DATETIME NULL DEFAULT NULL,
   `status` ENUM('ACTIVE', 'INACTIVE') NULL DEFAULT 'ACTIVE',
-  PRIMARY KEY (`customer_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 5
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`customer_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`accounts`
+-- Table `accounts`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`accounts` (
+CREATE TABLE IF NOT EXISTS `accounts` (
   `accounts_id` INT NOT NULL AUTO_INCREMENT,
   `sub_account_types_id` INT NULL DEFAULT NULL,
   `account_types_id` INT NULL DEFAULT NULL,
@@ -276,25 +244,22 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`accounts` (
   INDEX `fk_customer_id` (`customer_id` ASC) VISIBLE,
   CONSTRAINT `accounts_ibfk_1`
     FOREIGN KEY (`sub_account_types_id`)
-    REFERENCES `stone_design`.`sub_account_types` (`sub_account_types_id`)
+    REFERENCES `sub_account_types` (`sub_account_types_id`)
     ON DELETE SET NULL
     ON UPDATE CASCADE,
   CONSTRAINT `accounts_ibfk_2`
     FOREIGN KEY (`account_types_id`)
-    REFERENCES `stone_design`.`account_types` (`account_types_id`),
+    REFERENCES `account_types` (`account_types_id`),
   CONSTRAINT `fk_customer_id`
     FOREIGN KEY (`customer_id`)
-    REFERENCES `stone_design`.`customers` (`customer_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 105
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `customers` (`customer_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`suppliers`
+-- Table `suppliers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`suppliers` (
+CREATE TABLE IF NOT EXISTS `suppliers` (
   `supplier_id` INT NOT NULL AUTO_INCREMENT,
   `supplier_name` VARCHAR(255) NOT NULL,
   `code` VARCHAR(255) NULL DEFAULT NULL,
@@ -385,17 +350,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`suppliers` (
   UNIQUE INDEX `supplier_name_47` (`supplier_name` ASC) VISIBLE,
   UNIQUE INDEX `supplier_name_48` (`supplier_name` ASC) VISIBLE,
   UNIQUE INDEX `supplier_name_49` (`supplier_name` ASC) VISIBLE,
-  UNIQUE INDEX `supplier_name_50` (`supplier_name` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 13
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `supplier_name_50` (`supplier_name` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_orders`
+-- Table `sales_orders`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_orders` (
+CREATE TABLE IF NOT EXISTS `sales_orders` (
   `sales_orders_id` INT NOT NULL AUTO_INCREMENT,
   `customer_id` INT NOT NULL,
   `so` INT NOT NULL,
@@ -421,17 +383,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_orders` (
   INDEX `customer_id` (`customer_id` ASC) VISIBLE,
   CONSTRAINT `sales_orders_ibfk_1`
     FOREIGN KEY (`customer_id`)
-    REFERENCES `stone_design`.`customers` (`customer_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 97
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `customers` (`customer_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`so_loading_order`
+-- Table `so_loading_order`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`so_loading_order` (
+CREATE TABLE IF NOT EXISTS `so_loading_order` (
   `so_loading_order_id` INT NOT NULL AUTO_INCREMENT,
   `sales_orders_id` INT NOT NULL,
   `sub_total` FLOAT NULL DEFAULT NULL,
@@ -446,17 +405,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`so_loading_order` (
   INDEX `sales_orders_id` (`sales_orders_id` ASC) VISIBLE,
   CONSTRAINT `so_loading_order_ibfk_1`
     FOREIGN KEY (`sales_orders_id`)
-    REFERENCES `stone_design`.`sales_orders` (`sales_orders_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 205
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `sales_orders` (`sales_orders_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`account_transaction`
+-- Table `account_transaction`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`account_transaction` (
+CREATE TABLE IF NOT EXISTS `account_transaction` (
   `account_transaction_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_mapper_id` INT NULL DEFAULT NULL,
   `purchase_order_id` INT NULL DEFAULT NULL,
@@ -499,35 +455,32 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`account_transaction` (
   INDEX `customer_id` (`customer_id` ASC) VISIBLE,
   CONSTRAINT `account_transaction_ibfk_1`
     FOREIGN KEY (`po_supplier_invoice_mapper_id`)
-    REFERENCES `stone_design`.`po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`),
+    REFERENCES `po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`),
   CONSTRAINT `account_transaction_ibfk_2`
     FOREIGN KEY (`purchase_order_id`)
-    REFERENCES `stone_design`.`purchase_orders` (`purchase_order_id`),
+    REFERENCES `purchase_orders` (`purchase_order_id`),
   CONSTRAINT `account_transaction_ibfk_3`
     FOREIGN KEY (`accounts_id`)
-    REFERENCES `stone_design`.`accounts` (`accounts_id`),
+    REFERENCES `accounts` (`accounts_id`),
   CONSTRAINT `account_transaction_ibfk_4`
     FOREIGN KEY (`supplier_id`)
-    REFERENCES `stone_design`.`suppliers` (`supplier_id`),
+    REFERENCES `suppliers` (`supplier_id`),
   CONSTRAINT `account_transaction_ibfk_5`
     FOREIGN KEY (`so_loading_order_id`)
-    REFERENCES `stone_design`.`so_loading_order` (`so_loading_order_id`),
+    REFERENCES `so_loading_order` (`so_loading_order_id`),
   CONSTRAINT `account_transaction_ibfk_6`
     FOREIGN KEY (`so`)
-    REFERENCES `stone_design`.`sales_orders` (`so`),
+    REFERENCES `sales_orders` (`so`),
   CONSTRAINT `account_transaction_ibfk_7`
     FOREIGN KEY (`customer_id`)
-    REFERENCES `stone_design`.`customers` (`customer_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 84
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `customers` (`customer_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`container`
+-- Table `container`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`container` (
+CREATE TABLE IF NOT EXISTS `container` (
   `container_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_mapper_id` INT NOT NULL,
   `container_number` FLOAT NOT NULL,
@@ -542,16 +495,13 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`container` (
   INDEX `po_supplier_invoice_mapper_id` (`po_supplier_invoice_mapper_id` ASC) VISIBLE,
   CONSTRAINT `container_ibfk_1`
     FOREIGN KEY (`po_supplier_invoice_mapper_id`)
-    REFERENCES `stone_design`.`po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`));
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`products`
+-- Table `products`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`products` (
+CREATE TABLE IF NOT EXISTS `products` (
   `product_id` INT NOT NULL AUTO_INCREMENT,
   `product_name` VARCHAR(255) NOT NULL,
   `type` ENUM('Slab', 'Pavers', 'Bench', 'Table', 'Sink', 'Mirror') NOT NULL,
@@ -622,17 +572,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`products` (
   UNIQUE INDEX `product_name_26` (`product_name` ASC) VISIBLE,
   UNIQUE INDEX `product_name_27` (`product_name` ASC) VISIBLE,
   UNIQUE INDEX `product_name_28` (`product_name` ASC) VISIBLE,
-  UNIQUE INDEX `product_name_29` (`product_name` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 24
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `product_name_29` (`product_name` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`product_inventory`
+-- Table `product_inventory`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`product_inventory` (
+CREATE TABLE IF NOT EXISTS `product_inventory` (
   `product_inventory_id` INT NOT NULL AUTO_INCREMENT,
   `product_id` INT NOT NULL,
   `slab_in_stock` FLOAT NULL DEFAULT NULL,
@@ -647,17 +594,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`product_inventory` (
   INDEX `product_id` (`product_id` ASC) VISIBLE,
   CONSTRAINT `product_inventory_ibfk_1`
     FOREIGN KEY (`product_id`)
-    REFERENCES `stone_design`.`products` (`product_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 17
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `products` (`product_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`purchase_order_products`
+-- Table `purchase_order_products`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_order_products` (
+CREATE TABLE IF NOT EXISTS `purchase_order_products` (
   `purchase_order_product_id` INT NOT NULL AUTO_INCREMENT,
   `purchase_order_id` INT NOT NULL,
   `product_id` INT NOT NULL,
@@ -670,20 +614,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_order_products` (
   INDEX `product_id` (`product_id` ASC) VISIBLE,
   CONSTRAINT `purchase_order_products_ibfk_1`
     FOREIGN KEY (`purchase_order_id`)
-    REFERENCES `stone_design`.`purchase_orders` (`purchase_order_id`),
+    REFERENCES `purchase_orders` (`purchase_order_id`),
   CONSTRAINT `purchase_order_products_ibfk_2`
     FOREIGN KEY (`product_id`)
-    REFERENCES `stone_design`.`products` (`product_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 98
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `products` (`product_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`po_supplier_invoices`
+-- Table `po_supplier_invoices`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`po_supplier_invoices` (
+CREATE TABLE IF NOT EXISTS `po_supplier_invoices` (
   `po_supplier_invoice_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_mapper_id` INT NOT NULL,
   `purchase_order_product_id` INT NOT NULL,
@@ -705,20 +646,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`po_supplier_invoices` (
   INDEX `purchase_order_product_id` (`purchase_order_product_id` ASC) VISIBLE,
   CONSTRAINT `po_supplier_invoices_ibfk_1`
     FOREIGN KEY (`po_supplier_invoice_mapper_id`)
-    REFERENCES `stone_design`.`po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`),
+    REFERENCES `po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`),
   CONSTRAINT `po_supplier_invoices_ibfk_2`
     FOREIGN KEY (`purchase_order_product_id`)
-    REFERENCES `stone_design`.`purchase_order_products` (`purchase_order_product_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 85
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `purchase_order_products` (`purchase_order_product_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`inventory_invoice_mapper`
+-- Table `inventory_invoice_mapper`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`inventory_invoice_mapper` (
+CREATE TABLE IF NOT EXISTS `inventory_invoice_mapper` (
   `inventory_invoice_mapper_id` INT NOT NULL AUTO_INCREMENT,
   `product_inventory_id` INT NULL DEFAULT NULL,
   `po_supplier_invoice_id` INT NULL DEFAULT NULL,
@@ -730,40 +668,34 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`inventory_invoice_mapper` (
   INDEX `po_supplier_invoice_id` (`po_supplier_invoice_id` ASC) VISIBLE,
   CONSTRAINT `inventory_invoice_mapper_ibfk_1`
     FOREIGN KEY (`product_inventory_id`)
-    REFERENCES `stone_design`.`product_inventory` (`product_inventory_id`)
+    REFERENCES `product_inventory` (`product_inventory_id`)
     ON DELETE SET NULL
     ON UPDATE CASCADE,
   CONSTRAINT `inventory_invoice_mapper_ibfk_2`
     FOREIGN KEY (`po_supplier_invoice_id`)
-    REFERENCES `stone_design`.`po_supplier_invoices` (`po_supplier_invoice_id`)
+    REFERENCES `po_supplier_invoices` (`po_supplier_invoice_id`)
     ON DELETE SET NULL
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 41
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    ON UPDATE CASCADE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`permissions`
+-- Table `permissions`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`permissions` (
+CREATE TABLE IF NOT EXISTS `permissions` (
   `permission_id` INT NOT NULL AUTO_INCREMENT,
   `permission_name` VARCHAR(255) NOT NULL,
   `description` TEXT NULL DEFAULT NULL,
   `module` VARCHAR(255) NULL DEFAULT NULL,
   PRIMARY KEY (`permission_id`),
-  UNIQUE INDEX `permission_name` (`permission_name` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 29
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `permission_name` (`permission_name` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`po_slab_details`
+-- Table `po_slab_details`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`po_slab_details` (
+CREATE TABLE IF NOT EXISTS `po_slab_details` (
   `po_slab_detail_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_id` INT NOT NULL,
   `po_supplier_invoice_mapper_id` INT NOT NULL,
@@ -789,20 +721,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`po_slab_details` (
   INDEX `po_supplier_invoice_mapper_id` (`po_supplier_invoice_mapper_id` ASC) VISIBLE,
   CONSTRAINT `po_slab_details_ibfk_1`
     FOREIGN KEY (`po_supplier_invoice_id`)
-    REFERENCES `stone_design`.`po_supplier_invoices` (`po_supplier_invoice_id`),
+    REFERENCES `po_supplier_invoices` (`po_supplier_invoice_id`),
   CONSTRAINT `po_slab_details_ibfk_2`
     FOREIGN KEY (`po_supplier_invoice_mapper_id`)
-    REFERENCES `stone_design`.`po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 3803
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`pre_purchase_orders`
+-- Table `pre_purchase_orders`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`pre_purchase_orders` (
+CREATE TABLE IF NOT EXISTS `pre_purchase_orders` (
   `pre_purchase_order_id` INT NOT NULL AUTO_INCREMENT,
   `purchase_order_product_id` INT NOT NULL,
   `description` VARCHAR(255) NULL DEFAULT NULL,
@@ -826,17 +755,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`pre_purchase_orders` (
   INDEX `purchase_order_product_id` (`purchase_order_product_id` ASC) VISIBLE,
   CONSTRAINT `pre_purchase_orders_ibfk_1`
     FOREIGN KEY (`purchase_order_product_id`)
-    REFERENCES `stone_design`.`purchase_order_products` (`purchase_order_product_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 81
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `purchase_order_products` (`purchase_order_product_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`purchase_payment`
+-- Table `purchase_payment`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_payment` (
+CREATE TABLE IF NOT EXISTS `purchase_payment` (
   `purchase_payment_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_mapper_id` INT NULL DEFAULT NULL,
   `supplier_id` INT NOT NULL,
@@ -867,36 +793,33 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`purchase_payment` (
   INDEX `supplier_id` (`supplier_id` ASC) VISIBLE,
   CONSTRAINT `purchase_payment_ibfk_1`
     FOREIGN KEY (`po_supplier_invoice_mapper_id`)
-    REFERENCES `stone_design`.`po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`)
+    REFERENCES `po_supplier_invoice_mapper` (`po_supplier_invoice_mapper_id`)
     ON DELETE SET NULL
     ON UPDATE CASCADE,
   CONSTRAINT `purchase_payment_ibfk_2`
     FOREIGN KEY (`supplier_id`)
-    REFERENCES `stone_design`.`suppliers` (`supplier_id`))
+    REFERENCES `suppliers` (`supplier_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`roles`
+-- Table `roles`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
   `role_id` INT NOT NULL AUTO_INCREMENT,
   `role_name` VARCHAR(255) NOT NULL,
   `role_description` TEXT NULL DEFAULT NULL,
   PRIMARY KEY (`role_id`),
-  UNIQUE INDEX `role_name` (`role_name` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 24
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `role_name` (`role_name` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`role_permissions`
+-- Table `role_permissions`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`role_permissions` (
+CREATE TABLE IF NOT EXISTS `role_permissions` (
   `role_permission_id` INT NOT NULL AUTO_INCREMENT,
   `role_id` INT NULL DEFAULT NULL,
   `permission_id` INT NULL DEFAULT NULL,
@@ -905,20 +828,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`role_permissions` (
   INDEX `permission_id` (`permission_id` ASC) VISIBLE,
   CONSTRAINT `role_permissions_ibfk_1`
     FOREIGN KEY (`role_id`)
-    REFERENCES `stone_design`.`roles` (`role_id`),
+    REFERENCES `roles` (`role_id`),
   CONSTRAINT `role_permissions_ibfk_2`
     FOREIGN KEY (`permission_id`)
-    REFERENCES `stone_design`.`permissions` (`permission_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 4
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `permissions` (`permission_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_account`
+-- Table `sales_account`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_account` (
+CREATE TABLE IF NOT EXISTS `sales_account` (
   `sales_account_id` INT NOT NULL AUTO_INCREMENT,
   `so_loading_order_id` INT NULL DEFAULT NULL,
   `sales_orders_id` INT NULL DEFAULT NULL,
@@ -929,19 +849,19 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_account` (
   INDEX `sales_orders_id` (`sales_orders_id` ASC) VISIBLE,
   CONSTRAINT `sales_account_ibfk_1`
     FOREIGN KEY (`so_loading_order_id`)
-    REFERENCES `stone_design`.`so_loading_order` (`so_loading_order_id`),
+    REFERENCES `so_loading_order` (`so_loading_order_id`),
   CONSTRAINT `sales_account_ibfk_2`
     FOREIGN KEY (`sales_orders_id`)
-    REFERENCES `stone_design`.`sales_orders` (`sales_orders_id`))
+    REFERENCES `sales_orders` (`sales_orders_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_account_transaction`
+-- Table `sales_account_transaction`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_account_transaction` (
+CREATE TABLE IF NOT EXISTS `sales_account_transaction` (
   `sales_account_id` INT NOT NULL AUTO_INCREMENT,
   `so_loading_order_id` INT NOT NULL,
   `so` INT NULL DEFAULT NULL,
@@ -958,23 +878,20 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_account_transaction` (
   INDEX `accounts_id` (`accounts_id` ASC) VISIBLE,
   CONSTRAINT `sales_account_transaction_ibfk_1`
     FOREIGN KEY (`so_loading_order_id`)
-    REFERENCES `stone_design`.`so_loading_order` (`so_loading_order_id`),
+    REFERENCES `so_loading_order` (`so_loading_order_id`),
   CONSTRAINT `sales_account_transaction_ibfk_2`
     FOREIGN KEY (`so`)
-    REFERENCES `stone_design`.`sales_orders` (`so`),
+    REFERENCES `sales_orders` (`so`),
   CONSTRAINT `sales_account_transaction_ibfk_3`
     FOREIGN KEY (`accounts_id`)
-    REFERENCES `stone_design`.`accounts` (`accounts_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 5
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `accounts` (`accounts_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_credit_transactions`
+-- Table `sales_credit_transactions`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_credit_transactions` (
+CREATE TABLE IF NOT EXISTS `sales_credit_transactions` (
   `sales_credit_transaction_id` INT NOT NULL AUTO_INCREMENT,
   `sales_account_id` INT NULL DEFAULT NULL,
   `credit_amount` INT NULL DEFAULT NULL,
@@ -983,16 +900,16 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_credit_transactions` (
   INDEX `sales_account_id` (`sales_account_id` ASC) VISIBLE,
   CONSTRAINT `sales_credit_transactions_ibfk_1`
     FOREIGN KEY (`sales_account_id`)
-    REFERENCES `stone_design`.`sales_account` (`sales_account_id`))
+    REFERENCES `sales_account` (`sales_account_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_orders_inventory`
+-- Table `sales_orders_inventory`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_orders_inventory` (
+CREATE TABLE IF NOT EXISTS `sales_orders_inventory` (
   `sales_orders_inventory_id` INT NOT NULL AUTO_INCREMENT,
   `sales_orders_id` INT NOT NULL,
   `product_inventory_id` INT NOT NULL,
@@ -1013,26 +930,23 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_orders_inventory` (
   INDEX `so_loading_order_id` (`so_loading_order_id` ASC) VISIBLE,
   CONSTRAINT `sales_orders_inventory_ibfk_1`
     FOREIGN KEY (`sales_orders_id`)
-    REFERENCES `stone_design`.`sales_orders` (`sales_orders_id`),
+    REFERENCES `sales_orders` (`sales_orders_id`),
   CONSTRAINT `sales_orders_inventory_ibfk_2`
     FOREIGN KEY (`product_inventory_id`)
-    REFERENCES `stone_design`.`product_inventory` (`product_inventory_id`),
+    REFERENCES `product_inventory` (`product_inventory_id`),
   CONSTRAINT `sales_orders_inventory_ibfk_3`
     FOREIGN KEY (`po_slab_detail_id`)
-    REFERENCES `stone_design`.`po_slab_details` (`po_slab_detail_id`),
+    REFERENCES `po_slab_details` (`po_slab_detail_id`),
   CONSTRAINT `sales_orders_inventory_ibfk_4`
     FOREIGN KEY (`so_loading_order_id`)
-    REFERENCES `stone_design`.`so_loading_order` (`so_loading_order_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 539
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `so_loading_order` (`so_loading_order_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`sales_payment`
+-- Table `sales_payment`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`sales_payment` (
+CREATE TABLE IF NOT EXISTS `sales_payment` (
   `sales_payment_id` INT NOT NULL AUTO_INCREMENT,
   `so_loading_order_id` INT NOT NULL,
   `sales_orders_id` INT NOT NULL,
@@ -1063,20 +977,17 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`sales_payment` (
   INDEX `sales_orders_id` (`sales_orders_id` ASC) VISIBLE,
   CONSTRAINT `sales_payment_ibfk_1`
     FOREIGN KEY (`so_loading_order_id`)
-    REFERENCES `stone_design`.`so_loading_order` (`so_loading_order_id`),
+    REFERENCES `so_loading_order` (`so_loading_order_id`),
   CONSTRAINT `sales_payment_ibfk_2`
     FOREIGN KEY (`sales_orders_id`)
-    REFERENCES `stone_design`.`sales_orders` (`sales_orders_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 7
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `sales_orders` (`sales_orders_id`));
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`settings`
+-- Table `settings`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`settings` (
+CREATE TABLE IF NOT EXISTS `settings` (
   `setting_id` INT NOT NULL AUTO_INCREMENT,
   `setting_key` VARCHAR(255) NOT NULL,
   `setting_value` JSON NOT NULL,
@@ -1103,17 +1014,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`settings` (
   UNIQUE INDEX `setting_key_17` (`setting_key` ASC) VISIBLE,
   UNIQUE INDEX `setting_key_18` (`setting_key` ASC) VISIBLE,
   UNIQUE INDEX `setting_key_19` (`setting_key` ASC) VISIBLE,
-  UNIQUE INDEX `setting_key_20` (`setting_key` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 26
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `setting_key_20` (`setting_key` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`users`
+-- Table `users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(255) NOT NULL,
   `userid` VARCHAR(255) NOT NULL,
@@ -1124,17 +1032,14 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`users` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `userid` (`userid` ASC) VISIBLE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 5
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+  UNIQUE INDEX `userid` (`userid` ASC) VISIBLE);
+
 
 
 -- -----------------------------------------------------
--- Table `stone_design`.`user_roles`
+-- Table `user_roles`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`user_roles` (
+CREATE TABLE IF NOT EXISTS `user_roles` (
   `user_role_id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NULL DEFAULT NULL,
   `role_id` INT NULL DEFAULT NULL,
@@ -1143,14 +1048,11 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`user_roles` (
   INDEX `role_id` (`role_id` ASC) VISIBLE,
   CONSTRAINT `user_roles_ibfk_1`
     FOREIGN KEY (`user_id`)
-    REFERENCES `stone_design`.`users` (`id`),
+    REFERENCES `users` (`id`),
   CONSTRAINT `user_roles_ibfk_2`
     FOREIGN KEY (`role_id`)
-    REFERENCES `stone_design`.`roles` (`role_id`))
-ENGINE = InnoDB
-AUTO_INCREMENT = 25
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+    REFERENCES `roles` (`role_id`));
+
 
 USE `stone_design` ;
 
