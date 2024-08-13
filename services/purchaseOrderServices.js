@@ -136,27 +136,31 @@ export async function addSlabDetails(info) {
 
         const siplNumberMatch = siplNumber.match(/-\s*(\d+)/);
         const siplNumberAfterHyphen = siplNumberMatch ? parseInt(siplNumberMatch[1], 10) : null;
+
         let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId)
-        let serialCounter = 1;
+        let serialCounter = 0;
+
+    
         if (latestSerialNumber) {
-            const SerialNumberParts = latestSerialNumber.dataValues.serialNumber
-            const splitLatestNumber = SerialNumberParts.split('-');
-            serialCounter = parseInt(splitLatestNumber[1]); // Increment the counter
+            const serialNumberParts = latestSerialNumber.dataValues.serialNumber.split('-');
+            const lastPart = serialNumberParts[serialNumberParts.length - 1];
+            serialCounter = parseInt(lastPart, 10);
         }
 
-        for (let i = 1; i <= slabCounter; i++) {
+        for (let i = 0; i <slabCounter; i++) {
 
             let dynamicBlock = block;
             let dynamicLot = lot;
             let dynamicSlab = slab;
 
             // If flags is true, Increase the value
-            if (isBlockIncreament) dynamicBlock += i - 1;
-            if (iisLotIncreament) dynamicLot += i - 1;
-            if (isSlabIncreament) dynamicSlab += i - 1;
+            if (isBlockIncreament) dynamicBlock += i;
+            if (iisLotIncreament) dynamicLot += i;
+            if (isSlabIncreament) dynamicSlab += i;
 
             // Generate a dynamic po convert to serial Number
-            const dynamicPo = serialCounter ? `${po}- ${siplNumberAfterHyphen}-${serialCounter + i}` : `${po}-${i}`;
+            // const dynamicPo = serialCounter ? `${po}- ${siplNumberAfterHyphen}-${serialCounter + i}` : `${po}-${i}`;
+            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${serialCounter + i + 1}`;
             console.log(dynamicPo, 'dynamicPO');
 
             // Create a new slab
