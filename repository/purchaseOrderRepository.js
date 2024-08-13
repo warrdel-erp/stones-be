@@ -87,7 +87,7 @@ export async function getPrePurchaseOrder(data) {
     throw error;
   }
 }
-getPrePurchaseOrder();
+
 
 export async function singlePoDetails(poNumber) {
   try {
@@ -289,7 +289,7 @@ export async function updateSlabDetails(data) {
   try {
     const result = await model.poSlabDetails.update(data, {
       where: {
-        poSlabDetailId:data.poSlabDetailId
+        poSlabDetailId: data.poSlabDetailId
       },
     });
     return result;
@@ -422,11 +422,11 @@ export async function purchaseAccountTransaction(data) {
 export async function getCOATransactionDetails(queryParams = {}) {
   try {
     const result = await model.accountsModel.findAll({
-      attributes: ['accountName', 'accountsId', 'accountBalance','coaCode'],
+      attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
       include: [
         {
           model: model.accountTransactionModel,
-          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod','createdAt'],
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
           where: {
             ...(queryParams.customerId && { customerId: queryParams.customerId }),
             ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),

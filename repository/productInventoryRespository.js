@@ -183,6 +183,9 @@ export async function getInventoryListBasedOnSipl() {
                 {
                   model: model.poSlabDetails,
                   as: "slabDetails",
+                  where: {
+                    status: 'ACTIVE'
+                  },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                 }, 
                 {
@@ -199,12 +202,12 @@ export async function getInventoryListBasedOnSipl() {
         {
           model: model.productModel,
           as: "salesProductDetails",
-          attributes: ["productName", "type", "baseColor", "origin", "kind"]
+          attributes: ["productName", "type", "baseColor", "origin", "kind","category","groupsAll"]
         }
       ],
     });
-    console.log(JSON.stringify(result), 'invet');
-    console.log(`Fetched getInventoryList ${result.length} records`);
+    // console.log(JSON.stringify(result), 'invet');
+    // console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
     } catch (error) {
     console.error("Error in getInventoryList:", error);

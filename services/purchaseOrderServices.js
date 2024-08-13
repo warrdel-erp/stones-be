@@ -3,6 +3,7 @@ import * as purchaseOrderRepository from '../repository/purchaseOrderRepository.
 import * as slabpurchaseOrderRepository from '../repository/supplierInvoiceMapperRepository.js'
 import * as productInventory from '../repository/productInventoryRespository.js'
 import { getAccountIdByAccountName } from './accountsServices.js';
+import { getPrePurchaseProductDetails, updatePrePurchaseProductDetails } from '../repository/prePurchaseRepository.js';
 
 export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
@@ -98,7 +99,18 @@ export async function addSuplierInvoice(data) {
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
         const poSupplierInvoiceMappperId = result.get('poSupplierInvoiceMappperId')
         for (const dataArray of data.productDeatils) {
-            const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId }
+            const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId };
+            const prePurchaseOrderId = supplierData.prePurchaseOrderId;
+
+            //for update the prepurchaseorder product details
+            const prePurchaseProductDetails = await getPrePurchaseProductDetails(prePurchaseOrderId);
+            const requestedQuantity = supplierData.quantity;
+            const savedQuantity = prePurchaseProductDetails.dataValues.quantity;
+            const updatedQuantity = savedQuantity - requestedQuantity;
+            await updatePrePurchaseProductDetails(
+                { quantity: updatedQuantity },
+                { where: { prePurchaseOrderId }, transaction }
+            );
             result = await purchaseOrderRepository.createSupplierInvoice(supplierData, transaction);
             results.push(result);
         }
@@ -397,7 +409,7 @@ export async function getCOATransactionDetails(queryParams) {
 }
 export async function getInventoryListBasedOnSipl() {
     const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
-    console.log({inventoryJsonData: JSON.stringify(inventoryJsonData)});
+    console.log({ inventoryJsonData: JSON.stringify(inventoryJsonData) });
     return inventoryJsonData;
 }
 

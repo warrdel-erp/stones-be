@@ -2,7 +2,7 @@ import * as salesOrderRepository from '../repository/salesOrderRepository.js';
 import moment from 'moment';
 import sequelize from '../database/sequelizeConfig.js';
 import { updateProductInventoryInactive } from '../repository/productInventoryRespository.js';
-import { purchaseAccountTransaction } from '../repository/purchaseOrderRepository.js';
+import { purchaseAccountTransaction, updateSlabDetails } from '../repository/purchaseOrderRepository.js';
 import { getAccountIdByAccountName } from './accountsServices.js';
 
 export async function createOrder(info) {
@@ -159,6 +159,7 @@ export async function getAllSo(search) {
 
 export async function updateStatus(transactionData) {
     console.log('Received transaction data:', JSON.stringify(transactionData));
+
     const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
     try {
@@ -215,14 +216,22 @@ export async function updateStatus(transactionData) {
                     console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
                 }
 
-                // const productInventoryUpdateResult = await updateProductInventoryInactive(data.productInventoryId, { status: 'INACTIVE' }, { transaction });
+                const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
+                for (const item of poSlabDetailIds) {
+                    const data = {
+                        poSlabDetailId: item,
+                        status: 'INACTIVE'
+                    };
+                    await updateSlabDetails(data, { transaction });
+                }
+                
                 console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
 
                 await transaction.commit();
                 return {
                     success: true,
                     salesOrderUpdateResult: true,
-                    productInventoryUpdateResult
+                    // updateSlabDetailsStatus
                 };
             } else {
                 await transaction.commit();
@@ -253,8 +262,8 @@ export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
 };
 
 export async function createSalesAccountTransaction(data) {
-    console.log(data,'data');
-    
+    console.log(data, 'data');
+
     const transaction = await sequelize.transaction();
     const accNames = { debitAccountName: 'Goods', creditAccountName: 'Accounts, Notes and Loans Receivable' }
     try {

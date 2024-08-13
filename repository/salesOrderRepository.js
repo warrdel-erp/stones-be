@@ -69,7 +69,7 @@ export async function getSingleSalesOrder(soNumber) {
             {
               model: model.poSlabDetails,
               as: 'slabDetails',
-              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] }
             },
             {
               model: model.productInventoryModel,

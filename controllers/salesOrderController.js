@@ -112,7 +112,7 @@ export const updateStatus = async (req, res) => {
         } else if (!soLoadingOrder) {
             res.status(400).send("so Loading Order Id Not exist");
         } else {
-            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId});
+            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId,soLoadingOrder});
             res.status(200).send(result);
         }
     } catch (error) {
