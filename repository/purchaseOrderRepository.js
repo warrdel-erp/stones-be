@@ -482,3 +482,21 @@ export async function getCOATransactionDetails(queryParams = {}) {
     throw new Error('Failed to fetch transaction data');
   }
 }
+
+
+  //delete prepurchase orderproduct
+
+  
+  export async function deletePrePurchaeProduct(purchaseOrderProductId) {
+    try {
+      const result = await model.purchaseProductModel.destroy({
+        where: {
+          purchaseOrderProductId: purchaseOrderProductId
+        }
+      });
+      return result;
+    } catch (error) {
+      console.error("Error in fetching pre-purchase product details:", error);
+      throw error;
+    }
+  }

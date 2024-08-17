@@ -79,3 +79,8 @@ export async function getAccountIdByAccountName(data) {
         throw error;
     }
 }
+
+//get coa account details
+export async function getCOATransactionDetails(queryParams) {
+    return  await accountsRepository.getCOATransactionDetails(queryParams);
+}

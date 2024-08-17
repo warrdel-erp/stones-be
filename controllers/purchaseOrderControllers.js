@@ -259,7 +259,7 @@ export const purchaseAccountTransaction = async (req, res) => {
 //get coa transaction details
 export const getCOATransactionDetails = async (req, res) => {
     try {
-        const { soLoadingOrderId, poSupplierId,poSupplierInvoiceMapperId, customerId, accountsId, supplierId,so} = req.query;
+        const { soLoadingOrderId, poSupplierId, poSupplierInvoiceMapperId, customerId, accountsId, supplierId, so } = req.query;
         const queryParams = {
             soLoadingOrderId,
             poSupplierId,
@@ -300,14 +300,48 @@ export const getInventoryListBasedOnSipl = async (req, res) => {
 };
 
 
-export const updateSlabDetails = async (req, res) => {  
+export const updateSlabDetails = async (req, res) => {
     try {
         const data = req.body;
-        console.log(data,'updateSlabDetails');
+        console.log(data, 'updateSlabDetails');
         const result = await purchaseOrderService.updateSlabDetails(data);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Slab Details: ", error);
         res.status(500).send("Internal Server Error");
+    }
+};
+
+//delete prepurchase order products
+export const deletePrePurchaeProduct = async (req, res) => {
+    try {
+        const { purchaseOrderProductId } = req.params;
+        console.log(purchaseOrderProductId, 'deletePrePurchaseProduct');
+        const result = await purchaseOrderService.deletePrePurchaeProducts(purchaseOrderProductId);
+        res.sendStatus(200).send(result);
+    } catch (error) {
+        console.error("Error in add Slab Details: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+//update prepurchase products 
+
+
+export const updatePrePurchaseProduct = async (req, res) => {
+    try {
+        const data = req.body;
+        const result = await purchaseOrderService.updatePrePurchaseProduct(data);
+        res.status(200).send({
+            success: true,
+            message: "Pre purchaseProduct updated successfully.",
+            data: result
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
     }
 };

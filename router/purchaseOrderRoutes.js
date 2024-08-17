@@ -8,8 +8,12 @@ import { createOrder,getPoNumber,updateOrder,addPurchaseOrderProduct,singlePoDet
     getCOATransactionDetails,
     getInventoryListBasedOnSipl,
     updateSlabDetails,
+    deletePrePurchaeProduct,
+    updatePrePurchaseProduct,
     
 } from "../controllers/purchaseOrderControllers.js"
+
+router.patch('/prePurchaseProduct',updatePrePurchaseProduct)
 
 router.patch('/slabDetails',updateSlabDetails);
 
@@ -48,5 +52,7 @@ router.post('/purchaseAccountTransaction',purchaseAccountTransaction)
 router.get('/transactionDetailsCOA',getCOATransactionDetails);
 
 router.get('/inventoryDetailsBasedOnSipl',getInventoryListBasedOnSipl);
+
+router.delete('/prePurcahseProduct/:purchaseOrderProductId',deletePrePurchaeProduct);
 
 export default router

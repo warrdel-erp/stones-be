@@ -140,14 +140,14 @@ export async function addSlabDetails(info) {
         let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId)
         let serialCounter = 0;
 
-    
+
         if (latestSerialNumber) {
             const serialNumberParts = latestSerialNumber.dataValues.serialNumber.split('-');
             const lastPart = serialNumberParts[serialNumberParts.length - 1];
             serialCounter = parseInt(lastPart, 10);
         }
 
-        for (let i = 0; i <slabCounter; i++) {
+        for (let i = 0; i < slabCounter; i++) {
 
             let dynamicBlock = block;
             let dynamicLot = lot;
@@ -411,12 +411,13 @@ export async function getCOATransactionDetails(queryParams) {
 
     return processedAccounts;
 }
+
+
 export async function getInventoryListBasedOnSipl() {
     const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
     console.log({ inventoryJsonData: JSON.stringify(inventoryJsonData) });
     return inventoryJsonData;
 }
-
 
 
 export async function updateSlabDetails(data) {
@@ -427,3 +428,15 @@ export async function updateSlabDetails(data) {
     );
     return results;
 }
+
+
+//delete prepurchase order product
+
+export async function deletePrePurchaeProducts(purchaseOrderProductId) {
+    return await purchaseOrderRepository.deletePrePurchaeProduct(purchaseOrderProductId);
+};
+
+
+export async function updatePrePurchaseProduct(data) {
+    return await updatePrePurchaseProductDetails(data);
+};
