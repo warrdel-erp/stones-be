@@ -133,7 +133,11 @@ purchaseModel.hasMany(accountTransactionModel,{foreignKey:'purchase_order_id',as
 accountTransactionModel.belongsTo(soLoadingOrderModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrders'});
 soLoadingOrderModel.hasMany(accountTransactionModel,{foreignKey:'so_loading_order_id',as:'soLoadingOrders'});
 
+accountTransactionModel.belongsTo(supplierModel,{foreignKey:'supplier_id',as:'supplierTransactions'});
+supplierModel.hasMany(accountTransactionModel,{foreignKey:'supplier_id',as:'supplierTransactions'});
 
+accountTransactionModel.belongsTo(customerModel,{foreignKey:'customer_id',as:'customerTransactions'});
+customerModel.hasMany(accountTransactionModel,{foreignKey:'customer_id',as:'customerTransactions'});
 //changes for inventory
 
 inventoryInvoiceMapper.belongsTo(productInventoryModel,{foreignKey:'product_inventory_id'})

@@ -1,6 +1,6 @@
 import {Router} from  'express';
 const router =  Router();
-import { addAccount, getAllAccounts,getAllAccountsTypeAndSubTypes,updateAccount,deleteAccount, getCashFinancialAssestOptions, getGroupedAccountList, getAccountIdByAccountName, getCOATransactionDetails} from '../controllers/accountsController.js';
+import { addAccount, getAllAccounts,getAllAccountsTypeAndSubTypes,updateAccount,deleteAccount, getCashFinancialAssestOptions, getGroupedAccountList, getAccountIdByAccountName, getCOATransactionDetails, getTransactionSupplierCustomers} from '../controllers/accountsController.js';
 
 router.post('/', addAccount);
 
@@ -18,6 +18,8 @@ router.get('/groupedListAccounts',getGroupedAccountList);
 
 router.get('/transactionDetailsCOA',getCOATransactionDetails);
 
-router.get('/accountIdsByName',getAccountIdByAccountName)
+router.get('/accountIdsByName',getAccountIdByAccountName);
+
+router.get('/transactionHistory/:type', getTransactionSupplierCustomers);
 
 export default router;

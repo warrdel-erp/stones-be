@@ -146,3 +146,16 @@ export const getCOATransactionDetails = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 }
+
+
+//get the transaction history based on the suppliers or customers
+export const getTransactionSupplierCustomers = async (req, res) => {
+    try {
+       const typeOfData= req.params
+        const result = await accountsService.getTransactionSupplierCustomer(typeOfData);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting all grouped list accounts type :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

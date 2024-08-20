@@ -283,3 +283,81 @@ export async function getCOATransactionDetails(queryParams = {}) {
         throw new Error('Failed to fetch transaction data');
     }
 }
+
+//get transaction history based on supplier 
+
+export async function getPurchaseTransactions() {
+    try {
+        const result = model.supplierModel.findAll({
+            attributes: ['supplierId', 'supplierName'],
+            include: [
+                {
+                    model: model.accountTransactionModel,
+                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                    as: 'supplierTransactions',
+                    required: true,
+                    include: [
+                        {
+                            model: model.accountsModel
+                        },
+                        {
+                            model: model.poSupplierInvoiceMapperModel,
+                            attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+                            as: 'poSupplierInvoice'
+                        },
+                        {
+                            model: model.purchaseModel,
+                            attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+                            as: 'purchaseOrder'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching purchase transactions:", error);
+        throw new Error('Failed to fetch purchase transactions');
+    }
+}
+
+
+//get transaction history based on customers
+
+export async function getSalesTransactions() {
+    try {
+        const result = model.customerModel.findAll({
+            attributes: ['customerId', 'customerName'],
+            include: [
+                {
+                    model: model.accountTransactionModel,
+                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                    as: 'customerTransactions',
+                    required: true,
+                    include: [
+                        {
+                            model: model.accountsModel
+                        },
+                        {
+                            model: model.soLoadingOrderModel,
+                            as: 'soLoadingOrders',
+                            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+                            include: [
+                                {
+                                    model: model.salesOrderModel,
+                                    attributes: ['salesOrdersId', 'customerId', 'location'],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching sales transactions:", error);
+        throw new Error('Failed to fetch sales transactions');
+    }
+}
