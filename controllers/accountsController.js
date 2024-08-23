@@ -151,8 +151,8 @@ export const getCOATransactionDetails = async (req, res) => {
 //get the transaction history based on the suppliers or customers
 export const getTransactionSupplierCustomers = async (req, res) => {
     try {
-       const typeOfData= req.params
-        const result = await accountsService.getTransactionSupplierCustomer(typeOfData);
+        const typeOfData = req.params
+        const result = await accountsService.getTransactionSupplierCustomer(typeOfData, req.query);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all grouped list accounts type :", error);

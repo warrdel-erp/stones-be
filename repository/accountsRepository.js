@@ -286,14 +286,19 @@ export async function getCOATransactionDetails(queryParams = {}) {
 
 //get transaction history based on supplier 
 
-export async function getPurchaseTransactions() {
+export async function getPurchaseTransactions(supplierId, limit, offset) {
     try {
         const result = model.supplierModel.findAll({
             attributes: ['supplierId', 'supplierName'],
+            where: {
+                ...(supplierId && { supplierId })
+            },
+            limit: limit,
+            offset: offset,
             include: [
                 {
                     model: model.accountTransactionModel,
-                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount','transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
                     as: 'supplierTransactions',
                     required: true,
                     include: [
@@ -325,14 +330,24 @@ export async function getPurchaseTransactions() {
 
 //get transaction history based on customers
 
-export async function getSalesTransactions() {
+export async function getSalesTransactions(customerId, limit, offset) {
     try {
-        const result = model.customerModel.findAll({
+        const result = await model.customerModel.findAll({
             attributes: ['customerId', 'customerName'],
+            where: {
+                ...(customerId && { customerId })
+            },
+            limit: limit,
+            offset: offset,
             include: [
                 {
                     model: model.accountTransactionModel,
-                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                    attributes: [
+                        'accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId',
+                        'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType',
+                        'transactionAmountDate', 'transactionAmountType', 'accountsId',
+                        'entryType', 'paymentMethod', 'createdAt'
+                    ],
                     as: 'customerTransactions',
                     required: true,
                     include: [
@@ -352,7 +367,7 @@ export async function getSalesTransactions() {
                         }
                     ]
                 }
-            ]
+            ],
         });
 
         return result;
@@ -361,3 +376,4 @@ export async function getSalesTransactions() {
         throw new Error('Failed to fetch sales transactions');
     }
 }
+

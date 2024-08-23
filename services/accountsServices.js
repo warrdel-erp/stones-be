@@ -88,18 +88,21 @@ export async function getCOATransactionDetails(queryParams) {
 
 //get transaction history based on supplier and customers
 
-export async function getTransactionSupplierCustomer(typeOfData) {
-    let dataApi
-    if (typeOfData.type === 'sales') {
-        dataApi = await accountsRepository.getSalesTransactions();
-    }
-    else if (typeOfData.type == 'purchase') {
-        dataApi = await accountsRepository.getPurchaseTransactions();
-    }
+export async function getTransactionSupplierCustomer(typeOfData, queryParams) {
+    const { limit = 1, offset = 0, customerId, supplierId } = queryParams;
+    const dataApi = await (typeOfData.type === 'sales'
+        ? accountsRepository.getSalesTransactions(customerId, limit, offset)
+        : typeOfData.type === 'purchase'
+            ? accountsRepository.getPurchaseTransactions(supplierId, limit, offset)
+            : Promise.resolve(null));
+
+
 
     let initialBalance = 0;
     let totalDebit = 0;
     let totalCredit = 0;
+    let totalDebitBalance = 0;
+    let totalCreditBalance = 0;
 
     const getPrefixFromAccountName = (accountName) => {
         return accountName
@@ -114,8 +117,16 @@ export async function getTransactionSupplierCustomer(typeOfData) {
         return transactions.map(transaction => {
             const debitAmount = transaction.entryType === 'dr' ? transaction.transactionAmount : 0;
             const creditAmount = transaction.entryType === 'cr' ? transaction.transactionAmount : 0;
+            const debitBalance = transaction.transactionAmountType === 'debit' ? transaction.transactionAmount : 0;
+            const creditBalance = transaction.transactionAmountType === 'credit' ? transaction.transactionAmount : 0;
             totalDebit += debitAmount;
             totalCredit += creditAmount;
+            totalDebitBalance += debitBalance;
+            totalCreditBalance += creditBalance;
+            console.log(totalDebitBalance,'totalDebitbalance');
+            
+            console.log(totalCreditBalance,'creditbalace');
+            
 
             if (transaction.account.accountBalance === 'Dr') {
                 balance = balance + debitAmount - creditAmount;
@@ -133,6 +144,7 @@ export async function getTransactionSupplierCustomer(typeOfData) {
                 transactionDate: transaction.createdAt,
                 accountsId: transaction.accountsId,
                 entryType: transaction.entryType,
+                transactionAmountType: transaction.transactionAmountType,
                 debitAmount: debitAmount,
                 creditAmount: creditAmount,
                 paymentMethod: transaction.paymentMethod,
@@ -172,8 +184,10 @@ export async function getTransactionSupplierCustomer(typeOfData) {
                 ),
                 totalDebit: totalDebit,
                 totalCredit: totalCredit,
-                transactionData: transactionData,
+                totalBalance: totalDebitBalance - totalCreditBalance,
+                ...(queryParams.supplierId != null || queryParams.customerId != null ? { transactionData: transactionData } : {}),
             };
+
         });
 
     return filteredData;
