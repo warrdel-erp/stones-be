@@ -25,7 +25,7 @@ export async function updateOrder(poNumber, info) {
     return await purchaseOrderRepository.updateOrder(poNumber, info)
 }
 
-export async function addPurchaseOrderProduct(dataArray) {
+export async function addPurchaseOrderProduct(dataArray) { 
     const transaction = await sequelize.transaction();
     try {
         const results = [];

@@ -62,8 +62,8 @@ export const addPurchaseOrderProduct = async (req, res) => {
         const createdBy = user.dataValues.id;
         console.log(createdBy,'createdBY');
         
-        const result = await purchaseOrderService.addPurchaseOrderProduct({...data,createdBy});
-        res.status(200).send(result);
+        const result = await purchaseOrderService.addPurchaseOrderProduct(data,createdBy);
+        res.status(200).send(result); 
     } catch (error) {
         console.error("Error in add Purchase  Order Products: ", error);
         res.status(500).send("Internal Server Error");
