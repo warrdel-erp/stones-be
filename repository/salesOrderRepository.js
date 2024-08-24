@@ -157,15 +157,15 @@ export async function updateSalesOrderInventory(salesOrdersInventoryId, data) {
 
 // get all sales order
 
-export async function getAllSalesOrder(searchText) {
+export async function getAllSalesOrder(data) {
   let result;
   try {
-    if (searchText) {
+    if (data.search) {
       result = await model.salesOrderModel.findAll({
         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         where: {
           so: {
-            [Op.like]: `%${searchText}%`
+            [Op.like]: `%${data.search}%`
           }
         },
         include: [
@@ -174,7 +174,7 @@ export async function getAllSalesOrder(searchText) {
             as: 'customers',
             where: {
               customer_name: {
-                [Op.like]: `%${searchText}%`
+                [Op.like]: `%${data.search}%`
               }
             }
           },
@@ -185,6 +185,14 @@ export async function getAllSalesOrder(searchText) {
       result = await model.salesOrderModel.findAll({
         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         include: [
+          {
+            model: model.clientUserModel,
+            as: 'clientDetails',
+            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+            where: {
+              clientId: data.clientId
+            },
+          },
           {
             model: model.customerModel,
             as: 'customers',

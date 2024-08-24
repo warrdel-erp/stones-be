@@ -4,6 +4,7 @@ import sequelize from '../database/sequelizeConfig.js';
 import { updateProductInventoryInactive } from '../repository/productInventoryRespository.js';
 import { purchaseAccountTransaction, updateSlabDetails } from '../repository/purchaseOrderRepository.js';
 import { getAccountIdByAccountName } from './accountsServices.js';
+import { findUserId } from '../repository/clientUserRepository.js';
 
 export async function createOrder(info) {
     return await salesOrderRepository.createOrder(info)
@@ -147,9 +148,9 @@ export async function loadingOrder(info) {
     }
 };
 
-export async function getAllSo(search) {
+export async function getAllSo(data) {
     try {
-        const salesOrders = await salesOrderRepository.getAllSalesOrder(search);
+        const salesOrders = await salesOrderRepository.getAllSalesOrder(data);
         return salesOrders;
     } catch (error) {
         console.error('Error fetching sales orders:', error);
@@ -224,7 +225,7 @@ export async function updateStatus(transactionData) {
                     };
                     await updateSlabDetails(data, { transaction });
                 }
-                
+
                 console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
 
                 await transaction.commit();

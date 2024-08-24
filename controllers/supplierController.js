@@ -6,7 +6,6 @@ export const addSupplier = async (req,res) => {
         const user = req.user
         const createdBy = user.dataValues.id
         const info = req.body
-
         const result = await supplierService.addSupplier({...info,createdBy});
         res.status(200).send(result);
     } catch (error) {
@@ -19,8 +18,9 @@ export const addSupplier = async (req,res) => {
 export const getAllSupplier = async (req,res) => {
     let {search} = req.query
      search = search || 'all' 
+     const clientId= req.clientId; 
     try {
-        const result = await supplierService.getAllSupplier(search);
+        const result = await supplierService.getAllSupplier({search,clientId});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting suppliers name:", error);

@@ -4,8 +4,9 @@ import * as customerService from '../services/customerServices.js';
 export const addCustomer = async (req, res) => {
     try {
         const info = req.body;
-
-        const result = await customerService.addCustomer(info);
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const result = await customerService.addCustomer({...info,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addCustomer:", error);
@@ -17,8 +18,9 @@ export const addCustomer = async (req, res) => {
 export const getAllCustomers = async (req, res) => {
     let { search } = req.query;
     search = search || 'all';
+    const clientId= req.clientId; 
     try {
-        const result = await customerService.getAllCustomers(search);
+        const result = await customerService.getAllCustomers({search,clientId});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting customers:", error);

@@ -11,27 +11,39 @@ export async function addProduct(data) {
     }
 }
 
-export async function getAllProduct(productName) {
+export async function getAllProduct(data) {
     let result;
     try {
-        const attributes = ['productName', 'type', 'kind', 'productId','alternativeName','category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku'];
-        if (productName !== 'all') {
+        const attributes = ['productName', 'type', 'kind', 'productId', 'alternativeName', 'category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku', 'createdBy'];
+
+        if (data.search !== 'all') {
             result = await model.productModel.findAll({
                 attributes: attributes,
                 where: {
                     product_name: {
-                        [Op.like]: `%${productName}%`
+                        [Op.like]: `%${data.search}%`
                     }
                 },
             });
         } else {
             result = await model.productModel.findAll({
                 attributes: attributes,
+                include: [
+                    {
+                        model: model.clientUserModel,
+                        as: 'clientDetails',
+                        attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                        where: {
+                            clientId: data.clientId
+                        },
+                    }
+                ],
+
             });
         }
         return result;
     } catch (error) {
-        console.error(`Error in getting supplier name${productName}:`, error);
+        console.error(`Error in getting supplier name${data.search}:`, error);
         throw error;
     }
 }
@@ -57,10 +69,10 @@ export async function updateProduct(productName, data) {
                 productName: productName
             }
         });
-     return result; 
+        return result;
     } catch (error) {
         console.error("Error updating product:", error);
-        throw error; 
+        throw error;
     }
 }
 

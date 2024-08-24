@@ -1,11 +1,11 @@
 import * as customerRepository from '../repository/customerRepository.js'
-
+import { findUserId } from '../repository/clientUserRepository.js';
 export async function addCustomer(info){
     return await customerRepository.addCustomer(info);
 }
 
-export async function getAllCustomers(search){
-    return await customerRepository.getAllCustomers(search);
+export async function getAllCustomers(data){
+    return await customerRepository.getAllCustomers(data);
 }
 
 export async function getSingleCustomer(customerName){

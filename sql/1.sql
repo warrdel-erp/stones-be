@@ -679,3 +679,32 @@ DROP COLUMN supplier_id;
 
 
 
+--client table creation
+
+CREATE TABLE clients (
+    client_id INT AUTO_INCREMENT,
+    client_uuid CHAR(36) NOT NULL DEFAULT (UUID()),
+    client_name VARCHAR(255),
+    client_password VARCHAR(255),
+    client_email VARCHAR(255) UNIQUE,
+    client_location VARCHAR(255);
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deletedAt TIMESTAMP NULL,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    createdBy CHAR(36),
+    PRIMARY KEY (client_uuid), 
+    UNIQUE (client_id)
+);
+
+
+--user- client relation table
+CREATE TABLE client_users (
+    client_user_id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT,
+    user_id INT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deletedAt TIMESTAMP NULL,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(client_id),
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);

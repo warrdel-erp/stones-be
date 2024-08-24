@@ -11,27 +11,36 @@ export async function addCustomer(data) {
     }
 }
 
-export async function getAllCustomers(customerName) {
+export async function getAllCustomers(data) {
     let result;
     try {
-        const attributes = ['customerName','customerId','primaryPhoneNumber','country', 'customerType', 'primaryPhoneNumber', 'accEmail', 'address', 'city', 'state', 'zip', 'pSalesPerson', 'priceLevel', 'sAddress','sUnit','sCity','sState','sZip', 'taxExempt', 'salesTax', 'paymentTerms', 'exemptCerti', 'exemptExipry', 'internalNotes', 'deliveryNotes'];
-        if (customerName !== 'all') {
+        const attributes = ['customerName', 'customerId', 'primaryPhoneNumber', 'country', 'customerType', 'primaryPhoneNumber', 'accEmail', 'address', 'city', 'state', 'zip', 'pSalesPerson', 'priceLevel', 'sAddress', 'sUnit', 'sCity', 'sState', 'sZip', 'taxExempt', 'salesTax', 'paymentTerms', 'exemptCerti', 'exemptExipry', 'internalNotes', 'deliveryNotes'];
+        if (data.search !== 'all') {
             result = await model.customerModel.findAll({
                 attributes: attributes,
                 where: {
                     customerName: {
-                        [Op.like]: `%${customerName}%`
+                        [Op.like]: `%${data.search}%`
                     }
                 },
             });
         } else {
             result = await model.customerModel.findAll({
-                attributes: attributes,
+                attributes: attributes, include: [
+                    {
+                        model: model.clientUserModel,
+                        as: 'clientDetails',
+                        attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                        where: {
+                            clientId: data.clientId
+                        },
+                    }
+                ],
             });
         }
         return result;
     } catch (error) {
-        console.error(`Error in getting customer ${customerName}:`, error);
+        console.error(`Error in getting customer ${data.search}:`, error);
         throw error;
     }
 }
@@ -55,13 +64,13 @@ export async function getCustomerID() {
     try {
         const attributes = ['customerId'];
         const result = await model.customerModel.findOne({
-          attributes: attributes,
-          order: [['created_at', 'DESC']],
-          limit: 1,
+            attributes: attributes,
+            order: [['created_at', 'DESC']],
+            limit: 1,
         });
         return result;
-      } catch (error) {
+    } catch (error) {
         console.log("Error getting customerID: ", error);
         throw error;
-      }
+    }
 }

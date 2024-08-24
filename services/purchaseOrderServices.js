@@ -4,7 +4,7 @@ import * as slabpurchaseOrderRepository from '../repository/supplierInvoiceMappe
 import * as productInventory from '../repository/productInventoryRespository.js'
 import { getAccountIdByAccountName } from './accountsServices.js';
 import { getPrePurchaseProductDetails, updatePrePurchaseProductDetails } from '../repository/prePurchaseRepository.js';
-
+import { findUserId } from '../repository/clientUserRepository.js';
 export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
 }
@@ -55,8 +55,8 @@ export async function addPurchaseOrderProduct(dataArray) {
     }
 }
 
-export async function getAllPo(search) {
-    return await purchaseOrderRepository.getAllPurchaseOrder(search)
+export async function getAllPo(data) {
+    return await purchaseOrderRepository.getAllPurchaseOrder(data)
 }
 
 // single po complete details  page

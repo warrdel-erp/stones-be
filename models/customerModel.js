@@ -1,6 +1,6 @@
 import sequelize from "../database/sequelizeConfig.js";
 import { DataTypes } from 'sequelize';
-import {country, customerType, paymentTerms, priceLevel, reasons, wayOfDocsSend} from  '../constant.js';
+import { country, customerType, paymentTerms, priceLevel, reasons, wayOfDocsSend } from '../constant.js';
 
 
 
@@ -19,7 +19,7 @@ export default sequelize.define(
       field: 'customer_name'
     },
     customerType: {
-      type:DataTypes.ENUM(...customerType),
+      type: DataTypes.ENUM(...customerType),
       allowNull: true,
       field: 'customer_type'
     },
@@ -82,7 +82,7 @@ export default sequelize.define(
       type: DataTypes.STRING,
       allowNull: true
     },
-    country:{
+    country: {
       type: DataTypes.ENUM(...country),
       allowNull: true
     },
@@ -111,12 +111,12 @@ export default sequelize.define(
       allowNull: true,
       field: 's_state'
     },
-    sSountry:{
+    sSountry: {
       type: DataTypes.ENUM(...country),
       allowNull: true,
       field: 's_country'
     },
-    
+
     pSalesPerson: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -162,45 +162,45 @@ export default sequelize.define(
       allowNull: true,
       field: 'delivery_notes'
     },
-    poRequired:{
+    poRequired: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       field: 'po_required'
     },
-    applyFinanceCharges:{
+    applyFinanceCharges: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       field: 'apply_finance_charges'
     },
-    preferredDocSend:{
+    preferredDocSend: {
       type: DataTypes.ENUM(...wayOfDocsSend),
       allowNull: true,
       field: 'preferred_way_docs'
     },
-    daysForGrace:{
-      type:DataTypes.STRING,
-      allowNull:true,
-      field:'days_grace'
+    daysForGrace: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'days_grace'
     },
-    daysForHold:{
-      type:DataTypes.STRING,
-      allowNull:true,
-      field:'days_hold'
+    daysForHold: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'days_hold'
     },
-    customerSince:{
-      type:DataTypes.DATE,
-      allowNull:true,
-      field:'customerSince'
+    customerSince: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'customerSince'
     },
-    einNumber:{
-      type:DataTypes.STRING,
-      allowNull:true,
-      field:'ein_number'
+    einNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'ein_number'
     },
-    reason:{
-      type:DataTypes.ENUM(...reasons),
-      allowNull:true,
-      field:'reason'
+    reason: {
+      type: DataTypes.ENUM(...reasons),
+      allowNull: true,
+      field: 'reason'
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -224,6 +224,11 @@ export default sequelize.define(
       allowNull: true,
       defaultValue: 'ACTIVE'
     },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'created_by',
+    }
   },
   {
     tableName: 'customers',

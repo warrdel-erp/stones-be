@@ -1,11 +1,11 @@
 import * as supplierRepository from '../repository/supplierRepository.js'
-
+import { findUserId } from '../repository/clientUserRepository.js';
 export async function addSupplier(info){
     return await supplierRepository.addSupplier(info)
 }
 
-export async function getAllSupplier(search){
-    return await supplierRepository.getAllSupplierName(search)
+export async function getAllSupplier(data){
+    return await supplierRepository.getAllSupplierName(data)
 }
 
 export async function getSingleSupplierDetails(productName){

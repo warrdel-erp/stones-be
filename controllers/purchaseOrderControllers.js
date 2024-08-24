@@ -4,10 +4,10 @@ import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 // 1. create order
 export const createOrder = async (req, res) => {
     try {
-        const info = req.body
-        const { po, poDate } = req.body
-        const user = req.user
-        const createdBy = user.dataValues.id
+        const info = req.body;
+        const { po, poDate } = req.body;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         const poDetails = await findPoNumber(po);
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
@@ -69,8 +69,9 @@ export const addPurchaseOrderProduct = async (req, res) => {
 // 5. get all Purchase Order
 export const getAllOpenPo = async (req, res) => {
     let { search } = req.query
+    const clientId= req.clientId;    
     try {
-        const result = await purchaseOrderService.getAllPo(search);
+        const result = await purchaseOrderService.getAllPo({search,clientId});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  PO :", error);

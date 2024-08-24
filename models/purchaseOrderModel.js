@@ -218,7 +218,7 @@ export default sequelize.define(
         type: DataTypes.DATE,
         allowNull: true,
         field:'deleted_at'
-    },
+    }
 },  
 {
     tableName: 'purchase_orders',

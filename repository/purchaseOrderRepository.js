@@ -194,15 +194,15 @@ export async function getSinglePurchaseOrder(poNumber) {
 
 //get all purchase Order
 
-export async function getAllPurchaseOrder(searchText) {
+export async function getAllPurchaseOrder(data) {
   let result;
   try {
-    if (searchText) {
+    if (data.search) {
       result = await model.purchaseModel.findAll({
         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         where: {
           po: {
-            [Op.like]: `%${searchText}%`
+            [Op.like]: `%${data.search}%`
           }
         },
         include: [
@@ -211,7 +211,7 @@ export async function getAllPurchaseOrder(searchText) {
             as: 'suppliers',
             where: {
               supplier_name: {
-                [Op.like]: `%${searchText}%`
+                [Op.like]: `%${data.search}%`
               }
             }
           },
@@ -220,7 +220,7 @@ export async function getAllPurchaseOrder(searchText) {
             as: 'location',
             where: {
               location: {
-                [Op.like]: `%${searchText}%`
+                [Op.like]: `%${data.search}%`
               }
             }
           },
@@ -231,6 +231,14 @@ export async function getAllPurchaseOrder(searchText) {
       result = await model.purchaseModel.findAll({
         attributes: ['po', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
         include: [
+          {
+            model: model.clientUserModel,
+            as: 'clientDetails',
+            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+            where: {
+                clientId: data.clientId
+            },
+        },
           {
             model: model.supplierModel,
             as: 'suppliers',
@@ -484,19 +492,19 @@ export async function getCOATransactionDetails(queryParams = {}) {
 }
 
 
-  //delete prepurchase orderproduct
+//delete prepurchase orderproduct
 
-  
-  export async function deletePrePurchaeProduct(purchaseOrderProductId) {
-    try {
-      const result = await model.purchaseProductModel.destroy({
-        where: {
-          purchaseOrderProductId: purchaseOrderProductId
-        }
-      });
-      return result;
-    } catch (error) {
-      console.error("Error in fetching pre-purchase product details:", error);
-      throw error;
-    }
+
+export async function deletePrePurchaeProduct(purchaseOrderProductId) {
+  try {
+    const result = await model.purchaseProductModel.destroy({
+      where: {
+        purchaseOrderProductId: purchaseOrderProductId
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in fetching pre-purchase product details:", error);
+    throw error;
   }
+}

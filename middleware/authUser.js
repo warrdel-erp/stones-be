@@ -11,16 +11,16 @@ async function verifyAndExtendToken(token) {
     throw new Error("Invalid token");
   }
 
-  const { email } = decoded;
+  const { email, clientId } = decoded;
   const user = await userRepository.findEmailByEmail(email);
 
   if (!user) {
     throw new Error("Invalid token");
   }
-  
-  const newToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: tokenExpiryTime });
 
-  return { user, newToken };
+  const newToken = jwt.sign({ email: user.email, clientId }, secretKey, { expiresIn: tokenExpiryTime });
+
+  return { user, clientId, newToken };
 }
 
 export async function userAuth(req, res, next) {
@@ -32,8 +32,11 @@ export async function userAuth(req, res, next) {
     }
 
     const token = authHeader.split(" ")[1];
-    const { user, newToken } = await verifyAndExtendToken(token);
+    const { user, newToken, clientId } = await verifyAndExtendToken(token);
     req.user = user;
+    req.clientId = clientId;
+    console.log(clientId, 'clientID');
+
     res.setHeader('Authorization', `Bearer ${newToken}`);
 
     next();

@@ -14,6 +14,7 @@ import accounts from './router/accountsRoutes.js'
 import dashboard from './router/dashboardRoutes.js'
 // import roles from './router/roleAssignRoutes.js';
 import role from './router/roleAssignRoutes.js'
+import client from './router/adminauth/clientRoutes.js'
 // middleware
 app.use(json())
 app.use(cors())
@@ -30,6 +31,7 @@ app.use("/salesOrder",salesOrder);
 app.use("/accounts", accounts);
 app.use("/dashboard", dashboard);
 app.use("/roles", role);
+app.use('/client',client)
 
 
 app.listen(PORT, () => {

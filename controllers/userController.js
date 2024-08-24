@@ -1,13 +1,14 @@
 import * as userService from "../services/userServices.js";
 import * as userRepository from "../repository/userRepository.js";
+import * as clientUserRepository from '../repository/clientUserRepository.js'
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {secretKey} from '../constant.js'
+import { secretKey } from '../constant.js'
 
 // register
 export const register = async (req, res) => {
   try {
-    const { email, password, username, phone } = req.body;
+    const { email, password, username, phone, clientId } = req.body;
     const existingEmail = await userRepository.findEmailByEmail(email);
 
     // Check if all required fields are provided
@@ -36,7 +37,9 @@ export const login = async (req, res) => {
   try {
     let { email, password } = req.body;
     const existingEmail = await userRepository.findEmailByEmail(email);
-
+    const userId = existingEmail.dataValues.id;
+    const clientIdOfEmail = await clientUserRepository.findClientID(userId);
+    const clientId = clientIdOfEmail.dataValues.clientId;
     if (!existingEmail) {
       return res.status(400).send("Email does not exist");
     }
@@ -50,18 +53,22 @@ export const login = async (req, res) => {
       return res.status(400).send("Incorrect password");
     }
 
-   const token = jwt.sign({ email: existingEmail.email }, secretKey,{ expiresIn: '60000000' });
-   res.cookie("token", token);
-   res.status(200).json({
-    status: true,
-    message: "User logged in successfully",
-    token,
-  });
+    const token = jwt.sign(
+      { email: existingEmail.email, clientId },
+      secretKey,
+      { expiresIn: '60000000' }
+    );
+    res.cookie("token", token);
+    res.status(200).json({
+      status: true,
+      message: "User logged in successfully",
+      token,
+    });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).send("Internal server error");
   }
- 
+
 };
 
 

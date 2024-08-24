@@ -4,8 +4,8 @@ import * as salesOrderService from '../services/salesOrderServices.js'
 // 1. create order
 export const createOrder = async (req, res) => {
     try {
-        const user = req.user
-        const createdBy = user.dataValues.id
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         const info = req.body
         const { so, soDate, salesTax } = req.body
         const soDetails = await findSoNumber(so);
@@ -89,9 +89,10 @@ export const loadingOrder = async (req, res) => {
 
 //  get all Sales Order
 export const getAllOpenSo = async (req, res) => {
-    let { search } = req.query
+    let { search } = req.query;
+    const clientId= req.clientId; 
     try {
-        const result = await salesOrderService.getAllSo(search);
+        const result = await salesOrderService.getAllSo({search,clientId});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  SO :", error);

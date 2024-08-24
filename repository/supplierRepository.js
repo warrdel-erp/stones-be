@@ -12,23 +12,34 @@ export async function addSupplier(data) {
     }
 }
 
-export async function getAllSupplierName(supplierName) {
+export async function getAllSupplierName(data) {
     let result;
     try {
-        if (supplierName !== 'all') {
+        if (data.search !== 'all') {
             result = await model.supplierModel.findAll({
                 where: {
                     supplier_name: {
-                        [Op.like]: `%${supplierName}%`
+                        [Op.like]: `%${data.search}%`
                     }
                 },
             });
         } else {
-            result = await model.supplierModel.findAll();
+            result = await model.supplierModel.findAll({
+                include: [
+                    {
+                        model: model.clientUserModel,
+                        as: 'clientDetails',
+                        attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                        where: {
+                            clientId: data.clientId
+                        },
+                    }
+                ],
+            });
         }
         return result;
     } catch (error) {
-        console.error(`Error in getting supplier name${supplierName}:`, error);
+        console.error(`Error in getting supplier name${data.search}:`, error);
         throw error;
     }
 }
@@ -54,10 +65,10 @@ export async function updateSupplier(supplierName, data) {
                 supplierName: supplierName
             }
         });
-     return result; 
+        return result;
     } catch (error) {
         console.error("Error updating Supplier:", error);
-        throw error; 
+        throw error;
     }
 }
 
