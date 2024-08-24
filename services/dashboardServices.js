@@ -42,18 +42,18 @@ function formatLargeNumber(number) {
     return number.toFixed(2) + ' ' + units[unitIndex];
 }
 
-export async function getDashBoardData(fromDate, toDate) {
+export async function getDashBoardData(fromDate, toDate,clientId) {
     try {
 
         const [totalPurchase, openPo, totalSales, openSo, soNotes, poNotes, stockInventory, lowStock] = await Promise.all([
             dashboardRepository.getTotalPurchase(fromDate, toDate),
-            dashboardRepository.getOpenPo(fromDate, toDate),
+            dashboardRepository.getOpenPo(fromDate, toDate,clientId),
             dashboardRepository.getTotalsales(fromDate, toDate),
             dashboardRepository.getOpenSo(fromDate, toDate),
-            dashboardRepository.soNotes(fromDate, toDate),
-            dashboardRepository.poNotes(fromDate, toDate),
-            dashboardRepository.stockInventory(fromDate, toDate),
-            dashboardRepository.lowStock(fromDate, toDate),
+            dashboardRepository.soNotes(fromDate, toDate,clientId),
+            dashboardRepository.poNotes(fromDate, toDate,clientId),
+            dashboardRepository.stockInventory(fromDate, toDate,clientId),
+            dashboardRepository.lowStock(fromDate, toDate,clientId),
         ]);
 
         // Calculate total earnings

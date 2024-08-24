@@ -10,9 +10,9 @@ export const getDashBoardData = async (req, res) => {
     // if fromDate or toDate are not provided
     fromDate = fromDate || tenDaysAgo;
     toDate = toDate || today;
-
+    const clientId = req.clientId;
     try {
-        const result = await dashboardService.getDashBoardData(fromDate, toDate);
+        const result = await dashboardService.getDashBoardData(fromDate, toDate,clientId);
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in getting dashboard Data:", error);

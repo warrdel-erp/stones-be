@@ -16,16 +16,26 @@ export async function getTotalPurchase(fromDate, toDate) {
     return totalFinalCharges;
 };
 
-export async function getOpenPo(fromDate, toDate){
+export async function getOpenPo(fromDate, toDate, clientId) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.purchaseModel.findAll({
         where: {
-                status: 'Open',
-                po_date: {
-                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
-                }
+            status: 'Open',
+            po_date: {
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                }
+            },
+        ]
     });
     return result.length
 };
@@ -44,74 +54,102 @@ export async function getTotalsales(fromDate, toDate) {
     return totalFinalCharges;
 };
 
-export async function getOpenSo(fromDate, toDate){
+export async function getOpenSo(fromDate, toDate) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.salesOrderInventoryModel.findAll({
         where: {
             sales_status: 'INITIATED',
             created_at: {
-                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
-                }
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
+        }
     });
     return result.length
 };
 
-export async function soNotes(fromDate, toDate){
-    const attributes = ['so','soDate','internalNotes','printedNotes'];
+export async function soNotes(fromDate, toDate, clientId) {
+    const attributes = ['so', 'soDate', 'internalNotes', 'printedNotes'];
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.salesOrderModel.findAll({
-        attributes:attributes,
+        attributes: attributes,
         where: {
             created_at: {
-                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
-                }
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                },
+            },
+        ]
     });
     return result
 };
 
-export async function poNotes(fromDate, toDate){
-    const attributes = ['po','poDate','notes'];
+export async function poNotes(fromDate, toDate, clientId) {
+    const attributes = ['po', 'poDate', 'notes'];
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.purchaseModel.findAll({
-        attributes:attributes,
+        attributes: attributes,
         where: {
             created_at: {
-                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
-                }
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                },
+            },
+        ]
     });
     return result
 };
 
-export async function stockInventory(fromDate, toDate){
-    const attributes = ['productId','slabInStock','quantityInStock'];
+export async function stockInventory(fromDate, toDate, clientId) {
+    const attributes = ['productId', 'slabInStock', 'quantityInStock'];
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.productInventoryModel.findAll({
-        attributes:attributes,
+        attributes: attributes,
         where: {
             created_at: {
-                    [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
-                }
+                [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
+            }
+        },
+        include: [
+            {
+                model: model.productModel,
+                as: "salesProductDetails",
+                attributes: ['productName'],
             },
-            include: [
-                {
-                    model: model.productModel,
-                    as: "salesProductDetails",
-                    attributes: ['productName'],
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
                 },
-            ],    
+            },
+        ],
     });
     return result
 };
 
 
-export async function lowStock(fromDate, toDate) {
+export async function lowStock(fromDate, toDate, clientId) {
     const attributes = ['productId', 'slabInStock', 'quantityInStock'];
 
     const endDate = new Date(toDate);
@@ -124,7 +162,7 @@ export async function lowStock(fromDate, toDate) {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             },
             quantityInStock: {
-                [Op.gt]: lowStockQuantity  //  quantityInStock is greater than 500
+                [Op.gt]: lowStockQuantity
             }
         },
         include: [
@@ -132,6 +170,14 @@ export async function lowStock(fromDate, toDate) {
                 model: model.productModel,
                 as: "salesProductDetails",
                 attributes: ['productName'],
+            },
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                },
             },
         ],
     });
@@ -141,17 +187,17 @@ export async function lowStock(fromDate, toDate) {
 
 // calender complete month Data
 
-export async function getCalenderMonthData(fromDate, toDate){
+export async function getCalenderMonthData(fromDate, toDate) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
-    const attributes = ['po','etaDate','purchaseOrderId'];
+    const attributes = ['po', 'etaDate', 'purchaseOrderId'];
     const result = await model.purchaseModel.findAll({
-        attributes:attributes,
+        attributes: attributes,
         where: {
             eta_date: {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
-            }
+        }
     });
     return result
 };
@@ -159,14 +205,14 @@ export async function getCalenderMonthData(fromDate, toDate){
 // single Date Data
 
 export async function getCalenderDateData(date) {
-        const targetDate = new Date(date);
+    const targetDate = new Date(date);
 
     const startDate = new Date(targetDate.setHours(0, 0, 0, 0));
     const endDate = new Date(targetDate.setHours(23, 59, 59, 999));
 
     let result;
-    const attributes = ['po','poDate', 'etaDate', 'purchaseOrderId'];
-     result = await model.purchaseModel.findAll({
+    const attributes = ['po', 'poDate', 'etaDate', 'purchaseOrderId'];
+    result = await model.purchaseModel.findAll({
         attributes: attributes,
         where: {
             eta_date: {
@@ -183,22 +229,22 @@ export async function getCalenderDateData(date) {
                 model: model.locationModel,
                 as: "location",
                 foreignKey: "location_id",
-                attributes: ['location'] ,
+                attributes: ['location'],
             },
             {
                 model: model.locationModel,
                 as: "purchaseLocation",
                 foreignKey: "purchase_location_id",
-                attributes: ['location'] ,
+                attributes: ['location'],
             },
             {
                 model: model.purchaseProductModel,
-                as:'purchaseProduct',
+                as: 'purchaseProduct',
                 attributes: ['productId'],
                 include: [
                     {
                         model: model.productModel,
-                        as:'products',
+                        as: 'products',
                         attributes: ['productName']
                     }
                 ]
