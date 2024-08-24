@@ -15,11 +15,11 @@ router.post('/loadingOrder',userAuth, loadingOrder);
 
 router.get('/allPo',userAuth, getAllOpenSo);
 
-router.patch('/:soLoadingOrderId', updateStatus);
+router.patch('/:soLoadingOrderId',userAuth, updateStatus);
 
 router.post('/addPayment',addPayment);
 
-router.post('/salesAccountTransaction',createSalesAccountTransaction);
+router.post('/salesAccountTransaction', userAuth,createSalesAccountTransaction);
 
 
 

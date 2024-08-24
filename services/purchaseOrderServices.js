@@ -35,6 +35,7 @@ export async function addPurchaseOrderProduct(dataArray) {
             const purchaseOrderProduct = {
                 purchaseOrderId: data.purchaseOrderId,
                 productId: data.productId,
+                createdBy:data.createdBy
             };
 
             result = await purchaseOrderRepository.createPurchaseProductOrder(purchaseOrderProduct, transaction);
@@ -101,16 +102,18 @@ export async function addSuplierInvoice(data) {
         for (const dataArray of data.productDeatils) {
             const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId };
             const prePurchaseOrderId = supplierData.prePurchaseOrderId;
+            console.log(prePurchaseOrderId, 'prepurchaseorderis');
 
             //for update the prepurchaseorder product details
             const prePurchaseProductDetails = await getPrePurchaseProductDetails(prePurchaseOrderId);
             const requestedQuantity = supplierData.quantity;
             const savedQuantity = prePurchaseProductDetails.dataValues.quantity;
             const updatedQuantity = savedQuantity - requestedQuantity;
-            await updatePrePurchaseProductDetails(
-                { quantity: updatedQuantity },
-                { where: { prePurchaseOrderId }, transaction }
-            );
+            await updatePrePurchaseProductDetails({
+                quantity: updatedQuantity,
+                prePurchaseOrderId: prePurchaseOrderId,
+                transaction: transaction
+            });
             result = await purchaseOrderRepository.createSupplierInvoice(supplierData, transaction);
             results.push(result);
         }
@@ -211,6 +214,8 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
+    console.log(dataArray.createdBy,'dataArray');
+    
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
@@ -228,7 +233,8 @@ export async function addProductInventory(dataArray) {
                     accountsId: accountDetail.accountsId,
                     entryType: accountDetail.entryType,
                     transactionOf: 'purchase',
-                    transactionAmountType: 'debit'
+                    transactionAmountType: 'debit',
+                    createdBy:dataArray.createdBy
                 };
                 await purchaseAccountTransaction(transactionDataWithAccount, transaction);
             }
@@ -252,10 +258,11 @@ export async function addProductInventory(dataArray) {
                 const updateData = {
                     slabInStock: productSlabInStock + newSlabInStock,
                     quantityInStock: productQuantityInStock + newQuantityInStock,
-                    productId: data.productId
+                    productId: data.productId,
+                    createdBy:dataArray.createdBy
                 };
                 result = await productInventory.updateProductInventory(updateData, transaction)
-                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId }
+                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId ,createdBy:dataArray.createdBy }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 // result = await productInventory.addProductInventory(info, transaction);
@@ -263,7 +270,7 @@ export async function addProductInventory(dataArray) {
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 result = await productInventory.addProductInventory(info, transaction);
                 const productInventoryId = result.get('productInventoryId')
-                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId }
+                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId,createdBy:dataArray.createdBy }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
             };
             results.push(result);
@@ -339,6 +346,8 @@ export async function getContainerDetails(poSupplierInvoiceMappperId) {
 
 //purchase account transaction
 export async function purchaseAccountTransaction(transactionData) {
+    console.log(transactionData,'transaction');
+    
     const transaction = await sequelize.transaction();
     const accNames = { debitAccountName: 'Trade Payables', creditAccountName: 'Cost Of Sales' }
     try {
@@ -354,7 +363,8 @@ export async function purchaseAccountTransaction(transactionData) {
                     accountsId: accountDetail.accountsId,
                     entryType: accountDetail.entryType,
                     transactionOf: 'purchase',
-                    transactionAmountType: 'credit'
+                    transactionAmountType: 'credit',
+                    createdBy:transactionData.createdBy
                 };
                 await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, { transaction });
             }
@@ -413,9 +423,8 @@ export async function getCOATransactionDetails(queryParams) {
 }
 
 
-export async function getInventoryListBasedOnSipl() {
-    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl();
-    console.log({ inventoryJsonData: JSON.stringify(inventoryJsonData) });
+export async function getInventoryListBasedOnSipl(clientId) {
+    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId);
     return inventoryJsonData;
 }
 

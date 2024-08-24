@@ -209,7 +209,7 @@ export async function getAllSalesOrder(data) {
     }
     return result;
   } catch (error) {
-    console.error(`Error in getting sales Order ${searchText}:`, error);
+    console.error(`Error in getting sales Order ${data.search}:`, error);
     throw error;
   }
 };

@@ -211,7 +211,8 @@ export async function updateStatus(transactionData) {
                         accountsId: accountDetail.accountsId,
                         entryType: accountDetail.entryType,
                         transactionOf: 'sales',
-                        transactionAmountType: 'debit'
+                        transactionAmountType: 'debit',
+                        createdBy:transactionData.createdBy
                     };
                     await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
                     console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
@@ -282,7 +283,8 @@ export async function createSalesAccountTransaction(data) {
                     accountsId: accountDetail.accountsId,
                     entryType: accountDetail.entryType,
                     transactionOf: 'sales',
-                    transactionAmountType: 'credit'
+                    transactionAmountType: 'credit',
+                    createdBy:data.createdBy
                 };
                 await purchaseAccountTransaction(transactionDataWithAccount, { transaction });
             }

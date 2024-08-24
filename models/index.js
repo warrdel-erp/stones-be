@@ -180,6 +180,13 @@ clientUserModel.hasMany(customerModel, { foreignKey: 'created_by', sourceKey: 'u
 salesOrderModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
 clientUserModel.hasMany(salesOrderModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'sales' });
 
+productInventoryModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(productInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'inventoryDetail' });
+
+accountTransactionModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(accountTransactionModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'accountTransaction' });
+
+
 export {
 	productModel,
 	userModel,

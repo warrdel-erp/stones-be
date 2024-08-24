@@ -47,11 +47,11 @@ router.post('/addContainer',addContainer);
 
 router.get('/containerDetails',getContainerDetails);
 
-router.post('/purchaseAccountTransaction',purchaseAccountTransaction)
+router.post('/purchaseAccountTransaction',userAuth,purchaseAccountTransaction)
 
 router.get('/transactionDetailsCOA',getCOATransactionDetails);
 
-router.get('/inventoryDetailsBasedOnSipl',getInventoryListBasedOnSipl);
+router.get('/inventoryDetailsBasedOnSipl', userAuth,getInventoryListBasedOnSipl);
 
 router.delete('/prePurcahseProduct/:purchaseOrderProductId',deletePrePurchaeProduct);
 

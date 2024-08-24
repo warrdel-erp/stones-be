@@ -162,7 +162,9 @@ export async function getInventoryList(page, limit) {
   }
 }
 
-export async function getInventoryListBasedOnSipl() {
+export async function getInventoryListBasedOnSipl(clientId) {
+  console.log(clientId,'cleindh');
+  
   try {
     const result = await model.productInventoryModel.findAll({
       where: {
@@ -187,7 +189,7 @@ export async function getInventoryListBasedOnSipl() {
                     status: 'ACTIVE'
                   },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
-                }, 
+                },
                 {
                   model: model.poSupplierInvoiceMapperModel,
                   as: "transactionData",
@@ -202,14 +204,22 @@ export async function getInventoryListBasedOnSipl() {
         {
           model: model.productModel,
           as: "salesProductDetails",
-          attributes: ["productName", "type", "baseColor", "origin", "kind","category","groupsAll"]
+          attributes: ["productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"]
+        },
+        {
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: clientId
+          },
         }
       ],
     });
     // console.log(JSON.stringify(result), 'invet');
     // console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
-    } catch (error) {
+  } catch (error) {
     console.error("Error in getInventoryList:", error);
     throw error;
   }

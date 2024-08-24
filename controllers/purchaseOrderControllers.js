@@ -57,8 +57,12 @@ export const updateOrder = async (req, res) => {
 // 4. add purchase order product 
 export const addPurchaseOrderProduct = async (req, res) => {
     try {
-        const data = req.body
-        const result = await purchaseOrderService.addPurchaseOrderProduct(data);
+        const data = req.body;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        console.log(createdBy,'createdBY');
+        
+        const result = await purchaseOrderService.addPurchaseOrderProduct({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Purchase  Order Products: ", error);
@@ -101,10 +105,12 @@ export const addSuplierInvoice = async (req, res) => {
         const data = req.body
         const poNumber = req.body.po;
         const purchaseOrderId = req.body.purchaseOrderId;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         if (!(poNumber && purchaseOrderId)) {
             res.status(400).send("po and purchase Order Id is required for add supplier invoice");
         }
-        const result = await purchaseOrderService.addSuplierInvoice(data);
+        const result = await purchaseOrderService.addSuplierInvoice({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add supplier Invoice: ", error);
@@ -118,10 +124,12 @@ export const addSlabDetails = async (req, res) => {
     try {
         const data = req.body
         const po = req.body.po;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         if (!(po)) {
             res.status(400).send("Po is required for add Slab Details");
         }
-        const result = await purchaseOrderService.addSlabDetails(data);
+        const result = await purchaseOrderService.addSlabDetails({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Slab Details: ", error);
@@ -152,10 +160,12 @@ export const addProductInventory = async (req, res) => {
     try {
         const data = req.body
         const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         if (!(poSupplierInvoiceMapperId)) {
             res.status(400).send("po Supplier Invoice Mapper Id  is required for add product Inventory");
         }
-        const result = await purchaseOrderService.addProductInventory(data);
+        const result = await purchaseOrderService.addProductInventory({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add product Inventory: ", error);
@@ -180,12 +190,14 @@ export const getProductInventory = async (req, res) => {
 
 export const addPayment = async (req, res) => {
     try {
-        const data = req.body
+        const data = req.body;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         const poSupplierInvoiceMapperId = req.body.poSupplierInvoiceMapperId;
         if (!(poSupplierInvoiceMapperId)) {
             res.status(400).send("po Supplier Invoice Mapper Id  is required for make payment");
         }
-        const result = await purchaseOrderService.addPayment(data);
+        const result = await purchaseOrderService.addPayment({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add payment: ", error);
@@ -248,7 +260,9 @@ export const getContainerDetails = async (req, res) => {
 export const purchaseAccountTransaction = async (req, res) => {
     const transactionData = req.body;
     try {
-        const result = await purchaseOrderService.purchaseAccountTransaction({ ...transactionData });
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const result = await purchaseOrderService.purchaseAccountTransaction({ ...transactionData,createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
@@ -292,7 +306,8 @@ export const getCOATransactionDetails = async (req, res) => {
 
 export const getInventoryListBasedOnSipl = async (req, res) => {
     try {
-        const result = await purchaseOrderService.getInventoryListBasedOnSipl();
+        const clientId= req.clientId;   
+        const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting Product Inventory:", error);

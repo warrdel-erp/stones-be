@@ -2,12 +2,16 @@ import * as model from "../models/index.js";
 // import { Op } from "sequelize";
 
 export async function getPrePurchaseProductDetails(prePurchaseOrderId) {
+  console.log(prePurchaseOrderId,'ksjdhkds');
+  
   try {
     const result = await model.prePurchaseModel.findOne({
       where: {
         prePurchaseOrderId: prePurchaseOrderId
       }
     });
+    console.log(result,'resulse');
+    
     return result;
   } catch (error) {
     console.error("Error in fetching pre-purchase product details:", error);

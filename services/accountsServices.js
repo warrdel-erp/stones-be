@@ -88,12 +88,12 @@ export async function getCOATransactionDetails(queryParams) {
 
 //get transaction history based on supplier and customers
 
-export async function getTransactionSupplierCustomer(typeOfData, queryParams) {
+export async function getTransactionSupplierCustomer(typeOfData, queryParams,clientId) {
     const { limit = 1, offset = 0, customerId, supplierId } = queryParams;
     const dataApi = await (typeOfData.type === 'sales'
-        ? accountsRepository.getSalesTransactions(customerId, limit, offset)
+        ? accountsRepository.getSalesTransactions(customerId, limit, offset,clientId)
         : typeOfData.type === 'purchase'
-            ? accountsRepository.getPurchaseTransactions(supplierId, limit, offset)
+            ? accountsRepository.getPurchaseTransactions(supplierId, limit, offset,clientId)
             : Promise.resolve(null));
 
 

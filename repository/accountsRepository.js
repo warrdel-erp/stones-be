@@ -208,6 +208,7 @@ export async function getAccountIdByAccountName(data) {
 //get coa account details
 export async function getCOATransactionDetails(queryParams = {}) {
     try {
+
         const { month, year } = queryParams;
         let startDate, endDate;
 
@@ -238,41 +239,50 @@ export async function getCOATransactionDetails(queryParams = {}) {
                             }
                         }),
                     },
-                    include: [{
-                        model: model.poSupplierInvoiceMapperModel,
-                        attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
-                        as: 'poSupplierInvoice'
-                    },
-                    {
-                        model: model.purchaseModel,
-                        attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
-                        as: 'purchaseOrder',
-                        include: [
-                            {
-                                model: model.supplierModel,
-                                as: 'suppliers',
-                                attributes: ['supplierName', 'supplierId']
+                    include: [
+                        {
+                            model: model.poSupplierInvoiceMapperModel,
+                            attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+                            as: 'poSupplierInvoice'
+                        },
+                        {
+                            model: model.purchaseModel,
+                            attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+                            as: 'purchaseOrder',
+                            include: [
+                                {
+                                    model: model.supplierModel,
+                                    as: 'suppliers',
+                                    attributes: ['supplierName', 'supplierId']
 
-                            }
-                        ]
-                    },
-                    {
-                        model: model.soLoadingOrderModel,
-                        as: 'soLoadingOrders',
-                        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
-                        include: [
-                            {
-                                model: model.salesOrderModel,
-                                attributes: ['salesOrdersId', 'customerId', 'location'],
-                                include: [
-                                    {
-                                        model: model.customerModel,
-                                        as: 'customers', attributes: ['customerId', 'customerName']
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                }
+                            ]
+                        },
+                        {
+                            model: model.soLoadingOrderModel,
+                            as: 'soLoadingOrders',
+                            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+                            include: [
+                                {
+                                    model: model.salesOrderModel,
+                                    attributes: ['salesOrdersId', 'customerId', 'location'],
+                                    include: [
+                                        {
+                                            model: model.customerModel,
+                                            as: 'customers', attributes: ['customerId', 'customerName']
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            model: model.clientUserModel,
+                            as: 'clientDetails',
+                            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                            where: {
+                                clientId: queryParams.clientId
+                            },
+                        }
                     ]
                 },
             ],
@@ -286,7 +296,7 @@ export async function getCOATransactionDetails(queryParams = {}) {
 
 //get transaction history based on supplier 
 
-export async function getPurchaseTransactions(supplierId, limit, offset) {
+export async function getPurchaseTransactions(supplierId, limit, offset,clientId) {
     try {
         const result = model.supplierModel.findAll({
             attributes: ['supplierId', 'supplierName'],
@@ -297,8 +307,16 @@ export async function getPurchaseTransactions(supplierId, limit, offset) {
             offset: offset,
             include: [
                 {
+                    model: model.clientUserModel,
+                    as: 'clientDetails',
+                    attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                    where: {
+                        clientId: clientId
+                    },
+                },
+                {
                     model: model.accountTransactionModel,
-                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount','transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
                     as: 'supplierTransactions',
                     required: true,
                     include: [
@@ -330,7 +348,7 @@ export async function getPurchaseTransactions(supplierId, limit, offset) {
 
 //get transaction history based on customers
 
-export async function getSalesTransactions(customerId, limit, offset) {
+export async function getSalesTransactions(customerId, limit, offset, clientId) {
     try {
         const result = await model.customerModel.findAll({
             attributes: ['customerId', 'customerName'],
@@ -340,6 +358,14 @@ export async function getSalesTransactions(customerId, limit, offset) {
             limit: limit,
             offset: offset,
             include: [
+                {
+                    model: model.clientUserModel,
+                    as: 'clientDetails',
+                    attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                    where: {
+                        clientId: clientId
+                    },
+                },
                 {
                     model: model.accountTransactionModel,
                     attributes: [
@@ -364,7 +390,8 @@ export async function getSalesTransactions(customerId, limit, offset) {
                                     attributes: ['salesOrdersId', 'customerId', 'location'],
                                 }
                             ]
-                        }
+                        },
+
                     ]
                 }
             ],

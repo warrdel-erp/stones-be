@@ -708,3 +708,66 @@ CREATE TABLE client_users (
     CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(client_id),
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+
+--added column created by in customers table
+
+ALTER TABLE customers
+ADD COLUMN created_by INT ,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE account_transaction
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE account_types
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE accounts
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE inventory_invoice_mapper
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE po_supplier_invoices
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE pre_purchase_orders
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE product_inventory
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE purchase_order_products
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE purchase_payment
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE so_loading_order
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE sub_account_types
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;
+
+ALTER TABLE po_slab_details
+ADD COLUMN created_by INT,
+ADD COLUMN updated_by INT;

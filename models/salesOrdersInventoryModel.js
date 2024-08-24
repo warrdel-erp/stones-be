@@ -90,6 +90,17 @@ export default sequelize.define(
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
         field:'updated_at'
     },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+        field: 'updated_at',
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'created_by',
+    },
     deletedAt: {
         type: DataTypes.DATE,
         allowNull: true,

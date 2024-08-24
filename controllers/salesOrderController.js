@@ -105,7 +105,9 @@ export const getAllOpenSo = async (req, res) => {
 export const updateStatus = async (req, res) => {
     const soLoadingOrderId = req.body.soLoadingOrderId;
     const soLoadingOrder = await findSalesOrdersInventory(soLoadingOrderId);
-    const requestBodyTransaction = req.body
+    const requestBodyTransaction = req.body;
+    const user = req.user;
+    const createdBy = user.dataValues.id;
     console.log(soLoadingOrder,'jskjnwdiehiwuh');
     try {
         if (!soLoadingOrderId) {
@@ -113,7 +115,7 @@ export const updateStatus = async (req, res) => {
         } else if (!soLoadingOrder) {
             res.status(400).send("so Loading Order Id Not exist");
         } else {
-            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId,soLoadingOrder});
+            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId,soLoadingOrder,createdBy});
             res.status(200).send(result);
         }
     } catch (error) {
@@ -143,9 +145,10 @@ export const addPayment = async (req, res) => {
 // create sales account transaction 
 export const createSalesAccountTransaction = async (req, res) => {
     const transactionData = req.body;
-    console.log(transactionData,'ssssssssssssss');
+    const user = req.user;
+    const createdBy = user.dataValues.id;
     try {
-        const result = await salesOrderService.createSalesAccountTransaction({...transactionData});
+        const result = await salesOrderService.createSalesAccountTransaction({...transactionData,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error(error);

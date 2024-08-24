@@ -191,6 +191,16 @@ export default sequelize.define('account_transaction', {
         onUpdate: DataTypes.NOW,
         field: 'updated_at'
     },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'created_by',
+    },
+    updatedBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'updated_by',
+    },
     deletedAt: {
         type: DataTypes.DATE,
         allowNull: true,
