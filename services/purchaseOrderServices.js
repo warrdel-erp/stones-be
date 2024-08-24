@@ -267,7 +267,7 @@ export async function addProductInventory(dataArray) {
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 // result = await productInventory.addProductInventory(info, transaction);
             } else {
-                const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
+                const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId, createdBy:dataArray.createdBy };
                 result = await productInventory.addProductInventory(info, transaction);
                 const productInventoryId = result.get('productInventoryId')
                 const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId,createdBy:dataArray.createdBy }
