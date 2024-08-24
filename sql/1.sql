@@ -634,7 +634,7 @@ ADD COLUMN updated_by INT;
 -- alter table product to remove 
 
 ALTER TABLE products
-DROP CONSTRAINT fk_supplierId;
+DROP CONSTRAINT products_ibfk_1;
 ALTER TABLE products
 DROP COLUMN supplier_id;
 
@@ -687,7 +687,7 @@ CREATE TABLE clients (
     client_name VARCHAR(255),
     client_password VARCHAR(255),
     client_email VARCHAR(255) UNIQUE,
-    client_location VARCHAR(255);
+    client_location VARCHAR(255),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deletedAt TIMESTAMP NULL,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
