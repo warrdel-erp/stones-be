@@ -773,14 +773,14 @@ ADD COLUMN created_by INT,
 ADD COLUMN updated_by INT;
 
 --dropped po column to remove unique key
-ALTER TABLE `stone_design`.`purchase_orders` 
-DROP INDEX `po_unique` ;
+ALTER TABLE purchase_orders 
+DROP INDEX po_unique ;
 
-ALTER TABLE `stone_design`.`sales_orders` 
-DROP INDEX `so`;
+ALTER TABLE sales_orders 
+DROP INDEX so;
 
-ALTER TABLE `stone_design_test`.`products` 
-DROP INDEX `product_name` ;
+ALTER TABLE products 
+DROP INDEX product_name ;
 
-ALTER TABLE `stone_design_test`.`suppliers` 
-DROP INDEX `supplier_name` ;
+ALTER TABLE suppliers 
+DROP INDEX supplier_name ;
