@@ -15,7 +15,6 @@ export default sequelize.define(
     productName: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         field: 'product_name'
     },
     type: {

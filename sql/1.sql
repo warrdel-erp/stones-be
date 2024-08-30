@@ -597,7 +597,7 @@ VALUES (1, 'Cash and Financial Assets'),
        (4, 'Recognized Point Of Time'),
        (4, 'Recognized Over Time'),
        (4, 'Adjustments'),
-       (5, 'Expenses Classified By Nature'),
+       (5, 'Expenses Classified By Nature'),    
        (5, 'Expenses Classified By Function'),
        (6, 'Other Revenue and Expenses'),
        (6, 'Gains and Losses'),
@@ -771,3 +771,16 @@ ADD COLUMN updated_by INT;
 ALTER TABLE po_slab_details
 ADD COLUMN created_by INT,
 ADD COLUMN updated_by INT;
+
+--dropped po column to remove unique key
+ALTER TABLE `stone_design`.`purchase_orders` 
+DROP INDEX `po_unique` ;
+
+ALTER TABLE `stone_design`.`sales_orders` 
+DROP INDEX `so`;
+
+ALTER TABLE `stone_design_test`.`products` 
+DROP INDEX `product_name` ;
+
+ALTER TABLE `stone_design_test`.`suppliers` 
+DROP INDEX `supplier_name` ;

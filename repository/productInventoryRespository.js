@@ -97,7 +97,7 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
     throw error;
   }
 }
-export async function getInventoryList(page, limit) {
+export async function getInventoryList(page, limit, clientId) {
   try {
     const offset = page * limit;
     console.log(`Fetching inventory with limit: ${limit}, offset: ${offset}`);
@@ -109,6 +109,14 @@ export async function getInventoryList(page, limit) {
       // offset: offset,
       // limit: limit,
       include: [
+        {
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: clientId
+          }
+        },
         {
           model: model.inventoryInvoiceMapper,
           as: "productInventoryInvoiceMapper",
@@ -150,6 +158,7 @@ export async function getInventoryList(page, limit) {
               ],
             },
           ],
+
         },
       ],
     });
@@ -163,8 +172,8 @@ export async function getInventoryList(page, limit) {
 }
 
 export async function getInventoryListBasedOnSipl(clientId) {
-  console.log(clientId,'cleindh');
-  
+  console.log(clientId, 'cleindh');
+
   try {
     const result = await model.productInventoryModel.findAll({
       where: {

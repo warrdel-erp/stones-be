@@ -2,7 +2,7 @@ import { lowStockQuantity } from '../constant.js';
 import * as model from '../models/index.js';
 import { Op } from "sequelize";
 
-export async function getTotalPurchase(fromDate, toDate) {
+export async function getTotalPurchase(fromDate, toDate, clientId) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.poSupplierInvoiceMapperModel.findAll({
@@ -10,7 +10,17 @@ export async function getTotalPurchase(fromDate, toDate) {
             created_at: {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
-        }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                },
+            },
+        ]
     });
     const totalFinalCharges = result.reduce((sum, entry) => sum + entry.dataValues.finalTotalCharges, 0);
     return totalFinalCharges;
@@ -40,7 +50,7 @@ export async function getOpenPo(fromDate, toDate, clientId) {
     return result.length
 };
 
-export async function getTotalsales(fromDate, toDate) {
+export async function getTotalsales(fromDate, toDate, clientId) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.soLoadingOrderModel.findAll({
@@ -48,13 +58,23 @@ export async function getTotalsales(fromDate, toDate) {
             created_at: {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
-        }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                }
+            },
+        ]
     });
     const totalFinalCharges = result.reduce((sum, entry) => sum + entry.dataValues.total, 0);
     return totalFinalCharges;
 };
 
-export async function getOpenSo(fromDate, toDate) {
+export async function getOpenSo(fromDate, toDate, clientId) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
     const result = await model.salesOrderInventoryModel.findAll({
@@ -63,7 +83,17 @@ export async function getOpenSo(fromDate, toDate) {
             created_at: {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }
-        }
+        },
+        include: [
+            {
+                model: model.clientUserModel,
+                as: 'clientDetails',
+                attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                where: {
+                    clientId: clientId
+                }
+            },
+        ]
     });
     return result.length
 };

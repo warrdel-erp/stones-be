@@ -46,10 +46,10 @@ export async function getDashBoardData(fromDate, toDate,clientId) {
     try {
 
         const [totalPurchase, openPo, totalSales, openSo, soNotes, poNotes, stockInventory, lowStock] = await Promise.all([
-            dashboardRepository.getTotalPurchase(fromDate, toDate),
+            dashboardRepository.getTotalPurchase(fromDate, toDate,clientId),
             dashboardRepository.getOpenPo(fromDate, toDate,clientId),
-            dashboardRepository.getTotalsales(fromDate, toDate),
-            dashboardRepository.getOpenSo(fromDate, toDate),
+            dashboardRepository.getTotalsales(fromDate, toDate,clientId),
+            dashboardRepository.getOpenSo(fromDate, toDate,clientId),
             dashboardRepository.soNotes(fromDate, toDate,clientId),
             dashboardRepository.poNotes(fromDate, toDate,clientId),
             dashboardRepository.stockInventory(fromDate, toDate,clientId),

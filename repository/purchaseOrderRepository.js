@@ -11,15 +11,27 @@ export async function createOrder(data) {
   }
 }
 
-export async function latestPoNumber() {
+export async function latestPoNumber(clientId) {
   try {
     const attributes = ['po'];
-    const result = await model.purchaseModel.findOne({
+    const result = await model.purchaseModel.findAll({
       attributes: attributes,
       order: [['created_at', 'DESC']],
-      limit: 1,
+      // limit: 1,
+      include: [
+        {
+            model: model.clientUserModel,
+            as: 'clientDetails',
+            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+            where: {
+                clientId: clientId
+            }
+        },
+    ]
     });
-    return result;
+    return result.length;
+
+    
   } catch (error) {
     console.log("Error getting PO Number: ", error);
     throw error;

@@ -8,13 +8,11 @@ export const createOrder = async (req, res) => {
         const createdBy = user.dataValues.id;
         const info = req.body
         const { so, soDate, salesTax } = req.body
-        const soDetails = await findSoNumber(so);
-        console.log(`>>>>>>>>>>soDetails>>>>>>`, soDetails);
+        // const soDetails = await findSoNumber(so);
+        // console.log(`>>>>>>>>>>soDetails>>>>>>`, soDetails);
         if (!(so && soDate && salesTax)) {
             res.status(400).send("SO Number,SO Date and sales Tax is required");
-        } else if (soDetails) {
-            res.status(400).send("SO Number can't Be Same");
-        } else {
+        }  else {
             const result = await salesOrderService.createOrder({ ...info, createdBy });
             res.status(200).send(result);
         }
@@ -27,7 +25,8 @@ export const createOrder = async (req, res) => {
 // 2. get so Number 
 export const getSoNumber = async (req, res) => {
     try {
-        const result = await salesOrderService.getSoNumber();
+        const clientId = req.clientId;
+        const result = await salesOrderService.getSoNumber(clientId);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting So Number:", error);
@@ -73,12 +72,14 @@ export const addProduct = async (req, res) => {
 
 export const loadingOrder = async (req, res) => {
     try {
-        const info = req.body
-        const { salesOrdersId } = req.body
+        const info = req.body;
+        const { salesOrdersId } = req.body;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
         if (!(salesOrdersId)) {
             res.status(400).send("Sales orders Id is required");
         } else {
-            const result = await salesOrderService.loadingOrder(info);
+            const result = await salesOrderService.loadingOrder({ ...info, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
@@ -90,9 +91,9 @@ export const loadingOrder = async (req, res) => {
 //  get all Sales Order
 export const getAllOpenSo = async (req, res) => {
     let { search } = req.query;
-    const clientId= req.clientId; 
+    const clientId = req.clientId;
     try {
-        const result = await salesOrderService.getAllSo({search,clientId});
+        const result = await salesOrderService.getAllSo({ search, clientId });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  SO :", error);
@@ -108,14 +109,14 @@ export const updateStatus = async (req, res) => {
     const requestBodyTransaction = req.body;
     const user = req.user;
     const createdBy = user.dataValues.id;
-    console.log(soLoadingOrder,'jskjnwdiehiwuh');
+    console.log(soLoadingOrder, 'jskjnwdiehiwuh');
     try {
         if (!soLoadingOrderId) {
             res.status(400).send("so Loading Order Id Id is required");
         } else if (!soLoadingOrder) {
             res.status(400).send("so Loading Order Id Not exist");
         } else {
-            const result = await salesOrderService.updateStatus({...requestBodyTransaction,soLoadingOrderId,soLoadingOrder,createdBy});
+            const result = await salesOrderService.updateStatus({ ...requestBodyTransaction, soLoadingOrderId, soLoadingOrder, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
@@ -148,7 +149,7 @@ export const createSalesAccountTransaction = async (req, res) => {
     const user = req.user;
     const createdBy = user.dataValues.id;
     try {
-        const result = await salesOrderService.createSalesAccountTransaction({...transactionData,createdBy});
+        const result = await salesOrderService.createSalesAccountTransaction({ ...transactionData, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error(error);

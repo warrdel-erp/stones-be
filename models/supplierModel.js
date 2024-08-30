@@ -14,7 +14,6 @@ export default sequelize.define(
         supplierName: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
             field: 'supplier_name',
         },
         code: {

@@ -10,15 +10,9 @@ export async function createOrder(info) {
     return await salesOrderRepository.createOrder(info)
 }
 
-export async function getSoNumber() {
-    const result = await salesOrderRepository.latestPoNumber()
-    let newSo; // declare newSo outside the if-else blocks
-    if (!result) {
-        newSo = "0001";
-    } else {
-        let lastPo = parseInt(result.get('so'));
-        newSo = String(lastPo + 1).padStart(4, '0');
-    }
+export async function getSoNumber(clientId) {
+    const result = await salesOrderRepository.latestPoNumber(clientId)
+    const newSo = result + 1;
     const todayDate = moment().format('YYYY-MM-DD');
     return { newSo, todayDate };
 }
@@ -86,6 +80,8 @@ export async function addProduct(info) {
 
 
 export async function loadingOrder(info) {
+    console.log(info.createdBy, 'createdbyssss');
+
     const transaction = await sequelize.transaction();
     try {
         let soLoadingOrderId, updateResults = [];
@@ -118,7 +114,8 @@ export async function loadingOrder(info) {
             total: totalAmount,
             tax: totalTax,
             salesOrdersId: info.salesOrdersId,
-            salesStatus: 'LOADING ORDER'
+            salesStatus: 'LOADING ORDER',
+            createdBy: info.createdBy
         };
         const result = await salesOrderRepository.createLoadingOrder(data, { transaction });
         soLoadingOrderId = result.get('soLoadingOrderId');
@@ -130,9 +127,10 @@ export async function loadingOrder(info) {
                     remeasureLength: slab.remeasureLength,
                     remeasureWidth: slab.remeasureWidth,
                     soLoadingOrderId: soLoadingOrderId,
-                    salesStatus: 'LOADING ORDER'
+                    salesStatus: 'LOADING ORDER',
+                    createdBy: info.createdBy
                 };
-                const updateResult = await salesOrderRepository.updateSalesOrderInventory(slab.salesOrdersInventoryId, updateData, { transaction });
+                const updateResult = await salesOrderRepository.updateSalesOrderInventory(slab.salesOrdersInventoryId, updateData, { createdBy: info.createdBy }, { transaction });
                 updateResults.push(updateResult);
             };
         };
@@ -159,7 +157,7 @@ export async function getAllSo(data) {
 };
 
 export async function updateStatus(transactionData) {
-    console.log('Received transaction data:', JSON.stringify(transactionData));
+    console.log('Received transaction data:', transactionData.createdBy);
 
     const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
@@ -212,7 +210,7 @@ export async function updateStatus(transactionData) {
                         entryType: accountDetail.entryType,
                         transactionOf: 'sales',
                         transactionAmountType: 'debit',
-                        createdBy:transactionData.createdBy
+                        createdBy: transactionData.createdBy
                     };
                     await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
                     console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
@@ -264,8 +262,6 @@ export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
 };
 
 export async function createSalesAccountTransaction(data) {
-    console.log(data, 'data');
-
     const transaction = await sequelize.transaction();
     const accNames = { debitAccountName: 'Goods', creditAccountName: 'Accounts, Notes and Loans Receivable' }
     try {
@@ -274,7 +270,8 @@ export async function createSalesAccountTransaction(data) {
             console.log(transactionAccontId, 'transactionAccontId');
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' },
+                { accountsId: data.paymentMethod, entryType: 'dr' }
             ];
 
             for (const accountDetail of accountDetails) {
@@ -284,7 +281,7 @@ export async function createSalesAccountTransaction(data) {
                     entryType: accountDetail.entryType,
                     transactionOf: 'sales',
                     transactionAmountType: 'credit',
-                    createdBy:data.createdBy
+                    createdBy: data.createdBy
                 };
                 await purchaseAccountTransaction(transactionDataWithAccount, { transaction });
             }

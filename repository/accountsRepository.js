@@ -206,6 +206,96 @@ export async function getAccountIdByAccountName(data) {
 }
 
 //get coa account details
+// export async function getCOATransactionDetails(queryParams = {}) {
+//     try {
+
+//         const { month, year } = queryParams;
+//         let startDate, endDate;
+
+
+//         if (month && year) {
+//             startDate = new Date(year, month - 1, 1);
+//             endDate = new Date(year, month, 0);
+//         }
+//         console.log(queryParams, 'datess');
+
+//         const result = await model.accountsModel.findAll({
+//             attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
+//             include: [
+//                 {
+//                     model: model.accountTransactionModel,
+//                     attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+//                     where: {
+//                         ...(queryParams.customerId && { customerId: queryParams.customerId }),
+//                         ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),
+//                         ...(queryParams.poSupplierInvoiceMapperId && { poSupplierInvoiceMapperId: queryParams.poSupplierInvoiceMapperId }),
+//                         ...(queryParams.purchaseOrderId && { purchaseOrderId: queryParams.purchaseOrderIds }),
+//                         ...(queryParams.soLoadingOrderId && { soLoadingOrderId: queryParams.soLoadingOrderId }),
+//                         ...(queryParams.so && { so: queryParams.so }),
+//                         ...(queryParams.accountsId && { accountsId: queryParams.accountsId }),
+//                         ...(startDate && endDate && {
+//                             createdAt: {
+//                                 [Op.between]: [startDate, endDate]
+//                             }
+//                         }),
+//                     },
+//                     include: [
+//                         {
+//                             model: model.poSupplierInvoiceMapperModel,
+//                             attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+//                             as: 'poSupplierInvoice'
+//                         },
+//                         {
+//                             model: model.purchaseModel,
+//                             attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+//                             as: 'purchaseOrder',
+//                             include: [
+//                                 {
+//                                     model: model.supplierModel,
+//                                     as: 'suppliers',
+//                                     attributes: ['supplierName', 'supplierId']
+
+//                                 }
+//                             ]
+//                         },
+//                         {
+//                             model: model.soLoadingOrderModel,
+//                             as: 'soLoadingOrders',
+//                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+//                             include: [
+//                                 {
+//                                     model: model.salesOrderModel,
+//                                     attributes: ['salesOrdersId', 'customerId', 'location'],
+//                                     include: [
+//                                         {
+//                                             model: model.customerModel,
+//                                             as: 'customers', attributes: ['customerId', 'customerName']
+//                                         }
+//                                     ]
+//                                 }
+//                             ]
+//                         },
+//                         {
+//                             model: model.clientUserModel,
+//                             as: 'clientDetails',
+//                             attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+//                             where: {
+//                                 clientId: queryParams.clientId
+//                             },
+//                         }
+//                     ]
+//                 },
+//             ],
+//         });;
+//         return result;
+//     } catch (error) {
+//         console.error("Error fetching transaction data:", error);
+//         throw new Error('Failed to fetch transaction data');
+//     }
+// }
+
+
+
 export async function getCOATransactionDetails(queryParams = {}) {
     try {
 
@@ -218,75 +308,82 @@ export async function getCOATransactionDetails(queryParams = {}) {
             endDate = new Date(year, month, 0);
         }
         console.log(queryParams, 'datess');
-
-        const result = await model.accountsModel.findAll({
-            attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
+        const result = await model.subAccountTypesModel.findAll({
+            attributes:['subAccountType','subAccountTypesId'],
             include: [
                 {
-                    model: model.accountTransactionModel,
-                    attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
-                    where: {
-                        ...(queryParams.customerId && { customerId: queryParams.customerId }),
-                        ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),
-                        ...(queryParams.poSupplierInvoiceMapperId && { poSupplierInvoiceMapperId: queryParams.poSupplierInvoiceMapperId }),
-                        ...(queryParams.purchaseOrderId && { purchaseOrderId: queryParams.purchaseOrderIds }),
-                        ...(queryParams.soLoadingOrderId && { soLoadingOrderId: queryParams.soLoadingOrderId }),
-                        ...(queryParams.so && { so: queryParams.so }),
-                        ...(queryParams.accountsId && { accountsId: queryParams.accountsId }),
-                        ...(startDate && endDate && {
-                            createdAt: {
-                                [Op.between]: [startDate, endDate]
-                            }
-                        }),
-                    },
+                    model: model.accountsModel,
+                    attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
+                    as: 'accountSubtype',
+                    required:true,
                     include: [
                         {
-                            model: model.poSupplierInvoiceMapperModel,
-                            attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
-                            as: 'poSupplierInvoice'
-                        },
-                        {
-                            model: model.purchaseModel,
-                            attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
-                            as: 'purchaseOrder',
+                            model: model.accountTransactionModel,
+                            attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+                            where: {
+                                ...(queryParams.customerId && { customerId: queryParams.customerId }),
+                                ...(queryParams.supplierId && { supplierId: queryParams.supplierId }),
+                                ...(queryParams.poSupplierInvoiceMapperId && { poSupplierInvoiceMapperId: queryParams.poSupplierInvoiceMapperId }),
+                                ...(queryParams.purchaseOrderId && { purchaseOrderId: queryParams.purchaseOrderIds }),
+                                ...(queryParams.soLoadingOrderId && { soLoadingOrderId: queryParams.soLoadingOrderId }),
+                                ...(queryParams.so && { so: queryParams.so }),
+                                ...(queryParams.accountsId && { accountsId: queryParams.accountsId }),
+                                ...(startDate && endDate && {
+                                    createdAt: {
+                                        [Op.between]: [startDate, endDate]
+                                    }
+                                }),
+                            },
                             include: [
                                 {
-                                    model: model.supplierModel,
-                                    as: 'suppliers',
-                                    attributes: ['supplierName', 'supplierId']
-
-                                }
-                            ]
-                        },
-                        {
-                            model: model.soLoadingOrderModel,
-                            as: 'soLoadingOrders',
-                            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
-                            include: [
+                                    model: model.poSupplierInvoiceMapperModel,
+                                    attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+                                    as: 'poSupplierInvoice'
+                                },
                                 {
-                                    model: model.salesOrderModel,
-                                    attributes: ['salesOrdersId', 'customerId', 'location'],
+                                    model: model.purchaseModel,
+                                    attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+                                    as: 'purchaseOrder',
                                     include: [
                                         {
-                                            model: model.customerModel,
-                                            as: 'customers', attributes: ['customerId', 'customerName']
+                                            model: model.supplierModel,
+                                            as: 'suppliers',
+                                            attributes: ['supplierName', 'supplierId']
+
                                         }
                                     ]
+                                },
+                                {
+                                    model: model.soLoadingOrderModel,
+                                    as: 'soLoadingOrders',
+                                    attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+                                    include: [
+                                        {
+                                            model: model.salesOrderModel,
+                                            attributes: ['salesOrdersId', 'customerId', 'location'],
+                                            include: [
+                                                {
+                                                    model: model.customerModel,
+                                                    as: 'customers', attributes: ['customerId', 'customerName']
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    model: model.clientUserModel,
+                                    as: 'clientDetails',
+                                    attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+                                    where: {
+                                        clientId: queryParams.clientId
+                                    },
                                 }
                             ]
                         },
-                        {
-                            model: model.clientUserModel,
-                            as: 'clientDetails',
-                            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-                            where: {
-                                clientId: queryParams.clientId
-                            },
-                        }
                     ]
-                },
-            ],
-        });;
+                }
+            ]
+        })
         return result;
     } catch (error) {
         console.error("Error fetching transaction data:", error);
@@ -296,15 +393,15 @@ export async function getCOATransactionDetails(queryParams = {}) {
 
 //get transaction history based on supplier 
 
-export async function getPurchaseTransactions(supplierId, limit, offset,clientId) {
+export async function getPurchaseTransactions(supplierId, limit, offset, clientId) {
     try {
-        const result = model.supplierModel.findAll({
+        const result = await model.supplierModel.findAll({
             attributes: ['supplierId', 'supplierName'],
             where: {
                 ...(supplierId && { supplierId })
             },
-            limit: limit,
-            offset: offset,
+            // limit: limit,
+            // offset: offset,
             include: [
                 {
                     model: model.clientUserModel,
@@ -337,6 +434,7 @@ export async function getPurchaseTransactions(supplierId, limit, offset,clientId
                 }
             ]
         });
+        console.log(result, 'resusllls');
 
         return result;
     } catch (error) {
@@ -355,8 +453,8 @@ export async function getSalesTransactions(customerId, limit, offset, clientId) 
             where: {
                 ...(customerId && { customerId })
             },
-            limit: limit,
-            offset: offset,
+            // limit: limit,
+            // offset: offset,
             include: [
                 {
                     model: model.clientUserModel,
@@ -392,7 +490,7 @@ export async function getSalesTransactions(customerId, limit, offset, clientId) 
                             ]
                         },
 
-                    ]
+                    ],
                 }
             ],
         });

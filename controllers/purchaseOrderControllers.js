@@ -26,13 +26,17 @@ export const createOrder = async (req, res) => {
 // 2. get po Number 
 export const getPoNumber = async (req, res) => {
     try {
-        const result = await purchaseOrderService.getPoNumber();
-        res.status(200).send(result);
+        const clientId = req.clientId;
+        const result = await purchaseOrderService.getPoNumber(clientId);
+
+        console.log(result, 'Result from purchaseOrderService');
+        res.status(200).json(result);
     } catch (error) {
         console.error("Error in getting Po Number:", error);
         res.status(500).send("Internal Server Error");
     }
 };
+
 
 // 3. update order 
 export const updateOrder = async (req, res) => {
@@ -60,10 +64,10 @@ export const addPurchaseOrderProduct = async (req, res) => {
         const data = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        console.log(createdBy,'createdBY');
-        
-        const result = await purchaseOrderService.addPurchaseOrderProduct(data,createdBy);
-        res.status(200).send(result); 
+        console.log(createdBy, 'createdBY');
+
+        const result = await purchaseOrderService.addPurchaseOrderProduct(data, createdBy);
+        res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Purchase  Order Products: ", error);
         res.status(500).send("Internal Server Error");
@@ -73,9 +77,9 @@ export const addPurchaseOrderProduct = async (req, res) => {
 // 5. get all Purchase Order
 export const getAllOpenPo = async (req, res) => {
     let { search } = req.query
-    const clientId= req.clientId;    
+    const clientId = req.clientId;
     try {
-        const result = await purchaseOrderService.getAllPo({search,clientId});
+        const result = await purchaseOrderService.getAllPo({ search, clientId });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  PO :", error);
@@ -110,7 +114,7 @@ export const addSuplierInvoice = async (req, res) => {
         if (!(poNumber && purchaseOrderId)) {
             res.status(400).send("po and purchase Order Id is required for add supplier invoice");
         }
-        const result = await purchaseOrderService.addSuplierInvoice({...data,createdBy});
+        const result = await purchaseOrderService.addSuplierInvoice({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add supplier Invoice: ", error);
@@ -129,7 +133,7 @@ export const addSlabDetails = async (req, res) => {
         if (!(po)) {
             res.status(400).send("Po is required for add Slab Details");
         }
-        const result = await purchaseOrderService.addSlabDetails({...data,createdBy});
+        const result = await purchaseOrderService.addSlabDetails({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Slab Details: ", error);
@@ -165,7 +169,7 @@ export const addProductInventory = async (req, res) => {
         if (!(poSupplierInvoiceMapperId)) {
             res.status(400).send("po Supplier Invoice Mapper Id  is required for add product Inventory");
         }
-        const result = await purchaseOrderService.addProductInventory({...data,createdBy});
+        const result = await purchaseOrderService.addProductInventory({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add product Inventory: ", error);
@@ -176,9 +180,10 @@ export const addProductInventory = async (req, res) => {
 // 11. get inventory product data
 export const getProductInventory = async (req, res) => {
     try {
+        const clientId = req.clientId;
         const page = parseInt(req.query.page) || 0;  // Default to page 0 if not provided
         const limit = 10;  // Fixed limit of 10 items per page
-        const result = await purchaseOrderService.getProductInventory(page, limit);
+        const result = await purchaseOrderService.getProductInventory(page, limit, clientId);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting Product Inventory:", error);
@@ -197,7 +202,7 @@ export const addPayment = async (req, res) => {
         if (!(poSupplierInvoiceMapperId)) {
             res.status(400).send("po Supplier Invoice Mapper Id  is required for make payment");
         }
-        const result = await purchaseOrderService.addPayment({...data,createdBy});
+        const result = await purchaseOrderService.addPayment({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add payment: ", error);
@@ -262,7 +267,7 @@ export const purchaseAccountTransaction = async (req, res) => {
     try {
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const result = await purchaseOrderService.purchaseAccountTransaction({ ...transactionData,createdBy });
+        const result = await purchaseOrderService.purchaseAccountTransaction({ ...transactionData, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
@@ -306,7 +311,7 @@ export const getCOATransactionDetails = async (req, res) => {
 
 export const getInventoryListBasedOnSipl = async (req, res) => {
     try {
-        const clientId= req.clientId;   
+        const clientId = req.clientId;
         const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId);
         res.status(200).send(result);
     } catch (error) {

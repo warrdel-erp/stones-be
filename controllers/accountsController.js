@@ -154,7 +154,7 @@ export const getCOATransactionDetails = async (req, res) => {
 export const getTransactionSupplierCustomers = async (req, res) => {
     try {
         const typeOfData = req.params;
-        const clientId = req.clientId;
+        const clientId = req.clientId;  
         const result = await accountsService.getTransactionSupplierCustomer(typeOfData, req.query,clientId);
         res.status(200).send(result);
     } catch (error) {

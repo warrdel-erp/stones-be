@@ -85,30 +85,54 @@ export async function getCOATransactionDetails(queryParams) {
     return await accountsRepository.getCOATransactionDetails(queryParams);
 }
 
+// export async function getCOATransactionDetails(queryParams) {
+//     const apiData = await accountsRepository.getCOATransactionDetails(queryParams);
+//     let filteredData = [];
+//     if (Array.isArray(apiData) && apiData.length > 0) {
+//         filteredData = apiData.filter((subAccountData) => {
+//             const { subAccountType, status } = subAccountData.dataValues; 
+
+//             return status === 'ACTIVE';
+//         });
+//         filteredData = filteredData.map((subAccountData) => {
+//             return {
+//                 subAccountType: subAccountData.dataValues.subAccountType,
+//                 accountSubtype: subAccountData.dataValues.accountSubtype, 
+//             };
+//         });
+//     }
+//     return { apiData, filteredData };
+// }
+
 
 //get transaction history based on supplier and customers
 
-export async function getTransactionSupplierCustomer(typeOfData, queryParams,clientId) {
+export async function getTransactionSupplierCustomer(typeOfData, queryParams, clientId) {
     const { limit = 1, offset = 0, customerId, supplierId } = queryParams;
+
     const dataApi = await (typeOfData.type === 'sales'
-        ? accountsRepository.getSalesTransactions(customerId, limit, offset,clientId)
+        ? accountsRepository.getSalesTransactions(customerId, limit, offset, clientId, queryParams)
         : typeOfData.type === 'purchase'
-            ? accountsRepository.getPurchaseTransactions(supplierId, limit, offset,clientId)
+            ? accountsRepository.getPurchaseTransactions(supplierId, limit, offset, clientId, queryParams)
             : Promise.resolve(null));
-
-
 
     let initialBalance = 0;
     let totalDebit = 0;
     let totalCredit = 0;
     let totalDebitBalance = 0;
     let totalCreditBalance = 0;
+    let balancedCalculatedAmount=0
 
     const getPrefixFromAccountName = (accountName) => {
         return accountName
             .split(' ')
             .map(word => word.charAt(0).toUpperCase())
             .join('');
+    };
+
+    const formatCurrency = (amount) => {
+        const formattedAmount = Math.abs(amount).toFixed(2);
+        return amount < 0 ? `-$${formattedAmount}` : `$${formattedAmount}`;
     };
 
     const processTransactions = (transactions, isSales) => {
@@ -123,10 +147,6 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams,cli
             totalCredit += creditAmount;
             totalDebitBalance += debitBalance;
             totalCreditBalance += creditBalance;
-            console.log(totalDebitBalance,'totalDebitbalance');
-            
-            console.log(totalCreditBalance,'creditbalace');
-            
 
             if (transaction.account.accountBalance === 'Dr') {
                 balance = balance + debitAmount - creditAmount;
@@ -136,22 +156,23 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams,cli
 
             const prefix = getPrefixFromAccountName(transaction.account.accountName);
             const transactionId = isSales
-                ? `${prefix}-SO#${transaction.so}-${transaction.soLoadingOrderId}-${transaction.accountTransactionId}`
+                ? `${prefix}-LO#${transaction.so}-${transaction.soLoadingOrderId}-${transaction.accountTransactionId}`
                 : `${prefix}-PO#${transaction.purchaseOrderId}-${transaction.poSupplierInvoiceMapperId}-${transaction.accountTransactionId}`;
 
-            return {
+            const result = {
                 accountTransactionId: transaction.accountTransactionId,
                 transactionDate: transaction.createdAt,
                 accountsId: transaction.accountsId,
                 entryType: transaction.entryType,
                 transactionAmountType: transaction.transactionAmountType,
-                debitAmount: debitAmount,
-                creditAmount: creditAmount,
+                debitAmount: formatCurrency(debitAmount),
+                creditAmount: formatCurrency(creditAmount),
                 paymentMethod: transaction.paymentMethod,
                 accountBalance: transaction.account.accountBalance,
                 accountName: transaction.account.accountName,
-                balancedAmount: balance,
+                balancedAmount: formatCurrency(balance),
                 transactionId: transactionId,
+                balancedCalculatedAmount: formatCurrency(balance),
                 ...(!isSales && {
                     poSupplierInvoiceMapperId: transaction.poSupplierInvoiceMapperId,
                     purchaseOrderId: transaction.purchaseOrderId,
@@ -161,6 +182,8 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams,cli
                     so: transaction.so,
                 }),
             };
+
+            return result;
         });
     };
 
@@ -171,9 +194,20 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams,cli
                 : entity.supplierTransactions.length > 0;
         })
         .map(entity => {
-            const transactions = typeOfData.type === 'sales'
+            let transactions = typeOfData.type === 'sales'
                 ? entity.customerTransactions
                 : entity.supplierTransactions;
+
+            if (customerId) {
+                transactions = transactions.filter(transaction =>
+                    ['Accounts, Notes and Loans Receivable'].includes(transaction.account.accountName)
+                );
+            } else if (supplierId) {
+                transactions = transactions.filter(transaction =>
+                    transaction.account.accountName === 'Trade Payables'
+                );
+            }
+
             const transactionData = processTransactions(transactions, typeOfData.type === 'sales');
 
             return {
@@ -182,14 +216,16 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams,cli
                         ? { customerId: entity.dataValues.customerId, customerName: entity.dataValues.customerName.trim() }
                         : { supplierId: entity.dataValues.supplierId, supplierName: entity.dataValues.supplierName.trim() }
                 ),
-                totalDebit: totalDebit,
-                totalCredit: totalCredit,
-                totalBalance: totalDebitBalance - totalCreditBalance,
+                totalDebit: formatCurrency(totalDebit),
+                totalCredit: formatCurrency(totalCredit),
+                totalBalance: balancedCalculatedAmount,
                 ...(queryParams.supplierId != null || queryParams.customerId != null ? { transactionData: transactionData } : {}),
             };
-
         });
 
     return filteredData;
 }
+
+
+
 

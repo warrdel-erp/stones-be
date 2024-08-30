@@ -36,15 +36,27 @@ export async function findSoNumber(soNumber) {
   return result;
 }
 
-export async function latestPoNumber() {
+export async function latestPoNumber(clientId) {
   try {
     const attributes = ['so'];
-    const result = await model.salesOrderModel.findOne({
+    const result = await model.salesOrderModel.findAll({
       attributes: attributes,
       order: [['created_at', 'DESC']],
-      limit: 1,
+      // limit: 1,
+      include: [
+        {
+            model: model.clientUserModel,
+            as: 'clientDetails',
+            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+            where: {
+                clientId: clientId
+            }
+        }
+    ]
     });
-    return result;
+    console.log(result);
+    
+    return result.length;
   } catch (error) {
     console.log("Error getting SO Number: ", error);
     throw error;

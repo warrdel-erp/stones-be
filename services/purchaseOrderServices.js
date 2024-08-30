@@ -9,15 +9,12 @@ export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
 }
 
-export async function getPoNumber() {
-    const result = await purchaseOrderRepository.latestPoNumber()
-    let newPo;
-    if (!result) {
-        newPo = "0001";
-    } else {
-        let lastPo = parseInt(result.get('po'));
-        newPo = String(lastPo + 1).padStart(4, '0');
-    }
+export async function getPoNumber(clientId) {
+    const result = await purchaseOrderRepository.latestPoNumber(clientId);
+    console.log(result, 'ssss');
+
+    const newPo = result + 1;
+    console.log(newPo, 'newpo');
     return newPo;
 }
 
@@ -25,7 +22,7 @@ export async function updateOrder(poNumber, info) {
     return await purchaseOrderRepository.updateOrder(poNumber, info)
 }
 
-export async function addPurchaseOrderProduct(dataArray) { 
+export async function addPurchaseOrderProduct(dataArray) {
     const transaction = await sequelize.transaction();
     try {
         const results = [];
@@ -35,7 +32,7 @@ export async function addPurchaseOrderProduct(dataArray) {
             const purchaseOrderProduct = {
                 purchaseOrderId: data.purchaseOrderId,
                 productId: data.productId,
-                createdBy:data.createdBy
+                createdBy: data.createdBy
             };
 
             result = await purchaseOrderRepository.createPurchaseProductOrder(purchaseOrderProduct, transaction);
@@ -73,6 +70,8 @@ export async function singlePoDetails(poNumber) {
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
+    console.log(data.createdBy, 'data');
+
     const transaction = await sequelize.transaction();
     const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId);
     let transcationNumber
@@ -95,6 +94,7 @@ export async function addSuplierInvoice(data) {
             invoiceDate: data.invoiceDate,
             shipDate: data.shipDate,
             dueDate: data.dueDate,
+            createdBy: data.createdBy
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
@@ -204,8 +204,22 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
         const dueDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].dueDate
         const shipDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].shipDate
         const paymentTerm = allDetailsPurchaseOrderId.dataValues.paymentTerm
-        const supplierId = allDetailsPurchaseOrderId.dataValues.supplierId
-        const allSlabDetails = { slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId };
+        const supplierId = allDetailsPurchaseOrderId.dataValues.supplierId;
+        const parentLocation = allDetailsPurchaseOrderId.dataValues.suppliers.parentLocation;
+        const printName = allDetailsPurchaseOrderId.dataValues.suppliers.printName;
+        const remitAddress = allDetailsPurchaseOrderId.dataValues.suppliers.remitAddress;
+        const remitSuite = allDetailsPurchaseOrderId.dataValues.suppliers.remitSuite;
+        const remitCity = allDetailsPurchaseOrderId.dataValues.suppliers.remitCity;
+        const remitState = allDetailsPurchaseOrderId.dataValues.suppliers.remitState;
+        const remitZip = allDetailsPurchaseOrderId.dataValues.suppliers.remitZip;
+        const remitCountry = allDetailsPurchaseOrderId.dataValues.suppliers.remitCountry;
+        const shippingAddress = allDetailsPurchaseOrderId.dataValues.suppliers.shippingAddress;
+        const shippingSuite = allDetailsPurchaseOrderId.dataValues.suppliers.shippingSuite;
+        const shippingCity = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCity;
+        const shippingState = allDetailsPurchaseOrderId.dataValues.suppliers.shippingState;
+        const shippingZip = allDetailsPurchaseOrderId.dataValues.suppliers.shippingZip;
+        const shippingCountry = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCountry;
+        const allSlabDetails = { shippingZip,shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId };
         return allSlabDetails;
     } catch (error) {
         throw new Error(`Failed to fetch slab Details ${poNumber} && ${poSupplierInvoiceMappperId}: ${error.message}`);
@@ -214,8 +228,8 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
-    console.log(dataArray.createdBy,'dataArray');
-    
+    console.log(dataArray.createdBy, 'dataArray');
+
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
@@ -234,13 +248,13 @@ export async function addProductInventory(dataArray) {
                     entryType: accountDetail.entryType,
                     transactionOf: 'purchase',
                     transactionAmountType: 'debit',
-                    createdBy:dataArray.createdBy
+                    createdBy: dataArray.createdBy
                 };
                 await purchaseAccountTransaction(transactionDataWithAccount, transaction);
             }
         }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
-        // console.log(inventoryDetails, 'inventorydetails');
+        console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
             slab: item.slab,
@@ -259,18 +273,18 @@ export async function addProductInventory(dataArray) {
                     slabInStock: productSlabInStock + newSlabInStock,
                     quantityInStock: productQuantityInStock + newQuantityInStock,
                     productId: data.productId,
-                    createdBy:dataArray.createdBy
+                    createdBy: dataArray.createdBy
                 };
                 result = await productInventory.updateProductInventory(updateData, transaction)
-                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId ,createdBy:dataArray.createdBy }
+                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId, createdBy: dataArray.createdBy }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
                 // result = await productInventory.addProductInventory(info, transaction);
             } else {
-                const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId, createdBy:dataArray.createdBy };
+                const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId, createdBy: dataArray.createdBy };
                 result = await productInventory.addProductInventory(info, transaction);
                 const productInventoryId = result.get('productInventoryId')
-                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId,createdBy:dataArray.createdBy }
+                const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId, createdBy: dataArray.createdBy }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
             };
             results.push(result);
@@ -286,9 +300,9 @@ export async function addProductInventory(dataArray) {
     };
 };
 
-export async function getProductInventory(page, limit) {
+export async function getProductInventory(page, limit, clientId) {
     let result = [];
-    const data = await productInventory.getInventoryList(page, limit);
+    const data = await productInventory.getInventoryList(page, limit, clientId);
     for (const abc of data) {
         const abcd = abc.toJSON();
         const slabData = [].concat(...abcd?.productInventoryInvoiceMapper?.map(pim => {
@@ -346,8 +360,6 @@ export async function getContainerDetails(poSupplierInvoiceMappperId) {
 
 //purchase account transaction
 export async function purchaseAccountTransaction(transactionData) {
-    console.log(transactionData,'transaction');
-    
     const transaction = await sequelize.transaction();
     const accNames = { debitAccountName: 'Trade Payables', creditAccountName: 'Cost Of Sales' }
     try {
@@ -355,7 +367,8 @@ export async function purchaseAccountTransaction(transactionData) {
             const transactionAccontId = await getAccountIdByAccountName(accNames);
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' },
+                { accountsId: transactionData.paymentMethod, entryType: 'cr' }
             ];
             for (const accountDetail of accountDetails) {
                 const transactionDataWithAccount = {
@@ -364,7 +377,7 @@ export async function purchaseAccountTransaction(transactionData) {
                     entryType: accountDetail.entryType,
                     transactionOf: 'purchase',
                     transactionAmountType: 'credit',
-                    createdBy:transactionData.createdBy
+                    createdBy: transactionData.createdBy
                 };
                 await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, { transaction });
             }

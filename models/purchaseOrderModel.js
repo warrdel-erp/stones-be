@@ -17,7 +17,7 @@ export default sequelize.define(
     po: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        unique: true,
+        // unique: true,
     },
     poDate: {
         type: DataTypes.DATE,

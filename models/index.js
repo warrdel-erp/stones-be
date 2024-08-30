@@ -186,6 +186,15 @@ clientUserModel.hasMany(productInventoryModel, { foreignKey: 'created_by', sourc
 accountTransactionModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
 clientUserModel.hasMany(accountTransactionModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'accountTransaction' });
 
+poSupplierInvoiceMapperModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'poSupplplierInvoice' });
+
+soLoadingOrderModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(soLoadingOrderModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'soLoadingOrder' });
+
+salesOrderInventoryModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(salesOrderInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'salesOrderInventory' });
+
 
 export {
 	productModel,
