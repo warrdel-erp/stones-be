@@ -1,3 +1,4 @@
+import filterObject from '../helpers/filteredKeysUtils.js';
 import { findSoNumber, findSalesOrdersInventory } from '../repository/salesOrderRepository.js';
 import * as salesOrderService from '../services/salesOrderServices.js'
 
@@ -8,17 +9,16 @@ export const createOrder = async (req, res) => {
         const createdBy = user.dataValues.id;
         const info = req.body
         const { so, soDate, salesTax } = req.body
-        // const soDetails = await findSoNumber(so);
-        // console.log(`>>>>>>>>>>soDetails>>>>>>`, soDetails);
+        const data = filterObject(info)
         if (!(so && soDate && salesTax)) {
             res.status(400).send("SO Number,SO Date and sales Tax is required");
-        }  else {
-            const result = await salesOrderService.createOrder({ ...info, createdBy });
+        } else {
+            const result = await salesOrderService.createOrder({ ...data, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
         console.error("Error in create Order: ", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send(error);
     }
 };
 
@@ -148,8 +148,9 @@ export const createSalesAccountTransaction = async (req, res) => {
     const transactionData = req.body;
     const user = req.user;
     const createdBy = user.dataValues.id;
+    const data= filterObject(transactionData)
     try {
-        const result = await salesOrderService.createSalesAccountTransaction({ ...transactionData, createdBy });
+        const result = await salesOrderService.createSalesAccountTransaction({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error(error);

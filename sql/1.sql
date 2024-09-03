@@ -784,3 +784,19 @@ DROP INDEX product_name ;
 
 ALTER TABLE suppliers 
 DROP INDEX supplier_name ;
+
+
+--removed so foreign key from account_transaction table
+ALTER TABLE `stone_design`.`account_transaction` 
+DROP FOREIGN KEY `account_transaction_ibfk_6`;
+ALTER TABLE `stone_design`.`account_transaction` 
+DROP INDEX `so` ;
+;
+
+
+ALTER TABLE customers ADD CONSTRAINT unique_email UNIQUE (emails);
+ALTER TABLE customers ADD CONSTRAINT unique_primary_phone_number UNIQUE (primary_phone_number);
+
+
+ALTER TABLE suppliers ADD CONSTRAINT unique_email UNIQUE (email);
+ALTER TABLE suppliers ADD CONSTRAINT unique_primary_phone_number UNIQUE (primary_phone_no);

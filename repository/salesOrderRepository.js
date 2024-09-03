@@ -104,7 +104,7 @@ export async function getSingleSalesOrder(soNumber) {
         },
       ],
       where: {
-        so: soNumber
+        salesOrdersId: soNumber
       },
     });
     return result;

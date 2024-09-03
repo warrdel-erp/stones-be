@@ -25,7 +25,7 @@ router.patch('/:po', userAuth, updateOrder);
 
 router.post('/addPurchaseProduct',userAuth, addPurchaseOrderProduct);
 
-router.get('/poNumber',userAuth, singlePoDetails);
+router.get('/purchaseOrderId',userAuth, singlePoDetails);
 
 router.post('/addSuplierInvoice', userAuth,addSuplierInvoice);
 

@@ -1,3 +1,4 @@
+import filterObject from '../helpers/filteredKeysUtils.js';
 import { findPoNumber } from '../repository/purchaseOrderRepository.js';
 import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 
@@ -9,17 +10,20 @@ export const createOrder = async (req, res) => {
         const user = req.user;
         const createdBy = user.dataValues.id;
         const poDetails = await findPoNumber(po);
+        const data = filterObject(info)
+        console.log(data,'ayssy');
+        
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
         } else if (poDetails) {
             res.status(400).send("PO Number can't Be Same");
         } else {
-            const result = await purchaseOrderService.createOrder({ ...info, createdBy });
+            const result = await purchaseOrderService.createOrder({ ...data, createdBy });
             res.status(200).send(result);
         }
     } catch (error) {
         console.error("Error in create Order: ", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send(error);
     }
 };
 
@@ -90,15 +94,15 @@ export const getAllOpenPo = async (req, res) => {
 // 6. get single purchase order details
 
 export const singlePoDetails = async (req, res) => {
-    const poNumber = req.query.po;
+    const purchaseOrderId = req.query.purchaseOrderId;
     try {
-        if (!poNumber) {
+        if (!purchaseOrderId) {
             res.status(400).send("purchase order number is required");
         }
-        const result = await purchaseOrderService.singlePoDetails(poNumber);
+        const result = await purchaseOrderService.singlePoDetails(purchaseOrderId);
         res.status(200).send(result);
     } catch (error) {
-        console.error(`Error in getting ${poNumber} details:`, error);
+        console.error(`Error in getting ${purchaseOrderId} details:`, error);
         res.status(500).send("Internal Server Error");
     }
 };
@@ -144,16 +148,16 @@ export const addSlabDetails = async (req, res) => {
 // 9. get Slab details
 
 export const singleSlabDetails = async (req, res) => {
-    const poNumber = req.query.po;
+    const purchaseOrderId = req.query.purchaseOrderId;
     const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
     try {
-        if (!poNumber && poSupplierInvoiceMappperId) {
+        if (!purchaseOrderId && poSupplierInvoiceMappperId) {
             res.status(400).send("purchase order number and po Supplier Invoice Mappper Id is required");
         }
-        const result = await purchaseOrderService.singleSlabDetails(poNumber, poSupplierInvoiceMappperId);
+        const result = await purchaseOrderService.singleSlabDetails(purchaseOrderId, poSupplierInvoiceMappperId);
         res.status(200).send(result);
     } catch (error) {
-        console.error(`Error in getting ${poNumber} details:`, error);
+        console.error(`Error in getting ${purchaseOrderId} details:`, error);
         res.status(500).send("Internal Server Error");
     }
 };

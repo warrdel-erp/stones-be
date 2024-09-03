@@ -81,28 +81,95 @@ export async function getAccountIdByAccountName(data) {
 }
 
 //get coa account details
+
 export async function getCOATransactionDetails(queryParams) {
-    return await accountsRepository.getCOATransactionDetails(queryParams);
+    const apiData = await accountsRepository.getCOATransactionDetails(queryParams);
+    let previousAccountLevelTotal = 0;
+    let previousTransactionLevelTotal = 0;
+
+    const filteredData = apiData.map((subAccountData) => {
+        let accountTypeDebitTotal = 0;
+        let accountTypeCreditTotal = 0;
+
+        const accountSubtype = subAccountData.accountSubtype.map((account) => {
+            let debitTotal = 0;
+            let creditTotal = 0;
+
+            const accountTransactions = account.account_transactions.map((transaction) => {
+                let creditAmount = 0;
+                let debitAmount = 0;
+
+                if (transaction.entryType === 'cr') {
+                    creditAmount = transaction.transactionAmount;
+                    creditTotal += creditAmount;
+                } else if (transaction.entryType === 'dr') {
+                    debitAmount = transaction.transactionAmount;
+                    debitTotal += debitAmount;
+                }
+                const transactionLevelTotal = account.accountBalance === 'Dr'
+                    ? previousTransactionLevelTotal + debitAmount - creditAmount :
+                    previousTransactionLevelTotal + creditAmount - debitAmount;
+                previousTransactionLevelTotal = transactionLevelTotal;
+                return {
+                    transactionId: transaction.accountTransactionId,
+                    transactionAmount: transaction.transactionAmount,
+                    creditAmount,
+                    debitAmount,
+                    transactionLevelTotal,
+                    entryType: transaction.entryType,
+                    transactionDate: transaction.createdAt,
+                    paymentMethod: transaction.paymentMethod,
+                    transactionAmountType: transaction.transactionAmountType,
+                    transactionOf: transaction.transactionOf,
+                    poSupplierInvoice: transaction.poSupplierInvoice,
+                    poSupplierInvoiceMapperId: transaction.poSupplierInvoiceMapperId,
+                    purchaseOrderId: transaction.purchaseOrderId,
+                    so: transaction.so,
+                    soLoadingOrders: transaction.soLoadingOrders,
+                    soLoadingOrderId: transaction.soLoadingOrderId,
+                    purchaseOrder: transaction.purchaseOrder
+                };
+            });
+
+            accountTypeDebitTotal += debitTotal;
+            accountTypeCreditTotal += creditTotal;
+            const accountLevelTotal = account.accountBalance === 'Dr'
+                ? previousAccountLevelTotal + debitTotal - creditTotal
+                : previousAccountLevelTotal + creditTotal - debitTotal;
+            previousAccountLevelTotal = accountLevelTotal;
+
+            return {
+                accountName: account.accountName,
+                accountBalance: account.accountBalance,
+                accountTransactions,
+                debitTotal,
+                creditTotal,
+                accountLevelTotal
+            };
+        });
+
+        return {
+            subAccountType: subAccountData.subAccountType,
+            accountSubtype,
+            debitTotal: accountTypeDebitTotal,
+            creditTotal: accountTypeCreditTotal,
+            subAccountTypesId: subAccountData.subAccountTypesId,
+            subAccountTotal: accountTypeDebitTotal - accountTypeCreditTotal
+        };
+    });
+
+    const overallDebitTotal = filteredData.reduce((sum, data) => sum + data.debitTotal, 0);
+    const overallCreditTotal = filteredData.reduce((sum, data) => sum + data.creditTotal, 0);
+
+    const combinedData = {
+        filteredData,
+        overallDebitTotal,
+        overallCreditTotal
+    };
+
+    return combinedData;
 }
 
-// export async function getCOATransactionDetails(queryParams) {
-//     const apiData = await accountsRepository.getCOATransactionDetails(queryParams);
-//     let filteredData = [];
-//     if (Array.isArray(apiData) && apiData.length > 0) {
-//         filteredData = apiData.filter((subAccountData) => {
-//             const { subAccountType, status } = subAccountData.dataValues; 
-
-//             return status === 'ACTIVE';
-//         });
-//         filteredData = filteredData.map((subAccountData) => {
-//             return {
-//                 subAccountType: subAccountData.dataValues.subAccountType,
-//                 accountSubtype: subAccountData.dataValues.accountSubtype, 
-//             };
-//         });
-//     }
-//     return { apiData, filteredData };
-// }
 
 
 //get transaction history based on supplier and customers
@@ -121,7 +188,7 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams, cl
     let totalCredit = 0;
     let totalDebitBalance = 0;
     let totalCreditBalance = 0;
-    let balancedCalculatedAmount=0
+    let balancedCalculatedAmount = 0
 
     const getPrefixFromAccountName = (accountName) => {
         return accountName
@@ -157,7 +224,7 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams, cl
             const prefix = getPrefixFromAccountName(transaction.account.accountName);
             const transactionId = isSales
                 ? `${prefix}-LO#${transaction.so}-${transaction.soLoadingOrderId}-${transaction.accountTransactionId}`
-                : `${prefix}-PO#${transaction.purchaseOrderId}-${transaction.poSupplierInvoiceMapperId}-${transaction.accountTransactionId}`;
+                : `${prefix}-#${transaction.poSupplierInvoice.transaction}-${transaction.accountTransactionId}`;
 
             const result = {
                 accountTransactionId: transaction.accountTransactionId,

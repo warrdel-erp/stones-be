@@ -59,12 +59,12 @@ export async function getAllPo(data) {
 
 // single po complete details  page
 
-export async function singlePoDetails(poNumber) {
+export async function singlePoDetails(purchaseOrderId) {
     try {
-        const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(poNumber);
+        const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
         return allDetailsPurchaseOrderId;
     } catch (error) {
-        throw new Error(`Failed to fetch purchase ${poNumber} order details: ${error.message}`);
+        throw new Error(`Failed to fetch purchase ${purchaseOrderId} order details: ${error.message}`);
     }
 };
 
@@ -186,10 +186,10 @@ export async function addSlabDetails(info) {
 
 // get Slab Details
 
-export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
+export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMappperId) {
     try {
         const slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId);
-        const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(poNumber);
+        const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
         const po = allDetailsPurchaseOrderId.dataValues.po;
         const supplierSo = allDetailsPurchaseOrderId.dataValues.supplierSo;
         const freightForwarder = allDetailsPurchaseOrderId.dataValues.freightForwarder
@@ -222,7 +222,7 @@ export async function singleSlabDetails(poNumber, poSupplierInvoiceMappperId) {
         const allSlabDetails = { shippingZip,shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId };
         return allSlabDetails;
     } catch (error) {
-        throw new Error(`Failed to fetch slab Details ${poNumber} && ${poSupplierInvoiceMappperId}: ${error.message}`);
+        throw new Error(`Failed to fetch slab Details ${purchaseOrderId} && ${poSupplierInvoiceMappperId}: ${error.message}`);
     }
 };
 

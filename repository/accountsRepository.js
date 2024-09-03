@@ -360,7 +360,7 @@ export async function getCOATransactionDetails(queryParams = {}) {
                                     include: [
                                         {
                                             model: model.salesOrderModel,
-                                            attributes: ['salesOrdersId', 'customerId', 'location'],
+                                            attributes: ['salesOrdersId', 'customerId', 'location','so'],
                                             include: [
                                                 {
                                                     model: model.customerModel,

@@ -1,3 +1,4 @@
+import filterObject from '../helpers/filteredKeysUtils.js';
 import * as productService from '../services/productServices.js'
 
 // 1. create product
@@ -6,11 +7,12 @@ export const addProduct = async (req, res) => {
         const user = req.user;
         const createdBy = user.dataValues.id;
         const info = req.body;
-        const result = await productService.addProducts({ ...info, createdBy });
+        const data = filterObject(info)
+        const result = await productService.addProducts({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addProduct:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send(error);
     }
 };
 

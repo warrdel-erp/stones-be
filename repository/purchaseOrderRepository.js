@@ -20,18 +20,18 @@ export async function latestPoNumber(clientId) {
       // limit: 1,
       include: [
         {
-            model: model.clientUserModel,
-            as: 'clientDetails',
-            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-            where: {
-                clientId: clientId
-            }
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: clientId
+          }
         },
-    ]
+      ]
     });
     return result.length;
 
-    
+
   } catch (error) {
     console.log("Error getting PO Number: ", error);
     throw error;
@@ -141,7 +141,7 @@ export async function createSupplierInvoice(data) {
 
 // get Single details
 
-export async function getSinglePurchaseOrder(poNumber) {
+export async function getSinglePurchaseOrder(purchaseOrderId) {
   try {
     const result = await model.purchaseModel.findOne({
       attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
@@ -194,12 +194,12 @@ export async function getSinglePurchaseOrder(poNumber) {
         },
       ],
       where: {
-        po: poNumber
+        purchaseOrderId: purchaseOrderId
       },
     });
     return result;
   } catch (error) {
-    console.error(`Error in getting purchase order Id :-${poNumber}:`, error);
+    console.error(`Error in getting purchase order Id :-${purchaseOrderId}:`, error);
     throw error;
   }
 }
@@ -241,16 +241,16 @@ export async function getAllPurchaseOrder(data) {
       });
     } else {
       result = await model.purchaseModel.findAll({
-        attributes: ['po', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
+        attributes: ['po', 'purchaseOrderId', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
         include: [
           {
             model: model.clientUserModel,
             as: 'clientDetails',
             attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
             where: {
-                clientId: data.clientId
+              clientId: data.clientId
             },
-        },
+          },
           {
             model: model.supplierModel,
             as: 'suppliers',

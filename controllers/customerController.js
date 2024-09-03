@@ -1,3 +1,4 @@
+import filteredKeysUtils from '../helpers/filteredKeysUtils.js';
 import * as customerService from '../services/customerServices.js';
 
 // 1. Create customer
@@ -6,11 +7,12 @@ export const addCustomer = async (req, res) => {
         const info = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const result = await customerService.addCustomer({...info,createdBy});
+        const data = filteredKeysUtils(info)
+        const result = await customerService.addCustomer({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addCustomer:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send(error.parent.sqlMessage);
     }
 };
 

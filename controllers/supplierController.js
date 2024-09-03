@@ -1,3 +1,4 @@
+import filterObject from '../helpers/filteredKeysUtils.js';
 import * as supplierService from '../services/supplierServices.js'
 
 // 1. create supplier
@@ -5,12 +6,13 @@ export const addSupplier = async (req,res) => {
     try {
         const user = req.user
         const createdBy = user.dataValues.id
-        const info = req.body
-        const result = await supplierService.addSupplier({...info,createdBy});
+        const info = req.body;
+        const data = filterObject(info)
+        const result = await supplierService.addSupplier({...data,createdBy});
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addSupplier:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send(error);
     }
 };
 
