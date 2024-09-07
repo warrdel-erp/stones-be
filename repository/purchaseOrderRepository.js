@@ -52,13 +52,23 @@ export async function updateOrder(poNumber, data) {
   }
 }
 
-export async function findPoNumber(poNumber) {
+export async function findPoNumber(poNumber, clientId) {
   const result = await model.purchaseModel.findOne({
     where: {
       po: {
         [Op.eq]: poNumber
       }
-    }
+    },
+    include: [
+      {
+        model: model.clientUserModel,
+        as: 'clientDetails',
+        attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+        where: {
+          clientId
+        }
+      }
+    ]
   })
   return result;
 }

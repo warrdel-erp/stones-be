@@ -9,7 +9,8 @@ export const createOrder = async (req, res) => {
         const { po, poDate } = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const poDetails = await findPoNumber(po);
+        const clientId = req.clientId;
+        const poDetails = await findPoNumber(po, clientId);
         const data = filterObject(info)
         console.log(data,'ayssy');
         
