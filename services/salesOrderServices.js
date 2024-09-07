@@ -254,6 +254,8 @@ export async function updateStatus(transactionData) {
 
     const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
+    let shouldUpdateAccounts = false;
+
     try {
         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
         if (salesOrderInventory.length === 0) {
@@ -280,44 +282,51 @@ export async function updateStatus(transactionData) {
 
                 console.log(`Status updated to ${newStatus} for inventory ID ${salesOrdersInventoryId}`);
 
+        
                 if (newStatus === 'INVOICE') {
-                    const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
-                    const transactionAccountId = await getAccountIdByAccountName(accNames);
-
-                    console.log(transactionAccountId, 'transactionAccountId');
-
-                    const accountDetails = [
-                        { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
-                        { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
-                    ];
-
-                    for (const accountDetail of accountDetails) {
-                        const transactionDataWithAccount = {
-                            ...transactionData,
-                            accountsId: accountDetail.accountsId,
-                            entryType: accountDetail.entryType,
-                            transactionOf: 'sales',
-                            transactionAmountType: 'debit',
-                            createdBy: transactionData.createdBy
-                        };
-                        await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
-                        console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
-                    }
-                    const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
-                    for (const item of poSlabDetailIds) {
-                        const data = {
-                            poSlabDetailId: item,
-                            status: 'INACTIVE'
-                        };
-                        await updateSlabDetails(data, { transaction });
-                    }
-
-                    console.log(`Product inventory ID ${productInventoryId} set to INACTIVE`);
+                    shouldUpdateAccounts = true;
                 }
             } else {
                 console.log(`No update required for status: ${currentStatus}`);
             }
         }
+
+        if (shouldUpdateAccounts) {
+            const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
+            const transactionAccountId = await getAccountIdByAccountName(accNames);
+
+            console.log(transactionAccountId, 'transactionAccountId');
+
+            const accountDetails = [
+                { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
+            ];
+
+            for (const accountDetail of accountDetails) {
+                const transactionDataWithAccount = {
+                    ...transactionData,
+                    accountsId: accountDetail.accountsId,
+                    entryType: accountDetail.entryType,
+                    transactionOf: 'sales',
+                    transactionAmountType: 'debit',
+                    createdBy: transactionData.createdBy
+                };
+                await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
+                console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+            }
+
+            const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
+            for (const item of poSlabDetailIds) {
+                const data = {
+                    poSlabDetailId: item,
+                    status: 'INACTIVE'
+                };
+                await updateSlabDetails(data, { transaction });
+            }
+
+            console.log('Product inventory set to INACTIVE for relevant items.');
+        }
+
         await transaction.commit();
         return { success: true, message: 'Status updated successfully' };
 
@@ -327,6 +336,7 @@ export async function updateStatus(transactionData) {
         return { success: false, error: error.message };
     }
 }
+
 
 
 
