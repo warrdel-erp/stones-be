@@ -31,12 +31,27 @@ export async function userAuth(req, res, next) {
       return res.status(401).json({ message: "Unauthorized token" });
     }
 
+    const requestClientId = req.query.clientId;
+
     const token = authHeader.split(" ")[1];
+
     const { user, newToken, clientId } = await verifyAndExtendToken(token);
+    
+
+    if (requestClientId === undefined) {
+     
+      req.user = user;
+      req.clientId = clientId;
+      res.setHeader('Authorization', `Bearer ${newToken}`);
+      return next();
+    }
+
+    if (String(requestClientId) !== String(clientId)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     req.user = user;
     req.clientId = clientId;
-    console.log(clientId, 'clientID');
-
     res.setHeader('Authorization', `Bearer ${newToken}`);
 
     next();
@@ -45,3 +60,4 @@ export async function userAuth(req, res, next) {
     return res.status(401).json({ message: "Unauthorized user" });
   }
 }
+

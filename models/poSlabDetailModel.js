@@ -1,6 +1,6 @@
 import sequelize from "../database/sequelizeConfig.js"
 import { DataTypes } from 'sequelize';
-import { status, slabBinEnum } from "../constant.js";
+import { poSlabDetailStatus, slabBinEnum } from "../constant.js";
 import poSupplierInvoice from "./poSupplierInvoiceModel.js";
 import poSupplierInvoiceMapper from "./poSupplierInvoiceMapperModel.js";
 
@@ -91,7 +91,7 @@ export default sequelize.define(
             allowNull: true,
         },
         status: {
-            type: DataTypes.ENUM(...status),
+            type: DataTypes.ENUM(...poSlabDetailStatus),
             allowNull: false,
             defaultValue: 'ACTIVE' // Default value is 'active'
         },

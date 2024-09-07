@@ -63,6 +63,7 @@ export const login = async (req, res) => {
       status: true,
       message: "User logged in successfully",
       token,
+      clientId
     });
   } catch (error) {
     console.error("Error during login:", error);

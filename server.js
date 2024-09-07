@@ -15,6 +15,7 @@ import dashboard from './router/dashboardRoutes.js'
 // import roles from './router/roleAssignRoutes.js';
 import role from './router/roleAssignRoutes.js'
 import client from './router/adminauth/clientRoutes.js'
+import returnReceipt from './router/returnReceiptRoutes.js'
 // middleware
 app.use(json())
 app.use(cors())
@@ -27,11 +28,13 @@ app.use("/supplier", supplier)
 app.use("/setting", setting)
 app.use("/customer", customer);
 app.use('/purchaseOrder', purchaseOrder);
-app.use("/salesOrder",salesOrder);
+app.use("/salesOrder", salesOrder);
 app.use("/accounts", accounts);
 app.use("/dashboard", dashboard);
 app.use("/roles", role);
-app.use('/client',client)
+app.use('/client', client)
+app.use("/return", returnReceipt);
+
 
 
 app.listen(PORT, () => {

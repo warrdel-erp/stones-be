@@ -800,3 +800,7 @@ ALTER TABLE customers ADD CONSTRAINT unique_primary_phone_number UNIQUE (primary
 
 ALTER TABLE suppliers ADD CONSTRAINT unique_email UNIQUE (email);
 ALTER TABLE suppliers ADD CONSTRAINT unique_primary_phone_number UNIQUE (primary_phone_no);
+
+
+ALTER TABLE po_slab_details
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED') NOT NULL DEFAULT 'ACTIVE';

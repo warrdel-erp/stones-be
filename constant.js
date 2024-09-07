@@ -45,6 +45,8 @@ export const productAssignedBinEnum = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
 
 export const status = ['ACTIVE', 'INACTIVE'];
 
+export const poSlabDetailStatus =['ACTIVE','INACTIVE','RETURNED'];
+
 export const deliveryType = ['Pickup', 'Delivery', 'Other'];
 
 export const shipmentTerm = ['Prepaid', 'Prepaid & Add', 'Collect', 'Prepaid & COD', 'Add & COD', 'Collect & COD', 'Credit 45', 'CAD', 'Consigment'];

@@ -1,5 +1,5 @@
 import * as model from "../models/index.js";
-
+import { Op } from "sequelize";
 // update product Inventory
 
 export async function updateProductInventory(data) {
@@ -139,6 +139,11 @@ export async function getInventoryList(page, limit, clientId) {
                 {
                   model: model.poSlabDetails,
                   as: "slabDetails",
+                  where: {
+                    status: {
+                      [Op.in]: ['ACTIVE', 'RETURNED']
+                    }
+                  },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                 },
                 {
@@ -195,7 +200,9 @@ export async function getInventoryListBasedOnSipl(clientId) {
                   model: model.poSlabDetails,
                   as: "slabDetails",
                   where: {
-                    status: 'ACTIVE'
+                    status: {
+                      [Op.in]: ['ACTIVE', 'RETURNED']
+                    }
                   },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
                 },
@@ -225,8 +232,6 @@ export async function getInventoryListBasedOnSipl(clientId) {
         }
       ],
     });
-    // console.log(JSON.stringify(result), 'invet');
-    // console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
   } catch (error) {
     console.error("Error in getInventoryList:", error);

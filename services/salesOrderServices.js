@@ -156,6 +156,99 @@ export async function getAllSo(data) {
     };
 };
 
+// export async function updateStatus(transactionData) {
+//     console.log('Received transaction data:', transactionData.createdBy);
+
+//     const soLoadingOrderId = transactionData.soLoadingOrderId;
+//     const transaction = await sequelize.transaction();
+//     try {
+//         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
+//         if (salesOrderInventory.length === 0) {
+//             console.log(`No sales order inventory found with id ${soLoadingOrderId}`);
+//             await transaction.rollback();
+//             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
+//         }
+
+//         const statusMapping = {
+//             'INITIATED': 'LOADING ORDER',
+//             'LOADING ORDER': 'PACKING LIST',
+//             'PACKING LIST': 'INVOICE'
+//         };
+
+//         let data = {};
+//         for (const inventory of salesOrderInventory) {
+//             data = {
+//                 salesOrdersInventoryId: inventory.dataValues.salesOrdersInventoryId,
+//                 productInventoryId: inventory.dataValues.productInventoryId,
+//                 status: inventory.dataValues.salesStatus,
+//             };
+//         }
+
+//         const currentStatus = data.status;
+//         const newStatus = statusMapping[currentStatus];
+
+//         if (newStatus) {
+//             await salesOrderRepository.updateSalesStatus(data.salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
+//             await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
+
+//             console.log(`Status updated to ${newStatus} for inventory ID ${data.salesOrdersInventoryId}`);
+//             if (newStatus === 'INVOICE') {
+//                 // Static account details for INVOICE status
+
+//                 const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' }
+
+//                 const transactionAccontId = await getAccountIdByAccountName(accNames);
+//                 console.log(transactionAccontId, 'transactionAccontId');
+//                 const accountDetails = [
+//                     { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+//                     { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+//                 ];
+//                 for (const accountDetail of accountDetails) {
+//                     const transactionDataWithAccount = {
+//                         ...transactionData,
+//                         accountsId: accountDetail.accountsId,
+//                         entryType: accountDetail.entryType,
+//                         transactionOf: 'sales',
+//                         transactionAmountType: 'debit',
+//                         createdBy: transactionData.createdBy
+//                     };
+//                     await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
+//                     console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+//                 }
+
+//                 const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
+//                 for (const item of poSlabDetailIds) {
+//                     const data = {
+//                         poSlabDetailId: item,
+//                         status: 'INACTIVE'
+//                     };
+//                     await updateSlabDetails(data, { transaction });
+//                 }
+
+//                 console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
+
+//                 await transaction.commit();
+//                 return {
+//                     success: true,
+//                     salesOrderUpdateResult: true,
+//                     // updateSlabDetailsStatus
+//                 };
+//             } else {
+//                 await transaction.commit();
+//                 return { success: true, message: 'Status updated successfully' };
+//             }
+//         } else {
+//             console.log(`No update required for status: ${currentStatus}`);
+//             await transaction.rollback();
+//             return { success: false, message: `No update required because the current status value is: ${currentStatus}` };
+//         }
+//     } catch (error) {
+//         console.error('Error updating status:', error);
+//         await transaction.rollback();
+//         return { success: false, error: error.message };
+//     }
+// }
+
 export async function updateStatus(transactionData) {
     console.log('Received transaction data:', transactionData.createdBy);
 
@@ -175,73 +268,59 @@ export async function updateStatus(transactionData) {
             'PACKING LIST': 'INVOICE'
         };
 
-        let data = {};
         for (const inventory of salesOrderInventory) {
-            data = {
-                salesOrdersInventoryId: inventory.dataValues.salesOrdersInventoryId,
-                productInventoryId: inventory.dataValues.productInventoryId,
-                status: inventory.dataValues.salesStatus,
-            };
-        }
+            const currentStatus = inventory.dataValues.salesStatus;
+            const newStatus = statusMapping[currentStatus];
 
-        const currentStatus = data.status;
-        const newStatus = statusMapping[currentStatus];
+            if (newStatus) {
+                const salesOrdersInventoryId = inventory.dataValues.salesOrdersInventoryId;
+                const productInventoryId = inventory.dataValues.productInventoryId;
+                await salesOrderRepository.updateSalesStatus(salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
+                await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
 
-        if (newStatus) {
-            await salesOrderRepository.updateSalesStatus(data.salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
-            await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
+                console.log(`Status updated to ${newStatus} for inventory ID ${salesOrdersInventoryId}`);
 
-            console.log(`Status updated to ${newStatus} for inventory ID ${data.salesOrdersInventoryId}`);
-            if (newStatus === 'INVOICE') {
-                // Static account details for INVOICE status
+                if (newStatus === 'INVOICE') {
+                    const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
+                    const transactionAccountId = await getAccountIdByAccountName(accNames);
 
-                const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' }
+                    console.log(transactionAccountId, 'transactionAccountId');
 
-                const transactionAccontId = await getAccountIdByAccountName(accNames);
-                console.log(transactionAccontId, 'transactionAccontId');
-                const accountDetails = [
-                    { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-                    { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
-                ];
-                for (const accountDetail of accountDetails) {
-                    const transactionDataWithAccount = {
-                        ...transactionData,
-                        accountsId: accountDetail.accountsId,
-                        entryType: accountDetail.entryType,
-                        transactionOf: 'sales',
-                        transactionAmountType: 'debit',
-                        createdBy: transactionData.createdBy
-                    };
-                    await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
-                    console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+                    const accountDetails = [
+                        { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
+                        { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
+                    ];
+
+                    for (const accountDetail of accountDetails) {
+                        const transactionDataWithAccount = {
+                            ...transactionData,
+                            accountsId: accountDetail.accountsId,
+                            entryType: accountDetail.entryType,
+                            transactionOf: 'sales',
+                            transactionAmountType: 'debit',
+                            createdBy: transactionData.createdBy
+                        };
+                        await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
+                        console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+                    }
+                    const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
+                    for (const item of poSlabDetailIds) {
+                        const data = {
+                            poSlabDetailId: item,
+                            status: 'INACTIVE'
+                        };
+                        await updateSlabDetails(data, { transaction });
+                    }
+
+                    console.log(`Product inventory ID ${productInventoryId} set to INACTIVE`);
                 }
-
-                const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
-                for (const item of poSlabDetailIds) {
-                    const data = {
-                        poSlabDetailId: item,
-                        status: 'INACTIVE'
-                    };
-                    await updateSlabDetails(data, { transaction });
-                }
-
-                console.log(`Product inventory ID ${data.productInventoryId} set to INACTIVE`);
-
-                await transaction.commit();
-                return {
-                    success: true,
-                    salesOrderUpdateResult: true,
-                    // updateSlabDetailsStatus
-                };
             } else {
-                await transaction.commit();
-                return { success: true, message: 'Status updated successfully' };
+                console.log(`No update required for status: ${currentStatus}`);
             }
-        } else {
-            console.log(`No update required for status: ${currentStatus}`);
-            await transaction.rollback();
-            return { success: false, message: `No update required because the current status value is: ${currentStatus}` };
         }
+        await transaction.commit();
+        return { success: true, message: 'Status updated successfully' };
+
     } catch (error) {
         console.error('Error updating status:', error);
         await transaction.rollback();
