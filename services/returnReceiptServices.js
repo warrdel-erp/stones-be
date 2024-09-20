@@ -6,12 +6,16 @@ export async function getSalesInvoices(search, clientId) {
         const salesInvoiceList = await returnReceiptRepository.getSalesInvoices(search, clientId);
         const invoicesList = salesInvoiceList.map((loadingDetails) => {
             const loadingData = loadingDetails.loadingOrders.map((data) => ({
-                createdAt: data.createdAt,
+                createdAt: new Date(data.createdAt).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',  
+                    year: 'numeric'
+                }),          
                 salesOrdersId: data.salesOrdersId,
                 soLoadingOrderId: data.soLoadingOrderId,
                 salesStatus: data.salesStatus,
                 subTotal: data.subTotal,
-                total: data.total,
+                total: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.total),
                 tax: data.tax,
                 customerName: loadingDetails.customers.customerName,
                 customerId: loadingDetails.customers.customerId,
@@ -23,9 +27,12 @@ export async function getSalesInvoices(search, clientId) {
                 loadingOrders: loadingData,
                 customerName: loadingDetails.customers.customerName,
                 customerId: loadingDetails.customers.customerId,
+                customerAddress:loadingDetails.customers.address,
+                location:loadingDetails.location,
                 so: loadingDetails.so,
                 salesOrdersId: loadingDetails.salesOrdersId,
-                salesTax: loadingDetails.salesTax
+                salesTax: loadingDetails.salesTax,
+                shipTo:loadingDetails.shipTo
             };
         });
 
@@ -41,31 +48,53 @@ export async function getSalesInvoices(search, clientId) {
 export async function singleInvoiceDetails(search, clientId, queries) {
     try {
         const salesInvoiceList = await returnReceiptRepository.getSalesInvoices(search, clientId, queries);
+
         const invoicesByLoadingOrder = salesInvoiceList.reduce((acc, salesInventory) => {
+            const customer = salesInventory.customers;
+            const internalNotes = salesInventory.internalNotes;
+            const printedNotes = salesInventory.printedNotes;
+            const shipTo = salesInventory.shipTo;
+            const location = salesInventory.location;
+
+            let hasProductData = false; 
+
             salesInventory.salesInventory.forEach((data) => {
                 const soLoadingOrderId = data.soLoadingOrderId;
                 const productName = data.salesProduct.salesProductDetails.productName;
+                const slabCurrentStatus = data.slabDetails.status;
+                
+                if (slabCurrentStatus === 'RETURNED') {
+                    return;
+                }
 
                 let loadingOrder = acc.find(order => order.soLoadingOrderId === soLoadingOrderId);
 
                 if (!loadingOrder) {
                     loadingOrder = {
                         soLoadingOrderId,
-                        products: []
+                        products: [],
+                        customerDetails: customer,
+                        internalNotes: internalNotes,
+                        printedNotes: printedNotes,
+                        shipTo: shipTo,
+                        location: location
                     };
                     acc.push(loadingOrder);
                 }
+
                 let product = loadingOrder.products.find(prod => prod.productName === productName);
 
                 if (!product) {
                     product = {
                         productName,
-                        items: []
+                        items: [],
+                        unitPrice: data.unitPrice
                     };
                     loadingOrder.products.push(product);
                 }
+
                 const loadingData = {
-                    createdBy: data.createdBy,
+                    createdBy: data.createdBy,           
                     poSlabDetailId: data.poSlabDetailId,
                     productInventoryId: data.productInventoryId,
                     remeasureLength: data.remeasureLength,
@@ -78,21 +107,39 @@ export async function singleInvoiceDetails(search, clientId, queries) {
                     poSupplierInvoiceId: data.slabDetails.poSupplierInvoiceId,
                     poSupplierInvoiceMapperId: data.slabDetails.poSupplierInvoiceMapperId,
                     serialNumber: data.slabDetails.serialNumber,
+                    block: data.slabDetails.block,
+                    lot: data.slabDetails.lot,
+                    bin: data.slabDetails.bin,
                     unitPrice: data.unitPrice,
                     quantity: `${data.remeasureLength} x ${data.remeasureWidth} = ${(data.remeasureLength * data.remeasureWidth / 144).toFixed(2)} SF`
                 };
+
                 product.items.push(loadingData);
+                hasProductData = true;
             });
+
+            if (!hasProductData) {
+                acc.push({
+                    soLoadingOrderId: 'No Product Data',
+                    products: [],
+                    customerDetails: customer,
+                    internalNotes: internalNotes,
+                    printedNotes: printedNotes,
+                    shipTo: shipTo,
+                    location: location
+                });
+            }
 
             return acc;
         }, []);
 
-        return { invoicesByLoadingOrder };
+        return { invoicesByLoadingOrder, salesInvoiceList };
     } catch (error) {
         console.error('Error fetching sales invoices:', error);
         throw error;
     }
 }
+
 
 
 export async function addReturnSlabs(info) {
@@ -105,14 +152,13 @@ export async function addReturnSlabs(info) {
 
 
 
-export async function getReturnInvoice(search, clientId,queries) {
-    console.log(search, clientId,queries,'jsjsjjsjsj');
-    
+export async function getReturnInvoice(search, clientId, queries) {
+    console.log(search, clientId, queries, 'jsjsjjsjsj');
+
     try {
-        const repoResponse = await returnReceiptRepository.getReturnInvoice(search, clientId,queries);
+        const repoResponse = await returnReceiptRepository.getReturnInvoice(search, clientId, queries);
         const invoicesByLoadingOrder = repoResponse.reduce((acc, salesInventory) => {
             const customers = salesInventory.customers;
-
             salesInventory.salesInventory.forEach((data) => {
                 const soLoadingOrderId = data.soLoadingOrderId;
                 const productName = data.salesProduct.salesProductDetails.productName;
@@ -133,8 +179,11 @@ export async function getReturnInvoice(search, clientId,queries) {
                         accEmail: customers.accEmail,
                         emails: customers.emails,
                         address: customers.address,
-                        paymentTerms:`${customers.paymentTerms} 'days'`,
-                        products: []
+                        paymentTerms: `${customers.paymentTerms} 'days'`,
+                        products: [],
+                        shipTo: salesInventory.shipTo,
+                        purchaseLocation:salesInventory.location,
+                        customers:customers
                     };
                     acc.push(loadingOrder);
                 }
@@ -163,6 +212,9 @@ export async function getReturnInvoice(search, clientId,queries) {
                     poSupplierInvoiceId: data.slabDetails.poSupplierInvoiceId,
                     poSupplierInvoiceMapperId: data.slabDetails.poSupplierInvoiceMapperId,
                     serialNumber: data.slabDetails.serialNumber,
+                    lot: data.slabDetails.lot,
+                    bin: data.slabDetails.bin,
+                    // block: block.slabDetails.block,
                     quantity: `${data.remeasureLength} x ${data.remeasureWidth} = ${(data.remeasureLength * data.remeasureWidth / 144).toFixed(2)} SF`,
                 };
 

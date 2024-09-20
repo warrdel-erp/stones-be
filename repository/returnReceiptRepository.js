@@ -5,6 +5,7 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
     try {
         const result = await model.salesOrderModel.findAll({
             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+          
             include: [
                 {
                     model: model.customerModel,
@@ -28,7 +29,6 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
                             as: 'slabDetails',
                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
                             where:{
-                                status:'INACTIVE'
                             },
                         },
                         {
@@ -45,7 +45,6 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
                         }
                     ],
                     where: {
-                        salesStatus: 'INVOICE',
                         ...(queries.soLoadingOrderId ? { soLoadingOrderId: queries.soLoadingOrderId } : {})
                     },
                 },
@@ -56,6 +55,7 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
                     where: {
                         salesStatus: 'INVOICE'
                     },
+                    order: [['updatedAt', 'DESC']],
                 },
             ],
         });
