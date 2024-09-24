@@ -148,10 +148,6 @@ INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
 -- ADD CONSTRAINT fk_supplierId
 -- FOREIGN KEY (supplier_id)
 -- REFERENCES suppliers(supplier_id);
-ALTER TABLE products
-DROP CONSTRAINT fk_supplierId;
-ALTER TABLE products
-DROP COLUMN supplier_id;
 
 ALTER TABLE products ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
 
@@ -804,3 +800,58 @@ ALTER TABLE suppliers ADD CONSTRAINT unique_primary_phone_number UNIQUE (primary
 
 ALTER TABLE po_slab_details
 MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED') NOT NULL DEFAULT 'ACTIVE';
+
+
+-- create opportunity table
+CREATE TABLE opportunity (
+    opportunity_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    customer_id INTEGER NOT NULL,
+    op INTEGER NOT NULL UNIQUE,
+    op_date DATE NOT NULL,
+    customer_po VARCHAR(255),
+    location VARCHAR(255),
+    ship_to ENUM('DELIVERY', 'PICKUP') NOT NULL,
+    special_instruction VARCHAR(255),
+    internal_notes VARCHAR(255),
+    printed_notes VARCHAR(255),
+    sub_total FLOAT,
+    tax FLOAT,
+    total FLOAT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_by INT,
+    updated_by INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- CREATE SELECTION SHEET FOR OPPORUTNITY
+CREATE TABLE opportunity_selection_sheet (
+    op_selection_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    selection_sheet_id VARCHAR(255) NOT NULL,
+    opportunity_id INTEGER NOT NULL,
+    product_inventory_id INTEGER NOT NULL,
+    po_slab_detail_id INTEGER NOT NULL,
+    status ENUM('HOLD', 'SALES ORDER'),
+    created_by  INTEGER NOT NULL, 
+    updated_by INTEGER NOT NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+    FOREIGN KEY (opportunity_id) REFERENCES opportunity(opportunity_id),
+    FOREIGN KEY (product_inventory_id) REFERENCES product_inventory(product_inventory_id),
+    FOREIGN KEY (po_slab_detail_id) REFERENCES po_slab_details(po_slab_detail_id)
+);
+
+
+-- Status of slab update to ONHOLD key added
+ALTER TABLE po_slab_details
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD') NOT NULL DEFAULT 'ACTIVE';
+
+ALTER TABLE po_slab_details
+ADD COLUMN addedToSelectionSheet TINYINT(1) NOT NULL DEFAULT 0;
+
+
+ALTER TABLE `stone_design`.`opportunity` 
+DROP INDEX `op` ;
+;

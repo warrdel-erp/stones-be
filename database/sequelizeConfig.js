@@ -26,9 +26,4 @@ sequelize.authenticate()
     console.log('Error while connecting to database'+ err)
 })
 
-sequelize.sync({ force: false })
-.then(() => {
-    console.log('yes re-sync done!')
-})
-  
 export default sequelize;

@@ -32,6 +32,12 @@ import salesPaymentModel from './salesPaymentModel.js';
 import accountTransactionModel from './accountTransactionModel.js';
 import clientModel from './clientModel.js'
 import clientUserModel from './clientUsersModel.js'
+import opportunityModel from './opportunityModel.js';
+import opportunitySelectionModel from './opportunitySelectionModel.js';
+
+
+clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
+userModel.hasOne(clientUserModel, { foreignKey: 'user_id' });
 
 userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id' });
 roleModel.hasMany(userRoleModel, { foreignKey: 'role_id' });
@@ -166,34 +172,51 @@ poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_s
 
 //user client relation 
 productModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(productModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'products' });
+clientUserModel.hasMany(productModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'products' });
 
 supplierModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(supplierModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'suppliers' });
+clientUserModel.hasMany(supplierModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'suppliers' });
 
 purchaseModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(purchaseModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'purchase' });
+clientUserModel.hasMany(purchaseModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'purchase' });
 
 customerModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(customerModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'customers' });
+clientUserModel.hasMany(customerModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'customers' });
 
 salesOrderModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(salesOrderModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'sales' });
+clientUserModel.hasMany(salesOrderModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'sales' });
 
 productInventoryModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(productInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'inventoryDetail' });
+clientUserModel.hasMany(productInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'inventoryDetail' });
 
 accountTransactionModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(accountTransactionModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'accountTransaction' });
+clientUserModel.hasMany(accountTransactionModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'accountTransaction' });
 
 poSupplierInvoiceMapperModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'poSupplplierInvoice' });
+clientUserModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'poSupplplierInvoice' });
 
 soLoadingOrderModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(soLoadingOrderModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'soLoadingOrder' });
+clientUserModel.hasMany(soLoadingOrderModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'soLoadingOrder' });
 
 salesOrderInventoryModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
-clientUserModel.hasMany(salesOrderInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId',   as: 'salesOrderInventory' });
+clientUserModel.hasMany(salesOrderInventoryModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'salesOrderInventory' });
+
+//opportunity module relations
+opportunityModel.belongsTo(customerModel, { foreignKey: 'customer_id', as: 'customerDetails' });
+customerModel.hasMany(opportunityModel, { foreignKey: 'customer_id', as: 'customerDetails' });
+
+opportunitySelectionModel.belongsTo(opportunityModel, { foreignKey: 'opportunity_id', as: 'oppSelectionSheet' });
+opportunityModel.hasMany(opportunitySelectionModel, { foreignKey: 'opportunity_id', as: 'oppSelectionSheet' });
+
+opportunitySelectionModel.belongsTo(poSlabDetails, { foreignKey: 'po_slab_detail_id', as: 'slabsDetails' });
+poSlabDetails.hasOne(opportunitySelectionModel, { foreignKey: 'po_slab_detail_id', as: 'slabsDetails' });
+
+opportunitySelectionModel.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: 'inventrory' });
+productInventoryModel.hasOne(opportunitySelectionModel, { foreignKey: 'product_inventory_id', as: 'inventrory' });
+
+opportunityModel.belongsTo(clientUserModel, { foreignKey: 'created_by', targetKey: 'userId', as: 'clientDetails' });
+clientUserModel.hasMany(opportunityModel, { foreignKey: 'created_by', sourceKey: 'userId', as: 'opportunity' });
+
 
 
 export {
@@ -226,5 +249,7 @@ export {
 	salesPaymentModel,
 	accountTransactionModel,
 	clientModel,
-	clientUserModel
+	clientUserModel,
+	opportunityModel,
+	opportunitySelectionModel
 };

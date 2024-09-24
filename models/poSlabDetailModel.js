@@ -95,6 +95,11 @@ export default sequelize.define(
             allowNull: false,
             defaultValue: 'ACTIVE' // Default value is 'active'
         },
+        addedToSelectionSheet: {
+            type: DataTypes.TINYINT,
+            allowNull: false,
+            defaultValue: 0,  // Default value is false (0)
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false,

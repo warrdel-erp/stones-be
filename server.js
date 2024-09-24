@@ -16,6 +16,7 @@ import dashboard from './router/dashboardRoutes.js'
 import role from './router/roleAssignRoutes.js'
 import client from './router/adminauth/clientRoutes.js'
 import returnReceipt from './router/returnReceiptRoutes.js'
+import opportunitiy from './router/opportunityRoutes.js'
 // middleware
 app.use(json())
 app.use(cors())
@@ -34,6 +35,7 @@ app.use("/dashboard", dashboard);
 app.use("/roles", role);
 app.use('/client', client)
 app.use("/return", returnReceipt);
+app.use("/opportunity", opportunitiy);
 
 
 

@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../database/sequelizeConfig.js';
+import clientModel from './clientModel.js';
+import userModel from './userModel.js';
 
  export default sequelize.define(
     'client_users',
@@ -14,7 +16,7 @@ import sequelize from '../database/sequelizeConfig.js';
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'clients', 
+                model: clientModel, 
                 key: 'client_id'
             },
             field: 'client_id'
@@ -23,7 +25,7 @@ import sequelize from '../database/sequelizeConfig.js';
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'users', 
+                model: userModel, 
                 key: 'id'
             },
             field: 'user_id'

@@ -2,13 +2,13 @@ import filterObject from '../helpers/filteredKeysUtils.js';
 import * as supplierService from '../services/supplierServices.js'
 
 // 1. create supplier
-export const addSupplier = async (req,res) => {
+export const addSupplier = async (req, res) => {
     try {
         const user = req.user
         const createdBy = user.dataValues.id
         const info = req.body;
         const data = filterObject(info)
-        const result = await supplierService.addSupplier({...data,createdBy});
+        const result = await supplierService.addSupplier({ ...data, createdBy });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in addSupplier:", error);
@@ -17,12 +17,12 @@ export const addSupplier = async (req,res) => {
 };
 
 // 2. get all supplier name
-export const getAllSupplier = async (req,res) => {
-    let {search} = req.query
-     search = search || 'all' 
-     const clientId= req.clientId; 
+export const getAllSupplier = async (req, res) => {
+    let { search } = req.query
+    search = search || 'all'
+    const clientId = req.clientId;
     try {
-        const result = await supplierService.getAllSupplier({search,clientId});
+        const result = await supplierService.getAllSupplier({ search, clientId });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting suppliers name:", error);
@@ -31,10 +31,10 @@ export const getAllSupplier = async (req,res) => {
 };
 
 // 3. get single supplier details
-export const getSingleSupplierDetails = async (req,res) => {
+export const getSingleSupplierDetails = async (req, res) => {
     const supplierName = req.query.supplierName;
     try {
-        if (!supplierName){
+        if (!supplierName) {
             res.status(400).send("supplierName is required");
         }
         const result = await supplierService.getSingleSupplierDetails(supplierName);
@@ -46,17 +46,17 @@ export const getSingleSupplierDetails = async (req,res) => {
 };
 
 // 4. update supplier 
-export const updateSupplier = async (req,res) => {
+export const updateSupplier = async (req, res) => {
     const supplierName = req.body.supplierName || req.query.supplierName || req.headers["x-supplierName"];
     const info = req.body;
-    
+
     try {
-        if (!supplierName){
+        if (!supplierName) {
             res.status(400).send("supplierName is required");
         }
         const user = req.user
         const updatedBy = user.dataValues.id
-        const result = await supplierService.updateSupplier(supplierName, {...info,updatedBy});
+        const result = await supplierService.updateSupplier(supplierName, { ...info, updatedBy });
         res.status(200).send(result);
     } catch (error) {
         console.error(`Error in updating ${supplierName}:`, error);

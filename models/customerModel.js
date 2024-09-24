@@ -1,6 +1,7 @@
 import sequelize from "../database/sequelizeConfig.js";
 import { DataTypes } from 'sequelize';
 import { country, customerType, paymentTerms, priceLevel, reasons, wayOfDocsSend } from '../constant.js';
+import clientUsersModel from "./clientUsersModel.js";
 
 
 
@@ -202,6 +203,7 @@ export default sequelize.define(
       allowNull: true,
       field: 'reason'
     },
+
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -228,7 +230,20 @@ export default sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       field: 'created_by',
-    }
+      references: {
+        model: clientUsersModel,
+        key: 'user_id'
+      }
+    },
+    updatedBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'updated_by',
+      references: {
+        model: clientUsersModel,
+        key: 'user_id'
+      }
+    },
   },
   {
     tableName: 'customers',

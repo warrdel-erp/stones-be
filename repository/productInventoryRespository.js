@@ -141,10 +141,10 @@ export async function getInventoryList(page, limit, clientId) {
                   as: "slabDetails",
                   where: {
                     status: {
-                      [Op.in]: ['ACTIVE', 'RETURNED']
+                      [Op.in]: ['ACTIVE', 'RETURNED','ONHOLD']
                     }
                   },
-                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
+                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
                 },
                 {
                   model: model.purchaseProductModel,
@@ -201,10 +201,10 @@ export async function getInventoryListBasedOnSipl(clientId) {
                   as: "slabDetails",
                   where: {
                     status: {
-                      [Op.in]: ['ACTIVE', 'RETURNED']
+                      [Op.in]: ['ACTIVE', 'RETURNED','ONHOLD']
                     }
                   },
-                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
+                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
                 },
                 {
                   model: model.poSupplierInvoiceMapperModel,
