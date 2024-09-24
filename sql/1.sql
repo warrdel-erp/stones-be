@@ -835,9 +835,9 @@ CREATE TABLE opportunity_selection_sheet (
     po_slab_detail_id INTEGER NOT NULL,
     status ENUM('HOLD', 'SALES ORDER'),
     created_by  INTEGER NOT NULL, 
-    updated_by INTEGER NOT NULL, 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+    updated_by INTEGER, 
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
     FOREIGN KEY (opportunity_id) REFERENCES opportunity(opportunity_id),
     FOREIGN KEY (product_inventory_id) REFERENCES product_inventory(product_inventory_id),
     FOREIGN KEY (po_slab_detail_id) REFERENCES po_slab_details(po_slab_detail_id)
@@ -852,6 +852,6 @@ ALTER TABLE po_slab_details
 ADD COLUMN addedToSelectionSheet TINYINT(1) NOT NULL DEFAULT 0;
 
 
-ALTER TABLE `stone_design`.`opportunity` 
+ALTER TABLE `opportunity` 
 DROP INDEX `op` ;
 ;
