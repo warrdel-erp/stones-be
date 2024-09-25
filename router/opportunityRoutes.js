@@ -21,7 +21,7 @@ router.patch('/selectionSheetUpdate',userAuth, updateSelectionSheet);
 
 router.patch('/selectionSheettoSO', userAuth, convertSelectionSheetToSO);
 
-router.patch('/opportunityToSO', convertOpportunityToSO);
+router.patch('/opportunityToSO',userAuth, convertOpportunityToSO);
 
 
 export default router;

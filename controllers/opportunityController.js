@@ -147,12 +147,12 @@ export const convertSelectionSheetToSO = async (req, res) => {
 export const convertOpportunityToSO = async (req, res) => {
     try {
         const opportunityId = req.query.opportunityId;
-        // const user = req.user;
-        // const createdBy = user.dataValues.id;
-        // const clientId = req.clientId;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const clientId = req.clientId;
         // const result = await opportunitiyService.convertOpportunityToSO(opportunityId,createdBy,clientId);
         const selectedSlabsData = req.body;
-        const result = await opportunitiyService.convertOpportunityToSO(opportunityId,selectedSlabsData);
+        const result = await opportunitiyService.convertOpportunityToSO(opportunityId,selectedSlabsData,createdBy,clientId);
         res.status(200).json({
             status: 'success',
             message: 'Opportunity converted to SO  successfully',

@@ -240,8 +240,8 @@ export async function convertSelectionSheetToSO(selectionSheetId, createdBy, cli
                 specialInstruction: opportunityData.specialInstruction,
                 internalNotes: opportunityData.internalNotes,
                 printedNotes: opportunityData.printedNotes,
-                createdBy: 1,
-                updatedBy: 1
+                createdBy: createdBy,
+                updatedBy: createdBy
             };
 
             const createSalesOrder = await createOrder(salesOrderPayload);
@@ -306,14 +306,14 @@ export async function convertSelectionSheetToSO(selectionSheetId, createdBy, cli
 
 
 //convery opportunity to SO 
-export async function convertOpportunityToSO(opportunityId,selectedSlabsData) {
+export async function convertOpportunityToSO(opportunityId, selectedSlabsData, createdBy, clientId) {
     try {
-        const clientId = 1;
-        console.log(selectedSlabsData,'data');
-        
-        const opportunityDetails = await opportunitiyRepository.getOpportunityDetails({ opportunityId, clientId: 1 });
+        // const clientId = 1;
+        console.log(selectedSlabsData, 'data');
+
+        const opportunityDetails = await opportunitiyRepository.getOpportunityDetails({ opportunityId, clientId: clientId });
         const selectedInventory = [];
-        return await createSalesOrderWithProducts(opportunityDetails.dataValues, selectedInventory, clientId,selectedSlabsData);
+        return await createSalesOrderWithProducts(opportunityDetails.dataValues, selectedInventory, clientId, selectedSlabsData);
     } catch (error) {
         console.error('Error fetching opportunity details:', error);
         throw error;
