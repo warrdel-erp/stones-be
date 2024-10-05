@@ -855,3 +855,48 @@ ADD COLUMN addedToSelectionSheet TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE `opportunity` 
 DROP INDEX `op` ;
 ;
+
+
+
+-- vendor table creation
+CREATE TABLE IF NOT EXISTS vendors (
+    vendor_id INT AUTO_INCREMENT PRIMARY KEY,
+    vendor_name VARCHAR(255) NOT NULL UNIQUE,
+    code VARCHAR(255),
+    vendor_type ENUM('National', 'International'),
+    contact_name VARCHAR(255),
+    vendor_since VARCHAR(255) NOT NULL,
+    primary_phone_no VARCHAR(255) NOT NULL UNIQUE,  -- Unique constraint added
+    secondary_phone_no VARCHAR(255),
+    landline_no VARCHAR(255),
+    email VARCHAR(255) UNIQUE,  -- Unique constraint added
+    accounting_email VARCHAR(255),
+    remit_address VARCHAR(255),
+    remit_suite VARCHAR(255),
+    remit_city VARCHAR(255),
+    remit_state VARCHAR(255),
+    remit_zip INTEGER,
+    remit_country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+    shipping_address VARCHAR(255),
+    shipping_suite VARCHAR(255),
+    shipping_city VARCHAR(255),
+    shipping_state VARCHAR(255),
+    shipping_zip INTEGER,
+    shipping_country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+    payment_terms VARCHAR(255),
+    currency VARCHAR(255),
+    default_expense_account VARCHAR(255),
+    default_payment_method VARCHAR(255),
+    account VARCHAR(255),
+    ein_number VARCHAR(255),
+    memo_on_check VARCHAR(255),
+    generic_vendor BOOLEAN,
+    form_us_vendor BOOLEAN,
+    freight_carrie BOOLEAN,
+    sub_contractor BOOLEAN,
+    allow_vendor_login BOOLEAN,
+    internal_notes VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);

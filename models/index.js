@@ -34,6 +34,7 @@ import clientModel from './clientModel.js'
 import clientUserModel from './clientUsersModel.js'
 import opportunityModel from './opportunityModel.js';
 import opportunitySelectionModel from './opportunitySelectionModel.js';
+import vendorModel from './vendorModel.js';
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -251,5 +252,6 @@ export {
 	clientModel,
 	clientUserModel,
 	opportunityModel,
-	opportunitySelectionModel
+	opportunitySelectionModel,
+	vendorModel
 };
