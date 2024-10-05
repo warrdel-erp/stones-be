@@ -5,6 +5,7 @@ import * as productInventory from '../repository/productInventoryRespository.js'
 import { getAccountIdByAccountName } from './accountsServices.js';
 import { getPrePurchaseProductDetails, updatePrePurchaseProductDetails } from '../repository/prePurchaseRepository.js';
 import { findUserId } from '../repository/clientUserRepository.js';
+import { getFreightData } from '../repository/freightRepository.js';
 export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
 }
@@ -190,6 +191,20 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
     try {
         const slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId);
         const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
+        const poSupplierInvoiceId = slabDetails.supplierInvoice[0].poSupplierInvoiceId;
+        console.log(poSupplierInvoiceId, 'jsjsjsjjsjs');
+
+        const detailsToFindIds = { poSupplierInvoiceMapperId: Number(poSupplierInvoiceMappperId), poSupplierInvoiceId: Number(poSupplierInvoiceId) };
+        console.log(detailsToFindIds, 'ksksksksk');
+        const freightDetails = await getFreightData(detailsToFindIds);
+        console.log(freightDetails, 'freidhdhdh');
+        const freightTotalSum = freightDetails.reduce((acc, bill) => {
+          return acc + (bill.dataValues.total || 0);
+        }, 0);
+        
+        console.log(`Total Sum: $${freightTotalSum}`);
+        
+
         const po = allDetailsPurchaseOrderId.dataValues.po;
         const supplierSo = allDetailsPurchaseOrderId.dataValues.supplierSo;
         const freightForwarder = allDetailsPurchaseOrderId.dataValues.freightForwarder
@@ -219,7 +234,9 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
         const shippingState = allDetailsPurchaseOrderId.dataValues.suppliers.shippingState;
         const shippingZip = allDetailsPurchaseOrderId.dataValues.suppliers.shippingZip;
         const shippingCountry = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCountry;
-        const allSlabDetails = { shippingZip,shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId };
+        const allSlabDetails = { shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId,freightTotalSum };
+
+
         return allSlabDetails;
     } catch (error) {
         throw new Error(`Failed to fetch slab Details ${purchaseOrderId} && ${poSupplierInvoiceMappperId}: ${error.message}`);

@@ -3,7 +3,6 @@ import * as accountsRepository from '../repository/accountsRepository.js';
 export async function addAccount(info) {
     return await accountsRepository.addAccount(info);
 };
-getAllAccountsTypeAndSubTypes
 export async function getAllAccounts(search) {
     try {
         const salesOrders = await accountsRepository.getAllAccounts(search);

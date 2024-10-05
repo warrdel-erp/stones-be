@@ -97,6 +97,7 @@ export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInv
     throw error;
   }
 }
+
 export async function getInventoryList(page, limit, clientId) {
   try {
     const offset = page * limit;
@@ -141,7 +142,7 @@ export async function getInventoryList(page, limit, clientId) {
                   as: "slabDetails",
                   where: {
                     status: {
-                      [Op.in]: ['ACTIVE', 'RETURNED','ONHOLD']
+                      [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
                     }
                   },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
@@ -201,7 +202,7 @@ export async function getInventoryListBasedOnSipl(clientId) {
                   as: "slabDetails",
                   where: {
                     status: {
-                      [Op.in]: ['ACTIVE', 'RETURNED','ONHOLD']
+                      [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
                     }
                   },
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },

@@ -1,0 +1,30 @@
+import filterObject from '../helpers/filteredKeysUtils.js';
+import * as freightBillService from '../services/freightServices.js'
+
+// 1. create order
+export const addFreightBill = async (req, res) => {
+    try {
+        const info = req.body;
+        const result = await freightBillService.addFreightBill(info);
+        res.status(200).send(result);
+
+    } catch (error) {
+        console.error("Error in create Order: ", error);
+        res.status(500).send(error);
+    }
+};
+
+
+//get freight data
+export const getFreightData = async (req, res) => {
+    const query = req.query
+    console.log(query,'quer');
+    
+    try {
+        const result = await freightBillService.getFreightData(query);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting all accounts :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

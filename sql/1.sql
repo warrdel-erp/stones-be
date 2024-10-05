@@ -857,6 +857,51 @@ DROP INDEX `op` ;
 ;
 
 
+-- create freight bills
+CREATE TABLE IF NOT EXISTS freight_bills (
+    freight_bills_id INT PRIMARY KEY AUTO_INCREMENT,
+    po_supplier_invoice_id INT NOT NULL,
+    po_supplier_invoice_mapper_id INT NOT NULL,
+    transaction_id VARCHAR(255),
+    vendor_id INT,
+    location VARCHAR(255),
+    invoice VARCHAR(255),
+    invoice_date DATE,
+    payment_terms ENUM('30', '45', '60', '90', '120'),
+    due_date DATE,
+    contacts_location VARCHAR(255),
+    address VARCHAR(255),
+    address_2 VARCHAR(255),
+    city VARCHAR(100),
+    state VARCHAR(100),
+    zip VARCHAR(20),
+    country ENUM('Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'),
+    printed_notes VARCHAR(255),
+    internal_notes VARCHAR(255),
+    sub_total INT,
+    total INT,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (po_supplier_invoice_id) REFERENCES po_supplier_invoices(po_supplier_invoice_id),
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id)
+);
+
+-- freight bills details
+
+CREATE TABLE IF NOT EXISTS freight_bill_details (
+    detail_id INT PRIMARY KEY AUTO_INCREMENT,
+    freight_bills_id INT NOT NULL,
+    accounts_id INT,
+    locations VARCHAR(255),
+    services VARCHAR(255),
+    purchased_as VARCHAR(255),
+    description VARCHAR(255),
+    extended VARCHAR(255),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (freight_bills_id) REFERENCES freight_bills(freight_bills_id)
 
 -- vendor table creation
 CREATE TABLE IF NOT EXISTS vendors (

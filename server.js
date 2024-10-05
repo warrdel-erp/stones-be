@@ -17,6 +17,7 @@ import role from './router/roleAssignRoutes.js'
 import client from './router/adminauth/clientRoutes.js'
 import returnReceipt from './router/returnReceiptRoutes.js'
 import opportunitiy from './router/opportunityRoutes.js'
+import freightBill from './router/freightRoutes.js'
 import vendor from './router/vendorRoutes.js'
 // middleware
 app.use(json())
@@ -37,6 +38,7 @@ app.use("/roles", role);
 app.use('/client', client)
 app.use("/return", returnReceipt);
 app.use("/opportunity", opportunitiy);
+app.use("/freightBill", freightBill);
 app.use("/vendor", vendor);
 
 
