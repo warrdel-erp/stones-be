@@ -6,6 +6,11 @@ import { getAccountIdByAccountName } from './accountsServices.js';
 import { getPrePurchaseProductDetails, updatePrePurchaseProductDetails } from '../repository/prePurchaseRepository.js';
 import { findUserId } from '../repository/clientUserRepository.js';
 import { getFreightData } from '../repository/freightRepository.js';
+import QRCode from 'qrcode';
+import bwipjs from 'bwip-js'
+import fs from 'fs';
+
+// const fs = require('fs');
 export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
 }
@@ -179,6 +184,46 @@ export async function addSlabDetails(info) {
             });
             slabDetails.push(slabDetail); // Push the slab detail In array
         }
+        console.log(slabDetails, 'slabdetails');
+        // const productDeatils = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMapperId);
+        // console.log(productDeatils,'sjsjsjs');
+
+        for (const slab of slabDetails) {
+            const slabData = `
+                Serial Number: ${slab.dataValues.serialNumber}
+                Block: ${slab.dataValues.block}
+                Lot: ${slab.dataValues.lot}
+                Slab: ${slab.dataValues.slab}
+                Slab Counter: ${slab.dataValues.slabCounter}
+                Package Length: ${slab.dataValues.packageLength}
+                Package Width: ${slab.dataValues.packageWidth}
+                Receiving Length: ${slab.dataValues.recevingLength}
+                Receiving Width: ${slab.dataValues.recevingWidth}
+                Bin: ${slab.dataValues.bin}
+                Barcode: ${slab.dataValues.barcode}
+                PO Supplier Invoice Mapper ID: ${slab.dataValues.poSupplierInvoiceMapperId}
+                PO Slab Detail ID: ${slab.dataValues.poSlabDetailId}
+                Created By: ${slab.dataValues.createdBy}
+                Status: ${slab.dataValues.status}
+            `.trim();
+            const qrCodeData = JSON.stringify(slabData);
+            const qrCode = await QRCode.toDataURL(qrCodeData);
+            slab.dataValues.qrCode = qrCode;
+            await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
+
+            const barcodeData = slabData;;
+            const barcodeBuffer = await bwipjs.toBuffer({
+                bcid: 'code128',
+                text: barcodeData,
+                scale: 3,
+                height: 10,
+                includetext: true,
+                textxalign: 'center',
+                background: 'white',
+                color: 'black',
+            });
+            fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
+        }
         return slabDetails;
     } catch (error) {
         throw error;
@@ -199,11 +244,11 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
         const freightDetails = await getFreightData(detailsToFindIds);
         console.log(freightDetails, 'freidhdhdh');
         const freightTotalSum = freightDetails.reduce((acc, bill) => {
-          return acc + (bill.dataValues.total || 0);
+            return acc + (bill.dataValues.total || 0);
         }, 0);
-        
+
         console.log(`Total Sum: $${freightTotalSum}`);
-        
+
 
         const po = allDetailsPurchaseOrderId.dataValues.po;
         const supplierSo = allDetailsPurchaseOrderId.dataValues.supplierSo;
@@ -234,7 +279,7 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
         const shippingState = allDetailsPurchaseOrderId.dataValues.suppliers.shippingState;
         const shippingZip = allDetailsPurchaseOrderId.dataValues.suppliers.shippingZip;
         const shippingCountry = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCountry;
-        const allSlabDetails = { shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId,freightTotalSum };
+        const allSlabDetails = { shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId, freightTotalSum };
 
 
         return allSlabDetails;

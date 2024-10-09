@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
-    "server":"nodemon deplay--500ms server.js"
+    "server": "nodemon deplay--500ms server.js"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +21,7 @@
     "aws-sdk": "^2.971.0",
     "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
+    "bwip-js": "^4.5.1",
     "cities-list": "^1.0.3",
     "city-state-country": "^1.0.3",
     "cookie-session": "^1.4.0",
@@ -31,6 +32,7 @@
     "express": "^4.17.1",
     "http-errors": "^1.8.0",
     "indian-cities-database": "^1.0.5",
+    "jimp": "^1.6.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
     "mongoose": "^5.12.10",
@@ -38,6 +40,8 @@
     "mysql2": "^3.9.2",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
+    "qrcode": "^1.5.4",
+    "qrcode-reader": "^1.0.4",
     "razorpay": "^2.0.7",
     "sequelize": "^6.37.1",
     "uuid": "^8.3.2",
