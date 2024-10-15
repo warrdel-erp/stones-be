@@ -948,6 +948,21 @@ CREATE TABLE IF NOT EXISTS vendors (
 
 
 
+-- added columns in client table
+ALTER TABLE clients
+ADD COLUMN client_location_short_name VARCHAR(100),
+ADD COLUMN client_type VARCHAR(100),
+ADD COLUMN client_address VARCHAR(255),
+ADD COLUMN client_country VARCHAR(100),
+ADD COLUMN client_city VARCHAR(100),
+ADD COLUMN pincode VARCHAR(20),
+ADD COLUMN client_tax VARCHAR(50),
+ADD COLUMN client_price_level INT,
+ADD COLUMN payment_terms VARCHAR(100),
+ADD COLUMN client_license_number VARCHAR(100),
+ADD COLUMN user_count INT;
+
+
 ALTER TABLE suppliers
 MODIFY print_name VARCHAR(255);
 

@@ -33,10 +33,65 @@ export default sequelize.define(
             unique: true,
             field: 'client_email'
         },
-        clientLocation:{
+        clientLocation: {
             type: DataTypes.STRING,
             allowNull: true,
             field: 'client_location'
+        },
+        clientLocationShortName: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'client_location_short_name'
+        },
+        clientType: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'client_type'
+        },
+        clientAddress: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'client_address'
+        },
+        clientCountry: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'client_country'
+        },
+        clientCity: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'client_city'
+        },
+        pincode: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+            field: 'pincode'
+        },
+        clientTax: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+            field: 'client_tax'
+        },
+        clientPriceLevel: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'client_price_level'
+        },
+        paymentTerms: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'payment_terms'
+        },
+        clientLicenseNumber: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            field: 'client_license_number'
+        },
+        userCount: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'user_count'
         },
         createdAt: {
             type: DataTypes.DATE,

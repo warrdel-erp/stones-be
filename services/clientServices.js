@@ -7,23 +7,52 @@ var salt = bcrypt.genSaltSync(10);
 
 export async function register(info) {
     try {
-        let { clientName, clientPassword, clientEmail, clientLocation } = info;
-        const hashedPassword = await bcrypt.hash(clientPassword, salt);
+        const {
+            clientName,
+            clientPassword,
+            clientEmail,
+            clientLocation,
+            clientLocationShortName,
+            clientType,
+            clientAddress,
+            clientCountry,
+            clientCity,
+            pincode,
+            clientTax,
+            clientPriceLevel,
+            paymentTerms,
+            clientLicenseNumber,
+            userCount
+        } = info;
 
+        const hashedPassword = await bcrypt.hash(clientPassword, salt);
         const data = {
             clientName: clientName,
             clientPassword: hashedPassword,
             clientEmail: clientEmail.toLowerCase(),
-            clientLocation: clientLocation
+            clientLocation: clientLocation,
+            clientLocationShortName: clientLocationShortName,
+            clientType: clientType,
+            clientAddress: clientAddress,
+            clientCountry: clientCountry,
+            clientCity: clientCity,
+            pincode: pincode,
+            clientTax: clientTax,
+            clientPriceLevel: clientPriceLevel,
+            paymentTerms: paymentTerms,
+            clientLicenseNumber: clientLicenseNumber,
+            userCount: userCount
         };
+
 
         return await clientRepository.register(data);
 
     } catch (error) {
         console.error("Error during client registration:", error);
-        throw new Error(error || "Registration failed");
+        throw new Error(error.message || "Registration failed");
     }
 }
+
 
 
 //find client details based on clientId
@@ -31,6 +60,23 @@ export async function findUserId(data) {
     try {
         const accessOfData = await clientUsersRepository.findUserId(data);
         return accessOfData;
+    } catch (error) {
+        console.error('Error fetching:', error);
+        throw error;
+    }
+};
+
+
+export async function getClientDetails(data) {
+    try {
+        const clientsUserCount = await clientRepository.getClientsUser(data);
+        console.log(clientsUserCount,'sjskjsj');
+        
+        const accessOfData = await clientRepository.getClientDetails(data);
+        return {
+            accessOfData, 
+            clientsUserCount, 
+        };
     } catch (error) {
         console.error('Error fetching:', error);
         throw error;
