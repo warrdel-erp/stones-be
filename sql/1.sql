@@ -902,7 +902,7 @@ CREATE TABLE IF NOT EXISTS freight_bill_details (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (freight_bills_id) REFERENCES freight_bills(freight_bills_id)
-
+);
 -- vendor table creation
 CREATE TABLE IF NOT EXISTS vendors (
     vendor_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -978,7 +978,6 @@ MODIFY payment_terms ENUM('30', '45', '60', '90', '120', 'COD');
 
 ALTER TABLE `stone_design_second`.`vendors` 
 DROP INDEX `vendor_name` ;
-;
 
 --adding the v
 INSERT INTO vendors (vendor_name, vendor_since, primary_phone_no, freight_carrie)
