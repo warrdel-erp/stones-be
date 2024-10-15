@@ -3,7 +3,7 @@ export const secretKey = 'wardellsolutionprivatelimited'
 export const country = ['Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'];
 
 export const customerType = ['Homeowner', 'Architect', 'KB Dealer', 'Designer', 'Fabricator', 'Builder'];
-export const paymentTerms = ['30', '45', '60', '90', '120'];
+export const paymentTerms = ['30', '45', '60', '90', '120','COD'];
 export const reasons = ['Reseller'];
 export const priceLevel = ['Single Slab', 'Bundle', 'Standard'];
 export const wayOfDocsSend =['Fax', 'Email','Mail', 'Text'];

@@ -37,7 +37,7 @@ export default sequelize.define(
         },
         printName: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             field: 'print_name'
         },
         language: {

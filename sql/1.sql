@@ -947,6 +947,20 @@ CREATE TABLE IF NOT EXISTS vendors (
 );
 
 
+
+ALTER TABLE suppliers
+MODIFY print_name VARCHAR(255);
+
+UPDATE settings
+SET setting_value = JSON_ARRAY_APPEND(setting_value, '$', 'COD')
+WHERE setting_key = 'payment_terms';
+
+ALTER TABLE customers
+MODIFY payment_terms ENUM('30', '45', '60', '90', '120', 'COD');
+
+ALTER TABLE freight_bills
+MODIFY payment_terms ENUM('30', '45', '60', '90', '120', 'COD');
+
 ALTER TABLE `stone_design_second`.`vendors` 
 DROP INDEX `vendor_name` ;
 ;
@@ -999,3 +1013,4 @@ ALTER TABLE purchase_orders
 MODIFY COLUMN freight_forwarder INT, 
 ADD CONSTRAINT fk_freight_forwarder 
 FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id);
+
