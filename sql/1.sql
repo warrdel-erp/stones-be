@@ -945,3 +945,57 @@ CREATE TABLE IF NOT EXISTS vendors (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME
 );
+
+
+ALTER TABLE `stone_design_second`.`vendors` 
+DROP INDEX `vendor_name` ;
+;
+
+--adding the v
+INSERT INTO vendors (vendor_name, vendor_since, primary_phone_no, freight_carrie)
+VALUES
+    ('Ace Drayage', '2024', '1234567890', TRUE),
+    ('Airlift (USA) Inc', '2024', '1234567891', TRUE),
+    ('AJ Worldwide services Inc', '2024', '1234567892', TRUE),
+    ('Avenger Logistics', '2024', '1234567893', TRUE),
+    ('CMA CGM (AMERICA) LLC', '2024', '1234567894', TRUE),
+    ('Crystal Granite (Ocean Freight)', '2024', '1234567895', TRUE),
+    ('DahNAY Logistics', '2024', '1234567896', TRUE),
+    ('Del Corona', '2024', '1234567897', TRUE),
+    ('Edmund Freight', '2024', '1234567898', TRUE),
+    ('Eurybia Logistics Inc', '2024', '1234567899', TRUE),
+    ('Ever Concord Logistics Inc', '2024', '1234567800', TRUE),
+    ('Fortuna Global Logistics LLC', '2024', '1234567801', TRUE),
+    ('Freight Experts Inc', '2024', '1234567802', TRUE),
+    ('General Noli USA Inc', '2024', '1234567803', TRUE),
+    ('Global Logistics & Customs of Charleston', '2024', '1234567804', TRUE),
+    ('Gramazini Freight', '2024', '1234567805', TRUE),
+    ('Heavy Weight Transport, Inc', '2024', '1234567806', TRUE),
+    ('Howard Sheppard, Inc', '2024', '1234567807', TRUE),
+    ('Interglobog', '2024', '1234567808', TRUE),
+    ('LAM USA International Transport, LLC', '2024', '1234567809', TRUE),
+    ('Leonardi & Co. USA Inc', '2024', '1234567810', TRUE),
+    ('Optimal Container Logistics', '2024', '1234567811', TRUE),
+    ('Pacific Granites Inc', '2024', '1234567812', TRUE),
+    ('Pacific Quartz (Freight)', '2024', '1234567813', TRUE),
+    ('Patagon Logistics LLC', '2024', '1234567814', TRUE),
+    ('PKD Logistics', '2024', '1234567815', TRUE),
+    ('Savannah River Logistics, LLC', '2024', '1234567816', TRUE),
+    ('SBB Shipping USA Inc', '2024', '1234567817', TRUE),
+    ('Surfaces by Pacific (Freight)', '2024', '1234567818', TRUE),
+    ('Total Quality Logistics (TQL)', '2024', '1234567819', TRUE),
+    ('Tova Trucking, Inc', '2024', '1234567820', TRUE),
+    ('Trans-World Shipping Service, Inc', '2024', '1234567821', TRUE),
+    ('Trident Freight', '2024', '1234567822', TRUE),
+    ('U.S. Customs and Border Protection', '2024', '1234567823', TRUE),
+    ('Western Overseas Corp', '2024', '1234567824', TRUE),
+    ('World-Wide Transportation', '2024', '1234567825', TRUE),
+    ('Worldwide Express Inc', '2024', '1234567826', TRUE),
+    ('Xpress Logistic Solution LLP', '2024', '1234567827', TRUE);
+
+
+
+ALTER TABLE purchase_orders
+MODIFY COLUMN freight_forwarder INT, 
+ADD CONSTRAINT fk_freight_forwarder 
+FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id);

@@ -24,7 +24,20 @@ export const getAllVendor = async (req, res) => {
         const result = await vendorService.getAllVendor({ search, clientId });
         res.status(200).send(result);
     } catch (error) {
-        console.error("Error in getting suppliers name:", error);
+        console.error("Error in getting vendors:", error);
         res.status(500).send("Internal Server Error");
+    }
+};
+
+//3. get freight carried vendot
+
+export const getFreightCarriedVendor = async (req, res) => {
+    const clientId = req.clientId;
+    try {
+        const result = await vendorService.getFreightCarriedVendor({ clientId });
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting freight carried vendors:", error);
+        res.status(500).send(error);
     }
 };

@@ -40,10 +40,10 @@ export async function getFreightData(data) {
                 // poSupplierInvoiceId: data.poSupplierInvoiceId
             },
             // attributes:{ex:['location']},
-            include:[
+            include: [
                 {
-                    model:model.freightDetailsModel,
-                    as:'freightBillsDetails'
+                    model: model.freightDetailsModel,
+                    as: 'freightBillsDetails'
                 }
             ]
         });
@@ -52,5 +52,30 @@ export async function getFreightData(data) {
     } catch (error) {
         console.error("Error in getting freight details:", error);
         throw error;
+    }
+}
+
+
+//get freight repository
+
+export async function getFreightAccounts() {
+    try {
+
+        const result = await model.subAccountTypesModel.findAll({
+            where: {
+                subAccountType: 'Expenses Classified By Nature'
+            },
+            include: [
+                {
+                    model: model.accountsModel,
+                    attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
+                    as: 'accountSubtype',
+                }
+            ]
+        })
+        return result;
+    } catch (error) {
+        console.error("Error fetching transaction data:", error);
+        throw new Error('Failed to fetch transaction data');
     }
 }

@@ -36,9 +36,33 @@ export async function addFreightBill(info) {
 export async function getFreightData(data) {
     try {
         const freightBill = await freightBillRepository.getFreightData(data);
-        console.log(freightBill,'jsjsjs');
-        
+        console.log(freightBill, 'jsjsjs');
+
         return freightBill;
+    } catch (error) {
+        console.error('Error fetching freight details:', error);
+        throw error;
+    }
+}
+
+
+export async function getFreightAccounts(data) {
+    try {
+        const freightBill = await freightBillRepository.getFreightAccounts(data);
+        console.log(freightBill, 'jsjsjs');
+
+
+        const accountDetails = freightBill.map(subAccount => {
+            const accountSubtypes = subAccount.dataValues.accountSubtype || [];
+            return accountSubtypes.map(account => ({
+                accountName: account.accountName,
+                accountsId: account.accountsId,
+            }));
+        }).flat();
+
+        console.log(accountDetails);
+
+        return accountDetails;
     } catch (error) {
         console.error('Error fetching freight details:', error);
         throw error;

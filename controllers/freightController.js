@@ -28,3 +28,16 @@ export const getFreightData = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+//get freight accounts details
+
+export const getFreightAccounts = async (req, res) => {    
+    try {
+        const result = await freightBillService.getFreightAccounts();
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in getting freight accounts :", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

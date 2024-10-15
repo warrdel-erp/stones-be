@@ -7,3 +7,8 @@ export async function addVendor(info){
 export async function getAllVendor(data){
     return await vendorRepository.getAllVendor(data)
 }
+
+
+export async function getFreightCarriedVendor(data){
+    return await vendorRepository.getFreightCarriedVendor(data)
+}

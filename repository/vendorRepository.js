@@ -12,13 +12,27 @@ export async function addVendors(data) {
 }
 
 export async function getAllVendor(data) {
-    try {
-      const result = await model.vendorModel.findAll({
-        
-      });
-      return result;
-    } catch (error) {
-      console.error("Error in create vendor:", error);
-      throw error;
-    }
+  try {
+    const result = await model.vendorModel.findAll({});
+    return result;
+  } catch (error) {
+    console.error("Error in create vendor:", error);
+    throw error;
   }
+}
+
+
+export async function getFreightCarriedVendor(data) {
+  try {
+    const result = await model.vendorModel.findAll({
+      where: {
+        freightCarrier: true,
+      },
+      attributes: ['vendorId', 'vendorName'], 
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in getting carried vendor:", error);
+    throw error;
+  }
+}
