@@ -1,3 +1,4 @@
+import { getClientDetails } from '../repository/clientRepository.js';
 import * as dashboardRepository from '../repository/dashboardRepository.js';
 
 function convertExponentialToDecimal(exponentialNumber) {
@@ -42,19 +43,23 @@ function formatLargeNumber(number) {
     return number.toFixed(2) + ' ' + units[unitIndex];
 }
 
-export async function getDashBoardData(fromDate, toDate,clientId) {
+export async function getDashBoardData(fromDate, toDate, clientId) {
     try {
 
         const [totalPurchase, openPo, totalSales, openSo, soNotes, poNotes, stockInventory, lowStock] = await Promise.all([
-            dashboardRepository.getTotalPurchase(fromDate, toDate,clientId),
-            dashboardRepository.getOpenPo(fromDate, toDate,clientId),
-            dashboardRepository.getTotalsales(fromDate, toDate,clientId),
-            dashboardRepository.getOpenSo(fromDate, toDate,clientId),
-            dashboardRepository.soNotes(fromDate, toDate,clientId),
-            dashboardRepository.poNotes(fromDate, toDate,clientId),
-            dashboardRepository.stockInventory(fromDate, toDate,clientId),
-            dashboardRepository.lowStock(fromDate, toDate,clientId),
+            dashboardRepository.getTotalPurchase(fromDate, toDate, clientId),
+            dashboardRepository.getOpenPo(fromDate, toDate, clientId),
+            dashboardRepository.getTotalsales(fromDate, toDate, clientId),
+            dashboardRepository.getOpenSo(fromDate, toDate, clientId),
+            dashboardRepository.soNotes(fromDate, toDate, clientId),
+            dashboardRepository.poNotes(fromDate, toDate, clientId),
+            dashboardRepository.stockInventory(fromDate, toDate, clientId),
+            dashboardRepository.lowStock(fromDate, toDate, clientId),
         ]);
+        const clientData = await getClientDetails({ clientId: clientId });
+        const clientName = clientData.dataValues.clientName;
+        const clientEmail = clientData.dataValues.clientEmail;
+        const clientLocation = clientData.dataValues.clientLocation;
 
         // Calculate total earnings
         const totalEarnings = totalPurchase - totalSales;
@@ -79,7 +84,12 @@ export async function getDashBoardData(fromDate, toDate,clientId) {
             poNotes,
             stockInventory,
             lowStock,
-            totalEarnings: formatLargeNumber(totalEarnings)
+            totalEarnings: formatLargeNumber(totalEarnings),
+            clientDetails: {
+                clientName,
+                clientEmail,
+                clientLocation
+            }
         };
     } catch (error) {
         console.error('Error fetching Dashboard Data:', error);
