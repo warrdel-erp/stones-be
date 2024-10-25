@@ -53,7 +53,31 @@ export async function getSingleProduct(productName) {
         const result = await model.productModel.findOne({
             where: {
                 product_name: productName
-            }
+            },
+            include: [
+                {
+                    model: model.productInventoryModel,
+                    as: 'salesProductDetails',
+                    include: [
+                        {
+                            model: model.inventoryInvoiceMapper,
+                            as: "productInventoryInvoiceMapper",
+                            include: [
+                                {
+                                    model: model.poSupplierInvoiceModel,
+                                    as: "productInventoryInvoice",
+                                    include: [
+                                        {
+                                            model: model.poSlabDetails,
+                                            as: "slabDetails",
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
         });
         return result;
     } catch (error) {

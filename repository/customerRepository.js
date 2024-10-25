@@ -50,7 +50,31 @@ export async function getSingleCustomer(customerName) {
         const result = await model.customerModel.findOne({
             where: {
                 customerName: customerName
-            }
+            },
+            include: [
+                {
+                    model: model.accountTransactionModel,
+                    attributes: [
+                        'accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId',
+                        'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType',
+                        'transactionAmountDate', 'transactionAmountType', 'accountsId',
+                        'entryType', 'paymentMethod', 'createdAt'
+                    ],
+                    as: 'customerTransactions',
+                },
+                {
+                    model: model.salesOrderModel,
+                    include: [
+                        {
+                            model: model.soLoadingOrderModel,
+                            as:'loadingOrders',
+                            where:{
+                                salesStatus:'INVOICE'
+                            }
+                        }
+                    ]
+                }
+            ]
         });
         return result;
     } catch (error) {

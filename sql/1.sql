@@ -362,7 +362,7 @@ CREATE TABLE IF NOT EXISTS inventory_invoice_mapper (
 );
 
 
---Adding data to setting api for customer table dropdown
+-- Adding data to setting api for customer table dropdown
 
 INSERT INTO settings (setting_key, setting_value, setting_type) 
 VALUES ('price_level', '["Single Slab", "Bundle", "Standard"]', 'customer');
@@ -1028,3 +1028,9 @@ MODIFY COLUMN freight_forwarder INT,
 ADD CONSTRAINT fk_freight_forwarder 
 FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id);
 
+ALTER TABLE products
+ADD COLUMN p_mfg_not_supplier BOOLEAN,
+ADD COLUMN generic_product BOOLEAN,
+ADD COLUMN customer_select_slab BOOLEAN,
+ADD COLUMN non_serialized BOOLEAN,
+ADD COLUMN invisible BOOLEAN;

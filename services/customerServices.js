@@ -1,17 +1,18 @@
 import * as customerRepository from '../repository/customerRepository.js'
 import { findUserId } from '../repository/clientUserRepository.js';
-export async function addCustomer(info){
+export async function addCustomer(info) {
     return await customerRepository.addCustomer(info);
 }
 
-export async function getAllCustomers(data){
+export async function getAllCustomers(data) {
     return await customerRepository.getAllCustomers(data);
 }
 
-export async function getSingleCustomer(customerName){
-    return await customerRepository.getSingleCustomer(customerName);
+export async function getSingleCustomer(customerName) {
+    const customerDetails = await customerRepository.getSingleCustomer(customerName);
+    return customerDetails;
 }
-export async function getCustomerID(){
+export async function getCustomerID() {
     const result = await customerRepository.getCustomerID()
     let customerNumber; // declare newPo outside the if-else blocks
     if (!result) {
