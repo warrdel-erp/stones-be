@@ -612,6 +612,7 @@ ALTER TABLE accounts ADD COLUMN can_delete BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- To add creation of data by whom
 ALTER TABLE suppliers
+ADD COLUMN created_at
 ADD COLUMN created_by INT ,
 ADD COLUMN updated_by INT;
 
@@ -976,7 +977,7 @@ MODIFY payment_terms ENUM('30', '45', '60', '90', '120', 'COD');
 ALTER TABLE freight_bills
 MODIFY payment_terms ENUM('30', '45', '60', '90', '120', 'COD');
 
-ALTER TABLE `stone_design_second`.`vendors` 
+ALTER TABLE `vendors` 
 DROP INDEX `vendor_name` ;
 
 --adding the v
@@ -1031,9 +1032,9 @@ FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id);
 
 -- updates in the user roles tables 
 
-ALTER TABLE `stone_design_second`.`user_roles` 
+ALTER TABLE `user_roles` 
 DROP FOREIGN KEY `user_roles_ibfk_1`;
-ALTER TABLE `stone_design_second`.`user_roles` 
+ALTER TABLE `user_roles` 
 DROP INDEX `user_id` ;
 ;
 
@@ -1045,7 +1046,7 @@ ADD COLUMN user_email VARCHAR(255);
 ALTER TABLE user_roles
 ADD CONSTRAINT fk_user_email FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `stone_design_second`.`user_roles` 
+ALTER TABLE `user_roles` 
 DROP COLUMN `user_id`;
 
 
@@ -1186,4 +1187,9 @@ CREATE TABLE supplier_writing_instruction (
     FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE 
 );
 
-
+ALTER TABLE supplier_writing_instruction
+ADD COLUMN created_by INT,
+ADD COLUMN  updated_by INT,
+ADD COLUMN  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ADD COLUMN deleted_at TIMESTAMP NULL;
