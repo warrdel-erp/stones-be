@@ -67,9 +67,9 @@ export async function getSingleCustomer(customerName) {
                     include: [
                         {
                             model: model.soLoadingOrderModel,
-                            as:'loadingOrders',
-                            where:{
-                                salesStatus:'INVOICE'
+                            as: 'loadingOrders',
+                            where: {
+                                salesStatus: 'INVOICE'
                             }
                         }
                     ]

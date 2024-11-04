@@ -309,13 +309,13 @@ export async function getCOATransactionDetails(queryParams = {}) {
         }
         console.log(queryParams, 'datess');
         const result = await model.subAccountTypesModel.findAll({
-            attributes:['subAccountType','subAccountTypesId'],
+            attributes: ['subAccountType', 'subAccountTypesId'],
             include: [
                 {
                     model: model.accountsModel,
                     attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
                     as: 'accountSubtype',
-                    required:true,
+                    required: true,
                     include: [
                         {
                             model: model.accountTransactionModel,
@@ -360,7 +360,7 @@ export async function getCOATransactionDetails(queryParams = {}) {
                                     include: [
                                         {
                                             model: model.salesOrderModel,
-                                            attributes: ['salesOrdersId', 'customerId', 'location','so'],
+                                            attributes: ['salesOrdersId', 'customerId', 'location', 'so'],
                                             include: [
                                                 {
                                                     model: model.customerModel,
@@ -502,3 +502,26 @@ export async function getSalesTransactions(customerId, limit, offset, clientId) 
     }
 }
 
+
+export async function getAccountTransactionCustomer(customerId, startDate, endDate) {
+    try {
+        const result = await model.accountTransactionModel.findAll({
+            where: {
+                customerId: customerId,
+                transactionAmountDate: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            attributes: [
+                'accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId',
+                'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType',
+                'transactionAmountDate', 'transactionAmountType', 'accountsId',
+                'entryType', 'paymentMethod', 'createdAt'
+            ],
+        });
+        return result;
+    } catch (error) {
+        console.error(`Error in account transactions for customer ${customerId}:`, error);
+        return error;
+    }
+}
