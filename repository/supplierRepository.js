@@ -49,7 +49,20 @@ export async function getSingleSupplier(supplierName) {
         const result = await model.supplierModel.findOne({
             where: {
                 supplier_name: supplierName
-            }
+            },
+            include: [
+                {
+                    model: model.purchaseModel
+                },
+                {
+                    model: model.accountTransactionModel,
+                    as: 'supplierTransactions'
+                },
+                {
+                    model: model.supplierWritingInstructionModel,
+                    as:'supplierWritingInstructions'
+                }
+            ]
         });
         return result;
     } catch (error) {
@@ -83,6 +96,18 @@ export async function getSupplerBySupplierId(supplierId) {
         return result;
     } catch (error) {
         console.error(`Error in getting supplier${supplierId}:`, error);
+        throw error;
+    }
+}
+
+
+
+export async function addWritingInstructions(data) {
+    try {
+        const result = await model.supplierWritingInstructionModel.create(data);
+        return result;
+    } catch (error) {
+        console.error("Error in addSupplier writing instruction:", error);
         throw error;
     }
 }

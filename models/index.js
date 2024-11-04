@@ -36,8 +36,8 @@ import opportunityModel from './opportunityModel.js';
 import opportunitySelectionModel from './opportunitySelectionModel.js';
 import freightBillsModel from './freightModel.js';
 import freightDetailsModel from './freightDetailsModel.js';
-
 import vendorModel from './vendorModel.js';
+import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -226,7 +226,8 @@ clientUserModel.hasMany(opportunityModel, { foreignKey: 'created_by', sourceKey:
 freightDetailsModel.belongsTo(freightBillsModel,{foreignKey:'freightBillsId'});
 freightBillsModel.hasMany(freightDetailsModel,{foreignKey:'freightBillsId',as:'freightBillsDetails'})
 
-
+supplierWritingInstructionModel.belongsTo(supplierModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
+supplierModel.hasMany(supplierWritingInstructionModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
 
 export {
 	productModel,
@@ -263,5 +264,6 @@ export {
 	opportunitySelectionModel,
 	freightBillsModel,
 	freightDetailsModel,
-	vendorModel
+	vendorModel,
+	supplierWritingInstructionModel
 };

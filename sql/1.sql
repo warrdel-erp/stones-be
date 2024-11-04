@@ -1034,3 +1034,25 @@ ADD COLUMN generic_product BOOLEAN,
 ADD COLUMN customer_select_slab BOOLEAN,
 ADD COLUMN non_serialized BOOLEAN,
 ADD COLUMN invisible BOOLEAN;
+
+
+CREATE TABLE supplier_writing_instruction (
+    id SERIAL PRIMARY KEY,  
+    beneficiary_name VARCHAR(255) NOT NULL,       
+    beneficiary_address VARCHAR(255) NOT NULL,     
+    beneficiary_phone VARCHAR(50),                 
+    beneficiary_mobile VARCHAR(50),               
+    beneficiary_fax VARCHAR(50),                  
+    bank_name VARCHAR(255) NOT NULL,               
+    bank_address VARCHAR(255) NOT NULL,           
+    bank_phone VARCHAR(50),                        
+    bank_mobile VARCHAR(50),
+    bank_fax VARCHAR(50),                         
+    routing VARCHAR(50),                         
+    account VARCHAR(50),                            
+    swift_code VARCHAR(50),                        
+    iban VARCHAR(50),                              
+    internal_notes TEXT,                           
+    supplier_id INT NOT NULL,                      
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE 
+);

@@ -63,3 +63,15 @@ export const updateSupplier = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+
+export const addWritingInstructions = async (req, res) => {
+    try {
+        const result = await supplierService.addWritingInstructions(req.body);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in addSupplier:", error);
+        res.status(500).send(error);
+    }
+};
