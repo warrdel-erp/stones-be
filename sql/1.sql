@@ -1028,6 +1028,50 @@ MODIFY COLUMN freight_forwarder INT,
 ADD CONSTRAINT fk_freight_forwarder 
 FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id);
 
+
+-- updates in the user roles tables 
+
+ALTER TABLE `stone_design_second`.`user_roles` 
+DROP FOREIGN KEY `user_roles_ibfk_1`;
+ALTER TABLE `stone_design_second`.`user_roles` 
+DROP INDEX `user_id` ;
+;
+
+CREATE INDEX idx_user_email ON users(email);
+
+ALTER TABLE user_roles
+ADD COLUMN user_email VARCHAR(255);
+
+ALTER TABLE user_roles
+ADD CONSTRAINT fk_user_email FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `stone_design_second`.`user_roles` 
+DROP COLUMN `user_id`;
+
+
+ALTER TABLE user_roles
+ADD COLUMN user_id INT,
+ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE permissions
+ADD COLUMN route VARCHAR(255);
+
+
+ALTER TABLE permissions
+ADD COLUMN route VARCHAR(255);
+
+
+CREATE TABLE user_permissions (
+    user_permission_id INT AUTO_INCREMENT PRIMARY KEY ,
+    user_id INT,
+    permission_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
+  );
+  
+
+ALTER TABLE `stone_design`.`role_permissions` 
+CHANGE COLUMN `role_permission_id` `role_permission_id` INT NOT NULL AUTO_INCREMENT ;
 ALTER TABLE products
 ADD COLUMN p_mfg_not_supplier BOOLEAN,
 ADD COLUMN generic_product BOOLEAN,
@@ -1035,6 +1079,85 @@ ADD COLUMN customer_select_slab BOOLEAN,
 ADD COLUMN non_serialized BOOLEAN,
 ADD COLUMN invisible BOOLEAN;
 
+
+
+ALTER TABLE permissions
+DROP INDEX permission_name;
+
+
+INSERT INTO settings (setting_key, setting_value, setting_type)
+VALUES 
+('permissionMap', 
+    '{
+        "/dashboard/all": ["DashboardRO"],
+        "/purchaseOrder/allPo": ["PurchaseOrderRO"],
+        "/purchaseOrder": ["PurchaseOrderRW"],
+        "/purchaseOrder/inventoryDetailsBasedOnSipl": ["InventoryListRO"],
+        "/salesOrder/allPo": ["SalesOrderRO"],
+        "/salesOrder": ["SalesOrderRW"],
+        "/return/all": ["ReturnRO"],
+        "/return/returnSlabs": ["ReturnRW"],
+        "/product/all": ["ProductRO"],
+        "/product": ["ProductRW"],
+        "/customer": ["CustomerRW"],
+        "/customer/all": ["CustomerRO"],
+        "/supplier": ["SupplierRW"],
+        "/supplier/all": ["SupplierRO"],
+        "/vendor/all": ["VendorRO"],
+        "/vendor": ["VendorRW"],
+        "/opportunity": ["OpportunityRW"],
+        "/opportunity/all": ["OpportunityRO"],
+        "/opportunity/selectionSheet": ["OpportunityRW"],
+        "/opportunity/opportunityDetails": ["OpportunityRO"],
+        "/opportunity/getProductInventory": ["OpportunityRO"],
+        "/opportunity/selectionSheetDetails": ["OpportunityRO"]
+    }', 
+    'json'
+);
+
+UPDATE settings
+SET setting_value = JSON_MERGE_PATCH(setting_value, '{
+    "/accounts/": ["AccountRW"],
+    "/accounts/all": ["AccountRO"],
+    "/accounts/allTypes": ["AccountRO"],
+    "/accounts/cashFinancialAssetList": ["AccountRO"],
+    "/accounts/groupedListAccounts": ["AccountRO"],
+    "/accounts/transactionDetailsCOA": ["AccountRO"],
+    "/accounts/accountIdsByName": ["AccountRO"]
+}')
+WHERE setting_key = 'permissionMap';
+
+
+INSERT INTO permissions (permission_name, description, module, route) VALUES 
+    ('DashboardRO', 'Read-only access to the dashboard', 'Dashboard', '/dashboard/all'),
+    ('PurchaseOrderRO', 'Read-only access to purchase orders', 'PurchaseOrder', '/purchaseOrder/allPo'),
+    ('PurchaseOrderRW', 'Read and write access to purchase orders', 'PurchaseOrder', '/purchaseOrder'),
+    ('InventoryListRO', 'Read-only access to inventory details based on supplier', 'Inventory', '/purchaseOrder/inventoryDetailsBasedOnSipl'),
+    ('SalesOrderRO', 'Read-only access to sales orders', 'SalesOrder', '/salesOrder/allPo'),
+    ('SalesOrderRW', 'Read and write access to sales orders', 'SalesOrder', '/salesOrder'),
+    ('ReturnRO', 'Read-only access to returns', 'Return', '/return/all'),
+    ('ReturnRW', 'Read and write access to return slabs', 'Return', '/return/returnSlabs'),
+    ('ProductRO', 'Read-only access to products', 'Product', '/product/all'),
+    ('ProductRW', 'Read and write access to products', 'Product', '/product'),
+    ('CustomerRW', 'Read and write access to customer data', 'Customer', '/customer'),
+    ('CustomerRO', 'Read-only access to customer data', 'Customer', '/customer/all'),
+    ('SupplierRW', 'Read and write access to supplier data', 'Supplier', '/supplier'),
+    ('SupplierRO', 'Read-only access to supplier data', 'Supplier', '/supplier/all'),
+    ('VendorRO', 'Read-only access to vendor data', 'Vendor', '/vendor/all'),
+    ('VendorRW', 'Read and write access to vendor data', 'Vendor', '/vendor'),
+    ('OpportunityRW', 'Read and write access to opportunities', 'Opportunity', '/opportunity'),
+    ('OpportunityRO', 'Read-only access to opportunities', 'Opportunity', '/opportunity/all'),
+    ('OpportunityRW', 'Read and write access to opportunity selection sheet', 'Opportunity', '/opportunity/selectionSheet'),
+    ('OpportunityRO', 'Read-only access to opportunity details', 'Opportunity', '/opportunity/opportunityDetails'),
+    ('OpportunityRO', 'Read-only access to product inventory in opportunities', 'Opportunity', '/opportunity/getProductInventory'),
+    ('OpportunityRO', 'Read-only access to selection sheet details', 'Opportunity', '/opportunity/selectionSheetDetails'),
+    ('AccountRW', 'Read and write access to accounts', 'Accounts', '/accounts/'),
+    ('AccountRO', 'Read-only access to all accounts', 'Accounts', '/accounts/all'),
+    ('AccountRO', 'Read-only access to all account types', 'Accounts', '/accounts/allTypes'),
+    ('AccountRO', 'Read-only access to cash financial asset list', 'Accounts', '/accounts/cashFinancialAssetList'),
+    ('AccountRO', 'Read-only access to grouped list of accounts', 'Accounts', '/accounts/groupedListAccounts'),
+    ('AccountRO', 'Read-only access to transaction details by chart of accounts', 'Accounts', '/accounts/transactionDetailsCOA'),
+    ('AccountRO', 'Read-only access to account IDs by name', 'Accounts', '/accounts/accountIdsByName');
 
 ALTER TABLE sales_orders 
 MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'CLOSE', 'OPEN') NOT NULL DEFAULT 'ACTIVE';
@@ -1062,4 +1185,5 @@ CREATE TABLE supplier_writing_instruction (
     supplier_id INT NOT NULL,                      
     FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE 
 );
+
 

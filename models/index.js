@@ -37,6 +37,8 @@ import opportunitySelectionModel from './opportunitySelectionModel.js';
 import freightBillsModel from './freightModel.js';
 import freightDetailsModel from './freightDetailsModel.js';
 import vendorModel from './vendorModel.js';
+
+import userPermissionsModel from './userPermissionsModel.js';
 import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
 
 
@@ -54,6 +56,14 @@ roleModel.hasMany(rolePermissionModel, { foreignKey: 'role_id' });
 
 rolePermissionModel.belongsTo(permissionModel, { foreignKey: 'permission_id' });
 permissionModel.hasMany(rolePermissionModel, { foreignKey: 'permission_id' });
+
+userPermissionsModel.belongsTo(userModel, { foreignKey: 'user_id' });
+userModel.hasMany(userPermissionsModel, { foreignKey: 'user_id' });
+
+
+
+// rolePermissionModel.belongsTo(userRoleModel, { foreignKey: 'role_id' });
+// userRoleModel.hasMany(rolePermissionModel, { foreignKey: 'role_id',as: 'userRolesPermission'})
 
 supplierModel.hasMany(purchaseModel, { foreignKey: 'supplier_id' });
 purchaseModel.belongsTo(supplierModel, { foreignKey: 'supplier_id', as: "suppliers" });
@@ -223,8 +233,8 @@ clientUserModel.hasMany(opportunityModel, { foreignKey: 'created_by', sourceKey:
 
 //freight realtions
 
-freightDetailsModel.belongsTo(freightBillsModel,{foreignKey:'freightBillsId'});
-freightBillsModel.hasMany(freightDetailsModel,{foreignKey:'freightBillsId',as:'freightBillsDetails'})
+freightDetailsModel.belongsTo(freightBillsModel, { foreignKey: 'freightBillsId' });
+freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' })
 
 supplierWritingInstructionModel.belongsTo(supplierModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
 supplierModel.hasMany(supplierWritingInstructionModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
@@ -265,5 +275,6 @@ export {
 	freightBillsModel,
 	freightDetailsModel,
 	vendorModel,
+	userPermissionsModel,
 	supplierWritingInstructionModel
 };

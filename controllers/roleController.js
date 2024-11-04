@@ -26,8 +26,8 @@ export const getAllRoles = async (req, res) => {
 //create permission for the roles 
 export const createPermission = async (req, res) => {
   try {
-    const { name, description, module } = req.body;
-    const role = await rolePermission.createPermission({ name, description, module});
+    const { name, description, module, route } = req.body;
+    const role = await rolePermission.createPermission({ name, description, module, route });
     res.status(201).json(role);
   } catch (error) {
     console.error('Failed to assign role:', error);
@@ -35,14 +35,22 @@ export const createPermission = async (req, res) => {
   }
 };
 
+//get all the permissions list 
+export const getAllPermissionList = async (req, res) => {
+  try {
+    const permissionList = await rolePermission.getAllPermissionList();
+    res.status(200).json(permissionList);
+  } catch (error) {
+    console.error('Failed to get permissionList:', error);
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+};
+
 //assign role the user 
 export const assignRoleToUser = async (req, res) => {
   try {
-    const { userId, roleId } = req.body;
-    const userRole = await rolePermission.createUserRole({ userId, roleId});
-    if (!userRole) {
-      return res.status(404).json({ error: 'User or Role not found' });
-    }
+    const userRole = await rolePermission.createUserRole(req.body);
+
     res.status(201).json(userRole);
   } catch (error) {
     console.error('Failed to assign role:', error);
@@ -64,8 +72,7 @@ export const getRolesWithUser = async (req, res) => {
 //assign permission to the roles
 export const assignPermissinToRoles = async (req, res) => {
   try {
-    const { permissionId, roleId } = req.body;
-    const permissionRole = await rolePermission.assignPermissinToRoles({ permissionId, roleId });
+    const permissionRole = await rolePermission.assignPermissinToRoles(req.body);
     if (!permissionRole) {
       return res.status(404).json({ error: 'Permission or Role not found' });
     }
@@ -88,3 +95,38 @@ export const getUserPermissions = async (req, res) => {
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
+
+
+
+export const assignPermissionsToUser = async (req, res) => {
+  try {
+    const userPermissions = await rolePermission.assignPermissionsToUser(req.body);
+    res.status(201).json(userPermissions);
+  } catch (error) {
+    console.error('Failed to assign userPermissions:', error);
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+};
+
+
+export const rolesPermission = async (req, res) => {
+  const rolesId = req.query
+  try {
+    const result = await rolePermission.rolesPermissions(rolesId);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error('Failed to get role:', error);
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+};
+
+
+export const rolesPermissionUpdate = async (req, res) => {
+  try {
+    const result = await rolePermission.rolesPermissionUpdate(req.body);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error('Failed to get role:', error);
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+};

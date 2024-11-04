@@ -39,3 +39,13 @@ export const findAllUsers = async () => {
 // }
 
 
+
+
+export async function findUserData(userId) {
+	const result = await model.userModel.findOne({
+		where: {
+			id: userId
+		}
+	})
+	return result;
+}

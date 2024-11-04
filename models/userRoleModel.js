@@ -8,13 +8,23 @@ export default sequelize.define('UserRole', {
     autoIncrement: true,
     field: 'user_role_id',
   },
-  userId: {
-    type: DataTypes.INTEGER,
+  userEmail: {
+    type: DataTypes.STRING,
+    field: 'user_email',
+    references: {
+      model: 'users',
+      key: 'email'
+    },
+    allowNull: false,
+  },
+  userId:{
+    type: DataTypes.NUMBER,
     field: 'user_id',
     references: {
       model: 'users',
       key: 'id'
-    }
+    },
+    allowNull: true,
   },
   roleId: {
     type: DataTypes.INTEGER,

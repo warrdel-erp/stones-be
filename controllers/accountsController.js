@@ -115,7 +115,7 @@ export const getAccountIdByAccountName = async (req, res) => {
 
 //get coa transaction details
 export const getCOATransactionDetails = async (req, res) => {
-    try {    
+    try {
         const clientId = req.clientId;
         const { soLoadingOrderId, poSupplierId, poSupplierInvoiceMapperId, customerId, accountsId, supplierId, so, month, year } = req.query;
         const queryParams = {
@@ -138,7 +138,7 @@ export const getCOATransactionDetails = async (req, res) => {
         });
         let transactionData;
         if (Object.keys(queryParams).length > 0) {
-            transactionData = await accountsService.getCOATransactionDetails({...queryParams});
+            transactionData = await accountsService.getCOATransactionDetails({ ...queryParams });
         } else {
             transactionData = await accountsService.getCOATransactionDetails(clientId);
         }
@@ -154,8 +154,8 @@ export const getCOATransactionDetails = async (req, res) => {
 export const getTransactionSupplierCustomers = async (req, res) => {
     try {
         const typeOfData = req.params;
-        const clientId = req.clientId;  
-        const result = await accountsService.getTransactionSupplierCustomer(typeOfData, req.query,clientId);
+        const clientId = req.clientId;
+        const result = await accountsService.getTransactionSupplierCustomer(typeOfData, req.query, clientId);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all grouped list accounts type :", error);

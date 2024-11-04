@@ -7,23 +7,28 @@ export default sequelize.define('permissions', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    field:'permission_id'
+    field: 'permission_id'
   },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    field:'permission_name'
+    field: 'permission_name'
   },
   description: {
     type: DataTypes.STRING,
     allowNull: true,
-    field:'description'
+    field: 'description'
   },
-  module:{
+  module: {
     type: DataTypes.STRING,
     allowNull: true,
-    field:'module'
+    field: 'module'
+  },
+  route: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'route'
   }
 }, {
   tableName: 'permissions',

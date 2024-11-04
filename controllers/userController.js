@@ -4,6 +4,7 @@ import * as clientUserRepository from '../repository/clientUserRepository.js'
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { secretKey } from '../constant.js'
+import { getUserPermissions } from "../repository/rolePermissionRepository.js";
 
 // register
 export const register = async (req, res) => {
@@ -40,6 +41,18 @@ export const login = async (req, res) => {
     const userId = existingEmail.dataValues.id;
     const clientIdOfEmail = await clientUserRepository.findClientID(userId);
     const clientId = clientIdOfEmail.dataValues.clientId;
+    const userHasPermissions = await getUserPermissions(email);
+    let userPermissionsArray = [];
+
+    userHasPermissions.UserRole.forEach(role => {
+      role.role.role_permissions.forEach(rolePermission => {
+        if (rolePermission.permission) {
+          userPermissionsArray.push(rolePermission.permission.name);
+        }
+      });
+    });
+
+    console.log(userPermissionsArray, 'Collected User Permissions');
     if (!existingEmail) {
       return res.status(400).send("Email does not exist");
     }
@@ -63,7 +76,8 @@ export const login = async (req, res) => {
       status: true,
       message: "User logged in successfully",
       token,
-      clientId
+      clientId,
+      userPermissionsArray
     });
   } catch (error) {
     console.error("Error during login:", error);

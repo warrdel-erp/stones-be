@@ -71,4 +71,37 @@ export const subAccountType = ['Cash and Financial Assets', 'Receivables and Con
 
 export const lowStockQuantity = 500;
 
-export const paymentMethod = ['Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other']
+export const paymentMethod = ['Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other'];
+
+export const permissionMap = {
+    
+    '/dashboard/all': ['DashboardRO'],
+    '/purchaseOrder/allPo': ['PurchaseOrderRO'],
+    '/purchaseOrder': ['PurchaseOrderRW'],
+    '/purchaseOrder/inventoryDetailsBasedOnSipl': ['InventoryListRO'],
+    '/salesOrder/allPo': ['SalesOrderRO'],
+    '/salesOrder': ['SalesOrderRW'],
+    '/return/all': ['ReturnRO'],
+    '/return/returnSlabs': ['ReturnRW'],
+    '/product/all': ['ProductRO'],
+    '/product': ['ProductRW'],
+    '/customer': ['CustomerRW'],
+    '/customer/all': ['CustomerRO'],
+    '/supplier': ['SupplierRW'],
+    '/supplier/all': ['SupplierRO'],
+    '/vendor/all': ['VendorRO'],
+    '/vendor': ['VendorRW'],
+    '/opportunity': ['OpportunityRW'],
+    '/opportunity/all': ['OpportunityRO'],
+    '/opportunity/selectionSheet': ['OpportunityRW'],
+    '/opportunity/opportunityDetails': ['OpportunityRO'],
+    '/opportunity/getProductInventory': ['OpportunityRO'],
+    '/opportunity/selectionSheetDetails': ['OpportunityRO'],
+    '/accounts/': ['AccountRW'],
+    '/accounts/all': ['AccountRO'],
+    '/accounts/allTypes': ['AccountRO'],
+    '/accounts/cashFinancialAssetList': ['AccountRO'],
+    '/accounts/groupedListAccounts': ['AccountRO'],
+    '/accounts/transactionDetailsCOA': ['AccountRO'],
+    '/accounts/accountIdsByName': ['AccountRO']
+};
