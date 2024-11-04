@@ -217,6 +217,10 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
 //get all purchase Order
 
 export async function getAllPurchaseOrder(data) {
+
+  const fromDate = data.queriedData.fromDate;
+  const toDate = data.queriedData.toDate;
+
   let result;
   try {
     if (data.search) {
@@ -252,6 +256,11 @@ export async function getAllPurchaseOrder(data) {
     } else {
       result = await model.purchaseModel.findAll({
         attributes: ['po', 'purchaseOrderId', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
+        where: {
+          createdAt: {
+            [Op.between]: [new Date(fromDate), new Date(toDate)],
+          },
+        },
         include: [
           {
             model: model.clientUserModel,

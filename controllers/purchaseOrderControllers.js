@@ -12,8 +12,8 @@ export const createOrder = async (req, res) => {
         const clientId = req.clientId;
         const poDetails = await findPoNumber(po, clientId);
         const data = filterObject(info)
-        console.log(data,'ayssy');
-        
+        console.log(data, 'ayssy');
+
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
         } else if (poDetails) {
@@ -83,8 +83,9 @@ export const addPurchaseOrderProduct = async (req, res) => {
 export const getAllOpenPo = async (req, res) => {
     let { search } = req.query
     const clientId = req.clientId;
+    const queriedData = req.query
     try {
-        const result = await purchaseOrderService.getAllPo({ search, clientId });
+        const result = await purchaseOrderService.getAllPo({ search, clientId, queriedData });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  PO :", error);

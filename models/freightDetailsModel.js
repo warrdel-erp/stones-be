@@ -2,7 +2,7 @@ import sequelize from "../database/sequelizeConfig.js";
 import { DataTypes } from 'sequelize';
 
 export default sequelize.define(
-    'freightBillDetails',
+    'freight_bill_details',
     {
         detailId: {
             type: DataTypes.INTEGER,

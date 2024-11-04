@@ -3,7 +3,7 @@ import { DataTypes } from 'sequelize';
 import { country, paymentTerms, status } from "../constant.js";
 
 export default sequelize.define(
-  'freightBills',
+  'freight_Bills',
   {
     freightBillsId: {
       type: DataTypes.INTEGER,
