@@ -1036,6 +1036,12 @@ ADD COLUMN non_serialized BOOLEAN,
 ADD COLUMN invisible BOOLEAN;
 
 
+ALTER TABLE sales_orders 
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'CLOSE', 'OPEN') NOT NULL DEFAULT 'ACTIVE';
+
+
+ALTER TABLE so_loading_order 
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'CLOSE', 'OPEN') NOT NULL DEFAULT 'ACTIVE';
 CREATE TABLE supplier_writing_instruction (
     id SERIAL PRIMARY KEY,  
     beneficiary_name VARCHAR(255) NOT NULL,       
@@ -1056,3 +1062,4 @@ CREATE TABLE supplier_writing_instruction (
     supplier_id INT NOT NULL,                      
     FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE 
 );
+

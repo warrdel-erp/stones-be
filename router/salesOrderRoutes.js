@@ -1,25 +1,29 @@
-import {Router} from  'express';
-const router =  Router();
+import { Router } from 'express';
+const router = Router();
 import { userAuth } from '../middleware/authUser.js';
-import { createOrder,getSoNumber,singleSoDetails,addProduct,loadingOrder,getAllOpenSo,updateStatus, addPayment, createSalesAccountTransaction} from "../controllers/salesOrderController.js";
+import { createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder } from "../controllers/salesOrderController.js";
 
-router.post('/',userAuth, createOrder);
+router.patch('/soClose', closeSalesOrder);
 
-router.get('/', userAuth,getSoNumber);
+router.post('/', userAuth, createOrder);
 
-router.get('/soNumber',userAuth, singleSoDetails);
+router.get('/', userAuth, getSoNumber);
 
-router.post('/addProduct', userAuth,addProduct);
+router.get('/soNumber', userAuth, singleSoDetails);
 
-router.post('/loadingOrder',userAuth, loadingOrder);
+router.post('/addProduct', userAuth, addProduct);
 
-router.get('/allPo',userAuth, getAllOpenSo);
+router.post('/loadingOrder', userAuth, loadingOrder);
 
-router.patch('/:soLoadingOrderId',userAuth, updateStatus);
+router.get('/allPo', userAuth, getAllOpenSo);
 
-router.post('/addPayment',addPayment);
+router.patch('/:soLoadingOrderId', userAuth, updateStatus);
 
-router.post('/salesAccountTransaction', userAuth,createSalesAccountTransaction);
+router.post('/addPayment', addPayment);
+
+router.post('/salesAccountTransaction', userAuth, createSalesAccountTransaction);
+
+
 
 
 

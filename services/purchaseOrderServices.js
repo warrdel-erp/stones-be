@@ -156,34 +156,35 @@ export async function addSlabDetails(info) {
             serialCounter = parseInt(lastPart, 10);
         }
 
-        for (let i = 0; i < slabCounter; i++) {
 
+        for (let i = 0; i < slabCounter; i++) {
             let dynamicBlock = block;
             let dynamicLot = lot;
             let dynamicSlab = slab;
 
-            // If flags is true, Increase the value
+            // Incremented based on flags
             if (isBlockIncreament) dynamicBlock += i;
             if (iisLotIncreament) dynamicLot += i;
             if (isSlabIncreament) dynamicSlab += i;
 
-            // Generate a dynamic po convert to serial Number
-            // const dynamicPo = serialCounter ? `${po}- ${siplNumberAfterHyphen}-${serialCounter + i}` : `${po}-${i}`;
-            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${serialCounter + i + 1}`;
+            //  serialCounter is an integer and incremented correctly
+            const currentSerial = serialCounter + i + 1;
+            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;
             console.log(dynamicPo, 'dynamicPO');
 
-            // Create a new slab
+            // Created a new slab
             const slabDetail = await purchaseOrderRepository.addSlabDetails({
                 ...slabInfo,
                 serialNumber: dynamicPo,
-                block: isBlockIncreament ? dynamicBlock : block,
-                lot: iisLotIncreament ? dynamicLot : lot,
-                slab: isSlabIncreament ? dynamicSlab : slab,
+                block: dynamicBlock,
+                lot: dynamicLot,
+                slab: dynamicSlab,
                 slabCounter: slabCounter,
                 poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
             });
-            slabDetails.push(slabDetail); // Push the slab detail In array
+            slabDetails.push(slabDetail); // Push the slab detail into array
         }
+
         console.log(slabDetails, 'slabdetails');
         // const productDeatils = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMapperId);
         // console.log(productDeatils,'sjsjsjs');

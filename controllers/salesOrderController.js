@@ -148,7 +148,7 @@ export const createSalesAccountTransaction = async (req, res) => {
     const transactionData = req.body;
     const user = req.user;
     const createdBy = user.dataValues.id;
-    const data= filterObject(transactionData)
+    const data = filterObject(transactionData)
     try {
         const result = await salesOrderService.createSalesAccountTransaction({ ...data, createdBy });
         res.status(200).send(result);
@@ -158,3 +158,15 @@ export const createSalesAccountTransaction = async (req, res) => {
     }
 };
 
+
+
+export const closeSalesOrder = async (req, res) => {
+    try {
+        const salesOrdersId= req.query;   
+        const result = await salesOrderService.closeSalesOrder(salesOrdersId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in updating sales order status: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

@@ -3,10 +3,10 @@ export const secretKey = 'wardellsolutionprivatelimited'
 export const country = ['Vietnam', 'Angola', 'Brazil', 'Canada', 'China', 'Greece', 'India', 'Italy', 'Norway', 'Saudi Arabia', 'South Africa', 'Spain', 'Ukraine'];
 
 export const customerType = ['Homeowner', 'Architect', 'KB Dealer', 'Designer', 'Fabricator', 'Builder'];
-export const paymentTerms = ['30', '45', '60', '90', '120','COD'];
+export const paymentTerms = ['30', '45', '60', '90', '120', 'COD'];
 export const reasons = ['Reseller'];
 export const priceLevel = ['Single Slab', 'Bundle', 'Standard'];
-export const wayOfDocsSend =['Fax', 'Email','Mail', 'Text'];
+export const wayOfDocsSend = ['Fax', 'Email', 'Mail', 'Text'];
 
 
 export const language = ['English', 'French', 'Spanish', 'Italian'];
@@ -43,9 +43,9 @@ export const productPriceRangeEnum = ['low', 'mid', 'high', 'very high'];
 
 export const productAssignedBinEnum = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
 
-export const status = ['ACTIVE', 'INACTIVE'];
+export const status = ['ACTIVE', 'INACTIVE', 'CLOSE', 'OPEN'];
 
-export const poSlabDetailStatus =['ACTIVE','INACTIVE','RETURNED','ONHOLD'];
+export const poSlabDetailStatus = ['ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD'];
 
 export const deliveryType = ['Pickup', 'Delivery', 'Other'];
 
@@ -61,14 +61,14 @@ export const slabBinEnum = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B1', 'B2', 'B3'
 
 export const inventoryStock = ['Available'];
 
-export const deliveryTypeSales = ['DELIVERY','PICKUP'];
+export const deliveryTypeSales = ['DELIVERY', 'PICKUP'];
 
-export const salesStatus = ['INITIATED','LOADING ORDER','PACKING LIST','INVOICE']
+export const salesStatus = ['INITIATED', 'LOADING ORDER', 'PACKING LIST', 'INVOICE']
 
-export const accountType = ['Assets','Liabilities','Revenue','Expenses', 'Equity Including Portion Attributable to Noncontrolling Interest','Other (Non-Operating) Income and Expenses','Intercompany and Related Party Accounts']
+export const accountType = ['Assets', 'Liabilities', 'Revenue', 'Expenses', 'Equity Including Portion Attributable to Noncontrolling Interest', 'Other (Non-Operating) Income and Expenses', 'Intercompany and Related Party Accounts']
 
-export const subAccountType = ['Cash and Financial Assets', 'Receivables and Contracts', 'Inventory', 'Accruals and Additional Assets', 'Property, Plant and Equipment','Intangible Assets (Excluding Goodwill)', 'Goodwill', 'Payables', 'Accruals, Deferrals and Other Liabilities', 'Financial Labilities', 'Commitments and Contingencies', 'Equity, Attributable to Parent', 'Retained Earnings (Accumulated Deficit)', 'Accumulated Other Comprehensive Income (Loss)', 'Other Equity Items', 'Equity, Attributable to Noncontrolling Interest' ,'Recognized Point Of Time', 'Recognized Over Time', 'Adjustments', 'Expenses Classified By Nature', 'Expenses Classified By Function', 'Other Revenue and Expenses', 'Gains and Losses', 'Taxes (Other Than Income and Payroll) and Fees', 'Income Tax Expense (Benefit)', 'Intercompany and Related Party Assets', 'Intercompany and Related Party Liabilities', 'Intercompany and Related Party Income and Expense']
+export const subAccountType = ['Cash and Financial Assets', 'Receivables and Contracts', 'Inventory', 'Accruals and Additional Assets', 'Property, Plant and Equipment', 'Intangible Assets (Excluding Goodwill)', 'Goodwill', 'Payables', 'Accruals, Deferrals and Other Liabilities', 'Financial Labilities', 'Commitments and Contingencies', 'Equity, Attributable to Parent', 'Retained Earnings (Accumulated Deficit)', 'Accumulated Other Comprehensive Income (Loss)', 'Other Equity Items', 'Equity, Attributable to Noncontrolling Interest', 'Recognized Point Of Time', 'Recognized Over Time', 'Adjustments', 'Expenses Classified By Nature', 'Expenses Classified By Function', 'Other Revenue and Expenses', 'Gains and Losses', 'Taxes (Other Than Income and Payroll) and Fees', 'Income Tax Expense (Benefit)', 'Intercompany and Related Party Assets', 'Intercompany and Related Party Liabilities', 'Intercompany and Related Party Income and Expense']
 
 export const lowStockQuantity = 500;
 
-export const paymentMethod = ['Cash','Check','Debit Card','CC-Amex','CC-Master','CC-Visa','CC-Discover','Wire','ACH','AutoPay','Other']
+export const paymentMethod = ['Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other']

@@ -1,5 +1,5 @@
 import * as model from "../models/index.js";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 
 export async function createOrder(data) {
   try {
@@ -45,17 +45,17 @@ export async function latestPoNumber(clientId) {
       // limit: 1,
       include: [
         {
-            model: model.clientUserModel,
-            as: 'clientDetails',
-            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-            where: {
-                clientId: clientId
-            }
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: clientId
+          }
         }
-    ]
+      ]
     });
     // console.log(result);
-    
+
     return result.length;
   } catch (error) {
     console.log("Error getting SO Number: ", error);
@@ -66,7 +66,7 @@ export async function latestPoNumber(clientId) {
 export async function getSingleSalesOrder(soNumber) {
   try {
     const result = await model.salesOrderModel.findOne({
-      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
       include: [
         {
           model: model.customerModel,
@@ -100,7 +100,7 @@ export async function getSingleSalesOrder(soNumber) {
         {
           model: model.soLoadingOrderModel,
           as: 'loadingOrders',
-          attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
+          attributes: { exclude: ['updatedAt', 'deletedAt'] },
         },
       ],
       where: {
@@ -370,3 +370,19 @@ export async function createTransactionAccountSales(data) {
     return error
   }
 };
+
+export async function closeSalesOrder(data) {
+  try {
+    const result = await model.salesOrderModel.update(data,
+      {
+        where: {
+          salesOrdersId: data.salesOrdersId,
+        }
+      }
+    );
+    return result;
+  } catch (error) {
+    console.error("Error in closing sales order:", error);
+    return error;
+  }
+}
