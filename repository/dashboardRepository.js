@@ -77,9 +77,9 @@ export async function getTotalsales(fromDate, toDate, clientId) {
 export async function getOpenSo(fromDate, toDate, clientId) {
     const endDate = new Date(toDate);
     endDate.setHours(23, 59, 59, 999);
-    const result = await model.salesOrderInventoryModel.findAll({
+    const result = await model.salesOrderModel.findAll({
         where: {
-            sales_status: 'INITIATED',
+            status: 'ACTIVE',
             created_at: {
                 [Op.between]: [new Date(fromDate).toISOString(), endDate.toISOString()]
             }

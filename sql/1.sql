@@ -1187,9 +1187,56 @@ CREATE TABLE supplier_writing_instruction (
     FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE 
 );
 
+
 ALTER TABLE supplier_writing_instruction
 ADD COLUMN created_by INT,
 ADD COLUMN  updated_by INT,
 ADD COLUMN  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 ADD COLUMN deleted_at TIMESTAMP NULL;
+
+
+CREATE TABLE IF NOT EXISTS client_locations (
+    client_location_id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT,
+    location_id INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIME NULL,
+    FOREIGN KEY (client_id) REFERENCES clients(client_id),
+    FOREIGN KEY (location_id) REFERENCES locations(location_id)
+)
+
+
+CREATE TABLE IF NOT EXISTS container (
+    container_id INT AUTO_INCREMENT PRIMARY KEY,
+    container_number VARCHAR(50),
+    received_on DATE,
+    received_by VARCHAR(100),
+    notes VARCHAR(255),
+    po_supplier_invoice_mapper_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIME NULL,
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id)
+);
+
+-- If this table container table already exist in database
+ALTER TABLE container
+CHANGE COLUMN `container_number` `container_number` VARCHAR(255) NOT NULL ;
+
+
+
+CREATE TABLE IF NOT EXISTS add_to_cart (
+    cart_id INT AUTO_INCREMENT PRIMARY KEY,
+    po_slab_detail_id INT,
+    created_by INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (po_slab_detail_id) REFERENCES po_slab_details(po_slab_detail_id) ON DELETE SET NULL
+);
+
+
+ALTER TABLE po_slab_details
+ADD COLUMN slab_added_to_cart TINYINT(1) NOT NULL DEFAULT 0;

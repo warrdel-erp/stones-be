@@ -37,7 +37,7 @@ import opportunitySelectionModel from './opportunitySelectionModel.js';
 import freightBillsModel from './freightModel.js';
 import freightDetailsModel from './freightDetailsModel.js';
 import vendorModel from './vendorModel.js';
-
+import AddToCart from './addToCartModel.js';
 import userPermissionsModel from './userPermissionsModel.js';
 import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
 
@@ -234,10 +234,22 @@ clientUserModel.hasMany(opportunityModel, { foreignKey: 'created_by', sourceKey:
 //freight realtions
 
 freightDetailsModel.belongsTo(freightBillsModel, { foreignKey: 'freightBillsId' });
-freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' })
+freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' }),
+
+	poSlabDetails.belongsTo(productInventoryModel, { foreignKey: 'po_slab_detail_id' });
+productInventoryModel.hasMany(poSlabDetails, { foreignKey: 'po_slab_detail_id' });
+
+// freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' })
 
 supplierWritingInstructionModel.belongsTo(supplierModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
 supplierModel.hasMany(supplierWritingInstructionModel, { foreignKey: 'supplier_id', as: 'supplierWritingInstructions' });
+
+
+purchaseModel.belongsTo(vendorModel, { foreignKey: 'freight_forwarder' });
+vendorModel.hasMany(purchaseModel, { foreignKey: 'freight_forwarder', as: 'purchaseOrders' });
+
+AddToCart.belongsTo(poSlabDetails, { foreignKey: 'po_slab_detail_id' });
+poSlabDetails.hasOne(AddToCart, { foreignKey: 'po_slab_detail_id' });
 
 export {
 	productModel,
@@ -276,5 +288,6 @@ export {
 	freightDetailsModel,
 	vendorModel,
 	userPermissionsModel,
-	supplierWritingInstructionModel
+	supplierWritingInstructionModel,
+	AddToCart
 };

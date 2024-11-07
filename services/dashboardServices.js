@@ -60,6 +60,7 @@ export async function getDashBoardData(fromDate, toDate, clientId) {
         const clientName = clientData.dataValues.clientName;
         const clientEmail = clientData.dataValues.clientEmail;
         const clientLocation = clientData.dataValues.clientLocation;
+        console.log(stockInventory, 'ksksksk');
 
         // Calculate total earnings
         const totalEarnings = totalPurchase - totalSales;

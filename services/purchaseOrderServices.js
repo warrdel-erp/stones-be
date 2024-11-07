@@ -162,17 +162,17 @@ export async function addSlabDetails(info) {
             let dynamicLot = lot;
             let dynamicSlab = slab;
 
-            // Incremented based on flags
-            if (isBlockIncreament) dynamicBlock += i;
-            if (iisLotIncreament) dynamicLot += i;
-            if (isSlabIncreament) dynamicSlab += i;
+            // Increment based on flags and ensure values are treated as numbers
+            if (isBlockIncreament) dynamicBlock = parseInt(block, 10) + i;
+            if (iisLotIncreament) dynamicLot = parseInt(lot, 10) + i;
+            if (isSlabIncreament) dynamicSlab = parseInt(slab, 10) + i;
 
-            //  serialCounter is an integer and incremented correctly
-            const currentSerial = serialCounter + i + 1;
-            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;
+            // Increment serial counter correctly
+            const currentSerial = serialCounter + i + 1;  // Ensure correct integer addition
+            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;  // Construct dynamic PO
             console.log(dynamicPo, 'dynamicPO');
 
-            // Created a new slab
+            // Create a new slab detail
             const slabDetail = await purchaseOrderRepository.addSlabDetails({
                 ...slabInfo,
                 serialNumber: dynamicPo,
@@ -180,10 +180,14 @@ export async function addSlabDetails(info) {
                 lot: dynamicLot,
                 slab: dynamicSlab,
                 slabCounter: slabCounter,
-                poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+                poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
             });
-            slabDetails.push(slabDetail); // Push the slab detail into array
+
+            slabDetails.push(slabDetail);
+
+
         }
+
 
         console.log(slabDetails, 'slabdetails');
         // const productDeatils = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMapperId);
@@ -525,3 +529,100 @@ export async function deletePrePurchaeProducts(purchaseOrderProductId) {
 export async function updatePrePurchaseProduct(data) {
     return await updatePrePurchaseProductDetails(data);
 };
+
+
+export async function getSupplierInvoices(data) {
+    const siplsData = await purchaseOrderRepository.getSupplierInvoices(data);
+    return siplsData
+};
+
+
+export async function addToCart(info) {
+    try {
+        const slabStatusUpdate = await purchaseOrderRepository.updateSlabDetails({
+            poSlabDetailId: info.poSlabDetailId,
+            slabAddedToCart: 1,
+        });
+
+        const addToCartResponse = await purchaseOrderRepository.addToCart(info);
+        return addToCartResponse;
+    } catch (error) {
+        console.error('Error in addToCart:', error);
+        throw error;
+    }
+}
+
+
+export async function deleteCartItem(info) {
+    return await purchaseOrderRepository.deleteCartItem(info)
+}
+
+export async function getCartItems(info) {
+    return await purchaseOrderRepository.getCartItems(info)
+}
+
+
+
+export async function convertCartItemToHold(info) {
+    try {
+        const { poSlabDetailsArray } = info;
+
+        const updatePromises = poSlabDetailsArray.map(async (slabDetail) => {
+            const updatedSlab = await purchaseOrderRepository.updateSlabDetails({
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: 'ONHOLD',
+            });
+
+            return {
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: 'ONHOLD',
+                success: !!updatedSlab
+            };
+        });
+
+        const results = await Promise.all(updatePromises);
+        return {
+            success: true,
+            data: results
+        };
+
+    } catch (error) {
+        console.error('Error in convertCartItemToHold:', error);
+        throw error;
+    }
+}
+
+
+export async function convertCartItemToSO(info) {
+    return await purchaseOrderRepository.convertCartItemToSO(info)
+}
+
+export async function getSuppliersPOJournal(info) {
+    try {
+        const supplierJournal = await purchaseOrderRepository.getSuppliersPOJournal(info);
+        const transformedSupplierJournal = supplierJournal.map(supplier => {
+            const supplierData = supplier.toJSON();
+            if (Array.isArray(supplierData.supplierTransactions)) {
+                supplierData.supplierTransactions = supplierData.supplierTransactions.map(transaction => {
+                    const transformedTransaction = { ...transaction };
+                    if (transaction.transactionAmountType === 'debit') {
+                        transformedTransaction.debitAmount = `$${transaction.transactionAmount}`;
+                    } else if (transaction.transactionAmountType === 'credit') {
+                        transformedTransaction.creditAmount = `$${transaction.transactionAmount}`;
+                    }
+
+                    delete transformedTransaction.transactionAmount;
+
+                    return transformedTransaction;
+                });
+            }
+
+            return supplierData;
+        });
+
+        return transformedSupplierJournal;
+    } catch (error) {
+        console.error("Error fetching purchase transactions:", error);
+        throw new Error('Failed to fetch purchase transactions');
+    }
+}

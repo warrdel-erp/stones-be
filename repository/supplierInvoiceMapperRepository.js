@@ -13,7 +13,8 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
                         model:model.poSlabDetails,
                         as:'slabDetails',
                         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt','status'] },
-                    }
+                    },
+                    
                 ]
             },
         ],

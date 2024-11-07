@@ -1,58 +1,81 @@
-import {Router} from  'express'
-import { userAuth } from '../middleware/authUser.js'; 
-const router =  Router();
+import { Router } from 'express'
+import { userAuth } from '../middleware/authUser.js';
+const router = Router();
 
-import { createOrder,getPoNumber,updateOrder,addPurchaseOrderProduct,singlePoDetails,addSuplierInvoice,getAllOpenPo,
-    addSlabDetails,singleSlabDetails,addProductInventory,getProductInventory,addPayment,getPaymentDetails,addContainer,getContainerDetails,
+import {
+    createOrder, getPoNumber, updateOrder, addPurchaseOrderProduct, singlePoDetails, addSuplierInvoice, getAllOpenPo,
+    addSlabDetails, singleSlabDetails, addProductInventory, getProductInventory, addPayment, getPaymentDetails, addContainer, getContainerDetails,
     purchaseAccountTransaction,
     getCOATransactionDetails,
     getInventoryListBasedOnSipl,
     updateSlabDetails,
     deletePrePurchaeProduct,
     updatePrePurchaseProduct,
-    
+    getSupplierInvoices,
+    addToCart,
+    deleteCartItem,
+    getCartItems,
+    convertCartItemToHold,
+    convertCartItemToSO,
+    getSuppliersPOJournal
+
 } from "../controllers/purchaseOrderControllers.js"
 
-router.patch('/prePurchaseProduct',updatePrePurchaseProduct)
 
-router.patch('/slabDetails',updateSlabDetails);
+router.patch('/cartHold', convertCartItemToHold);
 
-router.post('/',userAuth, createOrder);
+router.patch('/prePurchaseProduct', updatePrePurchaseProduct)
 
-router.get('/',userAuth, getPoNumber);
+router.patch('/slabDetails', updateSlabDetails);
+
+router.post('/', userAuth, createOrder);
+
+router.get('/', userAuth, getPoNumber);
 
 router.patch('/:po', userAuth, updateOrder);
 
-router.post('/addPurchaseProduct',userAuth, addPurchaseOrderProduct);
+router.post('/addPurchaseProduct', userAuth, addPurchaseOrderProduct);
 
-router.get('/purchaseOrderId',userAuth, singlePoDetails);
+router.get('/purchaseOrderId', userAuth, singlePoDetails);
 
-router.post('/addSuplierInvoice', userAuth,addSuplierInvoice);
+router.post('/addSuplierInvoice', userAuth, addSuplierInvoice);
 
-router.get('/allPo',userAuth, getAllOpenPo);
+router.get('/allPo', userAuth, getAllOpenPo);
 
-router.post('/addSlabDetails',userAuth, addSlabDetails);
+router.post('/addSlabDetails', userAuth, addSlabDetails);
 
-router.get('/slabDetails',userAuth, singleSlabDetails);
+router.get('/slabDetails', userAuth, singleSlabDetails);
 
-router.post('/productInventory',userAuth,addProductInventory)
+router.post('/productInventory', userAuth, addProductInventory)
 
-router.get('/productInventory',userAuth,getProductInventory);
+router.get('/productInventory', userAuth, getProductInventory);
 
-router.post('/addPayment',addPayment);
+router.post('/addPayment', addPayment);
 
-router.get('/paymentDetails',getPaymentDetails);
+router.get('/paymentDetails', getPaymentDetails);
 
-router.post('/addContainer',addContainer);
+router.post('/addContainer', addContainer);
 
-router.get('/containerDetails',getContainerDetails);
+router.get('/containerDetails', getContainerDetails);
 
-router.post('/purchaseAccountTransaction',userAuth,purchaseAccountTransaction)
+router.post('/purchaseAccountTransaction', userAuth, purchaseAccountTransaction)
 
-router.get('/transactionDetailsCOA',getCOATransactionDetails);
+router.get('/transactionDetailsCOA', getCOATransactionDetails);
 
-router.get('/inventoryDetailsBasedOnSipl', userAuth,getInventoryListBasedOnSipl);
+router.get('/inventoryDetailsBasedOnSipl', userAuth, getInventoryListBasedOnSipl);
 
-router.delete('/prePurcahseProduct/:purchaseOrderProductId',deletePrePurchaeProduct);
+router.delete('/prePurcahseProduct/:purchaseOrderProductId', deletePrePurchaeProduct);
+
+router.get('/getSupplierInvoices', getSupplierInvoices);
+
+router.post('/addToCart', userAuth, addToCart);
+
+router.delete('/deleteItem', deleteCartItem);
+
+router.get('/getCartItems', getCartItems);
+
+router.post('/cartItemsToSO', convertCartItemToSO);
+
+router.get('/supplierJournal', getSuppliersPOJournal);
 
 export default router

@@ -100,6 +100,12 @@ export default sequelize.define(
             allowNull: false,
             defaultValue: 0,  // Default value is false (0)
         },
+        slabAddedToCart: {
+            type: DataTypes.TINYINT,
+            allowNull: false,
+            defaultValue: 0,  // Default value is false (0),
+            field: 'slab_added_to_cart'
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false,

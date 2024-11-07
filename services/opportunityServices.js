@@ -199,10 +199,8 @@ export async function updateSelectionSheet(selectionSheetId) {
             return await updateSlabDetails({
                 poSlabDetailId: slabDetail.poSlabDetailId,
                 status: 'ONHOLD',
-
             });
         });
-
         await Promise.all(updatePromises);
 
         return poSlabDetailsArray;

@@ -1,5 +1,5 @@
 import * as model from "../models/index.js";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 
 export async function createOrder(data) {
   try {
@@ -162,6 +162,10 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
+          model: model.vendorModel,
+          attributes: { include: ['vendorName', 'vendorType', 'vendorId'] },
+        },
+        {
           model: model.locationModel,
           as: "location",
           foreignKey: "location_id",
@@ -218,8 +222,8 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
 
 export async function getAllPurchaseOrder(data) {
 
-  const fromDate = data.queriedData.fromDate;
-  const toDate = data.queriedData.toDate;
+  // const fromDate = data.queriedData.fromDate;
+  // const toDate = data.queriedData.toDate;
 
   let result;
   try {
@@ -256,11 +260,11 @@ export async function getAllPurchaseOrder(data) {
     } else {
       result = await model.purchaseModel.findAll({
         attributes: ['po', 'purchaseOrderId', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
-        where: {
-          createdAt: {
-            [Op.between]: [new Date(fromDate), new Date(toDate)],
-          },
-        },
+        // where: {
+        //   createdAt: {
+        //     [Op.between]: [new Date(fromDate), new Date(toDate)],
+        //   },
+        // },
         include: [
           {
             model: model.clientUserModel,
@@ -273,7 +277,7 @@ export async function getAllPurchaseOrder(data) {
           {
             model: model.supplierModel,
             as: 'suppliers',
-            attributes: ['supplierType', 'paymentTerm']
+            attributes: ['supplierType', 'paymentTerm', 'supplierName']
           },
           {
             model: model.locationModel,
@@ -537,5 +541,149 @@ export async function deletePrePurchaeProduct(purchaseOrderProductId) {
   } catch (error) {
     console.error("Error in fetching pre-purchase product details:", error);
     throw error;
+  }
+}
+
+
+
+
+export async function getSupplierInvoices(data) {
+  try {
+    const result = await model.poSupplierInvoiceMapperModel.findAll({
+      include: [
+        {
+          model: model.purchaseModel,
+          attributes: ['paymentTerm', 'purchaseLocationId', 'locationId', 'supplierSo', 'container', 'requiredShipDate'],
+          include: [
+            {
+              model: model.supplierModel,
+              as: 'suppliers',
+              attributes: ['supplierName', 'supplierId'],
+              where: {
+                supplierId: data.supplierId
+              }
+
+            },
+            {
+              model: model.vendorModel,
+              attributes: ['vendorName', 'vendorId'],
+            },
+
+          ]
+        },
+        {
+          model: model.accountTransactionModel,
+          as: 'poSupplierInvoice',
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'amount', 'supplierId'],
+          where: {
+            transactionOf: 'purchase',
+            supplierId: data.supplierId
+          }
+        }
+      ]
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in add supplier Invoice:", error);
+    throw error;
+  }
+}
+
+
+
+export async function addToCart(data) {
+  try {
+    const result = await model.AddToCart.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in create order:", error);
+    throw error;
+  }
+}
+
+
+export async function deleteCartItem(data) {
+  try {
+    const cartIds = Array.isArray(data.cartId) ? data.cartId : [data.cartId];
+
+    const result = await model.AddToCart.destroy({
+      where: {
+        cartId: cartIds,
+      },
+    });
+
+    if (result === 0) {
+      throw new Error("No cart items found for the specified cart IDs.");
+    }
+
+    return { message: "Cart item(s) deleted successfully", deletedCount: result };
+  } catch (error) {
+    console.error("Error in delete cart item:", error);
+    throw new Error("Failed to delete cart item(s). Please try again.");
+  }
+}
+
+
+export async function getCartItems(data) {
+  try {
+    const result = await model.AddToCart.findAndCountAll({
+      where: {
+        createdBy: data.createdBy
+      },
+      include: [
+        {
+          model: model.poSlabDetails
+        }
+      ]
+    });
+    return {
+      count: result.count,
+      items: result.rows
+    };
+  } catch (error) {
+    console.error("Error in retrieving cart items:", error);
+    throw error;
+  }
+}
+
+
+
+export async function getSuppliersPOJournal(info) {
+  try {
+    const result = await model.supplierModel.findAll({
+      attributes: ['supplierId', 'supplierName', 'parentLocation'],
+      include: [
+        {
+          model: model.accountTransactionModel,
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+          as: 'supplierTransactions',
+          where: {
+            poSupplierInvoiceMapperId: info.poSupplierInvoiceMapperId
+          },
+          required: true,
+          include: [
+            {
+              model: model.accountsModel
+            },
+            {
+              model: model.poSupplierInvoiceMapperModel,
+              attributes: ['poSupplierInvoiceMappperId', 'transaction', 'purchaseOrderId', 'totalProductCharges', 'invoice', 'invoiceDate', 'shipDate', 'dueDate'],
+              as: 'poSupplierInvoice',
+            },
+            {
+              model: model.purchaseModel,
+              attributes: ['purchaseOrderId', 'poDate', 'supplierSo', 'locationId', 'purchaseLocationId', 'etaDate', 'supplier_id'],
+              as: 'purchaseOrder'
+            }
+          ]
+        }
+      ]
+    });
+    console.log(result, 'resusllls');
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching purchase transactions:", error);
+    throw new Error('Failed to fetch purchase transactions');
   }
 }

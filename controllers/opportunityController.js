@@ -6,7 +6,7 @@ export const addOpportunity = async (req, res) => {
         const info = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const result = await opportunitiyService.addOpportunity({...info,createdBy});
+        const result = await opportunitiyService.addOpportunity({ ...info, createdBy });
         res.status(200).json({
             status: 'success',
             message: 'Opportunity created successfully',
@@ -21,10 +21,10 @@ export const addOpportunity = async (req, res) => {
 // get all account type and account sub type
 export const getAllOpportunity = async (req, res) => {
     let { search } = req.query;
-    const clientId= req.clientId; 
+    const clientId = req.clientId;
     try {
         search = search || '';
-        const result = await opportunitiyService.getAllOpportunity({search,clientId});
+        const result = await opportunitiyService.getAllOpportunity({ search, clientId });
         res.status(200).json({
             status: 'success',
             message: 'Opportunity list retrieved successfully',
@@ -39,7 +39,7 @@ export const getAllOpportunity = async (req, res) => {
 //get opportunity number
 export const getOpportunityNumber = async (req, res) => {
     try {
-        const clientId= req.clientId; 
+        const clientId = req.clientId;
         const result = await opportunitiyService.getOpportunityNumber(clientId);
         console.log(result, 'slslsl');
         res.status(200).json({
@@ -60,7 +60,7 @@ export const createSelectionSheet = async (req, res) => {
         const info = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const result = await opportunitiyService.createSelectionSheet({...info,createdBy});
+        const result = await opportunitiyService.createSelectionSheet({ ...info, createdBy });
         res.status(201).send(result);
     } catch (error) {
         console.error("Error in opportunity selection sheet:", error);
@@ -72,8 +72,8 @@ export const createSelectionSheet = async (req, res) => {
 export const getOpportunityDetails = async (req, res) => {
     try {
         const data = req.query
-        const clientId= req.clientId; 
-        const result = await opportunitiyService.getOpportunityDetails({...data,clientId});
+        const clientId = req.clientId;
+        const result = await opportunitiyService.getOpportunityDetails({ ...data, clientId });
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting opportunities details:", error);
@@ -116,7 +116,7 @@ export const updateSelectionSheet = async (req, res) => {
         const selectionSheetId = req.query.selectionSheetId;
         const user = req.user;
         const createdBy = user.dataValues.id;
-       const result = await opportunitiyService.updateSelectionSheet(selectionSheetId,createdBy);
+        const result = await opportunitiyService.updateSelectionSheet(selectionSheetId, createdBy);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in opportunity selection sheet:", error);
@@ -131,7 +131,7 @@ export const convertSelectionSheetToSO = async (req, res) => {
         const user = req.user;
         const createdBy = user.dataValues.id;
         const clientId = req.clientId;
-        const result = await opportunitiyService.convertSelectionSheetToSO(selectionSheetId,createdBy,clientId);
+        const result = await opportunitiyService.convertSelectionSheetToSO(selectionSheetId, createdBy, clientId);
         res.status(200).json({
             status: 'success',
             message: 'Opportunity retrieved successfully',
@@ -152,7 +152,7 @@ export const convertOpportunityToSO = async (req, res) => {
         const clientId = req.clientId;
         // const result = await opportunitiyService.convertOpportunityToSO(opportunityId,createdBy,clientId);
         const selectedSlabsData = req.body;
-        const result = await opportunitiyService.convertOpportunityToSO(opportunityId,selectedSlabsData,createdBy,clientId);
+        const result = await opportunitiyService.convertOpportunityToSO(opportunityId, selectedSlabsData, createdBy, clientId);
         res.status(200).json({
             status: 'success',
             message: 'Opportunity converted to SO  successfully',

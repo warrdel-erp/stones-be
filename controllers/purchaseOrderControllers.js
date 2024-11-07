@@ -239,7 +239,7 @@ export const addContainer = async (req, res) => {
         const data = req.body
         const { poSupplierInvoiceMapperId, containerNumber, receivedBy } = req.body;
         if (!(poSupplierInvoiceMapperId && containerNumber && receivedBy)) {
-            res.status(400).send("po Supplier Invoice Mapper,containerNumber and receivedBy Id  is required for make payment");
+            res.status(400).send("po Supplier Invoice Mapper,containerNumber");
         }
         const result = await purchaseOrderService.addContainer(data);
         res.status(200).send(result);
@@ -369,6 +369,131 @@ export const updatePrePurchaseProduct = async (req, res) => {
             success: false,
             message: "Internal Server Error",
             error: error.message
+        });
+    }
+};
+
+
+export const getSupplierInvoices = async (req, res) => {
+    try {
+        const data = req.query;
+        const result = await purchaseOrderService.getSupplierInvoices(data);
+        res.status(200).send({
+            success: true,
+            message: "Supplier invoices retrieved successfully.",
+            data: result,
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message || "An unexpected error occurred.",
+        });
+    }
+};
+
+
+export const addToCart = async (req, res) => {
+    try {
+        const data = req.body;
+        const createdBy = req.user.dataValues.id;
+        const result = await purchaseOrderService.addToCart({ ...data, createdBy });
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to add to cart." });
+        }
+    } catch (error) {
+        console.error("Error in addToCart: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+
+export const deleteCartItem = async (req, res) => {
+    try {
+        const data = req.body;
+        const result = await purchaseOrderService.deleteCartItem(data);
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to delete to cart." });
+        }
+    } catch (error) {
+        console.error("Error in delete ToCart: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+export const getCartItems = async (req, res) => {
+    try {
+        const data = req.query;
+        const result = await purchaseOrderService.getCartItems(data);
+        res.status(200).send({
+            success: true,
+            message: "get cart items retrieved successfully.",
+            data: result,
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message || "An unexpected error occurred.",
+        });
+    }
+};
+
+
+
+export const convertCartItemToHold = async (req, res) => {
+    try {
+        const data = req.body;
+        // const createdBy = req.user.dataValues.id;
+        // const result = await purchaseOrderService.convertCartItemsToSO({...data,createdBy});
+        const result = await purchaseOrderService.convertCartItemToHold(data);
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to conver cart to Hold ." });
+        }
+    } catch (error) {
+        console.error("Error in cart to Hold: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+
+export const convertCartItemToSO = async (req, res) => {
+    try {
+        const data = req.body;
+        // const createdBy = req.user.dataValues.id;
+        // const result = await purchaseOrderService.convertCartItemsToSO({...data,createdBy});
+        const result = await purchaseOrderService.convertCartItemToSO(data);
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to conver cart to SO ." });
+        }
+    } catch (error) {
+        console.error("Error in cart to SO: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+export const getSuppliersPOJournal = async (req, res) => {
+    try {
+        const data = req.query;
+        const result = await purchaseOrderService.getSuppliersPOJournal(data);
+        res.status(200).send({
+            success: true,
+            message: " supplier journal retrieved successfully.",
+            data: result,
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message || "An unexpected error occurred.",
         });
     }
 };
