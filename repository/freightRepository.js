@@ -1,5 +1,5 @@
 import * as model from '../models/index.js';
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 
 
 //create freight bills
@@ -61,18 +61,23 @@ export async function getFreightData(data) {
 export async function getFreightAccounts() {
     try {
 
-        const result = await model.subAccountTypesModel.findAll({
-            where: {
-                subAccountType: 'Expenses Classified By Nature'
-            },
-            include: [
-                {
-                    model: model.accountsModel,
-                    attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
-                    as: 'accountSubtype',
-                }
-            ]
+        const result = await model.accountsModel.findAll({
+            // where: {
+            //     subAccountType: 'Expenses Classified By Nature'
+            // },
+            // include: [
+            //     {
+            //         model: model.accountsModel,
+            //         attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
+            //         as: 'accountSubtype',
+                    where: {
+                        accountName:'Freight Payables '
+                    }
+            //     }
+            // ]
         })
+        console.log(result);
+        
         return result;
     } catch (error) {
         console.error("Error fetching transaction data:", error);

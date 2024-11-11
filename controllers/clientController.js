@@ -45,3 +45,26 @@ export const getClientDetails = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+export const clientLocationCreate = async (req, res) => {
+  try {
+    const result = await clientService.clientLocationCreate(req.body);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error in adding client details:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+export const getClientLocations = async (req, res) => {
+  try {
+    const result = await clientService.getClientLocations(req.query);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error in getting client details:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};

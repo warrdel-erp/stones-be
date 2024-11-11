@@ -70,13 +70,36 @@ export async function findUserId(data) {
 export async function getClientDetails(data) {
     try {
         const clientsUserCount = await clientRepository.getClientsUser(data);
-        console.log(clientsUserCount,'sjskjsj');
-        
+        console.log(clientsUserCount, 'sjskjsj');
+
         const accessOfData = await clientRepository.getClientDetails(data);
         return {
-            accessOfData, 
-            clientsUserCount, 
+            accessOfData,
+            clientsUserCount,
         };
+    } catch (error) {
+        console.error('Error fetching:', error);
+        throw error;
+    }
+};
+
+
+export async function clientLocationCreate(data) {
+    try {
+        const accessOfData = await clientRepository.clientLocationCreate(data);
+        return accessOfData;
+    } catch (error) {
+        console.error('Error fetching:', error);
+        throw error;
+    }
+};
+
+
+
+export async function getClientLocations(data) {
+    try {
+        const accessOfData = await clientRepository.getClientLocations(data);
+        return accessOfData;
     } catch (error) {
         console.error('Error fetching:', error);
         throw error;

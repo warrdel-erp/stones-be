@@ -1,3 +1,4 @@
+
 INSERT INTO accounts (sub_account_types_id, account_types_id, account_name, account_balance, can_delete, opening_balance_date, created_at, updated_at)
 VALUES 
 (1, 1, 'Cash and Cash Equivalents', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

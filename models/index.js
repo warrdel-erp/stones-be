@@ -40,6 +40,8 @@ import vendorModel from './vendorModel.js';
 import AddToCart from './addToCartModel.js';
 import userPermissionsModel from './userPermissionsModel.js';
 import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
+import clientLocationModel from './clientLocationModel.js';
+
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -251,6 +253,17 @@ vendorModel.hasMany(purchaseModel, { foreignKey: 'freight_forwarder', as: 'purch
 AddToCart.belongsTo(poSlabDetails, { foreignKey: 'po_slab_detail_id' });
 poSlabDetails.hasOne(AddToCart, { foreignKey: 'po_slab_detail_id' });
 
+clientLocationModel.belongsTo(clientModel, { foreignKey: 'clientId', as: 'clientDetails' });
+clientModel.hasMany(clientLocationModel, { foreignKey: 'clientId', sourceKey:'clientId', as: 'clientDetails' });
+
+// clientModel.belongsTo(clientLocationModel, { foreignKey: 'clientId', as: 'clientDetail' });
+// clientLocationModel.hasOne(clientModel, { foreignKey: 'clientId', as: 'clientDetail' });
+
+clientLocationModel.belongsTo(locationModel, { foreignKey: 'locationId', as: 'locationDetails' });
+locationModel.hasOne(clientLocationModel, { foreignKey: 'locationId', as: 'locationDetails' });
+
+// locationModel.belongsTo(clientLocationModel, { foreignKey: 'locationId' })
+
 export {
 	productModel,
 	userModel,
@@ -289,5 +302,6 @@ export {
 	vendorModel,
 	userPermissionsModel,
 	supplierWritingInstructionModel,
-	AddToCart
+	AddToCart,
+	clientLocationModel
 };

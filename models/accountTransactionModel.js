@@ -27,6 +27,15 @@ export default sequelize.define('account_transaction', {
         },
         field: 'purchase_order_id'
     },
+    vendorId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'vendors',
+            key: 'vendor_id'
+        },
+        field: 'vendor_id'
+    },
     supplierId: {
         type: DataTypes.INTEGER,
         allowNull: true,

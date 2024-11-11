@@ -183,7 +183,8 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
     delivery_date ENUM('Pickup', 'Delivery', 'Other'),
     shipment_terms ENUM('Prepaid', 'Prepaid & Add', 'Collect', 'Prepaid & COD', 'Add & COD', 'Collect & COD', 'Credit 45', 'CAD', 'Consignment'),
     payment_term INTEGER NOT NULL,
-    freight_forwarder ENUM('Ace Drayage', 'Airlift (USA) Inc', 'AJ Worldwide services Inc', 'Avenger Logistics', 'CMA CGM (AMERICA) LLC', 'Crystal Granite (Ocean Freight)', 'DahNAY Logistics', 'Del Corona', 'Edmund Freight', 'Eurybia Logistics Inc', 'Ever Concord Logistics Inc', 'Fortuna Global Logistics LLC', 'Freight Experts Inc', 'General Noli USA Inc', 'Global Logistics & Customs of Charleston', 'Gramazini Freight', 'Heavy Weight Transport, Inc', 'Howard Sheppard, Inc', 'Interglobog', 'LAM USA International Transport, LLC', 'Leonardi & Co. USA Inc', 'Optimal Container Logistics', 'Pacific Granites Inc', 'Pacific Quartz (Freight)', 'Patagon Logistics LLC', 'PKD Logistics', 'Savannah River Logistics, LLC', 'SBB Shipping USA Inc', 'Surfaces by Pacific (Freight)', 'Total Quality Logistics (TQL)', 'Tova Trucking, Inc', 'Trans-World Shipping Service, Inc', 'Trident Freight', 'U.S. Customs and Border Protection', 'Western Overseas Corp', 'World-Wide Transportation', 'Worldwide Express Inc', 'Xpress Logistic Solution LLP'),
+    freight_forwarder ENUM('Ace Drayage', 'Airlift (USA) Inc', 'AJ Worldwide services Inc', 'Avenger Logistics', 'CMA CGM (AMERICA) LLC', 'Crystal Granite (Ocean Freight)', 'DahNAY Logistics', 'Del Corona', 'Edmund Freight', 'Eurybia Logistics Inc', 'Ever Concord Logistics Inc', 'Fortuna Global Logistics LLC', 'Freight Experts Inc', 'General Noli USA Inc', 'Global Logistics & Customs of Charleston', 'Gramazini Freight', 'Heavy Weight 
+    port, Inc', 'Howard Sheppard, Inc', 'Interglobog', 'LAM USA International Transport, LLC', 'Leonardi & Co. USA Inc', 'Optimal Container Logistics', 'Pacific Granites Inc', 'Pacific Quartz (Freight)', 'Patagon Logistics LLC', 'PKD Logistics', 'Savannah River Logistics, LLC', 'SBB Shipping USA Inc', 'Surfaces by Pacific (Freight)', 'Total Quality Logistics (TQL)', 'Tova Trucking, Inc', 'Trans-World Shipping Service, Inc', 'Trident Freight', 'U.S. Customs and Border Protection', 'Western Overseas Corp', 'World-Wide Transportation', 'Worldwide Express Inc', 'Xpress Logistic Solution LLP'),
     vessel VARCHAR(255),
     air_bill INTEGER,
     planned_ex_factorydate DATE,
@@ -1205,7 +1206,7 @@ CREATE TABLE IF NOT EXISTS client_locations (
     deleted_at TIME NULL,
     FOREIGN KEY (client_id) REFERENCES clients(client_id),
     FOREIGN KEY (location_id) REFERENCES locations(location_id)
-)
+);
 
 
 CREATE TABLE IF NOT EXISTS container (
@@ -1240,3 +1241,26 @@ CREATE TABLE IF NOT EXISTS add_to_cart (
 
 ALTER TABLE po_slab_details
 ADD COLUMN slab_added_to_cart TINYINT(1) NOT NULL DEFAULT 0;
+
+
+ALTER TABLE freight_bills
+ADD COLUMN vendor_id INT,
+ADD CONSTRAINT fk_vendor_id
+    FOREIGN KEY (vendor_id)
+    REFERENCES vendors(vendor_id)
+    ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+ALTER TABLE account_transaction
+ADD COLUMN vendor_id INT NULL, 
+ADD CONSTRAINT fk_vendor_id_new
+    FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id);  
+
+
+INSERT INTO accounts (sub_account_types_id, account_types_id, account_name, account_balance, can_delete, opening_balance_date, created_at, updated_at)
+VALUES 
+(8, 2, 'Freight Payables ', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO accounts (sub_account_types_id, account_types_id, account_name, account_balance, can_delete, opening_balance_date, created_at, updated_at)
+VALUES 
+(3, 1, 'Inventory in Transit', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

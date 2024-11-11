@@ -43,3 +43,51 @@ export async function getClientsUser(data) {
         throw error;
     }
 }
+
+
+
+export async function clientLocationCreate(data) {
+    try {
+        const result = await model.clientLocationModel.bulkCreate(data.clientLocations);
+        return result;
+    } catch (error) {
+        console.error("Error adding client locations:", error);
+        throw error;
+    }
+}
+
+
+
+
+
+export async function getClientLocations(data) {
+    try {
+        // const { clientId } = data;
+        const result = await model.clientModel.findOne({
+            where: {
+                clientId: data.clientId
+            },
+            // attributes: ['clientName'],
+            include: [
+                {
+                    model: model.clientLocationModel,
+                    as: 'clientDetails',
+                    // attributes: ['clientId'],
+                    include: [
+                        {
+                            model: model.locationModel,
+                            as: 'locationDetails',
+                            // attributes: ['locationId']
+
+                        }
+                    ]
+                },
+
+            ]
+        });
+        return result;
+    } catch (error) {
+        console.error("Error fetching client details:", error);
+        throw error;
+    }
+}

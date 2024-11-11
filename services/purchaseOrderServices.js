@@ -76,9 +76,26 @@ export async function singlePoDetails(purchaseOrderId) {
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
-    console.log(data.createdBy, 'data');
-
     const transaction = await sequelize.transaction();
+    const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Other Inventory, Gross ' }
+    const transactionAccontId = await getAccountIdByAccountName(accNames);
+
+    const accountDetails = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' };
+
+    const transactionDataWithAccount = {
+        supplierId: data.supplierId,
+        accountsId: accountDetails.accountsId,
+        entryType: accountDetails.entryType,
+        transactionOf: 'purchase',
+        transactionAmountType: 'debit',
+        transactionAmount: data.totalProductCharges,
+        transactionAmountDate: new Date(),
+        createdBy: data.createdBy,
+        purchaseOrderId: data.purchaseOrderId
+
+    };
+    await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
+
     const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId);
     let transcationNumber
     if (!(getLatestTranscationNumber)) {
@@ -120,6 +137,21 @@ export async function addSuplierInvoice(data) {
                 prePurchaseOrderId: prePurchaseOrderId,
                 transaction: transaction
             });
+            const accountDetails = { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' };
+            const transactionDataWithAccount = {
+                supplierId: data.supplierId,
+                accountsId: accountDetails.accountsId,
+                entryType: accountDetails.entryType,
+                transactionOf: 'purchase',
+                transactionAmountType: 'debit',
+                transactionAmount: dataArray.totalPerUnit,
+                transactionAmountDate: new Date(),
+                createdBy: data.createdBy,
+                purchaseOrderId: data.purchaseOrderId,
+                poSupplierInvoiceMappperId: poSupplierInvoiceMappperId
+
+            };
+            await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
             result = await purchaseOrderRepository.createSupplierInvoice(supplierData, transaction);
             results.push(result);
         }
@@ -299,26 +331,24 @@ export async function addProductInventory(dataArray) {
 
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
-    const accNames = { creditAccountName: 'Trade Payables', debitAccountName: 'Cost Of Sales' }
+    const accNames = { creditAccountName: 'Inventory in Transit', debitAccountName: 'Finished Goods' }
     try {
         const transactionAccontId = await getAccountIdByAccountName(accNames);
         console.log(transactionAccontId, 'transactionAccontId');
-        if (dataArray.transactionAmountType = 'debit') {
-            const accountDetails = [
-                { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
-                { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
-            ];
-            for (const accountDetail of accountDetails) {
-                const transactionDataWithAccount = {
-                    ...dataArray,
-                    accountsId: accountDetail.accountsId,
-                    entryType: accountDetail.entryType,
-                    transactionOf: 'purchase',
-                    transactionAmountType: 'debit',
-                    createdBy: dataArray.createdBy
-                };
-                await purchaseAccountTransaction(transactionDataWithAccount, transaction);
-            }
+        const accountDetails = [
+            { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
+            { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
+        ];
+        for (const accountDetail of accountDetails) {
+            const transactionDataWithAccount = {
+                ...dataArray,
+                accountsId: accountDetail.accountsId,
+                entryType: accountDetail.entryType,
+                transactionOf: 'purchase',
+                transactionAmountType: 'debit',
+                createdBy: dataArray.createdBy
+            };
+            await purchaseAccountTransaction(transactionDataWithAccount, transaction);
         }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
         console.log(inventoryDetails, 'inventorydetails');
@@ -554,6 +584,10 @@ export async function addToCart(info) {
 
 
 export async function deleteCartItem(info) {
+    await purchaseOrderRepository.updateSlabDetails({
+        poSlabDetailId: info.poSlabDetailId,
+        slabAddedToCart: 0,
+    });
     return await purchaseOrderRepository.deleteCartItem(info)
 }
 
