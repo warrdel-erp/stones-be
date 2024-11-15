@@ -3,13 +3,14 @@ import * as freightBillRepository from '../repository/freightRepository.js'
 import sequelize from '../database/sequelizeConfig.js';
 import { getAccountIdByAccountName } from './accountsServices.js';
 import * as purchaseOrderRepository from '../repository/purchaseOrderRepository.js'
+
 export async function addFreightBill(info) {
- 
+
     const transaction = await sequelize.transaction();
     try {
         const accNames = { creditAccountName: 'Freight Payables ', debitAccountName: 'Inventory in Transit' };
         const transactionAccountId = await getAccountIdByAccountName(accNames);
-    
+
         const accountDetails = [
             { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
             { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
@@ -24,10 +25,14 @@ export async function addFreightBill(info) {
                 transactionAmountDate: new Date(),
                 createdBy: info.createdBy,
                 poSupplierInvoiceMapperId: info.freightBillData.poSupplierInvoiceMapperId,
-                vendorId:info.freightBillData.vendorId
+                vendorId: info.freightBillData.vendorId
             };
             await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, transaction);
         }
+        await purchaseOrderRepository.siplTransactionStatusUpdate({
+            poSupplierInvoiceMappperId: info.freightBillData.poSupplierInvoiceMapperId,
+            transactionStatus: 'FREIGHT ADDED'
+        });
         const freightCreate = await freightBillRepository.addFreightBill(info.freightBillData, transaction);
         const freightBillsId = freightCreate.dataValues.freightBillsId;
         const createdFreightBillDetails = [];

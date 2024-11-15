@@ -74,7 +74,7 @@ export const lowStockQuantity = 500;
 export const paymentMethod = ['Cash', 'Check', 'Debit Card', 'CC-Amex', 'CC-Master', 'CC-Visa', 'CC-Discover', 'Wire', 'ACH', 'AutoPay', 'Other'];
 
 export const permissionMap = {
-    
+
     '/dashboard/all': ['DashboardRO'],
     '/purchaseOrder/allPo': ['PurchaseOrderRO'],
     '/purchaseOrder': ['PurchaseOrderRW'],
@@ -105,3 +105,6 @@ export const permissionMap = {
     '/accounts/transactionDetailsCOA': ['AccountRO'],
     '/accounts/accountIdsByName': ['AccountRO']
 };
+
+export const transactionStatus = ['SIPL CREATED', 'SLAB ADDED', 'FREIGHT ADDED', 'CONTAINER ADDED', 'INVENTORY RECEIVED']
+

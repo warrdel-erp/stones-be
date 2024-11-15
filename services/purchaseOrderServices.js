@@ -117,7 +117,8 @@ export async function addSuplierInvoice(data) {
             invoiceDate: data.invoiceDate,
             shipDate: data.shipDate,
             dueDate: data.dueDate,
-            createdBy: data.createdBy
+            createdBy: data.createdBy,
+            transactionStatus: 'SIPL CREATED'
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
@@ -217,6 +218,10 @@ export async function addSlabDetails(info) {
 
             slabDetails.push(slabDetail);
 
+            await purchaseOrderRepository.siplTransactionStatusUpdate({
+                poSupplierInvoiceMappperId: poSupplierInvoiceMapperId,
+                transactionStatus: 'SLAB ADDED'
+            });
 
         }
 
@@ -386,6 +391,10 @@ export async function addProductInventory(dataArray) {
             };
             results.push(result);
         };
+        await purchaseOrderRepository.siplTransactionStatusUpdate({
+            poSupplierInvoiceMappperId: poMapperId,
+            transactionStatus: 'INVENTORY RECEIVED'
+        });
         // Commit the transaction if all inserts succeed
         await transaction.commit();
         return { success: true, message: 'Data inserted successfully', results };
@@ -445,8 +454,19 @@ export async function getPaymentDetails(poSupplierInvoiceMappperId) {
 // add container
 
 export async function addContainer(info) {
-    return await purchaseOrderRepository.addContainer(info)
-};
+    try {
+        const containerResult = await purchaseOrderRepository.addContainer(info);
+        await purchaseOrderRepository.siplTransactionStatusUpdate({
+            poSupplierInvoiceMappperId: info.poSupplierInvoiceMapperId,
+            transactionStatus: 'CONTAINER ADDED'
+        });
+        return containerResult;
+    } catch (error) {
+        console.error('Error adding container:', error);
+        throw error;
+    }
+}
+
 
 // get container details 
 
@@ -584,10 +604,6 @@ export async function addToCart(info) {
 
 
 export async function deleteCartItem(info) {
-    await purchaseOrderRepository.updateSlabDetails({
-        poSlabDetailId: info.poSlabDetailId,
-        slabAddedToCart: 0,
-    });
     return await purchaseOrderRepository.deleteCartItem(info)
 }
 
@@ -658,5 +674,24 @@ export async function getSuppliersPOJournal(info) {
     } catch (error) {
         console.error("Error fetching purchase transactions:", error);
         throw new Error('Failed to fetch purchase transactions');
+    }
+}
+
+export async function slabLocationTransfer(info) {
+    try {
+        const { poSlabDetailIds, ...restOfInfo } = info;
+        if (!Array.isArray(poSlabDetailIds) || poSlabDetailIds.length === 0) {
+            throw new Error("poSlabDetailIds must be a non-empty array");
+        }
+        const results = [];
+        for (let poSlabDetailId of poSlabDetailIds) {
+            const transferData = { ...restOfInfo, poSlabDetailId };
+            const result = await purchaseOrderRepository.slabLocationTransfer(transferData);
+            results.push(result);
+        }
+        return results;
+    } catch (error) {
+        console.error("Error in slabLocationTransfer:", error);
+        throw error;
     }
 }

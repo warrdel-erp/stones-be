@@ -41,7 +41,7 @@ import AddToCart from './addToCartModel.js';
 import userPermissionsModel from './userPermissionsModel.js';
 import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
 import clientLocationModel from './clientLocationModel.js';
-
+import inventoryTransfterModel from './inventoryTransfterModel.js';
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -254,7 +254,7 @@ AddToCart.belongsTo(poSlabDetails, { foreignKey: 'po_slab_detail_id' });
 poSlabDetails.hasOne(AddToCart, { foreignKey: 'po_slab_detail_id' });
 
 clientLocationModel.belongsTo(clientModel, { foreignKey: 'clientId', as: 'clientDetails' });
-clientModel.hasMany(clientLocationModel, { foreignKey: 'clientId', sourceKey:'clientId', as: 'clientDetails' });
+clientModel.hasMany(clientLocationModel, { foreignKey: 'clientId', sourceKey: 'clientId', as: 'clientDetails' });
 
 // clientModel.belongsTo(clientLocationModel, { foreignKey: 'clientId', as: 'clientDetail' });
 // clientLocationModel.hasOne(clientModel, { foreignKey: 'clientId', as: 'clientDetail' });
@@ -303,5 +303,6 @@ export {
 	userPermissionsModel,
 	supplierWritingInstructionModel,
 	AddToCart,
-	clientLocationModel
+	clientLocationModel,
+	inventoryTransfterModel
 };

@@ -252,7 +252,7 @@ export const addContainer = async (req, res) => {
 //15 get container details
 
 export const getContainerDetails = async (req, res) => {
-    const poSupplierInvoiceMappperId = req.query.poSupplierInvoiceMappperId
+    const poSupplierInvoiceMappperId = req.query
     try {
         if (!poSupplierInvoiceMappperId) {
             res.status(400).send("po Supplier Invoice Mappper Id is required");
@@ -495,5 +495,21 @@ export const getSuppliersPOJournal = async (req, res) => {
             message: "Internal Server Error",
             error: error.message || "An unexpected error occurred.",
         });
+    }
+};
+
+
+export const slabLocationTransfer = async (req, res) => {
+    try {
+        const data = req.body;
+        const result = await purchaseOrderService.slabLocationTransfer(data);
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to transfer slab inventory ." });
+        }
+    } catch (error) {
+        console.error("Error in transfer slabs: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
     }
 };

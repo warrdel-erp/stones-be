@@ -5,7 +5,9 @@ import * as freightBillService from '../services/freightServices.js'
 export const addFreightBill = async (req, res) => {
     try {
         const info = req.body;
-        const result = await freightBillService.addFreightBill(info);
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const result = await freightBillService.addFreightBill({ ...info, createdBy });
         res.status(200).send(result);
 
     } catch (error) {
@@ -18,8 +20,8 @@ export const addFreightBill = async (req, res) => {
 //get freight data
 export const getFreightData = async (req, res) => {
     const query = req.query
-    console.log(query,'quer');
-    
+    console.log(query, 'quer');
+
     try {
         const result = await freightBillService.getFreightData(query);
         res.status(200).send(result);
@@ -32,7 +34,7 @@ export const getFreightData = async (req, res) => {
 
 //get freight accounts details
 
-export const getFreightAccounts = async (req, res) => {    
+export const getFreightAccounts = async (req, res) => {
     try {
         const result = await freightBillService.getFreightAccounts();
         res.status(200).send(result);

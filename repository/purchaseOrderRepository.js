@@ -436,11 +436,11 @@ export async function addContainer(data) {
 
 export async function getContainerDetails(poSupplierInvoiceMapperId) {
   try {
-    console.log(`Fetching container details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`);
-    const result = await model.containerModel.findOne({
+    console.log('Fetching container details for poSupplierInvoiceMapperId:', poSupplierInvoiceMapperId.poSupplierInvoiceMappperId);
+    const result = await model.containerModel.findAll({
       attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       where: {
-        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId.poSupplierInvoiceMappperId
       },
     });
     return result;
@@ -559,16 +559,13 @@ export async function getSupplierInvoices(data) {
               model: model.supplierModel,
               as: 'suppliers',
               attributes: ['supplierName', 'supplierId'],
-              where: {
-                supplierId: data.supplierId
-              }
 
+              where: data.supplierId ? { supplierId: data.supplierId } : undefined,
             },
             {
               model: model.vendorModel,
               attributes: ['vendorName', 'vendorId'],
             },
-
           ]
         },
         {
@@ -576,8 +573,7 @@ export async function getSupplierInvoices(data) {
           as: 'poSupplierInvoice',
           attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'amount', 'supplierId'],
           where: {
-            transactionOf: 'purchase',
-            supplierId: data.supplierId
+            ...(data.supplierId && { supplierId: data.supplierId })
           }
         }
       ]
@@ -588,6 +584,7 @@ export async function getSupplierInvoices(data) {
     throw error;
   }
 }
+
 
 
 
@@ -685,5 +682,32 @@ export async function getSuppliersPOJournal(info) {
   } catch (error) {
     console.error("Error fetching purchase transactions:", error);
     throw new Error('Failed to fetch purchase transactions');
+  }
+}
+
+
+export async function slabLocationTransfer(data) {
+  try {
+    const result = await model.inventoryTransfterModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in create inventory transfer:", error);
+    throw error;
+  }
+}
+
+
+
+export async function siplTransactionStatusUpdate(data) {
+  try {
+    const result = await model.poSupplierInvoiceMapperModel.update(data, {
+      where: {
+        poSupplierInvoiceMappperId: data.poSupplierInvoiceMappperId
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in SIPL Status update:", error);
+    throw error;
   }
 }

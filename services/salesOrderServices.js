@@ -157,12 +157,102 @@ export async function getAllSo(data) {
 };
 
 
+// export async function updateStatus(transactionData) {
+//     console.log('Received transaction data:', transactionData.createdBy);
+
+//     const soLoadingOrderId = transactionData.soLoadingOrderId;
+//     const transaction = await sequelize.transaction();
+//     let shouldUpdateAccounts = false;
+
+//     try {
+//         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
+//         if (salesOrderInventory.length === 0) {
+//             console.log(`No sales order inventory found with id ${soLoadingOrderId}`);
+//             await transaction.rollback();
+//             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
+//         }
+
+//         const statusMapping = {
+//             'INITIATED': 'LOADING ORDER',
+//             'LOADING ORDER': 'PACKING LIST',
+//             'PACKING LIST': 'INVOICE'
+//         };
+
+//         for (const inventory of salesOrderInventory) {
+//             const currentStatus = inventory.dataValues.salesStatus;
+//             const newStatus = statusMapping[currentStatus];
+
+//             if (newStatus) {
+//                 const salesOrdersInventoryId = inventory.dataValues.salesOrdersInventoryId;
+//                 const productInventoryId = inventory.dataValues.productInventoryId;
+//                 await salesOrderRepository.updateSalesStatus(salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
+//                 await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
+
+//                 console.log(`Status updated to ${newStatus} for inventory ID ${salesOrdersInventoryId}`);
+
+
+//                 if (newStatus === 'INVOICE') {
+//                     shouldUpdateAccounts = true;
+//                 }
+//             } else {
+//                 console.log(`No update required for status: ${currentStatus}`);
+//             }
+//         }
+
+//         if (shouldUpdateAccounts) {
+//             const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
+//             const transactionAccountId = await getAccountIdByAccountName(accNames);
+
+//             console.log(transactionAccountId, 'transactionAccountId');
+
+//             const accountDetails = [
+//                 { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
+//                 { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
+//             ];
+
+//             for (const accountDetail of accountDetails) {
+//                 const transactionDataWithAccount = {
+//                     ...transactionData,
+//                     accountsId: accountDetail.accountsId,
+//                     entryType: accountDetail.entryType,
+//                     transactionOf: 'sales',
+//                     transactionAmountType: 'debit',
+//                     createdBy: transactionData.createdBy
+//                 };
+//                 await createSalesAccountTransaction(transactionDataWithAccount, { transaction });
+//                 console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
+//             }
+
+//             const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
+//             for (const item of poSlabDetailIds) {
+//                 const data = {
+//                     poSlabDetailId: item,
+//                     status: 'INACTIVE'
+//                 };
+//                 await updateSlabDetails(data, { transaction });
+//             }
+
+//             console.log('Product inventory set to INACTIVE for relevant items.');
+//         }
+
+//         await transaction.commit();
+//         return { success: true, message: 'Status updated successfully' };
+
+//     } catch (error) {
+//         console.error('Error updating status:', error);
+//         await transaction.rollback();
+//         return { success: false, error: error.message };
+//     }
+// }
+
+
 export async function updateStatus(transactionData) {
     console.log('Received transaction data:', transactionData.createdBy);
 
     const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
     let shouldUpdateAccounts = false;
+    let packingListAccountUpdateRequired = false;
 
     try {
         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
@@ -190,14 +280,20 @@ export async function updateStatus(transactionData) {
 
                 console.log(`Status updated to ${newStatus} for inventory ID ${salesOrdersInventoryId}`);
 
-
+                if (newStatus === 'PACKING LIST') {
+                    packingListAccountUpdateRequired = true;
+                }
                 if (newStatus === 'INVOICE') {
                     shouldUpdateAccounts = true;
                 }
+
+
+
             } else {
                 console.log(`No update required for status: ${currentStatus}`);
             }
         }
+
 
         if (shouldUpdateAccounts) {
             const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
@@ -223,6 +319,7 @@ export async function updateStatus(transactionData) {
                 console.log(`Sales account transaction created with accounts ID ${accountDetail.accountsId}`);
             }
 
+
             const poSlabDetailIds = transactionData.soLoadingOrder.map(item => item.dataValues.poSlabDetailId);
             for (const item of poSlabDetailIds) {
                 const data = {
@@ -235,6 +332,32 @@ export async function updateStatus(transactionData) {
             console.log('Product inventory set to INACTIVE for relevant items.');
         }
 
+
+        if (packingListAccountUpdateRequired) {
+            const packingListAccountNames = { creditAccountName: 'Finished Goods', debitAccountName: 'Cost of Goods & Services Sold' };
+            const packingListAccountId = await getAccountIdByAccountName(packingListAccountNames);
+
+            console.log(packingListAccountId, 'packingListAccountId');
+
+            const packingListAccountDetails = [
+                { accountsId: packingListAccountId.debitAccount.accountId, entryType: 'dr' },
+                { accountsId: packingListAccountId.creditAccount.accountId, entryType: 'cr' }
+            ];
+
+            for (const accountDetail of packingListAccountDetails) {
+                const packingListTransactionData = {
+                    ...transactionData,
+                    accountsId: accountDetail.accountsId,
+                    entryType: accountDetail.entryType,
+                    transactionOf: 'packing',
+                    transactionAmountType: 'debit',
+                    createdBy: transactionData.createdBy
+                };
+                await createSalesAccountTransaction(packingListTransactionData, { transaction });
+                console.log(`Packing list account transaction created with accounts ID ${accountDetail.accountsId}`);
+            }
+        }
+
         await transaction.commit();
         return { success: true, message: 'Status updated successfully' };
 
@@ -244,7 +367,6 @@ export async function updateStatus(transactionData) {
         return { success: false, error: error.message };
     }
 }
-
 
 
 

@@ -4,11 +4,11 @@ const router = Router();
 import { userAuth } from "../middleware/authUser.js";
 import { addFreightBill, getFreightAccounts, getFreightData } from "../controllers/freightController.js";
 
-router.post("/", addFreightBill);
+router.post("/", userAuth, addFreightBill);
 
-router.get("/", getFreightData);
+router.get("/", userAuth, getFreightData);
 
-router.get("/freightAccounts", getFreightAccounts);
+router.get("/freightAccounts", userAuth, getFreightAccounts);
 
 
 export default router;  

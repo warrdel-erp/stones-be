@@ -1264,3 +1264,86 @@ VALUES
 INSERT INTO accounts (sub_account_types_id, account_types_id, account_name, account_balance, can_delete, opening_balance_date, created_at, updated_at)
 VALUES 
 (3, 1, 'Inventory in Transit', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO accounts (sub_account_types_id, account_types_id, account_name, account_balance, can_delete, opening_balance_date, created_at, updated_at)
+VALUES 
+(21, 5, 'Cost of Goods & Services Sold', 0, true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+ALTER TABLE freight_bills
+ADD COLUMN created_by INT;
+
+
+CREATE TABLE IF NOT EXISTS inventory_transfer (
+    inventory_transfer_id INT AUTO_INCREMENT PRIMARY KEY,
+    po_slab_detail_id INT NULL,
+    initiated_date DATE,
+    required_ship_date DATE,
+    eta_date DATE,
+    delivery_method ENUM('DELIVERY', 'PICKUP') NOT NULL,
+    shipment_terms ENUM(
+        'Prepaid', 
+        'Prepaid & Add', 
+        'Collect', 
+        'Prepaid & COD', 
+        'Add & COD', 
+        'Collect & COD', 
+        'Credit 45', 
+        'CAD', 
+        'Consignment'
+    ),
+    transfer_from INT,
+    transfer_to INT,
+    freight_forwarder ENUM(
+        'Ace Drayage', 
+        'Airlift (USA) Inc', 
+        'AJ Worldwide services Inc', 
+        'Avenger Logistics', 
+        'CMA CGM (AMERICA) LLC', 
+        'Crystal Granite (Ocean Freight)', 
+        'DahNAY Logistics', 
+        'Del Corona', 
+        'Edmund Freight', 
+        'Eurybia Logistics Inc', 
+        'Ever Concord Logistics Inc', 
+        'Fortuna Global Logistics LLC', 
+        'Freight Experts Inc', 
+        'General Noli USA Inc', 
+        'Global Logistics & Customs of Charleston', 
+        'Gramazini Freight', 
+        'Heavy Weight Port, Inc', 
+        'Howard Sheppard, Inc', 
+        'Interglobog', 
+        'LAM USA International Transport, LLC', 
+        'Leonardi & Co. USA Inc', 
+        'Optimal Container Logistics', 
+        'Pacific Granites Inc', 
+        'Pacific Quartz (Freight)', 
+        'Patagon Logistics LLC', 
+        'PKD Logistics', 
+        'Savannah River Logistics, LLC', 
+        'SBB Shipping USA Inc', 
+        'Surfaces by Pacific (Freight)', 
+        'Total Quality Logistics (TQL)', 
+        'Tova Trucking, Inc', 
+        'Trans-World Shipping Service, Inc', 
+        'Trident Freight', 
+        'U.S. Customs and Border Protection', 
+        'Western Overseas Corp', 
+        'World-Wide Transportation', 
+        'Worldwide Express Inc', 
+        'Xpress Logistic Solution LLP'
+    ),
+    tracking_id VARCHAR(50),
+    actual_ship_date DATE,
+    pick_ticket_restriction ENUM('Exact Slab','Within Lot', 'Within Product'),
+    printed_notes VARCHAR(255),
+    internal_notes VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (po_slab_detail_id) REFERENCES po_slab_details(po_slab_detail_id) ON DELETE SET NULL
+);
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD COLUMN transaction_status ENUM('SIPL CREATED', 'SLAB ADDED', 'FREIGHT ADDED', 'CONTAINER ADDED', 'INVENTORY RECEIVED') 
+DEFAULT 'SIPL CREATED';
