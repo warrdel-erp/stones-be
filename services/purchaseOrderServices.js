@@ -118,7 +118,7 @@ export async function addSuplierInvoice(data) {
             shipDate: data.shipDate,
             dueDate: data.dueDate,
             createdBy: data.createdBy,
-            transactionStatus: 'SIPL CREATED'
+            // transactionStatus: 'SIPL CREATED'
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);

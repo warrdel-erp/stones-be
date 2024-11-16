@@ -1,7 +1,9 @@
 import { Router } from 'express';
 const router = Router();
 import { userAuth } from '../middleware/authUser.js';
-import { createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder } from "../controllers/salesOrderController.js";
+import { createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder, updateSlabToPicked } from "../controllers/salesOrderController.js";
+
+router.patch('/slabPicked', updateSlabToPicked);
 
 router.patch('/soClose', closeSalesOrder);
 
@@ -22,6 +24,7 @@ router.patch('/:soLoadingOrderId', userAuth, updateStatus);
 router.post('/addPayment', addPayment);
 
 router.post('/salesAccountTransaction', userAuth, createSalesAccountTransaction);
+
 
 
 

@@ -377,7 +377,8 @@ export const updatePrePurchaseProduct = async (req, res) => {
 export const getSupplierInvoices = async (req, res) => {
     try {
         const data = req.query;
-        const result = await purchaseOrderService.getSupplierInvoices(data);
+        const clientId = req.clientId;
+        const result = await purchaseOrderService.getSupplierInvoices({...data,clientId});
         res.status(200).send({
             success: true,
             message: "Supplier invoices retrieved successfully.",

@@ -67,7 +67,7 @@ router.get('/inventoryDetailsBasedOnSipl', userAuth, getInventoryListBasedOnSipl
 
 router.delete('/prePurcahseProduct/:purchaseOrderProductId', deletePrePurchaeProduct);
 
-router.get('/getSupplierInvoices', getSupplierInvoices);
+router.get('/getSupplierInvoices', userAuth, getSupplierInvoices);
 
 router.post('/addToCart', userAuth, addToCart);
 

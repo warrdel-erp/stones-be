@@ -386,3 +386,23 @@ export async function closeSalesOrder(data) {
     return error;
   }
 }
+
+
+
+export async function updateSlabToPicked(data) {
+  try {
+    const result = await model.salesOrderInventoryModel.update(
+      { slabPicked: true },
+      {
+        where: {
+          salesOrdersInventoryId: data.salesOrdersInventoryId,
+        }
+      }
+    );
+    return result;
+  } catch (error) {
+    console.error("Error updating slabPicked status:", error);
+    return error;
+  }
+}
+

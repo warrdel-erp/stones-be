@@ -162,8 +162,19 @@ export const createSalesAccountTransaction = async (req, res) => {
 
 export const closeSalesOrder = async (req, res) => {
     try {
-        const salesOrdersId= req.query;   
+        const salesOrdersId = req.query;
         const result = await salesOrderService.closeSalesOrder(salesOrdersId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in updating sales order status: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+export const updateSlabToPicked = async (req, res) => {
+    try {
+        const result = await salesOrderService.updateSlabToPicked(req.query);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in updating sales order status: ", error);

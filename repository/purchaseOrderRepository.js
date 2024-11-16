@@ -548,9 +548,20 @@ export async function deletePrePurchaeProduct(purchaseOrderProductId) {
 
 
 export async function getSupplierInvoices(data) {
+  console.log(data, 'jsjsj');
+
   try {
     const result = await model.poSupplierInvoiceMapperModel.findAll({
+
       include: [
+        {
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: data.clientId
+          }
+        },
         {
           model: model.purchaseModel,
           attributes: ['paymentTerm', 'purchaseLocationId', 'locationId', 'supplierSo', 'container', 'requiredShipDate'],
@@ -572,9 +583,9 @@ export async function getSupplierInvoices(data) {
           model: model.accountTransactionModel,
           as: 'poSupplierInvoice',
           attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'amount', 'supplierId'],
-          where: {
-            ...(data.supplierId && { supplierId: data.supplierId })
-          }
+          // where: {
+          //   ...(data.supplierId && { supplierId: data.supplierId })
+          // }
         }
       ]
     });
@@ -652,10 +663,10 @@ export async function getSuppliersPOJournal(info) {
       include: [
         {
           model: model.accountTransactionModel,
-          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
+          attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'supplierId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
           as: 'supplierTransactions',
           where: {
-            poSupplierInvoiceMapperId: info.poSupplierInvoiceMapperId
+            supplierId: info.supplierId
           },
           required: true,
           include: [

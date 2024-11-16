@@ -349,7 +349,7 @@ export async function updateStatus(transactionData) {
                     ...transactionData,
                     accountsId: accountDetail.accountsId,
                     entryType: accountDetail.entryType,
-                    transactionOf: 'packing',
+                    transactionOf: 'sales',
                     transactionAmountType: 'debit',
                     createdBy: transactionData.createdBy
                 };
@@ -516,3 +516,7 @@ export async function closeSalesOrder(data) {
 }
 
 
+
+export async function updateSlabToPicked(info) {
+    return await salesOrderRepository.updateSlabToPicked(info)
+}
