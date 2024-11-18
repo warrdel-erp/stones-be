@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import { addAccount, getAllAccounts, getAllAccountsTypeAndSubTypes, updateAccount, deleteAccount, getCashFinancialAssestOptions, getGroupedAccountList, getAccountIdByAccountName, getCOATransactionDetails, getTransactionSupplierCustomers } from '../controllers/accountsController.js';
+import { addAccount, getAllAccounts, getAllAccountsTypeAndSubTypes, updateAccount, deleteAccount, getCashFinancialAssestOptions, getGroupedAccountList, getAccountIdByAccountName, getCOATransactionDetails, getTransactionSupplierCustomers, journalEntryCreation } from '../controllers/accountsController.js';
 import { userAuth } from '../middleware/authUser.js';
 
 router.post('/', addAccount);
@@ -22,5 +22,7 @@ router.get('/transactionDetailsCOA', userAuth, getCOATransactionDetails);
 router.get('/accountIdsByName', getAccountIdByAccountName);
 
 router.get('/transactionHistory/:type', userAuth, getTransactionSupplierCustomers);
+
+router.post('/journalEntry', journalEntryCreation);
 
 export default router;

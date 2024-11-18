@@ -221,7 +221,14 @@ export async function getInventoryListBasedOnSipl(clientId) {
         {
           model: model.productModel,
           as: "salesProductDetails",
-          attributes: ["productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"]
+          attributes: ["productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"],
+          include: [
+            {
+              model: model.landedCostModel,
+              as: "productLandeCost",
+              
+            }
+          ]
         },
         {
           model: model.clientUserModel,

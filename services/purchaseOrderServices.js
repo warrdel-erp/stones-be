@@ -332,7 +332,7 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
-    console.log(dataArray.createdBy, 'dataArray');
+    console.log(dataArray.landedCostData, 'dataArray');
 
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
@@ -381,13 +381,34 @@ export async function addProductInventory(dataArray) {
                 const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId, createdBy: dataArray.createdBy }
                 result = await productInventory.addInventoryInvoice(inventoryData, transaction)
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId };
+
+                const landedCostData = dataArray.landedCostData.find(item => item.productId === data.productId);
+                if (landedCostData) {
+                    const landedCostInfo = {
+                        productId: landedCostData.productId,
+                        productLandedCost: parseFloat(landedCostData.totalLandedCost), 
+                        poSupplierInvoiceMapperId: poMapperId,
+                        createdBy: dataArray.createdBy
+                    };
+                    await purchaseOrderRepository.createProductLandedCost(landedCostInfo, transaction); // Insert landed cost
+                }
                 // result = await productInventory.addProductInventory(info, transaction);
             } else {
                 const info = { ...data, poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId, createdBy: dataArray.createdBy };
                 result = await productInventory.addProductInventory(info, transaction);
                 const productInventoryId = result.get('productInventoryId')
                 const inventoryData = { poSupplierInvoiceId: data.po_supplier_invoice_id, productInventoryId: productInventoryId, createdBy: dataArray.createdBy }
-                result = await productInventory.addInventoryInvoice(inventoryData, transaction)
+                result = await productInventory.addInventoryInvoice(inventoryData, transaction);
+                const landedCostData = dataArray.landedCostData.find(item => item.productId === data.productId);
+                if (landedCostData) {
+                    const landedCostInfo = {
+                        productId: landedCostData.productId,
+                        productLandedCost: parseFloat(landedCostData.totalLandedCost),
+                        poSupplierInvoiceMapperId: poMapperId,
+                        createdBy: dataArray.createdBy
+                    };
+                    await purchaseOrderRepository.createProductLandedCost(landedCostInfo, transaction); 
+                }
             };
             results.push(result);
         };

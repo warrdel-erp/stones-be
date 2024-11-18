@@ -1,4 +1,5 @@
 import * as accountsRepository from '../repository/accountsRepository.js';
+import sequelize from '../database/sequelizeConfig.js';
 
 export async function addAccount(info) {
     return await accountsRepository.addAccount(info);
@@ -294,4 +295,18 @@ export async function getTransactionSupplierCustomer(typeOfData, queryParams, cl
 
 
 
-
+export async function journalEntryCreation(infoArray) {
+    const transaction = await sequelize.transaction();
+    try {
+        const results = [];
+        for (const info of infoArray) {
+            const result = await accountsRepository.journalEntryCreation(info, { transaction });
+            results.push(result);
+        }
+        await transaction.commit();
+        return results;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+}

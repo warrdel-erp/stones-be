@@ -3,6 +3,7 @@ import { DataTypes } from 'sequelize';
 import {status} from "../constant.js";
 import poSupplierInvoiceMapper from "./poSupplierInvoiceMapperModel.js";
 import purchaseOrderProduct from '../models/purchaseOrderProductModel.js'
+import productModel from "./productModel.js";
 
 export default sequelize.define(
   'po_supplier_invoice',
@@ -35,6 +36,15 @@ export default sequelize.define(
         type:DataTypes.STRING,
         field:'product_sku',
         allowNull:false
+    },
+    productId:{
+        type:DataTypes.INTEGER,
+        field:'product_id',
+        allowNull:true,
+        references: {
+            model: productModel,
+            key: 'product_id'
+        }
     },
     description:{
         type:DataTypes.STRING,

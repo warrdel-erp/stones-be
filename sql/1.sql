@@ -1355,3 +1355,30 @@ ALTER TABLE products MODIFY COLUMN type VARCHAR(255) NULL;
 
 ALTER TABLE sales_orders_inventory
 ADD COLUMN slab_picked BOOLEAN NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS product_landed_cost (
+    product_landed_cost_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    product_landed_cost INT,
+    po_supplier_invoice_mapper_id INT,
+    created_by INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE SET NULL,
+    FOREIGN KEY (po_supplier_invoice_mapper_id) REFERENCES po_supplier_invoice_mapper(po_supplier_invoice_mapper_id) ON DELETE SET NULL
+);
+
+ALTER TABLE purchase_orders MODIFY COLUMN etd_Port VARCHAR(255) NULL;
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD COLUMN receive_inventory_date DATE;
+
+-- First, add the product_id column to the table
+ALTER TABLE po_supplier_invoices
+ADD COLUMN product_id INTEGER;
+
+-- Then, add the foreign key constraint
+ALTER TABLE po_supplier_invoices
+ADD CONSTRAINT fk_product_id_one
+FOREIGN KEY (product_id) REFERENCES products(product_id);

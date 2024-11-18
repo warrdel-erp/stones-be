@@ -722,3 +722,15 @@ export async function siplTransactionStatusUpdate(data) {
     throw error;
   }
 }
+
+
+
+export async function createProductLandedCost(data) {
+  try {
+    const result = await model.landedCostModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in SIPL Status update:", error);
+    throw error;
+  }
+}

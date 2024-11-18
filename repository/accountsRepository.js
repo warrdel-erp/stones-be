@@ -525,3 +525,14 @@ export async function getAccountTransactionCustomer(customerId, startDate, endDa
         return error;
     }
 }
+
+
+export async function journalEntryCreation(data) {
+    try {
+        const result = await model.accountTransactionModel.create(data);
+        return result;
+    } catch (error) {
+        console.error("Error in add Account:", error);
+        throw error;
+    }
+};

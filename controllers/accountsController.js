@@ -162,3 +162,15 @@ export const getTransactionSupplierCustomers = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+export const journalEntryCreation = async (req, res) => {
+    try {
+        const info = req.body;
+        const result = await accountsService.journalEntryCreation(info);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in add Account:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

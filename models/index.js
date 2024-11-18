@@ -42,6 +42,7 @@ import userPermissionsModel from './userPermissionsModel.js';
 import supplierWritingInstructionModel from './supplierWritingInstructionModel.js';
 import clientLocationModel from './clientLocationModel.js';
 import inventoryTransfterModel from './inventoryTransfterModel.js';
+import landedCostModel from './landedCostModel.js';
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -262,7 +263,11 @@ clientModel.hasMany(clientLocationModel, { foreignKey: 'clientId', sourceKey: 'c
 clientLocationModel.belongsTo(locationModel, { foreignKey: 'locationId', as: 'locationDetails' });
 locationModel.hasOne(clientLocationModel, { foreignKey: 'locationId', as: 'locationDetails' });
 
+
+landedCostModel.belongsTo(productModel, { foreignKey: 'productId' });
+productModel.hasMany(landedCostModel, { foreignKey: 'productId', as: 'productLandeCost' });
 // locationModel.belongsTo(clientLocationModel, { foreignKey: 'locationId' })
+
 
 export {
 	productModel,
@@ -304,5 +309,6 @@ export {
 	supplierWritingInstructionModel,
 	AddToCart,
 	clientLocationModel,
-	inventoryTransfterModel
+	inventoryTransfterModel,
+	landedCostModel
 };
