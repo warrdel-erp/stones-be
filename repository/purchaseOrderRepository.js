@@ -38,19 +38,25 @@ export async function latestPoNumber(clientId) {
   }
 }
 
-export async function updateOrder(poNumber, data) {
+export async function updateOrder(poNumber, info) {
+  console.log('PO Number:', poNumber); // Log the PO number for debugging
+  console.log('Info:', info); // Log the info object
   try {
-    const result = await model.purchaseModel.update(data, {
+    // Update the order
+    const result = await model.purchaseModel.update(info, {
       where: {
-        po: poNumber
+        purchaseOrderId: Number(poNumber)
       }
     });
+
+    console.log('Update result:', result); // Log the result of the update
     return result;
   } catch (error) {
     console.error("Error in updating order:", error);
     throw error;
   }
 }
+
 
 export async function findPoNumber(poNumber, clientId) {
   const result = await model.purchaseModel.findOne({
@@ -59,16 +65,16 @@ export async function findPoNumber(poNumber, clientId) {
         [Op.eq]: poNumber
       }
     },
-    include: [
-      {
-        model: model.clientUserModel,
-        as: 'clientDetails',
-        attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-        where: {
-          clientId
-        }
-      }
-    ]
+    // include: [
+    //   {
+    //     model: model.clientUserModel,
+    //     as: 'clientDetails',
+    //     attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+    //     where: {
+    //       clientId: clientId
+    //     }
+    //   }
+    // ]
   })
   return result;
 }
@@ -400,18 +406,11 @@ export async function addPayment(data) {
 
 export async function getPaymentDetails(poSupplierInvoiceMapperId) {
   try {
-    console.log(`Fetching payment details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`);
-
-    const result = await model.purchasePaymentModel.findOne({
-      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+    const result = await model.accountTransactionModel.findAll({
       where: {
-        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        transactionAmountType: 'credit'
       },
-      include: [{
-        model: model.poSupplierInvoiceMapperModel,
-        as: "purchaseInvoice",
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
-      }],
     });
     return result;
   } catch (error) {

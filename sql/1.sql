@@ -1382,3 +1382,5 @@ ADD COLUMN product_id INTEGER;
 ALTER TABLE po_supplier_invoices
 ADD CONSTRAINT fk_product_id_one
 FOREIGN KEY (product_id) REFERENCES products(product_id);
+
+SET GLOBAL sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));

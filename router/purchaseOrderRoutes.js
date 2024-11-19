@@ -33,7 +33,7 @@ router.post('/', userAuth, createOrder);
 
 router.get('/', userAuth, getPoNumber);
 
-router.patch('/:po', userAuth, updateOrder);
+router.patch('/addTotal/:po', userAuth, updateOrder);
 
 router.post('/addPurchaseProduct', userAuth, addPurchaseOrderProduct);
 

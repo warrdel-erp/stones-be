@@ -28,7 +28,7 @@ export async function getFreightCarriedVendor(data) {
       where: {
         freightCarrier: true,
       },
-      attributes: ['vendorId', 'vendorName'], 
+      // attributes: ['vendorId', 'vendorName'], 
     });
     return result;
   } catch (error) {

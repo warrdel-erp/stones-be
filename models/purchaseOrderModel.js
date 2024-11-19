@@ -94,7 +94,7 @@ export default sequelize.define(
     },
     etdPort: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
         field: 'etd_port'
     },
     arrivalPort: {

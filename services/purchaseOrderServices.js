@@ -9,6 +9,7 @@ import { getFreightData } from '../repository/freightRepository.js';
 import QRCode from 'qrcode';
 import bwipjs from 'bwip-js'
 import fs from 'fs';
+import poSlabDetailModel from '../models/poSlabDetailModel.js';
 
 // const fs = require('fs');
 export async function createOrder(info) {
@@ -179,16 +180,14 @@ export async function addSlabDetails(info) {
         const siplNumberMatch = siplNumber.match(/-\s*(\d+)/);
         const siplNumberAfterHyphen = siplNumberMatch ? parseInt(siplNumberMatch[1], 10) : null;
 
-        let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId)
+        let latestSerialNumber = await purchaseOrderRepository.latestSlapSerialNumber(poSupplierInvoiceMapperId);
         let serialCounter = 0;
-
 
         if (latestSerialNumber) {
             const serialNumberParts = latestSerialNumber.dataValues.serialNumber.split('-');
             const lastPart = serialNumberParts[serialNumberParts.length - 1];
             serialCounter = parseInt(lastPart, 10);
         }
-
 
         for (let i = 0; i < slabCounter; i++) {
             let dynamicBlock = block;
@@ -200,9 +199,26 @@ export async function addSlabDetails(info) {
             if (iisLotIncreament) dynamicLot = parseInt(lot, 10) + i;
             if (isSlabIncreament) dynamicSlab = parseInt(slab, 10) + i;
 
-            // Increment serial counter correctly
-            const currentSerial = serialCounter + i + 1;  // Ensure correct integer addition
-            const dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;  // Construct dynamic PO
+            // Increment serial counter correctly and ensure it's unique
+            let currentSerial = serialCounter + i + 1;
+            let dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;
+
+            // Check if the serial number already exists in the database
+            let existingSerialNumber = await poSlabDetailModel.findOne({
+                where: { serialNumber: dynamicPo, poSupplierInvoiceMapperId: poSupplierInvoiceMapperId },
+            });
+
+            // If the serial number exists, increment it until it's unique
+            while (existingSerialNumber) {
+                currentSerial += 1;  // Increment serial number
+                dynamicPo = `${po}-${siplNumberAfterHyphen}-${currentSerial}`;
+
+                // Check again for uniqueness
+                existingSerialNumber = await poSlabDetailModel.findOne({
+                    where: { serialNumber: dynamicPo, poSupplierInvoiceMapperId: poSupplierInvoiceMapperId },
+                });
+            }
+
             console.log(dynamicPo, 'dynamicPO');
 
             // Create a new slab detail
@@ -222,7 +238,6 @@ export async function addSlabDetails(info) {
                 poSupplierInvoiceMappperId: poSupplierInvoiceMapperId,
                 transactionStatus: 'SLAB ADDED'
             });
-
         }
 
 
@@ -386,7 +401,7 @@ export async function addProductInventory(dataArray) {
                 if (landedCostData) {
                     const landedCostInfo = {
                         productId: landedCostData.productId,
-                        productLandedCost: parseFloat(landedCostData.totalLandedCost), 
+                        productLandedCost: parseFloat(landedCostData.totalLandedCost),
                         poSupplierInvoiceMapperId: poMapperId,
                         createdBy: dataArray.createdBy
                     };
@@ -407,7 +422,7 @@ export async function addProductInventory(dataArray) {
                         poSupplierInvoiceMapperId: poMapperId,
                         createdBy: dataArray.createdBy
                     };
-                    await purchaseOrderRepository.createProductLandedCost(landedCostInfo, transaction); 
+                    await purchaseOrderRepository.createProductLandedCost(landedCostInfo, transaction);
                 }
             };
             results.push(result);
@@ -581,11 +596,13 @@ export async function getInventoryListBasedOnSipl(clientId) {
 
 
 export async function updateSlabDetails(data) {
+    console.log(data, 'jsjsj');
     const results = await Promise.all(
         data.slabs.map(async (slab) => {
             return await purchaseOrderRepository.updateSlabDetails(slab);
         })
     );
+    
     return results;
 }
 

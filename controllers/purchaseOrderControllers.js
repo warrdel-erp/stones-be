@@ -45,18 +45,12 @@ export const getPoNumber = async (req, res) => {
 
 // 3. update order 
 export const updateOrder = async (req, res) => {
-    const poNumber = req.body.po;
+    const poNumber = req.params;
     const info = req.body;
-    const poDetails = await findPoNumber(poNumber);
     try {
-        if (!poNumber) {
-            res.status(400).send("Po Number is required");
-        } else if (!poDetails) {
-            res.status(400).send("Po Number Not exist");
-        } else {
             const result = await purchaseOrderService.updateOrder(poNumber, info);
             res.status(200).send(result);
-        }
+        
     } catch (error) {
         console.error(`Error in updating po Number${poNumber}:`, error);
         res.status(500).send("Internal Server Error");
