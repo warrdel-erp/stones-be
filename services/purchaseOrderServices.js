@@ -602,7 +602,7 @@ export async function updateSlabDetails(data) {
             return await purchaseOrderRepository.updateSlabDetails(slab);
         })
     );
-    
+
     return results;
 }
 
@@ -693,9 +693,9 @@ export async function getSuppliersPOJournal(info) {
             if (Array.isArray(supplierData.supplierTransactions)) {
                 supplierData.supplierTransactions = supplierData.supplierTransactions.map(transaction => {
                     const transformedTransaction = { ...transaction };
-                    if (transaction.transactionAmountType === 'debit') {
+                    if (transaction.entryType === 'dr') {
                         transformedTransaction.debitAmount = `$${transaction.transactionAmount}`;
-                    } else if (transaction.transactionAmountType === 'credit') {
+                    } else if (transaction.entryType === 'cr') {
                         transformedTransaction.creditAmount = `$${transaction.transactionAmount}`;
                     }
 

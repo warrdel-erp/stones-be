@@ -268,6 +268,15 @@ landedCostModel.belongsTo(productModel, { foreignKey: 'productId' });
 productModel.hasMany(landedCostModel, { foreignKey: 'productId', as: 'productLandeCost' });
 // locationModel.belongsTo(clientLocationModel, { foreignKey: 'locationId' })
 
+clientUserModel.belongsTo(clientModel, { foreignKey: 'client_id' })
+clientModel.hasMany(clientUserModel, { foreignKey: 'client_id', as: 'clientUsers' })
+
+clientModel.belongsTo(clientUserModel, { foreignKey: 'client_id' })
+clientUserModel.hasMany(clientModel, { foreignKey: 'client_id', as: 'clientUsers' });
+
+containerModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id' })
+poSupplierInvoiceMapperModel.hasMany(containerModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'invoiceContainers' })
+
 
 export {
 	productModel,

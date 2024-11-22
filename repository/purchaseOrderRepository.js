@@ -193,6 +193,10 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
               as: "supplierInvoice",
               attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
+            {
+              model: model.containerModel,
+              as: 'invoiceContainers'
+            }
           ]
         },
         {
@@ -409,7 +413,8 @@ export async function getPaymentDetails(poSupplierInvoiceMapperId) {
     const result = await model.accountTransactionModel.findAll({
       where: {
         poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
-        transactionAmountType: 'credit'
+        transactionAmountType: 'credit',
+        entryType: 'dr'
       },
     });
     return result;

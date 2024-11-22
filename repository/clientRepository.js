@@ -82,6 +82,14 @@ export async function getClientLocations(data) {
                         }
                     ]
                 },
+                {
+                    model: model.clientUserModel,
+                    include: [
+                        {
+                            model: model.userModel
+                        }
+                    ]
+                }
 
             ]
         });

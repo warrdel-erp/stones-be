@@ -30,6 +30,7 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
             where: {
                 poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
                 transactionAmountType: 'credit',
+                entryType: 'dr'
             }
         });
 
@@ -44,6 +45,7 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
                 where: {
                     poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
                     transactionAmountType: 'credit',
+                    entryType: 'dr'
                 },
                 group: ['po_supplier_invoice_mapper_id'],
                 raw: true,

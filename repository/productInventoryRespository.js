@@ -1,5 +1,5 @@
 import * as model from "../models/index.js";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 // update product Inventory
 
 export async function updateProductInventory(data) {
@@ -178,9 +178,38 @@ export async function getInventoryList(page, limit, clientId) {
 }
 
 export async function getInventoryListBasedOnSipl(clientId) {
-  console.log(clientId, 'cleindh');
+  console.log(clientId, 'clientId');
 
   try {
+    const landedCosts = await model.landedCostModel.findAll({
+      attributes: [
+        'productId',
+        [Sequelize.fn('AVG', Sequelize.col('product_landed_cost_id')), 'averageLandedCost'],
+        [Sequelize.fn('MAX', Sequelize.col('created_at')), 'lastUpdatedAt'],
+      ],
+      group: ['productId'],
+      raw: true,
+    });
+
+    const lastLandedCosts = await model.landedCostModel.findAll({
+      attributes: [
+        'productId',
+        'productLandedCost',
+      ],
+      where: {
+        createdAt: {
+          [Op.eq]: Sequelize.literal("(SELECT MAX(`created_at`) FROM `product_landed_cost` WHERE `product_id` = `product_landed_cost`.`product_id`)")
+        }
+      },
+      raw: true,
+    });
+
+    const averageCostMap = Object.fromEntries(
+      landedCosts.map(cost => [cost.productId, cost])
+    );
+    const lastCostMap = Object.fromEntries(
+      lastLandedCosts.map(cost => [cost.productId, cost.productLandedCost])
+    );
     const result = await model.productInventoryModel.findAll({
       where: {
         status: 'ACTIVE'
@@ -221,14 +250,7 @@ export async function getInventoryListBasedOnSipl(clientId) {
         {
           model: model.productModel,
           as: "salesProductDetails",
-          attributes: ["productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"],
-          include: [
-            {
-              model: model.landedCostModel,
-              as: "productLandeCost",
-              
-            }
-          ]
+          attributes: ["productId", "productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"],
         },
         {
           model: model.clientUserModel,
@@ -240,7 +262,18 @@ export async function getInventoryListBasedOnSipl(clientId) {
         }
       ],
     });
-    return result;
+
+    const enrichedResult = result.map(entry => {
+      const productId = entry.salesProductDetails.productId;
+      return {
+        ...entry.toJSON(),
+        averageLandedCost: averageCostMap[productId]?.averageLandedCost || null,
+        lastLandedCost: lastCostMap[productId] || null,
+      };
+    });
+
+    return enrichedResult;
+
   } catch (error) {
     console.error("Error in getInventoryList:", error);
     throw error;
