@@ -181,3 +181,15 @@ export const updateSlabToPicked = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+
+export const swapSlab = async (req, res) => {
+    try {
+        const result = await salesOrderService.swapSlab(req.body);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in updating sales order swap slab: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};

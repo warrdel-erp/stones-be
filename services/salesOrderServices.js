@@ -520,3 +520,30 @@ export async function closeSalesOrder(data) {
 export async function updateSlabToPicked(info) {
     return await salesOrderRepository.updateSlabToPicked(info)
 }
+
+export async function swapSlab(info) {
+    const transaction = await sequelize.transaction();
+    try {
+        const updateData = {
+            remeasureLength: info.remeasureLength,
+            remeasureWidth: info.remeasureWidth,
+            soLoadingOrderId: info.soLoadingOrderId,
+            updatedBy: info.updatedBy,
+            poSlabDetailId: info.poSlabDetailId,
+            unitPrice: info.unitPrice
+        };
+        const updateResult = await salesOrderRepository.updateSalesOrderInventory(
+            info.salesOrdersInventoryId,
+            updateData,
+            { updatedBy: info.updatedBy },
+            { transaction }
+        );
+        await transaction.commit();
+        return { success: true, message: 'Slab swapped successfully', updateResult };
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Error swapping slab:', error);
+        return { success: false, error: error.message };
+    }
+}
+

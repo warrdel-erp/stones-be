@@ -234,6 +234,12 @@ export async function getInventoryListBasedOnSipl(clientId) {
                       [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
                     }
                   },
+                  include: [
+                    {
+                      model: model.locationModel,
+                      as: 'slabLocation'
+                    }
+                  ],
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
                 },
                 {

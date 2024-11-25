@@ -73,7 +73,7 @@ router.post('/addToCart', userAuth, addToCart);
 
 router.delete('/deleteItem', deleteCartItem);
 
-router.get('/getCartItems', getCartItems);
+router.get('/getCartItems', userAuth, getCartItems);
 
 router.post('/cartItemsToSO', convertCartItemToSO);
 

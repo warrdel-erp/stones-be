@@ -69,11 +69,47 @@ export async function getAllPo(data) {
 export async function singlePoDetails(purchaseOrderId) {
     try {
         const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
-        return allDetailsPurchaseOrderId;
+        if (!allDetailsPurchaseOrderId) {
+            throw new Error(`Purchase order with ID ${purchaseOrderId} not found.`);
+        }
+        let totalPercentage = 0;
+        let totalInvoices = allDetailsPurchaseOrderId.invoiceMapper.length;
+        const enrichedInvoiceMapper = allDetailsPurchaseOrderId.invoiceMapper.map((invoice) => {
+            let percentage = 0;
+            if (invoice.poSupplierInvoice && invoice.poSupplierInvoice.length > 0) {
+                percentage += 30;
+            }
+            if (invoice.invoiceContainers && invoice.invoiceContainers.length > 0) {
+                percentage += 30;
+            }
+            if (invoice.totalProductCharges && invoice.totalProductCharges > 0) {
+                percentage += 40;
+            }
+            percentage = Math.min(percentage, 100);
+            totalPercentage += percentage;
+            return {
+                ...invoice,
+                poCurrentStatus: percentage,
+                percentage,
+            };
+        });
+        const averagePoCurrentStatus = totalInvoices > 0 ? Math.round(totalPercentage / totalInvoices) : 0;
+        const enrichedResult = {
+            ...allDetailsPurchaseOrderId,
+            invoiceMapper: enrichedInvoiceMapper,
+            poCurrentStatus: averagePoCurrentStatus,
+            percentage: averagePoCurrentStatus,
+        };
+
+        return enrichedResult;
     } catch (error) {
-        throw new Error(`Failed to fetch purchase ${purchaseOrderId} order details: ${error.message}`);
+        throw new Error(`Failed to fetch purchase order ${purchaseOrderId} details: ${error.message}`);
     }
-};
+}
+
+
+
+
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
@@ -220,7 +256,7 @@ export async function addSlabDetails(info) {
             }
 
             console.log(dynamicPo, 'dynamicPO');
-
+            const barcode = `WDP${po}${siplNumberAfterHyphen}${currentSerial}${dynamicBlock}${dynamicLot}${dynamicSlab}`;
             // Create a new slab detail
             const slabDetail = await purchaseOrderRepository.addSlabDetails({
                 ...slabInfo,
@@ -230,6 +266,7 @@ export async function addSlabDetails(info) {
                 slab: dynamicSlab,
                 slabCounter: slabCounter,
                 poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+                barcode: barcode
             });
 
             slabDetails.push(slabDetail);
@@ -292,9 +329,11 @@ export async function addSlabDetails(info) {
 export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMappperId) {
     try {
         const slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId);
+        const freightData = await getFreightData(({ poSupplierInvoiceMapperId: poSupplierInvoiceMappperId }))
+        console.log(slabDetails, 'jsjsjsjjsjs');
         const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
-        const poSupplierInvoiceId = slabDetails.supplierInvoice[0].poSupplierInvoiceId;
-        console.log(poSupplierInvoiceId, 'jsjsjsjjsjs');
+        const poSupplierInvoiceId = slabDetails.supplierInvoice.poSupplierInvoiceId;
+
 
         const detailsToFindIds = { poSupplierInvoiceMapperId: Number(poSupplierInvoiceMappperId), poSupplierInvoiceId: Number(poSupplierInvoiceId) };
         console.log(detailsToFindIds, 'ksksksksk');
@@ -307,36 +346,37 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
         console.log(`Total Sum: $${freightTotalSum}`);
 
 
-        const po = allDetailsPurchaseOrderId.dataValues.po;
-        const supplierSo = allDetailsPurchaseOrderId.dataValues.supplierSo;
-        const freightForwarder = allDetailsPurchaseOrderId.dataValues.freightForwarder
-        const etaDate = allDetailsPurchaseOrderId.dataValues.etaDate
-        const container = allDetailsPurchaseOrderId.dataValues.container
-        const etdPort = allDetailsPurchaseOrderId.dataValues.etdPort
-        const supplierName = allDetailsPurchaseOrderId.dataValues.suppliers.supplierName
-        const shipLocation = allDetailsPurchaseOrderId.dataValues.location.location
-        const purchaseLocation = allDetailsPurchaseOrderId.dataValues.purchaseLocation.location
-        const invoice = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].invoice
-        const invoiceDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].invoiceDate
-        const dueDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].dueDate
-        const shipDate = allDetailsPurchaseOrderId.dataValues.invoiceMapper[0].shipDate
-        const paymentTerm = allDetailsPurchaseOrderId.dataValues.paymentTerm
-        const supplierId = allDetailsPurchaseOrderId.dataValues.supplierId;
-        const parentLocation = allDetailsPurchaseOrderId.dataValues.suppliers.parentLocation;
-        const printName = allDetailsPurchaseOrderId.dataValues.suppliers.printName;
-        const remitAddress = allDetailsPurchaseOrderId.dataValues.suppliers.remitAddress;
-        const remitSuite = allDetailsPurchaseOrderId.dataValues.suppliers.remitSuite;
-        const remitCity = allDetailsPurchaseOrderId.dataValues.suppliers.remitCity;
-        const remitState = allDetailsPurchaseOrderId.dataValues.suppliers.remitState;
-        const remitZip = allDetailsPurchaseOrderId.dataValues.suppliers.remitZip;
-        const remitCountry = allDetailsPurchaseOrderId.dataValues.suppliers.remitCountry;
-        const shippingAddress = allDetailsPurchaseOrderId.dataValues.suppliers.shippingAddress;
-        const shippingSuite = allDetailsPurchaseOrderId.dataValues.suppliers.shippingSuite;
-        const shippingCity = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCity;
-        const shippingState = allDetailsPurchaseOrderId.dataValues.suppliers.shippingState;
-        const shippingZip = allDetailsPurchaseOrderId.dataValues.suppliers.shippingZip;
-        const shippingCountry = allDetailsPurchaseOrderId.dataValues.suppliers.shippingCountry;
-        const allSlabDetails = { shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId, freightTotalSum };
+        const po = allDetailsPurchaseOrderId.po;
+        const supplierSo = allDetailsPurchaseOrderId.supplierSo;
+        const freightForwarder = allDetailsPurchaseOrderId.freightForwarder;
+        const etaDate = allDetailsPurchaseOrderId.etaDate;
+        const container = allDetailsPurchaseOrderId.container;
+        const etdPort = allDetailsPurchaseOrderId.etdPort;
+        const supplierName = allDetailsPurchaseOrderId.suppliers?.supplierName || "Unknown";
+        const shipLocation = allDetailsPurchaseOrderId.location?.location || "Unknown";
+        const purchaseLocation = allDetailsPurchaseOrderId.purchaseLocation?.location || "Unknown";
+        const invoice = allDetailsPurchaseOrderId.invoiceMapper?.[0]?.invoice || "No Invoice";
+        const invoiceDate = allDetailsPurchaseOrderId.invoiceMapper?.[0]?.invoiceDate || null;
+        const dueDate = allDetailsPurchaseOrderId.invoiceMapper?.[0]?.dueDate || null;
+        const shipDate = allDetailsPurchaseOrderId.invoiceMapper?.[0]?.shipDate || null;
+        const paymentTerm = allDetailsPurchaseOrderId.paymentTerm || "Unknown";
+        const supplierId = allDetailsPurchaseOrderId.supplierId;
+        const parentLocation = allDetailsPurchaseOrderId.suppliers?.parentLocation || "Unknown";
+        const printName = allDetailsPurchaseOrderId.suppliers?.printName || "Unknown";
+        const remitAddress = allDetailsPurchaseOrderId.suppliers?.remitAddress || "Unknown";
+        const remitSuite = allDetailsPurchaseOrderId.suppliers?.remitSuite || "Unknown";
+        const remitCity = allDetailsPurchaseOrderId.suppliers?.remitCity || "Unknown";
+        const remitState = allDetailsPurchaseOrderId.suppliers?.remitState || "Unknown";
+        const remitZip = allDetailsPurchaseOrderId.suppliers?.remitZip || "Unknown";
+        const remitCountry = allDetailsPurchaseOrderId.suppliers?.remitCountry || "Unknown";
+        const shippingAddress = allDetailsPurchaseOrderId.suppliers?.shippingAddress || "Unknown";
+        const shippingSuite = allDetailsPurchaseOrderId.suppliers?.shippingSuite || "Unknown";
+        const shippingCity = allDetailsPurchaseOrderId.suppliers?.shippingCity || "Unknown";
+        const shippingState = allDetailsPurchaseOrderId.suppliers?.shippingState || "Unknown";
+        const shippingZip = allDetailsPurchaseOrderId.suppliers?.shippingZip || "Unknown";
+        const shippingCountry = allDetailsPurchaseOrderId.suppliers?.shippingCountry || "Unknown";
+
+        const allSlabDetails = { freightData, shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId, freightTotalSum };
 
 
         return allSlabDetails;
@@ -645,8 +685,8 @@ export async function deleteCartItem(info) {
     return await purchaseOrderRepository.deleteCartItem(info)
 }
 
-export async function getCartItems(info) {
-    return await purchaseOrderRepository.getCartItems(info)
+export async function getCartItems(info,createdBy) {
+    return await purchaseOrderRepository.getCartItems(info,createdBy)
 }
 
 

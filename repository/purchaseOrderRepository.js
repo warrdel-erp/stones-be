@@ -1,5 +1,5 @@
 import * as model from "../models/index.js";
-import { Op, where } from "sequelize";
+import { Op, Sequelize, where } from "sequelize";
 
 export async function createOrder(data) {
   try {
@@ -159,12 +159,44 @@ export async function createSupplierInvoice(data) {
 
 export async function getSinglePurchaseOrder(purchaseOrderId) {
   try {
+    // Step 1: Fetch Landed Costs
+    const landedCosts = await model.landedCostModel.findAll({
+      attributes: [
+        'productId',
+        [Sequelize.fn('AVG', Sequelize.col('product_landed_cost')), 'averageLandedCost'],
+        [Sequelize.fn('MAX', Sequelize.col('created_at')), 'lastUpdatedAt'],
+      ],
+      group: ['productId'],
+      raw: true,
+    });
+
+    const lastLandedCosts = await model.landedCostModel.findAll({
+      attributes: [
+        'productId',
+        'productLandedCost',
+      ],
+      where: {
+        createdAt: {
+          [Op.eq]: Sequelize.literal("(SELECT MAX(`created_at`) FROM `product_landed_cost` WHERE `product_id` = `product_landed_cost`.`product_id`)")
+        },
+      },
+      raw: true,
+    });
+
+    const averageCostMap = Object.fromEntries(
+      landedCosts.map((cost) => [cost.productId, cost.averageLandedCost])
+    );
+    const lastCostMap = Object.fromEntries(
+      lastLandedCosts.map((cost) => [cost.productId, cost.productLandedCost])
+    );
+
+    // Step 2: Fetch Purchase Order Details
     const result = await model.purchaseModel.findOne({
       attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       include: [
         {
           model: model.supplierModel,
-          as: "suppliers",
+          as: 'suppliers',
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
@@ -173,68 +205,91 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
         },
         {
           model: model.locationModel,
-          as: "location",
-          foreignKey: "location_id",
+          as: 'location',
+          foreignKey: 'location_id',
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.locationModel,
-          as: "purchaseLocation",
-          foreignKey: "purchase_location_id",
+          as: 'purchaseLocation',
+          foreignKey: 'purchase_location_id',
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.poSupplierInvoiceMapperModel,
-          as: "invoiceMapper",
+          as: 'invoiceMapper',
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+
           include: [
             {
               model: model.poSupplierInvoiceModel,
-              as: "supplierInvoice",
+              as: 'supplierInvoice',
               attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
             {
               model: model.containerModel,
-              as: 'invoiceContainers'
+              as: 'invoiceContainers',
+            },
+            {
+              model: model.accountTransactionModel,
+              as: 'poSupplierInvoice'
             }
-          ]
+          ],
         },
         {
           model: model.purchaseProductModel,
-          as: "purchaseProduct",
+          as: 'purchaseProduct',
           attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
           include: [
             {
               model: model.productModel,
-              as: "products",
+              as: 'products',
               attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
             {
               model: model.prePurchaseModel,
-              as: "prePurchase",
+              as: 'prePurchase',
               attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             },
-          ]
+          ],
         },
       ],
       where: {
-        purchaseOrderId: purchaseOrderId
+        purchaseOrderId: purchaseOrderId,
       },
     });
-    return result;
+
+    if (!result) {
+      throw new Error(`Purchase order with ID ${purchaseOrderId} not found.`);
+    }
+
+    // Step 3: Enrich Result with Landed Costs
+    const enrichedProducts = result.purchaseProduct.map((productEntry) => {
+      const productId = productEntry.products?.productId;
+      return {
+        ...productEntry.toJSON(),
+        averageLandedCost: averageCostMap[productId] || null,
+        lastLandedCost: lastCostMap[productId] || null,
+      };
+    });
+
+    // Replace `purchaseProduct` with enriched version
+    const enrichedResult = {
+      ...result.toJSON(),
+      purchaseProduct: enrichedProducts,
+    };
+
+    return enrichedResult;
   } catch (error) {
-    console.error(`Error in getting purchase order Id :-${purchaseOrderId}:`, error);
+    console.error(`Error in getting purchase order ID: ${purchaseOrderId}:`, error);
     throw error;
   }
 }
 
+
 //get all purchase Order
 
 export async function getAllPurchaseOrder(data) {
-
-  // const fromDate = data.queriedData.fromDate;
-  // const toDate = data.queriedData.toDate;
-
   let result;
   try {
     if (data.search) {
@@ -246,6 +301,14 @@ export async function getAllPurchaseOrder(data) {
           }
         },
         include: [
+          {
+            model: model.poSupplierInvoiceMapperModel,
+            where: {
+              purchaseOrderId: {
+                [Op.like]: `%${data.search}%`
+              }
+            }
+          },
           {
             model: model.supplierModel,
             as: 'suppliers',
@@ -269,20 +332,47 @@ export async function getAllPurchaseOrder(data) {
       });
     } else {
       result = await model.purchaseModel.findAll({
-        attributes: ['po', 'purchaseOrderId', 'poDate', 'requiredShipDate', 'supplierSo', 'container', 'paymentTerm', 'status', 'purchaseLocationId'],
-        // where: {
-        //   createdAt: {
-        //     [Op.between]: [new Date(fromDate), new Date(toDate)],
-        //   },
-        // },
+        attributes: [
+          'po',
+          'purchaseOrderId',
+          'poDate',
+          'requiredShipDate',
+          'supplierSo',
+          'container',
+          'paymentTerm',
+          'status',
+          'purchaseLocationId',
+          [
+            Sequelize.literal(
+              `(SELECT SUM(transaction_amount) 
+                      FROM account_transaction 
+                      WHERE account_transaction.purchase_order_id = purchase_orders.purchase_order_id)`
+            ),
+            'totalTransactionAmount'
+          ]
+        ],
         include: [
+          {
+            model: model.poSupplierInvoiceMapperModel,
+            as: 'invoiceMapper',
+            include: [
+              {
+                model: model.containerModel,
+                as: 'invoiceContainers'
+              },
+              {
+                model: model.accountTransactionModel,
+                as: 'poSupplierInvoice'
+              }
+            ]
+          },
           {
             model: model.clientUserModel,
             as: 'clientDetails',
             attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
             where: {
               clientId: data.clientId
-            },
+            }
           },
           {
             model: model.supplierModel,
@@ -293,17 +383,19 @@ export async function getAllPurchaseOrder(data) {
             model: model.locationModel,
             as: 'location',
             attributes: ['location', 'purchaseLocation']
-          },
+          }
         ],
         order: [['createdAt', 'DESC']]
       });
+
     }
     return result;
   } catch (error) {
-    console.error(`Error in getting purchase Order ${searchText}:`, error);
+    console.error(`Error in getting purchase Order for search term '${data.search || "N/A"}':`, error);
     throw error;
   }
 }
+
 
 // get latest transcation number
 
@@ -636,11 +728,11 @@ export async function deleteCartItem(data) {
 }
 
 
-export async function getCartItems(data) {
+export async function getCartItems(data, createdBy) {
   try {
     const result = await model.AddToCart.findAndCountAll({
       where: {
-        createdBy: data.createdBy
+        createdBy: createdBy
       },
       include: [
         {

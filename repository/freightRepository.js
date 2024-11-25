@@ -44,6 +44,9 @@ export async function getFreightData(data) {
                 {
                     model: model.freightDetailsModel,
                     as: 'freightBillsDetails'
+                },
+                {
+                    model:model.vendorModel
                 }
             ]
         });
@@ -70,14 +73,14 @@ export async function getFreightAccounts() {
             //         model: model.accountsModel,
             //         attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
             //         as: 'accountSubtype',
-                    where: {
-                        accountName:'Freight Payables '
-                    }
+            where: {
+                accountName: 'Freight Payables '
+            }
             //     }
             // ]
         })
         console.log(result);
-        
+
         return result;
     } catch (error) {
         console.error("Error fetching transaction data:", error);

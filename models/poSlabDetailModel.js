@@ -90,6 +90,16 @@ export default sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
         },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'location_id'
+        },
+        productId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'product_id'
+        },
         status: {
             type: DataTypes.ENUM(...poSlabDetailStatus),
             allowNull: false,

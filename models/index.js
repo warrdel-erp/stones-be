@@ -275,8 +275,19 @@ clientModel.belongsTo(clientUserModel, { foreignKey: 'client_id' })
 clientUserModel.hasMany(clientModel, { foreignKey: 'client_id', as: 'clientUsers' });
 
 containerModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id' })
-poSupplierInvoiceMapperModel.hasMany(containerModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'invoiceContainers' })
+poSupplierInvoiceMapperModel.hasMany(containerModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'invoiceContainers' });
 
+freightBillsModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_id' });
+poSupplierInvoiceMapperModel.hasMany(freightBillsModel, { foreignKey: 'po_supplier_invoice_id' });
+
+vendorModel.belongsTo(freightBillsModel, { foreignKey: 'vendor_id' })
+freightBillsModel.hasOne(vendorModel, { foreignKey: 'vendor_id' });
+
+locationModel.belongsTo(poSlabDetails, { foreignKey: 'location_id' });
+poSlabDetails.hasOne(locationModel, { foreignKey: 'location_id', as: 'slabLocation' });
+
+poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
+locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });
 
 export {
 	productModel,

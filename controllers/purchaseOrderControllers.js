@@ -48,9 +48,9 @@ export const updateOrder = async (req, res) => {
     const poNumber = req.params;
     const info = req.body;
     try {
-            const result = await purchaseOrderService.updateOrder(poNumber, info);
-            res.status(200).send(result);
-        
+        const result = await purchaseOrderService.updateOrder(poNumber, info);
+        res.status(200).send(result);
+
     } catch (error) {
         console.error(`Error in updating po Number${poNumber}:`, error);
         res.status(500).send("Internal Server Error");
@@ -372,7 +372,7 @@ export const getSupplierInvoices = async (req, res) => {
     try {
         const data = req.query;
         const clientId = req.clientId;
-        const result = await purchaseOrderService.getSupplierInvoices({...data,clientId});
+        const result = await purchaseOrderService.getSupplierInvoices({ ...data, clientId });
         res.status(200).send({
             success: true,
             message: "Supplier invoices retrieved successfully.",
@@ -423,7 +423,8 @@ export const deleteCartItem = async (req, res) => {
 export const getCartItems = async (req, res) => {
     try {
         const data = req.query;
-        const result = await purchaseOrderService.getCartItems(data);
+        const createdBy = req.user.dataValues.id;
+        const result = await purchaseOrderService.getCartItems(data, createdBy);
         res.status(200).send({
             success: true,
             message: "get cart items retrieved successfully.",

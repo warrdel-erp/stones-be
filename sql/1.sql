@@ -868,7 +868,7 @@ CREATE TABLE IF NOT EXISTS freight_bills (
     vendor_id INT,
     location VARCHAR(255),
     invoice VARCHAR(255),
-    invoice_date DATE,
+    invoice_date DATE,  
     payment_terms ENUM('30', '45', '60', '90', '120'),
     due_date DATE,
     contacts_location VARCHAR(255),
@@ -1385,3 +1385,18 @@ FOREIGN KEY (product_id) REFERENCES products(product_id);
 
 SET GLOBAL sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
 
+ALTER TABLE po_slab_details
+ADD COLUMN location_id INT,
+ADD COLUMN product_id INT;
+
+ALTER TABLE po_slab_details
+ADD CONSTRAINT fk_location_id
+FOREIGN KEY (location_id)
+REFERENCES locations(location_id);
+
+ALTER TABLE purchase_orders
+ADD COLUMN purchase_order_status INT NOT NULL DEFAULT 1;
+
+ALTER TABLE purchase_orders
+ADD CONSTRAINT chk_purchase_order_status
+CHECK (purchase_order_status BETWEEN 1 AND 100);
