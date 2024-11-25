@@ -762,7 +762,7 @@ export async function getSuppliersPOJournal(info) {
           attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'supplierId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
           as: 'supplierTransactions',
           where: {
-            supplierId: info.supplierId
+            poSupplierInvoiceMapperId: info.poSupplierInvoiceMapperId
           },
           required: true,
           include: [

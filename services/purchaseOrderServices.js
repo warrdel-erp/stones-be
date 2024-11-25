@@ -10,6 +10,7 @@ import QRCode from 'qrcode';
 import bwipjs from 'bwip-js'
 import fs from 'fs';
 import poSlabDetailModel from '../models/poSlabDetailModel.js';
+import { createSalesOrderWithProducts } from '../helpers/opportunityToSales.js';
 
 // const fs = require('fs');
 export async function createOrder(info) {
@@ -721,8 +722,9 @@ export async function convertCartItemToHold(info) {
 }
 
 
-export async function convertCartItemToSO(info) {
-    return await purchaseOrderRepository.convertCartItemToSO(info)
+export async function convertCartItemToSO(data, createdBy, clientId) {
+    const soToCreateOf = 'ADDED_CART_ITEM'
+    return await createSalesOrderWithProducts(data, createdBy, clientId, soToCreateOf)
 }
 
 export async function getSuppliersPOJournal(info) {

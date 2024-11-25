@@ -464,7 +464,10 @@ export const convertCartItemToSO = async (req, res) => {
         const data = req.body;
         // const createdBy = req.user.dataValues.id;
         // const result = await purchaseOrderService.convertCartItemsToSO({...data,createdBy});
-        const result = await purchaseOrderService.convertCartItemToSO(data);
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const clientId = req.clientId;
+        const result = await purchaseOrderService.convertCartItemToSO(data, createdBy, clientId);
         if (result) {
             res.status(200).send({ success: true, data: result });
         } else {
