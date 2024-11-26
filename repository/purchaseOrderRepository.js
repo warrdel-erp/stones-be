@@ -693,8 +693,6 @@ export async function getSupplierInvoices(data) {
 }
 
 
-
-
 export async function addToCart(data) {
   try {
     const result = await model.AddToCart.create(data);
@@ -709,7 +707,6 @@ export async function addToCart(data) {
 export async function deleteCartItem(data) {
   try {
     const cartIds = Array.isArray(data.cartId) ? data.cartId : [data.cartId];
-
     const result = await model.AddToCart.destroy({
       where: {
         cartId: cartIds,
@@ -827,6 +824,22 @@ export async function createProductLandedCost(data) {
     return result;
   } catch (error) {
     console.error("Error in SIPL Status update:", error);
+    throw error;
+  }
+}
+
+
+export async function findCartById(cartId) {
+  try {
+    const result = await model.AddToCart.findOne({
+      attributes: ['poSlabDetailId'],
+      where: {
+        cartId: cartId,
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error(`Error in ${cartId}:`, error);
     throw error;
   }
 }

@@ -682,11 +682,17 @@ export async function addToCart(info) {
 
 
 export async function deleteCartItem(info) {
+    const cartData = await purchaseOrderRepository.findCartById(info.cartId)
+    const poSlabDetailId = cartData?.dataValues?.poSlabDetailId
+    const slabStatusUpdate = await purchaseOrderRepository.updateSlabDetails({
+        poSlabDetailId: poSlabDetailId,
+        slabAddedToCart: 0,
+    });
     return await purchaseOrderRepository.deleteCartItem(info)
 }
 
-export async function getCartItems(info,createdBy) {
-    return await purchaseOrderRepository.getCartItems(info,createdBy)
+export async function getCartItems(info, createdBy) {
+    return await purchaseOrderRepository.getCartItems(info, createdBy)
 }
 
 

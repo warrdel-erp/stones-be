@@ -3,7 +3,6 @@ const router = Router();
 import { userAuth } from '../middleware/authUser.js';
 import { swapSlab, createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder, updateSlabToPicked } from "../controllers/salesOrderController.js";
 
-
 router.patch('/swapSlab', swapSlab);
 
 router.patch('/slabPicked', updateSlabToPicked);
