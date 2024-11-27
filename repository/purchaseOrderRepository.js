@@ -830,3 +830,18 @@ export async function createProductLandedCost(data) {
     throw error;
   }
 }
+
+export async function findCartById(cartId) {
+  try {
+    const result = await model.AddToCart.findOne({
+      attributes: ['poSlabDetailId'],
+      where: {
+        cartId: cartId,
+      },
+    });
+    return result;
+  } catch (error) {
+    console.error(`Error in ${ cartId }:`, error);
+    throw error;
+  }
+}
