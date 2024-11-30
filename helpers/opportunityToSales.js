@@ -3,8 +3,8 @@ import { getSoNumber } from "../services/salesOrderServices.js";
 import sequelize from '../database/sequelizeConfig.js';
 import { updateSlabDetails } from "../repository/purchaseOrderRepository.js";
 
-export async function createSalesOrderWithProducts(opportunityDetails, selectedInventory, clientId, selectedSlabsData) {
-    console.log(selectedSlabsData, 'seensj');
+export async function createSalesOrderWithProducts(opportunityDetails, selectedInventory, clientId, selectedSlabsData,soToCreateOf) {
+    console.log(soToCreateOf, 'seensj');
 
     const latestSoDetails = await getSoNumber(clientId);
     const salesOrderNumber = latestSoDetails.newSo;

@@ -131,7 +131,7 @@ export const addSlabDetails = async (req, res) => {
         const user = req.user;
         const createdBy = user.dataValues.id;
         if (!(po)) {
-            res.status(400).send("Po is required for add Slab Details");
+            return res.status(400).send("Po is required for add Slab Details");
         }
         const result = await purchaseOrderService.addSlabDetails({ ...data, createdBy });
         res.status(200).send(result);
@@ -464,7 +464,10 @@ export const convertCartItemToSO = async (req, res) => {
         const data = req.body;
         // const createdBy = req.user.dataValues.id;
         // const result = await purchaseOrderService.convertCartItemsToSO({...data,createdBy});
-        const result = await purchaseOrderService.convertCartItemToSO(data);
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const clientId = req.clientId;
+        const result = await purchaseOrderService.convertCartItemToSO(data, createdBy, clientId);
         if (result) {
             res.status(200).send({ success: true, data: result });
         } else {

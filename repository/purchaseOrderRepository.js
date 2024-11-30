@@ -759,7 +759,7 @@ export async function getSuppliersPOJournal(info) {
           attributes: ['accountTransactionId', 'poSupplierInvoiceMapperId', 'supplierId', 'purchaseOrderId', 'soLoadingOrderId', 'so', 'transactionOf', 'transactionAmount', 'transactionAmountType', 'transactionAmountDate', 'transactionAmountType', 'accountsId', 'entryType', 'paymentMethod', 'createdAt'],
           as: 'supplierTransactions',
           where: {
-            supplierId: info.supplierId
+            poSupplierInvoiceMapperId: info.poSupplierInvoiceMapperId
           },
           required: true,
           include: [
@@ -828,7 +828,6 @@ export async function createProductLandedCost(data) {
   }
 }
 
-
 export async function findCartById(cartId) {
   try {
     const result = await model.AddToCart.findOne({
@@ -839,7 +838,7 @@ export async function findCartById(cartId) {
     });
     return result;
   } catch (error) {
-    console.error(`Error in ${cartId}:`, error);
+    console.error(`Error in ${ cartId }:`, error);
     throw error;
   }
 }

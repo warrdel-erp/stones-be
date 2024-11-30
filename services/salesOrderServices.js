@@ -49,18 +49,42 @@ export async function addProduct(info) {
             }
 
             const data = { subTotal, total, tax };
+            console.log('data-----------------', data);
+
             await salesOrderRepository.updateOrder(salesOrderId, data, { transaction });
         }
 
 
         // Loop through inventories and slabs to add products
         for (const inventory of info.selectedInventory) {
+            console.log('inventory--------', inventory);
+
+            // let { unitPrice } = inventory;
+            // let tax = 0;
+
+            // if (inventory.isTax) {
+            //     const salesTax = await salesOrderRepository.getsalestax(salesOrderId, { transaction });
+            //     const taxPercentage = parseFloat(salesTax) / 100;
+            //     tax = unitPrice * taxPercentage;
+            // }
+
+            let tax = 0;
+
+            if (inventory.isTax) {
+                const salesTax = await salesOrderRepository.getsalestax(salesOrderId, { transaction });
+                tax = parseFloat(salesTax);
+
+            }
+
+
             for (const slab of inventory.selectedSlabs) {
+                console.log('slab--------', slab);
                 const productData = {
                     salesOrdersId: info.salesOrdersId,
                     productInventoryId: inventory.productInventoryId,
                     poSlabDetailId: slab.poSlabDetailId,
                     unitPrice: inventory.unitPrice,
+                    tax,
                 };
                 const result = await salesOrderRepository.addProduct(productData, { transaction });
                 results.push(result);
@@ -247,12 +271,11 @@ export async function getAllSo(data) {
 
 
 export async function updateStatus(transactionData) {
-    console.log('Received transaction data:', transactionData.createdBy);
-
     const soLoadingOrderId = transactionData.soLoadingOrderId;
     const transaction = await sequelize.transaction();
     let shouldUpdateAccounts = false;
     let packingListAccountUpdateRequired = false;
+
 
     try {
         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
@@ -260,6 +283,11 @@ export async function updateStatus(transactionData) {
             console.log(`No sales order inventory found with id ${soLoadingOrderId}`);
             await transaction.rollback();
             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
+        }
+        //slabPick Status Change
+        const salesOrdersInventoryIds = transactionData.soLoadingOrder.map(item => item.salesOrdersInventoryId);
+        for (const id of salesOrdersInventoryIds) {
+            await updateSlabToPicked({ salesOrdersInventoryId: id })
         }
 
         const statusMapping = {
@@ -515,9 +543,8 @@ export async function closeSalesOrder(data) {
     };
 }
 
-
-
 export async function updateSlabToPicked(info) {
+    console.log('info-----------', info);
     return await salesOrderRepository.updateSlabToPicked(info)
 }
 

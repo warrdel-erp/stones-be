@@ -390,6 +390,8 @@ export async function closeSalesOrder(data) {
 
 
 export async function updateSlabToPicked(data) {
+  console.log('data-----------------', data);
+  
   try {
     const result = await model.salesOrderInventoryModel.update(
       { slabPicked: true },
@@ -399,6 +401,8 @@ export async function updateSlabToPicked(data) {
         }
       }
     );
+    console.log('result-----------===============', result);
+    
     return result;
   } catch (error) {
     console.error("Error updating slabPicked status:", error);

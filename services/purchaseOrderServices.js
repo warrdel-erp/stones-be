@@ -10,6 +10,7 @@ import QRCode from 'qrcode';
 import bwipjs from 'bwip-js'
 import fs from 'fs';
 import poSlabDetailModel from '../models/poSlabDetailModel.js';
+import { createSalesOrderWithProducts } from '../helpers/opportunityToSales.js';
 
 // const fs = require('fs');
 export async function createOrder(info) {
@@ -44,7 +45,7 @@ export async function addPurchaseOrderProduct(dataArray) {
 
             result = await purchaseOrderRepository.createPurchaseProductOrder(purchaseOrderProduct, transaction);
             const purchaseOrderProductId = result.get('purchaseOrderProductId');
-            const info = { ...data, purchaseOrderProductId: purchaseOrderProductId };
+            const info = { ...data, purchaseOrderProductId: purchaseOrderProductId, poQty: data.quantity };
             result = await purchaseOrderRepository.createPrePurchaseOrder(info, transaction);
             results.push(result);
         }
@@ -303,7 +304,7 @@ export async function addSlabDetails(info) {
             const qrCodeData = JSON.stringify(slabData);
             const qrCode = await QRCode.toDataURL(qrCodeData);
             slab.dataValues.qrCode = qrCode;
-            await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
+            // await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
 
             const barcodeData = slabData;;
             const barcodeBuffer = await bwipjs.toBuffer({
@@ -316,7 +317,7 @@ export async function addSlabDetails(info) {
                 background: 'white',
                 color: 'black',
             });
-            fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
+            // fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
         }
         return slabDetails;
     } catch (error) {
@@ -680,7 +681,6 @@ export async function addToCart(info) {
     }
 }
 
-
 export async function deleteCartItem(info) {
     const cartData = await purchaseOrderRepository.findCartById(info.cartId)
     const poSlabDetailId = cartData?.dataValues?.poSlabDetailId
@@ -727,8 +727,9 @@ export async function convertCartItemToHold(info) {
 }
 
 
-export async function convertCartItemToSO(info) {
-    return await purchaseOrderRepository.convertCartItemToSO(info)
+export async function convertCartItemToSO(data, createdBy, clientId) {
+    const soToCreateOf = 'ADDED_CART_ITEM'
+    return await createSalesOrderWithProducts(data, createdBy, clientId, soToCreateOf)
 }
 
 export async function getSuppliersPOJournal(info) {

@@ -79,6 +79,10 @@ export default sequelize.define(
             defaultValue: false,
             field: 'slab_picked'
         },
+        tax: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+        },
         status: {
             type: DataTypes.ENUM(...status),
             allowNull: false,

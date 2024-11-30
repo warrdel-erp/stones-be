@@ -1400,3 +1400,9 @@ ADD COLUMN purchase_order_status INT NOT NULL DEFAULT 1;
 ALTER TABLE purchase_orders
 ADD CONSTRAINT chk_purchase_order_status
 CHECK (purchase_order_status BETWEEN 1 AND 100);
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN tax FLOAT;
+
+ALTER TABLE pre_purchase_orders
+ADD COLUMN po_qty int;
