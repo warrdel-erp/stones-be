@@ -57,7 +57,6 @@ export async function addProduct(info) {
 
         // Loop through inventories and slabs to add products
         for (const inventory of info.selectedInventory) {
-            console.log('inventory--------', inventory);
 
             // let { unitPrice } = inventory;
             // let tax = 0;
@@ -73,9 +72,7 @@ export async function addProduct(info) {
             if (inventory.isTax) {
                 const salesTax = await salesOrderRepository.getsalestax(salesOrderId, { transaction });
                 tax = parseFloat(salesTax);
-
             }
-
 
             for (const slab of inventory.selectedSlabs) {
                 console.log('slab--------', slab);
