@@ -284,9 +284,6 @@ poSupplierInvoiceMapperModel.hasMany(freightBillsModel, { foreignKey: 'po_suppli
 vendorModel.belongsTo(freightBillsModel, { foreignKey: 'vendor_id' })
 freightBillsModel.hasOne(vendorModel, { foreignKey: 'vendor_id' });
 
-locationModel.belongsTo(poSlabDetails, { foreignKey: 'location_id' });
-poSlabDetails.hasOne(locationModel, { foreignKey: 'location_id', as: 'slabLocation' });
-
 poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
 locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });
 

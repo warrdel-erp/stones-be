@@ -2,14 +2,6 @@ import * as clientService from '../services/clientServices.js';
 
 export const register = async (req, res) => {
   try {
-    const {
-      clientName,
-      clientPassword,
-      clientEmail
-    } = req.body;
-    if (!clientName || !clientPassword || !clientEmail) {
-      return res.status(400).send("Missing required fields");
-    }
 
     const result = await clientService.register(req.body);
     res.status(200).send(result);

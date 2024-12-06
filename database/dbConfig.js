@@ -1,8 +1,8 @@
 export const dbConfig = {
     HOST: process.env.HOST || 'localhost',
     USER: process.env.MYSQL_USERNAME || 'root',
-    PASSWORD: process.env.MYSQL_PASSWORD|| 'root',
-    DB: process.env.MYSQL_DATABASE_NAME || 'stone_design_second',
+    PASSWORD: process.env.MYSQL_PASSWORD|| 'sanju',
+    DB: process.env.MYSQL_DATABASE_NAME || 'new_schema_stone',
     dialect: 'mysql',
 
     pool: {

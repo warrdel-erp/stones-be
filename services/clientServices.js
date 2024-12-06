@@ -22,7 +22,8 @@ export async function register(info) {
             clientPriceLevel,
             paymentTerms,
             clientLicenseNumber,
-            userCount
+            userCount,
+            clientId
         } = info;
 
         const hashedPassword = await bcrypt.hash(clientPassword, salt);

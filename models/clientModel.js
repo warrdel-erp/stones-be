@@ -7,15 +7,9 @@ export default sequelize.define(
         clientId: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
+            primaryKey: true, // Make it the primary key
             field: 'client_id',
-            unique: true 
-        },
-        clientUuid: {
-            type: DataTypes.CHAR(36),
-            primaryKey: true,
-            allowNull: false,
-            defaultValue: DataTypes.UUIDV4,
-            field: 'client_uuid'
+            allowNull: false
         },
         clientName: {
             type: DataTypes.STRING,

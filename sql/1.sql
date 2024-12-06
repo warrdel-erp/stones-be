@@ -684,7 +684,7 @@ DROP COLUMN supplier_id;
 --client table creation
 
 CREATE TABLE clients (
-    client_id INT AUTO_INCREMENT,
+    client_id INT AUTO_INCREMENT PRIMARY KEY,
     client_uuid CHAR(36) NOT NULL DEFAULT (UUID()),
     client_name VARCHAR(255),
     client_password VARCHAR(255),
@@ -694,9 +694,9 @@ CREATE TABLE clients (
     deletedAt TIMESTAMP NULL,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     createdBy CHAR(36),
-    PRIMARY KEY (client_uuid), 
-    UNIQUE (client_id)
+    PRIMARY KEY (client_id), 
 );
+
 
 
 --user- client relation table
@@ -707,8 +707,8 @@ CREATE TABLE client_users (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deletedAt TIMESTAMP NULL,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(client_id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (client_id) REFERENCES clients(client_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 
@@ -1405,12 +1405,6 @@ ALTER TABLE purchase_orders
 ADD CONSTRAINT chk_purchase_order_status
 CHECK (purchase_order_status BETWEEN 1 AND 100);
 
-ALTER TABLE sales_orders_inventory
-ADD COLUMN tax FLOAT;
-
-ALTER TABLE pre_purchase_orders
-ADD COLUMN po_qty int;
-
 ALTER TABLE vendors ADD INDEX (vendor_id);
 ALTER TABLE purchase_orders
 MODIFY COLUMN freight_forwarder INT;
@@ -1482,6 +1476,12 @@ ALTER TABLE client_locations
   ADD CONSTRAINT client_locations_ibfk_1 FOREIGN KEY (client_id)
   REFERENCES clients(client_id)
   ON DELETE CASCADE;
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN tax FLOAT;
+
+ALTER TABLE pre_purchase_orders
+ADD COLUMN po_qty int;
 
 CREATE TABLE product_other_charges (
     product_other_charges_id INT AUTO_INCREMENT PRIMARY KEY,
