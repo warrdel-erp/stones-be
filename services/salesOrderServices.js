@@ -264,6 +264,7 @@ export async function updateStatus(transactionData) {
     let shouldUpdateAccounts = false;
     let packingListAccountUpdateRequired = false;
 
+    const creatingList = transactionData.soLoadingOrder[0].salesStatus
 
     try {
         const salesOrderInventory = await salesOrderRepository.findSalesOrdersInventory(soLoadingOrderId, { transaction });
@@ -272,10 +273,13 @@ export async function updateStatus(transactionData) {
             await transaction.rollback();
             return { success: false, message: `No sales order inventory found with id ${soLoadingOrderId}` };
         }
+
         //slabPick Status Change
-        const salesOrdersInventoryIds = transactionData.soLoadingOrder.map(item => item.salesOrdersInventoryId);
-        for (const id of salesOrdersInventoryIds) {
-            await updateSlabToPicked({ salesOrdersInventoryId: id })
+        if (creatingList !== "LOADING ORDER") {
+            const salesOrdersInventoryIds = transactionData.soLoadingOrder.map(item => item.salesOrdersInventoryId);
+            for (const id of salesOrdersInventoryIds) {
+                await updateSlabToPicked({ salesOrdersInventoryId: id })
+            }
         }
 
         const statusMapping = {

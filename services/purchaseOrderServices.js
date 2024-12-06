@@ -19,10 +19,7 @@ export async function createOrder(info) {
 
 export async function getPoNumber(clientId) {
     const result = await purchaseOrderRepository.latestPoNumber(clientId);
-    console.log(result, 'ssss');
-
     const newPo = result + 1;
-    console.log(newPo, 'newpo');
     return newPo;
 }
 
@@ -31,11 +28,12 @@ export async function updateOrder(poNumber, info) {
 }
 
 export async function addPurchaseOrderProduct(dataArray) {
+
     const transaction = await sequelize.transaction();
     try {
         const results = [];
 
-        for (const data of dataArray) {
+        for (const data of dataArray.Products) {
             let result;
             const purchaseOrderProduct = {
                 purchaseOrderId: data.purchaseOrderId,
@@ -43,10 +41,26 @@ export async function addPurchaseOrderProduct(dataArray) {
                 createdBy: data.createdBy
             };
 
+            // Create the purchase order product
             result = await purchaseOrderRepository.createPurchaseProductOrder(purchaseOrderProduct, transaction);
             const purchaseOrderProductId = result.get('purchaseOrderProductId');
             const info = { ...data, purchaseOrderProductId: purchaseOrderProductId, poQty: data.quantity };
+
+            // Create the pre-purchase order
             result = await purchaseOrderRepository.createPrePurchaseOrder(info, transaction);
+
+            // Check if there are other charges and add them if they exist
+            if (dataArray.othercharge && dataArray.othercharge.length > 0) {
+
+                const otherCharges = dataArray.othercharge.map(charge => ({
+                    ...charge,
+                    createdBy: data.createdBy
+                }));
+
+                // Add the other charges
+                result = await purchaseOrderRepository.addOtherCharges(otherCharges, transaction);
+            }
+
             results.push(result);
         }
 
@@ -60,6 +74,7 @@ export async function addPurchaseOrderProduct(dataArray) {
         return { success: false, error: error.message };
     }
 }
+
 
 export async function getAllPo(data) {
     return await purchaseOrderRepository.getAllPurchaseOrder(data)
@@ -107,10 +122,6 @@ export async function singlePoDetails(purchaseOrderId) {
         throw new Error(`Failed to fetch purchase order ${purchaseOrderId} details: ${error.message}`);
     }
 }
-
-
-
-
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
@@ -164,7 +175,7 @@ export async function addSuplierInvoice(data) {
         for (const dataArray of data.productDeatils) {
             const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId };
             const prePurchaseOrderId = supplierData.prePurchaseOrderId;
-            console.log(prePurchaseOrderId, 'prepurchaseorderis');
+
 
             //for update the prepurchaseorder product details
             const prePurchaseProductDetails = await getPrePurchaseProductDetails(prePurchaseOrderId);
@@ -256,7 +267,6 @@ export async function addSlabDetails(info) {
                 });
             }
 
-            console.log(dynamicPo, 'dynamicPO');
             const barcode = `WDP${po}${siplNumberAfterHyphen}${currentSerial}${dynamicBlock}${dynamicLot}${dynamicSlab}`;
             // Create a new slab detail
             const slabDetail = await purchaseOrderRepository.addSlabDetails({
@@ -278,10 +288,7 @@ export async function addSlabDetails(info) {
             });
         }
 
-
-        console.log(slabDetails, 'slabdetails');
         // const productDeatils = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMapperId);
-        // console.log(productDeatils,'sjsjsjs');
 
         for (const slab of slabDetails) {
             const slabData = `
@@ -328,24 +335,19 @@ export async function addSlabDetails(info) {
 // get Slab Details
 
 export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMappperId) {
+    
     try {
         const slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId);
+
         const freightData = await getFreightData(({ poSupplierInvoiceMapperId: poSupplierInvoiceMappperId }))
-        console.log(slabDetails, 'jsjsjsjjsjs');
         const allDetailsPurchaseOrderId = await purchaseOrderRepository.getSinglePurchaseOrder(purchaseOrderId);
         const poSupplierInvoiceId = slabDetails.supplierInvoice.poSupplierInvoiceId;
 
-
         const detailsToFindIds = { poSupplierInvoiceMapperId: Number(poSupplierInvoiceMappperId), poSupplierInvoiceId: Number(poSupplierInvoiceId) };
-        console.log(detailsToFindIds, 'ksksksksk');
         const freightDetails = await getFreightData(detailsToFindIds);
-        console.log(freightDetails, 'freidhdhdh');
         const freightTotalSum = freightDetails.reduce((acc, bill) => {
             return acc + (bill.dataValues.total || 0);
-        }, 0);
-
-        console.log(`Total Sum: $${freightTotalSum}`);
-
+        }, 0);        
 
         const po = allDetailsPurchaseOrderId.po;
         const supplierSo = allDetailsPurchaseOrderId.supplierSo;
@@ -379,7 +381,6 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
 
         const allSlabDetails = { freightData, shippingZip, shippingCountry, shippingState, shippingCity, shippingSuite, shippingAddress, remitCountry, remitZip, remitState, remitSuite, remitCity, printName, remitAddress, printName, parentLocation, slabDetails, po, supplierSo, freightForwarder, etaDate, container, etdPort, supplierName, shipLocation, purchaseLocation, invoice, invoiceDate, dueDate, shipDate, paymentTerm, supplierId, freightTotalSum };
 
-
         return allSlabDetails;
     } catch (error) {
         throw new Error(`Failed to fetch slab Details ${purchaseOrderId} && ${poSupplierInvoiceMappperId}: ${error.message}`);
@@ -388,14 +389,11 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
 
 // add product inventory 
 export async function addProductInventory(dataArray) {
-    console.log(dataArray.landedCostData, 'dataArray');
-
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Inventory in Transit', debitAccountName: 'Finished Goods' }
     try {
         const transactionAccontId = await getAccountIdByAccountName(accNames);
-        console.log(transactionAccontId, 'transactionAccontId');
         const accountDetails = [
             { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
             { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' }
@@ -412,7 +410,6 @@ export async function addProductInventory(dataArray) {
             await purchaseAccountTransaction(transactionDataWithAccount, transaction);
         }
         const inventoryDetails = await productInventory.getInventoryDetailsBySupplierInvoiceMapperId(poMapperId)
-        console.log(inventoryDetails, 'inventorydetails');
         const values = inventoryDetails.supplierInvoice.map(item => ({
             productId: item.supplierPurchaseProduct.product_id,
             slab: item.slab,
@@ -637,7 +634,6 @@ export async function getInventoryListBasedOnSipl(clientId) {
 
 
 export async function updateSlabDetails(data) {
-    console.log(data, 'jsjsj');
     const results = await Promise.all(
         data.slabs.map(async (slab) => {
             return await purchaseOrderRepository.updateSlabDetails(slab);
@@ -779,4 +775,8 @@ export async function slabLocationTransfer(info) {
         console.error("Error in slabLocationTransfer:", error);
         throw error;
     }
+}
+
+export async function getSlabInfo(poSlabDetailId) {
+    return await purchaseOrderRepository.getSlabInfo(poSlabDetailId)
 }

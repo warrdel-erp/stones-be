@@ -14,11 +14,11 @@ export async function addProduct(data) {
 export async function getAllProduct(data) {
     let result;
     try {
-        const attributes = ['productName', 'type', 'kind', 'productId', 'alternativeName', 'category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku', 'createdBy', 'singleSlab'];
+        // const attributes = ['productName', 'type', 'kind', 'productId', 'alternativeName', 'category', 'subCategory', 'origin', 'groupsAll', 'priceRange', 'supplierSku', 'createdBy', 'singleSlab'];
 
         if (data.search !== 'all') {
             result = await model.productModel.findAll({
-                attributes: attributes,
+                // attributes: attributes,
                 where: {
                     product_name: {
                         [Op.like]: `%${data.search}%`
@@ -27,7 +27,7 @@ export async function getAllProduct(data) {
             });
         } else {
             result = await model.productModel.findAll({
-                attributes: attributes,
+                // attributes: attributes,
                 include: [
                     {
                         model: model.clientUserModel,

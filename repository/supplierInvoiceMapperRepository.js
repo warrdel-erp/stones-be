@@ -17,6 +17,11 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
                             as: 'slabDetails',
                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
                         },
+                        {
+                            model: model.productModel,
+                            as: 'supplierInvoices',
+                            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+                        },
                     ]
                 }
             ],
@@ -40,7 +45,7 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
                 as: 'poSupplierInvoice',
                 attributes: [
                     'po_supplier_invoice_mapper_id',
-                    [Sequelize.fn('SUM', Sequelize.col('transaction_amount')), 'totalTransactionAmount'],
+                    // [Sequelize.fn('SUM', Sequelize.col('transaction_amount')), 'totalTransactionAmount'],
                 ],
                 where: {
                     poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,

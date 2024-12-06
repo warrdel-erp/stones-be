@@ -79,9 +79,11 @@ export async function findPoNumber(poNumber, clientId) {
   return result;
 }
 
-export async function createPurchaseProductOrder(data) {
+export async function createPurchaseProductOrder(data,transaction) {
   try {
-    const result = await model.purchaseProductModel.create(data);
+    const result = await model.purchaseProductModel.create(data,{
+      transaction: transaction
+    });
     return result;
   } catch (error) {
     console.error("Error in create purchase product order:", error);
@@ -89,9 +91,33 @@ export async function createPurchaseProductOrder(data) {
   }
 }
 
-export async function createPrePurchaseOrder(data) {
+export async function addOtherCharges(data,transaction) {
   try {
-    const result = await model.prePurchaseModel.create(data);
+    if (Array.isArray(data)) {
+      //  multiple records 
+      const results = await model.productOtherCharges.bulkCreate(data,{
+        transaction: transaction
+      });
+      return results;
+      //single
+    } else {
+      const result = await model.productOtherCharges.create(data,{transaction});
+      return result;
+    }
+  } catch (error) {
+    console.error("Error in adding other charges:", error);
+    throw new Error("Failed to add other charges. Please try again later.");
+  }
+}
+
+
+export async function createPrePurchaseOrder(data,transaction) {
+  try {
+    const result = await model.prePurchaseModel.create(data,
+      {
+      transaction: transaction
+      }
+  );
     return result;
   } catch (error) {
     console.error("Error in create pre purchase order:", error);
@@ -194,6 +220,11 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
     const result = await model.purchaseModel.findOne({
       attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       include: [
+        {
+          model: model.productOtherCharges,
+          as: 'productothercharges',
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+        },
         {
           model: model.supplierModel,
           as: 'suppliers',
@@ -838,7 +869,61 @@ export async function findCartById(cartId) {
     });
     return result;
   } catch (error) {
-    console.error(`Error in ${ cartId }:`, error);
+    console.error(`Error in ${cartId}:`, error);
+    throw error;
+  }
+}
+
+export async function getSlabInfo(poSlabDetailId) {
+  try {
+    const result = await model.poSlabDetails.findOne({
+      where: { poSlabDetailId },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy", "po_supplier_invoice_id", "po_supplier_invoice_mapper_id", "po_slab_detail_id", "location_id"] },
+      include: [
+        {
+          model: model.poSupplierInvoiceModel,
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy", "po_supplier_invoice_mapper_id", "purchase_order_product_id"] },
+          include: [
+            {
+              model: model.productModel,
+              as: 'supplierInvoices',
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy",] },
+              include: [
+                {
+                  model: model.landedCostModel,
+                  as: 'productLandeCost',
+                  attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy",] },
+                }
+              ]
+            },
+            {
+              model: model.poSupplierInvoiceMapperModel,
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy",] },
+              include: [
+                {
+                  model: model.purchaseModel,
+                  attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy",] },
+                  include: [
+                    {
+                      model: model.supplierModel,
+                      as: "suppliers",
+                      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', "createdBy", "updatedBy",] },
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: model.locationModel,
+          attributes: ["location"],
+        }
+      ]
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in getting PO slab Detail:", error);
     throw error;
   }
 }

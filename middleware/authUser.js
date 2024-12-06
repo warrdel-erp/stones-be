@@ -38,7 +38,6 @@ export async function userAuth(req, res, next) {
 
     const { user, newToken, clientId } = await verifyAndExtendToken(token);
 
-
     if (requestClientId === undefined) {
 
       req.user = user;
@@ -49,7 +48,6 @@ export async function userAuth(req, res, next) {
 
     const userEmail = user.dataValues.email;
     const userHasPermissions = await getUserPermissions(userEmail);
-    // console.log(userHasPermissions.dataValues.UserPermissions, 'shshs');
 
     let userPermissionsArray = [];
 
@@ -61,23 +59,17 @@ export async function userAuth(req, res, next) {
       });
     });
 
-    // console.log(userPermissionsArray, 'Collected User Permissions');
-
     const reqUrl = req.originalUrl.split('?')[0].endsWith('/')
       ? req.originalUrl.slice(0, -1)
       : req.originalUrl.split('?')[0];
 
-    // console.log('Requested URL:', reqUrl);
-
-
     const requiredPermissions = permissionMap[reqUrl] || [];
-    // console.log(requiredPermissions, 'Required Permissions');
+    console.log(`>>>>>>>>requiredPermissions>>>`, requiredPermissions);
 
     const hasRequiredPermissions = requiredPermissions.every(permission =>
       userPermissionsArray.includes(permission)
     );
-
-    // console.log(hasRequiredPermissions, 'Permissions Check');
+    console.log(`>>>>>>>>hasRequiredPermissions>>>`, hasRequiredPermissions);
 
     if (!hasRequiredPermissions) {
       return res.status(403).json({
@@ -100,4 +92,3 @@ export async function userAuth(req, res, next) {
     return res.status(401).json({ message: "Unauthorized user" });
   }
 }
-

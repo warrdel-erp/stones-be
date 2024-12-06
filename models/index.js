@@ -43,12 +43,13 @@ import supplierWritingInstructionModel from './supplierWritingInstructionModel.j
 import clientLocationModel from './clientLocationModel.js';
 import inventoryTransfterModel from './inventoryTransfterModel.js';
 import landedCostModel from './landedCostModel.js';
+import productOtherCharges from './productOtherCharges.js';
 
 
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
 userModel.hasOne(clientUserModel, { foreignKey: 'user_id' });
 
-userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id' });
+userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id'});
 roleModel.hasMany(userRoleModel, { foreignKey: 'role_id' });
 
 userRoleModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -289,6 +290,8 @@ poSlabDetails.hasOne(locationModel, { foreignKey: 'location_id', as: 'slabLocati
 poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
 locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });
 
+productOtherCharges.belongsTo(purchaseModel, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
+purchaseModel.hasMany(productOtherCharges, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
 export {
 	productModel,
 	userModel,
@@ -330,5 +333,6 @@ export {
 	AddToCart,
 	clientLocationModel,
 	inventoryTransfterModel,
-	landedCostModel
+	landedCostModel,
+	productOtherCharges
 };

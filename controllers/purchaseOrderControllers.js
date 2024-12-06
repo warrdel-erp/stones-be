@@ -63,8 +63,6 @@ export const addPurchaseOrderProduct = async (req, res) => {
         const data = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        console.log(createdBy, 'createdBY');
-
         const result = await purchaseOrderService.addPurchaseOrderProduct(data, createdBy);
         res.status(200).send(result);
     } catch (error) {
@@ -510,5 +508,25 @@ export const slabLocationTransfer = async (req, res) => {
     } catch (error) {
         console.error("Error in transfer slabs: ", error);
         res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+export const getSlabInfo = async (req, res) => {
+    try {
+        const { poSlabDetailId } = req.query;
+        if (!poSlabDetailId) {
+            return res.status(404).send({message: 'poSlabDetailId Required'})
+        }
+        const result = await purchaseOrderService.getSlabInfo(poSlabDetailId);
+        res.status(200).send({
+            success: true,
+            result,
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message || "An unexpected error occurred.",
+        });
     }
 };

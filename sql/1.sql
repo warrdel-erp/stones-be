@@ -650,6 +650,10 @@ CREATE TABLE roles (
     description TEXT,
     module VARCHAR(255)
   );
+
+  alter table permissions drop column permission_name;
+
+ alter table permissions add column permission_name varchar(255);
   
 -- user-role table creation 
 CREATE TABLE user_roles (
@@ -1406,3 +1410,90 @@ ADD COLUMN tax FLOAT;
 
 ALTER TABLE pre_purchase_orders
 ADD COLUMN po_qty int;
+
+ALTER TABLE vendors ADD INDEX (vendor_id);
+ALTER TABLE purchase_orders
+MODIFY COLUMN freight_forwarder INT;
+
+ALTER TABLE purchase_orders
+ADD CONSTRAINT fk_freight_forwarder
+FOREIGN KEY (freight_forwarder) REFERENCES vendors(vendor_id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
+
+ALTER TABLE locations ADD INDEX (location_id);
+
+ALTER TABLE purchase_orders MODIFY COLUMN purchase_location_id INT;
+
+ALTER TABLE purchase_orders
+ADD CONSTRAINT fk_purchase_location
+FOREIGN KEY (purchase_location_id) REFERENCES locations(location_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE products ADD INDEX (product_name);
+
+ALTER TABLE products ADD UNIQUE (product_name);
+
+ALTER TABLE po_supplier_invoices MODIFY COLUMN product_sku VARCHAR(255);
+
+ALTER TABLE po_supplier_invoices
+ADD CONSTRAINT fk_product_sku
+FOREIGN KEY (product_sku) REFERENCES products(product_name)
+ON DELETE NO ACTION
+ON UPDATE CASCADE;
+
+ALTER TABLE users ADD INDEX (email);
+
+ALTER TABLE user_roles MODIFY COLUMN user_email VARCHAR(255);
+
+ALTER TABLE user_roles
+ADD CONSTRAINT fk_user_email
+FOREIGN KEY (user_email) REFERENCES users(email)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE sales_orders ADD INDEX (so);
+
+ALTER TABLE account_transaction MODIFY COLUMN so INT;
+
+ALTER TABLE account_transaction
+ADD CONSTRAINT fk_so
+FOREIGN KEY (so) REFERENCES sales_orders(so)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE client_users
+DROP FOREIGN KEY client_users_ibfk_3;
+
+ALTER TABLE client_locations
+DROP FOREIGN KEY client_locations_ibfk_1;
+
+ALTER TABLE clients
+MODIFY client_id INT AUTO_INCREMENT PRIMARY KEY;
+
+ALTER TABLE client_users
+  ADD CONSTRAINT client_users_ibfk_3 FOREIGN KEY (client_id)
+  REFERENCES clients(client_id)
+  ON DELETE CASCADE;
+
+ALTER TABLE client_locations
+  ADD CONSTRAINT client_locations_ibfk_1 FOREIGN KEY (client_id)
+  REFERENCES clients(client_id)
+  ON DELETE CASCADE;
+
+CREATE TABLE product_other_charges (
+    product_other_charges_id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_order_id INT NOT NULL,
+    account VARCHAR(255) DEFAULT NULL,
+    charge_type VARCHAR(255) DEFAULT NULL,
+    charge FLOAT DEFAULT NULL,
+    description VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by INT DEFAULT NULL,
+    updated_by INT DEFAULT NULL,
+    deleted_at TIME DEFAULT NULL,
+    FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(purchase_order_id)
+);

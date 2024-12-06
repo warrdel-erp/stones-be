@@ -18,7 +18,8 @@ import {
     convertCartItemToHold,
     convertCartItemToSO,
     getSuppliersPOJournal,
-    slabLocationTransfer
+    slabLocationTransfer,
+    getSlabInfo
 
 } from "../controllers/purchaseOrderControllers.js"
 
@@ -80,5 +81,7 @@ router.post('/cartItemsToSO', convertCartItemToSO);
 router.get('/supplierJournal', getSuppliersPOJournal);
 
 router.post('/inventoryTransfer', slabLocationTransfer);
+
+router.get('/getSlabInfo', getSlabInfo);
 
 export default router
