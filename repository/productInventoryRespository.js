@@ -237,7 +237,7 @@ export async function getInventoryListBasedOnSipl(clientId) {
                   include: [
                     {
                       model: model.locationModel,
-                      as: 'slabLocation'
+                      // as: 'slabLocation'
                     }
                   ],
                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
