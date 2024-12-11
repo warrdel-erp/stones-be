@@ -49,8 +49,6 @@ export async function addProduct(info) {
             }
 
             const data = { subTotal, total, tax };
-            console.log('data-----------------', data);
-
             await salesOrderRepository.updateOrder(salesOrderId, data, { transaction });
         }
 
@@ -66,7 +64,6 @@ export async function addProduct(info) {
             }
 
             for (const slab of inventory.selectedSlabs) {
-                console.log('slab--------', slab);
                 const productData = {
                     salesOrdersId: info.salesOrdersId,
                     productInventoryId: inventory.productInventoryId,
@@ -92,8 +89,6 @@ export async function addProduct(info) {
 
 
 export async function loadingOrder(info) {
-    console.log(info.createdBy, 'createdbyssss');
-
     const transaction = await sequelize.transaction();
     try {
         let soLoadingOrderId, updateResults = [];
@@ -386,10 +381,7 @@ export async function updateStatus(transactionData) {
         await transaction.rollback();
         return { success: false, error: error.message };
     }
-}
-
-
-
+};
 
 export async function addPayment(info) {
     return await salesOrderRepository.addPayment(info)
@@ -500,7 +492,6 @@ export async function closeSalesOrder(data) {
             status: order.status
         }))
         : [];
-    console.log("soLoadingOrder Info:", soLoadingOrderInfo);
 
     const nonInvoiceOrders = soLoadingOrderInfo.filter(order => order.salesStatus !== "INVOICE");
 
@@ -536,7 +527,6 @@ export async function closeSalesOrder(data) {
 }
 
 export async function updateSlabToPicked(info) {
-    console.log('info-----------', info);
     return await salesOrderRepository.updateSlabToPicked(info)
 }
 
@@ -564,5 +554,22 @@ export async function swapSlab(info) {
         console.error('Error swapping slab:', error);
         return { success: false, error: error.message };
     }
-}
+};
 
+export async function updateTaxService(poSlabDetailIds, taxPer) {
+    try {
+        if (!Array.isArray(poSlabDetailIds) || poSlabDetailIds.length === 0) {
+            throw new Error("poSlabDetailIds must be a non-empty array.");
+        }
+
+        const updatePromises = poSlabDetailIds.map(async (poSlabDetailId) => {
+            return await salesOrderRepository.updateTax(poSlabDetailId, taxPer);
+        });
+        const results = await Promise.all(updatePromises);
+        return results;
+
+    } catch (error) {
+        console.error("Error in updateTaxService:", error);
+        throw error;  
+    }
+};

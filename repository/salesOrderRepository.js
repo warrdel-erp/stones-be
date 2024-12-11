@@ -389,9 +389,7 @@ export async function closeSalesOrder(data) {
 
 
 
-export async function updateSlabToPicked(data) {
-  console.log('data-----------------', data);
-  
+export async function updateSlabToPicked(data) {  
   try {
     const result = await model.salesOrderInventoryModel.update(
       { slabPicked: true },
@@ -400,9 +398,7 @@ export async function updateSlabToPicked(data) {
           salesOrdersInventoryId: data.salesOrdersInventoryId,
         }
       }
-    );
-    console.log('result-----------===============', result);
-    
+    );    
     return result;
   } catch (error) {
     console.error("Error updating slabPicked status:", error);
@@ -410,3 +406,18 @@ export async function updateSlabToPicked(data) {
   }
 }
 
+export async function updateTax(poSlabDetailId,tax) {  
+  try {
+    const result = await model.salesOrderInventoryModel.update({ tax },
+      {
+        where: {
+          poSlabDetailId: poSlabDetailId,
+        }
+      }
+    );    
+    return result;
+  } catch (error) {
+    console.error("Error updating sales Tax:", error);
+    return error;
+  }
+}

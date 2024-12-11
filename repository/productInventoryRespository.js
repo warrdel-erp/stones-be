@@ -168,7 +168,6 @@ export async function getInventoryList(page, limit, clientId) {
         },
       ],
     });
-    console.log(JSON.stringify(result), 'invet');
     console.log(`Fetched getInventoryList ${result.length} records`);
     return result;
   } catch (error) {
@@ -178,14 +177,15 @@ export async function getInventoryList(page, limit, clientId) {
 }
 
 export async function getInventoryListBasedOnSipl(clientId) {
-  console.log(clientId, 'clientId');
-
   try {
     const landedCosts = await model.landedCostModel.findAll({
       attributes: [
         'productId',
         [Sequelize.fn('AVG', Sequelize.col('product_landed_cost_id')), 'averageLandedCost'],
         [Sequelize.fn('MAX', Sequelize.col('created_at')), 'lastUpdatedAt'],
+        [Sequelize.fn('SUM', Sequelize.col('product_landed_cost')), 'totalLandedCost'],
+        [Sequelize.fn('COUNT', Sequelize.col('product_Id')), 'productCount'],
+        [Sequelize.literal('SUM(product_landed_cost) / COUNT(product_Id)'), 'finalAverageLandedCost']
       ],
       group: ['productId'],
       raw: true,
@@ -204,12 +204,20 @@ export async function getInventoryListBasedOnSipl(clientId) {
       raw: true,
     });
 
-    const averageCostMap = Object.fromEntries(
-      landedCosts.map(cost => [cost.productId, cost])
+    const landedCostMap = Object.fromEntries(
+      landedCosts.map(cost => [cost.productId, {
+        averageLandedCost: cost.averageLandedCost,
+        lastLandedCost: cost.lastLandedCost,
+        totalLandedCost: cost.totalLandedCost,
+        productCount: cost.productCount,
+        finalAverageLandedCost: cost.finalAverageLandedCost,
+      }])
     );
+
     const lastCostMap = Object.fromEntries(
       lastLandedCosts.map(cost => [cost.productId, cost.productLandedCost])
     );
+
     const result = await model.productInventoryModel.findAll({
       where: {
         status: 'ACTIVE'
@@ -271,9 +279,15 @@ export async function getInventoryListBasedOnSipl(clientId) {
 
     const enrichedResult = result.map(entry => {
       const productId = entry.salesProductDetails.productId;
+      const landedCostInfo = landedCostMap[productId] || {};
+
       return {
         ...entry.toJSON(),
-        averageLandedCost: averageCostMap[productId]?.averageLandedCost || null,
+        averageLandedCost: landedCostInfo.averageLandedCost || null,
+        // lastLandedCost: landedCostInfo.lastLandedCost || null,
+        totalLandedCost: landedCostInfo.totalLandedCost || null,
+        productCount: landedCostInfo.productCount || null,
+        finalAverageLandedCost: landedCostInfo.finalAverageLandedCost || null,
         lastLandedCost: lastCostMap[productId] || null,
       };
     });
@@ -285,6 +299,116 @@ export async function getInventoryListBasedOnSipl(clientId) {
     throw error;
   }
 }
+
+
+// export async function getInventoryListBasedOnSipl(clientId) {
+//   console.log(clientId, 'clientId');
+
+//   try {
+//     const landedCosts = await model.landedCostModel.findAll({
+//       attributes: [
+//         'productId',
+//         [Sequelize.fn('AVG', Sequelize.col('product_landed_cost_id')), 'averageLandedCost'],
+//         [Sequelize.fn('MAX', Sequelize.col('created_at')), 'lastUpdatedAt'],
+//       ],
+//       group: ['productId'],
+//       raw: true,
+//     });
+
+//     const lastLandedCosts = await model.landedCostModel.findAll({
+//       attributes: [
+//         'productId',
+//         'productLandedCost',
+//       ],
+//       where: {
+//         createdAt: {
+//           [Op.eq]: Sequelize.literal("(SELECT MAX(`created_at`) FROM `product_landed_cost` WHERE `product_id` = `product_landed_cost`.`product_id`)")
+//         }
+//       },
+//       raw: true,
+//     });
+
+//     const averageCostMap = Object.fromEntries(
+//       landedCosts.map(cost => [cost.productId, cost])
+//     );
+//     const lastCostMap = Object.fromEntries(
+//       lastLandedCosts.map(cost => [cost.productId, cost.productLandedCost])
+//     );
+//     const result = await model.productInventoryModel.findAll({
+//       where: {
+//         status: 'ACTIVE'
+//       },
+//       attributes: ["slabInStock", "quantityInStock", "slabAvailable", "quantityAvailable"],
+//       include: [
+//         {
+//           model: model.inventoryInvoiceMapper,
+//           as: "productInventoryInvoiceMapper",
+//           attributes: ["inventoryInvoiceMapperId"],
+//           include: [
+//             {
+//               model: model.poSupplierInvoiceModel,
+//               as: "productInventoryInvoice",
+//               attributes: ["poSupplierInvoiceId"],
+//               include: [
+//                 {
+//                   model: model.poSlabDetails,
+//                   as: "slabDetails",
+//                   where: {
+//                     status: {
+//                       [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
+//                     }
+//                   },
+//                   include: [
+//                     {
+//                       model: model.locationModel,
+//                       // as: 'slabLocation'
+//                     }
+//                   ],
+//                   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+//                 },
+//                 {
+//                   model: model.poSupplierInvoiceMapperModel,
+//                   as: "transactionData",
+//                   attributes: {
+//                     exclude: ["createdAt", "updatedAt", "deletedAt", "status"],
+//                   }
+//                 }
+//               ]
+//             },
+//           ],
+//         },
+//         {
+//           model: model.productModel,
+//           as: "salesProductDetails",
+//           attributes: ["productId", "productName", "type", "baseColor", "origin", "kind", "category", "groupsAll"],
+//         },
+//         {
+//           model: model.clientUserModel,
+//           as: 'clientDetails',
+//           attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+//           where: {
+//             clientId: clientId
+//           },
+//         }
+//       ],
+//     });
+
+//     const enrichedResult = result.map(entry => {
+//       const productId = entry.salesProductDetails.productId;
+//       return {
+//         ...entry.toJSON(),
+//         averageLandedCost: averageCostMap[productId]?.averageLandedCost || null,
+//         lastLandedCost: lastCostMap[productId] || null,
+//       };
+//     });
+
+//     return enrichedResult;
+
+//   } catch (error) {
+//     console.error("Error in getInventoryList:", error);
+//     throw error;
+//   }
+// }
 // after sales_orders_inventory table sale status change to Invoice then It become Inactive
 
 export async function updateProductInventoryInactive(productInventoryId, data) {
@@ -299,4 +423,4 @@ export async function updateProductInventoryInactive(productInventoryId, data) {
     console.error("Error updating product Inventory INACTIVE:", error);
     throw error;
   }
-}
+};

@@ -335,7 +335,7 @@ export async function addSlabDetails(info) {
 // get Slab Details
 
 export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMappperId) {
-    
+
     try {
         const slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId);
 
@@ -347,7 +347,7 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
         const freightDetails = await getFreightData(detailsToFindIds);
         const freightTotalSum = freightDetails.reduce((acc, bill) => {
             return acc + (bill.dataValues.total || 0);
-        }, 0);        
+        }, 0);
 
         const po = allDetailsPurchaseOrderId.po;
         const supplierSo = allDetailsPurchaseOrderId.supplierSo;
@@ -629,6 +629,7 @@ export async function getCOATransactionDetails(queryParams) {
 
 export async function getInventoryListBasedOnSipl(clientId) {
     const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId);
+    // const landedCost= await productInventory.getLandedCost();
     return inventoryJsonData;
 }
 

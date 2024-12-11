@@ -109,7 +109,6 @@ export const updateStatus = async (req, res) => {
     const requestBodyTransaction = req.body;
     const user = req.user;
     const createdBy = user.dataValues.id;
-    console.log(soLoadingOrder, 'jskjnwdiehiwuh');
     try {
         if (!soLoadingOrderId) {
             res.status(400).send("so Loading Order Id Id is required");
@@ -158,8 +157,6 @@ export const createSalesAccountTransaction = async (req, res) => {
     }
 };
 
-
-
 export const closeSalesOrder = async (req, res) => {
     try {
         const salesOrdersId = req.query;
@@ -171,7 +168,6 @@ export const closeSalesOrder = async (req, res) => {
     }
 };
 
-
 export const updateSlabToPicked = async (req, res) => {
     try {
         const result = await salesOrderService.updateSlabToPicked(req.query);
@@ -182,14 +178,30 @@ export const updateSlabToPicked = async (req, res) => {
     }
 };
 
-
-
 export const swapSlab = async (req, res) => {
     try {
         const result = await salesOrderService.swapSlab(req.body);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in updating sales order swap slab: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+export const updateTax = async (req, res) => {
+    try {
+        const { poSlabDetailId, taxPer } = req.body;
+        if (!poSlabDetailId && !taxPer) {
+            return res.status(400).send("poSlabDetailId and taxPer is required for update");
+        }
+        const result = await salesOrderService.updateTaxService(poSlabDetailId, taxPer);
+        return res.status(200).json({
+            success: true,
+            message: "Tax updated successfully for the given slabs.",
+            data: result
+        });
+    } catch (error) {
+        console.error("Error in updating sales order tax: ", error);
         res.status(500).send("Internal Server Error");
     }
 };
