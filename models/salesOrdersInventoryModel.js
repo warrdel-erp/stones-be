@@ -73,6 +73,16 @@ export default sequelize.define(
             allowNull: true,
             field: 'remeasure_width',
         },
+        packagingLength: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            field: 'packaging_length',
+        },
+        packagingWidth: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            field: 'packaging_width',
+        },
         slabPicked: {
             type: DataTypes.BOOLEAN,
             allowNull: true,

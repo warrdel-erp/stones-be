@@ -290,21 +290,22 @@ export async function updateStatus(transactionData) {
             if (newStatus) {
                 const salesOrdersInventoryId = inventory.dataValues.salesOrdersInventoryId;
                 const productInventoryId = inventory.dataValues.productInventoryId;
-                await salesOrderRepository.updateSalesStatus(salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
-                await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
-
-                console.log(`Status updated to ${newStatus} for inventory ID ${salesOrdersInventoryId}`);
 
                 if (newStatus === 'PACKING LIST') {
-                    packingListAccountUpdateRequired = true;
+                    const packingDetails = transactionData.packingRemeasure.map(item => ({
+                        packagingWidth: item.packagingWidth,
+                        packagingLength: item.packagingLength,
+                        salesStatus: newStatus,
+                        poSlabDetailId: item.poSlabDetailId,
+                    }));
+                    for (const packingDetail of packingDetails) {
+                        await salesOrderRepository.updateSalesStatusOnPackagingList(packingDetail, { transaction });
+                    }
                 }
-                if (newStatus === 'INVOICE') {
-                    shouldUpdateAccounts = true;
+                if (newStatus !== 'PACKING LIST') {
+                    await salesOrderRepository.updateSalesStatus(salesOrdersInventoryId, { salesStatus: newStatus }, { transaction });
                 }
-
-
-
-            } else {
+                await salesOrderRepository.updateSalesStatusLoadingOrder(soLoadingOrderId, { salesStatus: newStatus }, { transaction });
                 console.log(`No update required for status: ${currentStatus}`);
             }
         }

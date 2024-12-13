@@ -243,6 +243,23 @@ export async function findSalesOrdersInventory(soLoadingOrderId) {
   }
 };
 
+// update sale Status on packing list
+
+export async function updateSalesStatusOnPackagingList(data) {
+  const poSlabDetailId = data.poSlabDetailId
+  try {
+    const result = await model.salesOrderInventoryModel.update(data, {
+      where: {
+        poSlabDetailId: poSlabDetailId
+      }
+    });
+  } catch (error) {
+    console.error("Error updating Sales Status in sales order inventory:", error);
+    throw error;
+  }
+};
+
+
 // update sale Status and return the updated sales status
 
 export async function updateSalesStatus(salesOrdersInventoryId, data) {

@@ -1497,3 +1497,9 @@ CREATE TABLE product_other_charges (
     deleted_at TIME DEFAULT NULL,
     FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(purchase_order_id)
 );
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN packaging_width FLOAT;
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN packaging_length FLOAT;
