@@ -292,26 +292,30 @@ export async function addSlabDetails(info) {
 
         for (const slab of slabDetails) {
             const slabData = `
-                Serial Number: ${slab.dataValues.serialNumber}
-                Block: ${slab.dataValues.block}
-                Lot: ${slab.dataValues.lot}
-                Slab: ${slab.dataValues.slab}
-                Slab Counter: ${slab.dataValues.slabCounter}
-                Package Length: ${slab.dataValues.packageLength}
-                Package Width: ${slab.dataValues.packageWidth}
-                Receiving Length: ${slab.dataValues.recevingLength}
-                Receiving Width: ${slab.dataValues.recevingWidth}
-                Bin: ${slab.dataValues.bin}
-                Barcode: ${slab.dataValues.barcode}
-                PO Supplier Invoice Mapper ID: ${slab.dataValues.poSupplierInvoiceMapperId}
-                PO Slab Detail ID: ${slab.dataValues.poSlabDetailId}
-                Created By: ${slab.dataValues.createdBy}
-                Status: ${slab.dataValues.status}
+                Serial_Number:${slab.dataValues.serialNumber},
+                Block:${slab.dataValues.block},
+                Lot:${slab.dataValues.lot},
+                Slab:${slab.dataValues.slab},
+                Slab_Counter:${slab.dataValues.slabCounter},
+                Package_Length:${slab.dataValues.packageLength},
+                Package_Width:${slab.dataValues.packageWidth},
+                Receiving_Length:${slab.dataValues.recevingLength},
+                Receiving_Width:${slab.dataValues.recevingWidth},
+                Bin:${slab.dataValues.bin},
+                Barcode:${slab.dataValues.barcode},
+                PO_Supplier_Invoice_Mapper_ID:${slab.dataValues.poSupplierInvoiceMapperId},
+                PO_Slab_Detail_ID:${slab.dataValues.poSlabDetailId},
+                Created_By:${slab.dataValues.createdBy},
+                Status:${slab.dataValues.status}
             `.trim();
-            const qrCodeData = JSON.stringify(slabData);
+
+            const cleanSlabData = slabData.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+            const qrCodeData = JSON.stringify(cleanSlabData);
             const qrCode = await QRCode.toDataURL(qrCodeData);
+
+
             slab.dataValues.qrCode = qrCode;
-            // await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
+            await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
 
             const barcodeData = slabData;;
             const barcodeBuffer = await bwipjs.toBuffer({
@@ -324,7 +328,7 @@ export async function addSlabDetails(info) {
                 background: 'white',
                 color: 'black',
             });
-            // fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
+            fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
         }
         return slabDetails;
     } catch (error) {

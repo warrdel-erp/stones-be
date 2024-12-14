@@ -315,8 +315,6 @@ export async function updateStatus(transactionData) {
             const accNames = { creditAccountName: 'Goods', debitAccountName: 'Accounts, Notes and Loans Receivable' };
             const transactionAccountId = await getAccountIdByAccountName(accNames);
 
-            console.log(transactionAccountId, 'transactionAccountId');
-
             const accountDetails = [
                 { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
                 { accountsId: transactionAccountId.creditAccount.accountId, entryType: 'cr' }
@@ -352,8 +350,6 @@ export async function updateStatus(transactionData) {
         if (packingListAccountUpdateRequired) {
             const packingListAccountNames = { creditAccountName: 'Finished Goods', debitAccountName: 'Cost of Goods & Services Sold' };
             const packingListAccountId = await getAccountIdByAccountName(packingListAccountNames);
-
-            console.log(packingListAccountId, 'packingListAccountId');
 
             const packingListAccountDetails = [
                 { accountsId: packingListAccountId.debitAccount.accountId, entryType: 'dr' },
@@ -399,7 +395,6 @@ export async function createSalesAccountTransaction(data) {
     try {
         if (data.transactionAmountType === 'credit') {
             const transactionAccontId = await getAccountIdByAccountName(accNames);
-            console.log(transactionAccontId, 'transactionAccontId');
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
                 { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' },
@@ -537,7 +532,7 @@ export async function swapSlab(info) {
         const updateData = {
             remeasureLength: info.remeasureLength,
             remeasureWidth: info.remeasureWidth,
-            soLoadingOrderId: info.soLoadingOrderId,
+            // soLoadingOrderId: info.soLoadingOrderId,
             updatedBy: info.updatedBy,
             poSlabDetailId: info.poSlabDetailId,
             unitPrice: info.unitPrice

@@ -7,7 +7,6 @@ const barCodeDir = 'public/barCodes';
 export async function getQrCodesAndBarCodes(req, res) {
     try {
         const poSupplierInvoiceMapper = req.query.poSupplierInvoiceMapperId; 
-        console.log(req,'jsjsj');
         
         const qrCodeFiles = fs.readdirSync(qrCodeDir).filter(file => file.endsWith('.png'));
         const barCodeFiles = fs.readdirSync(barCodeDir).filter(file => file.endsWith('.png'));
@@ -32,6 +31,7 @@ export async function getQrCodesAndBarCodes(req, res) {
             .map(file => {
                 const filePath = `${barCodeDir}/${file}`;
                 const fileData = fs.readFileSync(filePath);
+                
                 const base64Image = `data:image/png;base64,${fileData.toString('base64')}`;
                 return {
                     filename: file,

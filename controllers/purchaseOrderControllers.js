@@ -12,7 +12,6 @@ export const createOrder = async (req, res) => {
         const clientId = req.clientId;
         const poDetails = await findPoNumber(po, clientId);
         const data = filterObject(info)
-        console.log(data, 'ayssy');
 
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
@@ -34,7 +33,6 @@ export const getPoNumber = async (req, res) => {
         const clientId = req.clientId;
         const result = await purchaseOrderService.getPoNumber(clientId);
 
-        console.log(result, 'Result from purchaseOrderService');
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in getting Po Number:", error);
@@ -322,7 +320,6 @@ export const getInventoryListBasedOnSipl = async (req, res) => {
 export const updateSlabDetails = async (req, res) => {
     try {
         const data = req.body;
-        console.log(data, 'updateSlabDetails');
         const result = await purchaseOrderService.updateSlabDetails(data);
         res.status(200).send(result);
     } catch (error) {
@@ -335,7 +332,6 @@ export const updateSlabDetails = async (req, res) => {
 export const deletePrePurchaeProduct = async (req, res) => {
     try {
         const { purchaseOrderProductId } = req.params;
-        console.log(purchaseOrderProductId, 'deletePrePurchaseProduct');
         const result = await purchaseOrderService.deletePrePurchaeProducts(purchaseOrderProductId);
         res.sendStatus(200).send(result);
     } catch (error) {
