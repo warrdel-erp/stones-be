@@ -566,6 +566,6 @@ export async function updateTaxService(poSlabDetailIds, taxPer) {
 
     } catch (error) {
         console.error("Error in updateTaxService:", error);
-        throw error;  
+        throw error;
     }
 };

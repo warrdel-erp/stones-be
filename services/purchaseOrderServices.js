@@ -315,7 +315,7 @@ export async function addSlabDetails(info) {
 
 
             slab.dataValues.qrCode = qrCode;
-            await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
+            // await QRCode.toFile(`public/qrCodes/slabQRCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, qrCodeData);
 
             const barcodeData = slabData;;
             const barcodeBuffer = await bwipjs.toBuffer({
@@ -328,7 +328,7 @@ export async function addSlabDetails(info) {
                 background: 'white',
                 color: 'black',
             });
-            fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
+            // fs.writeFileSync(`public/barCodes/slabbarCode-${slab.dataValues.poSlabDetailId}-${slab.dataValues.poSupplierInvoiceMapperId}.png`, barcodeBuffer);
         }
         return slabDetails;
     } catch (error) {

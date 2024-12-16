@@ -200,7 +200,15 @@ export async function getAllSalesOrder(data) {
           {
             model: model.clientUserModel,
             as: 'clientDetails',
-            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+            attributes: {
+              exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'],
+            },
+            include: [
+              {
+                model: model.userModel,
+                attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+              }
+            ],
             where: {
               clientId: data.clientId
             },
@@ -216,9 +224,11 @@ export async function getAllSalesOrder(data) {
             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
           },
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
       });
-    }
+    };
+
     return result;
   } catch (error) {
     console.error(`Error in getting sales Order ${data.search}:`, error);
@@ -406,7 +416,7 @@ export async function closeSalesOrder(data) {
 
 
 
-export async function updateSlabToPicked(data) {  
+export async function updateSlabToPicked(data) {
   try {
     const result = await model.salesOrderInventoryModel.update(
       { slabPicked: true },
@@ -415,7 +425,7 @@ export async function updateSlabToPicked(data) {
           salesOrdersInventoryId: data.salesOrdersInventoryId,
         }
       }
-    );    
+    );
     return result;
   } catch (error) {
     console.error("Error updating slabPicked status:", error);
@@ -423,7 +433,7 @@ export async function updateSlabToPicked(data) {
   }
 }
 
-export async function updateTax(poSlabDetailId,tax) {  
+export async function updateTax(poSlabDetailId, tax) {
   try {
     const result = await model.salesOrderInventoryModel.update({ tax },
       {
@@ -431,7 +441,7 @@ export async function updateTax(poSlabDetailId,tax) {
           poSlabDetailId: poSlabDetailId,
         }
       }
-    );    
+    );
     return result;
   } catch (error) {
     console.error("Error updating sales Tax:", error);
