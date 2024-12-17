@@ -27,6 +27,28 @@ export async function findClientID(userId) {
     }
 }
 
+
+export async function findClientUserLocation(clientId) {
+    try {
+        const result = await model.clientLocationModel.findOne({
+            where: {
+                clientId: clientId
+            },
+            include: [
+                {
+                    model: model.locationModel,
+                    as: 'locationDetails',
+                    attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
+                }
+            ]
+        });
+        return result;
+    } catch (error) {
+        console.error("Error during client user registration:", error);
+        throw error;
+    }
+}
+
 //find userids based on client id 
 
 export async function findUserId(clientId) {

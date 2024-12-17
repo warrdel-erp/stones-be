@@ -1,11 +1,11 @@
 import * as model from "../models/index.js";
 import { Op } from "sequelize";
 
-export async function getSalesInvoices(soNumber, clientId, queries = {}) {  
+export async function getSalesInvoices(soNumber, clientId, queries = {}) {
     try {
         const result = await model.salesOrderModel.findAll({
             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
-          
+
             include: [
                 {
                     model: model.customerModel,
@@ -28,7 +28,7 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
                             model: model.poSlabDetails,
                             as: 'slabDetails',
                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
-                            where:{
+                            where: {
                             },
                         },
                         {
@@ -68,27 +68,27 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
 
 export async function updateSlabDetails(poSlabDetailId, status) {
     try {
-      const result = await model.poSlabDetails.update(
-        { status },
-        {
-          where: {
-            poSlabDetailId
-          },
-        }
-      );
-      return result;
+        const result = await model.poSlabDetails.update(
+            { status },
+            {
+                where: {
+                    poSlabDetailId
+                },
+            }
+        );
+        return result;
     } catch (error) {
-      console.error("Error in update Slab Details:", error);
-      throw error;
+        console.error("Error in update Slab Details:", error);
+        throw error;
     }
-  }
-  
+}
 
 
-  export async function getReturnInvoice(search, clientId,queries) {  
+
+export async function getReturnInvoice(search, clientId, queries) {
     try {
-        console.log(queries.soLoadingOrderId,'skskskk');
-        
+        console.log(queries.soLoadingOrderId, 'skskskk');
+
         const result = await model.salesOrderModel.findAll({
             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
             include: [
@@ -101,7 +101,7 @@ export async function updateSlabDetails(poSlabDetailId, status) {
                     model: model.clientUserModel,
                     as: 'clientDetails',
                     where: {
-                        clientId:queries.clientId
+                        clientId: queries.clientId
                     },
                 },
                 {
@@ -113,8 +113,8 @@ export async function updateSlabDetails(poSlabDetailId, status) {
                             model: model.poSlabDetails,
                             as: 'slabDetails',
                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] },
-                            where:{
-                                status:'RETURNED'
+                            where: {
+                                status: 'RETURNED'
                             },
                         },
                         {

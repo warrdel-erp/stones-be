@@ -5,34 +5,42 @@ export async function getSalesInvoices(search, clientId) {
     try {
         const salesInvoiceList = await returnReceiptRepository.getSalesInvoices(search, clientId);
         const invoicesList = salesInvoiceList.map((loadingDetails) => {
+
             const loadingData = loadingDetails.loadingOrders.map((data) => ({
                 createdAt: new Date(data.createdAt).toLocaleDateString('en-GB', {
                     day: 'numeric',
-                    month: 'long',  
+                    month: 'long',
                     year: 'numeric'
-                }),          
+                }),
                 salesOrdersId: data.salesOrdersId,
                 soLoadingOrderId: data.soLoadingOrderId,
                 salesStatus: data.salesStatus,
                 subTotal: data.subTotal,
+                shipTo: data.shipTo,
+                location: data.location,
+                customerPo: data.customerPo,
                 total: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.total),
                 tax: data.tax,
                 customerName: loadingDetails.customers.customerName,
                 customerId: loadingDetails.customers.customerId,
                 so: loadingDetails.so,
                 salesOrdersId: loadingDetails.salesOrdersId,
-                salesTax: loadingDetails.salesTax
+                salesTax: loadingDetails.salesTax,
+
             }));
+
             return {
                 loadingOrders: loadingData,
                 customerName: loadingDetails.customers.customerName,
                 customerId: loadingDetails.customers.customerId,
-                customerAddress:loadingDetails.customers.address,
-                location:loadingDetails.location,
+                customerAddress: loadingDetails.customers.address,
+                location: loadingDetails.location,
                 so: loadingDetails.so,
                 salesOrdersId: loadingDetails.salesOrdersId,
                 salesTax: loadingDetails.salesTax,
-                shipTo:loadingDetails.shipTo
+                shipTo: loadingDetails.shipTo,
+                location: loadingDetails.location,
+                customerPo: loadingDetails.customerPo,
             };
         });
 
@@ -56,13 +64,13 @@ export async function singleInvoiceDetails(search, clientId, queries) {
             const shipTo = salesInventory.shipTo;
             const location = salesInventory.location;
 
-            let hasProductData = false; 
+            let hasProductData = false;
 
             salesInventory.salesInventory.forEach((data) => {
                 const soLoadingOrderId = data.soLoadingOrderId;
                 const productName = data.salesProduct.salesProductDetails.productName;
                 const slabCurrentStatus = data.slabDetails.status;
-                
+
                 if (slabCurrentStatus === 'RETURNED') {
                     return;
                 }
@@ -94,7 +102,7 @@ export async function singleInvoiceDetails(search, clientId, queries) {
                 }
 
                 const loadingData = {
-                    createdBy: data.createdBy,           
+                    createdBy: data.createdBy,
                     poSlabDetailId: data.poSlabDetailId,
                     productInventoryId: data.productInventoryId,
                     remeasureLength: data.remeasureLength,
@@ -143,7 +151,6 @@ export async function singleInvoiceDetails(search, clientId, queries) {
 
 
 export async function addReturnSlabs(info) {
-    console.log(info);
     const updatedSlabs = await Promise.all(info.poSlabDetailIds.map(async (id) => {
         return await returnReceiptRepository.updateSlabDetails(id, 'RETURNED');
     }));
@@ -153,7 +160,6 @@ export async function addReturnSlabs(info) {
 
 
 export async function getReturnInvoice(search, clientId, queries) {
-    console.log(search, clientId, queries, 'jsjsjjsjsj');
 
     try {
         const repoResponse = await returnReceiptRepository.getReturnInvoice(search, clientId, queries);
@@ -182,8 +188,8 @@ export async function getReturnInvoice(search, clientId, queries) {
                         paymentTerms: `${customers.paymentTerms} 'days'`,
                         products: [],
                         shipTo: salesInventory.shipTo,
-                        purchaseLocation:salesInventory.location,
-                        customers:customers
+                        purchaseLocation: salesInventory.location,
+                        customers: customers
                     };
                     acc.push(loadingOrder);
                 }

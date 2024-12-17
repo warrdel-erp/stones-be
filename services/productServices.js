@@ -26,6 +26,7 @@ export async function getSingleProductDetails(productName) {
         glIncomeAccount: result.dataValues.glIncomeAccount,
         glCostGoodsAccount: result.dataValues.glCostGoodsAccount,
         status: result.dataValues.status,
+        allProducts: result.dataValues
     };
 
     // Extracting slab details and merging into the product details

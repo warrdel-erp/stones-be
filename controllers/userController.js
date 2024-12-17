@@ -41,6 +41,7 @@ export const login = async (req, res) => {
     const userId = existingEmail.dataValues.id;
     const clientIdOfEmail = await clientUserRepository.findClientID(userId);
     const clientId = clientIdOfEmail.dataValues.clientId;
+    const location = await clientUserRepository.findClientUserLocation(clientId)
     const userHasPermissions = await getUserPermissions(email);
     let userPermissionsArray = [];
 
@@ -77,7 +78,8 @@ export const login = async (req, res) => {
       message: "User logged in successfully",
       token,
       clientId,
-      userPermissionsArray
+      userPermissionsArray,
+      location,
     });
   } catch (error) {
     console.error("Error during login:", error);
