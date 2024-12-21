@@ -49,7 +49,7 @@ import productOtherCharges from './productOtherCharges.js';
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
 userModel.hasOne(clientUserModel, { foreignKey: 'user_id' });
 
-userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id'});
+userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id' });
 roleModel.hasMany(userRoleModel, { foreignKey: 'role_id' });
 
 userRoleModel.belongsTo(userModel, { foreignKey: 'user_id' });
@@ -95,6 +95,9 @@ poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_s
 
 poSlabDetails.belongsTo(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_id' });
 poSupplierInvoiceModel.hasMany(poSlabDetails, { foreignKey: 'po_supplier_invoice_id', as: 'slabDetails' });
+
+poSlabDetails.belongsTo(productModel, { foreignKey: 'productId' });
+productModel.hasMany(poSlabDetails, { foreignKey: 'productId', as: 'product' });
 
 inventoryInvoiceMapper.belongsTo(productInventoryModel, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
 productInventoryModel.hasMany(inventoryInvoiceMapper, { foreignKey: 'product_inventory_id', as: 'productInventoryInvoiceMapper' });
@@ -288,7 +291,7 @@ poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
 locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });
 
 productOtherCharges.belongsTo(purchaseModel, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
-purchaseModel.hasMany(productOtherCharges, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
+purchaseModel.hasMany(productOtherCharges, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
 export {
 	productModel,
 	userModel,

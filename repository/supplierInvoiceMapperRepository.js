@@ -16,6 +16,13 @@ export async function getSlabDetailByInvoiceMapper(poSupplierInvoiceMappperId) {
                             model: model.poSlabDetails,
                             as: 'slabDetails',
                             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+                            include: [
+                                {
+                                    model: model.productModel,
+                                    as: 'product',
+                                    attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+                                }
+                            ]
                         },
                         {
                             model: model.productModel,

@@ -3,6 +3,7 @@ import * as freightBillRepository from '../repository/freightRepository.js'
 import sequelize from '../database/sequelizeConfig.js';
 import { getAccountIdByAccountName } from './accountsServices.js';
 import * as purchaseOrderRepository from '../repository/purchaseOrderRepository.js'
+import * as slabpurchaseOrderRepository from '../repository/supplierInvoiceMapperRepository.js';
 
 export async function addFreightBill(info) {
 
@@ -61,10 +62,14 @@ export async function addFreightBill(info) {
 //get freigh data 
 export async function getFreightData(data) {
     try {
-        const freightBill = await freightBillRepository.getFreightData(data);
-        console.log(freightBill, 'jsjsjs');
+        let slabDetails = {}
+        if (data.poSupplierInvoiceMapperId) {
+            slabDetails = await slabpurchaseOrderRepository.getSlabDetailByInvoiceMapper(data.poSupplierInvoiceMapperId);
+        }
 
-        return freightBill;
+        const freightBill = await freightBillRepository.getFreightData(data);
+
+        return { freightBill, slabDetails };
     } catch (error) {
         console.error('Error fetching freight details:', error);
         throw error;
