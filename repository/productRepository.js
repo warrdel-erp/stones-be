@@ -76,6 +76,11 @@ export async function getSingleProduct(productName) {
                             ]
                         }
                     ]
+                },
+                {
+                    model:model.landedCostModel,
+                    as: 'productLandeCost',
+                    attributes: { exclude: [ 'createdAt', 'deletedAt', 'updatedAt'] },
                 }
             ]
         });
