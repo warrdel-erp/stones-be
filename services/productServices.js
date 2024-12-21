@@ -8,29 +8,30 @@ export async function getAllProducts(data) {
     return await productRepository.getAllProduct(data)
 }
 export async function getSingleProductDetails(productName) {
-    const result = await productRepository.getSingleProduct(productName);
-    if (!result) {
+    const { product, costData } = await productRepository.getSingleProduct(productName);
+    if (!product) {
         return null;
     }
 
     // Extracting product details
     const productDetails = {
-        productId: result.dataValues.productId,
-        productName: result.dataValues.productName,
-        type: result.dataValues.type,
-        alternativeName: result.dataValues.alternativeName,
-        kind: result.dataValues.kind,
-        uomGroup: result.dataValues.uomGroup,
-        singleSlab: result.dataValues.singleSlab,
-        glInventoryLinkAccount: result.dataValues.glInventoryLinkAccount,
-        glIncomeAccount: result.dataValues.glIncomeAccount,
-        glCostGoodsAccount: result.dataValues.glCostGoodsAccount,
-        status: result.dataValues.status,
-        allProducts: result.dataValues
+        productId: product.dataValues.productId,
+        productName: product.dataValues.productName,
+        type: product.dataValues.type,
+        alternativeName: product.dataValues.alternativeName,
+        kind: product.dataValues.kind,
+        uomGroup: product.dataValues.uomGroup,
+        singleSlab: product.dataValues.singleSlab,
+        glInventoryLinkAccount: product.dataValues.glInventoryLinkAccount,
+        glIncomeAccount: product.dataValues.glIncomeAccount,
+        glCostGoodsAccount: product.dataValues.glCostGoodsAccount,
+        status: product.dataValues.status,
+        allProducts: product.dataValues,
+        ...costData
     };
 
     // Extracting slab details and merging into the product details
-    productDetails.slabDetails = result.salesProductDetails.map(saleDetail => {
+    productDetails.slabDetails = product.salesProductDetails.map(saleDetail => {
         return saleDetail.productInventoryInvoiceMapper.map(mapper => {
             return mapper.productInventoryInvoice.slabDetails;
         }).flat();

@@ -1,5 +1,5 @@
 import * as model from '../models/index.js'
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 
 export async function addProduct(data) {
     try {
@@ -48,9 +48,11 @@ export async function getAllProduct(data) {
     }
 }
 
+
 export async function getSingleProduct(productName) {
     try {
-        const result = await model.productModel.findOne({
+
+        const product = await model.productModel.findOne({
             where: {
                 product_name: productName
             },
@@ -84,11 +86,37 @@ export async function getSingleProduct(productName) {
                 }
             ]
         });
-        return result;
+
+        let costData = {};
+        if (product?.dataValues?.productId) {
+            costData = await getCostData(product.dataValues.productId);
+        }
+
+        return { product, costData };
     } catch (error) {
         console.error(`Error in ${productName}:`, error);
         throw error;
     }
+}
+
+const getCostData = async (productId) => {
+    let avgLandedCost = null;
+
+    // Get average landed cost
+    avgLandedCost = await model.landedCostModel.findAll({
+        where: { productId },
+        attributes: [[Sequelize.fn('AVG', Sequelize.col('product_landed_cost')), 'avgLandedCost'],]
+    })
+    avgLandedCost = avgLandedCost?.[0]?.dataValues;
+
+    // Get last landed cost
+    let lastLandedCosts = await model.landedCostModel.findOne({
+        order: [["created_at", "DESC"]],
+        attributes: ["product_landed_cost"]
+    })
+
+    lastLandedCosts = lastLandedCosts?.dataValues.product_landed_cost;
+    return { ...avgLandedCost, lastLandedCosts };
 }
 
 export async function updateProduct(productName, data) {

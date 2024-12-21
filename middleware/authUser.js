@@ -46,7 +46,7 @@ export async function userAuth(req, res, next) {
       return next();
     }
 
-    const userEmail = user.dataValues.email;
+    const userEmail = user?.dataValues?.email;
     const userHasPermissions = await getUserPermissions(userEmail);
 
     let userPermissionsArray = [];

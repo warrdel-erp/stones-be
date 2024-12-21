@@ -1,5 +1,4 @@
 import * as model from "../models/index.js";
-import { Op } from "sequelize";
 
 export async function getSalesInvoices(soNumber, clientId, queries = {}) {
     try {
@@ -15,6 +14,12 @@ export async function getSalesInvoices(soNumber, clientId, queries = {}) {
                 {
                     model: model.clientUserModel,
                     as: 'clientDetails',
+                    include: [
+                        {
+                            model: model.userModel,
+                            attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+                        }
+                    ],
                     where: {
                         clientId: clientId
                     },
