@@ -99,3 +99,38 @@ export const getAllUsers = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
+
+// get all users
+export const updateLastSelectedLocation = async (req, res) => {
+  try {
+    const user = req.user;
+    const createdBy = user?.dataValues?.id;
+
+    const {locationId} = req.body;
+
+    if (!locationId) {
+        res.status(400).send("locationId is required");
+    }
+    
+    const users = await userRepository.changeLastSelectedLocation(locationId, createdBy);
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).send("Internal server error");
+  }
+};
+
+// get all users
+export const getLastSelectedLocation = async (req, res) => {
+  try {
+
+    const user = req.user;
+    const createdBy = user?.dataValues?.id;
+
+    const userLocation = await userRepository.findLastSelectedLocation(createdBy);
+    res.status(200).json(userLocation);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).send("Internal server error");
+  }
+};

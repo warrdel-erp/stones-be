@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import * as model from '../models/index.js'
 
 export async function register(data) {
@@ -27,6 +27,39 @@ export const findAllUsers = async () => {
 		throw error;
 	}
 };
+
+// Find all users
+export const changeLastSelectedLocation = async (locationId, userId) => {
+	try {
+		const users = await model.userModel.update(
+			{ lastSelectedLocation: locationId },
+			{
+				where: {
+					id: userId
+				}
+			});
+		return users;
+	} catch (error) {
+		console.error('Error updating location of user:', error);
+		throw error;
+	}
+};
+
+// Find all users
+export const findLastSelectedLocation = async (userId) => {
+	try {
+
+		const user = await model.userModel.findByPk(userId, {
+			attributes:["lastSelectedLocation"]
+		})
+
+		return user;
+	} catch (error) {
+		console.error('Error updating location of user:', error);
+		throw error;
+	}
+};
+
 
 // //find role based on userid
 // export async function findRoleByUserId(userId) {

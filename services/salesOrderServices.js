@@ -122,7 +122,8 @@ export async function loadingOrder(info) {
             tax: totalTax,
             salesOrdersId: info.salesOrdersId,
             salesStatus: 'LOADING ORDER',
-            createdBy: info.createdBy
+            createdBy: info.createdBy,
+
         };
         const result = await salesOrderRepository.createLoadingOrder(data, { transaction });
         soLoadingOrderId = result.get('soLoadingOrderId');
@@ -135,8 +136,10 @@ export async function loadingOrder(info) {
                     remeasureWidth: slab.remeasureWidth,
                     soLoadingOrderId: soLoadingOrderId,
                     salesStatus: 'LOADING ORDER',
-                    createdBy: info.createdBy
+                    createdBy: info.createdBy,
+                    loDate: info.loDate && info.loDate,
                 };
+
                 const updateResult = await salesOrderRepository.updateSalesOrderInventory(slab.salesOrdersInventoryId, updateData, { createdBy: info.createdBy }, { transaction });
                 updateResults.push(updateResult);
             };
@@ -297,7 +300,9 @@ export async function updateStatus(transactionData) {
                         packagingLength: item.packagingLength,
                         salesStatus: newStatus,
                         poSlabDetailId: item.poSlabDetailId,
+                        plDate: transactionData.plDate && transactionData.plDate,
                     }));
+                    
                     for (const packingDetail of packingDetails) {
                         await salesOrderRepository.updateSalesStatusOnPackagingList(packingDetail, { transaction });
                     }

@@ -45,9 +45,10 @@ import inventoryTransfterModel from './inventoryTransfterModel.js';
 import landedCostModel from './landedCostModel.js';
 import productOtherCharges from './productOtherCharges.js';
 
-
 clientUserModel.belongsTo(userModel, { foreignKey: 'user_id' });
 userModel.hasOne(clientUserModel, { foreignKey: 'user_id' });
+
+userModel.belongsTo(clientLocationModel, { foreignKey: 'last_selected_location' });
 
 userRoleModel.belongsTo(roleModel, { foreignKey: 'role_id' });
 roleModel.hasMany(userRoleModel, { foreignKey: 'role_id' });

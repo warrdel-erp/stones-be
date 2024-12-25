@@ -1503,3 +1503,14 @@ ADD COLUMN packaging_width FLOAT;
 
 ALTER TABLE sales_orders_inventory
 ADD COLUMN packaging_length FLOAT;
+
+
+-- Add pl_date and lo_date in sales_order_invertory
+ALTER TABLE sales_orders_inventory
+ADD COLUMN pl_date DATE;
+
+ALTER TABLE sales_orders_inventory
+ADD COLUMN lo_date DATE;
+
+-- Add last selected location to users table.
+ALTER TABLE users ADD COLUMN last_selected_location INT;

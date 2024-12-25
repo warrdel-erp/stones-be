@@ -126,6 +126,16 @@ export default sequelize.define(
             allowNull: true,
             field: 'deleted_at'
         },
+        plDate:{
+            type: DataTypes.DATE,
+            allowNull:true,
+            field: 'pl_date'    
+        },
+        loDate:{
+            type: DataTypes.DATE,
+            allowNull:true,
+            field: 'lo_date'    
+        }
     },
     {
         tableName: 'sales_orders_inventory',

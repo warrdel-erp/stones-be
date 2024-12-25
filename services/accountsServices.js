@@ -71,7 +71,6 @@ export async function getGroupedAccountList() {
 
 export async function getAccountIdByAccountName(data) {
     try {
-        console.log(data, 'jsdjsj');
         const accountDetails = await accountsRepository.getAccountIdByAccountName(data);
         return accountDetails;
     } catch (error) {

@@ -36,6 +36,11 @@ export default sequelize.define(
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
         field:'created_at'
     },
+    lastSelectedLocation: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field:'last_selected_location',
+    },
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
