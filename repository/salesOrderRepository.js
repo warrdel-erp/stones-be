@@ -326,6 +326,33 @@ export async function addPayment(data) {
   }
 };
 
+// Get payment details of sales order from account_transection table.
+export async function getPaymentDetailsFromAccountTransection(soLoadingOrderId) {
+  try {
+
+    const result = await model.accountTransactionModel.findOne({
+      attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      where: {
+        soLoadingOrderId: soLoadingOrderId,
+      },
+      include: [{
+        model: model.soLoadingOrderModel,
+        as: "soLoadingOrders",
+        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      }],
+    });
+
+    if (!result) {
+      return { message: `No data found for soLoadingOrderId: ${soLoadingOrderId}` };
+    }
+
+    return result;
+  } catch (error) {
+    console.error(`Error in getting payment details for soLoadingOrderId: ${soLoadingOrderId}`, error.message);
+    return { error: error.message };
+  }
+};
+
 // Get payment details of sales order
 export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
   try {

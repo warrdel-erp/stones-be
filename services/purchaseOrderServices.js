@@ -563,7 +563,7 @@ export async function purchaseAccountTransaction(transactionData) {
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
                 { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' },
-                { accountsId: transactionData.paymentMethod, entryType: 'cr' }
+                // { accountsId: transactionData.paymentMethod, entryType: 'cr' }
             ];
             for (const accountDetail of accountDetails) {
                 const transactionDataWithAccount = {

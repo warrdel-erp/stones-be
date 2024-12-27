@@ -390,9 +390,11 @@ export async function addPayment(info) {
 };
 
 
-export async function getPaymentDetails(soLoadingOrderId, salesOrderId) {
-    return await salesOrderRepository.getPaymentDetails(soLoadingOrderId, salesOrderId)
+// get payment details 
+export async function getPaymentDetails(soLoadingOrderId) {
+    return await salesOrderRepository.getPaymentDetailsFromAccountTransection(soLoadingOrderId);
 };
+
 
 export async function createSalesAccountTransaction(data) {
     const transaction = await sequelize.transaction();
@@ -403,7 +405,7 @@ export async function createSalesAccountTransaction(data) {
             const accountDetails = [
                 { accountsId: transactionAccontId.debitAccount.accountId, entryType: 'dr' },
                 { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' },
-                { accountsId: data.paymentMethod, entryType: 'dr' }
+                // { accountsId: data.paymentMethod, entryType: 'dr' }
             ];
 
             for (const accountDetail of accountDetails) {

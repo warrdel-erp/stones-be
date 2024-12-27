@@ -157,6 +157,23 @@ export const createSalesAccountTransaction = async (req, res) => {
     }
 };
 
+// get payment details
+
+export const getPaymentDetails = async (req, res) => {
+    const soLoadingOrderId = req.query?.soLoadingOrderId
+    try {
+        if (!soLoadingOrderId) {
+            res.status(400).send("soLoadingOrderId Id is required");
+        }
+        const result = await salesOrderService.getPaymentDetails(soLoadingOrderId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(`Error in getting payment detail for soLoadingOrderId :-${soLoadingOrderId} :`, error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
 export const closeSalesOrder = async (req, res) => {
     try {
         const salesOrdersId = req.query;

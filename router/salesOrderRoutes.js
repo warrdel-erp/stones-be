@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 import { userAuth } from '../middleware/authUser.js';
-import { swapSlab, createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder, updateSlabToPicked ,updateTax} from "../controllers/salesOrderController.js";
+import { swapSlab, createOrder, getSoNumber, singleSoDetails, addProduct, loadingOrder, getAllOpenSo, updateStatus, addPayment, createSalesAccountTransaction, closeSalesOrder, updateSlabToPicked ,updateTax, getPaymentDetails} from "../controllers/salesOrderController.js";
 
 router.patch('/swapSlab', swapSlab);
 
@@ -26,6 +26,8 @@ router.patch('/:soLoadingOrderId', userAuth, updateStatus);
 router.post('/addPayment', addPayment);
 
 router.post('/salesAccountTransaction', userAuth, createSalesAccountTransaction);
+
+router.get('/paymentDetails', getPaymentDetails);
 
 router.put('/updateTax',userAuth, updateTax);
 
