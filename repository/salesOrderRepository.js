@@ -330,10 +330,11 @@ export async function addPayment(data) {
 export async function getPaymentDetailsFromAccountTransection(soLoadingOrderId) {
   try {
 
-    const result = await model.accountTransactionModel.findOne({
+    const result = await model.accountTransactionModel.findAll({
       attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
       where: {
         soLoadingOrderId: soLoadingOrderId,
+        entryType: 'cr',
       },
       include: [{
         model: model.soLoadingOrderModel,
