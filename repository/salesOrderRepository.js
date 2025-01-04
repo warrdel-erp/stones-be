@@ -181,7 +181,8 @@ export async function getAllSalesOrder(data, limit, page) {
         where: {
           so: {
             [Op.like]: `%${data.search}%`
-          }
+          },
+          location: data?.locationId
         },
         include: [
           {
@@ -201,6 +202,9 @@ export async function getAllSalesOrder(data, limit, page) {
       });
     } else {
       result = await model.salesOrderModel.findAndCountAll({
+        where:{
+          location: data?.locationId
+        },
         attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
         include: [
           {

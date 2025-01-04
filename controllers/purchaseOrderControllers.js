@@ -73,7 +73,8 @@ export const addPurchaseOrderProduct = async (req, res) => {
 
 // 5. get all Purchase Order
 export const getAllOpenPo = async (req, res) => {
-    let { search } = req.query
+    const locationId = req.user?.dataValues?.lastSelectedLocation;
+    let { search } = req.query;
     const clientId = req.clientId;
     const queriedData = req.query;
 
@@ -82,7 +83,7 @@ export const getAllOpenPo = async (req, res) => {
 
     try {
         const result = await purchaseOrderService.getAllPo(
-            { search, clientId, queriedData },
+            { search, clientId, queriedData, locationId },
             limit, page
         );
         res.status(200).send(result);
@@ -315,13 +316,14 @@ export const getCOATransactionDetails = async (req, res) => {
 
 
 export const getInventoryListBasedOnSipl = async (req, res) => {
+    const locationId = req.user?.dataValues?.lastSelectedLocation;
 
     let limit = Number(req.query?.limit) || 50;
     let page = Number(req.query?.page) || 1;
 
     try {
         const clientId = req.clientId;
-        const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId, limit, page);
+        const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId, locationId, limit, page);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting Product Inventory:", error);

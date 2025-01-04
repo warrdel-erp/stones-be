@@ -631,8 +631,8 @@ export async function getCOATransactionDetails(queryParams) {
 }
 
 
-export async function getInventoryListBasedOnSipl(clientId, limit, page) {
-    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId, limit, page);
+export async function getInventoryListBasedOnSipl(clientId, locationId, limit, page) {
+    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId, locationId, limit, page);
     // const landedCost= await productInventory.getLandedCost();
     return inventoryJsonData;
 }

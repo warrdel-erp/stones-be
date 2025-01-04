@@ -332,7 +332,8 @@ export async function getAllPurchaseOrder(data, limit, page) {
         where: {
           po: {
             [Op.like]: `%${data.search}%`
-          }
+          },
+          locationId: data?.locationId
         },
         include: [
           {
@@ -369,6 +370,9 @@ export async function getAllPurchaseOrder(data, limit, page) {
       });
     } else {
       result = await model.purchaseModel.findAndCountAll({
+        where: {
+          locationId: data?.locationId
+        },
         attributes: [
           'po',
           'purchaseOrderId',
