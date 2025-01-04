@@ -156,9 +156,9 @@ export async function loadingOrder(info) {
     }
 };
 
-export async function getAllSo(data) {
+export async function getAllSo(data, limit, page) {
     try {
-        const salesOrders = await salesOrderRepository.getAllSalesOrder(data);
+        const salesOrders = await salesOrderRepository.getAllSalesOrder(data, limit, page);
         return salesOrders;
     } catch (error) {
         console.error('Error fetching sales orders:', error);
@@ -302,7 +302,7 @@ export async function updateStatus(transactionData) {
                         poSlabDetailId: item.poSlabDetailId,
                         plDate: transactionData.plDate && transactionData.plDate,
                     }));
-                    
+
                     for (const packingDetail of packingDetails) {
                         await salesOrderRepository.updateSalesStatusOnPackagingList(packingDetail, { transaction });
                     }

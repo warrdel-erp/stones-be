@@ -1,3 +1,4 @@
+import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
 import { Op, Sequelize, where } from "sequelize";
 
@@ -79,9 +80,9 @@ export async function findPoNumber(poNumber, clientId) {
   return result;
 }
 
-export async function createPurchaseProductOrder(data,transaction) {
+export async function createPurchaseProductOrder(data, transaction) {
   try {
-    const result = await model.purchaseProductModel.create(data,{
+    const result = await model.purchaseProductModel.create(data, {
       transaction: transaction
     });
     return result;
@@ -91,17 +92,17 @@ export async function createPurchaseProductOrder(data,transaction) {
   }
 }
 
-export async function addOtherCharges(data,transaction) {
+export async function addOtherCharges(data, transaction) {
   try {
     if (Array.isArray(data)) {
       //  multiple records 
-      const results = await model.productOtherCharges.bulkCreate(data,{
+      const results = await model.productOtherCharges.bulkCreate(data, {
         transaction: transaction
       });
       return results;
       //single
     } else {
-      const result = await model.productOtherCharges.create(data,{transaction});
+      const result = await model.productOtherCharges.create(data, { transaction });
       return result;
     }
   } catch (error) {
@@ -111,13 +112,13 @@ export async function addOtherCharges(data,transaction) {
 }
 
 
-export async function createPrePurchaseOrder(data,transaction) {
+export async function createPrePurchaseOrder(data, transaction) {
   try {
     const result = await model.prePurchaseModel.create(data,
       {
-      transaction: transaction
+        transaction: transaction
       }
-  );
+    );
     return result;
   } catch (error) {
     console.error("Error in create pre purchase order:", error);
@@ -223,7 +224,7 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
         {
           model: model.productOtherCharges,
           as: 'productothercharges',
-          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+          attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
         },
         {
           model: model.supplierModel,
@@ -320,12 +321,14 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
 
 //get all purchase Order
 
-export async function getAllPurchaseOrder(data) {
+export async function getAllPurchaseOrder(data, limit, page) {
   let result;
   try {
+    const offset = (page - 1) * limit;
+
     if (data.search) {
-      result = await model.purchaseModel.findAll({
-        attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },
+      result = await model.purchaseModel.findAndCountAll({
+        attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
         where: {
           po: {
             [Op.like]: `%${data.search}%`
@@ -359,10 +362,13 @@ export async function getAllPurchaseOrder(data) {
             }
           },
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+        distinct: true
       });
     } else {
-      result = await model.purchaseModel.findAll({
+      result = await model.purchaseModel.findAndCountAll({
         attributes: [
           'po',
           'purchaseOrderId',
@@ -373,6 +379,7 @@ export async function getAllPurchaseOrder(data) {
           'paymentTerm',
           'status',
           'purchaseLocationId',
+          "createdAt",
           [
             Sequelize.literal(
               `(SELECT SUM(transaction_amount) 
@@ -416,13 +423,18 @@ export async function getAllPurchaseOrder(data) {
             attributes: ['location', 'purchaseLocation']
           }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        offset,
+        limit,
+        distinct: true
       });
 
     }
-    return result;
+    
+    return PaginatedData(result, limit, page)
+
   } catch (error) {
-    console.error(`Error in getting purchase Order for search term '${data.search || "N/A"}':`, error);
+    console.error(`Error in getting purchase Order for search term '${data.search || "N/A"}':`, error.message);
     throw error;
   }
 }

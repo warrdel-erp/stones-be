@@ -1,6 +1,8 @@
 import filterObject from '../helpers/filteredKeysUtils.js';
 import { findPoNumber } from '../repository/purchaseOrderRepository.js';
 import * as purchaseOrderService from '../services/purchaseOrderServices.js'
+import { paginationValidation } from '../zodValidations/purchaseOrder/pagination.js';
+import { ErrorResponse } from '../helpers/errorResponse.js';
 
 // 1. create order
 export const createOrder = async (req, res) => {
@@ -73,9 +75,16 @@ export const addPurchaseOrderProduct = async (req, res) => {
 export const getAllOpenPo = async (req, res) => {
     let { search } = req.query
     const clientId = req.clientId;
-    const queriedData = req.query
+    const queriedData = req.query;
+
+    let limit = Number(req.query?.limit) || 50;
+    let page = Number(req.query?.page) || 1;
+
     try {
-        const result = await purchaseOrderService.getAllPo({ search, clientId, queriedData });
+        const result = await purchaseOrderService.getAllPo(
+            { search, clientId, queriedData },
+            limit, page
+        );
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  PO :", error);
@@ -306,9 +315,13 @@ export const getCOATransactionDetails = async (req, res) => {
 
 
 export const getInventoryListBasedOnSipl = async (req, res) => {
+
+    let limit = Number(req.query?.limit) || 50;
+    let page = Number(req.query?.page) || 1;
+
     try {
         const clientId = req.clientId;
-        const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId);
+        const result = await purchaseOrderService.getInventoryListBasedOnSipl(clientId, limit, page);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting Product Inventory:", error);
@@ -511,7 +524,7 @@ export const getSlabInfo = async (req, res) => {
     try {
         const { poSlabDetailId } = req.query;
         if (!poSlabDetailId) {
-            return res.status(404).send({message: 'poSlabDetailId Required'})
+            return res.status(404).send({ message: 'poSlabDetailId Required' })
         }
         const result = await purchaseOrderService.getSlabInfo(poSlabDetailId);
         res.status(200).send({

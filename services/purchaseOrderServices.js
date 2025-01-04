@@ -76,8 +76,8 @@ export async function addPurchaseOrderProduct(dataArray) {
 }
 
 
-export async function getAllPo(data) {
-    return await purchaseOrderRepository.getAllPurchaseOrder(data)
+export async function getAllPo(data, limit, page) {
+    return await purchaseOrderRepository.getAllPurchaseOrder(data, limit, page)
 }
 
 // single po complete details  page
@@ -631,8 +631,8 @@ export async function getCOATransactionDetails(queryParams) {
 }
 
 
-export async function getInventoryListBasedOnSipl(clientId) {
-    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId);
+export async function getInventoryListBasedOnSipl(clientId, limit, page) {
+    const inventoryJsonData = await productInventory.getInventoryListBasedOnSipl(clientId, limit, page);
     // const landedCost= await productInventory.getLandedCost();
     return inventoryJsonData;
 }

@@ -1,3 +1,4 @@
+import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 // update product Inventory
@@ -176,8 +177,10 @@ export async function getInventoryList(page, limit, clientId) {
   }
 }
 
-export async function getInventoryListBasedOnSipl(clientId) {
+export async function getInventoryListBasedOnSipl(clientId, limit, page) {
   try {
+    const offset = (page - 1) * limit;
+
     const landedCosts = await model.landedCostModel.findAll({
       attributes: [
         'productId',
@@ -218,7 +221,7 @@ export async function getInventoryListBasedOnSipl(clientId) {
       lastLandedCosts.map(cost => [cost.productId, cost.productLandedCost])
     );
 
-    const result = await model.productInventoryModel.findAll({
+    const result = await model.productInventoryModel.findAndCountAll({
       where: {
         status: 'ACTIVE'
       },
@@ -227,7 +230,7 @@ export async function getInventoryListBasedOnSipl(clientId) {
         {
           model: model.inventoryInvoiceMapper,
           as: "productInventoryInvoiceMapper",
-          attributes: ["inventoryInvoiceMapperId"],
+          attributes: ["inventoryInvoiceMapperId", "poSupplierInvoiceId"],
           include: [
             {
               model: model.poSupplierInvoiceModel,
@@ -275,9 +278,16 @@ export async function getInventoryListBasedOnSipl(clientId) {
           },
         }
       ],
+      offset,
+      limit,
+      subQuery: false,
+      distinct: true
     });
 
-    const enrichedResult = result.map(entry => {
+    // convert to paginated response.
+    const paginatedData = PaginatedData(result, limit, page)
+
+    const enrichedResult = paginatedData.data.map(entry => {
       const productId = entry.salesProductDetails.productId;
       const landedCostInfo = landedCostMap[productId] || {};
 
@@ -292,7 +302,9 @@ export async function getInventoryListBasedOnSipl(clientId) {
       };
     });
 
-    return enrichedResult;
+    paginatedData.data = enrichedResult
+
+    return paginatedData;
 
   } catch (error) {
     console.error("Error in getInventoryList:", error);

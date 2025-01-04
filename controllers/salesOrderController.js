@@ -92,8 +92,15 @@ export const loadingOrder = async (req, res) => {
 export const getAllOpenSo = async (req, res) => {
     let { search } = req.query;
     const clientId = req.clientId;
+
+    let limit = Number(req.query?.limit) || 50;
+    let page = Number(req.query?.page) || 1;
+
     try {
-        const result = await salesOrderService.getAllSo({ search, clientId });
+        const result = await salesOrderService.getAllSo(
+            { search, clientId },
+            limit, page
+        );
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in getting all  SO :", error);
