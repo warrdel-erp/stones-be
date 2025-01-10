@@ -1,6 +1,7 @@
 import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
-import { Op, Sequelize, where } from "sequelize";
+import { Op, Sequelize } from "sequelize";
+import { purchaseStatus } from "../constant.js";
 
 export async function createOrder(data) {
   try {
@@ -318,123 +319,93 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
   }
 }
 
-
-//get all purchase Order
-
+// Get all purchase Order.
 export async function getAllPurchaseOrder(data, limit, page) {
   let result;
   try {
     const offset = (page - 1) * limit;
 
+    // --------------- Applying Filters S -------------------
+    let whereCondition = {};
+
+    // If Search exists match it inside 'po'.
     if (data.search) {
-      result = await model.purchaseModel.findAndCountAll({
-        attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
-        where: {
-          po: {
-            [Op.like]: `%${data.search}%`
-          },
-          locationId: data?.locationId
-        },
-        include: [
-          {
-            model: model.poSupplierInvoiceMapperModel,
-            where: {
-              purchaseOrderId: {
-                [Op.like]: `%${data.search}%`
-              }
-            }
-          },
-          {
-            model: model.supplierModel,
-            as: 'suppliers',
-            where: {
-              supplier_name: {
-                [Op.like]: `%${data.search}%`
-              }
-            }
-          },
-          {
-            model: model.locationModel,
-            as: 'location',
-            where: {
-              location: {
-                [Op.like]: `%${data.search}%`
-              }
-            }
-          },
-        ],
-        order: [['createdAt', 'DESC']],
-        limit,
-        offset,
-        distinct: true
-      });
-    } else {
-      result = await model.purchaseModel.findAndCountAll({
-        where: {
-          locationId: data?.locationId
-        },
-        attributes: [
-          'po',
-          'purchaseOrderId',
-          'poDate',
-          'requiredShipDate',
-          'supplierSo',
-          'container',
-          'paymentTerm',
-          'status',
-          'purchaseLocationId',
-          "createdAt",
-          [
-            Sequelize.literal(
-              `(SELECT SUM(transaction_amount) 
+      whereCondition.po = {
+        [Op.like]: `%${data?.search}%`
+      }
+    }
+
+    // Add status and location conditions.
+    whereCondition = {
+      ...whereCondition,
+      ...(data.status && { status: data.status }),
+      ...(data.locationId && { locationId: data.locationId })
+    }
+
+    // --------------- Applying Filters E -------------------
+
+    result = await model.purchaseModel.findAndCountAll({
+      where: whereCondition,
+      attributes: [
+        'po',
+        'purchaseOrderId',
+        'poDate',
+        'requiredShipDate',
+        'supplierSo',
+        'container',
+        'paymentTerm',
+        'status',
+        'purchaseLocationId',
+        "createdAt",
+        [
+          Sequelize.literal(
+            `(SELECT SUM(transaction_amount) 
                       FROM account_transaction 
                       WHERE account_transaction.purchase_order_id = purchase_orders.purchase_order_id)`
-            ),
-            'totalTransactionAmount'
-          ]
-        ],
-        include: [
-          {
-            model: model.poSupplierInvoiceMapperModel,
-            as: 'invoiceMapper',
-            include: [
-              {
-                model: model.containerModel,
-                as: 'invoiceContainers'
-              },
-              {
-                model: model.accountTransactionModel,
-                as: 'poSupplierInvoice'
-              }
-            ]
-          },
-          {
-            model: model.clientUserModel,
-            as: 'clientDetails',
-            attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-            where: {
-              clientId: data.clientId
+          ),
+          'totalTransactionAmount'
+        ]
+      ],
+      include: [
+        {
+          model: model.poSupplierInvoiceMapperModel,
+          as: 'invoiceMapper',
+          include: [
+            {
+              model: model.containerModel,
+              as: 'invoiceContainers'
+            },
+            {
+              model: model.accountTransactionModel,
+              as: 'poSupplierInvoice'
             }
-          },
-          {
-            model: model.supplierModel,
-            as: 'suppliers',
-            attributes: ['supplierType', 'paymentTerm', 'supplierName']
-          },
-          {
-            model: model.locationModel,
-            as: 'location',
-            attributes: ['location', 'purchaseLocation']
+          ]
+        },
+        {
+          model: model.clientUserModel,
+          as: 'clientDetails',
+          attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
+          where: {
+            clientId: data.clientId
           }
-        ],
-        order: [['createdAt', 'DESC']],
-        offset,
-        limit,
-        distinct: true
-      });
+        },
+        {
+          model: model.supplierModel,
+          as: 'suppliers',
+          attributes: ['supplierType', 'paymentTerm', 'supplierName']
+        },
+        {
+          model: model.locationModel,
+          as: 'location',
+          attributes: ['location', 'purchaseLocation']
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      offset,
+      limit,
+      distinct: true
+    });
 
-    }
-    
     return PaginatedData(result, limit, page)
 
   } catch (error) {
@@ -940,6 +911,22 @@ export async function getSlabInfo(poSlabDetailId) {
     return result;
   } catch (error) {
     console.error("Error in getting PO slab Detail:", error);
+    throw error;
+  }
+}
+
+// Cancel purchase order.
+export async function cancelPurchaseOrder(id) {
+  try {
+    const result = await model.purchaseModel.update({ status: purchaseStatus[3] }, {
+      where: {
+        purchaseOrderId: id
+      }
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error in cancelling PO:", error);
     throw error;
   }
 }

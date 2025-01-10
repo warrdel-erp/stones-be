@@ -1514,3 +1514,7 @@ ADD COLUMN lo_date DATE;
 
 -- Add last selected location to users table.
 ALTER TABLE users ADD COLUMN last_selected_location INT;
+
+-- NEW STATUS FOR PO
+ALTER TABLE purchase_orders 
+MODIFY COLUMN status ENUM('OPEN', 'CLOSE', 'UNAPPROVED', 'APPROVED', 'CANCELLED');

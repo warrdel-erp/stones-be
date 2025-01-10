@@ -19,7 +19,8 @@ import {
     convertCartItemToSO,
     getSuppliersPOJournal,
     slabLocationTransfer,
-    getSlabInfo
+    getSlabInfo,
+    cancelPurchaseOrder
 
 } from "../controllers/purchaseOrderControllers.js"
 
@@ -83,5 +84,7 @@ router.get('/supplierJournal', getSuppliersPOJournal);
 router.post('/inventoryTransfer', slabLocationTransfer);
 
 router.get('/getSlabInfo', getSlabInfo);
+
+router.patch('/cancel/:id', userAuth, cancelPurchaseOrder);
 
 export default router

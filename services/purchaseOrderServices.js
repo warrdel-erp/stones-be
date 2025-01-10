@@ -785,3 +785,9 @@ export async function slabLocationTransfer(info) {
 export async function getSlabInfo(poSlabDetailId) {
     return await purchaseOrderRepository.getSlabInfo(poSlabDetailId)
 }
+
+// Cancel purchase order.
+
+export async function cancelPurchaseOrder(id) {
+    return await purchaseOrderRepository.cancelPurchaseOrder(id)
+}

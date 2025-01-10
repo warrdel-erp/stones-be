@@ -2,7 +2,7 @@ import filterObject from '../helpers/filteredKeysUtils.js';
 import { findPoNumber } from '../repository/purchaseOrderRepository.js';
 import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 import { paginationValidation } from '../zodValidations/purchaseOrder/pagination.js';
-import { ErrorResponse } from '../helpers/errorResponse.js';
+import { ErrorResponse, SuccessResponse } from '../helpers/response.js';
 
 // 1. create order
 export const createOrder = async (req, res) => {
@@ -74,7 +74,7 @@ export const addPurchaseOrderProduct = async (req, res) => {
 // 5. get all Purchase Order
 export const getAllOpenPo = async (req, res) => {
     const locationId = req.user?.dataValues?.lastSelectedLocation;
-    let { search } = req.query;
+    let { search, status } = req.query;
     const clientId = req.clientId;
     const queriedData = req.query;
 
@@ -83,7 +83,7 @@ export const getAllOpenPo = async (req, res) => {
 
     try {
         const result = await purchaseOrderService.getAllPo(
-            { search, clientId, queriedData, locationId },
+            { search, clientId, queriedData, locationId, status },
             limit, page
         );
         res.status(200).send(result);
@@ -539,5 +539,28 @@ export const getSlabInfo = async (req, res) => {
             message: "Internal Server Error",
             error: error.message || "An unexpected error occurred.",
         });
+    }
+};
+
+export const cancelPurchaseOrder = async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+
+        // Validate that id is a valid number.
+        if (isNaN(id)) {
+            return ErrorResponse(res, 400, "Invalid id.")
+        }
+
+        // Service to cancel purchase order.
+        const result = await purchaseOrderService.cancelPurchaseOrder(id);
+
+        // if 0th index of result is 0 then update operation is not successfully done. 
+        if (result[0] == 0) {
+           return ErrorResponse(res, 400, "Purchase order does not cancelled.");
+        }
+
+        return SuccessResponse(res, 200, "Purchase order cancelled successfully.")
+    } catch (error) {
+        return ErrorResponse(res, 500, error.message, error.stack);
     }
 };
