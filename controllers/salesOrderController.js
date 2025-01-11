@@ -230,3 +230,55 @@ export const updateTax = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+export const deleteSlabsSO = async (req, res) => {
+    const { poSlabDetailId } = req.query;
+    try {
+        const result = await salesOrderService.deleteItem(poSlabDetailId);
+        return res.status(200).send(result);
+    } catch (error) {
+        console.error("Error while Deleting item: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+export const allPl = async (req, res) => {
+    const { clientId } = req.query;
+    try {
+        const result = await salesOrderService.getAllPL(clientId);
+        return res.status(200).send(result);
+    } catch (error) {
+        console.error("Error while Fetching PL: ", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+export const batchSalesInvoicing = async (req, res) => {
+    // console.log('batchSalesInvoicing req', req);
+    console.log('batchSalesInvoicing req.body', req.body);
+    // console.log('batchSalesInvoicing req.user', req.user);
+
+    const body = req.body
+
+    try {
+        const update = body.map(async (data) => {
+            console.log('data', data);
+            const soLoadingOrderId = data.soLoadingOrderId;
+            const soLoadingOrder = await findSalesOrdersInventory(soLoadingOrderId);
+            console.log('soLoadingOrder', soLoadingOrder);
+
+            const requestBodyTransaction = data;
+            const user = req.user;
+            const createdBy = user.dataValues.id;
+            await salesOrderService.updateStatus({ ...requestBodyTransaction, soLoadingOrderId, soLoadingOrder, createdBy });
+        })
+        const results = await Promise.all(update);
+        return res.status(200).send(results);
+        // return res.status(200).send("success");;
+    } catch (error) {
+        console.error(`Error while Btach Invoicing :`, error);
+        res.status(500).send("Internal Server Error");
+    }
+};

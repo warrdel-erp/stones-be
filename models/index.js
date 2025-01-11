@@ -291,6 +291,16 @@ freightBillsModel.hasOne(vendorModel, { foreignKey: 'vendor_id' });
 poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
 locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });
 
+salesOrderInventoryModel.belongsTo(soLoadingOrderModel, { foreignKey: 'so_loading_order_id' });
+soLoadingOrderModel.hasMany(salesOrderInventoryModel, { foreignKey: 'so_loading_order_id' });
+
+salesOrderModel.belongsTo(locationModel, { foreignKey: 'location', as: 'clientLocation' });
+locationModel.hasOne(salesOrderModel, { foreignKey: 'location', as: 'clientLocation' });
+
+salesOrderModel.belongsTo(userModel, { foreignKey: 'created_by' });
+userModel.hasMany(salesOrderModel, { foreignKey: 'created_by' });
+
+
 productOtherCharges.belongsTo(purchaseModel, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
 purchaseModel.hasMany(productOtherCharges, { foreignKey: 'purchase_order_id', as: 'productothercharges' });
 export {

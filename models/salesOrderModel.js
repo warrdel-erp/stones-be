@@ -24,7 +24,7 @@ export default sequelize.define(
         so: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            key:'so'
+            key: 'so'
             // unique: true,
         },
         soDate: {

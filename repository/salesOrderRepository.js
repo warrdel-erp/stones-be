@@ -202,7 +202,7 @@ export async function getAllSalesOrder(data, limit, page) {
       });
     } else {
       result = await model.salesOrderModel.findAndCountAll({
-        where:{
+        where: {
           location: data?.locationId
         },
         attributes: { exclude: ['updatedAt', 'deletedAt', 'status'] },
@@ -485,6 +485,61 @@ export async function updateTax(poSlabDetailId, tax) {
     return result;
   } catch (error) {
     console.error("Error updating sales Tax:", error);
+    return error;
+  }
+}
+
+export async function deleteSlab(slabId) {
+  try {
+    const result = await model.salesOrderInventoryModel.update(
+      { deletedAt: sequelize.literal('CURRENT_TIMESTAMP') },
+      {
+        where: {
+          poSlabDetailId: slabId,
+        }
+      }
+    );
+    return result;
+  } catch (error) {
+    console.error("Error updating slabPicked status:", error);
+    return error;
+  }
+}
+
+export async function fetchAllPl(clientId) {
+  try {
+    const result = await model.soLoadingOrderModel.findAll({
+      where: {
+        createdBy: clientId,
+        salesStatus: "PACKING LIST"
+      },
+      include: [
+        {
+          model: model.salesOrderInventoryModel,
+        },
+        {
+          model: model.salesOrderModel,
+          include: [
+            {
+              model: model.customerModel,
+              as: "customers"
+            },
+            {
+              model: model.locationModel,
+              as: 'clientLocation',
+            },
+            {
+              model: model.userModel,
+              attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] }
+            }
+          ]
+        }
+      ]
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error while Fetching PL:", error);
     return error;
   }
 }

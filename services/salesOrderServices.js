@@ -576,3 +576,31 @@ export async function updateTaxService(poSlabDetailIds, taxPer) {
         throw error;
     }
 };
+
+
+export async function deleteItem(poSlabDetailIds) {
+    try {
+        if (!Array.isArray(poSlabDetailIds) || poSlabDetailIds.length === 0) {
+            throw new Error("poSlabDetailIds must be a non-empty array.");
+        }
+
+        const updatePromises = poSlabDetailIds.map(async (poSlabDetailId) => {
+            return await salesOrderRepository.deleteSlab(poSlabDetailId);
+        });
+        const results = await Promise.all(updatePromises);
+        return results;
+
+    } catch (error) {
+        console.error("Error in updateTaxService:", error);
+        throw error;
+    }
+};
+
+export async function getAllPL(clientId) {
+    try {
+        return await salesOrderRepository.fetchAllPl(clientId);
+    } catch (error) {
+        console.error("Error whle Fetching PL:", error);
+        throw error;
+    }
+};
