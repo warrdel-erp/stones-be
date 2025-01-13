@@ -80,7 +80,6 @@ export async function getSingleCustomer(customerName) {
     } catch (error) {
         console.error(`Error in getSingleCustomer ${customerName}:`, error);
         throw error;
-        return error;
     }
 }
 

@@ -10,10 +10,13 @@ export async function getAllCustomers(data) {
 }
 
 export async function getSingleCustomer(customerName) {
+    console.log('customerName---------------', customerName);
     const customerDetails = await customerRepository.getSingleCustomer(customerName);
+    console.log('customerDetails---------------', customerDetails);
+
     const customerId = customerDetails.dataValues.customerId;
     const currentDate = new Date();
-    
+
     const ranges = [
         { name: 'creditSum_0_30', start: 0, end: 30 },
         { name: 'creditSum_31_45', start: 31, end: 45 },
@@ -40,9 +43,9 @@ export async function getSingleCustomer(customerName) {
         endDate.setDate(currentDate.getDate() - range.start);
 
         const transactions = await getAccountTransactionCustomer(customerId, startDate, endDate);
-        console.log(transactions,'jsjsjsjsj');
-        
-        
+        console.log(transactions, 'jsjsjsjsj');
+
+
         transactions.forEach(transaction => {
             if (transaction.transactionAmountType === 'credit') {
                 creditTransactionCount++;

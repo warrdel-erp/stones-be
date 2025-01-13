@@ -2,8 +2,6 @@ import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 import { purchaseStatus } from "../constant.js";
-import { Op, Sequelize } from "sequelize";
-import { purchaseStatus } from "../constant.js";
 
 export async function createOrder(data) {
   try {
@@ -344,7 +342,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
     }
 
     // --------------- Applying Filters E -------------------
-    
+
     const result = await model.purchaseModel.findAndCountAll({
       where: whereCondition,
       attributes: [
@@ -365,6 +363,14 @@ export async function getAllPurchaseOrder(data, limit, page) {
                       WHERE account_transaction.purchase_order_id = purchase_orders.purchase_order_id)`
           ),
           'totalTransactionAmount'
+        ],
+        [
+          Sequelize.fn('DATE', Sequelize.col('createdAt')),
+          'createdDate'
+        ],
+        [
+          Sequelize.fn('DATE', Sequelize.col('required_ship_date')),
+          'requiredShipDateFormatted'
         ]
       ],
       include: [

@@ -494,11 +494,22 @@ export async function deleteSlab(slabId) {
   }
 }
 
+
 export async function fetchAllPl(clientId) {
+  const allusersObj = await model.clientUserModel.findAll({
+    where: {
+      clientId
+    }
+  })
+
+  const userIds = allusersObj.map(data => data.dataValues.userId)
+
   try {
     const result = await model.soLoadingOrderModel.findAll({
       where: {
-        createdBy: clientId,
+        createdBy: {
+          [Op.in]: userIds
+        },
         salesStatus: "PACKING LIST"
       },
       include: [

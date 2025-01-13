@@ -79,7 +79,7 @@ export const login = async (req, res) => {
       token,
       clientId,
       userPermissionsArray,
-      locations: JSON.stringify(location),
+      userId
     });
   } catch (error) {
     console.error("Error during login:", error);
