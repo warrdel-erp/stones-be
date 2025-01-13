@@ -2,6 +2,8 @@ import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 import { purchaseStatus } from "../constant.js";
+import { Op, Sequelize } from "sequelize";
+import { purchaseStatus } from "../constant.js";
 
 export async function createOrder(data) {
   try {
@@ -321,7 +323,6 @@ export async function getSinglePurchaseOrder(purchaseOrderId) {
 
 // Get all purchase Order.
 export async function getAllPurchaseOrder(data, limit, page) {
-  let result;
   try {
     const offset = (page - 1) * limit;
 
@@ -343,8 +344,8 @@ export async function getAllPurchaseOrder(data, limit, page) {
     }
 
     // --------------- Applying Filters E -------------------
-
-    result = await model.purchaseModel.findAndCountAll({
+    
+    const result = await model.purchaseModel.findAndCountAll({
       where: whereCondition,
       attributes: [
         'po',

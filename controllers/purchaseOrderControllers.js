@@ -556,7 +556,7 @@ export const cancelPurchaseOrder = async (req, res) => {
 
         // if 0th index of result is 0 then update operation is not successfully done. 
         if (result[0] == 0) {
-            return ErrorResponse(res, 400, "Purchase order does not cancelled.");
+           return ErrorResponse(res, 400, "Purchase order does not cancelled.");
         }
 
         return SuccessResponse(res, 200, "Purchase order cancelled successfully.")

@@ -91,7 +91,7 @@ export const loadingOrder = async (req, res) => {
 //  get all Sales Order
 export const getAllOpenSo = async (req, res) => {
     const locationId = req.user?.dataValues?.lastSelectedLocation;
-    let { search } = req.query;
+    let { search, status } = req.query;
     const clientId = req.clientId;
 
     let limit = Number(req.query?.limit) || 50;
@@ -99,7 +99,7 @@ export const getAllOpenSo = async (req, res) => {
 
     try {
         const result = await salesOrderService.getAllSo(
-            { search, clientId, locationId },
+        { search, clientId, locationId, status },
             limit, page
         );
         res.status(200).send(result);
