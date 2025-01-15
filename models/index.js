@@ -242,9 +242,12 @@ clientUserModel.hasMany(opportunityModel, { foreignKey: 'created_by', sourceKey:
 //freight realtions
 
 freightDetailsModel.belongsTo(freightBillsModel, { foreignKey: 'freightBillsId' });
-freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' }),
+freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' });
 
-	poSlabDetails.belongsTo(productInventoryModel, { foreignKey: 'po_slab_detail_id' });
+freightDetailsModel.belongsTo(locationModel, { foreignKey: 'locations' });
+locationModel.hasOne(freightDetailsModel, { foreignKey: 'locations' });
+
+poSlabDetails.belongsTo(productInventoryModel, { foreignKey: 'po_slab_detail_id' });
 productInventoryModel.hasMany(poSlabDetails, { foreignKey: 'po_slab_detail_id' });
 
 // freightBillsModel.hasMany(freightDetailsModel, { foreignKey: 'freightBillsId', as: 'freightBillsDetails' })
@@ -285,8 +288,8 @@ poSupplierInvoiceMapperModel.hasMany(containerModel, { foreignKey: 'po_supplier_
 freightBillsModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_id' });
 poSupplierInvoiceMapperModel.hasMany(freightBillsModel, { foreignKey: 'po_supplier_invoice_id' });
 
-vendorModel.belongsTo(freightBillsModel, { foreignKey: 'vendor_id' })
-freightBillsModel.hasOne(vendorModel, { foreignKey: 'vendor_id' });
+freightBillsModel.belongsTo(vendorModel, { foreignKey: 'vendor_id' });
+vendorModel.hasOne(freightBillsModel, { foreignKey: 'vendor_id' });
 
 poSlabDetails.belongsTo(locationModel, { foreignKey: 'location_id' });
 locationModel.hasOne(poSlabDetails, { foreignKey: 'location_id', as: 'slabLocation' });

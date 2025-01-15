@@ -37,19 +37,22 @@ export async function getFreightData(data) {
         const result = await model.freightBillsModel.findAll({
             where: {
                 poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId,
-                // poSupplierInvoiceId: data.poSupplierInvoiceId
             },
-            // attributes:{ex:['location']},
             include: [
                 {
                     model: model.freightDetailsModel,
-                    as: 'freightBillsDetails'
+                    as: 'freightBillsDetails',
+                    include: [{
+                        model: model.locationModel,
+                    }]
                 },
                 {
-                    model:model.vendorModel
+                    model: model.vendorModel
                 }
             ]
         });
+
+        console.log('result-----------', result);
 
         return result;
     } catch (error) {
