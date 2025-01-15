@@ -1,6 +1,6 @@
 import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
-import { Op, where } from "sequelize";
+import { Op, Sequelize, where } from "sequelize";
 
 export async function createOrder(data) {
   try {
@@ -186,9 +186,33 @@ export async function getAllSalesOrder(data, limit, page) {
     // Add status and location conditions.
     whereCondition = {
       ...whereCondition,
-      ...(data.status && { status: data.status }),
       ...(data.location && { locationId: data.locationId })
     }
+
+    // SO that have loading order created.
+    if (data.status === "LOADING_ORDER") {
+      whereCondition.sales_orders_id = {
+        [Sequelize.Op.in]: Sequelize.literal(
+          `(select sales_orders_id from so_loading_order WHERE sales_status = 'LOADING ORDER')` // Subquery to fetch IDs with loading order.
+        ),
+      }
+    } else if (data.status === "PACKAGING_LIST") {
+      whereCondition.sales_orders_id = {
+        [Sequelize.Op.in]: Sequelize.literal(
+          `(select sales_orders_id from so_loading_order WHERE sales_status = 'PACKING LIST')` // Subquery to fetch IDs with packaging list.
+        ),
+      }
+    } else if (data.status === "OPEN") {
+      whereCondition.sales_orders_id = {
+        [Sequelize.Op.notIn]: Sequelize.literal(
+          `(select sales_orders_id from so_loading_order WHERE sales_orders_id IS NOT NULL)` // Subquery to fetch IDs with packaging list.
+        ),
+      }
+    }
+    else if (data.status) {
+      whereCondition.status = data.status
+    }
+
     // --------------- Applying Filters E -------------------
 
     const result = await model.salesOrderModel.findAndCountAll({

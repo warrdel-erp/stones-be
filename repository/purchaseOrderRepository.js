@@ -337,12 +337,27 @@ export async function getAllPurchaseOrder(data, limit, page) {
     // Add status and location conditions.
     whereCondition = {
       ...whereCondition,
-      ...(data.status && { status: data.status }),
-      ...(data.locationId && { locationId: data.locationId })
+      ...(data.locationId && { locationId: data.locationId }),
+    }
+
+    // To get pending transaction POs
+    if (data.status === "PENDING_PAYMENT") {
+      whereCondition.purchaseOrderId = {
+        [Sequelize.Op.notIn]: Sequelize.literal(
+          `(select purchase_order_id from account_transaction WHERE purchase_order_id IS NOT NULL)` // Subquery to fetch IDs
+        ),
+      }
+    } else if (data.status === "IN_TRANSIT") {
+      whereCondition.container = {
+        [Sequelize.Op.not]: null
+      }
+    }
+    else if (data.status) {
+      whereCondition.status = data.status
     }
 
     // --------------- Applying Filters E -------------------
-
+    
     const result = await model.purchaseModel.findAndCountAll({
       where: whereCondition,
       attributes: [
