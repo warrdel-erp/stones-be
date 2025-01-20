@@ -20,7 +20,6 @@ export const addFreightBill = async (req, res) => {
 //get freight data
 export const getFreightData = async (req, res) => {
     const query = req.query
-    console.log(query, 'quer');
 
     try {
         const result = await freightBillService.getFreightData(query);

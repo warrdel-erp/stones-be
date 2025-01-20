@@ -71,7 +71,6 @@ export async function findUserId(data) {
 export async function getClientDetails(data) {
     try {
         const clientsUserCount = await clientRepository.getClientsUser(data);
-        console.log(clientsUserCount, 'sjskjsj');
 
         const accessOfData = await clientRepository.getClientDetails(data);
         return {

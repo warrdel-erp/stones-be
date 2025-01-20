@@ -42,7 +42,6 @@ export async function getAllPermissionList() {
 }
 
 export async function createUserRole(info) {
-    console.log(info, 'infor');
 
 
     if (!Array.isArray(info)) {
@@ -109,7 +108,6 @@ export async function getUserPermissions(userId) {
         const userData = await findUserData(userId);
         const userEmail = userData.dataValues.email;
         const userRolePermission = await rolePermissionRepository.getUserPermissions(userEmail);
-        console.log(userRolePermission, 'uerek');
 
         return userRolePermission;
     } catch (error) {

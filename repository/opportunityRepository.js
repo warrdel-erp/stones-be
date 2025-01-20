@@ -205,7 +205,6 @@ export async function getInventoryList(page, limit, clientId) {
                 },
             ],
         });
-        console.log(JSON.stringify(result), 'invet');
         console.log(`Fetched getInventoryList ${result.length} records`);
         return result;
     } catch (error) {
@@ -218,9 +217,7 @@ export async function getInventoryList(page, limit, clientId) {
 //get selection sheet details
 
 
-export async function getSelectionSheetDetails(selectionSheetId) {
-    console.log(selectionSheetId,'losjsj');
-    
+export async function getSelectionSheetDetails(selectionSheetId) {    
     try {
         const result = await model.opportunitySelectionModel.findAll({
             where: {

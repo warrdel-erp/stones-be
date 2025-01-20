@@ -4,7 +4,6 @@ import sequelize from '../database/sequelizeConfig.js';
 import { updateSlabDetails } from "../repository/purchaseOrderRepository.js";
 
 export async function createSalesOrderWithProducts(opportunityDetails, selectedInventory, clientId, selectedSlabsData,soToCreateOf) {
-    console.log(soToCreateOf, 'seensj');
 
     const latestSoDetails = await getSoNumber(clientId);
     const salesOrderNumber = latestSoDetails.newSo;
@@ -26,10 +25,8 @@ export async function createSalesOrderWithProducts(opportunityDetails, selectedI
     };
 
     const createSalesOrder = await createOrder(salesOrderPayload);
-    console.log(createSalesOrder, 'sjsjsjsjs');
 
     const salesOrderId = createSalesOrder.dataValues.salesOrdersId;
-    console.log(salesOrderId, 'salesorcerid');
 
     const transaction = await sequelize.transaction();
     const results = [];
@@ -43,7 +40,6 @@ export async function createSalesOrderWithProducts(opportunityDetails, selectedI
             };
 
             const result = await addProduct(productData, { transaction });
-            console.log(result, 'dsddd');
 
             results.push(result);
         }

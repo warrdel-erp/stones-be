@@ -41,7 +41,6 @@ export const getOpportunityNumber = async (req, res) => {
     try {
         const clientId = req.clientId;
         const result = await opportunitiyService.getOpportunityNumber(clientId);
-        console.log(result, 'slslsl');
         res.status(200).json({
             status: 'success',
             message: 'Opportunity number retrieved successfully',

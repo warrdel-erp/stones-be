@@ -170,7 +170,6 @@ export async function getGroupedAccountList() {
 
 export async function getAccountIdByAccountName(data) {
     const { creditAccountName, debitAccountName } = data;
-    console.log(data, 'accnames');
 
     try {
         const result = await model.accountsModel.findAll({
@@ -217,7 +216,6 @@ export async function getAccountIdByAccountName(data) {
 //             startDate = new Date(year, month - 1, 1);
 //             endDate = new Date(year, month, 0);
 //         }
-//         console.log(queryParams, 'datess');
 
 //         const result = await model.accountsModel.findAll({
 //             attributes: ['accountName', 'accountsId', 'accountBalance', 'coaCode'],
@@ -307,7 +305,6 @@ export async function getCOATransactionDetails(queryParams = {}) {
             startDate = new Date(year, month - 1, 1);
             endDate = new Date(year, month, 0);
         }
-        console.log(queryParams, 'datess');
         const result = await model.subAccountTypesModel.findAll({
             attributes: ['subAccountType', 'subAccountTypesId'],
             include: [
@@ -434,7 +431,6 @@ export async function getPurchaseTransactions(supplierId, limit, offset, clientI
                 }
             ]
         });
-        console.log(result, 'resusllls');
 
         return result;
     } catch (error) {

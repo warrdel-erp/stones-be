@@ -256,18 +256,13 @@ export const allPl = async (req, res) => {
 };
 
 export const batchSalesInvoicing = async (req, res) => {
-    // console.log('batchSalesInvoicing req', req);
-    console.log('batchSalesInvoicing req.body', req.body);
-    // console.log('batchSalesInvoicing req.user', req.user);
 
     const body = req.body
 
     try {
         const update = body.map(async (data) => {
-            console.log('data', data);
             const soLoadingOrderId = data.soLoadingOrderId;
             const soLoadingOrder = await findSalesOrdersInventory(soLoadingOrderId);
-            console.log('soLoadingOrder', soLoadingOrder);
 
             const requestBodyTransaction = data;
             const user = req.user;

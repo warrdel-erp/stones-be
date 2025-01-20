@@ -64,12 +64,10 @@ export async function userAuth(req, res, next) {
       : req.originalUrl.split('?')[0];
 
     const requiredPermissions = permissionMap[reqUrl] || [];
-    // console.log(`>>>>>>>>requiredPermissions>>>`, requiredPermissions);
 
     const hasRequiredPermissions = requiredPermissions.every(permission =>
       userPermissionsArray.includes(permission)
     );
-    // console.log(`>>>>>>>>hasRequiredPermissions>>>`, hasRequiredPermissions);
 
     if (!hasRequiredPermissions) {
       return res.status(403).json({

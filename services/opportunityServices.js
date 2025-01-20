@@ -9,7 +9,6 @@ import { createSalesOrderWithProducts } from '../helpers/opportunityToSales.js';
 
 //create opportunity
 export async function addOpportunity(info) {
-    console.log(info, 'ifnor');
 
     return await opportunitiyRepository.addOpportunity(info);
 };
@@ -213,11 +212,9 @@ export async function updateSelectionSheet(selectionSheetId) {
 
 //convert selection sheet to SO
 export async function convertSelectionSheetToSO(selectionSheetId, createdBy, clientId) {
-    console.log(createdBy, 'cystomer');
 
     try {
         const selectionSheetDetails = await opportunitiyRepository.getSelectionSheetDetails(selectionSheetId);
-        console.log(selectionSheetDetails, 'detailss');
 
         if (selectionSheetDetails.length > 0) {
             const opportunityId = selectionSheetDetails[0].opportunityId;
@@ -307,7 +304,6 @@ export async function convertSelectionSheetToSO(selectionSheetId, createdBy, cli
 export async function convertOpportunityToSO(opportunityId, selectedSlabsData, createdBy, clientId) {
     try {
         // const clientId = 1;
-        console.log(selectedSlabsData, 'data');
 
         const opportunityDetails = await opportunitiyRepository.getOpportunityDetails({ opportunityId, clientId: clientId });
         const selectedInventory = [];

@@ -55,7 +55,6 @@ export async function latestPoNumber(clientId) {
         }
       ]
     });
-    // console.log(result);
 
     return result.length;
   } catch (error) {

@@ -11,7 +11,6 @@ export const getQRCode = async (req, res) => {
         if (!poSupplierInvoiceMapperId) {
             return res.status(400).json({ error: 'Missing poSupplierInvoiceMapperId' });
         }
-        console.log(poSupplierInvoiceMapperId,'jsjsj');
         // Call the service function and send the response
         await qrCodeService.getQrCodesAndBarCodes(req, res);
         

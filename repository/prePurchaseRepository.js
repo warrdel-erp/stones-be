@@ -8,7 +8,6 @@ export async function getPrePurchaseProductDetails(prePurchaseOrderId) {
         prePurchaseOrderId: prePurchaseOrderId
       }
     });
-    console.log(result,'resulse');
     
     return result;
   } catch (error) {

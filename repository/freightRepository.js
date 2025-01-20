@@ -4,7 +4,6 @@ import { Op, where } from "sequelize";
 
 //create freight bills
 export async function addFreightBill(data) {
-    console.log(`>>>>>>>>>>data`,data);   
     try {
         const result = await model.freightBillsModel.create(data);
         return result;
@@ -50,7 +49,6 @@ export async function getFreightData(data) {
             ]
         });
 
-        console.log('result-----------', result);
 
         return result;
     } catch (error) {
@@ -80,7 +78,6 @@ export async function getFreightAccounts() {
             //     }
             // ]
         })
-        console.log(result);
 
         return result;
     } catch (error) {

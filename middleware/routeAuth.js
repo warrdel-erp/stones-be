@@ -3,7 +3,6 @@ export const authorizePermissionForRole = (requiredPermissions) => {
     return async (req, res, next) => {
         try {
             const userId = req.user.id;
-            console.log(userId,'useridll');
             const userPermissions = await getUserPermissions(userId);
 
             const hasPermission = requiredPermissions.every(permission => userPermissions.includes(permission));

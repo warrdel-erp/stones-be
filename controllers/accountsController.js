@@ -128,7 +128,6 @@ export const getCOATransactionDetails = async (req, res) => {
             month, year,
             clientId
         };
-        console.log(queryParams, 'queryparams');
 
         Object.keys(queryParams).forEach(key => {
             if (queryParams[key] === undefined) {

@@ -42,7 +42,6 @@ export async function latestPoNumber(clientId) {
 
 export async function updateOrder(poNumber, info) {
   console.log('PO Number:', poNumber); // Log the PO number for debugging
-  console.log('Info:', info); // Log the info object
   try {
     // Update the order
     const result = await model.purchaseModel.update(info, {
@@ -51,7 +50,6 @@ export async function updateOrder(poNumber, info) {
       }
     });
 
-    console.log('Update result:', result); // Log the result of the update
     return result;
   } catch (error) {
     console.error("Error in updating order:", error);
@@ -136,7 +134,6 @@ export async function getPrePurchaseOrder(data) {
         }
       }
     });
-    console.log(result, 'kjasdkas');
     return result;
   } catch (error) {
     console.error("Error in create pre purchase order:", error);
@@ -162,7 +159,6 @@ export async function singlePoDetails(poNumber) {
 // Create Supplier Invoice mapper table 
 
 export async function createSupplierInvoiceMapper(data) {
-  console.log(`>>>165>>>>>>>data>>>>>>`,data);
   try {
     const result = await model.poSupplierInvoiceMapperModel.create(data);
     return result;
@@ -460,7 +456,6 @@ export async function latestTranscationNumber(purchaseOrderId) {
 // add slap details 
 
 export async function addSlabDetails(data) {
-  console.log(`>>>>addSlabDetails>>>data>>>>`,data);
   try {
     const result = await model.poSlabDetails.create(data);
     return result;
@@ -832,7 +827,6 @@ export async function deletePrePurchaeProduct(purchaseOrderProductId) {
 
 
 export async function getSupplierInvoices(data) {
-  console.log(data, 'jsjsj');
 
   try {
     const result = await model.poSupplierInvoiceMapperModel.findAll({
@@ -968,7 +962,6 @@ export async function getSuppliersPOJournal(info) {
         }
       ]
     });
-    console.log(result, 'resusllls');
 
     return result;
   } catch (error) {

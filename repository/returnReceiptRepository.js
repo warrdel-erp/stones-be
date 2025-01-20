@@ -92,7 +92,6 @@ export async function updateSlabDetails(poSlabDetailId, status) {
 
 export async function getReturnInvoice(search, clientId, queries) {
     try {
-        console.log(queries.soLoadingOrderId, 'skskskk');
 
         const result = await model.salesOrderModel.findAll({
             attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'status'] },

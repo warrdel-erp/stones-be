@@ -53,7 +53,6 @@ export const login = async (req, res) => {
       });
     });
 
-    console.log(userPermissionsArray, 'Collected User Permissions');
     if (!existingEmail) {
       return res.status(400).send("Email does not exist");
     }
