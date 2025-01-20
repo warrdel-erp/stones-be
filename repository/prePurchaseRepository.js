@@ -1,9 +1,7 @@
 import * as model from "../models/index.js";
 // import { Op } from "sequelize";
 
-export async function getPrePurchaseProductDetails(prePurchaseOrderId) {
-  console.log(prePurchaseOrderId,'ksjdhkds');
-  
+export async function getPrePurchaseProductDetails(prePurchaseOrderId) {  
   try {
     const result = await model.prePurchaseModel.findOne({
       where: {

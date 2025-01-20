@@ -181,11 +181,20 @@ export default sequelize.define('account_transaction', {
         allowNull: true,
         field: 'internal_notes'
     },
+    purpose: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     status: {
         type: DataTypes.ENUM(...status),
         allowNull: true,
         defaultValue: 'ACTIVE',
         field: 'status'
+    },
+    stage: {
+        type: DataTypes.ENUM('purchase','poSlab','freightBill','inventory','payment'),
+        allowNull: false, 
+        defaultValue: 'purchase'
     },
     createdAt: {
         type: DataTypes.DATE,

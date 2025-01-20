@@ -103,7 +103,6 @@ export const getGroupedAccountList = async (req, res) => {
 export const getAccountIdByAccountName = async (req, res) => {
     try {
         const requestData = req.body
-        console.log(requestData, 'jkasa');
         const result = await accountsService.getAccountIdByAccountName(requestData);
         res.status(200).send(result);
     } catch (error) {
@@ -171,6 +170,18 @@ export const journalEntryCreation = async (req, res) => {
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Account:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+export const getJournalEntry = async (req, res) => {
+    try {
+        const { poSupplierInvoiceMapperId } = req.query;
+        const result = await accountsService.getJournalEntry(poSupplierInvoiceMapperId);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error in get Journal Entry:", error);
         res.status(500).send("Internal Server Error");
     }
 };

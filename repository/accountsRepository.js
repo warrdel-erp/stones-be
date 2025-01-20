@@ -536,3 +536,59 @@ export async function journalEntryCreation(data) {
         throw error;
     }
 };
+
+export async function getjournalEntryByPurchaseOrder(poSupplierInvoiceMapperId) {
+    const result = await model.accountTransactionModel.findAll({
+        attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "status"] },
+        where: {
+            poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+            stage: {
+                [Op.in]: ['purchase', 'poSlab', 'freightBill', 'inventory', 'payment'],
+            },
+        },
+        include: [
+            {
+                model: model.accountsModel,
+                attributes: ["accountName", "openingBalanceDate", "accountBalance"],
+                include: [
+                    {
+                        model: model.subAccountTypesModel,
+                        as: 'accountSubtype',
+                        attributes: ["subAccountType"],
+                    },
+                ]
+            },
+            {
+                model: model.poSupplierInvoiceMapperModel,
+                as: 'poSupplierInvoice',
+                attributes: ["totalProductCharges", "otherChargesTotal", "finalTotalCharges", "transaction"],
+                include:[
+                    {
+                        model:model.poSlabDetails,
+                        as: 'siplSlabDetails',
+                        attributes: ["serialNumber"]
+                    }
+                ]
+            },
+            {
+                model: model.purchaseModel,
+                as: 'purchaseOrder',
+                attributes: ["purchaseOrderId","purchase_location_id"],
+                include:[
+                    {
+                        model:model.locationModel,
+                        as: 'purchaseLocation',
+                        attributes:["location"]
+                    }
+                ]
+            },
+            {
+                model: model.supplierModel,
+                as: 'supplierTransactions',
+                attributes: ["supplierName"],
+            }
+        ]
+    });
+
+    return result;
+}

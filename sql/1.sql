@@ -1518,3 +1518,15 @@ ALTER TABLE users ADD COLUMN last_selected_location INT;
 -- NEW STATUS FOR PO
 ALTER TABLE purchase_orders 
 MODIFY COLUMN status ENUM('OPEN', 'CLOSE', 'UNAPPROVED', 'APPROVED', 'CANCELLED');
+
+alter table account_transaction
+add column stage ENUM('purchase', 'poSlab', 'freightBill', 'inventory','payment') not null default 'purchase';
+
+alter table po_supplier_invoice_mapper
+add column total_product_quantity FLOAT;
+
+ALTER TABLE freightBills
+ADD COLUMN unit_fright FLOAT NULL;
+
+alter table account_transaction 
+add column purpose varchar(255);

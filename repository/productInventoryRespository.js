@@ -65,7 +65,7 @@ export async function addInventoryInvoice(data) {
 export async function getInventoryDetailsBySupplierInvoiceMapperId(poSupplierInvoiceMappperId) {
   try {
     const res = await model.poSupplierInvoiceMapperModel.findOne({
-      attributes: ["purchase_order_id"],
+      attributes: ["purchase_order_id",'totalProductQuantity'],
       include: [
         {
           model: model.poSupplierInvoiceModel,

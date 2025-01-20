@@ -103,6 +103,11 @@ export default sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    unitFright: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      field: 'unit_fright'
+    },
     status: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
       allowNull: false,

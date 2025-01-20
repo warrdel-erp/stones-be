@@ -36,6 +36,11 @@ export default sequelize.define(
             allowNull: true,
             field: 'final_total_charges',
         },
+        totalProductQuantity: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            field: 'total_product_quantity',
+        },
         transaction: {
             type: DataTypes.STRING,
             allowNull: true,

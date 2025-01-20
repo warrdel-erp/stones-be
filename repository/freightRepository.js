@@ -4,6 +4,7 @@ import { Op, where } from "sequelize";
 
 //create freight bills
 export async function addFreightBill(data) {
+    console.log(`>>>>>>>>>>data`,data);   
     try {
         const result = await model.freightBillsModel.create(data);
         return result;
@@ -16,8 +17,6 @@ export async function addFreightBill(data) {
 
 //create freight bills details
 export async function addFreightBillDetails(data) {
-    console.log(data, 'djdd');
-
     try {
         const result = await model.freightDetailsModel.create(data);
         return result;
@@ -32,7 +31,6 @@ export async function addFreightBillDetails(data) {
 
 
 export async function getFreightData(data) {
-    console.log(data, 'data');
     try {
         const result = await model.freightBillsModel.findAll({
             where: {
@@ -90,3 +88,19 @@ export async function getFreightAccounts() {
         throw new Error('Failed to fetch transaction data');
     }
 }
+
+export async function getFreightBillByPoSupplierInvoiceMapperId(poSupplierInvoiceMapperId) {
+    try {
+        const result = await model.freightBillsModel.findAll({
+            attributes :["unitFright",'vendorId'],
+            where: {
+                poSupplierInvoiceMapperId: poSupplierInvoiceMapperId
+            }
+        });
+        return result;
+    } catch (error) {
+        console.error("Error in creating freight Bills:", error);
+        throw error;
+    }
+};
+// getFreightBill()

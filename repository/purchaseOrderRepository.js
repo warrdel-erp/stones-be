@@ -1,6 +1,6 @@
 import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
-import { Op, Sequelize } from "sequelize";
+import { JSON, Op, Sequelize } from "sequelize";
 import { purchaseStatus } from "../constant.js";
 
 export async function createOrder(data) {
@@ -162,6 +162,7 @@ export async function singlePoDetails(poNumber) {
 // Create Supplier Invoice mapper table 
 
 export async function createSupplierInvoiceMapper(data) {
+  console.log(`>>>165>>>>>>>data>>>>>>`,data);
   try {
     const result = await model.poSupplierInvoiceMapperModel.create(data);
     return result;
@@ -459,6 +460,7 @@ export async function latestTranscationNumber(purchaseOrderId) {
 // add slap details 
 
 export async function addSlabDetails(data) {
+  console.log(`>>>>addSlabDetails>>>data>>>>`,data);
   try {
     const result = await model.poSlabDetails.create(data);
     return result;
@@ -545,10 +547,11 @@ export async function getPaymentDetails(poSupplierInvoiceMapperId) {
     const result = await model.accountTransactionModel.findAll({
       where: {
         poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
-        transactionAmountType: 'credit',
-        entryType: 'dr'
+        stage: {
+          [Op.in]: ['payment'],
       },
-    });
+      },
+    });    
     return result;
   } catch (error) {
     console.error(`Error in getting payment details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`, error);
@@ -593,6 +596,151 @@ export async function purchaseAccountTransaction(data) {
     return result;
   } catch (error) {
     console.error("Error in add paymentr:", error);
+    throw error;
+  }
+};
+
+export async function balanceDebitEntriesForPurchaseOrder(poSupplierInvoiceMapperId,accountsId) {
+  
+  try {
+    const result = await model.accountTransactionModel.findAll({
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        transactionAmountType: 'debit',
+        stage: {
+          [Op.in]: ['purchase', 'freightBill']
+        }
+      }
+    });
+
+    const newEntries = result.map(entry => {
+      const entryData = entry.toJSON(); 
+      
+      delete entryData.accountTransactionId;
+      
+      return {
+        ...entryData,
+        transactionAmountType: 'credit',
+        stage: 'inventory',
+        entryType:'cr',
+        // accountsId:accountsId
+      };
+    });
+    await model.accountTransactionModel.bulkCreate(newEntries);
+    console.log('New credit entries with poslab stage have been created.');
+
+    return result; 
+  } catch (error) {
+    console.error("Error in getting and creating debit entries:", error);
+    throw error;
+  }
+};
+
+
+export async function inventoryInverance(poSupplierInvoiceMapperId) {
+  try {
+    const inventoryTotal = await model.accountTransactionModel.sum('transactionAmount', {
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        stage: 'inventory',
+      }
+    });
+
+    const poslabTotal = await model.accountTransactionModel.sum('transactionAmount', {
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        stage: 'poslab',
+      }
+    });
+
+    const inventoryEntries = await model.accountTransactionModel.findOne({
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        stage: 'inventory',
+      }
+    });
+
+    const variance = inventoryTotal - poslabTotal;
+    const type = variance > 0 ? 'debit' : 'credit';
+    const entryType = variance > 0 ? 'dr' : 'cr';
+
+    return {
+      inventoryTotal,
+      poslabTotal,
+      variance,
+      type,
+      entryType,
+      inventoryEntries
+    };
+
+  } catch (error) {
+    console.error("Error in calculating inventory and poslab totals:", error);
+    throw error;
+  }
+};
+
+export async function balanceDebitEntriesForPurchaseOrderOnPayment(poSupplierInvoiceMapperId) {  
+  try {
+    const result = await model.accountTransactionModel.findAll({
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        transactionAmountType: 'credit',
+        stage: {
+          [Op.in]: ['purchase']
+        }
+      }
+    });
+
+    const results = await model.accountTransactionModel.findAll({
+      where: {
+        poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
+        accountsId: 105
+      }
+    });
+
+    if (!result || result.length === 0) {
+      console.log('No credit entries found for the given PO.');
+      return;
+    }
+
+    const newEntries = result.map(entry => {
+      const entryData = entry.toJSON();
+      delete entryData.accountTransactionId;
+
+      return {
+        ...entryData,
+        transactionAmountType: 'debit',
+        stage: 'payment',
+        entryType: 'dr',
+      };
+    });
+
+    await model.accountTransactionModel.bulkCreate(newEntries);
+    console.log('New debit entries for result have been created for the payment stage.');
+
+    const newResultsEntries = results.map(entry => {
+      const entryData = entry.toJSON();
+      delete entryData.accountTransactionId;
+
+      return {
+        ...entryData,
+        transactionAmountType: 'debit',
+        stage: 'payment',
+        entryType: 'dr',
+      };
+    });
+
+    await model.accountTransactionModel.bulkCreate(newResultsEntries);
+    console.log('New debit entries for results have been created for the payment stage.');
+
+    return {
+      result: result,
+      results: newResultsEntries,
+      newEntries: newEntries
+    };
+
+  } catch (error) {
+    console.error("Error in getting and creating debit entries:", error);
     throw error;
   }
 };
@@ -952,3 +1100,25 @@ export async function cancelPurchaseOrder(id) {
     throw error;
   }
 }
+
+export async function getSupplierInvoiceByPoSupplierInvoiceId(poSupplierInvoiceId) {
+    try {
+        const result = await model.poSupplierInvoiceModel.findAll({
+            attributes :["unitPrice"],
+            where: {
+              poSupplierInvoiceId: poSupplierInvoiceId
+            },
+            include:[
+              {
+                model:model.purchaseProductModel,
+                as: 'supplierPurchaseProduct',
+                attributes:['purchaseOrderId']
+              }
+            ]
+        });        
+        return result;
+    } catch (error) {
+        console.error("Error in getting supplierinvoice:", error);
+        throw error;
+    }
+};

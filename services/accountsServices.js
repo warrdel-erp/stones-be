@@ -309,3 +309,37 @@ export async function journalEntryCreation(infoArray) {
         throw error;
     }
 }
+
+
+export async function getJournalEntry(poSupplierInvoiceMapperId) {
+    try {
+        const journalEntryDetails = await accountsRepository.getjournalEntryByPurchaseOrder(poSupplierInvoiceMapperId);
+
+        const groupedByStage = {
+            purchase: { entries: [], totalDebit: 0, totalCredit: 0 },
+            poSlab: { entries: [], totalDebit: 0, totalCredit: 0 },
+            freightBill: { entries: [], totalDebit: 0, totalCredit: 0 },
+            inventory: { entries: [], totalDebit: 0, totalCredit: 0 },
+            payment: { entries: [], totalDebit: 0, totalCredit: 0 }
+        };
+
+        journalEntryDetails.forEach(entry => {
+            const { stage, transactionAmount, transactionAmountType } = entry;
+
+            if (groupedByStage[stage]) {
+                groupedByStage[stage].entries.push(entry);
+
+                if (transactionAmountType === 'debit') {
+                    groupedByStage[stage].totalDebit += transactionAmount || 0;
+                } else if (transactionAmountType === 'credit') {
+                    groupedByStage[stage].totalCredit += transactionAmount || 0;
+                }
+            }
+        });
+        return groupedByStage;
+
+    } catch (error) {
+        console.error('Error fetching journal entry details:', error);
+        throw error;
+    }
+}
