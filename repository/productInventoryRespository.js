@@ -177,7 +177,7 @@ export async function getInventoryList(page, limit, clientId) {
   }
 }
 
-export async function getInventoryListBasedOnSipl(clientId, limit, page) {
+export async function getInventoryListBasedOnSipl(clientId, locationId, limit, page) {
   try {
     const offset = (page - 1) * limit;
 
@@ -231,11 +231,13 @@ export async function getInventoryListBasedOnSipl(clientId, limit, page) {
           model: model.inventoryInvoiceMapper,
           as: "productInventoryInvoiceMapper",
           attributes: ["inventoryInvoiceMapperId", "poSupplierInvoiceId"],
+          required: true,
           include: [
             {
               model: model.poSupplierInvoiceModel,
               as: "productInventoryInvoice",
               attributes: ["poSupplierInvoiceId"],
+              required: true,
               include: [
                 {
                   model: model.poSlabDetails,
@@ -243,8 +245,10 @@ export async function getInventoryListBasedOnSipl(clientId, limit, page) {
                   where: {
                     status: {
                       [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
-                    }
+                    },
+                    locationId
                   },
+                  required: true,
                   include: [
                     {
                       model: model.locationModel,
