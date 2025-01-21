@@ -2,6 +2,7 @@ import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
 import { JSON, Op, Sequelize } from "sequelize";
 import { purchaseStatus } from "../constant.js";
+import poSlabDetailModel from "../models/poSlabDetailModel.js";
 
 export async function createOrder(data) {
   try {
@@ -354,7 +355,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
     }
 
     // --------------- Applying Filters E -------------------
-    
+
     const result = await model.purchaseModel.findAndCountAll({
       where: whereCondition,
       attributes: [
@@ -544,9 +545,9 @@ export async function getPaymentDetails(poSupplierInvoiceMapperId) {
         poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
         stage: {
           [Op.in]: ['payment'],
+        },
       },
-      },
-    });    
+    });
     return result;
   } catch (error) {
     console.error(`Error in getting payment details for poSupplierInvoiceMapperId: ${poSupplierInvoiceMapperId}`, error);
@@ -595,8 +596,8 @@ export async function purchaseAccountTransaction(data) {
   }
 };
 
-export async function balanceDebitEntriesForPurchaseOrder(poSupplierInvoiceMapperId,accountsId) {
-  
+export async function balanceDebitEntriesForPurchaseOrder(poSupplierInvoiceMapperId, accountsId) {
+
   try {
     const result = await model.accountTransactionModel.findAll({
       where: {
@@ -609,22 +610,22 @@ export async function balanceDebitEntriesForPurchaseOrder(poSupplierInvoiceMappe
     });
 
     const newEntries = result.map(entry => {
-      const entryData = entry.toJSON(); 
-      
+      const entryData = entry.toJSON();
+
       delete entryData.accountTransactionId;
-      
+
       return {
         ...entryData,
         transactionAmountType: 'credit',
         stage: 'inventory',
-        entryType:'cr',
+        entryType: 'cr',
         // accountsId:accountsId
       };
     });
     await model.accountTransactionModel.bulkCreate(newEntries);
     console.log('New credit entries with poslab stage have been created.');
 
-    return result; 
+    return result;
   } catch (error) {
     console.error("Error in getting and creating debit entries:", error);
     throw error;
@@ -674,7 +675,7 @@ export async function inventoryInverance(poSupplierInvoiceMapperId) {
   }
 };
 
-export async function balanceDebitEntriesForPurchaseOrderOnPayment(poSupplierInvoiceMapperId) {  
+export async function balanceDebitEntriesForPurchaseOrderOnPayment(poSupplierInvoiceMapperId) {
   try {
     const result = await model.accountTransactionModel.findAll({
       where: {
@@ -1095,23 +1096,40 @@ export async function cancelPurchaseOrder(id) {
 }
 
 export async function getSupplierInvoiceByPoSupplierInvoiceId(poSupplierInvoiceId) {
-    try {
-        const result = await model.poSupplierInvoiceModel.findAll({
-            attributes :["unitPrice"],
-            where: {
-              poSupplierInvoiceId: poSupplierInvoiceId
-            },
-            include:[
-              {
-                model:model.purchaseProductModel,
-                as: 'supplierPurchaseProduct',
-                attributes:['purchaseOrderId']
-              }
-            ]
-        });        
-        return result;
-    } catch (error) {
-        console.error("Error in getting supplierinvoice:", error);
-        throw error;
-    }
+  try {
+    const result = await model.poSupplierInvoiceModel.findAll({
+      attributes: ["unitPrice"],
+      where: {
+        poSupplierInvoiceId: poSupplierInvoiceId
+      },
+      include: [
+        {
+          model: model.purchaseProductModel,
+          as: 'supplierPurchaseProduct',
+          attributes: ['purchaseOrderId']
+        }
+      ]
+    });
+    return result;
+  } catch (error) {
+    console.error("Error in getting supplierinvoice:", error);
+    throw error;
+  }
 };
+
+//updateSlabStatus
+export async function updateSlabStatus(poSimId) {
+  try {
+    await poSlabDetailModel.update(
+      { status: 'ACTIVE' },
+      {
+        where: {
+          poSupplierInvoiceMapperId: poSimId
+        }
+      }
+    )
+  } catch (error) {
+    console.error('Error While Uopdating Slab Status', error);
+    throw error
+  }
+}

@@ -103,7 +103,7 @@ export default sequelize.define(
         status: {
             type: DataTypes.ENUM(...poSlabDetailStatus),
             allowNull: false,
-            defaultValue: 'ACTIVE' // Default value is 'active'
+            defaultValue: 'INITIATED'
         },
         addedToSelectionSheet: {
             type: DataTypes.TINYINT,

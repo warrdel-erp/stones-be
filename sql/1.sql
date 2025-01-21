@@ -1530,3 +1530,13 @@ ADD COLUMN unit_fright FLOAT NULL;
 
 alter table account_transaction 
 add column purpose varchar(255);
+
+-- poslab status added
+ALTER TABLE po_slab_details
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD', 'INTRANSIT', 'INITIATED', 'ALLOCATED');
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD column container varchar(255);
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD column freightForwarder int;

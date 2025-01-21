@@ -55,6 +55,8 @@ export const singleSoDetails = async (req, res) => {
 export const addProduct = async (req, res) => {
     try {
         const info = req.body
+        console.log('info----------', JSON.stringify(info));
+
         const { salesOrdersId } = req.body
         if (!(salesOrdersId)) {
             res.status(400).send("Sales orders Id is required");
@@ -99,7 +101,7 @@ export const getAllOpenSo = async (req, res) => {
 
     try {
         const result = await salesOrderService.getAllSo(
-        { search, clientId, locationId, status },
+            { search, clientId, locationId, status },
             limit, page
         );
         res.status(200).send(result);

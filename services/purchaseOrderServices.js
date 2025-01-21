@@ -125,17 +125,18 @@ export async function singlePoDetails(purchaseOrderId) {
 
 // add supplier Invoice
 export async function addSuplierInvoice(data) {
-    
+
     const transaction = await sequelize.transaction();
-    const accNames = { creditAccountName: 'Trade Payables',
+    const accNames = {
+        creditAccountName: 'Trade Payables',
         //  debitAccountName: 'Other Inventory, Gross ' 
-        }
+    }
     const transactionAccontId = await getAccountIdByAccountName(accNames);
 
     const accountDetails = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' };
     const totalQuantity = data.productDeatils.map(product => product.quantity).reduce((sum, quantity) => sum + quantity, 0);
 
- 
+
     const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId);
     let transcationNumber
     if (!(getLatestTranscationNumber)) {
@@ -148,6 +149,8 @@ export async function addSuplierInvoice(data) {
         const results = [];
         let result;
         const info = {
+            freightForwarder: data.freightForwarder,
+            container: data.container,
             finalTotalCharges: data.finalTotalCharges,
             totalProductCharges: data.totalProductCharges,
             otherChargesTotal: data.otherChargesTotal,
@@ -159,7 +162,7 @@ export async function addSuplierInvoice(data) {
             dueDate: data.dueDate,
             createdBy: data.createdBy,
             // transactionStatus: 'SIPL CREATED'
-            totalProductQuantity:totalQuantity
+            totalProductQuantity: totalQuantity
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
@@ -175,11 +178,11 @@ export async function addSuplierInvoice(data) {
             transactionAmountDate: new Date(),
             createdBy: data.createdBy,
             purchaseOrderId: data.purchaseOrderId,
-            stage:'purchase',
+            stage: 'purchase',
             poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
             purpose: 'Accounts Payable',
         };
-        await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccountOnSupplier);    
+        await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccountOnSupplier);
 
         for (const dataArray of data.productDeatils) {
             const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId };
@@ -196,11 +199,11 @@ export async function addSuplierInvoice(data) {
                 prePurchaseOrderId: prePurchaseOrderId,
                 transaction: transaction
             });
-            
-        const accNames = { creditAccountName: 'Inventory in Transit'}
-        const transactionAccontId = await getAccountIdByAccountName(accNames);
-    
-        const accountDetailCR = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'dr' };
+
+            const accNames = { creditAccountName: 'Inventory in Transit' }
+            const transactionAccontId = await getAccountIdByAccountName(accNames);
+
+            const accountDetailCR = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'dr' };
 
             const transactionDataWithAccount = {
                 // supplierId: data.supplierId,
@@ -213,7 +216,7 @@ export async function addSuplierInvoice(data) {
                 createdBy: data.createdBy,
                 purchaseOrderId: data.purchaseOrderId,
                 poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
-                stage:'purchase',
+                stage: 'purchase',
                 purpose: 'Inventory In Transit'
             };
             await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
@@ -234,7 +237,7 @@ export async function addSuplierInvoice(data) {
 
 // add slab details
 
-export async function addSlabDetails(info) {    
+export async function addSlabDetails(info) {
     try {
         const { slabCounter, po, isBlockIncreament, iisLotIncreament, isSlabIncreament, block, lot, poSupplierInvoiceMapperId, slab, siplNumber, ...slabInfo } = info;
         const freightBillDetails = await getFreightBillByPoSupplierInvoiceMapperId(poSupplierInvoiceMapperId)
@@ -330,16 +333,16 @@ export async function addSlabDetails(info) {
                 Created_By:${slab.dataValues.createdBy},
                 Status:${slab.dataValues.status}
             `.trim();
-            const accNames = { 
+            const accNames = {
                 // creditAccountName: 'Finished Goods', 
-                debitAccountName: 'Finished Goods' 
+                debitAccountName: 'Finished Goods'
             };
             const transactionAccountId = await getAccountIdByAccountName(accNames);
-    
+
             const accountDetails = [
                 { accountsId: transactionAccountId.debitAccount.accountId, entryType: 'dr' },
             ];
-             const transactionDataWithAccount = {
+            const transactionDataWithAccount = {
                 accountsId: accountDetails[0].accountsId,
                 entryType: 'dr',
                 transactionOf: 'purchase',
@@ -349,12 +352,12 @@ export async function addSlabDetails(info) {
                 createdBy: info.createdBy,
                 poSupplierInvoiceMapperId: slab.dataValues.poSupplierInvoiceMapperId,
                 vendorId: vendorId,
-                stage:'poSlab',
-                purchaseOrderId :purchaseOrderId,
+                stage: 'poSlab',
+                purchaseOrderId: purchaseOrderId,
                 purpose: 'Invetory Received'
             };
-            
-            await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);      
+
+            await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
 
             const cleanSlabData = slabData.replace(/\n/g, ' ').replace(/\s+/g, ' ');
             const qrCodeData = JSON.stringify(cleanSlabData);
@@ -441,6 +444,7 @@ export async function singleSlabDetails(purchaseOrderId, poSupplierInvoiceMapppe
 // add product inventory 
 export async function addProductInventory(dataArray) {
     const poMapperId = parseInt(dataArray.poSupplierInvoiceMapperId);
+    await purchaseOrderRepository.updateSlabStatus(poMapperId)
     const transaction = await sequelize.transaction();
     const accNames = { creditAccountName: 'Other Expenses', debitAccountName: 'Other Expenses' }
     try {
@@ -457,9 +461,9 @@ export async function addProductInventory(dataArray) {
                 transactionOf: 'purchase',
                 transactionAmountType: 'debit',
                 createdBy: dataArray.createdBy,
-                stage:'inventory'
+                stage: 'inventory'
             };
-            const balanceInventory = await purchaseOrderRepository.balanceDebitEntriesForPurchaseOrder(poMapperId,accountDetails[0].accountsId)
+            const balanceInventory = await purchaseOrderRepository.balanceDebitEntriesForPurchaseOrder(poMapperId, accountDetails[0].accountsId)
 
             // await purchaseAccountTransaction(transactionDataWithAccount, transaction);
         }
@@ -524,8 +528,8 @@ export async function addProductInventory(dataArray) {
             transactionStatus: 'INVENTORY RECEIVED'
         });
 
-         await inventoryInveranceDiffernce(poMapperId,accountDetails[0].accountsId)
-         await purchaseOrderRepository.balanceDebitEntriesForPurchaseOrderOnPayment(poMapperId)
+        await inventoryInveranceDiffernce(poMapperId, accountDetails[0].accountsId)
+        await purchaseOrderRepository.balanceDebitEntriesForPurchaseOrderOnPayment(poMapperId)
 
         // Commit the transaction if all inserts succeed
         await transaction.commit();
@@ -540,31 +544,31 @@ export async function addProductInventory(dataArray) {
 
 export async function inventoryInveranceDiffernce(poSupplierInvoiceMappperId, accountId) {
     try {
-      const veranceDiffernceDetail = await purchaseOrderRepository.inventoryInverance(poSupplierInvoiceMappperId);
-      const { variance, type, entryType, inventoryEntries } = veranceDiffernceDetail;
-      const { purchaseOrderId, vendorId, createdBy } = inventoryEntries.dataValues || {};
-  
-      const transactionDataWithAccount = {
-        accountsId: accountId,
-        entryType: entryType,
-        transactionOf: 'purchase',
-        transactionAmountType: type,
-        transactionAmount: variance,
-        transactionAmountDate: new Date(),
-        createdBy: createdBy,
-        poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
-        vendorId: vendorId,
-        stage: 'inventory',
-        purchaseOrderId: purchaseOrderId,
-        purpose : 'Inventory Variance'
-      };
-      await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
-  
+        const veranceDiffernceDetail = await purchaseOrderRepository.inventoryInverance(poSupplierInvoiceMappperId);
+        const { variance, type, entryType, inventoryEntries } = veranceDiffernceDetail;
+        const { purchaseOrderId, vendorId, createdBy } = inventoryEntries.dataValues || {};
+
+        const transactionDataWithAccount = {
+            accountsId: accountId,
+            entryType: entryType,
+            transactionOf: 'purchase',
+            transactionAmountType: type,
+            transactionAmount: variance,
+            transactionAmountDate: new Date(),
+            createdBy: createdBy,
+            poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
+            vendorId: vendorId,
+            stage: 'inventory',
+            purchaseOrderId: purchaseOrderId,
+            purpose: 'Inventory Variance'
+        };
+        await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
+
     } catch (error) {
-      console.error("Error in inventoryInveranceDiffernce function:", error);
+        console.error("Error in inventoryInveranceDiffernce function:", error);
     }
 }
-    
+
 
 export async function getProductInventory(page, limit, clientId) {
     let result = [];
@@ -654,13 +658,13 @@ export async function purchaseAccountTransaction(transactionData) {
                     transactionOf: 'purchase',
                     transactionAmountType: 'credit',
                     createdBy: transactionData.createdBy,
-                    stage:'payment',
-                    purpose:'payment'
+                    stage: 'payment',
+                    purpose: 'payment'
                 };
                 await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, { transaction });
             }
         }
-        else {            
+        else {
             await purchaseOrderRepository.purchaseAccountTransaction(transactionData, transaction);
         }
         await transaction.commit();

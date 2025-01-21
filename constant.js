@@ -45,7 +45,7 @@ export const productAssignedBinEnum = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
 
 export const status = ['ACTIVE', 'INACTIVE', 'CLOSE', 'OPEN'];
 
-export const poSlabDetailStatus = ['ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD'];
+export const poSlabDetailStatus = ['ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD', 'INTRANSIT', 'INITIATED', 'ALLOCATED'];
 
 export const deliveryType = ['Pickup', 'Delivery', 'Other'];
 

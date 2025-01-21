@@ -75,6 +75,12 @@ export default sequelize.define(
             allowNull: true,
             field: 'transaction_status'
         },
+        container: {
+            type: String,
+        },
+        freightForwarder: {
+            type: Number,
+        },
         status: {
             type: DataTypes.ENUM(...status),
             allowNull: false,
