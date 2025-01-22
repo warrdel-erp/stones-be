@@ -230,25 +230,23 @@ export async function getInventoryListBasedOnSipl(clientId, locationId, limit, p
         {
           model: model.inventoryInvoiceMapper,
           as: "productInventoryInvoiceMapper",
-          attributes: ["inventoryInvoiceMapperId", "poSupplierInvoiceId"],
-          required: true,
+          attributes: ["inventoryInvoiceMapperId"],
           include: [
             {
               model: model.poSupplierInvoiceModel,
               as: "productInventoryInvoice",
-              attributes: ["poSupplierInvoiceId"],
-              required: true,
+              attributes: ["poSupplierInvoiceId", "po_supplier_invoice_id"],
               include: [
                 {
                   model: model.poSlabDetails,
                   as: "slabDetails",
+                  separate: true,
                   where: {
                     status: {
                       [Op.in]: ['ACTIVE', 'RETURNED', 'ONHOLD']
                     },
                     locationId
                   },
-                  required: true,
                   include: [
                     {
                       model: model.locationModel,
@@ -284,9 +282,14 @@ export async function getInventoryListBasedOnSipl(clientId, locationId, limit, p
       ],
       offset,
       limit,
-      subQuery: false,
       distinct: true
     });
+
+    // Assuming if slab details does not exists then return no data because every product must have slab details and if first will not have then no one will. 
+    // As data is not found for a location.
+    if(!result.rows[0]?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.slabDetails?.length){
+      return PaginatedData({count: 0, rows: []})
+    }
 
     // convert to paginated response.
     const paginatedData = PaginatedData(result, limit, page)
