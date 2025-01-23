@@ -389,7 +389,18 @@ export async function getAllPurchaseOrder(data, limit, page) {
             },
             {
               model: model.accountTransactionModel,
-              as: 'poSupplierInvoice'
+              as: 'poSupplierInvoice',
+              where: {
+                stage: {
+                  [Op.in]: ['purchase']
+                },
+                transactionAmountType: 'debit',
+              },
+              // attributes: [
+              //   'purchaseOrderId',
+              //   [Sequelize.fn('SUM', Sequelize.col('transaction_amount')), 'total'] 
+              // ],
+              // group: ['purchaseOrderId'],
             }
           ]
         },
@@ -410,7 +421,13 @@ export async function getAllPurchaseOrder(data, limit, page) {
           model: model.locationModel,
           as: 'location',
           attributes: ['location', 'purchaseLocation']
-        }
+        },
+        {
+          model: model.locationModel,
+          as: "purchaseLocation",
+          // foreignKey: "purchase_location_id",
+          attributes: ['location'],
+        },
       ],
       order: [['createdAt', 'DESC']],
       offset,
