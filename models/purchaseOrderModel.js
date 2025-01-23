@@ -53,6 +53,9 @@ export default sequelize.define(
             allowNull: true,
             field: 'delivery_date',
         },
+        deliveryType: {
+            type: DataTypes.ENUM(...deliveryType),
+        },
         shipmentTerms: {
             type: DataTypes.ENUM(...shipmentTerm),
             allowNull: true,

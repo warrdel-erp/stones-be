@@ -77,7 +77,12 @@ export async function addPurchaseOrderProduct(dataArray) {
 
 
 export async function getAllPo(data, limit, page) {
-    return await purchaseOrderRepository.getAllPurchaseOrder(data, limit, page)
+    console.log('data----------', data);
+
+    const result = await purchaseOrderRepository.getAllPurchaseOrder(data, limit, page)
+    console.log('result----------', result);
+
+    return result
 }
 
 // single po complete details  page
@@ -149,6 +154,12 @@ export async function addSuplierInvoice(data) {
         const results = [];
         let result;
         const info = {
+            supplierSo: data.supplierSo,
+            paymentTerm: data.paymentTerm,
+            etaDate: data.etaDate,
+            deliveryType: data.deliveryType,
+            shipmentTerms: data.shipmentTerms,
+            Paymentholdreason: data.Paymentholdreason,
             freightForwarder: data.freightForwarder,
             container: data.container,
             finalTotalCharges: data.finalTotalCharges,
@@ -161,7 +172,6 @@ export async function addSuplierInvoice(data) {
             shipDate: data.shipDate,
             dueDate: data.dueDate,
             createdBy: data.createdBy,
-            // transactionStatus: 'SIPL CREATED'
             totalProductQuantity: totalQuantity
         };
 
@@ -238,6 +248,8 @@ export async function addSuplierInvoice(data) {
 // add slab details
 
 export async function addSlabDetails(info) {
+    // console.log('info-------------', info);
+
     try {
         const { slabCounter, po, isBlockIncreament, iisLotIncreament, isSlabIncreament, block, lot, poSupplierInvoiceMapperId, slab, siplNumber, ...slabInfo } = info;
         const freightBillDetails = await getFreightBillByPoSupplierInvoiceMapperId(poSupplierInvoiceMapperId)
@@ -248,6 +260,8 @@ export async function addSlabDetails(info) {
         const unitPrice = supplierInvoiceDetails[0]?.unitPrice || 0;
         const totalLandedCost = unitFright + unitPrice
         const slabDetails = [];
+        const isContainer = await purchaseOrderRepository.isContainerExist(poSupplierInvoiceMapperId)
+        console.log('isContainer-----------', isContainer);
 
         const siplNumberMatch = siplNumber.match(/-\s*(\d+)/);
         const siplNumberAfterHyphen = siplNumberMatch ? parseInt(siplNumberMatch[1], 10) : null;
@@ -301,7 +315,8 @@ export async function addSlabDetails(info) {
                 slab: dynamicSlab,
                 slabCounter: slabCounter,
                 poSupplierInvoiceMapperId: poSupplierInvoiceMapperId,
-                barcode: barcode
+                barcode: barcode,
+                status: isContainer ? 'INTRANSIT' : 'INITIATED'
             });
 
             slabDetails.push(slabDetail);
@@ -618,8 +633,11 @@ export async function getPaymentDetails(poSupplierInvoiceMappperId) {
 // add container
 
 export async function addContainer(info) {
+    console.log('info', info);
+
     try {
         const containerResult = await purchaseOrderRepository.addContainer(info);
+        await purchaseOrderRepository.updateSlabStatusOnContainer(info.poSupplierInvoiceMapperId)
         await purchaseOrderRepository.siplTransactionStatusUpdate({
             poSupplierInvoiceMappperId: info.poSupplierInvoiceMapperId,
             transactionStatus: 'CONTAINER ADDED'
