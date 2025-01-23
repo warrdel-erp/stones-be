@@ -1,10 +1,12 @@
 import { PaginatedData } from "../helpers/paginatedData.js";
 import * as model from "../models/index.js";
-import { JSON, Op, Sequelize } from "sequelize";
+import { JSON, Op, Sequelize, where } from "sequelize";
 import { purchaseStatus } from "../constant.js";
 import poSlabDetailModel from "../models/poSlabDetailModel.js";
 
 export async function createOrder(data) {
+  console.log('data-----------------', data);
+
   try {
     const result = await model.purchaseModel.create(data);
     return result;
@@ -64,18 +66,8 @@ export async function findPoNumber(poNumber, clientId) {
     where: {
       po: {
         [Op.eq]: poNumber
-      }
+      },
     },
-    // include: [
-    //   {
-    //     model: model.clientUserModel,
-    //     as: 'clientDetails',
-    //     attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
-    //     where: {
-    //       clientId: clientId
-    //     }
-    //   }
-    // ]
   })
   return result;
 }
@@ -457,6 +449,7 @@ export async function latestTranscationNumber(purchaseOrderId) {
 // add slap details 
 
 export async function addSlabDetails(data) {
+  console.log('data-----------', data);
   try {
     const result = await model.poSlabDetails.create(data);
     return result;
@@ -1131,5 +1124,31 @@ export async function updateSlabStatus(poSimId) {
   } catch (error) {
     console.error('Error While Uopdating Slab Status', error);
     throw error
+  }
+}
+
+export async function isContainerExist(poSupplierInvoiceMappperId) {
+  try {
+    const result = await model.poSupplierInvoiceMapperModel.findOne({ where: { poSupplierInvoiceMappperId } });
+    return result?.dataValues?.container ? true : false;
+  } catch (error) {
+    console.error("Error while Fetching Container in SIPL:", error);
+    throw error;
+  }
+}
+
+export async function updateSlabStatusOnContainer(poSupplierInvoiceMapperId) {
+  try {
+    poSlabDetailModel.update(
+      { status: 'INTRANSIT' },
+      {
+        where: {
+          poSupplierInvoiceMapperId
+        }
+      }
+    )
+  } catch (error) {
+    console.error("Error while Fetching Container in SIPL:", error);
+    throw error;
   }
 }

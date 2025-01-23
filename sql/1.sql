@@ -1540,3 +1540,14 @@ ADD column container varchar(255);
 
 ALTER TABLE po_supplier_invoice_mapper
 ADD column freightForwarder int;
+
+ALTER TABLE purchase_orders
+ADD column deliveryType ENUM('Pickup', 'Delivery', 'Other')
+
+ALTER TABLE po_supplier_invoice_mapper
+ADD COLUMN supplierSo VARCHAR(255),
+ADD COLUMN paymentTerm int,
+ADD COLUMN etaDate VARCHAR(255),
+ADD COLUMN deliveryType VARCHAR(255),
+ADD COLUMN shipmentTerms VARCHAR(255),
+ADD COLUMN Paymentholdreason VARCHAR(255);

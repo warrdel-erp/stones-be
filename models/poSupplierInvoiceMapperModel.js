@@ -81,6 +81,24 @@ export default sequelize.define(
         freightForwarder: {
             type: Number,
         },
+        supplierSo: {
+            type: String,
+        },
+        paymentTerm: {
+            type: Number,
+        },
+        etaDate: {
+            type: String,
+        },
+        deliveryType: {
+            type: String,
+        },
+        shipmentTerms: {
+            type: String,
+        },
+        Paymentholdreason: {
+            type: String,
+        },
         status: {
             type: DataTypes.ENUM(...status),
             allowNull: false,

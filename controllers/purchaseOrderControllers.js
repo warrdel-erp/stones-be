@@ -15,10 +15,12 @@ export const createOrder = async (req, res) => {
         const poDetails = await findPoNumber(po, clientId);
         const data = filterObject(info)
 
+        console.log('poDetails', poDetails);
+
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
-        } else if (poDetails) {
-            res.status(400).send("PO Number can't Be Same");
+            // } else if (poDetails) {
+            //     res.status(400).send("PO Number can't Be Same");
         } else {
             const result = await purchaseOrderService.createOrder({ ...data, createdBy });
             res.status(200).send(result);
@@ -556,7 +558,7 @@ export const cancelPurchaseOrder = async (req, res) => {
 
         // if 0th index of result is 0 then update operation is not successfully done. 
         if (result[0] == 0) {
-           return ErrorResponse(res, 400, "Purchase order does not cancelled.");
+            return ErrorResponse(res, 400, "Purchase order does not cancelled.");
         }
 
         return SuccessResponse(res, 200, "Purchase order cancelled successfully.")
