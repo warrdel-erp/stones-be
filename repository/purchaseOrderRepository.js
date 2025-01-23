@@ -403,11 +403,11 @@ export async function getAllPurchaseOrder(data, limit, page) {
                 },
                 transactionAmountType: 'debit',
               },
-              attributes: [
-                'purchaseOrderId',
-                [Sequelize.fn('SUM', Sequelize.col('transaction_amount')), 'total'] 
-              ],
-              group: ['purchaseOrderId'],
+              // attributes: [
+              //   'purchaseOrderId',
+              //   [Sequelize.fn('SUM', Sequelize.col('transaction_amount')), 'total'] 
+              // ],
+              // group: ['purchaseOrderId'],
             }
           ]
         },
