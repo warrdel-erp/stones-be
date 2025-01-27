@@ -31,9 +31,10 @@ export async function addFreightBillDetails(data) {
 
 export async function getFreightData(data) {
     try {
+ 
         const result = await model.freightBillsModel.findAll({
             where: {
-                poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId,
+               ...(data.poSupplierInvoiceMapperId && { poSupplierInvoiceMapperId: data.poSupplierInvoiceMapperId}),
             },
             include: [
                 {

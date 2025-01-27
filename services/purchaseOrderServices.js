@@ -81,10 +81,7 @@ export async function addPurchaseOrderProduct(dataArray) {
 
 
 export async function getAllPo(data, limit, page) {
-    console.log('data----------', data);
-
     const result = await purchaseOrderRepository.getAllPurchaseOrder(data, limit, page)
-    console.log('result----------', result);
 
     return result
 }
