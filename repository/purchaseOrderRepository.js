@@ -5,10 +5,18 @@ import { purchaseStatus } from "../constant.js";
 import poSlabDetailModel from "../models/poSlabDetailModel.js";
 
 export async function createOrder(data) {
-  console.log('data-----------------', data);
-
   try {
     const result = await model.purchaseModel.create(data);
+    return result;
+  } catch (error) {
+    console.error("Error in create order:", error);
+    throw error;
+  }
+}
+
+export async function updatePO(data, poNO) {
+  try {
+    const result = await model.purchaseModel.update(data, { where: { po: poNO } });
     return result;
   } catch (error) {
     console.error("Error in create order:", error);
