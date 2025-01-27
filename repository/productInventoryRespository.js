@@ -253,7 +253,7 @@ export async function getInventoryListBasedOnSipl(clientId, locationId, limit, p
                       // as: 'slabLocation'
                     }
                   ],
-                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+                  attributes: { exclude: ["createdAt", "updatedAt", "deletedAt", "locationId"] },
                 },
                 {
                   model: model.poSupplierInvoiceMapperModel,
@@ -286,10 +286,10 @@ export async function getInventoryListBasedOnSipl(clientId, locationId, limit, p
     });
 
     // Assuming if slab details does not exists then return no data because every product must have slab details and if first will not have then no one will. 
-    // As data is not found for a location.
-    if(!result.rows[0]?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.slabDetails?.length){
-      return PaginatedData({count: 0, rows: []})
-    }
+    // // As data is not found for a location.
+    // if(!result.rows[0]?.productInventoryInvoiceMapper?.[0]?.productInventoryInvoice?.slabDetails?.length){
+    //   return PaginatedData({count: 0, rows: []})
+    // }
 
     // convert to paginated response.
     const paginatedData = PaginatedData(result, limit, page)
