@@ -23,7 +23,7 @@ sequelize.authenticate()
 .then(() => {
     console.log(`Database connected: Name: ${dbConfig.DB} , host: ${dbConfig.HOST}`)})
 .catch(err => {
-    console.log('Error while connecting to database'+ err)
+    console.log('Error while connecting to  database'+ err)
 })
 
 export default sequelize;

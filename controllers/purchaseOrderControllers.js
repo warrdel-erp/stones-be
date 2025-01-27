@@ -15,12 +15,10 @@ export const createOrder = async (req, res) => {
         const poDetails = await findPoNumber(po, clientId);
         const data = filterObject(info)
 
-        console.log('poDetails', poDetails);
-
         if (!(po && poDate)) {
             res.status(400).send("PO Number and PO Date is required");
-            // } else if (poDetails) {
-            //     res.status(400).send("PO Number can't Be Same");
+        } else if (poDetails) {
+            res.status(400).send("PO Number can't Be Same");
         } else {
             const result = await purchaseOrderService.createOrder({ ...data, createdBy });
             res.status(200).send(result);
@@ -30,6 +28,20 @@ export const createOrder = async (req, res) => {
         res.status(500).send(error);
     }
 };
+
+export const updatePO = async (req, res) => {
+    const info = req.body;
+    const createdBy = req.user.dataValues.id;
+    const data = filterObject(info)
+
+    try {
+        const result = await purchaseOrderService.updatePO({ ...data, createdBy }, data.po);
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error while Updating PO: ", error);
+        res.status(500).send(error);
+    }
+}
 
 // 2. get po Number 
 export const getPoNumber = async (req, res) => {
