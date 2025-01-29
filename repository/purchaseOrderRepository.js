@@ -470,6 +470,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
       offset,
       limit,
       subQuery: false,
+      order: [['createdAt', 'DESC']],
       group: ['purchase_orders.purchase_order_id', 'purchaseProduct.purchase_order_product_id']
     });
 
