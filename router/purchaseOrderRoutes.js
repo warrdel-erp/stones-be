@@ -21,7 +21,8 @@ import {
     slabLocationTransfer,
     getSlabInfo,
     cancelPurchaseOrder,
-    updatePO
+    updatePO,
+    addInvoice
 
 } from "../controllers/purchaseOrderControllers.js"
 
@@ -89,5 +90,7 @@ router.post('/inventoryTransfer', slabLocationTransfer);
 router.get('/getSlabInfo', getSlabInfo);
 
 router.patch('/cancel/:id', userAuth, cancelPurchaseOrder);
+
+router.post('/addInvoice', userAuth, addInvoice);
 
 export default router

@@ -897,3 +897,7 @@ export async function getSlabInfo(poSlabDetailId) {
 export async function cancelPurchaseOrder(id) {
     return await purchaseOrderRepository.cancelPurchaseOrder(id)
 }
+
+export async function addInvoice(data, createdBy) {
+    return await purchaseOrderRepository.addInvoice(data, createdBy)
+}
