@@ -1177,3 +1177,28 @@ export async function updateSlabStatusOnContainer(poSupplierInvoiceMapperId) {
     throw error;
   }
 }
+
+
+export function addInvoice(data, createdBy) {
+  const { invoiceData, productDetail, otherCharges } = data
+  const totalProductCharges = productDetail.reduce((sum, data) => (sum + parseFloat(data.qty) * parseFloat(data.unitPrice)), 0)
+  const otherChargesTotal = parseFloat(otherCharges?.amount)
+  const finalTotalCharges = totalProductCharges + otherChargesTotal
+  const totalProductQuantity = productDetail.reduce((sum, data) => (sum + parseFloat(data.qty)), 0)
+
+  try {
+    // const result = await model.poSupplierInvoiceMapperModel.create({
+    //   ...invoiceData,
+    //   totalProductCharges,
+    //   otherChargesTotal,
+    //   finalTotalCharges,
+    //   totalProductQuantity,
+    //   createdBy
+    // });
+
+    return 0;
+  } catch (error) {
+    console.error("Error while Adding Purchase Invoice", error);
+    throw error;
+  }
+}

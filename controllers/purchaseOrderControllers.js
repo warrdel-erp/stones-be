@@ -3,6 +3,7 @@ import { findPoNumber } from '../repository/purchaseOrderRepository.js';
 import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 import { paginationValidation } from '../zodValidations/purchaseOrder/pagination.js';
 import { ErrorResponse, SuccessResponse } from '../helpers/response.js';
+import poSupplierInvoiceMapperModel from '../models/poSupplierInvoiceMapperModel.js';
 
 // 1. create order
 export const createOrder = async (req, res) => {
@@ -578,3 +579,30 @@ export const cancelPurchaseOrder = async (req, res) => {
         return ErrorResponse(res, 500, error.message, error.stack);
     }
 };
+
+export async function addInvoice(req, res) {
+    const data = req.body
+    const createdBy = req.user.dataValues.id
+    const invoice = data.invoiceData.invoice
+
+    try {
+        const checkInvoiceNo = await poSupplierInvoiceMapperModel.findOne({
+            where: {
+                invoice,
+                // createdBy
+            }
+        })
+
+        if (checkInvoiceNo) {
+            return ErrorResponse(res, 400, "Purchase Invoice Number already Exist")
+        }
+
+        const result = await purchaseOrderService.addInvoice(data, createdBy);
+        if (result[0] == 0) {
+            return ErrorResponse(res, 400, "Some Error while Adding Purchase Invoice");
+        }
+        return SuccessResponse(res, 200, "Purchase Invoice Created successfully.")
+    } catch (error) {
+        return ErrorResponse(res, 500, error.message, error.stack);
+    }
+}
