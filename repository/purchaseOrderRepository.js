@@ -355,7 +355,6 @@ export async function getAllPurchaseOrder(data, limit, page) {
     }
 
     // --------------- Applying Filters E -------------------
-
     const result = await model.purchaseModel.findAndCountAll({
       where: whereCondition,
       attributes: [
@@ -440,8 +439,48 @@ export async function getAllPurchaseOrder(data, limit, page) {
       order: [['createdAt', 'DESC']],
       offset,
       limit,
+      subQuery: false,
       distinct: true
     });
+
+    // fetching it separately because group does not work with pagination, And aggregation function SUM does not work without group.
+    const totalQuantityArr = await model.purchaseModel.findAll({
+      where: whereCondition,
+      attributes: [
+        "purchaseOrderId",
+        [
+          Sequelize.fn("SUM", Sequelize.col('purchaseProduct.prePurchase.po_qty')),
+          "totalProductQty"
+        ]
+      ],
+      include: [
+        {
+          model: model.purchaseProductModel,
+          as: 'purchaseProduct',
+          attributes: [],
+          include: [
+            {
+              model: model.prePurchaseModel,
+              as: 'prePurchase',
+              attributes: [],
+            },
+          ],
+        },
+      ],
+      offset,
+      limit,
+      subQuery: false,
+      group: ['purchase_orders.purchase_order_id', 'purchaseProduct.purchase_order_product_id']
+    });
+
+    // Combine total product data to PO.
+    result.rows = result.rows.map(e => {
+      const plainObj = e.toJSON()
+      return {
+        ...plainObj,
+        "totalProductQty": totalQuantityArr?.find(k => k.purchaseOrderId == e.purchaseOrderId)?.dataValues?.totalProductQty || 0
+      }
+    })
 
     return PaginatedData(result, limit, page)
 
@@ -451,9 +490,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
   }
 }
 
-
-// get latest transcation number
-
+// get latest transaction number
 export async function latestTranscationNumber(purchaseOrderId) {
   try {
     const result = await model.poSupplierInvoiceMapperModel.findOne({
