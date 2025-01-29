@@ -20,7 +20,8 @@ import {
     getSuppliersPOJournal,
     slabLocationTransfer,
     getSlabInfo,
-    cancelPurchaseOrder
+    cancelPurchaseOrder,
+    updatePO
 
 } from "../controllers/purchaseOrderControllers.js"
 
@@ -32,6 +33,8 @@ router.patch('/prePurchaseProduct', updatePrePurchaseProduct)
 router.patch('/slabDetails', updateSlabDetails);
 
 router.post('/', userAuth, createOrder);
+
+router.patch('/', userAuth, updatePO);
 
 router.get('/', userAuth, getPoNumber);
 

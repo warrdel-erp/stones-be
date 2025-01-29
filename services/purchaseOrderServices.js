@@ -17,6 +17,10 @@ export async function createOrder(info) {
     return await purchaseOrderRepository.createOrder(info)
 }
 
+export async function updatePO(info, poNo) {
+    return await purchaseOrderRepository.updatePO(info, poNo)
+}
+
 export async function getPoNumber(clientId) {
     const result = await purchaseOrderRepository.latestPoNumber(clientId);
     const newPo = result + 1;
