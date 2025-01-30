@@ -5,6 +5,7 @@ import { updateProductInventoryInactive } from '../repository/productInventoryRe
 import { purchaseAccountTransaction, updateSlabDetails } from '../repository/purchaseOrderRepository.js';
 import { getAccountIdByAccountName } from './accountsServices.js';
 import { findUserId } from '../repository/clientUserRepository.js';
+import { updateSlabStatus } from '../repository/poSlabesRepository.js';
 
 export async function createOrder(info) {
     return await salesOrderRepository.createOrder(info)
@@ -71,10 +72,17 @@ export async function addProduct(info) {
                     unitPrice: inventory.unitPrice,
                     tax,
                 };
+
+                // Set slab to allocated because it should not be in active inventory.
+                await updateSlabStatus(slab.poSlabDetailId, "ALLOCATED")
+
                 const result = await salesOrderRepository.addProduct(productData, { transaction });
                 results.push(result);
             }
         }
+
+
+
 
         // Commit the transaction if all operations succeed
         await transaction.commit();
