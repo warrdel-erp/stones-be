@@ -126,3 +126,6 @@ dist
 # ignoring the static generated local files
 public/barCodes/*
 public/qrCodes/*
+
+
+.env
