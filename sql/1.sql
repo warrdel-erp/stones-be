@@ -1533,7 +1533,7 @@ add column purpose varchar(255);
 
 -- poslab status added
 ALTER TABLE po_slab_details
-MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD', 'INTRANSIT', 'INITIATED', 'ALLOCATED');
+MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'RETURNED', 'ONHOLD', 'INTRANSIT', 'INITIATED', 'ALLOCATED',  'SOLD');
 
 ALTER TABLE po_supplier_invoice_mapper
 ADD column container varchar(255);
