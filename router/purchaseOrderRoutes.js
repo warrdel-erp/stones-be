@@ -22,12 +22,14 @@ import {
     getSlabInfo,
     cancelPurchaseOrder,
     updatePO,
-    addInvoice
+    addInvoice,
+    convertCartItemToUnHold
 
 } from "../controllers/purchaseOrderControllers.js"
 
-
 router.patch('/cartHold', convertCartItemToHold);
+
+router.patch('/cartUnhold', convertCartItemToUnHold);
 
 router.patch('/prePurchaseProduct', updatePrePurchaseProduct)
 

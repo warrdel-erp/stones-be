@@ -834,6 +834,39 @@ export async function convertCartItemToHold(info) {
 }
 
 
+export async function convertCartItemToUnhold(info) {
+    try {
+        const { poSlabDetailsArray } = info;
+
+        const updatePromises = poSlabDetailsArray.map(async (slabDetail) => {
+
+            const isContainer = await purchaseOrderRepository.isContainerExist(slabDetail.poSupplierInvoiceMapperId)
+
+            const updatedSlab = await purchaseOrderRepository.updateSlabDetails({
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: isContainer ? 'INTRANSIT' : 'INITIATED'
+            });
+
+            return {
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: isContainer ? 'INTRANSIT' : 'INITIATED',
+                success: !!updatedSlab
+            };
+        });
+
+        const results = await Promise.all(updatePromises);
+        return {
+            success: true,
+            data: results
+        };
+
+    } catch (error) {
+        console.error('Error in convertCartItemToUnhold:', error);
+        throw error;
+    }
+}
+
+
 export async function convertCartItemToSO(data, createdBy, clientId) {
     const soToCreateOf = 'ADDED_CART_ITEM'
     return await createSalesOrderWithProducts(data, createdBy, clientId, soToCreateOf)
