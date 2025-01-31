@@ -482,6 +482,21 @@ export const convertCartItemToHold = async (req, res) => {
     }
 };
 
+export const convertCartItemToUnHold = async (req, res) => {
+    try {
+        const data = req.body;
+
+        const result = await purchaseOrderService.convertCartItemToUnhold(data);
+        if (result) {
+            res.status(200).send({ success: true, data: result });
+        } else {
+            res.status(400).send({ success: false, message: "Failed to Unhold cart." });
+        }
+    } catch (error) {
+        console.error("Error in cart to Unhold: ", error);
+        res.status(500).send({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
 
 export const convertCartItemToSO = async (req, res) => {
     try {
