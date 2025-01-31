@@ -91,6 +91,8 @@ prePurchaseModel.belongsTo(purchaseProductModel, { foreignKey: 'purchase_order_p
 poSupplierInvoiceMapperModel.belongsTo(purchaseModel, { foreignKey: 'purchase_order_id' });
 purchaseModel.hasMany(poSupplierInvoiceMapperModel, { foreignKey: 'purchase_order_id', as: 'invoiceMapper' });
 
+poSupplierInvoiceMapperModel.belongsTo(locationModel, { foreignKey: 'shipLocationId', as:'shipLocation' });
+
 poSupplierInvoiceModel.belongsTo(poSupplierInvoiceMapperModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'transactionData' });
 poSupplierInvoiceMapperModel.hasMany(poSupplierInvoiceModel, { foreignKey: 'po_supplier_invoice_mapper_id', as: 'supplierInvoice' });
 
