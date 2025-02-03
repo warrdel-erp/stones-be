@@ -471,7 +471,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
       limit,
       subQuery: false,
       order: [['createdAt', 'DESC']],
-      group: ['purchase_orders.purchase_order_id', 'purchaseProduct.purchase_order_product_id']
+      group: ['purchase_orders.purchase_order_id']
     });
 
     // Combine total product data to PO.
