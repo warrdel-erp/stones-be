@@ -890,6 +890,10 @@ export async function getSupplierInvoices(data) {
 
       include: [
         {
+          model: model.locationModel,
+          as: "shipLocation"
+        },
+        {
           model: model.clientUserModel,
           as: 'clientDetails',
           attributes: { exclude: ['clientId', 'clientUserId', 'createdAt', 'deletedAt', 'updatedAt', 'userId'] },
@@ -912,6 +916,10 @@ export async function getSupplierInvoices(data) {
               model: model.vendorModel,
               attributes: ['vendorName', 'vendorId'],
             },
+            {
+              model: model.locationModel,
+              as: 'location'
+            }
           ]
         },
         {

@@ -834,6 +834,37 @@ export async function convertCartItemToHold(info) {
 }
 
 
+export async function convertCartItemToUnhold(info) {
+    try {
+        const { poSlabDetailsArray } = info;
+
+        const updatePromises = poSlabDetailsArray.map(async (slabDetail) => {
+
+            const updatedSlab = await purchaseOrderRepository.updateSlabDetails({
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: "ACTIVE"
+            });
+
+            return {
+                poSlabDetailId: slabDetail.poSlabDetailId,
+                status: "ACTIVE",
+                success: !!updatedSlab
+            };
+        });
+
+        const results = await Promise.all(updatePromises);
+        return {
+            success: true,
+            data: results
+        };
+
+    } catch (error) {
+        console.error('Error in convertCartItemToUnhold:', error);
+        throw error;
+    }
+}
+
+
 export async function convertCartItemToSO(data, createdBy, clientId) {
     const soToCreateOf = 'ADDED_CART_ITEM'
     return await createSalesOrderWithProducts(data, createdBy, clientId, soToCreateOf)
@@ -899,5 +930,31 @@ export async function cancelPurchaseOrder(id) {
 }
 
 export async function addInvoice(data, createdBy) {
+
+    const transaction = await sequelize.transaction();
+    
+    const accNames = {
+        creditAccountName: 'Trade Payables',
+        //  debitAccountName: 'Other Inventory, Gross ' 
+    }
+
+    const transactionAccontId = await getAccountIdByAccountName(accNames);
+    const accountDetails = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' };
+
+    // calculate total amount
+    const totalQuantity = data.productDeatils.map(product => product.quantity).reduce((sum, quantity) => sum + quantity, 0);
+
+    // Generate a new trasaction number.
+    const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId);
+    let transactionNumber
+    if (!(getLatestTranscationNumber)) {
+        transactionNumber = `SIPL ${data.po} -1`
+    } else {
+        const latestTranscationNumber = getLatestTranscationNumber.dataValues.transaction
+        transactionNumber = `SIPL ${data.po} ${parseInt(latestTranscationNumber.split(" ")[2]) - 1}`
+    }
+
+    
+
     return await purchaseOrderRepository.addInvoice(data, createdBy)
 }
