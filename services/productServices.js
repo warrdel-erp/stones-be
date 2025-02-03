@@ -41,6 +41,9 @@ export async function getSingleProductDetails(productName) {
     return productDetails;
 }
 
+export async function getOpenSoProductDetail(id){
+    return await productRepository.getOpenSoProduct(id);
+}
 
 export async function updateProduct(productName, info) {
     return await productRepository.updateProduct(productName, info)

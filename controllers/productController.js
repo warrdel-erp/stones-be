@@ -1,4 +1,5 @@
 import filterObject from '../helpers/filteredKeysUtils.js';
+import { ErrorResponse, SuccessResponse } from '../helpers/response.js';
 import * as productService from '../services/productServices.js'
 
 // 1. create product
@@ -42,6 +43,22 @@ export const getSingleProductDetails = async (req, res) => {
     } catch (error) {
         console.error(`Error in getting ${productName} details:`, error);
         res.status(500).send("Internal Server Error");
+    }
+};
+
+// 3. get single product details
+export const getProductDetailForOpenSO = async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        if (!productId) {
+            res.status(400).send("productId is required");
+        }
+        const result = await productService.getOpenSoProductDetail(productId);
+
+        SuccessResponse(res, 200, "Successfully fetched product slabs data in Open SO", result)
+    } catch (error) {
+        console.error(`Error in getting product slabs data in Open SO ${productId} details:`, error);
+        ErrorResponse(res, 500, "Internal server error.", error)
     }
 };
 
