@@ -80,9 +80,9 @@ export async function getSingleProduct(productName) {
                     ]
                 },
                 {
-                    model:model.landedCostModel,
+                    model: model.landedCostModel,
                     as: 'productLandeCost',
-                    attributes: { exclude: [ 'createdAt', 'deletedAt', 'updatedAt'] },
+                    attributes: { exclude: ['createdAt', 'deletedAt', 'updatedAt'] },
                 }
             ]
         });
@@ -95,6 +95,26 @@ export async function getSingleProduct(productName) {
         return { product, costData };
     } catch (error) {
         console.error(`Error in ${productName}:`, error);
+        throw error;
+    }
+}
+
+export async function getOpenSoProduct(id) {
+    try {
+
+        // If it is open SO. Status must be allocated.
+        const product = await model.poSlabDetails.findAll({
+            attributes: ["serialNumber", "packageLength", "packageWidth", "recevingLength", "recevingWidth", "barcode", "status", "bin"],
+            where: {
+                productId: id,
+                status: "ALLOCATED"
+            },
+        });
+
+        return product;
+
+    } catch (error) {
+        console.error(`Error in getting slabs for Product:${id}:`, error);
         throw error;
     }
 }
