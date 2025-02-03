@@ -104,11 +104,23 @@ export async function getOpenSoProduct(id) {
 
         // If it is open SO. Status must be allocated.
         const product = await model.poSlabDetails.findAll({
-            attributes: ["serialNumber", "packageLength", "packageWidth", "recevingLength", "recevingWidth", "barcode", "status", "bin"],
+            // attributes: ["serialNumber", "packageLength", "packageWidth", "recevingLength", "recevingWidth", "barcode", "status", "bin", "block", "serialNumber", "lot"],
+            attributes: { exclude: ["poSupplierInvoiceId", "poSupplierInvoiceMapperId", "po_supplier_invoice_id", "po_supplier_invoice_mapper_id", "location_id", "locationId"] },
             where: {
                 productId: id,
                 status: "ALLOCATED"
             },
+            include: [
+                {
+                    model: model.locationModel,
+                    as: "location",
+                    attributes: ["location"]
+                },
+                // {
+                //     model: model.productModel,
+                //     as: "product"
+                // }
+            ]
         });
 
         return product;
