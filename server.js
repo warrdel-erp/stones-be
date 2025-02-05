@@ -21,6 +21,7 @@ import opportunitiy from './router/opportunityRoutes.js'
 import freightBill from './router/freightRoutes.js'
 import vendor from './router/vendorRoutes.js'
 import qrCode from './router/qrCodeRoutes.js'
+import inventory from './router/inventory.js'
 
 // middleware
 app.use(json())
@@ -44,6 +45,7 @@ app.use("/opportunity", opportunitiy);
 app.use("/freightBill", freightBill);
 app.use("/vendor", vendor);
 app.use("/qrCode", qrCode);
+app.use("/inventory", inventory);
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)

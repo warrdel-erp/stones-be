@@ -308,8 +308,6 @@ export async function getAllSalesOrder(data, limit, page) {
         result.rows = result.rows.filter(e => Math.trunc(e.totalPriceWithTax) > Math.trunc(e.totalPaidAmount));
     }
 
-    // return totalPaidData;
-    // return pendingPayment;
     return PaginatedData(result, limit, page);
   } catch (error) {
     console.error(`Error in getting sales Order ${data.search}:`, error);
