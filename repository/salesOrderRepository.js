@@ -171,6 +171,7 @@ export async function updateSalesOrderInventory(salesOrdersInventoryId, data) {
 export async function getAllSalesOrder(data, limit, page) {
   try {
     const offset = (page - 1) * limit;
+    let totalPaidData = null;
 
     // --------------- Applying Filters S -------------------
     let whereCondition = {};
@@ -207,10 +208,13 @@ export async function getAllSalesOrder(data, limit, page) {
           `(select sales_orders_id from so_loading_order WHERE sales_orders_id IS NOT NULL)` // Subquery to fetch IDs with packaging list.
         ),
       }
+    } else if (data.status === "PENDING_PAYMENT") {
+      totalPaidData = await getTotalPaidAmountForSO(offset, limit)
     }
     else if (data.status) {
       whereCondition.status = data.status
     }
+
 
     // --------------- Applying Filters E -------------------
     const result = await model.salesOrderModel.findAndCountAll({
@@ -245,7 +249,7 @@ export async function getAllSalesOrder(data, limit, page) {
         },
         {
           model: model.locationModel,
-          as :'clientLocation',
+          as: 'clientLocation',
           attributes: ['location']
         }
       ],
@@ -255,11 +259,13 @@ export async function getAllSalesOrder(data, limit, page) {
       limit,
     });
 
+    // Calculate total amount.
     const totalPriceArr = await model.salesOrderModel.findAll({
       where: whereCondition,
       attributes: [
         "salesOrdersId",
-        [Sequelize.fn("SUM", Sequelize.literal("`salesInventory->slabDetails`.`package_length` * `salesInventory->slabDetails`.`package_width` * `salesInventory`.`unit_price` / 144")), "totalPrice"]
+        [Sequelize.fn("SUM", Sequelize.literal("`salesInventory->slabDetails`.`receving_length` * `salesInventory->slabDetails`.`receving_width` * `salesInventory`.`unit_price` / 144 * ((`salesInventory`.`tax` + 100)/100)")), "totalPriceWithTax"],
+        [Sequelize.fn("SUM", Sequelize.literal("`salesInventory->slabDetails`.`receving_length` * `salesInventory->slabDetails`.`receving_width` * `salesInventory`.`unit_price` / 144")), "totalPriceWithoutTax"]
       ],
       include: [
         {
@@ -283,15 +289,27 @@ export async function getAllSalesOrder(data, limit, page) {
       group: ["sales_orders.sales_orders_id"]
     });
 
-    // Combine total product data to PO.
+    // Combine total product, totalPaid Data data to PO.
     result.rows = result.rows.map(e => {
-      const plainObj = e.toJSON()
+      const plainObj = e.toJSON();
+
+      const totalPriceData = totalPriceArr?.find(k => k.salesOrdersId == e.salesOrdersId)?.dataValues;
+
       return {
         ...plainObj,
-        totalPrice: totalPriceArr?.find(k => k.salesOrdersId == e.salesOrdersId)?.dataValues?.totalPrice || 0
+        totalPaidAmount: totalPaidData?.find(k => k.salesOrdersId == e.salesOrdersId)?.dataValues?.totalPayedAmount || 0,
+        totalPriceWithTax: totalPriceData?.totalPriceWithTax || 0,
+        totalPriceWithoutTax: totalPriceData?.totalPriceWithoutTax || 0,
       }
+
     })
 
+    if (data.status == "PENDING_PAYMENT") {
+        result.rows = result.rows.filter(e => Math.trunc(e.totalPriceWithTax) > Math.trunc(e.totalPaidAmount));
+    }
+
+    // return totalPaidData;
+    // return pendingPayment;
     return PaginatedData(result, limit, page);
   } catch (error) {
     console.error(`Error in getting sales Order ${data.search}:`, error);
@@ -299,7 +317,48 @@ export async function getAllSalesOrder(data, limit, page) {
   }
 };
 
-// get the sales Order Inventory by sales Orders Inventory Id for update sale Status and product Inventory Inactive
+const getTotalPaidAmountForSO = async (offset, limit) => {
+
+  // Algo--------
+  // 1. get all loading orders for a SO
+  // 2. find loading_order in account transaction with entry-type "cr"
+  // 3. add all transaction_amount
+  // 4. if this sum is less then it is pending payment SO 
+  return await model.salesOrderModel.findAll({
+    order: [['createdAt', 'DESC']],
+    attributes: [
+      "salesOrdersId",
+      [
+        Sequelize.fn("SUM", Sequelize.literal("`loadingOrders->accountTransaction`.`transaction_amount`")),
+        "totalPayedAmount"
+      ]
+    ],
+    include: [
+      {
+        model: model.soLoadingOrderModel,
+        as: "loadingOrders",
+        attributes: [],
+        include: [
+          {
+            model: model.accountTransactionModel,
+            as: "accountTransaction",
+            where: {
+              entryType: "cr"
+            },
+            attributes: []
+          }
+        ]
+      }
+    ],
+    group: ["sales_orders.sales_orders_id", "loadingOrders.so_loading_order_id"],
+    subQuery: false,
+    offset,
+    limit,
+  });
+
+}
+
+// get the sales Order Inventory by sales Orders Inventory Id for update sale Status and product Inventory Inactive.
 
 export async function findSalesOrdersInventory(soLoadingOrderId) {
   try {
