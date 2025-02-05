@@ -163,7 +163,7 @@ accountTransactionModel.belongsTo(purchaseModel, { foreignKey: 'purchase_order_i
 purchaseModel.hasMany(accountTransactionModel, { foreignKey: 'purchase_order_id', as: 'purchaseOrder' });
 
 accountTransactionModel.belongsTo(soLoadingOrderModel, { foreignKey: 'so_loading_order_id', as: 'soLoadingOrders' });
-soLoadingOrderModel.hasMany(accountTransactionModel, { foreignKey: 'so_loading_order_id', as: 'soLoadingOrders' });
+soLoadingOrderModel.hasMany(accountTransactionModel, { foreignKey: 'so_loading_order_id', as: 'accountTransaction' });
 
 accountTransactionModel.belongsTo(supplierModel, { foreignKey: 'supplier_id', as: 'supplierTransactions' });
 supplierModel.hasMany(accountTransactionModel, { foreignKey: 'supplier_id', as: 'supplierTransactions' });
