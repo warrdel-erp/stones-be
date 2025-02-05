@@ -94,7 +94,7 @@ export const loadingOrder = async (req, res) => {
 export const getAllOpenSo = async (req, res) => {
     const locationId = req.user?.dataValues?.lastSelectedLocation;
     let { search, status } = req.query;
-    const clientId = req.clientId;
+    const clientId = req.query.clientId;
 
     let limit = Number(req.query?.limit) || 50;
     let page = Number(req.query?.page) || 1;
