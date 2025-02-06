@@ -11,7 +11,3 @@ export const updateSlabStatus = async (id, status) => {
         throw Error("Error while updating slab status.")
     }
 }
-
-export const countSlabWithGivenStatus = ()=>{
-
-}
