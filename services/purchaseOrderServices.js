@@ -65,7 +65,7 @@ export async function addPurchaseOrderProduct(dataArray) {
                 result = await purchaseOrderRepository.addOtherCharges(otherCharges, transaction);
             }
 
-            results.push(result);
+            results.push({ ...result.dataValues, ...purchaseOrderProduct });
         }
 
         // Commit the transaction if all inserts succeed
@@ -932,7 +932,7 @@ export async function cancelPurchaseOrder(id) {
 export async function addInvoice(data, createdBy) {
 
     const transaction = await sequelize.transaction();
-    
+
     const accNames = {
         creditAccountName: 'Trade Payables',
         //  debitAccountName: 'Other Inventory, Gross ' 
@@ -954,7 +954,7 @@ export async function addInvoice(data, createdBy) {
         transactionNumber = `SIPL ${data.po} ${parseInt(latestTranscationNumber.split(" ")[2]) - 1}`
     }
 
-    
+
 
     return await purchaseOrderRepository.addInvoice(data, createdBy)
 }
