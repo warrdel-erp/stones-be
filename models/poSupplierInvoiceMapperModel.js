@@ -14,7 +14,7 @@ export default sequelize.define(
         },
         purchaseOrderId: {
             type: DataTypes.INTEGER,
-            allowNull: true,
+            allowNull: false,
             field: 'purchase_order_id',
             references: {
                 model: purchaseOrders,
@@ -74,105 +74,6 @@ export default sequelize.define(
             type: DataTypes.ENUM(...transactionStatus),
             allowNull: true,
             field: 'transaction_status'
-        },
-        container: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        freightForwarder: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null
-        },
-        supplierSo: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        paymentTerm: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null
-        },
-        etaDate: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        deliveryType: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        shipmentTerms: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        Paymentholdreason: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: null
-        },
-        vessel: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        airBill: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        plannedExFactoryDate: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: null,
-        },
-        exFactoryDate: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: null,
-        },
-        departurePort: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        etdPort: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: null,
-        },
-        etaPort: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: null,
-        },
-        arrivalPort: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        dischargePort: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        wiringInstruction: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: null,
-        },
-        purchaseLocationId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-
-        },
-        shipLocationId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
         },
         status: {
             type: DataTypes.ENUM(...status),

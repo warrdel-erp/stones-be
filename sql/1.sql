@@ -1566,3 +1566,27 @@ ADD COLUMN wiringInstruction INT DEFAULT NULL;
 
 ALTER TABLE po_supplier_invoice_mapper
 MODIFY purchase_order_id INT NULL;
+
+
+
+ALTER TABLE po_supplier_invoice_mapper
+DROP COLUMN supplierSo,
+DROP COLUMN paymentTerm,
+DROP COLUMN etaDate,
+DROP COLUMN deliveryType,
+DROP COLUMN shipmentTerms,
+DROP COLUMN Paymentholdreason,
+DROP COLUMN vessel,
+DROP COLUMN airBill,
+DROP COLUMN plannedExFactoryDate,
+DROP COLUMN exFactoryDate,
+DROP COLUMN departurePort,
+DROP COLUMN etdPort,
+DROP COLUMN etaPort,
+DROP COLUMN arrivalPort,
+DROP COLUMN dischargePort,
+DROP COLUMN wiringInstruction,
+DROP COLUMN container,
+DROP COLUMN freightForwarder,
+DROP COLUMN shipLocationId,
+DROP COLUMN purchaseLocationId;
