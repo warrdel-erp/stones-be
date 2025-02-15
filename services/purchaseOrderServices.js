@@ -13,8 +13,8 @@ import poSlabDetailModel from '../models/poSlabDetailModel.js';
 import { createSalesOrderWithProducts } from '../helpers/opportunityToSales.js';
 
 // const fs = require('fs');
-export async function createOrder(info) {
-    return await purchaseOrderRepository.createOrder(info)
+export async function createOrder(info, t) {
+    return await purchaseOrderRepository.createOrder(info, t)
 }
 
 export async function updatePO(info, poNo) {
@@ -31,9 +31,9 @@ export async function updateOrder(poNumber, info) {
     return await purchaseOrderRepository.updateOrder(poNumber, info)
 }
 
-export async function addPurchaseOrderProduct(dataArray) {
+export async function addPurchaseOrderProduct(dataArray, t) {
 
-    const transaction = await sequelize.transaction();
+    const transaction = t || await sequelize.transaction();
     try {
         const results = [];
 
@@ -69,11 +69,11 @@ export async function addPurchaseOrderProduct(dataArray) {
         }
 
         // Commit the transaction if all inserts succeed
-        await transaction.commit();
+        if (!t) await transaction.commit();
         return { success: true, message: 'Data inserted successfully', results };
     } catch (error) {
         // Rollback the transaction if any error occurs
-        await transaction.rollback();
+        if (!t) await transaction.rollback();
         console.error('Error inserting data:', error);
         return { success: false, error: error.message };
     }
@@ -130,20 +130,20 @@ export async function singlePoDetails(purchaseOrderId) {
 }
 
 // add supplier Invoice
-export async function addSuplierInvoice(data) {
+export async function addSuplierInvoice(data, t) {
 
-    const transaction = await sequelize.transaction();
+    const transaction = t || await sequelize.transaction();
     const accNames = {
         creditAccountName: 'Trade Payables',
         //  debitAccountName: 'Other Inventory, Gross ' 
     }
-    const transactionAccontId = await getAccountIdByAccountName(accNames);
+    const transactionAccontId = await getAccountIdByAccountName(accNames, t);
 
     const accountDetails = { accountsId: transactionAccontId.creditAccount.accountId, entryType: 'cr' };
     const totalQuantity = data.productDeatils.map(product => product.quantity).reduce((sum, quantity) => sum + quantity, 0);
 
 
-    const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId);
+    const getLatestTranscationNumber = await purchaseOrderRepository.latestTranscationNumber(data.purchaseOrderId, transaction);
     let transcationNumber
     if (!(getLatestTranscationNumber)) {
         transcationNumber = `SIPL ${data.po} -1`
@@ -151,6 +151,7 @@ export async function addSuplierInvoice(data) {
         const latestTranscationNumber = getLatestTranscationNumber.dataValues.transaction
         transcationNumber = `SIPL ${data.po} ${parseInt(latestTranscationNumber.split(" ")[2]) - 1}`
     }
+
     try {
         const results = [];
         let result;
@@ -177,6 +178,9 @@ export async function addSuplierInvoice(data) {
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
+        
+        console.log("This is sample.")
+
         const poSupplierInvoiceMappperId = result.get('poSupplierInvoiceMappperId')
 
         const transactionDataWithAccountOnSupplier = {
@@ -193,7 +197,7 @@ export async function addSuplierInvoice(data) {
             poSupplierInvoiceMapperId: poSupplierInvoiceMappperId,
             purpose: 'Accounts Payable',
         };
-        await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccountOnSupplier);
+        await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccountOnSupplier, transaction);
 
         for (const dataArray of data.productDeatils) {
             const supplierData = { ...dataArray, poSupplierInvoiceMappperId: poSupplierInvoiceMappperId };
@@ -230,17 +234,19 @@ export async function addSuplierInvoice(data) {
                 stage: 'purchase',
                 purpose: 'Inventory In Transit'
             };
-            await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount);
+
+            await purchaseOrderRepository.purchaseAccountTransaction(transactionDataWithAccount, transaction);
             result = await purchaseOrderRepository.createSupplierInvoice(supplierData, transaction);
             results.push(result);
         }
 
         // Commit the transaction if all inserts succeed
-        await transaction.commit();
+        if (!t) await transaction.commit();
         return { success: true, message: 'Data inserted successfully', results };
     } catch (error) {
         // Rollback the transaction if any error occurs
-        await transaction.rollback();
+
+        if (!t) await transaction.rollback();
         console.error('Error inserting data:', error);
         return { success: false, error: error.message };
     }

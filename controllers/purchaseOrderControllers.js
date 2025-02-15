@@ -4,6 +4,8 @@ import * as purchaseOrderService from '../services/purchaseOrderServices.js'
 import { paginationValidation } from '../zodValidations/purchaseOrder/pagination.js';
 import { ErrorResponse, SuccessResponse } from '../helpers/response.js';
 import poSupplierInvoiceMapperModel from '../models/poSupplierInvoiceMapperModel.js';
+import sequelize from '../database/sequelizeConfig.js';
+import { Sequelize } from 'sequelize';
 
 // 1. create order
 export const createOrder = async (req, res) => {
@@ -78,7 +80,7 @@ export const addPurchaseOrderProduct = async (req, res) => {
         const data = req.body;
         const user = req.user;
         const createdBy = user.dataValues.id;
-        const result = await purchaseOrderService.addPurchaseOrderProduct(data, createdBy);
+        const result = await purchaseOrderService.addPurchaseOrderProduct(data);
         res.status(200).send(result);
     } catch (error) {
         console.error("Error in add Purchase  Order Products: ", error);
@@ -595,29 +597,79 @@ export const cancelPurchaseOrder = async (req, res) => {
     }
 };
 
-export async function addInvoice(req, res) {
-    const data = req.body
-    const createdBy = req.user.dataValues.id
-    const invoice = data.invoiceData.invoice
+// Create a PO.
+// Add Products.
+// Create an invoice.
+export async function createDirectInvoice(req, res) {
 
+    const t = undefined;
     try {
-        const checkInvoiceNo = await poSupplierInvoiceMapperModel.findOne({
-            where: {
-                invoice,
-                // createdBy
-            }
-        })
+        const info = req.body;
+        const { po, poDate } = req.body;
+        const user = req.user;
+        const createdBy = user.dataValues.id;
+        const clientId = req.clientId;
+        const poDetails = await findPoNumber(po, clientId);
 
-        if (checkInvoiceNo) {
-            return ErrorResponse(res, 400, "Purchase Invoice Number already Exist")
-        }
+        // console.log(info)
 
-        const result = await purchaseOrderService.addInvoice(data, createdBy);
-        if (result[0] == 0) {
-            return ErrorResponse(res, 400, "Some Error while Adding Purchase Invoice");
+        let poData = info.poData;
+        let productsData = info.productData;
+        let invoiceData = info.invoiceData;
+
+        if (!(poData.po && poData.poDate)) {
+            res.status(400).send("PO Number and PO Date is required");
+        } else if (poDetails) {
+            res.status(400).send("PO Number can't Be Same");
+        } else {
+
+            poData = filterObject(poData);
+            // Create PO.
+            const poResult = await purchaseOrderService.createOrder({ ...poData, createdBy }, t);
+            const purchaseOrderId = poResult.get("purchaseOrderId");
+            const po = poResult.get("po");
+
+            // Create Data for products in PO.
+            // products = products?.map(e => ({ ...e, purchaseOrderId: poResult?.dataValues?.purchaseOrderId }))
+            productsData.Products = productsData.Products?.map(e => ({ ...e, purchaseOrderId }));
+
+            // Add products to that PO.
+            const productResult = await purchaseOrderService.addPurchaseOrderProduct(productsData, t);
+
+            // Create data for invoice.
+            invoiceData.purchaseOrderId = purchaseOrderId;
+            invoiceData.po = po;
+            invoiceData.supplierId = poData?.supplierId;
+            invoiceData.totalProductCharges = productsData.Products.reduce((a, b) => a + b.totalPrice, 0);
+            invoiceData.finalTotalCharges = invoiceData.totalProductCharges + invoiceData.otherChargesTotal;
+            invoiceData.createdBy = createdBy
+
+            // Create product details in invoice.
+            invoiceData.productDeatils = productResult.results.map(e => {
+                const { createdAt, updatedAt, ...data } = e;
+
+                // "sqm": 1,
+                // "uom": 161.46,
+                // "totalPerUnit": 210,
+
+                data.productSku = productsData?.Products?.find(k => k.productId == e.productId)?.productName;
+                return data;
+            });
+
+            // Create a SIPL for this PO.
+
+            await purchaseOrderService.addSuplierInvoice(invoiceData, t);
+
+            // // Commit the changes if everything is ok.
+            // t.commit();
+
+            res.status(200).send(productResult);
+
         }
-        return SuccessResponse(res, 200, "Purchase Invoice Created successfully.")
     } catch (error) {
-        return ErrorResponse(res, 500, error.message, error.stack);
+        // Rollback everything if anything went wrong.
+        // t.rollback();
+        console.error("Error in create Order: ", error);
+        res.status(500).send(error);
     }
 }

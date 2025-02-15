@@ -18,7 +18,7 @@ export default sequelize.define(
             field: 'product_name'
         },
         type: {
-            type: DataTypes.ENUM(...productTypeEnum),
+            type: DataTypes.STRING,
             allowNull: false,
         },
         baseColor: {
