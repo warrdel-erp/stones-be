@@ -168,7 +168,7 @@ export async function getGroupedAccountList() {
 
 
 
-export async function getAccountIdByAccountName(data) {
+export async function getAccountIdByAccountName(data, t) {
     const { creditAccountName, debitAccountName } = data;
 
     try {
@@ -178,7 +178,8 @@ export async function getAccountIdByAccountName(data) {
                     [Op.in]: [creditAccountName, debitAccountName]
                 }
             },
-            attributes: ['accountsId', 'accountName']
+            attributes: ['accountsId', 'accountName'],
+            ...(t && { transaction: t })
         });
 
         const accountDetails = result.reduce((acc, account) => {
@@ -558,9 +559,9 @@ export async function getjournalEntryByPurchaseOrder(poSupplierInvoiceMapperId) 
                 model: model.poSupplierInvoiceMapperModel,
                 as: 'poSupplierInvoice',
                 attributes: ["totalProductCharges", "otherChargesTotal", "finalTotalCharges", "transaction"],
-                include:[
+                include: [
                     {
-                        model:model.poSlabDetails,
+                        model: model.poSlabDetails,
                         as: 'siplSlabDetails',
                         attributes: ["serialNumber"]
                     }
@@ -569,12 +570,12 @@ export async function getjournalEntryByPurchaseOrder(poSupplierInvoiceMapperId) 
             {
                 model: model.purchaseModel,
                 as: 'purchaseOrder',
-                attributes: ["purchaseOrderId","purchase_location_id"],
-                include:[
+                attributes: ["purchaseOrderId", "purchase_location_id"],
+                include: [
                     {
-                        model:model.locationModel,
+                        model: model.locationModel,
                         as: 'purchaseLocation',
-                        attributes:["location"]
+                        attributes: ["location"]
                     }
                 ]
             },

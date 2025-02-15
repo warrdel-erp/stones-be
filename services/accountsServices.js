@@ -69,9 +69,9 @@ export async function getGroupedAccountList() {
 }
 
 
-export async function getAccountIdByAccountName(data) {
+export async function getAccountIdByAccountName(data, t) {
     try {
-        const accountDetails = await accountsRepository.getAccountIdByAccountName(data);
+        const accountDetails = await accountsRepository.getAccountIdByAccountName(data, t);
         return accountDetails;
     } catch (error) {
         console.error('Error fetching accounts Type Sub Types:', error);

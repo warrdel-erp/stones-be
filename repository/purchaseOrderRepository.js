@@ -4,9 +4,10 @@ import { JSON, Op, Sequelize, where } from "sequelize";
 import { purchaseStatus } from "../constant.js";
 import poSlabDetailModel from "../models/poSlabDetailModel.js";
 
-export async function createOrder(data) {
+export async function createOrder(data, t) {
   try {
-    const result = await model.purchaseModel.create(data);
+    const options = t ? { transaction: t } : {};
+    const result = await model.purchaseModel.create(data, options);
     return result;
   } catch (error) {
     console.error("Error in create order:", error);
@@ -492,7 +493,7 @@ export async function getAllPurchaseOrder(data, limit, page) {
 }
 
 // get latest transaction number
-export async function latestTranscationNumber(purchaseOrderId) {
+export async function latestTranscationNumber(purchaseOrderId, t) {
   try {
     const result = await model.poSupplierInvoiceMapperModel.findOne({
       attributes: ['transaction'],
@@ -501,6 +502,7 @@ export async function latestTranscationNumber(purchaseOrderId) {
       },
       order: [['created_at', 'DESC']],
       limit: 1,
+      ...(t && { transaction: t })
     });
     return result;
   } catch (error) {
@@ -642,9 +644,9 @@ export async function getContainerDetails(poSupplierInvoiceMapperId) {
 };
 
 
-export async function purchaseAccountTransaction(data) {
+export async function purchaseAccountTransaction(data, transaction) {
   try {
-    const result = await model.accountTransactionModel.create(data);
+    const result = await model.accountTransactionModel.create(data, {transaction});
     return result;
   } catch (error) {
     console.error("Error in add paymentr:", error);

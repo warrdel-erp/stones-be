@@ -1,31 +1,43 @@
-import { Router } from 'express'
+import { Router } from 'express';
 import { userAuth } from '../middleware/authUser.js';
 const router = Router();
 
 import {
-    createOrder, getPoNumber, updateOrder, addPurchaseOrderProduct, singlePoDetails, addSuplierInvoice, getAllOpenPo,
-    addSlabDetails, singleSlabDetails, addProductInventory, getProductInventory, addPayment, getPaymentDetails, addContainer, getContainerDetails,
-    purchaseAccountTransaction,
-    getCOATransactionDetails,
-    getInventoryListBasedOnSipl,
-    updateSlabDetails,
-    deletePrePurchaeProduct,
-    updatePrePurchaseProduct,
-    getSupplierInvoices,
+    addContainer,
+    addPayment,
+    addProductInventory,
+    addPurchaseOrderProduct,
+    addSlabDetails,
+    addSuplierInvoice,
     addToCart,
-    deleteCartItem,
-    getCartItems,
+    cancelPurchaseOrder,
     convertCartItemToHold,
     convertCartItemToSO,
-    getSuppliersPOJournal,
-    slabLocationTransfer,
+    convertCartItemToUnHold,
+    createDirectInvoice,
+    createOrder,
+    deleteCartItem,
+    deletePrePurchaeProduct,
+    getAllOpenPo,
+    getCartItems,
+    getCOATransactionDetails,
+    getContainerDetails,
+    getInventoryListBasedOnSipl,
+    getPaymentDetails,
+    getPoNumber,
+    getProductInventory,
     getSlabInfo,
-    cancelPurchaseOrder,
+    getSupplierInvoices,
+    getSuppliersPOJournal,
+    purchaseAccountTransaction,
+    singlePoDetails,
+    singleSlabDetails,
+    slabLocationTransfer,
+    updateOrder,
     updatePO,
-    addInvoice,
-    convertCartItemToUnHold
-
-} from "../controllers/purchaseOrderControllers.js"
+    updatePrePurchaseProduct,
+    updateSlabDetails
+} from "../controllers/purchaseOrderControllers.js";
 
 router.patch('/cartHold', convertCartItemToHold);
 
@@ -93,6 +105,6 @@ router.get('/getSlabInfo', getSlabInfo);
 
 router.patch('/cancel/:id', userAuth, cancelPurchaseOrder);
 
-router.post('/addInvoice', userAuth, addInvoice);
+router.post('/createDirectInvoice', userAuth, createDirectInvoice);
 
 export default router

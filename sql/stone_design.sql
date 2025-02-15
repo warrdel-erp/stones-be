@@ -963,7 +963,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- -----------------------------------------------------
 -- Table `stone_design`.`freightbills`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `stone_design`.`freightbills` (
+CREATE TABLE IF NOT EXISTS `stone_design`.`freightBills` (
   `freight_bills_id` INT NOT NULL AUTO_INCREMENT,
   `po_supplier_invoice_id` INT NOT NULL,
   `po_supplier_invoice_mapper_id` INT NOT NULL,
@@ -1015,7 +1015,7 @@ CREATE TABLE IF NOT EXISTS `stone_design`.`freightbilldetails` (
   INDEX `freight_bills_id` (`freight_bills_id` ASC) VISIBLE,
   CONSTRAINT `freightbilldetails_ibfk_1`
     FOREIGN KEY (`freight_bills_id`)
-    REFERENCES `stone_design`.`freightbills` (`freight_bills_id`)
+    REFERENCES `stone_design`.`freightBills` (`freight_bills_id`)
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 18
