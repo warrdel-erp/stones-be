@@ -1,11 +1,9 @@
 import filterObject from '../helpers/filteredKeysUtils.js';
-import { findPoNumber } from '../repository/purchaseOrderRepository.js';
-import * as purchaseOrderService from '../services/purchaseOrderServices.js'
-import { paginationValidation } from '../zodValidations/purchaseOrder/pagination.js';
 import { ErrorResponse, SuccessResponse } from '../helpers/response.js';
-import poSupplierInvoiceMapperModel from '../models/poSupplierInvoiceMapperModel.js';
-import sequelize from '../database/sequelizeConfig.js';
-import { Sequelize } from 'sequelize';
+import * as purchaseOrderRepository from '../repository/purchaseOrderRepository.js';
+import { findPoNumber } from '../repository/purchaseOrderRepository.js';
+import * as purchaseOrderService from '../services/purchaseOrderServices.js';
+
 
 // 1. create order
 export const createOrder = async (req, res) => {
@@ -603,6 +601,7 @@ export const cancelPurchaseOrder = async (req, res) => {
 export async function createDirectInvoice(req, res) {
 
     const t = undefined;
+
     try {
         const info = req.body;
         const { po, poDate } = req.body;
@@ -611,11 +610,19 @@ export async function createDirectInvoice(req, res) {
         const clientId = req.clientId;
         const poDetails = await findPoNumber(po, clientId);
 
-        // console.log(info)
+        const poKeys = ["supplierId", "purchaseLocationId", "locationId", "freightForwarder", "vessel", "airBill", "airBill", "exFactoryDate", "departurePort", "etdPort", "etaPort", "arrivalPort", "dischargePort", "wiringInstruction", "po", "poDate", "supplierSo", "etaDate", "container", "deliveryType", "paymentTerm"];
 
-        let poData = info.poData;
-        let productsData = info.productData;
         let invoiceData = info.invoiceData;
+        let poData = {};
+
+        // bifurcating poData and invoiceData
+        poKeys.map((key, i) => {
+            poData[key] = invoiceData[key];
+            delete invoiceData[key];
+        })
+
+        let productsData = info.productsData;
+        let otherCharges = info.otherCharges;
 
         if (!(poData.po && poData.poDate)) {
             res.status(400).send("PO Number and PO Date is required");
@@ -630,42 +637,48 @@ export async function createDirectInvoice(req, res) {
             const po = poResult.get("po");
 
             // Create Data for products in PO.
-            // products = products?.map(e => ({ ...e, purchaseOrderId: poResult?.dataValues?.purchaseOrderId }))
-            productsData.Products = productsData.Products?.map(e => ({ ...e, purchaseOrderId }));
+            productsData = productsData.map(e => ({ ...e, purchaseOrderId, totalPrice: e.quantity * e.unitPrice }));
 
-            // Add products to that PO.
-            const productResult = await purchaseOrderService.addPurchaseOrderProduct(productsData, t);
+            // // Add products to that PO.
+            const productResult = await purchaseOrderService.addPurchaseOrderProduct({ Products: productsData }, t);
+
+            // Check if there are other charges and add them if they exist
+            if (otherCharges?.length > 0) {
+
+                otherCharges = otherCharges.map(charge => ({
+                    ...charge,
+                    createdBy: createdBy,
+                    purchaseOrderId
+                }));
+
+                // Add the other charges
+                await purchaseOrderRepository.addOtherCharges(otherCharges, t);
+            }
 
             // Create data for invoice.
             invoiceData.purchaseOrderId = purchaseOrderId;
             invoiceData.po = po;
             invoiceData.supplierId = poData?.supplierId;
-            invoiceData.totalProductCharges = productsData.Products.reduce((a, b) => a + b.totalPrice, 0);
-            invoiceData.finalTotalCharges = invoiceData.totalProductCharges + invoiceData.otherChargesTotal;
+            invoiceData.totalProductCharges = productsData.reduce((a, b) => a + b.totalPrice, 0);
+            invoiceData.finalTotalCharges = invoiceData.totalProductCharges + invoiceData.otherChargesTotal || 0;
             invoiceData.createdBy = createdBy
 
             // Create product details in invoice.
             invoiceData.productDeatils = productResult.results.map(e => {
                 const { createdAt, updatedAt, ...data } = e;
-
-                // "sqm": 1,
-                // "uom": 161.46,
-                // "totalPerUnit": 210,
-
-                data.productSku = productsData?.Products?.find(k => k.productId == e.productId)?.productName;
+                data.productSku = productsData?.find(k => k.productId == e.productId)?.productSku;
                 return data;
             });
 
             // Create a SIPL for this PO.
+            const invoiceResult = await purchaseOrderService.addSuplierInvoice(invoiceData, t);
 
-            await purchaseOrderService.addSuplierInvoice(invoiceData, t);
-
-            // // Commit the changes if everything is ok.
+            // Commit the changes if everything is ok.
             // t.commit();
 
-            res.status(200).send(productResult);
-
+            res.status(200).send(invoiceResult);
         }
+
     } catch (error) {
         // Rollback everything if anything went wrong.
         // t.rollback();

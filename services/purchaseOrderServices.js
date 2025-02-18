@@ -54,16 +54,16 @@ export async function addPurchaseOrderProduct(dataArray, t) {
             result = await purchaseOrderRepository.createPrePurchaseOrder(info, transaction);
 
             // Check if there are other charges and add them if they exist
-            if (dataArray.othercharge && dataArray.othercharge.length > 0) {
+            // if (dataArray.othercharge && dataArray.othercharge.length > 0) {
 
-                const otherCharges = dataArray.othercharge.map(charge => ({
-                    ...charge,
-                    createdBy: data.createdBy
-                }));
+            //     const otherCharges = dataArray.othercharge.map(charge => ({
+            //         ...charge,
+            //         createdBy: data.createdBy
+            //     }));
 
-                // Add the other charges
-                result = await purchaseOrderRepository.addOtherCharges(otherCharges, transaction);
-            }
+            //     // Add the other charges
+            //     result = await purchaseOrderRepository.addOtherCharges(otherCharges, transaction);
+            // }
 
             results.push({ ...result.dataValues, ...purchaseOrderProduct });
         }
