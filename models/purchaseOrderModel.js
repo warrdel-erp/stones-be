@@ -4,7 +4,6 @@ import { purchaseStatus, deliveryType, shipmentTerm, freightForwarder, otherChar
 import Suppliers from './supplierModel.js'
 import Locations from './locationModel.js'
 
-
 export default sequelize.define(
     'purchase_orders',
     {
