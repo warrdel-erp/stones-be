@@ -30,7 +30,6 @@ export const createOrder = async (req, res) => {
             // Create PO.
             const poResult = await purchaseOrderService.createOrder({ ...poData, createdBy }, t);
             const purchaseOrderId = poResult.get("purchaseOrderId");
-            const po = poResult.get("po");
 
             // Create Data for products in PO.
             productsData = productsData.map(e => ({ ...e, purchaseOrderId, totalPrice: e.quantity * e.unitPrice }));
@@ -38,7 +37,7 @@ export const createOrder = async (req, res) => {
             // // Add products to that PO.
             const productResult = await purchaseOrderService.addPurchaseOrderProduct({ Products: productsData }, t);
 
-            res.status(200).send(productResult);
+            SuccessResponse(res, 201, "Invoice created successfully.", { po: poResult, products: productResult });
         }
     } catch (error) {
         console.error("Error in create Order: ", error);
@@ -626,7 +625,7 @@ export async function createDirectInvoice(req, res) {
         const clientId = req.clientId;
         const poDetails = await findPoNumber(po, clientId);
 
-        const poKeys = ["supplierId", "purchaseLocationId", "locationId", "freightForwarder", "vessel", "airBill", "airBill", "exFactoryDate", "departurePort", "etdPort", "etaPort", "arrivalPort", "dischargePort", "wiringInstruction", "po", "poDate", "supplierSo", "etaDate", "container", "deliveryType", "paymentTerm"];
+        const poKeys = ["supplierId", "purchaseLocationId", "locationId", "freightForwarder", "vessel", "airBill", "exFactoryDate", "departurePort", "etdPort", "etaPort", "arrivalPort", "dischargePort", "wiringInstruction", "po", "poDate", "supplierSo", "etaDate", "container", "deliveryType", "paymentTerm"];
 
         let invoiceData = info.invoiceData;
         let poData = {};
@@ -692,7 +691,7 @@ export async function createDirectInvoice(req, res) {
             // Commit the changes if everything is ok.
             // t.commit();
 
-            res.status(200).send(invoiceResult);
+            SuccessResponse(res, 201, "Invoice created successfully.", { po: poResult, products: productResult, invoice: invoiceResult });
         }
 
     } catch (error) {
