@@ -7,22 +7,38 @@ import * as purchaseOrderService from '../services/purchaseOrderServices.js';
 
 // 1. create order
 export const createOrder = async (req, res) => {
+    const t = undefined;
+
     try {
         const info = req.body;
-        const { po, poDate } = req.body;
+        const { po } = req.body.poData;
         const user = req.user;
         const createdBy = user.dataValues.id;
         const clientId = req.clientId;
         const poDetails = await findPoNumber(po, clientId);
-        const data = filterObject(info)
 
-        if (!(po && poDate)) {
+        let poData = info.poData;
+        let productsData = info.productsData;
+
+        if (!(po)) {
             res.status(400).send("PO Number and PO Date is required");
         } else if (poDetails) {
             res.status(400).send("PO Number can't Be Same");
         } else {
-            const result = await purchaseOrderService.createOrder({ ...data, createdBy });
-            res.status(200).send(result);
+
+            poData = filterObject(poData);
+            // Create PO.
+            const poResult = await purchaseOrderService.createOrder({ ...poData, createdBy }, t);
+            const purchaseOrderId = poResult.get("purchaseOrderId");
+            const po = poResult.get("po");
+
+            // Create Data for products in PO.
+            productsData = productsData.map(e => ({ ...e, purchaseOrderId, totalPrice: e.quantity * e.unitPrice }));
+
+            // // Add products to that PO.
+            const productResult = await purchaseOrderService.addPurchaseOrderProduct({ Products: productsData }, t);
+
+            res.status(200).send(productResult);
         }
     } catch (error) {
         console.error("Error in create Order: ", error);
@@ -604,7 +620,7 @@ export async function createDirectInvoice(req, res) {
 
     try {
         const info = req.body;
-        const { po, poDate } = req.body;
+        const { po } = req.body.invoiceData;
         const user = req.user;
         const createdBy = user.dataValues.id;
         const clientId = req.clientId;
