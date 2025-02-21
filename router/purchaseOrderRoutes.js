@@ -23,6 +23,7 @@ import {
     getCOATransactionDetails,
     getContainerDetails,
     getInventoryListBasedOnSipl,
+    getInvoiceNumber,
     getPaymentDetails,
     getPoNumber,
     getProductInventory,
@@ -106,5 +107,7 @@ router.get('/getSlabInfo', getSlabInfo);
 router.patch('/cancel/:id', userAuth, cancelPurchaseOrder);
 
 router.post('/createDirectInvoice', userAuth, createDirectInvoice);
+
+router.get('/getInvoiceNumber', userAuth, getInvoiceNumber)
 
 export default router

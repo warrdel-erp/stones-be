@@ -701,3 +701,13 @@ export async function createDirectInvoice(req, res) {
         res.status(500).send(error);
     }
 }
+
+export const getInvoiceNumber = async (req, res)=>{
+    try {
+        const invoiceNumber = await purchaseOrderService.getNewInvoiceNumber();
+        SuccessResponse(res, 200, "New invoice number/id", invoiceNumber)
+    } catch (error) {
+        console.log('Error in getting new Invoice number', error);
+        ErrorResponse(res, 500, "Error in getting new Invoice number", {})
+    }
+}

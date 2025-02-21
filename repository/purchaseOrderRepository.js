@@ -182,6 +182,15 @@ export async function createSupplierInvoice(data) {
   }
 }
 
+export async function getLastInvoiceNumber() {
+  const lastRecord = await model.poSupplierInvoiceModel.findOne({
+    order: [['createdAt', 'DESC']],
+    attributes: ["poSupplierInvoiceId"]
+  });
+  return lastRecord
+}
+
+
 // get Single details
 
 export async function getSinglePurchaseOrder(purchaseOrderId) {
@@ -646,7 +655,7 @@ export async function getContainerDetails(poSupplierInvoiceMapperId) {
 
 export async function purchaseAccountTransaction(data, transaction) {
   try {
-    const result = await model.accountTransactionModel.create(data, {transaction});
+    const result = await model.accountTransactionModel.create(data, { transaction });
     return result;
   } catch (error) {
     console.error("Error in add paymentr:", error);

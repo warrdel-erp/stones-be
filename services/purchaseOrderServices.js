@@ -178,7 +178,7 @@ export async function addSuplierInvoice(data, t) {
         };
 
         result = await purchaseOrderRepository.createSupplierInvoiceMapper(info, transaction);
-        
+
         console.log("This is sample.")
 
         const poSupplierInvoiceMappperId = result.get('poSupplierInvoiceMappperId')
@@ -252,7 +252,13 @@ export async function addSuplierInvoice(data, t) {
     }
 }
 
-// add slab details
+export async function getNewInvoiceNumber() {
+    const data = await purchaseOrderRepository.getLastInvoiceNumber()
+    // increase it with one to new invoice id.
+    data.dataValues.poSupplierInvoiceId++;
+    return data
+}
+
 
 export async function addSlabDetails(info) {
     // console.log('info-------------', info);
