@@ -15,9 +15,9 @@ export async function createOrder(data, t) {
   }
 }
 
-export async function updatePO(data, poNO) {
+export async function updatePO(data) {
   try {
-    const result = await model.purchaseModel.update(data, { where: { po: poNO } });
+    const result = await model.purchaseModel.update(data, { where: { purchaseOrderId: data.purchaseOrderId } });
     return result;
   } catch (error) {
     console.error("Error in create order:", error);

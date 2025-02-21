@@ -46,13 +46,24 @@ export const createOrder = async (req, res) => {
 };
 
 export const updatePO = async (req, res) => {
-    const info = req.body;
-    const createdBy = req.user.dataValues.id;
-    const data = filterObject(info)
+    let { poData, productsData } = req.body;
+    const updatedBy = req.user.dataValues.id;
+
+    if (poData) {
+        poData = filterObject(poData)
+    }
+
+    let poResult, preProResult;
 
     try {
-        const result = await purchaseOrderService.updatePO({ ...data, createdBy }, data.po);
-        res.status(200).send(result);
+        if (poData) {
+            poResult = await purchaseOrderService.updatePO({ ...poData, updatedBy });
+        }
+        if (productsData) {
+            preProResult = await purchaseOrderService.updatePrePurchaseProduct(productsData);
+        }
+
+        res.status(200).send({ po: poResult, product: preProResult });
     } catch (error) {
         console.error("Error while Updating PO: ", error);
         res.status(500).send(error);
@@ -702,7 +713,7 @@ export async function createDirectInvoice(req, res) {
     }
 }
 
-export const getInvoiceNumber = async (req, res)=>{
+export const getInvoiceNumber = async (req, res) => {
     try {
         const invoiceNumber = await purchaseOrderService.getNewInvoiceNumber();
         SuccessResponse(res, 200, "New invoice number/id", invoiceNumber)

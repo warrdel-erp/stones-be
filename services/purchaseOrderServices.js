@@ -17,8 +17,8 @@ export async function createOrder(info, t) {
     return await purchaseOrderRepository.createOrder(info, t)
 }
 
-export async function updatePO(info, poNo) {
-    return await purchaseOrderRepository.updatePO(info, poNo)
+export async function updatePO(info) {
+    return await purchaseOrderRepository.updatePO(info)
 }
 
 export async function getPoNumber(clientId) {
@@ -79,6 +79,9 @@ export async function addPurchaseOrderProduct(dataArray, t) {
     }
 }
 
+export async function updatePurchaseProduct() {
+    
+}
 
 export async function getAllPo(data, limit, page) {
     const result = await purchaseOrderRepository.getAllPurchaseOrder(data, limit, page)
