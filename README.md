@@ -1,23 +1,40 @@
-# stone-crm-be-app
+1. clone repo
+2. run
 
-# setup project
-checkout project from git@github.com:Warrdel/stone-crm-be-app.git
+```
+pnpm install
+```
 
-1. install project dependencies
-yarn install
+3. put following env and put values accordingly.
 
-2. run application
-nodemon app.js
+```
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=rootroot
+DB_NAME=stone_erp
+DB_PORT=3306
+PORT=5002
+JWT_SECRET=123456
+```
 
+5. uncomment line:45 at src/index.ts
 
-## steps to setup the database
--- navigate to the root sql folder in which
-1. run the stone_design.sql    -- this file have all the tables structure used in this project
+```
+    // syncModels();
+```
 
-below files 2 to 7 have all the master tables data to be inserted, without this some of the functionality will not work 
-2. run the stone_design_vendor_sql
-3. run the stone_design_sub_account_types.sql
-4. run the settings.sql
-5. run the permissions.sql
-6. run the account_types.sql
-7. run the accounts.sql
+6. and run
+
+```
+pnpm run dev
+```
+
+7. **_Comment-out again the uncommented sync models line_**
+
+8. run
+
+```
+pnpm run seed:all
+```
+
+9. Checkout Postman collection inside `/docs`
