@@ -66,9 +66,12 @@ export const loginUser = async (email: string, password: string) => {
     throw new Error("env does not exists.");
   }
 
-  const token = jwt.sign({ id: user.id, userid: user.userid, email: user.email }, process.env.JWT_SECRET);
+  const token = jwt.sign(
+    { id: user.id, userid: user.userid, email: user.email, clientId: user.client.id },
+    process.env.JWT_SECRET
+  );
 
-  return { token, user: { id: user.id, username: user.username, email: user.email } };
+  return { token, user: { id: user.id, username: user.username, email: user.email, clientId: user.client.id } };
 };
 
 // Get all Users.

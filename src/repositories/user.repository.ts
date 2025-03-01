@@ -1,6 +1,6 @@
-import { Op } from "sequelize";
+import { Model, Op } from "sequelize";
 import { sequelize } from "../config/database";
-import { Location, User } from "../models";
+import { Client, Location, User } from "../models";
 
 export const createUser = async (userData: {
   username: string;
@@ -14,7 +14,7 @@ export const createUser = async (userData: {
 };
 
 export const getUserByEmail = async (email: string) => {
-  return await User.findOne({ where: { email } });
+  return await User.findOne({ where: { email }, include: [{ model: Client, as: "client" }] });
 };
 
 export const getUserByUserId = async (userid: string) => {

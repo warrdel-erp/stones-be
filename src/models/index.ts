@@ -17,7 +17,7 @@ import Warehouse from "./warehouse";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId" });
-User.belongsTo(Client, { foreignKey: "clientId" });
+User.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // Client-Location relation (one 'Client' have multiple 'Location') (one 'Location' have one 'Client')
 Client.hasMany(Location, { foreignKey: "clientId" });
