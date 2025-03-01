@@ -212,6 +212,9 @@ Location.hasMany(User, { foreignKey: "defaultLocationId" });
 ProductSubCategory.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
 ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "subCategories" });
 
+Bill.belongsTo(User, { foreignKey: "createdBy" });
+User.hasMany(Bill, { foreignKey: "createdBy", as: "bills" });
+
 export {
   Client,
   User,

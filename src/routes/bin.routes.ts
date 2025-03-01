@@ -1,8 +1,9 @@
 import { Router } from "express";
 import * as binController from "../controllers/bin.controller";
+import { authenticateUser } from "../middleware/authMiddleware";
 const router = Router();
 
-// Route to register a new client
-router.get("/location/:locationId", binController.getBinsByLocationController);
+// Get bin by Location
+router.get("/location/:locationId", authenticateUser, binController.getBinsByLocationController);
 
 export default router;

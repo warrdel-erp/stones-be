@@ -89,7 +89,7 @@ export const modifyUser = async (id: number, updateData: any) => {
 // Ger user locations
 // Update User
 export const userLocations = async (id: number) => {
-  const userLocations = await userRepository.getUserLocation(id);
+  const userLocations = await userRepository.getUserLocations(id);
   return userLocations;
 };
 
@@ -122,4 +122,10 @@ export const fetchUserById = async (userId: number) => {
     throw new AppError("User not found", 400);
   }
   return user;
+};
+
+// Check if user has access to given location.
+export const checkUserLocationAccess = async (locationId: number, userId: number) => {
+  const userHasLocation = await userRepository.doesUserHaveLocation(Number(locationId), userId!);
+  if (!userHasLocation) throw new AppError("User does not have access to given location", 400);
 };

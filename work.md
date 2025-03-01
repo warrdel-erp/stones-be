@@ -4,7 +4,7 @@
 4. Receive inventory. ✔️
 5. Inventory Data.
 6. All user list for a given client
-7. configure api according to authentication and don't accept createdBy in payload get it from user TOKEN
+7. configure api according to authentication and don't accept createdBy in payload get it from user TOKEN(Question for every API that who can CRUD this.)
 8. check every id that corresponding data exists.
 9. send client id in userLogin
 10. COA (type, head, subhead)
@@ -16,6 +16,7 @@
 11. deploy.
 12. check location belongs to client that is being assigned to user.
 13. map every data and operation with location.
+14. create client login
 
 ---
 

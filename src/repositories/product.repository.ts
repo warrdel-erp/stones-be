@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import * as models from "../models";
+import { CustomUpdateOptions } from "../types/custom";
 
 export const createProduct = async (productData: any) => {
   return await models.Product.create(productData);
@@ -19,9 +20,18 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
   return { products, total, page, limit };
 };
 
+export const getProductById = async (id: number) => {
+  return (await models.Product.findByPk(id))?.get({ plain: true });
+};
+
 // Update product by ID
-export const updateProduct = async (id: number, updateData: any) => {
-  const [updatedRows] = await models.Product.update(updateData, { where: { id } });
+export const updateProduct = async (id: number, updateData: any, userId: number) => {
+  const [updatedRows] = await models.Product.update(updateData, {
+    where: { id },
+    individualHooks: true,
+    userId: userId,
+  } as CustomUpdateOptions);
+
   if (!updatedRows) return null;
 
   return await models.Product.findByPk(id);

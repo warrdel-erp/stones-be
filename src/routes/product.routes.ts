@@ -1,14 +1,15 @@
 import express from "express";
 import * as productController from "../controllers/product.controller";
+import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/", productController.createProduct);
+router.post("/", authenticateUser, productController.createProduct);
 
 // Get all products.
-router.get("/", productController.getProducts);
+router.get("/", authenticateUser, productController.getProducts);
 
 // Update product
-router.put("/:id", productController.updateProductById);
+router.put("/:id", authenticateUser, productController.updateProductById);
 
 export default router;

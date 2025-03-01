@@ -80,7 +80,7 @@ export const findUserById = async (userId: number) => {
 };
 
 // Get all locations that are assigned to user.
-export const getUserLocation = async (id: number) => {
+export const getUserLocations = async (id: number) => {
   const user: any = await models.User.findByPk(id, {
     include: [{ model: models.Location, as: "locations" }],
   });

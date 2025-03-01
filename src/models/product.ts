@@ -1,9 +1,11 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import User from "./user";
 import { sequelize } from "../config/database";
 import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
 import { PRODUCT_COLORS } from "../constants";
+import { AppError } from "../helper/appError";
+import { CustomUpdateOptions } from "../types/custom";
 
 const Product = sequelize.define(
   "products",
@@ -127,6 +129,16 @@ const Product = sequelize.define(
   }
 );
 
-// **Relations**
+Product.beforeUpdate((product, options) => {
+  const customOptions = options as CustomUpdateOptions;
+
+  if (product.get({ plain: true }).createdBy !== customOptions.userId) {
+    throw new AppError("You can't update this product because you haven't created it.", 400);
+  }
+
+  if (product.changed("createdBy" as keyof Model<any, any>)) {
+    throw new AppError("createdBy cannot be updated.", 400);
+  }
+});
 
 export default Product;

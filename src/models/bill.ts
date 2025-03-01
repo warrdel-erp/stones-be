@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import Vendor from "./vendor";
 import { sequelize } from "../config/database";
+import User from "./user";
 
 const Bill = sequelize.define(
   "bills",
@@ -48,6 +49,16 @@ const Bill = sequelize.define(
     referenceId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     vendorId: {
       type: DataTypes.INTEGER,
