@@ -858,6 +858,37 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Inventory",
+			"item": [
+				{
+					"name": "Get all inventory products.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventory/location/:locationId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"location",
+								":locationId"
+							],
+							"variable": [
+								{
+									"key": "locationId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
