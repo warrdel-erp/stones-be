@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import User from "./user";
 import { sequelize } from "../config/database";
 import ProductCategory from "./productCategory";
+import ProductSubCategory from "./productSubCategory";
+import { PRODUCT_COLORS } from "../constants";
 
 const Product = sequelize.define(
   "products",
@@ -19,12 +21,8 @@ const Product = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    subCategory: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     baseColor: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(PRODUCT_COLORS)),
       allowNull: true,
     },
     group: {
@@ -107,6 +105,15 @@ const Product = sequelize.define(
       allowNull: false,
       references: {
         model: ProductCategory,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    subCategoryId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: ProductSubCategory,
         key: "id",
       },
       onUpdate: "CASCADE",

@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 
+// Create a new user
 export const createUser = async (userData: {
   username: string;
   userid: string;
@@ -13,17 +14,17 @@ export const createUser = async (userData: {
   return await models.User.create(userData);
 };
 
+// Get User by Email
 export const getUserByEmail = async (email: string) => {
   return await models.User.findOne({ where: { email }, include: [{ model: models.Client, as: "client" }] });
 };
 
+// Get User by Id
 export const getUserByUserId = async (userid: string) => {
   return await models.User.findOne({ where: { userid } });
 };
 
-/**
- * Adds a location to a user by inserting a record into the user_locations table.
- */
+// Adds a location to a user by inserting a record into the user_locations table.
 export const addUserLocation = async (userId: number, locationId: number) => {
   const user = await models.User.findByPk(userId);
   const location = await models.Location.findByPk(locationId);

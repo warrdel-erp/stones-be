@@ -6,6 +6,7 @@ import Location from "./location";
 import Notes from "./note";
 import Product from "./product";
 import ProductCategory from "./productCategory";
+import ProductSubCategory from "./productSubCategory";
 import PurchaseOrder from "./purchaseOrder";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 import SIPL from "./sipl";
@@ -149,6 +150,10 @@ RequestedPurchaseProduct.belongsTo(Product, { foreignKey: "productId" });
 Product.belongsTo(ProductCategory, { foreignKey: "categoryId" });
 ProductCategory.hasMany(Product, { foreignKey: "categoryId" });
 
+// Product-ProductSubCategory (one 'Product' have one 'SubCategory') (one 'SubCategory' have multiple 'Product')
+Product.belongsTo(ProductSubCategory, { foreignKey: "subCategoryId" });
+ProductSubCategory.hasMany(Product, { foreignKey: "subCategoryId" });
+
 // Product-User (One 'Product' Belongs to one User) (One User can have multiple 'Products')
 Product.belongsTo(User, { foreignKey: "createdBy" });
 User.hasMany(Product, { foreignKey: "createdBy" });
@@ -203,6 +208,10 @@ Bill.belongsTo(SIPL, {
 User.belongsTo(Location, { foreignKey: "defaultLocationId" });
 Location.hasMany(User, { foreignKey: "defaultLocationId" });
 
+// (ProductCategory have multiple sub categories), (One subCategory has one category)
+ProductSubCategory.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
+ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "subCategories" });
+
 export {
   Client,
   User,
@@ -220,4 +229,5 @@ export {
   Warehouse,
   Bill,
   ProductCategory,
+  ProductSubCategory,
 };
