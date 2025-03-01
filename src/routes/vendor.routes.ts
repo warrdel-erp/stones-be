@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { createVendorController } from "../controllers/vendor.controller";
+import * as vendorController from "../controllers/vendor.controller";
 
 const router = Router();
 
-router.post("/", createVendorController);
+router.post("/", vendorController.createVendorController);
+
+router.put("/:id", vendorController.updateVendorController);
+
+// Get all vendors.
+router.get("/", vendorController.getAllVendorsController);
 
 export default router;

@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { registerClientHandler } from "../controllers/client.controller";
+import * as clientController from "../controllers/client.controller";
 
 const router = Router();
 
 // Route to register a new client
-router.post("/register", registerClientHandler);
+router.post("/register", clientController.registerClientHandler);
 
-// // Route to get all clients
-// router.get("/", getClients);
+// Get all clients with pagination and optional search filtering
+router.get("/", clientController.getClients);
 
-// // Route to get a single client by ID
-// router.get("/:id", getClientById);
+// Update an existing client by ID
+router.put("/:id", clientController.updateClient);
 
 export default router;

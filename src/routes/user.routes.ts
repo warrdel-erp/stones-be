@@ -13,4 +13,10 @@ router.post("/login", userController.login);
 // Assign Location to user
 router.put("/assignLocation", authenticateUser, userController.assignLocation);
 
+// Get All Users
+router.get("/", userController.getAllUsersController);
+
+// Update User
+router.put("/:id", userController.updateUserController);
+
 export default router;

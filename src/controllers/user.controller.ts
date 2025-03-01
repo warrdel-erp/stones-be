@@ -37,3 +37,33 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 
   SuccessResponse(res, 200, "Login successful", result);
 });
+
+/**
+ * Get all users with pagination
+ */
+export const getAllUsersController = catchAsync(async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = req.query.search as string | undefined;
+
+  const result = await userService.fetchAllUsers(page, limit, search);
+
+  SuccessResponse(res, 200, "Users retrieved successfully", result.users, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});
+
+export const updateUserController = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  const updatedUser = await userService.modifyUser(Number(id), updateData);
+
+  if (!updatedUser) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  return SuccessResponse(res, 200, "Vendor updated successfully", updatedUser);
+});

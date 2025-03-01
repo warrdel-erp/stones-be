@@ -4,6 +4,7 @@ import { checkClientExists } from "../repositories/client.repository";
 import { AppError } from "../helper/appError";
 import jwt from "jsonwebtoken";
 
+// Register User
 export const registerUser = async (userData: {
   username: string;
   userid: string;
@@ -53,6 +54,7 @@ export const assignLocationToUser = async (userId: number, locationId: number) =
   return result;
 };
 
+// Login User
 export const loginUser = async (email: string, password: string) => {
   const user: any = await userRepository.getUserByEmail(email);
   if (!user) throw new AppError("Invalid credentials", 401);
@@ -67,4 +69,16 @@ export const loginUser = async (email: string, password: string) => {
   const token = jwt.sign({ id: user.id, userid: user.userid, email: user.email }, process.env.JWT_SECRET);
 
   return { token, user: { id: user.id, username: user.username, email: user.email } };
+};
+
+// Get all Users.
+export const fetchAllUsers = async (page: number, limit: number, search?: string) => {
+  return await userRepository.getAllUsers(page, limit, search);
+};
+
+// Update User
+export const modifyUser = async (id: number, updateData: any) => {
+  const updatedUser = await userRepository.updateUser(id, updateData);
+  if (!updatedUser) throw new AppError("User not found or update failed", 400);
+  return updatedUser;
 };

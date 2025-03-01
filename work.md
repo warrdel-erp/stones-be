@@ -6,6 +6,7 @@
 6. All user list for a given client
 7. configure api according to authentication and don't accept createdBy in payload get it from user TOKEN
 8. check every id that corresponding data exists.
+9. send client id in userLogin
 
 ---
 
