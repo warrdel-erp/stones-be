@@ -199,6 +199,10 @@ Bill.belongsTo(SIPL, {
   constraints: false,
 });
 
+// user have one default location ,One location could be default for many users.
+User.belongsTo(Location, { foreignKey: "defaultLocationId" });
+Location.hasMany(User, { foreignKey: "defaultLocationId" });
+
 export {
   Client,
   User,

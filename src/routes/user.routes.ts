@@ -4,22 +4,28 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
-// Route to register a new client
+// Route to register a new client.
 router.post("/register", userController.registerUserHandler);
 
-// Login user
+// Login user.
 router.post("/login", userController.login);
 
-// Assign Location to user
+// Assign Location to user.
 router.put("/assignLocation", authenticateUser, userController.assignLocation);
 
-// Get All Users
+// Get All Users.
 router.get("/", userController.getAllUsersController);
 
-// Assign Location to user
+// Assign Location to user.
 router.get("/getLocations", authenticateUser, userController.getUserLocations);
 
-// Update User
+// Set default location.
+router.put("/setDefaultLocation", authenticateUser, userController.setDefaultLocation);
+
+// Get user by ID
+router.get("/:id", userController.getUser);
+
+// Update User.
 router.put("/:id", userController.updateUserController);
 
 export default router;

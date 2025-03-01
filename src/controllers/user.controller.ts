@@ -75,3 +75,29 @@ export const getUserLocations = catchAsync(async (req: AuthRequest, res: Respons
   const userLocations = await userService.userLocations(id!);
   return SuccessResponse(res, 200, "User locations fetched successfully", userLocations);
 });
+
+// Set Default location for user
+export const setDefaultLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const { locationId } = req.body;
+
+  if (!locationId) {
+    throw new AppError("Location ID is required", 400);
+  }
+
+  const response = await userService.assignDefaultLocation(userId!, locationId);
+
+  return SuccessResponse(res, 200, "Default location updated successfully", response);
+});
+
+// Fetch user by ID
+export const getUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = Number(req.params.id); // Convert ID to number
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  const user = await userService.fetchUserById(userId);
+  return res.json(user);
+});

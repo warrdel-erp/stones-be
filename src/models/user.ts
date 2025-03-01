@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Client from "./client";
+import Location from "./location";
 
 // Define User Model
 const User = sequelize.define(
@@ -42,6 +43,13 @@ const User = sequelize.define(
       },
       onUpdate: "CASCADE", // Update clientId when Client.id changes
       onDelete: "RESTRICT", // Prevent deleting Client if Users exist
+    },
+    defaultLocationId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Location,
+        key: "id",
+      },
     },
   },
   {

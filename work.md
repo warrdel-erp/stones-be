@@ -14,6 +14,7 @@
     4. entity (ledger, journal)
     5. customer,
 11. deploy.
+12. check location belongs to client that is being assigned to user.
 
 ---
 

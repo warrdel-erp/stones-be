@@ -92,3 +92,34 @@ export const userLocations = async (id: number) => {
   const userLocations = await userRepository.getUserLocation(id);
   return userLocations;
 };
+
+export const assignDefaultLocation = async (userId: number, locationId: number) => {
+  // Check if user exists
+  const user = await userRepository.findUserById(userId);
+  if (!user) {
+    throw new AppError("User not found", 400);
+  }
+
+  const userHaveLocation = await userRepository.doesUserHaveLocation(userId, locationId);
+
+  if (!userHaveLocation) {
+    throw new AppError("User does not have access to this location", 400);
+  }
+
+  // Update default location
+  const [updated] = await userRepository.updateUserDefaultLocation(userId, locationId);
+
+  if (!updated) {
+    throw new AppError("Failed to update default location", 400);
+  }
+  return updated;
+};
+
+// Fetch User by ID.
+export const fetchUserById = async (userId: number) => {
+  const user = await userRepository.findUserById(userId);
+  if (!user) {
+    throw new AppError("User not found", 400);
+  }
+  return user;
+};

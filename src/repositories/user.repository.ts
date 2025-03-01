@@ -73,10 +73,35 @@ export const updateUser = async (id: number, updateData: any) => {
   return await models.User.findByPk(id);
 };
 
+// get User By userID
+export const findUserById = async (userId: number) => {
+  return await models.User.findByPk(userId, { attributes: { exclude: ["password"] } });
+};
+
+// Get all locations that are assigned to user.
 export const getUserLocation = async (id: number) => {
   const user: any = await models.User.findByPk(id, {
     include: [{ model: models.Location, as: "locations" }],
   });
 
   return user?.locations;
+};
+
+// update user's default location.
+export const updateUserDefaultLocation = async (userId: number, locationId: number) => {
+  return await models.User.update({ defaultLocationId: locationId }, { where: { id: userId } });
+};
+
+// Check does user have access to given location
+export const doesUserHaveLocation = async (userId: number, locationId: number) => {
+  const user = await models.User.findOne({
+    where: { id: userId },
+    include: {
+      model: models.Location,
+      as: "locations",
+      where: { id: locationId }, // Ensure the location is associated
+    },
+  });
+
+  return !!user; // Returns true if user is found, otherwise false
 };
