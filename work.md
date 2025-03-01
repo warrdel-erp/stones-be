@@ -1,5 +1,5 @@
 1. User login (with JWT) ✔️
-2. Drop Database, Retest everything, create project setup docs, Put code on github.
+2. Drop Database, Retest everything, create project setup docs, Put code on github.✔️
 3. create system for SIPL different from PO ✔️
 4. Receive inventory. ✔️
 5. Inventory Data.
@@ -15,6 +15,7 @@
     5. customer,
 11. deploy.
 12. check location belongs to client that is being assigned to user.
+13. map every data and operation with location.
 
 ---
 

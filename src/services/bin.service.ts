@@ -5,6 +5,7 @@ import { AppError } from "../helper/appError";
 export async function getBinsByLocation(locationId: number) {
   // Check if location exists
   const location = await models.Location.findByPk(locationId);
+
   if (!location) {
     throw new AppError("Location not found", 400);
   }

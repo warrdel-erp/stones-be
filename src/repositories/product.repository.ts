@@ -1,15 +1,15 @@
 import { Op } from "sequelize";
-import Product from "../models/product";
+import * as models from "../models";
 
 export const createProduct = async (productData: any) => {
-  return await Product.create(productData);
+  return await models.Product.create(productData);
 };
 
 // Get all products
 export const getAllProducts = async (page: number, limit: number, search?: string) => {
   const offset = (page - 1) * limit;
   const whereClause = search ? { productName: { [Op.like]: `%${search}%` } } : {};
-  const { rows: products, count: total } = await Product.findAndCountAll({
+  const { rows: products, count: total } = await models.Product.findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -20,9 +20,37 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
 };
 
 // Update product by ID
-export const updateProduct = async (id: number, updateData: Partial<typeof Product>) => {
-  const [updatedRows] = await Product.update(updateData, { where: { id } });
+export const updateProduct = async (id: number, updateData: any) => {
+  const [updatedRows] = await models.Product.update(updateData, { where: { id } });
   if (!updatedRows) return null;
 
-  return await Product.findByPk(id);
+  return await models.Product.findByPk(id);
+};
+
+// Get product with specific location.
+export const getProductsWithSlabsByLocation = async (locationId: number) => {
+  return await models.Product.findAll({
+    include: [
+      {
+        model: models.Slab,
+        include: [
+          {
+            model: models.Bin,
+            attributes: [],
+            include: [
+              {
+                model: models.Warehouse,
+                include: [
+                  {
+                    model: models.Location,
+                    where: { id: locationId }, // Filter by locationId
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
 };
