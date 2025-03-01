@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 1\n}",
+							"raw": "{\n    \"locationId\": 2\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -261,6 +261,16 @@
 				{
 					"name": "Get user location",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -294,7 +304,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 1\n}",
+							"raw": "{\n    \"locationId\": 3\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -319,7 +329,24 @@
 					"name": "Get User by Id",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/user/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -783,6 +810,19 @@
 								}
 							]
 						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "general",
+			"item": [
+				{
+					"name": "Get general Data",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
