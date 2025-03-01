@@ -2,7 +2,6 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Location from "./location";
 import User from "./user";
-import Notes from "./note";
 import Vendor from "./vendor";
 
 const PurchaseOrder = sequelize.define(
@@ -13,10 +12,7 @@ const PurchaseOrder = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    po: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+
     purchaseLocationId: {
       type: DataTypes.INTEGER,
       references: {
@@ -59,5 +55,14 @@ const PurchaseOrder = sequelize.define(
     timestamps: true,
   }
 );
+
+// // Generate serialNumber manually before creation
+// PurchaseOrder.beforeCreate(async (order: any) => {
+//   const lastOrder: any = await PurchaseOrder.findOne({
+//     order: [["po", "DESC"]],
+//   });
+
+//   order.po = lastOrder ? lastOrder.po + 1 : 1;
+// });
 
 export default PurchaseOrder;

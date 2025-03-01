@@ -13,6 +13,7 @@ export default {
         status: "active",
         createdAt: new Date(),
         updatedAt: new Date(),
+        clientId: 1,
       },
       {
         id: 2,
@@ -26,6 +27,7 @@ export default {
         status: "active",
         createdAt: new Date(),
         updatedAt: new Date(),
+        clientId: 1,
       },
       {
         id: 3,
@@ -39,6 +41,7 @@ export default {
         status: "inactive",
         createdAt: new Date(),
         updatedAt: new Date(),
+        clientId: 1,
       },
     ]);
   },

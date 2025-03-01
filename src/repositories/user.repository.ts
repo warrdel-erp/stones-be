@@ -1,6 +1,6 @@
-import { Model, Op } from "sequelize";
+import { Op } from "sequelize";
 import { sequelize } from "../config/database";
-import { Client, Location, User } from "../models";
+import * as models from "../models";
 
 export const createUser = async (userData: {
   username: string;
@@ -10,23 +10,23 @@ export const createUser = async (userData: {
   email: string;
   clientId: number;
 }) => {
-  return await User.create(userData);
+  return await models.User.create(userData);
 };
 
 export const getUserByEmail = async (email: string) => {
-  return await User.findOne({ where: { email }, include: [{ model: Client, as: "client" }] });
+  return await models.User.findOne({ where: { email }, include: [{ model: models.Client, as: "client" }] });
 };
 
 export const getUserByUserId = async (userid: string) => {
-  return await User.findOne({ where: { userid } });
+  return await models.User.findOne({ where: { userid } });
 };
 
 /**
  * Adds a location to a user by inserting a record into the user_locations table.
  */
 export const addUserLocation = async (userId: number, locationId: number) => {
-  const user = await User.findByPk(userId);
-  const location = await Location.findByPk(locationId);
+  const user = await models.User.findByPk(userId);
+  const location = await models.Location.findByPk(locationId);
 
   if (!user || !location) {
     return null; // Handle in service layer
@@ -55,7 +55,7 @@ export const getAllUsers = async (page: number, limit: number, search?: string) 
       }
     : {};
 
-  const { rows: users, count: total } = await User.findAndCountAll({
+  const { rows: users, count: total } = await models.User.findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -66,9 +66,17 @@ export const getAllUsers = async (page: number, limit: number, search?: string) 
 };
 
 // Update User
-export const updateUser = async (id: number, updateData: Partial<typeof User>) => {
-  const [updatedRows] = await User.update(updateData, { where: { id } });
+export const updateUser = async (id: number, updateData: any) => {
+  const [updatedRows] = await models.User.update(updateData, { where: { id } });
 
   if (!updatedRows) return null;
-  return await User.findByPk(id);
+  return await models.User.findByPk(id);
+};
+
+export const getUserLocation = async (id: number) => {
+  const user: any = await models.User.findByPk(id, {
+    include: [{ model: models.Location, as: "locations" }],
+  });
+
+  return user?.locations;
 };

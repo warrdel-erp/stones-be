@@ -85,3 +85,10 @@ export const modifyUser = async (id: number, updateData: any) => {
   if (!updatedUser) throw new AppError("User not found or update failed", 400);
   return updatedUser;
 };
+
+// Ger user locations
+// Update User
+export const userLocations = async (id: number) => {
+  const userLocations = await userRepository.getUserLocation(id);
+  return userLocations;
+};

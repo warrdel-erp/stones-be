@@ -67,3 +67,11 @@ export const updateUserController = catchAsync(async (req: Request, res: Respons
 
   return SuccessResponse(res, 200, "Vendor updated successfully", updatedUser);
 });
+
+// Get Locations for user
+export const getUserLocations = catchAsync(async (req: AuthRequest, res: Response) => {
+  const id = req.user?.id;
+
+  const userLocations = await userService.userLocations(id!);
+  return SuccessResponse(res, 200, "User locations fetched successfully", userLocations);
+});

@@ -121,3 +121,8 @@ export const getSIPLsForPurchaseOrder = async (purchaseOrderId: number) => {
   const sipls = await poRepository.getSIPLsByPurchaseOrderId(purchaseOrderId);
   return sipls.length > 0 ? sipls : []; // Ensure an empty array if no SIPLs exist
 };
+
+// Get new PO number
+export const getPONumber = async () => {
+  return await poRepository.getPoNumber();
+};

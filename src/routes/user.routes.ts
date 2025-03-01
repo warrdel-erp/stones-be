@@ -16,6 +16,9 @@ router.put("/assignLocation", authenticateUser, userController.assignLocation);
 // Get All Users
 router.get("/", userController.getAllUsersController);
 
+// Assign Location to user
+router.get("/getLocations", authenticateUser, userController.getUserLocations);
+
 // Update User
 router.put("/:id", userController.updateUserController);
 

@@ -94,8 +94,6 @@ export const getTotalQuantityForPO = async (id: number) => {
     raw: true,
   });
 
-  console.log(result);
-
   return result?.totalQuantity || 0;
 };
 
@@ -106,4 +104,11 @@ export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
     raw: true,
     nest: true,
   });
+};
+
+// Get latest PO number
+export const getPoNumber = async () => {
+  const lastPO: any = await models.PurchaseOrder.findOne({ order: [["id", "DESC"]], attributes: ["id"] });
+
+  return { id: lastPO ? lastPO?.id + 1 : 1 };
 };

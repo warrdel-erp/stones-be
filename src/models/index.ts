@@ -27,6 +27,7 @@ Location.belongsTo(Client, { foreignKey: "clientId" });
 User.belongsToMany(Location, {
   through: "user_locations",
   foreignKey: "userId",
+  as: "locations",
 });
 
 Location.belongsToMany(User, {

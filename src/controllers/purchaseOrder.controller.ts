@@ -62,3 +62,9 @@ export const getSIPLsByPO = catchAsync(async (req: Request, res: Response) => {
   const sipls = await poService.getSIPLsForPurchaseOrder(purchaseOrderId);
   SuccessResponse(res, 200, "SIPL list fetched successfully.", sipls);
 });
+
+// Get new PO number
+export const getNewPoNumber = catchAsync(async (req: Request, res: Response) => {
+  const data = await poService.getPONumber();
+  SuccessResponse(res, 200, "New PO number fetched successfully.", data);
+});
