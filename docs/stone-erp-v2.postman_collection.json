@@ -827,6 +827,37 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "bin",
+			"item": [
+				{
+					"name": "Get bins according to location",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/bin/location/:locationId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"bin",
+								"location",
+								":locationId"
+							],
+							"variable": [
+								{
+									"key": "locationId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
