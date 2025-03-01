@@ -14,6 +14,7 @@ import productRoute from "./routes/product.routes";
 import billRoute from "./routes/bill.routes";
 import siplRoute from "./routes/sipl.routes";
 import generalRoute from "./routes/general.routes";
+import binRoute from "./routes/bin.routes";
 import { syncModels } from "./config/syncModels";
 
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/product", productRoute);
 app.use("/api/bill", billRoute);
 app.use("/api/sipl", siplRoute);
 app.use("/api/general", generalRoute);
+app.use("/api/bin", binRoute);
 
 // handler error globally.
 app.use(errorHandler);

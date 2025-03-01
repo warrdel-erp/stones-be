@@ -30,11 +30,11 @@ const Product = sequelize.define(
       allowNull: true,
     },
     origin: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     uom: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     weight: {

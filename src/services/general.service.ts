@@ -1,4 +1,5 @@
-import { PRODUCT_COLORS } from "../constants";
+import { PRODUCT_COLORS, UNITS_OF_MEASUREMENT } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 import * as productCategoryRepository from "../repositories/productCategory.repository";
 import * as productSubCategoryRepository from "../repositories/productSubCategory.repository";
 
@@ -10,5 +11,7 @@ export const getGeneralData = async () => {
     productCategories,
     productSubCategories,
     productColors: PRODUCT_COLORS,
+    countries: COUNTRIES,
+    unitOfMeasurement: UNITS_OF_MEASUREMENT,
   };
 };
