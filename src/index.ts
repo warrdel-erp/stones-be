@@ -16,6 +16,8 @@ import siplRoute from "./routes/sipl.routes";
 import generalRoute from "./routes/general.routes";
 import binRoute from "./routes/bin.routes";
 import inventoryRoute from "./routes/inventory.routes";
+import slabRoute from "./routes/slab.routes";
+import coaRoute from "./routes/coa.routes";
 import { syncModels } from "./config/syncModels";
 
 const app = express();
@@ -42,6 +44,8 @@ app.use("/api/sipl", siplRoute);
 app.use("/api/general", generalRoute);
 app.use("/api/bin", binRoute);
 app.use("/api/inventory", inventoryRoute);
+app.use("/api/slab", slabRoute);
+app.use("/api/coa", coaRoute);
 
 // handler error globally.
 app.use(errorHandler);

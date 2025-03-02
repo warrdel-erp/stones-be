@@ -2,7 +2,7 @@ import { sequelize } from "../config/database";
 import * as poRepository from "../repositories/purchaseOrder.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
-
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 /**
  * Processes the inventory reception by updating slab statuses.
  * @param siplId - The SIPL ID.
@@ -38,12 +38,45 @@ export async function createSIPLService(siplData: any) {
 // Create slabs for SIPL
 export async function handleCreateSlabs(slabData: any) {
   const transaction = await sequelize.transaction();
+
   try {
-    const newSlabs = await slabRepository.createSlabs(slabData, transaction);
+    if (!slabData.quantity || slabData.quantity < 1) {
+      throw new Error("Quantity must be at least 1.");
+    }
+
+    // Create a new InventoryProduct for each Slab
+    const inventoryProducts: any = await inventoryProductRepository.createInventoryProducts(
+      slabData.binId,
+      slabData.quantity,
+      transaction
+    );
+
+    // Pair each slab with its own inventory product
+    const slabs = inventoryProducts.map((inventoryProduct: any) => ({
+      ...slabData, // Ensure each slab has unique data
+      inventoryProductId: inventoryProduct.id,
+      serialNumber: `${slabData.serialNumber}-${Math.random().toString(36).substring(7)}`, // Ensuring uniqueness
+      barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
+    }));
+
+    console.log(slabData);
+
+    const createdSlabs = await slabRepository.createSlabs(slabs, transaction);
+    // Create a Slab linked to the new InventoryProduct
+    // const newSlab = await slabRepository.createSlab(
+    //   {
+    //     ...slabData,
+    //     inventoryProductId: inventoryProduct.id,
+    //     serialNumber: `${slabData.serialNumber}-${Math.random().toString(36).substring(7)}`, // Ensuring uniqueness
+    //     barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
+    //   },
+    //   transaction
+    // );
+
     await transaction.commit();
-    return newSlabs;
+    return createdSlabs;
   } catch (error) {
-    await transaction.rollback();
+    transaction.rollback();
     throw error;
   }
 }

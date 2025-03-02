@@ -5,6 +5,7 @@ import Product from "./product";
 import SIPL from "./sipl";
 import Bin from "./bin";
 import { SLAB_STATUS } from "../constants";
+import InventoryProduct from "./inventoryProduct";
 
 const Slab = sequelize.define(
   "slabs",
@@ -84,25 +85,25 @@ const Slab = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    binId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Bin,
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
-    },
     siplId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: SIPL,
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    inventoryProductId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: InventoryProduct,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
   },
   {

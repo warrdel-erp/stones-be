@@ -2,6 +2,7 @@ import Bill from "./bill";
 import Bin from "./bin";
 import Client from "./client";
 import FreightDetail from "./freightDetail";
+import InventoryProduct from "./inventoryProduct";
 import Location from "./location";
 import Notes from "./note";
 import Product from "./product";
@@ -212,8 +213,17 @@ Location.hasMany(User, { foreignKey: "defaultLocationId" });
 ProductSubCategory.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
 ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "subCategories" });
 
+// User can have multiple bills
 Bill.belongsTo(User, { foreignKey: "createdBy" });
 User.hasMany(Bill, { foreignKey: "createdBy", as: "bills" });
+
+// One Bin can have multiple products.
+Bin.hasMany(InventoryProduct, { foreignKey: "binId" });
+InventoryProduct.belongsTo(Bin, { foreignKey: "binId" });
+
+// One to One relation.
+Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId" });
+InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 
 export {
   Client,
@@ -233,4 +243,5 @@ export {
   Bill,
   ProductCategory,
   ProductSubCategory,
+  InventoryProduct,
 };
