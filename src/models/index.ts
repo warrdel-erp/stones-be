@@ -3,6 +3,7 @@ import Bin from "./bin";
 import Client from "./client";
 import FreightDetail from "./freightDetail";
 import InventoryProduct from "./inventoryProduct";
+import LedgerAccount from "./ledgerAccount.model";
 import Location from "./location";
 import Notes from "./note";
 import Product from "./product";
@@ -13,6 +14,7 @@ import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
+import Transaction from "./transaction.model";
 import User from "./user";
 import Vendor from "./vendor";
 import Warehouse from "./warehouse";
@@ -217,6 +219,10 @@ ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "sub
 Bill.belongsTo(User, { foreignKey: "createdBy" });
 User.hasMany(Bill, { foreignKey: "createdBy", as: "bills" });
 
+// User can have multiple vendors (One vendor belongs to one User)
+Vendor.belongsTo(User, { foreignKey: "createdBy" });
+User.hasMany(Vendor, { foreignKey: "createdBy", as: "vendors" });
+
 // One Bin can have multiple products.
 Bin.hasMany(InventoryProduct, { foreignKey: "binId" });
 InventoryProduct.belongsTo(Bin, { foreignKey: "binId" });
@@ -224,6 +230,10 @@ InventoryProduct.belongsTo(Bin, { foreignKey: "binId" });
 // One to One relation.
 Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId" });
 InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
+
+// One Ledger account have multiple transaction (one transaction belongs to one Account)
+LedgerAccount.hasMany(Transaction, { foreignKey: "ledgerId", as: "transactions" });
+Transaction.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
 
 export {
   Client,
@@ -244,4 +254,6 @@ export {
   ProductCategory,
   ProductSubCategory,
   InventoryProduct,
+  LedgerAccount,
+  Transaction,
 };

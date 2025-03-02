@@ -1,17 +1,42 @@
 import { AppError } from "../helper/appError";
 import * as vendorRepository from "../repositories/vendor.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import { type LedgerAccount } from "../models/ledgerAccount.model";
+import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { sequelize } from "../config/database";
 
 /**
  * Service function to create a vendor.
  */
 export const registerVendor = async (vendorData: any) => {
-  if (!vendorData.name || !vendorData.code || !vendorData.email) {
-    throw new Error("Name, Code, and Email are required fields.");
-  }
+  const transaction = await sequelize.transaction();
+  try {
+    if (!vendorData.name || !vendorData.code || !vendorData.email) {
+      throw new Error("Name, Code, and Email are required fields.");
+    }
 
-  // Create vendor
-  const newVendor = await vendorRepository.createVendor(vendorData);
-  return newVendor;
+    // Create vendor
+    const newVendor: any = await vendorRepository.createVendor(vendorData, transaction);
+
+    // Create Ledger Account data
+    const ledgerAccountData: LedgerAccount = {
+      name: newVendor.name,
+      subHeaderId: 1002,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,
+      referenceId: newVendor.id,
+    };
+
+    // console.log(vendorData.a.b.c);
+    const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
+
+    transaction.commit();
+    return { vendor: newVendor, ledgerAccount };
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
 };
 
 // Update vendor

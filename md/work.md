@@ -8,7 +8,7 @@
 8. check every id that corresponding data exists.
 9. send client id in userLogin
 10. COA (type, head, subhead)
-    1. opening date
+    1. ledger opening date
     2. journal (transaction)
     3. payment is different from
     4. entity (ledger, journal)

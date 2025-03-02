@@ -1,9 +1,10 @@
 import { Router } from "express";
 import * as vendorController from "../controllers/vendor.controller";
+import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post("/", vendorController.createVendorController);
+router.post("/", authenticateUser, vendorController.createVendorController);
 
 router.put("/:id", vendorController.updateVendorController);
 

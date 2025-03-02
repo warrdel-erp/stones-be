@@ -2,15 +2,17 @@ import { Request, Response } from "express";
 import * as vendorService from "../services/vendor.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
  * Controller to handle vendor creation.
  */
-export const createVendorController = catchAsync(async (req: Request, res: Response) => {
+export const createVendorController = catchAsync(async (req: AuthRequest, res: Response) => {
   const vendorData = req.body;
+  const userId = req.user?.id;
 
   // Call service function
-  const newVendor = await vendorService.registerVendor(vendorData);
+  const newVendor = await vendorService.registerVendor({ ...vendorData, createdBy: userId });
 
   return SuccessResponse(res, 201, "Vendor created successfully.", newVendor);
 });

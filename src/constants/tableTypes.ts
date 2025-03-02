@@ -2,3 +2,19 @@ export const VENDOR_TYPES = {
   FREIGHT: "FREIGHT",
   SUPPLIER: "SUPPLIER",
 } as const;
+
+export const LEDGER_ACCOUNT_REFERENCE_TYPES = {
+  CUSTOMER: "CUSTOMER",
+  VENDOR: "VENDOR",
+};
+
+export const TRANSACTION_REFERENCE_TYPES = {
+  SIPL: "SIPL",
+  PAYMENT: "PAYMENT",
+  SALES_ORDER: "SALES_ORDER",
+};
+
+export const TRANSACTION_TYPES = {
+  DR: "dr",
+  CR: "cr",
+};

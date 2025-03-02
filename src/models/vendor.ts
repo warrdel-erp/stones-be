@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Notes from "./note";
 import { VENDOR_TYPES } from "../constants/tableTypes";
+import User from "./user";
 
 const Vendor = sequelize.define(
   "Vendor",
@@ -105,6 +106,16 @@ const Vendor = sequelize.define(
     paymentTerms: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     currency: {
       type: DataTypes.STRING,

@@ -47,3 +47,8 @@ export const COA_SUB_HEADERS = [
   { id: 5004, name: "Depreciation", subheader_id: 502 },
   { id: 5005, name: "Interest Expense", subheader_id: 502 },
 ] as const;
+
+export const LEDGER_ACCOUNT_TYPES = {
+  CREDIT: "CREDIT ",
+  DEBIT: "DEBIT",
+} as const;
