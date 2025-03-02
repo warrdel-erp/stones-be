@@ -9,19 +9,20 @@ import * as siplService from "../services/sipl.service";
 /**
  * Controller to handle PO creation.
  */
-export const createPurchaseOrderController = catchAsync(async (req: Request, res: Response) => {
-  const { po, purchaseLocationId, shipmentLocationId, supplierId, userId } = req.body;
+export const createPurchaseOrderController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const { po, purchaseLocationId, shipmentLocationId, supplierId } = req.body;
   const { internalNote, printableNote, ...poData } = req.body; // Extract notes separately
 
   // Validate required fields
-  if (!po || !purchaseLocationId || !shipmentLocationId || !supplierId || !userId) {
-    throw new AppError("Missing required fields: po, purchaseLocationId, shipmentLocationId, supplierId, userId", 400);
+  if (!po || !purchaseLocationId || !shipmentLocationId || !supplierId) {
+    throw new AppError("Missing required fields: po, purchaseLocationId, shipmentLocationId, supplierId", 400);
   }
 
   const notesData = { internal: internalNote, printable: printableNote };
 
   // Call service function
-  const newPO = await poService.registerPurchaseOrder(poData, notesData);
+  const newPO = await poService.registerPurchaseOrder({ poData, userId }, notesData);
 
   return SuccessResponse(res, 201, "Purchase Order created successfully.", newPO);
 });

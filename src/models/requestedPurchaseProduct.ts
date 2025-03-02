@@ -21,7 +21,6 @@ const RequestedPurchaseProduct = sequelize.define(
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     supplierNote: {
       type: DataTypes.STRING,

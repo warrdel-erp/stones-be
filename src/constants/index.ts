@@ -42,3 +42,30 @@ export const UNITS_OF_MEASUREMENT = [
   { id: 12, name: "Pound" },
   { id: 13, name: "Ounce" },
 ] as const;
+
+export const DELIVERY_TYPE = {
+  Pickup: "Pickup",
+  Delivery: "Delivery",
+  Other: "Other",
+};
+
+export const PAYMENT_TERMS = {
+  "30": "30",
+  "45": "45",
+  "60": "60",
+  "90": "90",
+  "120": "120",
+  COD: "COD",
+};
+
+export const SHIPMENT_TERMS = {
+  PREPAID: "Prepaid",
+  PREPAID_AND_ADD: "Prepaid & Add",
+  COLLECT: "Collect",
+  PREPAID_AND_COD: "Prepaid & COD",
+  ADD_AND_COD: "Add & COD",
+  COLLECT_AND_COD: "Collect & COD",
+  CREDIT_45: "Credit 45",
+  CAD: "CAD",
+  CONSIGNMENT: "Consignment",
+} as const;

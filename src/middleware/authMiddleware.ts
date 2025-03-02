@@ -23,7 +23,11 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
 
   const decoded = jwt.verify(token, JWT_SECRET) as AuthRequest["user"];
 
-  req.user = (await userRepository.findUserById(decoded?.id!)) as any;
+  const user: any = await userRepository.findUserById(decoded?.id!);
+
+  if (!user) throw new AppError("Something wrong with token", 400);
+
+  req.user = user;
 
   next();
 });

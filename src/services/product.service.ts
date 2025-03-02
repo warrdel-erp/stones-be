@@ -4,7 +4,7 @@ import * as productRepository from "../repositories/product.repository";
 // Create a new product.
 export const addProduct = async (productData: any, userId: number) => {
   // Append created by and updated by as userId
-  return await productRepository.createProduct({ productData, createdBy: userId, updatedBy: userId });
+  return await productRepository.createProduct({ ...productData, createdBy: userId, updatedBy: userId });
 };
 
 // Fetch all products

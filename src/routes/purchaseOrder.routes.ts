@@ -5,7 +5,7 @@ import { authenticateUser } from "../middleware/authMiddleware";
 const router = Router();
 
 // Create new PO
-router.post("/", poController.createPurchaseOrderController);
+router.post("/", authenticateUser, poController.createPurchaseOrderController);
 
 // get all po list
 router.get("/", authenticateUser, poController.getAllPurchaseOrders);
