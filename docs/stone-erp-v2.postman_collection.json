@@ -167,7 +167,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"johndoe34@example.com\",\n    \"password\": \"SecurePass123\"\n}",
+							"raw": "{\n    \"email\": \"johndoe342@example.com\",\n    \"password\": \"SecurePass123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -481,7 +481,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcmlkIjoiam9obl9kb3NkZmVfMTIzIiwiZW1haWwiOiJqb2huZG9lMzRAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDA3NDM0NTZ9.rl2jU4uQwortCw3Ncc2U_sd4P_s3XD18f7O3IBPX3fs",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -573,11 +573,21 @@
 				{
 					"name": "create",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": \"Italy\",\n  \"uom\": \"kg\",\n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"categoryId\": 2\n}\n",
+							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"categoryId\": 2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -600,6 +610,16 @@
 				{
 					"name": "Get all products",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -626,13 +646,23 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "update product",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"alternativeName\":\"Kota stone\"\n}",
+							"raw": "{\n    \"alternativeName\":\"Kota stone12\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -729,7 +759,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"container\": \"SIPL-001\",\n  \"description\": \"Sample SIPL\",\n  \"supplierNotes\": \"Important notes\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"purchaseOrderId\": 3,\n  \"products\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 10,\n      \"unitPrice\": 100.5,\n      \"description\": \"Product 1 description\",\n      \"supplierNote\": \"Supplier note for product 1\"\n    }\n  ],\n  \"freightDetail\": {\n    \"vessel\": \"Ship ABC\",\n    \"airBill\": \"AB12345\",\n    \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n    \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n    \"departurePort\": \"Shanghai\",\n    \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n    \"arrivalPort\": \"Los Angeles\",\n    \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n    \"dischargePort\": \"California Port\",\n    \"wiringInstruction\": \"Bank details for payment\",\n    \"freightForwarderId\": 1\n  }\n}\n",
+							"raw": "{\n  \"container\": \"SIPL-001\",\n  \"description\": \"Sample SIPL\",\n  \"supplierNotes\": \"Important notes\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"purchaseOrderId\": 1,\n  \"products\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 10,\n      \"unitPrice\": 100.5,\n      \"description\": \"Product 1 description\",\n      \"supplierNote\": \"Supplier note for product 1\"\n    }\n  ],\n  \"freightDetail\": {\n    \"vessel\": \"Ship ABC\",\n    \"airBill\": \"AB12345\",\n    \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n    \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n    \"departurePort\": \"Shanghai\",\n    \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n    \"arrivalPort\": \"Los Angeles\",\n    \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n    \"dischargePort\": \"California Port\",\n    \"wiringInstruction\": \"Bank details for payment\",\n    \"freightForwarderId\": 1\n  }\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -785,7 +815,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"serialNumber\": \"SN-001\",\n  \"entryUnit\": \"meters\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"productId\": 1,\n  \"binId\": 1,\n  \"quantity\": 5\n}\n",
+							"raw": "{\n  \"serialNumber\": \"SN-001\",\n  \"entryUnit\": \"meters\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"productId\": 2,\n  \"binId\": 1,\n  \"quantity\": 5,\n  \"siplId\":3\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -822,7 +852,18 @@
 					"name": "Get general Data",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/general/data",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"general",
+								"data"
+							]
+						}
 					},
 					"response": []
 				}
@@ -834,6 +875,16 @@
 				{
 					"name": "Get bins according to location",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -850,7 +901,7 @@
 							"variable": [
 								{
 									"key": "locationId",
-									"value": ""
+									"value": "3"
 								}
 							]
 						}
@@ -881,10 +932,36 @@
 							"variable": [
 								{
 									"key": "locationId",
-									"value": ""
+									"value": "1"
 								}
 							]
 						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "slab",
+			"item": [
+				{
+					"name": "hold-unhold",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "coa",
+			"item": [
+				{
+					"name": "get account data",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
