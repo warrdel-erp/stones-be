@@ -25,6 +25,8 @@
 20. po number should start from 1 for every client.
 21. keep reference type of notes as enum.
 22. vendor list according to type
+23. check every update and create when it could be done. like after invoice lo can not be updated.
+24. Retrieve notes data with SO
 
 ---
 

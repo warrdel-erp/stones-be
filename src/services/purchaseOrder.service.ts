@@ -10,12 +10,7 @@ export const registerPurchaseOrder = async (poData: any, notesData: any) => {
 
   try {
     // Create purchase order
-    const newPO: any = await poRepository.createPurchaseOrder(
-      {
-        ...poData,
-      },
-      transaction
-    );
+    const newPO: any = await poRepository.createPurchaseOrder(poData, transaction);
 
     let freightDetail;
 

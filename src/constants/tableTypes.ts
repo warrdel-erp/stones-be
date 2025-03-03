@@ -22,4 +22,4 @@ export const TRANSACTION_TYPES = {
 export const CUSTOMER_ADDRESS_TYPES = {
   SHIPPING: "SHIPPING",
   BILLING: "BILLING",
-};
+} as const;

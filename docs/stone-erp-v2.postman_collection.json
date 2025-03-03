@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 2\n}",
+							"raw": "{\n    \"locationId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -454,7 +454,7 @@
 			]
 		},
 		{
-			"name": "purchaseOrder",
+			"name": "purchase order",
 			"item": [
 				{
 					"name": "create",
@@ -1055,7 +1055,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"John Doe\",\n  \"type\": \"Retail\",\n  \"contactName\": \"Jane Smith\",\n  \"printName\": \"Doe Inc.\",\n  \"parentCustomer\": null,\n  \"primaryPhoneNumber\": \"1234567890\",\n  \"secondaryPhoneNumber\": \"0987654321\",\n  \"landlineNumber\": \"123-456-789\",\n  \"accEmail\": \"john@example.com\",\n  \"email\": \"john@example.com\"\n  \"address\": \"123 Main St\",\n  \"suite\": \"Suite 400\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zip\": \"10001\",\n  \"country\": \"USA\",\n  \"sAddress\": \"456 Elm St\",\n  \"sUnit\": \"Unit 10\",\n  \"sCity\": \"Los Angeles\",\n  \"sZip\": \"90001\",\n  \"sState\": \"CA\",\n  \"sSountry\": \"USA\",\n  \"pSalesPerson\": \"Michael Scott\",\n  \"priceLevel\": \"Gold\",\n  \"taxExempt\": true,\n  \"salesTax\": 0.07,\n  \"paymentTerms\": \"Net 30\",\n  \"exemptCerti\": \"EX-12345\",\n  \"exemptExipry\": \"2026-12-31\",\n  \"internalNotes\": \"Customer prefers email communication.\",\n  \"deliveryNotes\": \"Deliver before 10 AM.\",\n  \"poRequired\": true,\n  \"applyFinanceCharges\": false,\n  \"preferredDocSend\": \"email\",\n  \"daysForGrace\": 5,\n  \"daysForHold\": 10,\n  \"customerSince\": \"2020-01-15\",\n  \"einNumber\": \"98-7654321\",\n  \"reason\": \"Loyal Customer\",\n  \"createdAt\": \"2025-02-28T12:00:00Z\",\n  \"updatedAt\": \"2025-02-28T12:00:00Z\",\n  \"deletedAt\": null,\n  \"status\": \"active\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1\n}\n",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"type\": \"Retail\",\n  \"contactName\": \"Jane Smith\",\n  \"printName\": \"Doe Inc.\",\n  \"parentCustomer\": null,\n  \"primaryPhoneNumber\": \"1234567890\",\n  \"secondaryPhoneNumber\": \"0987654321\",\n  \"landlineNumber\": \"123-456-789\",\n  \"accEmail\": \"john@example.com\",\n  \"email\": \"john@example.com\",\n  \"address\": \"123 Main St\",\n  \"suite\": \"Suite 400\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zip\": \"10001\",\n  \"country\": \"USA\",\n  \"sAddress\": \"456 Elm St\",\n  \"sUnit\": \"Unit 10\",\n  \"sCity\": \"Los Angeles\",\n  \"sZip\": \"90001\",\n  \"sState\": \"CA\",\n  \"sSountry\": \"USA\",\n  \"pSalesPerson\": \"Michael Scott\",\n  \"priceLevel\": \"Gold\",\n  \"taxExempt\": true,\n  \"salesTax\": 0.07,\n  \"paymentTerms\": \"Net 30\",\n  \"exemptCerti\": \"EX-12345\",\n  \"exemptExipry\": \"2026-12-31\",\n  \"internalNotes\": \"Customer prefers email communication.\",\n  \"deliveryNotes\": \"Deliver before 10 AM.\",\n  \"poRequired\": true,\n  \"applyFinanceCharges\": false,\n  \"preferredDocSend\": \"email\",\n  \"daysForGrace\": 5,\n  \"daysForHold\": 10,\n  \"customerSince\": \"2020-01-15\",\n  \"einNumber\": \"98-7654321\",\n  \"reason\": \"Loyal Customer\",\n  \"createdAt\": \"2025-02-28T12:00:00Z\",\n  \"updatedAt\": \"2025-02-28T12:00:00Z\",\n  \"deletedAt\": null,\n  \"status\": \"active\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1083,7 +1083,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\":\"this is new code \" \n}",
+							"raw": "{\n    \"name\":\"this is new name\" \n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1103,8 +1103,78 @@
 							"variable": [
 								{
 									"key": "id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer addresses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/customer/:customerId/addresses?addressType=shipping",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								":customerId",
+								"addresses"
+							],
+							"query": [
+								{
+									"key": "addressType",
+									"value": "shipping"
+								}
+							],
+							"variable": [
+								{
+									"key": "customerId",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add customer Address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": \"123 Main Street\",\n  \"suit\": \"Apt 4B\",\n  \"unit\": \"Building 2\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zip\": \"10001\",\n  \"countryId\": 1,\n  \"addressType\": \"shipping\",\n  \"customerId\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/customer/address",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								"address"
 							]
 						}
 					},
@@ -1123,6 +1193,264 @@
 							"path": [
 								"api",
 								"customer"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "sales order",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"soDate\": \"2025-02-28\",\n  \"customerPo\": \"PO123456\",\n  \"shipTo\": \"Warehouse B, 567 Industrial Road\",\n  \"specialInstruction\": \"Handle with care\",\n  \"status\": \"pending\",\n  \"taxId\": 3,\n  \"userId\": 1,\n  \"customerId\": 1,\n  \"shippingAddressId\": 2,\n  \"internalNote\":\"This is internal note for SO\",\n  \"printableNote\":\"This is printable note for SO\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrder",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all so",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrder",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get SO by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrder/:SOId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrder",
+								":SOId"
+							],
+							"variable": [
+								{
+									"key": "SOId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all loading orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrder/:SOId/loadingOrder",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrder",
+								":SOId",
+								"loadingOrder"
+							],
+							"variable": [
+								{
+									"key": "SOId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "loading order",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loDate\": \"2025-02-28T12:00:00.000Z\",\n  \"paymentTerms\": \"Net 30\",\n  \"deliveryNotes\": \"Deliver before noon\",\n  \"invoiced\": false,\n  \"salesOrderId\": 2\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All loading order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get LO by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update LO",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder",
+								"2"
 							]
 						}
 					},

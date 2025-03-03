@@ -12,7 +12,7 @@ import * as siplService from "../services/sipl.service";
 export const createPurchaseOrderController = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   const { po, purchaseLocationId, shipmentLocationId, supplierId } = req.body;
-  const { internalNote, printableNote, ...poData } = req.body; // Extract notes separately
+  const { internalNote, printableNote } = req.body; // Extract notes separately
 
   // Validate required fields
   if (!po || !purchaseLocationId || !shipmentLocationId || !supplierId) {

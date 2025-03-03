@@ -19,6 +19,8 @@ import inventoryRoute from "./routes/inventory.routes";
 import slabRoute from "./routes/slab.routes";
 import coaRoute from "./routes/coa.routes";
 import customerRoute from "./routes/customer.routes";
+import salesOrderRoute from "./routes/salesOrder.routes";
+import loadingOrderRoute from "./routes/loadingOrder.routes";
 import { syncModels } from "./config/syncModels";
 
 const app = express();
@@ -48,6 +50,8 @@ app.use("/api/inventory", inventoryRoute);
 app.use("/api/slab", slabRoute);
 app.use("/api/coa", coaRoute);
 app.use("/api/customer", customerRoute);
+app.use("/api/salesOrder", salesOrderRoute);
+app.use("/api/loadingOrder", loadingOrderRoute);
 
 // handler error globally.
 app.use(errorHandler);

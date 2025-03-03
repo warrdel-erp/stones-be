@@ -14,13 +14,10 @@ const SalesOrder = sequelize.define(
     },
     soDate: {
       type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
       allowNull: false,
     },
     customerPo: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    shipTo: {
       type: DataTypes.STRING,
       allowNull: true,
     },
