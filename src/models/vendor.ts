@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Notes from "./note";
 import { VENDOR_TYPES } from "../constants/tableTypes";
 import User from "./user";
+import { VENDOR_SCOP } from "../constants";
 
 const Vendor = sequelize.define(
   "Vendor",
@@ -18,6 +19,10 @@ const Vendor = sequelize.define(
     },
     type: {
       type: DataTypes.ENUM(...Object.values(VENDOR_TYPES)),
+      allowNull: false,
+    },
+    vendorScope: {
+      type: DataTypes.ENUM(...Object.values(VENDOR_SCOP)),
       allowNull: false,
     },
     contactName: {

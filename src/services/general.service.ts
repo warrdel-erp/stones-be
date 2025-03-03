@@ -1,4 +1,12 @@
-import { DELIVERY_TYPE, PAYMENT_TERMS, PRODUCT_COLORS, SHIPMENT_TERMS, UNITS_OF_MEASUREMENT } from "../constants";
+import {
+  DELIVERY_TYPE,
+  LANGUAGES,
+  PAYMENT_TERMS,
+  PRODUCT_COLORS,
+  SHIPMENT_TERMS,
+  UNITS_OF_MEASUREMENT,
+  VENDOR_SCOP,
+} from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import * as productCategoryRepository from "../repositories/productCategory.repository";
 import * as productSubCategoryRepository from "../repositories/productSubCategory.repository";
@@ -16,5 +24,7 @@ export const getGeneralData = async () => {
     deliveryType: DELIVERY_TYPE,
     paymentTerms: PAYMENT_TERMS,
     shipment_terms: SHIPMENT_TERMS,
+    vendorScope: VENDOR_SCOP,
+    languages: LANGUAGES,
   };
 };

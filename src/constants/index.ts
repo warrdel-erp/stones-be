@@ -58,14 +58,25 @@ export const PAYMENT_TERMS = {
   COD: "COD",
 };
 
-export const SHIPMENT_TERMS = {
-  PREPAID: "Prepaid",
-  PREPAID_AND_ADD: "Prepaid & Add",
-  COLLECT: "Collect",
-  PREPAID_AND_COD: "Prepaid & COD",
-  ADD_AND_COD: "Add & COD",
-  COLLECT_AND_COD: "Collect & COD",
-  CREDIT_45: "Credit 45",
-  CAD: "CAD",
-  CONSIGNMENT: "Consignment",
+export const SHIPMENT_TERMS = [
+  { id: 1, value: "Prepaid" },
+  { id: 2, value: "Prepaid & Add" },
+  { id: 3, value: "Collect" },
+  { id: 4, value: "Prepaid & COD" },
+  { id: 5, value: "Add & COD" },
+  { id: 6, value: "Collect & COD" },
+  { id: 7, value: "Credit 45" },
+  { id: 8, value: "CAD" },
+  { id: 9, value: "Consignment" },
+] as const;
+
+export const VENDOR_SCOP = {
+  NATIONAL: "National",
+  INTERNATIONAL: "International",
 } as const;
+
+export const LANGUAGES = [
+  { id: 1, value: "Hindi", code: "hi" },
+  { id: 2, value: "English", code: "en" },
+  { id: 3, value: "Marathi", code: "mr" },
+] as const;

@@ -27,6 +27,13 @@
 22. vendor list according to type
 23. check every update and create when it could be done. like after invoice lo can not be updated.
 24. Retrieve notes data with SO
+25. edit requested purchase order(get array of products, if id is null create one otherwise update) delete API.
+26. send location, freight in PO, product in single PO
+27. number of invoices in all PO details
+28. vendor type national
+29. const data as Jatin sent list.
+30. fulfilled PO => how much sipl is created for given po product. in SINGLE PO, SINGLE SIPL
+31. Bifurcate data of vendor according to type (supplier, freight, vendor)
 
 ---
 
