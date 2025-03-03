@@ -93,7 +93,7 @@ const Slab = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "SET NULL",
+      onDelete: "RESTRICT",
     },
     inventoryProductId: {
       type: DataTypes.INTEGER,
