@@ -58,7 +58,10 @@ const Slab = sequelize.define(
     barcode: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true,
+      unique: {
+        name: "unique_barcode_constraint",
+        msg: "unique barcode",
+      },
     },
     status: {
       type: DataTypes.ENUM(...Object.values(SLAB_STATUS)),

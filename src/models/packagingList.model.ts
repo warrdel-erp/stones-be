@@ -1,37 +1,28 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import SalesOrder from "./salesOrder.model";
+import LoadingOrder from "./loadingOrder.model";
 
-const LoadingOrder = sequelize.define(
-  "LoadingOrder",
+const PackagingList = sequelize.define(
+  "PackagingList",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    loDate: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    paymentTerms: {
+    status: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    deliveryNotes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     invoiced: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    salesOrderId: {
+    loadingOrderId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: SalesOrder,
+        model: LoadingOrder,
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -39,9 +30,9 @@ const LoadingOrder = sequelize.define(
     },
   },
   {
-    tableName: "loading_orders",
+    tableName: "packaging_lists",
     timestamps: true,
   }
 );
 
-export default LoadingOrder;
+export default PackagingList;

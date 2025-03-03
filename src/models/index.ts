@@ -7,8 +7,11 @@ import FreightDetail from "./freightDetail";
 import InventoryProduct from "./inventoryProduct";
 import LedgerAccount from "./ledgerAccount.model";
 import LoadingOrder from "./loadingOrder.model";
+import LoadingOrderProduct from "./loadingOrderProduct.model";
 import Location from "./location";
 import Notes from "./note";
+import PackagingList from "./packagingList.model";
+import PackagingListProduct from "./packagingListProduct.model";
 import Product from "./product";
 import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
@@ -273,13 +276,33 @@ SalesOrder.hasOne(Notes, {
 CustomerAddress.belongsTo(Customer, { foreignKey: "customerId" });
 Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" });
 
-// Sales Order can have one shipping address (Customer Address can used in many Sales Orders )
+// Sales Order can have one shipping address (Customer Address can used in many Sales Orders)
 SalesOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
 CustomerAddress.hasMany(SalesOrder, { foreignKey: "shippingAddressId" });
 
 // One SO can have multiple Loading Orders (one Loading Order belongs to just one SO)
 SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "loadingOrders" });
 LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+
+// Loading order have many LoadingOrderSlab
+LoadingOrder.hasMany(LoadingOrderProduct, { foreignKey: "loadingOrderId", as: "loadingOrderProducts" });
+LoadingOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+
+// Inventory product can have multiple LoadingOrderSlab because maybe one is canceled
+InventoryProduct.hasMany(LoadingOrderProduct, { foreignKey: "inventoryProductId", as: "loadingOrderProducts" });
+LoadingOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// One LoadingOrder have one Packaging list.
+LoadingOrder.hasOne(PackagingList, { foreignKey: "salesOrderId", as: "packagingList" });
+PackagingList.belongsTo(LoadingOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+
+// Loading order have many LoadingOrderSlab
+PackagingList.hasMany(PackagingListProduct, { foreignKey: "packagingListId", as: "packagingListProducts" });
+PackagingListProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
+
+// Inventory product can have multiple LoadingOrderSlab because maybe one is canceled
+InventoryProduct.hasMany(PackagingListProduct, { foreignKey: "inventoryProductId", as: "packagingListProducts" });
+PackagingListProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 
 export {
   Client,
@@ -303,4 +326,10 @@ export {
   LedgerAccount,
   Transaction,
   Customer,
+  CustomerAddress,
+  LoadingOrder,
+  LoadingOrderProduct,
+  PackagingList,
+  PackagingListProduct,
+  SalesOrder,
 };
