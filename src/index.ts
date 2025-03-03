@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
-import express from "express";
+import express, { urlencoded } from "express";
 import { connectDB } from "./config/database";
 import catchAsync from "./helper/asyncCatch";
 import { SuccessResponse } from "./helper/response";
@@ -28,14 +28,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-
-// Routes
-app.get(
-  "/test",
-  catchAsync(async (req, res) => {
-    SuccessResponse(res, 200, "Client created successfully", []);
-  })
-);
+app.use(urlencoded({ extended: true }));
 
 app.use("/api/client", clientRoute);
 app.use("/api/user", userRoute);
