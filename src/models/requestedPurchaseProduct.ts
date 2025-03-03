@@ -53,4 +53,14 @@ const RequestedPurchaseProduct = sequelize.define(
   }
 );
 
+// Hook to prevent updating productId and purchaseOrderId by removing them from update payload
+RequestedPurchaseProduct.beforeUpdate((product: any, options) => {
+  // if (product.changed("productId")) {
+  delete product.dataValues.productId;
+  // }
+  // if (product.changed("purchaseOrderId")) {
+  delete product.dataValues.purchaseOrderId;
+  // }
+});
+
 export default RequestedPurchaseProduct;
