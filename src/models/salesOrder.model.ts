@@ -1,11 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
-import Customer from "./customer";
-import Location from "./location";
-import Tax from "./tax";
-import PrintedNote from "./printedNote";
-import InternalNote from "./internalNote";
+import * as models from "../models";
+import CustomerAddress from "./customerAddress.model";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -36,17 +33,9 @@ const SalesOrder = sequelize.define(
       allowNull: false,
       defaultValue: "pending", // Example: pending, confirmed, shipped, completed, canceled
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true, // Soft delete
-    },
     taxId: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: Tax,
-        key: "id",
-      },
     },
     userId: {
       type: DataTypes.INTEGER,
@@ -60,31 +49,15 @@ const SalesOrder = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Customer,
+        model: models.Customer,
         key: "id",
       },
     },
-    printedNoteId: {
+    shippingAddressId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: PrintedNote,
-        key: "id",
-      },
-    },
-    internalNoteId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: InternalNote,
-        key: "id",
-      },
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: Location,
+        model: CustomerAddress,
         key: "id",
       },
     },
@@ -92,16 +65,7 @@ const SalesOrder = sequelize.define(
   {
     tableName: "sales_orders",
     timestamps: true,
-    paranoid: true, // Enables soft delete
   }
 );
-
-// Associations
-SalesOrder.belongsTo(User, { foreignKey: "userId", as: "user" });
-SalesOrder.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
-SalesOrder.belongsTo(Location, { foreignKey: "locationId", as: "location" });
-SalesOrder.belongsTo(Tax, { foreignKey: "taxId", as: "taxDetails" });
-SalesOrder.belongsTo(PrintedNote, { foreignKey: "printedNoteId", as: "printedNote" });
-SalesOrder.belongsTo(InternalNote, { foreignKey: "internalNoteId", as: "internalNote" });
 
 export default SalesOrder;

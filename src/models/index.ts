@@ -2,9 +2,11 @@ import Bill from "./bill";
 import Bin from "./bin";
 import Client from "./client";
 import Customer from "./customer.model";
+import CustomerAddress from "./customerAddress.model";
 import FreightDetail from "./freightDetail";
 import InventoryProduct from "./inventoryProduct";
 import LedgerAccount from "./ledgerAccount.model";
+import LoadingOrder from "./loadingOrder.model";
 import Location from "./location";
 import Notes from "./note";
 import Product from "./product";
@@ -12,6 +14,7 @@ import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
 import PurchaseOrder from "./purchaseOrder";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
+import SalesOrder from "./salesOrder.model";
 import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
@@ -239,6 +242,44 @@ Transaction.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
 // User can create multiple customers (Customer can belongs to one User)
 User.hasMany(Customer, { foreignKey: "userId", as: "customers" });
 Customer.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+// One Customer has Many SalesOrders, One SalesOrder belongs to One Customer
+Customer.hasMany(SalesOrder, { foreignKey: "customerId" });
+SalesOrder.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+
+// SalesOrder-InternalNote (A 'SalesOrder' has ONE 'Note' as internalNote)
+SalesOrder.hasOne(Notes, {
+  foreignKey: "referenceId",
+  constraints: false,
+  scope: { referenceType: "SalesOrder" },
+  as: "internalNote",
+});
+
+Notes.belongsTo(SalesOrder, {
+  foreignKey: "referenceId",
+  constraints: false,
+  as: "salesOrder",
+});
+
+// SalesOrder-Note (A 'SalesOrder' has ONE 'Note' as printableNote)
+SalesOrder.hasOne(Notes, {
+  foreignKey: "referenceId",
+  constraints: false,
+  scope: { referenceType: "SalesOrder" },
+  as: "printableNote",
+});
+
+// Customer can have multiple addresses (one address belongs to one Customer)
+CustomerAddress.belongsTo(Customer, { foreignKey: "customerId" });
+Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" });
+
+// Sales Order can have one shipping address (Customer Address can used in many Sales Orders )
+SalesOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
+CustomerAddress.hasMany(SalesOrder, { foreignKey: "shippingAddressId" });
+
+// One SO can have multiple Loading Orders (one Loading Order belongs to just one SO)
+SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "loadingOrders" });
+LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 
 export {
   Client,

@@ -22,6 +22,9 @@
 17. rollback every transaction.
 18. restructure customer.
 19. put all table relations in their specific model files.
+20. po number should start from 1 for every client.
+21. keep reference type of notes as enum.
+22. vendor list according to type
 
 ---
 

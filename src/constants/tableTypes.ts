@@ -18,3 +18,8 @@ export const TRANSACTION_TYPES = {
   DR: "dr",
   CR: "cr",
 };
+
+export const CUSTOMER_ADDRESS_TYPES = {
+  SHIPPING: "SHIPPING",
+  BILLING: "BILLING",
+};

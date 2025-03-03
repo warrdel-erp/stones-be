@@ -47,58 +47,6 @@ const Customer = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    suite: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    city: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    state: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    zip: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    country: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sAddress: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sUnit: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sCity: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sState: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sZip: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    sCountry: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    pSalesPerson: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     priceLevel: {
       type: DataTypes.STRING,
       allowNull: true,

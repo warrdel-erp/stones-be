@@ -18,7 +18,10 @@ const User = sequelize.define(
     },
     userid: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: {
+        name: "unique_user_id_constraint",
+        msg: "unique user_id",
+      },
       allowNull: false,
     },
     password: {
@@ -32,7 +35,10 @@ const User = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        name: "unique_email_constraint",
+        msg: "unique email",
+      },
       validate: { isEmail: true },
     },
     clientId: {

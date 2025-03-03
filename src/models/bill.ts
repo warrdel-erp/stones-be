@@ -14,7 +14,10 @@ const Bill = sequelize.define(
     billNumber: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        name: "unique_bill_no_constraint",
+        msg: "unique bill_no",
+      },
     },
     amount: {
       type: DataTypes.FLOAT,

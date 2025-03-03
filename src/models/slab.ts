@@ -18,7 +18,10 @@ const Slab = sequelize.define(
     serialNumber: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        name: "unique_serial_no_constraint",
+        msg: "unique serial_no",
+      },
     },
     entryUnit: {
       type: DataTypes.STRING,

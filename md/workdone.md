@@ -5,3 +5,4 @@
 5. debugging frontend to reduce build time
 6. customer apis.
 7. working on SO
+8. university deployment.

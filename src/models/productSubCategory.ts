@@ -13,7 +13,10 @@ const ProductSubCategory = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        name: "unique_name_no_constraint",
+        msg: "unique name_no",
+      },
     },
     categoryId: {
       type: DataTypes.INTEGER,

@@ -24,7 +24,10 @@ const LedgerAccount = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true,
+      unique: {
+        name: "unique_name_no_constraint",
+        msg: "unique name_no",
+      },
     },
     type: {
       type: DataTypes.ENUM(...Object.values(LEDGER_ACCOUNT_TYPES)),
