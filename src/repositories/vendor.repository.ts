@@ -1,18 +1,15 @@
 import { Op, Transaction } from "sequelize";
 import Vendor from "../models/vendor";
 
-/**
- * Create a new vendor in the database.
- */
+// Create a new vendor in the database.
 export const createVendor = async (vendorData: any, transaction?: Transaction) => {
   return await Vendor.create(vendorData, { transaction });
 };
 
 // Update Vendor
 export const updateVendorById = async (id: number, data: any) => {
-  const [updatedCount, updatedVendors] = await Vendor.update(data, {
+  const [updatedCount] = await Vendor.update(data, {
     where: { id },
-    returning: true, // This returns the updated row in PostgreSQL but not in MySQL
   });
 
   if (updatedCount === 0) return null;

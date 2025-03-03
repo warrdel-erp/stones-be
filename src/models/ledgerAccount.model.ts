@@ -4,7 +4,7 @@ import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 
 export type LedgerAccount = {
-  name: string;
+  name?: string;
   type: (typeof LEDGER_ACCOUNT_TYPES)[keyof typeof LEDGER_ACCOUNT_TYPES];
   openingBalance?: number;
   openingDate?: Date;
@@ -23,7 +23,7 @@ const LedgerAccount = sequelize.define(
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     type: {

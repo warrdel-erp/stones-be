@@ -1,6 +1,7 @@
 import Bill from "./bill";
 import Bin from "./bin";
 import Client from "./client";
+import Customer from "./customer.model";
 import FreightDetail from "./freightDetail";
 import InventoryProduct from "./inventoryProduct";
 import LedgerAccount from "./ledgerAccount.model";
@@ -235,6 +236,10 @@ InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 LedgerAccount.hasMany(Transaction, { foreignKey: "ledgerId", as: "transactions" });
 Transaction.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
 
+// User can create multiple customers (Customer can belongs to one User)
+User.hasMany(Customer, { foreignKey: "userId", as: "customers" });
+Customer.belongsTo(User, { foreignKey: "userId", as: "user" });
+
 export {
   Client,
   User,
@@ -256,4 +261,5 @@ export {
   InventoryProduct,
   LedgerAccount,
   Transaction,
+  Customer,
 };

@@ -35,6 +35,9 @@ importers:
       sequelize:
         specifier: ^6.37.5
         version: 6.37.5(mysql2@3.12.0)
+      tsc:
+        specifier: ^2.0.4
+        version: 2.0.4
     devDependencies:
       '@types/express':
         specifier: ^5.0.0
@@ -721,6 +724,10 @@ packages:
         optional: true
       '@swc/wasm':
         optional: true
+
+  tsc@2.0.4:
+    resolution: {integrity: sha512-fzoSieZI5KKJVBYGvwbVZs/J5za84f2lSTLPYf6AGiIf43tZ3GNrI1QzTLcjtyDDP4aLxd46RTZq1nQxe7+k5Q==}
+    hasBin: true
 
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -1454,6 +1461,8 @@ snapshots:
       typescript: 5.7.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+
+  tsc@2.0.4: {}
 
   type-is@1.6.18:
     dependencies:

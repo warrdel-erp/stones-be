@@ -6,14 +6,12 @@ import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 
-/**
- * Service function to create a vendor.
- */
+// Service function to create a vendor.
 export const registerVendor = async (vendorData: any) => {
   const transaction = await sequelize.transaction();
   try {
-    if (!vendorData.name || !vendorData.code || !vendorData.email) {
-      throw new Error("Name, Code, and Email are required fields.");
+    if (!vendorData.name || !vendorData.email) {
+      throw new Error("Name, and Email are required fields.");
     }
 
     // Create vendor

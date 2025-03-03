@@ -16,11 +16,6 @@ const Vendor = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    code: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-    },
     type: {
       type: DataTypes.ENUM(...Object.values(VENDOR_TYPES)),
       allowNull: false,

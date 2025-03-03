@@ -4,8 +4,10 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
+// Create vendor.
 router.post("/", authenticateUser, vendorController.createVendorController);
 
+// Update vendor.
 router.put("/:id", vendorController.updateVendorController);
 
 // Get all vendors.

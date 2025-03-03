@@ -4,9 +4,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 
-/**
- * Controller to handle vendor creation.
- */
+//  Controller to handle vendor creation.
 export const createVendorController = catchAsync(async (req: AuthRequest, res: Response) => {
   const vendorData = req.body;
   const userId = req.user?.id;
