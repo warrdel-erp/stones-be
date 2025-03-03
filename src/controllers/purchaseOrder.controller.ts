@@ -22,7 +22,7 @@ export const createPurchaseOrderController = catchAsync(async (req: AuthRequest,
   const notesData = { internal: internalNote, printable: printableNote };
 
   // Call service function
-  const newPO = await poService.registerPurchaseOrder({ poData, userId }, notesData);
+  const newPO = await poService.registerPurchaseOrder({ ...req.body, userId }, notesData);
 
   return SuccessResponse(res, 201, "Purchase Order created successfully.", newPO);
 });

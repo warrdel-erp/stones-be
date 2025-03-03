@@ -39,6 +39,34 @@ const PurchaseOrder = sequelize.define(
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     },
+    supplierSo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shipDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    etaDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    container: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    expiryDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    deliveryType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shipmentTerms: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.INTEGER,
       references: {
