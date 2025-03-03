@@ -101,7 +101,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"John Doe\",\n  \"userid\": \"john_dosdfe_123\",\n  \"password\": \"SecurePass123\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"johndoe34@example.com\",\n  \"clientId\": 1\n}",
+							"raw": "{\n  \"username\": \"John Doe\",\n  \"userid\": \"john_dosdfe_12\",\n  \"password\": \"SecurePass123\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"johndoe342@example.com\",\n  \"clientId\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -358,11 +358,21 @@
 				{
 					"name": "create",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"ABC Suppliers\",\n  \"code\": \"ABC123\",\n  \"type\": \"SUPPLIER\",\n  \"contactName\": \"John Doe\",\n  \"vendorSince\": \"2022-01-01\",\n  \"primaryPhoneNo\": \"1234567890\",\n  \"email\": \"abc@example.com\",\n  \"remitAddress\": \"123 Street\",\n  \"remitCity\": \"New York\",\n  \"remitState\": \"NY\",\n  \"remitZip\": \"10001\",\n  \"remitCountry\": \"USA\",\n  \"shippingAddress\": \"456 Avenue\",\n  \"shippingCity\": \"New York\",\n  \"shippingState\": \"NY\",\n  \"shippingZip\": \"10002\",\n  \"shippingCountry\": \"USA\",\n  \"currency\": \"USD\"\n}\n",
+							"raw": "{\n  \"name\": \"ABC Suppliers\",\n  \"type\": \"SUPPLIER\",\n  \"contactName\": \"John Doe\",\n  \"vendorSince\": \"2022-01-01\",\n  \"primaryPhoneNo\": \"1234567890\",\n  \"email\": \"abc@example.com\",\n  \"remitAddress\": \"123 Street\",\n  \"remitCity\": \"New York\",\n  \"remitState\": \"NY\",\n  \"remitZip\": \"10001\",\n  \"remitCountry\": \"USA\",\n  \"shippingAddress\": \"456 Avenue\",\n  \"shippingCity\": \"New York\",\n  \"shippingState\": \"NY\",\n  \"shippingZip\": \"10002\",\n  \"shippingCountry\": \"USA\",\n  \"currency\": \"USD\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -449,11 +459,21 @@
 				{
 					"name": "create",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"po\": \"PO-2025-001\",\n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 1,\n    \"supplierId\": 1,\n    \"userId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"po\": \"PO-2025-001\",\n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 1,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -532,14 +552,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/purchaseOrder/3/sipls",
+							"raw": "{{baseurl}}/api/purchaseOrder/1/sipls",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"purchaseOrder",
-								"3",
+								"1",
 								"sipls"
 							]
 						}
@@ -587,7 +607,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"categoryId\": 2\n}\n",
+							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -745,7 +765,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "3"
 								}
 							]
 						}
@@ -759,7 +779,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"container\": \"SIPL-001\",\n  \"description\": \"Sample SIPL\",\n  \"supplierNotes\": \"Important notes\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"purchaseOrderId\": 1,\n  \"products\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 10,\n      \"unitPrice\": 100.5,\n      \"description\": \"Product 1 description\",\n      \"supplierNote\": \"Supplier note for product 1\"\n    }\n  ],\n  \"freightDetail\": {\n    \"vessel\": \"Ship ABC\",\n    \"airBill\": \"AB12345\",\n    \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n    \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n    \"departurePort\": \"Shanghai\",\n    \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n    \"arrivalPort\": \"Los Angeles\",\n    \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n    \"dischargePort\": \"California Port\",\n    \"wiringInstruction\": \"Bank details for payment\",\n    \"freightForwarderId\": 1\n  }\n}\n",
+							"raw": "{\n  \"container\": \"SIPL-001\",\n  \"description\": \"Sample SIPL\",\n  \"supplierNotes\": \"Important notes\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"purchaseOrderId\": 1,\n  \"products\": [\n    {\n      \"productId\": 2,\n      \"quantity\": 10,\n      \"unitPrice\": 100.5,\n      \"description\": \"Product 1 description\",\n      \"supplierNote\": \"Supplier note for product 1\"\n    }\n  ],\n  \"freightDetail\": {\n    \"vessel\": \"Ship ABC\",\n    \"airBill\": \"AB12345\",\n    \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n    \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n    \"departurePort\": \"Shanghai\",\n    \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n    \"arrivalPort\": \"Los Angeles\",\n    \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n    \"dischargePort\": \"California Port\",\n    \"wiringInstruction\": \"Bank details for payment\",\n    \"freightForwarderId\": 1\n  }\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -815,7 +835,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"serialNumber\": \"SN-001\",\n  \"entryUnit\": \"meters\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"productId\": 2,\n  \"binId\": 1,\n  \"quantity\": 5,\n  \"siplId\":3\n}\n",
+							"raw": "{\n  \"serialNumber\": \"SN-001\",\n  \"entryUnit\": \"meters\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"productId\": 2,\n  \"binId\": 1,\n  \"quantity\": 5\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -836,7 +856,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "3"
 								}
 							]
 						}
@@ -947,8 +967,45 @@
 				{
 					"name": "hold-unhold",
 					"request": {
-						"method": "GET",
-						"header": []
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isHold\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/:slabId/hold",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								":slabId",
+								"hold"
+							],
+							"variable": [
+								{
+									"key": "slabId",
+									"value": "18"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -961,7 +1018,113 @@
 					"name": "get account data",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/coa/accountsData",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"coa",
+								"accountsData"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "customer",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"type\": \"Retail\",\n  \"contactName\": \"Jane Smith\",\n  \"printName\": \"Doe Inc.\",\n  \"parentCustomer\": null,\n  \"primaryPhoneNumber\": \"1234567890\",\n  \"secondaryPhoneNumber\": \"0987654321\",\n  \"landlineNumber\": \"123-456-789\",\n  \"accEmail\": \"john@example.com\",\n  \"email\": \"john@example.com\"\n  \"address\": \"123 Main St\",\n  \"suite\": \"Suite 400\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zip\": \"10001\",\n  \"country\": \"USA\",\n  \"sAddress\": \"456 Elm St\",\n  \"sUnit\": \"Unit 10\",\n  \"sCity\": \"Los Angeles\",\n  \"sZip\": \"90001\",\n  \"sState\": \"CA\",\n  \"sSountry\": \"USA\",\n  \"pSalesPerson\": \"Michael Scott\",\n  \"priceLevel\": \"Gold\",\n  \"taxExempt\": true,\n  \"salesTax\": 0.07,\n  \"paymentTerms\": \"Net 30\",\n  \"exemptCerti\": \"EX-12345\",\n  \"exemptExipry\": \"2026-12-31\",\n  \"internalNotes\": \"Customer prefers email communication.\",\n  \"deliveryNotes\": \"Deliver before 10 AM.\",\n  \"poRequired\": true,\n  \"applyFinanceCharges\": false,\n  \"preferredDocSend\": \"email\",\n  \"daysForGrace\": 5,\n  \"daysForHold\": 10,\n  \"customerSince\": \"2020-01-15\",\n  \"einNumber\": \"98-7654321\",\n  \"reason\": \"Loyal Customer\",\n  \"createdAt\": \"2025-02-28T12:00:00Z\",\n  \"updatedAt\": \"2025-02-28T12:00:00Z\",\n  \"deletedAt\": null,\n  \"status\": \"active\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/customer/",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update customer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"this is new code \" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/customer/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/customer",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer"
+							]
+						}
 					},
 					"response": []
 				}
