@@ -12,11 +12,8 @@ const PackagingList = sequelize.define(
     },
     status: {
       type: DataTypes.STRING,
+      defaultValue: "active",
       allowNull: false,
-    },
-    invoiced: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
     },
     loadingOrderId: {
       type: DataTypes.INTEGER,
@@ -32,6 +29,12 @@ const PackagingList = sequelize.define(
   {
     tableName: "packaging_lists",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["loadingOrderId"], // Ensures database enforces uniqueness
+      },
+    ],
   }
 );
 

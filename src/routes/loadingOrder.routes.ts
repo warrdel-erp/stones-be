@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as loadingOrderController from "../controllers/loadingOrder.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import * as loadingOrderProductController from "../controllers/loadingOrderProduct.controller";
 
 const router = Router();
 
@@ -15,5 +16,21 @@ router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById)
 
 // Update Loading Order
 router.put("/:id", authenticateUser, loadingOrderController.updateLoadingOrder);
+
+// Update requested loading order product
+router.put(
+  "/:loadingOrderId/loadingOrderProduct",
+  authenticateUser,
+  loadingOrderProductController.upsertLoadingOrderProducts
+);
+
+// Update requested loading order product
+router.get(
+  "/:loadingOrderId/loadingOrderProduct",
+  authenticateUser,
+  loadingOrderProductController.getLoadingOrderProducts
+);
+
+router.put("/:id/createInvoice", authenticateUser, loadingOrderController.invoiceLoadingOrder);
 
 export default router;

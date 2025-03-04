@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import cors from "cors";
 import express, { urlencoded } from "express";
 import { connectDB } from "./config/database";
-import catchAsync from "./helper/asyncCatch";
-import { SuccessResponse } from "./helper/response";
 import { errorHandler } from "./middleware/errorHandler";
+import { syncModels } from "./config/syncModels";
+
+// Routes
 import clientRoute from "./routes/client.routes";
 import userRoute from "./routes/user.routes";
 import vendorRoute from "./routes/vendor.routes";
@@ -21,7 +23,7 @@ import coaRoute from "./routes/coa.routes";
 import customerRoute from "./routes/customer.routes";
 import salesOrderRoute from "./routes/salesOrder.routes";
 import loadingOrderRoute from "./routes/loadingOrder.routes";
-import { syncModels } from "./config/syncModels";
+import packagingListRoute from "./routes/packagingList.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +32,7 @@ app.use(cors());
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 
+// Routes
 app.use("/api/client", clientRoute);
 app.use("/api/user", userRoute);
 app.use("/api/vendor", vendorRoute);
@@ -45,6 +48,7 @@ app.use("/api/coa", coaRoute);
 app.use("/api/customer", customerRoute);
 app.use("/api/salesOrder", salesOrderRoute);
 app.use("/api/loadingOrder", loadingOrderRoute);
+app.use("/api/packagingList", packagingListRoute);
 
 // handler error globally.
 app.use(errorHandler);

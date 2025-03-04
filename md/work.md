@@ -34,6 +34,7 @@
 29. const data as Jatin sent list.
 30. fulfilled PO => how much sipl is created for given po product. in SINGLE PO, SINGLE SIPL
 31. Bifurcate data of vendor according to type (supplier, freight, vendor)
+32. in salesOrderProduct combination of inventoryProductId and salesOrderId
 
 ---
 

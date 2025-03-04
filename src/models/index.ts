@@ -18,6 +18,7 @@ import ProductSubCategory from "./productSubCategory";
 import PurchaseOrder from "./purchaseOrder";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 import SalesOrder from "./salesOrder.model";
+import SalesOrderProduct from "./salesOrderProduct.model";
 import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
@@ -295,8 +296,8 @@ InventoryProduct.hasMany(LoadingOrderProduct, { foreignKey: "inventoryProductId"
 LoadingOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 
 // One LoadingOrder have one Packaging list.
-LoadingOrder.hasOne(PackagingList, { foreignKey: "salesOrderId", as: "packagingList" });
-PackagingList.belongsTo(LoadingOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+LoadingOrder.hasOne(PackagingList, { foreignKey: "loadingOrderId", as: "packagingList" });
+PackagingList.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
 
 // Loading order have many LoadingOrderSlab
 PackagingList.hasMany(PackagingListProduct, { foreignKey: "packagingListId", as: "packagingListProducts" });
@@ -305,6 +306,14 @@ PackagingListProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", a
 // Inventory product can have multiple LoadingOrderSlab because maybe one is canceled
 InventoryProduct.hasMany(PackagingListProduct, { foreignKey: "inventoryProductId", as: "packagingListProducts" });
 PackagingListProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// SalesOrder have many SalesOrderProduct (one SalesOrderProduct belongs to one Sales Order)
+SalesOrderProduct.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+SalesOrder.hasMany(SalesOrderProduct, { foreignKey: "salesOrderId", as: "salesOrderProducts" });
+
+// One sales Order belongs to inventory product.
+SalesOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", as: "salesOrderProduct" });
 
 export {
   Client,
@@ -334,4 +343,5 @@ export {
   PackagingList,
   PackagingListProduct,
   SalesOrder,
+  SalesOrderProduct,
 };

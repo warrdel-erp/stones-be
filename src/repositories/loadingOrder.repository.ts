@@ -1,3 +1,4 @@
+import { AppError } from "../helper/appError";
 import * as models from "../models";
 
 // Create new LO
@@ -22,6 +23,11 @@ export const getLoadingOrderById = async (id: number) => {
   });
 };
 
+// Get loading order by Id
+export const getLoadingOrderByIdSimple = async (id: number) => {
+  return await models.LoadingOrder.findByPk(id);
+};
+
 // Get loading order by SO id
 export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
   return await models.LoadingOrder.findAll({
@@ -36,7 +42,7 @@ export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
 // Update Loading Order
 export const updateLoadingOrder = async (id: number, data: any) => {
   const loadingOrder = await models.LoadingOrder.findByPk(id);
-  if (!loadingOrder) return null;
+  if (!loadingOrder) throw new AppError(`Loading order does not exists for given id: ${id}`, 400);
 
   await loadingOrder.update(data);
   return loadingOrder;

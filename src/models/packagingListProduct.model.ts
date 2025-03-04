@@ -25,6 +25,7 @@ const PackagingListProduct = sequelize.define(
     },
     status: {
       type: DataTypes.STRING,
+      defaultValue: "active",
       allowNull: false,
     },
     inventoryProductId: {
@@ -51,7 +52,19 @@ const PackagingListProduct = sequelize.define(
   {
     tableName: "packaging_list_products",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["packagingListId", "inventoryProductId"], // Composite unique constraint
+      },
+    ],
   }
 );
+
+// Hook to prevent updating inventoryProductId and packagingListId by removing them from update payload
+PackagingListProduct.beforeUpdate((product: any) => {
+  delete product.dataValues.packagingListId;
+  delete product.dataValues.inventoryProductId;
+});
 
 export default PackagingListProduct;

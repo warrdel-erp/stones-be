@@ -1,31 +1,18 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import SalesOrder from "./salesOrder.model";
 import InventoryProduct from "./inventoryProduct";
-import LoadingOrder from "./loadingOrder.model";
 
-const LoadingOrderProduct = sequelize.define(
-  "LoadingOrderProduct",
+const SalesOrderProduct = sequelize.define(
+  "SalesOrderProduct",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    remeasureLength: {
+    unitPrice: {
       type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    remeasureWidth: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    slabPicked: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: "active",
       allowNull: false,
     },
     inventoryProductId: {
@@ -36,13 +23,13 @@ const LoadingOrderProduct = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onDelete: "RESTRICT",
     },
-    loadingOrderId: {
+    salesOrderId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: LoadingOrder,
+        model: SalesOrder,
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -50,21 +37,21 @@ const LoadingOrderProduct = sequelize.define(
     },
   },
   {
-    tableName: "loading_order_products",
+    tableName: "sales_order_products",
     timestamps: true,
     indexes: [
       {
         unique: true,
-        fields: ["loadingOrderId", "inventoryProductId"], // Composite unique constraint
+        fields: ["salesOrderId", "inventoryProductId"], // Composite unique constraint
       },
     ],
   }
 );
 
 // Hook to prevent updating inventoryProductId and salesOrderId by removing them from update payload
-LoadingOrderProduct.beforeUpdate((product: any) => {
+SalesOrderProduct.beforeUpdate((product: any) => {
   delete product.dataValues.inventoryProductId;
-  delete product.dataValues.loadingOrderId;
+  delete product.dataValues.salesOrderId;
 });
 
-export default LoadingOrderProduct;
+export default SalesOrderProduct;

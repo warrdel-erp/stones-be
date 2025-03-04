@@ -44,4 +44,11 @@ const LoadingOrder = sequelize.define(
   }
 );
 
+// Hook to prevent updates if invoiced = true
+LoadingOrder.beforeUpdate((loadingOrder, options) => {
+  if (loadingOrder.dataValues.invoiced) {
+    throw new Error("Cannot update Loading Order as it is already invoiced.");
+  }
+});
+
 export default LoadingOrder;

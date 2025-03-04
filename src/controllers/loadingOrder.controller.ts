@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
-import { AppError } from "../helper/appError";
 
 // Create new LO
 export const createLoadingOrder = catchAsync(async (req: Request, res: Response) => {
@@ -41,7 +40,23 @@ export const getLoadingOrdersBySalesOrderId = catchAsync(async (req: Request, re
 export const updateLoadingOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const updatedLoadingOrder = await loadingOrderService.updateLoadingOrder(Number(id), req.body);
+  // Remove invoiced key if present because it should not change invoice key. it should only be changed by it's specific API.
+  const { invoiced, ...data } = req.body;
+
+  const updatedLoadingOrder = await loadingOrderService.updateLoadingOrder(Number(id), data);
+
+  if (!updatedLoadingOrder) {
+    return SuccessResponse(res, 404, "Loading Order not found", null);
+  }
+
+  SuccessResponse(res, 200, "Loading Order updated successfully", updatedLoadingOrder);
+});
+
+// Update Loading Order
+export const invoiceLoadingOrder = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const updatedLoadingOrder = await loadingOrderService.updateLoadingOrder(Number(id), { invoiced: true });
 
   if (!updatedLoadingOrder) {
     return SuccessResponse(res, 404, "Loading Order not found", null);

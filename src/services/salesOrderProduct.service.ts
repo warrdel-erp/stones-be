@@ -1,0 +1,72 @@
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as slabRepository from "../repositories/slab.repository";
+import { AppError } from "../helper/appError";
+import { sequelize } from "../config/database";
+import { SLAB_STATUS } from "../constants";
+
+//  Create or update multiple SalesOrderProduct entries.
+export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number) => {
+  const upsertedProducts = [];
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    for (const product of products) {
+      if (product.id) {
+        // Fetch existing product with SOid because update should be happen when product belongs to given SO.
+        const existingProduct = await salesOrderProductRepository.findByIdAndSalesOrderId(
+          { id: product.id, salesOrderId },
+          transaction
+        );
+
+        if (existingProduct) {
+          // Prevent updating `inventoryProductId` & `salesOrderId`.
+          await salesOrderProductRepository.updateSalesOrderProduct(product.id, product, transaction);
+
+          upsertedProducts.push({ id: product.id, ...product });
+        } else {
+          throw new AppError(`Invalid Id '${product.id}' or product does not belongs to given SO`, 400);
+        }
+      } else {
+        let slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
+
+        slab = slab?.get({ plain: true });
+
+        // can't add to SO if it is not in inventory
+        if (slab?.status !== SLAB_STATUS.IN_INVENTORY) {
+          throw new AppError(
+            `Slab is not in inventory. Slab is ${slab.status} with id: ${slab.id}, and inventoryProductId: ${product.inventoryProductId}`,
+            400
+          );
+        }
+
+        // can't add to SO if it is in hold.
+        if (slab?.isHold) {
+          throw new AppError(`Slab is in hold with id: ${slab.id}`, 400);
+        }
+
+        // Create new product entry.
+        const newProduct = await salesOrderProductRepository.createSalesOrderProduct(
+          { ...product, salesOrderId },
+          transaction
+        );
+
+        // If a product is added in SO then status is changed to ALLOCATED for that slab.
+        slabRepository.updateSlabStatusByInventoryProduct(product.inventoryProductId, SLAB_STATUS.ALLOCATED);
+
+        upsertedProducts.push(newProduct);
+      }
+    }
+
+    transaction.commit();
+    return upsertedProducts;
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
+};
+
+// Fetch all SalesOrderProducts linked to a SalesOrder
+export const getSalesOrderProducts = async (salesOrderId: number) => {
+  return await salesOrderProductRepository.getSalesOrderProductsBySalesOrderId(salesOrderId);
+};
