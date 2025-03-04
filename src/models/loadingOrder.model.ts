@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
+import { AppError } from "../helper/appError";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -45,9 +46,11 @@ const LoadingOrder = sequelize.define(
 );
 
 // Hook to prevent updates if invoiced = true
-LoadingOrder.beforeUpdate((loadingOrder, options) => {
-  if (loadingOrder.dataValues.invoiced) {
-    throw new Error("Cannot update Loading Order as it is already invoiced.");
+LoadingOrder.beforeUpdate(async (loadingOrder, options) => {
+  const loadingOrderExisting = await LoadingOrder.findByPk(loadingOrder.dataValues.id);
+
+  if (loadingOrderExisting?.dataValues.invoiced) {
+    throw new AppError("Cannot update Loading Order as it is already invoiced.", 400);
   }
 });
 

@@ -1,6 +1,10 @@
 import { AppError } from "../helper/appError";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as loadingOrderProductService from "../services/loadingOrderProduct.service";
+import * as loadingOrderService from "../services/loadingOrder.service";
+import * as slabRepository from "../repositories/slab.repository";
+import { SLAB_STATUS } from "../constants";
+import { sequelize } from "../config/database";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -32,6 +36,47 @@ export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
 // Update Loading Order
 export const updateLoadingOrder = async (id: number, data: any) => {
   return await loadingOrderRepository.updateLoadingOrder(id, data);
+};
+
+// Invoice Loading Order
+export const invoiceLoadingOrder = async (id: number, data: any) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    let loadingOrder: any = await loadingOrderService.getLoadingOrderById(Number(id));
+
+    if (!loadingOrder) {
+      throw new AppError(`Loading order does not exists with given id: ${id}`, 400);
+    }
+
+    if (loadingOrder.invoiced) {
+      throw new AppError("Cannot invoice Loading Order as it is already invoiced.", 400);
+    }
+
+    // If LO doesn't have any product.
+    if (!loadingOrder?.loadingOrderProducts?.length) {
+      throw new AppError("Loading order with id: ${id} does not have any product added. So it can't be invoiced", 400);
+    }
+
+    loadingOrder = loadingOrder.get({ plain: true });
+
+    // Mark corresponding slabs as SOLD
+    for (const loadingOrderProducts of loadingOrder?.loadingOrderProducts) {
+      await slabRepository.updateSlabStatusByInventoryProduct(
+        loadingOrderProducts.inventoryProductId,
+        SLAB_STATUS.SOLD,
+        transaction
+      );
+    }
+
+    loadingOrder = await loadingOrderRepository.updateLoadingOrder(id, data, transaction);
+
+    transaction.commit();
+    return loadingOrder;
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
 };
 
 export const checkIfLoadingOrderInvoiced = async (loadingOrderId: number, operation: string) => {

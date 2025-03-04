@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { AppError } from "../helper/appError";
 import * as models from "../models";
 
@@ -40,10 +41,7 @@ export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
 };
 
 // Update Loading Order
-export const updateLoadingOrder = async (id: number, data: any) => {
-  const loadingOrder = await models.LoadingOrder.findByPk(id);
-  if (!loadingOrder) throw new AppError(`Loading order does not exists for given id: ${id}`, 400);
-
-  await loadingOrder.update(data);
+export const updateLoadingOrder = async (id: number, data: any, transaction?: Transaction) => {
+  const loadingOrder = await models.LoadingOrder.update(data, { where: { id }, transaction, individualHooks: true });
   return loadingOrder;
 };

@@ -31,11 +31,13 @@ export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
-  status: (typeof SLAB_STATUS)[keyof typeof SLAB_STATUS]
+  status: (typeof SLAB_STATUS)[keyof typeof SLAB_STATUS],
+  transaction?: Transaction
 ) => {
   // Find the related slab
   const slab = await Slab.findOne({
     where: { inventoryProductId },
+    transaction,
   });
 
   if (!slab) {

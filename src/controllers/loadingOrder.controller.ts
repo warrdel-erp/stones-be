@@ -56,11 +56,7 @@ export const updateLoadingOrder = catchAsync(async (req: Request, res: Response)
 export const invoiceLoadingOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const updatedLoadingOrder = await loadingOrderService.updateLoadingOrder(Number(id), { invoiced: true });
-
-  if (!updatedLoadingOrder) {
-    return SuccessResponse(res, 404, "Loading Order not found", null);
-  }
+  const updatedLoadingOrder = await loadingOrderService.invoiceLoadingOrder(Number(id), { invoiced: true });
 
   SuccessResponse(res, 200, "Loading Order updated successfully", updatedLoadingOrder);
 });
