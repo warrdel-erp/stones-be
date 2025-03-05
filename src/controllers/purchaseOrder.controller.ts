@@ -48,6 +48,9 @@ export const getPurchaseOrderById = catchAsync(async (req: Request, res: Respons
   // Fetch PO details via service
   const purchaseOrder = await poService.getPurchaseOrderById(Number(id));
 
+  // find all products added in a PO
+  // get sum of all SIPL products that belongs to given product and purchaseOrder
+
   if (!purchaseOrder) {
     throw new AppError("Purchase Order not found", 404);
   }

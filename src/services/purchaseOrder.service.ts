@@ -103,7 +103,8 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10)
 
 export const getPurchaseOrderById = async (id: number) => {
   // Fetch PO details
-  const purchaseOrder = await poRepository.getPurchaseOrderById(id);
+  let purchaseOrder: any = await poRepository.getPurchaseOrderById(id);
+
   if (!purchaseOrder) {
     return null; // Handle case where PO does not exist
   }
@@ -112,10 +113,28 @@ export const getPurchaseOrderById = async (id: number) => {
   const totalQuantity = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrder(id);
   const totalSiplQuantity = await siplProductRepository.getTotalQuantityByPurchaseOrder(id);
 
+  const fulfilledBySipl = [];
+
+  console.log(
+    "purchaseOrder.requestedPurchaseProducts",
+    purchaseOrder.requestedPurchaseProducts.map((e: any) => e.productId)
+  );
+
+  // Remove duplicate product ids
+  const productIds = Array.from(
+    new Set(purchaseOrder.requestedPurchaseProducts.map((product: any) => product.productId))
+  );
+
+  for (const productId of productIds) {
+    const calc = await siplProductRepository.getTotalQuantityByProductAndPO(Number(productId), id);
+    fulfilledBySipl.push({ productId: productId, totalQuantity: calc });
+  }
+
   return {
-    ...purchaseOrder.get({ plain: true }),
-    totalQuantity: totalQuantity, // Ensure it's not null
+    ...purchaseOrder,
+    totalQuantity: totalQuantity,
     totalSiplQuantity,
+    fulfilledBySipl,
   };
 };
 

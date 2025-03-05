@@ -1,10 +1,15 @@
-import { Sequelize } from "sequelize";
+import { Sequelize, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 
 // find product by id
 export const findById = async (id: number) => {
   return await models.RequestedPurchaseProduct.findByPk(id);
+};
+
+// find product by id
+export const findByFilters = async (filter: WhereOptions) => {
+  return await models.RequestedPurchaseProduct.findAll({ where: filter || {} });
 };
 
 // Get updated product

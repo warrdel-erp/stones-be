@@ -52,3 +52,22 @@ export const getTotalQuantityForAllPO = async () => {
 
   return totalQuantity;
 };
+
+export const getTotalQuantityByProductAndPO = async (productId: number, purchaseOrderId: number) => {
+  const totalQuantity = await models.SIPLProduct.sum("quantity", {
+    where: { productId },
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipl",
+        where: { purchaseOrderId },
+        attributes: [],
+      },
+    ],
+    group: ["productId"],
+    raw: true,
+    // subQuery: false,
+  } as FindOptions);
+
+  return totalQuantity || 0; // Return 0 if no records found
+};

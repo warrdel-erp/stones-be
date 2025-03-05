@@ -45,7 +45,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number) => {
 };
 
 export const getPurchaseOrderById = async (id: number) => {
-  const result = await PurchaseOrder.findOne({
+  let result = await PurchaseOrder.findOne({
     include: [
       { model: models.Vendor, as: "supplier" },
       { model: models.RequestedPurchaseProduct, as: "requestedPurchaseProducts" },
@@ -60,6 +60,7 @@ export const getPurchaseOrderById = async (id: number) => {
     where: { id },
   });
 
+  result = result?.get({ plain: true });
   return result;
 };
 
