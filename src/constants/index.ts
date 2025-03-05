@@ -49,14 +49,14 @@ export const DELIVERY_TYPE = {
   Other: "Other",
 };
 
-export const PAYMENT_TERMS = {
-  "30": "30",
-  "45": "45",
-  "60": "60",
-  "90": "90",
-  "120": "120",
-  COD: "COD",
-};
+export const PAYMENT_TERMS = [
+  { id: 1, value: "30" },
+  { id: 2, value: "45" },
+  { id: 3, value: "60" },
+  { id: 4, value: "90" },
+  { id: 5, value: "120" },
+  { id: 6, value: "COD" },
+];
 
 export const SHIPMENT_TERMS = [
   { id: 1, value: "Prepaid" },
@@ -70,10 +70,10 @@ export const SHIPMENT_TERMS = [
   { id: 9, value: "Consignment" },
 ] as const;
 
-export const VENDOR_SCOP = {
-  NATIONAL: "National",
-  INTERNATIONAL: "International",
-} as const;
+export const VENDOR_SCOP = [
+  { id: 1, value: "National" },
+  { id: 2, value: "International" },
+] as const;
 
 export const LANGUAGES = [
   { id: 1, value: "Hindi", code: "hi" },
