@@ -23,3 +23,26 @@ export const CUSTOMER_ADDRESS_TYPES = {
   SHIPPING: "SHIPPING",
   BILLING: "BILLING",
 } as const;
+
+export const PAYMENT_METHOD = {
+  CREDIT_CARD: "creditCard",
+  BANK_TRANSFER: "bankTransfer",
+  CASH: "cash",
+  CHEQUE: "cheque",
+} as const;
+
+export const PAYMENT_STATUS = {
+  PENDING: "pending",
+  COMPLETE: "completed",
+  FAILED: "failed",
+} as const;
+
+export const PAYEE_TYPE = {
+  CUSTOMER: "customer",
+  VENDOR: "vendor",
+} as const;
+
+export const PAYMENT_TYPE = {
+  INCOMING: "incoming",
+  OUTGOING: "outgoing",
+} as const;

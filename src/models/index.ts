@@ -12,6 +12,7 @@ import Location from "./location";
 import Notes from "./note";
 import PackagingList from "./packagingList.model";
 import PackagingListProduct from "./packagingListProduct.model";
+import Payment from "./payment.model";
 import Product from "./product";
 import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
@@ -315,6 +316,10 @@ SalesOrder.hasMany(SalesOrderProduct, { foreignKey: "salesOrderId", as: "salesOr
 SalesOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", as: "salesOrderProduct" });
 
+// One Payment belongs to one user (One user can have multiple payments)
+Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
+User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
+
 export {
   Client,
   User,
@@ -344,4 +349,5 @@ export {
   PackagingListProduct,
   SalesOrder,
   SalesOrderProduct,
+  Payment,
 };
