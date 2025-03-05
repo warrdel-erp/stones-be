@@ -10,7 +10,7 @@ export const getBinsByLocationController = catchAsync(async (req: AuthRequest, r
   const userId = req.user?.id;
 
   // Check if user has access to this location.
-  checkUserLocationAccess(Number(locationId), userId!);
+  await checkUserLocationAccess(Number(locationId), userId!);
 
   const bins = await binService.getBinsByLocation(Number(locationId));
   SuccessResponse(res, 200, "Bin list according to location fetched", bins);
