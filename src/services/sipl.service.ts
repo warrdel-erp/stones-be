@@ -62,16 +62,6 @@ export async function handleCreateSlabs(slabData: any) {
     console.log(slabData);
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);
-    // Create a Slab linked to the new InventoryProduct
-    // const newSlab = await slabRepository.createSlab(
-    //   {
-    //     ...slabData,
-    //     inventoryProductId: inventoryProduct.id,
-    //     serialNumber: `${slabData.serialNumber}-${Math.random().toString(36).substring(7)}`, // Ensuring uniqueness
-    //     barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
-    //   },
-    //   transaction
-    // );
 
     await transaction.commit();
     return createdSlabs;
@@ -80,3 +70,8 @@ export async function handleCreateSlabs(slabData: any) {
     throw error;
   }
 }
+
+// Get new PO number
+export const getInvoiceNumber = async () => {
+  return await siplRepository.getInvoiceNumber();
+};

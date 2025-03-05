@@ -94,17 +94,22 @@ const SIPL = sequelize.define(
 
 // 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
 SIPL.beforeCreate(async (sipl: any) => {
-  if (!sipl.clientId) {
-    throw new Error("Client ID is required to generate clientInvoiceNumber and poInvoiceNumber.");
+  if (!sipl.clientId && !sipl.purchaseOrderId) {
+    throw new Error("Client ID and purchaseOrderId is required to generate clientInvoiceNumber and poInvoiceNumber.");
   }
 
-  const lastSIPL: any = await SIPL.findOne({
+  const lastSIPLAccordingToClient: any = await SIPL.findOne({
     where: { clientId: sipl.clientId },
     order: [["clientInvoiceNumber", "DESC"]],
   });
 
-  sipl.clientInvoiceNumber = lastSIPL ? lastSIPL.clientInvoiceNumber + 1 : 1;
-  sipl.poInvoiceNumber = lastSIPL ? lastSIPL.poInvoiceNumber + 1 : 1;
+  const lastSIPLAccordingToPO: any = await SIPL.findOne({
+    where: { purchaseOrderId: sipl.purchaseOrderId },
+    order: [["poInvoiceNumber", "DESC"]],
+  });
+
+  sipl.clientInvoiceNumber = lastSIPLAccordingToClient ? lastSIPLAccordingToClient.clientInvoiceNumber + 1 : 1;
+  sipl.poInvoiceNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poInvoiceNumber + 1 : 1;
 });
 
 export default SIPL;

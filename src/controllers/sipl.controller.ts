@@ -106,3 +106,9 @@ export const createSlabHandler = catchAsync(async (req: Request, res: Response) 
   const slabs = await siplService.handleCreateSlabs({ ...req.body, siplId: id });
   res.status(201).json({ message: "Slabs created successfully", slabs });
 });
+
+// Get new PO number
+export const getNewInvoiceNumber = catchAsync(async (req: Request, res: Response) => {
+  const data = await siplService.getInvoiceNumber();
+  SuccessResponse(res, 200, "New invoice number fetched successfully.", data);
+});

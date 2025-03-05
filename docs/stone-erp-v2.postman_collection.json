@@ -372,7 +372,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"ABC Suppliers\",\n  \"type\": \"SUPPLIER\",\n  \"contactName\": \"John Doe\",\n  \"vendorSince\": \"2022-01-01\",\n  \"primaryPhoneNo\": \"1234567890\",\n  \"email\": \"abc@example.com\",\n  \"remitAddress\": \"123 Street\",\n  \"remitCity\": \"New York\",\n  \"remitState\": \"NY\",\n  \"remitZip\": \"10001\",\n  \"remitCountry\": \"USA\",\n  \"shippingAddress\": \"456 Avenue\",\n  \"shippingCity\": \"New York\",\n  \"shippingState\": \"NY\",\n  \"shippingZip\": \"10002\",\n  \"shippingCountry\": \"USA\",\n  \"currency\": \"USD\"\n}\n",
+							"raw": "{\n    \"name\": \"ABC Suppliers121\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"SUPPLIER\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":\"30\",\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -820,11 +820,21 @@
 				{
 					"name": "create SIPL",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"container\": \"SIPL-001\",\n  \"description\": \"Sample SIPL\",\n  \"supplierNotes\": \"Important notes\",\n  \"createdBy\": 1,\n  \"updatedBy\": 1,\n  \"purchaseOrderId\": 1,\n  \"products\": [\n    {\n      \"productId\": 2,\n      \"quantity\": 10,\n      \"unitPrice\": 100.5,\n      \"description\": \"Product 1 description\",\n      \"supplierNote\": \"Supplier note for product 1\"\n    }\n  ],\n  \"freightDetail\": {\n    \"vessel\": \"Ship ABC\",\n    \"airBill\": \"AB12345\",\n    \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n    \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n    \"departurePort\": \"Shanghai\",\n    \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n    \"arrivalPort\": \"Los Angeles\",\n    \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n    \"dischargePort\": \"California Port\",\n    \"wiringInstruction\": \"Bank details for payment\",\n    \"freightForwarderId\": 1\n  }\n}\n",
+							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"clientInvoiceNumber\":23423;\n    \"purchaseOrderId\": 4,\n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        // \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        // \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -852,7 +862,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"createdBy\": 1,\n    //   \n    \"po\": \"PO-2025-001\",\n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"userId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
+							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    //   \n    \"po\": \"PO-2025-001\",\n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -905,6 +915,14 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
