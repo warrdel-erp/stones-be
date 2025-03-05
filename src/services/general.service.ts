@@ -1,9 +1,12 @@
 import {
   DELIVERY_TYPE,
+  FINISH,
+  GROUPS,
   LANGUAGES,
   PAYMENT_TERMS,
   PRODUCT_COLORS,
   SHIPMENT_TERMS,
+  THICKNESS,
   UNITS_OF_MEASUREMENT,
   VENDOR_SCOP,
 } from "../constants";
@@ -23,8 +26,11 @@ export const getGeneralData = async () => {
     unitOfMeasurement: UNITS_OF_MEASUREMENT,
     deliveryType: DELIVERY_TYPE,
     paymentTerms: PAYMENT_TERMS,
-    shipment_terms: SHIPMENT_TERMS,
+    shipmentTerms: SHIPMENT_TERMS,
     vendorScope: VENDOR_SCOP,
     languages: LANGUAGES,
+    thickness: THICKNESS,
+    finish: FINISH,
+    group: GROUPS,
   };
 };

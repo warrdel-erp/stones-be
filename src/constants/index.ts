@@ -80,3 +80,21 @@ export const LANGUAGES = [
   { id: 2, value: "English", code: "en" },
   { id: 3, value: "Marathi", code: "mr" },
 ] as const;
+
+export const THICKNESS = [
+  { id: 1, value: "1 CM" },
+  { id: 2, value: "2 CM" },
+  { id: 3, value: "3 CM" },
+];
+
+export const FINISH = [
+  { id: 1, value: "F1" },
+  { id: 2, value: "F2" },
+  { id: 3, value: "F3" },
+];
+
+export const GROUPS = [
+  { id: 1, value: "G1" },
+  { id: 2, value: "G2" },
+  { id: 3, value: "G3" },
+];
