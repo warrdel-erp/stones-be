@@ -24,6 +24,8 @@ import customerRoute from "./routes/customer.routes";
 import salesOrderRoute from "./routes/salesOrder.routes";
 import loadingOrderRoute from "./routes/loadingOrder.routes";
 import packagingListRoute from "./routes/packagingList.routes";
+import requestedPurchaseProductRoute from "./routes/requestedPurchaseProduct.routes";
+import siplProductRoute from "./routes/siplProduct.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +51,8 @@ app.use("/api/customer", customerRoute);
 app.use("/api/salesOrder", salesOrderRoute);
 app.use("/api/loadingOrder", loadingOrderRoute);
 app.use("/api/packagingList", packagingListRoute);
+app.use("/api/requestedPurchaseProduct", requestedPurchaseProductRoute);
+app.use("/api/siplProduct", siplProductRoute);
 
 // handler error globally.
 app.use(errorHandler);

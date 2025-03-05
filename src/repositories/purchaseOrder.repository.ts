@@ -6,7 +6,7 @@ import * as models from "../models";
  * Create a new Purchase Order in the database.
  */
 export const createPurchaseOrder = async (poData: any, transaction?: Transaction) => {
-  return await PurchaseOrder.create(poData, { transaction });
+  return await PurchaseOrder.create(poData, { transaction, hooks: true });
 };
 
 // create SIPL Product
@@ -108,7 +108,7 @@ export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
 
 // Get latest PO number
 export const getPoNumber = async () => {
-  const lastPO: any = await models.PurchaseOrder.findOne({ order: [["id", "DESC"]], attributes: ["id"] });
+  const lastPO: any = await models.PurchaseOrder.findOne({ order: [["id", "DESC"]], attributes: ["clientPoNumber"] });
 
-  return { id: lastPO ? lastPO?.id + 1 : 1 };
+  return { clientPoNumber: lastPO ? lastPO?.clientPoNumber + 1 : 1 };
 };

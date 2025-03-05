@@ -16,12 +16,20 @@ const SIPL = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
-    poInvoiceNumber: {
+    clientInvoiceDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    poSiplNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     supplierInvoiceNumber: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    supplierInvoiceDate: {
+      type: DataTypes.DATE,
       allowNull: false,
     },
     container: {
@@ -43,7 +51,7 @@ const SIPL = sequelize.define(
     },
     createdBy: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: User,
         key: "id",
@@ -86,7 +94,7 @@ const SIPL = sequelize.define(
       },
       {
         unique: true,
-        fields: ["purchaseOrderId", "poInvoiceNumber"],
+        fields: ["purchaseOrderId", "poSiplNumber"],
       },
     ],
   }
@@ -95,7 +103,7 @@ const SIPL = sequelize.define(
 // 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
 SIPL.beforeCreate(async (sipl: any) => {
   if (!sipl.clientId && !sipl.purchaseOrderId) {
-    throw new Error("Client ID and purchaseOrderId is required to generate clientInvoiceNumber and poInvoiceNumber.");
+    throw new Error("Client ID and purchaseOrderId is required to generate clientInvoiceNumber and poSiplNumber.");
   }
 
   const lastSIPLAccordingToClient: any = await SIPL.findOne({
@@ -105,11 +113,11 @@ SIPL.beforeCreate(async (sipl: any) => {
 
   const lastSIPLAccordingToPO: any = await SIPL.findOne({
     where: { purchaseOrderId: sipl.purchaseOrderId },
-    order: [["poInvoiceNumber", "DESC"]],
+    order: [["poSiplNumber", "DESC"]],
   });
 
   sipl.clientInvoiceNumber = lastSIPLAccordingToClient ? lastSIPLAccordingToClient.clientInvoiceNumber + 1 : 1;
-  sipl.poInvoiceNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poInvoiceNumber + 1 : 1;
+  sipl.poSiplNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poSiplNumber + 1 : 1;
 });
 
 export default SIPL;

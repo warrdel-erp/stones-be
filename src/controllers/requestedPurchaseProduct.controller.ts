@@ -19,3 +19,12 @@ export const upsertRequestedPurchaseProducts = catchAsync(async (req: Request, r
 
   return SuccessResponse(res, 200, "Requested Purchase Products processed successfully", updatedProducts);
 });
+
+// Delete requested purchase product
+export const deleteRequestedPurchaseProductController = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const data = await requestedPurchaseProductService.deleteRequestedPurchaseProduct(Number(id));
+
+  SuccessResponse(res, 200, "Requested purchase product deleted successfully", data);
+});

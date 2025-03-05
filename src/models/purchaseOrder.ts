@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Location from "./location";
 import User from "./user";
 import Vendor from "./vendor";
+import Client from "./client";
 
 const PurchaseOrder = sequelize.define(
   "PurchaseOrder",
@@ -11,6 +12,14 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    poDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    clientPoNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     purchaseLocationId: {
       type: DataTypes.INTEGER,
@@ -76,11 +85,43 @@ const PurchaseOrder = sequelize.define(
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "purchase_order",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "clientPoNumber"],
+      },
+    ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
+  if (!purchaseOrder.clientId) {
+    throw new Error("Client ID is required to generate clientPONumber.");
+  }
+
+  let lastPOAccordingToClient: any = await PurchaseOrder.findOne({
+    where: { clientId: purchaseOrder.clientId },
+    order: [["clientPoNumber", "DESC"]],
+  });
+
+  lastPOAccordingToClient = lastPOAccordingToClient?.get({ plain: true });
+  console.log("lastPOAccordingToClient", lastPOAccordingToClient);
+
+  purchaseOrder.clientPoNumber = !!lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
+});
 
 export default PurchaseOrder;

@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 1\n}\n",
+							"raw": "{\n    \"locationId\":2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -652,7 +652,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
+							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -834,7 +834,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"clientInvoiceNumber\":23423;\n    \"purchaseOrderId\": 4,\n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        // \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        // \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"purchaseOrderId\": 4,\n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        // \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        // \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -858,6 +858,16 @@
 				{
 					"name": "createDirectSipl",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -919,10 +929,31 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "new Invoice Number",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/sipl/newInvoiceNumber",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"sipl",
+								"newInvoiceNumber"
+							]
+						}
 					},
 					"response": []
 				}
@@ -984,7 +1015,7 @@
 							"variable": [
 								{
 									"key": "locationId",
-									"value": "3"
+									"value": "2"
 								}
 							]
 						}
@@ -1611,7 +1642,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"deliveryNotes\": \"this is new delivery note\"\n}\n",
+							"raw": "{\n    \"deliveryNotes\": \"this is new delivery notesd\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1670,7 +1701,7 @@
 							"variable": [
 								{
 									"key": "loadingOrderId",
-									"value": "3"
+									"value": "2"
 								}
 							]
 						}
@@ -1716,6 +1747,16 @@
 				{
 					"name": "invoice loading order",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"url": {
@@ -1732,7 +1773,7 @@
 							"variable": [
 								{
 									"key": "loadingOrderId",
-									"value": "2"
+									"value": "4"
 								}
 							]
 						}
@@ -1863,14 +1904,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/packagingList/1",
+							"raw": "{{baseurl}}/api/packagingList/3",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"packagingList",
-								"1"
+								"3"
 							]
 						}
 					},
@@ -1914,7 +1955,7 @@
 							"variable": [
 								{
 									"key": "packagingListId",
-									"value": "1"
+									"value": "3"
 								}
 							]
 						}
@@ -1941,7 +1982,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"remeasureLength\": 12,\n        \"remeasureWidth\": 14,\n        \"inventoryProductId\": 6\n    },\n    {\n        \"id\": 5,\n        \"remeasureLength\": 12,\n        \"remeasureWidth\": 14,\n        \"inventoryProductId\": 7\n    }\n]",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1949,20 +1990,80 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/loadingOrder/:loadingOrderId/loadingOrderProduct",
+							"raw": "{{baseurl}}/api/packagingList/:packagingListId/packagingListProduct",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
-								"loadingOrder",
-								":loadingOrderId",
-								"loadingOrderProduct"
+								"packagingList",
+								":packagingListId",
+								"packagingListProduct"
 							],
 							"variable": [
 								{
-									"key": "loadingOrderId",
-									"value": "3"
+									"key": "packagingListId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "requested purchase product",
+			"item": [
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/requestedPurchaseProduct/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"requestedPurchaseProduct",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "sipl product",
+			"item": [
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/siplProduct/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"siplProduct",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
 								}
 							]
 						}

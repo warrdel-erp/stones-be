@@ -28,3 +28,16 @@ export const upsertRequestedPurchaseProducts = async (products: Array<any>, purc
 
   return upsertedProducts;
 };
+
+// Delete requested purchase product
+export const deleteRequestedPurchaseProduct = async (id: number) => {
+  const product = await requestedPurchaseProductRepository.findById(id);
+
+  if (!product) {
+    throw new Error("Requested purchase product not found");
+  }
+
+  const data = await requestedPurchaseProductRepository.deleteProductById(id);
+
+  return data;
+};

@@ -2,7 +2,9 @@ import { sequelize } from "../config/database";
 import * as poRepository from "../repositories/purchaseOrder.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+
 /**
  * Processes the inventory reception by updating slab statuses.
  * @param siplId - The SIPL ID.
@@ -11,6 +13,7 @@ export const receiveInventory = async (siplId: number): Promise<number> => {
   return await slabRepository.updateSlabStatusBySipl(siplId);
 };
 
+// Create SIPL
 export async function createSIPLService(siplData: any) {
   const transaction = await sequelize.transaction();
   try {
@@ -19,7 +22,12 @@ export async function createSIPLService(siplData: any) {
 
     // Create SIPL Products (if provided)
     if (siplData.products?.length) {
-      await siplRepository.createSIPLProducts(siplData.products, sipl.id, transaction);
+      const productsWithSIPLId = siplData.products.map((product: any) => ({
+        ...product,
+        siplId: sipl.id,
+      }));
+
+      await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
     }
 
     // Create Freight Detail (if provided)
