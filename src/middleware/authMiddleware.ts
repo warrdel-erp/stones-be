@@ -5,7 +5,7 @@ import * as userRepository from "../repositories/user.repository";
 import catchAsync from "../helper/asyncCatch";
 
 export interface AuthRequest extends Request {
-  user?: { id: number; userid: string; email: string; defaultLocationId: number };
+  user?: { id: number; userid: string; email: string; defaultLocationId: number; clientId: number };
 }
 
 const JWT_SECRET = process.env.JWT_SECRET;

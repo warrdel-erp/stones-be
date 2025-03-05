@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
 import PurchaseOrder from "./purchaseOrder";
+import Client from "./client";
 
 const SIPL = sequelize.define(
   "SIPL",
@@ -10,6 +11,18 @@ const SIPL = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    clientInvoiceNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
+    poInvoiceNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
+    supplierInvoiceNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     container: {
       type: DataTypes.STRING,
@@ -30,6 +43,7 @@ const SIPL = sequelize.define(
     },
     createdBy: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: User,
         key: "id",
@@ -38,6 +52,7 @@ const SIPL = sequelize.define(
       onUpdate: "CASCADE",
     },
     updatedBy: {
+      allowNull: false,
       type: DataTypes.INTEGER,
       references: {
         model: User,
@@ -51,11 +66,45 @@ const SIPL = sequelize.define(
         key: "id",
       },
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "sipl",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "clientInvoiceNumber"],
+      },
+      {
+        unique: true,
+        fields: ["purchaseOrderId", "poInvoiceNumber"],
+      },
+    ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+SIPL.beforeCreate(async (sipl: any) => {
+  if (!sipl.clientId) {
+    throw new Error("Client ID is required to generate clientInvoiceNumber and poInvoiceNumber.");
+  }
+
+  const lastSIPL: any = await SIPL.findOne({
+    where: { clientId: sipl.clientId },
+    order: [["clientInvoiceNumber", "DESC"]],
+  });
+
+  sipl.clientInvoiceNumber = lastSIPL ? lastSIPL.clientInvoiceNumber + 1 : 1;
+  sipl.poInvoiceNumber = lastSIPL ? lastSIPL.poInvoiceNumber + 1 : 1;
+});
 
 export default SIPL;

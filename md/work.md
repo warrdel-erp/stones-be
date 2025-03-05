@@ -36,9 +36,9 @@
 31. Bifurcate data of vendor according to type (supplier, freight, vendor)
 32. in salesOrderProduct combination of inventoryProductId and salesOrderId
 33. po number,
-34. sipl (po1 sipl1, sipl2) according to PO
-35. supplier invoice no. (custom number)
-36. invoice no according to client
+34. sipl (po1 - sipl1, sipl2) according to PO ✔️
+35. supplier invoice no. (custom number) ✔️
+36. invoice no according to client ✔️
 37. update
 
 ---

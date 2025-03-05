@@ -26,8 +26,18 @@ export const receiveInventoryController = catchAsync(async (req: Request, res: R
 });
 
 // Create SIPL
-export const createSIPLController = catchAsync(async (req: Request, res: Response) => {
-  const sipl = await siplService.createSIPLService(req.body);
+export const createSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const clientId = req.user?.clientId;
+
+  const data = {
+    ...req.body,
+    clientId: clientId,
+    createdBy: userId,
+    updatedBy: userId,
+  };
+
+  const sipl = await siplService.createSIPLService(data);
   res.status(201).json({ success: true, data: sipl });
 });
 

@@ -37,7 +37,10 @@ const Payment = sequelize.define(
     },
     transactionId: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: {
+        name: "unique_transaction_constraint",
+        msg: "unique transaction",
+      },
       allowNull: false,
     },
     status: {

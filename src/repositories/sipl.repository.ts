@@ -3,6 +3,7 @@ import * as models from "../models";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
+  console.log("sdfsdfsd");
   return await models.SIPL.create(siplData, { transaction });
 }
 
