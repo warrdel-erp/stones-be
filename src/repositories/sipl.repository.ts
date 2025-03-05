@@ -22,7 +22,7 @@ export const getInvoiceNumber = async () => {
   lastPO = lastPO?.get({ plain: true });
 
   return {
-    clientInvoiceNumber: lastPO.clientInvoiceNumber ? lastPO?.clientInvoiceNumber + 1 : 1,
-    poSiplNumber: lastPO.poSiplNumber ? lastPO?.poSiplNumber + 1 : 1,
+    clientInvoiceNumber: lastPO ? lastPO?.clientInvoiceNumber + 1 : 1,
+    poSiplNumber: lastPO ? lastPO?.poSiplNumber + 1 : 1,
   };
 };
