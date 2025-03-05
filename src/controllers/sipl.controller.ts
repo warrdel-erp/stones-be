@@ -4,6 +4,7 @@ import * as siplService from "../services/sipl.service";
 import * as poService from "../services/purchaseOrder.service";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
  * Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
@@ -36,14 +37,13 @@ export const createSIPLController = catchAsync(async (req: Request, res: Respons
  * 2. create SIPL with PO data
  */
 
-export const createDirectSIPLController = catchAsync(async (req: Request, res: Response) => {
+export const createDirectSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
   const {
     po,
     purchaseLocationId,
     shipmentLocationId,
     supplierId,
     userId,
-    createdBy,
     products,
     freightDetail,
     container,
@@ -52,18 +52,11 @@ export const createDirectSIPLController = catchAsync(async (req: Request, res: R
   } = req.body;
   const { internalNote, printableNote } = req.body; // Extract notes separately
 
+  const createdBy = req.user?.id; // Get user ID from request
+
   // Validate required fields
-  if (
-    !po ||
-    !purchaseLocationId ||
-    !shipmentLocationId ||
-    !supplierId ||
-    !userId ||
-    !createdBy ||
-    !products ||
-    !freightDetail
-  ) {
-    throw new AppError("Missing required fields: po, purchaseLocationId, shipmentLocationId, supplierId, userId", 400);
+  if (!po || !purchaseLocationId || !shipmentLocationId || !supplierId || !products || !freightDetail) {
+    throw new AppError("Missing required fields: po, purchaseLocationId, shipmentLocationId, supplierId", 400);
   }
 
   const poData = {
