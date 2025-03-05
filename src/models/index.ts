@@ -320,6 +320,9 @@ InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", a
 Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 
+Vendor.belongsTo(Location, { foreignKey: "parentLocation", as: "location" });
+Location.hasMany(Vendor, { foreignKey: "parentLocation", as: "vendors" });
+
 export {
   Client,
   User,

@@ -4,6 +4,7 @@ import Notes from "./note";
 import { VENDOR_TYPES } from "../constants/tableTypes";
 import User from "./user";
 import { VENDOR_SCOP } from "../constants";
+import Location from "./location";
 
 const Vendor = sequelize.define(
   "Vendor",
@@ -17,12 +18,24 @@ const Vendor = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    printName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    parentLocation: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+    },
     type: {
       type: DataTypes.ENUM(...Object.values(VENDOR_TYPES)),
       allowNull: false,
     },
     vendorScope: {
-      type: DataTypes.ENUM(...Object.values(VENDOR_SCOP)),
+      type: DataTypes.ENUM(...VENDOR_SCOP.map((scope) => String(scope.id))),
       allowNull: false,
     },
     contactName: {
