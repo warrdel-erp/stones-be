@@ -5,6 +5,7 @@ import {
   LANGUAGES,
   PAYMENT_TERMS,
   PRODUCT_COLORS,
+  PRODUCT_KIND,
   SHIPMENT_TERMS,
   THICKNESS,
   UNITS_OF_MEASUREMENT,
@@ -32,5 +33,6 @@ export const getGeneralData = async () => {
     thickness: THICKNESS,
     finish: FINISH,
     group: GROUPS,
+    kind: PRODUCT_KIND,
   };
 };

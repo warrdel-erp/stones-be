@@ -98,3 +98,9 @@ export const GROUPS = [
   { id: 2, value: "G2" },
   { id: 3, value: "G3" },
 ];
+
+export const PRODUCT_KIND = [
+  { id: 1, value: "Stock" },
+  { id: 2, value: "No-Stock" },
+  { id: 3, value: "Service" },
+] as const;
