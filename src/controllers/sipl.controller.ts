@@ -49,7 +49,7 @@ export const createSIPLController = catchAsync(async (req: AuthRequest, res: Res
 
 export const createDirectSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
   const {
-    po,
+    poDate,
     purchaseLocationId,
     shipmentLocationId,
     supplierId,
@@ -65,12 +65,12 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
   const createdBy = req.user?.id; // Get user ID from request
 
   // Validate required fields
-  if (!po || !purchaseLocationId || !shipmentLocationId || !supplierId || !products || !freightDetail) {
-    throw new AppError("Missing required fields: po, purchaseLocationId, shipmentLocationId, supplierId", 400);
+  if (!poDate || !purchaseLocationId || !shipmentLocationId || !supplierId || !products || !freightDetail) {
+    throw new AppError("Missing required fields: poDate, purchaseLocationId, shipmentLocationId, supplierId", 400);
   }
 
   const poData = {
-    po,
+    poDate,
     purchaseLocationId,
     shipmentLocationId,
     supplierId,
