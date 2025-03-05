@@ -119,7 +119,6 @@ PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
   });
 
   lastPOAccordingToClient = lastPOAccordingToClient?.get({ plain: true });
-  console.log("lastPOAccordingToClient", lastPOAccordingToClient);
 
   purchaseOrder.clientPoNumber = !!lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
 });
