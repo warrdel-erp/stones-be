@@ -175,7 +175,7 @@ User.hasMany(Product, { foreignKey: "updatedBy" });
 
 // SIPL-SIPLProduct (one 'SIPLProduct' can have belongs to one 'SIPL') (one 'SIPL' have multiple 'SIPLProduct')
 SIPL.hasMany(SIPLProduct, { foreignKey: "siplId", as: "siplProducts" });
-SIPLProduct.belongsTo(SIPL, { foreignKey: "siplId" });
+SIPLProduct.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
 
 Product.hasMany(SIPLProduct, { foreignKey: "productId" });
 SIPLProduct.belongsTo(Product, { foreignKey: "productId", as: "product" });

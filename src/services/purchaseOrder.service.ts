@@ -1,6 +1,8 @@
 import * as poRepository from "../repositories/purchaseOrder.repository";
 import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
+import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
+import * as siplProductRepository from "../repositories/siplProducts.repository";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -74,13 +76,17 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10)
   if (limit < 1) limit = 10;
 
   let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(page, limit);
-  const poTotalQuantity: any[] = await poRepository.getTotalQuantityPerPO();
+
+  // Add totalQuantity to each PO
+  const poTotalQuantity: any[] = await requestedPurchaseProductRepository.getTotalQuantityForAllPOs();
+  const totalSiplProduct: any[] = await siplProductRepository.getTotalQuantityForAllPO();
 
   rows = rows.map((e) => {
     const plainPo = e.get({ plain: true }); // Convert Sequelize instance to plain object
     return {
       ...plainPo,
-      totalQuantity: poTotalQuantity?.find?.((k) => plainPo.id == k.id)?.totalQuantity || 0,
+      totalQuantity: Number(poTotalQuantity?.find?.((k) => plainPo.id == k.purchaseOrderId)?.totalQuantity || 0),
+      totalSiplQuantity: Number(totalSiplProduct?.find?.((k) => plainPo.id == k.purchaseOrderId)?.totalQuantity || 0),
     };
   });
 
@@ -103,11 +109,13 @@ export const getPurchaseOrderById = async (id: number) => {
   }
 
   // Fetch total quantity of requested products for this PO
-  const totalQuantity = await poRepository.getTotalQuantityForPO(id);
+  const totalQuantity = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrder(id);
+  const totalSiplQuantity = await siplProductRepository.getTotalQuantityByPurchaseOrder(id);
 
   return {
     ...purchaseOrder.get({ plain: true }),
-    totalQuantity: totalQuantity || 0, // Ensure it's not null
+    totalQuantity: totalQuantity, // Ensure it's not null
+    totalSiplQuantity,
   };
 };
 

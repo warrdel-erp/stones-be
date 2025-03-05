@@ -44,30 +44,6 @@ export const getAllPurchaseOrders = async (page: number, limit: number) => {
   });
 };
 
-// get Total quantity as per PO.
-export const getTotalQuantityPerPO = async () => {
-  const result = await PurchaseOrder.findAll({
-    attributes: [
-      "id",
-      [
-        Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("requestedPurchaseProducts.quantity")), 0),
-        "totalQuantity",
-      ],
-    ],
-    include: [
-      {
-        model: models.RequestedPurchaseProduct,
-        attributes: [],
-        as: "requestedPurchaseProducts",
-      },
-    ],
-    group: ["PurchaseOrder.id"],
-    raw: true,
-  });
-
-  return result;
-};
-
 export const getPurchaseOrderById = async (id: number) => {
   const result = await PurchaseOrder.findOne({
     include: [
@@ -85,16 +61,6 @@ export const getPurchaseOrderById = async (id: number) => {
   });
 
   return result;
-};
-
-export const getTotalQuantityForPO = async (id: number) => {
-  let result: any = await models.RequestedPurchaseProduct.findOne({
-    attributes: [[Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("quantity")), 0), "totalQuantity"]],
-    where: { purchaseOrderId: id },
-    raw: true,
-  });
-
-  return result?.totalQuantity || 0;
 };
 
 // get SIPLs for a PO.
