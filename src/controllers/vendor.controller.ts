@@ -39,3 +39,11 @@ export const getAllVendorsController = catchAsync(async (req: Request, res: Resp
     limit: result.limit,
   });
 });
+
+// Get vendor by ID
+export const getVendorById = catchAsync(async (req: Request, res: Response) => {
+  const vendorId = parseInt(req.params.id);
+  const vendor = await vendorService.getVendorById(vendorId);
+
+  SuccessResponse(res, 200, "Vendor fetched successfully", vendor);
+});

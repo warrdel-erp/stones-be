@@ -50,3 +50,14 @@ export const updateVendor = async (id: number, data: any) => {
 export const fetchAllVendors = async (page: number, limit: number, filter?: WhereOptions) => {
   return await vendorRepository.getAllVendors(page, limit, filter);
 };
+
+// Get vendor by id
+export const getVendorById = async (id: number) => {
+  const vendor = await vendorRepository.findVendorById(id);
+
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+
+  return vendor;
+};

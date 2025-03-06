@@ -13,4 +13,7 @@ router.put("/:id", vendorController.updateVendorController);
 // Get all vendors.
 router.get("/", vendorController.getAllVendorsController);
 
+// Get vendor by ID.
+router.get("/:id", vendorController.getVendorById); // Get vendor by ID
+
 export default router;
