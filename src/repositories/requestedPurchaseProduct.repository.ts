@@ -1,4 +1,4 @@
-import { Sequelize, WhereOptions } from "sequelize";
+import { FindOptions, Sequelize, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 
@@ -31,6 +31,14 @@ export const getTotalQuantityByPurchaseOrder = async (purchaseOrderId: number) =
   const totalQuantity = await models.RequestedPurchaseProduct.sum("quantity", {
     where: { purchaseOrderId },
   });
+
+  return totalQuantity || 0; // If no records, return 0
+};
+
+export const getTotalQuantityByPurchaseOrderAndProduct = async (purchaseOrderId: number, productId: number) => {
+  const totalQuantity = await models.RequestedPurchaseProduct.sum("quantity", {
+    where: { purchaseOrderId, productId },
+  } as FindOptions);
 
   return totalQuantity || 0; // If no records, return 0
 };

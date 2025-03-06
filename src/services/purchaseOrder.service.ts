@@ -115,19 +115,22 @@ export const getPurchaseOrderById = async (id: number) => {
 
   const fulfilledBySipl = [];
 
-  console.log(
-    "purchaseOrder.requestedPurchaseProducts",
-    purchaseOrder.requestedPurchaseProducts.map((e: any) => e.productId)
-  );
-
   // Remove duplicate product ids
   const productIds = Array.from(
     new Set(purchaseOrder.requestedPurchaseProducts.map((product: any) => product.productId))
   );
 
   for (const productId of productIds) {
-    const calc = await siplProductRepository.getTotalQuantityByProductAndPO(Number(productId), id);
-    fulfilledBySipl.push({ productId: productId, totalQuantity: calc });
+    const siplCalc = await siplProductRepository.getTotalQuantityByProductAndPO(Number(productId), id);
+    const requestedProductCalc = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrderAndProduct(
+      id,
+      Number(productId)
+    );
+    fulfilledBySipl.push({
+      productId: productId,
+      siplTotalQuantity: siplCalc,
+      requestedTotalQuantity: requestedProductCalc,
+    });
   }
 
   return {

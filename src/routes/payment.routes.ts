@@ -4,12 +4,12 @@ import * as paymentController from "../controllers/payment.controller";
 const router = Router();
 
 // Create a new payment
-router.post("/payments", paymentController.createPayment);
+router.post("/", paymentController.createPayment);
 
 // Get all payments
-router.get("/payments", paymentController.getAllPayments);
+router.get("/", paymentController.getAllPayments);
 
 // Get payment by id
-router.get("/payments/:id", paymentController.getPaymentById);
+router.get("/:id", paymentController.getPaymentById);
 
 export default router;

@@ -55,7 +55,7 @@ export const getPurchaseOrderById = catchAsync(async (req: Request, res: Respons
     throw new AppError("Purchase Order not found", 404);
   }
 
-  return res.status(200).json(purchaseOrder);
+  SuccessResponse(res, 200, "Purchase Order fetched successfully", purchaseOrder);
 });
 
 // Get all SIPLs for a PO.

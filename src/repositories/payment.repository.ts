@@ -7,6 +7,12 @@ export const createPayment = async (paymentData: any) => {
 export const getAllPayments = async (filters: any = {}) => {
   return await models.Payment.findAll({
     where: filters,
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipl",
+      },
+    ],
     order: [["createdAt", "DESC"]],
   });
 };

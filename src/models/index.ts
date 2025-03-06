@@ -323,6 +323,10 @@ User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 Vendor.belongsTo(Location, { foreignKey: "parentLocation", as: "location" });
 Location.hasMany(Vendor, { foreignKey: "parentLocation", as: "vendors" });
 
+// Payment can belongs to many "types" of invoice. but in number it is one. (One invoice can have multiple payments.)
+Payment.belongsTo(SIPL, { foreignKey: "invoiceId", as: "sipl" });
+SIPL.hasMany(Payment, { foreignKey: "invoiceId", as: "payments" });
+
 export {
   Client,
   User,
