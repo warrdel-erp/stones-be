@@ -44,6 +44,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number) => {
   });
 };
 
+// Get PO detail by ID
 export const getPurchaseOrderById = async (id: number) => {
   let result = await PurchaseOrder.findOne({
     include: [
