@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database";
 import SIPL from "./sipl";
 import Product from "./product";
+import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 
 const SIPLProduct = sequelize.define(
   "sipl_products",
@@ -35,11 +36,11 @@ const SIPLProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    productId: {
+    requestedPurchaseProductId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Product,
+        model: RequestedPurchaseProduct,
         key: "id",
       },
       onUpdate: "CASCADE",

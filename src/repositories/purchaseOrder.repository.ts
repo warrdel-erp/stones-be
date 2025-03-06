@@ -48,13 +48,14 @@ export const getPurchaseOrderById = async (id: number) => {
   let result = await PurchaseOrder.findOne({
     include: [
       { model: models.Vendor, as: "supplier" },
-      { model: models.RequestedPurchaseProduct, as: "requestedPurchaseProducts" },
+      {
+        model: models.RequestedPurchaseProduct,
+        as: "requestedPurchaseProducts",
+        include: [{ model: models.SIPLProduct, as: "siplProduct" }],
+      },
       {
         model: models.SIPL,
         as: "sipls",
-        include: [
-          { model: models.SIPLProduct, as: "siplProducts", include: [{ model: models.Product, as: "product" }] },
-        ],
       },
     ],
     where: { id },

@@ -6,6 +6,7 @@ import SIPL from "./sipl";
 import Bin from "./bin";
 import { SLAB_STATUS } from "../constants";
 import InventoryProduct from "./inventoryProduct";
+import PurchaseOrder from "./purchaseOrder";
 
 const Slab = sequelize.define(
   "slabs",
@@ -16,12 +17,7 @@ const Slab = sequelize.define(
       primaryKey: true,
     },
     serialNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        name: "unique_serial_no_constraint",
-        msg: "unique serial_no",
-      },
+      type: DataTypes.INTEGER,
     },
     entryUnit: {
       type: DataTypes.STRING,
@@ -111,11 +107,33 @@ const Slab = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    purchaseOrderId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: PurchaseOrder,
+        key: "id",
+      },
+      onDelete: "NO ACTION",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "slabs",
     timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ["purchaseOrderId", "siplId", "serialNumber"],
+      },
+    ],
   }
 );
+
+Slab.beforeUpdate((slab: any) => {
+  Slab.findOne({
+    where: { siplId: slab.siplId, serialNumber: slab.serialNumber },
+  });
+});
 
 export default Slab;

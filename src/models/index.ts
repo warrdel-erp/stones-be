@@ -327,6 +327,14 @@ Location.hasMany(Vendor, { foreignKey: "parentLocation", as: "vendors" });
 Payment.belongsTo(SIPL, { foreignKey: "invoiceId", as: "sipl" });
 SIPL.hasMany(Payment, { foreignKey: "invoiceId", as: "payments" });
 
+// SIPLProduct belongs to one RequestedPurchaseProduct (One RequestedPurchaseProduct can have one SIPLProducts)
+SIPLProduct.belongsTo(RequestedPurchaseProduct, {
+  foreignKey: "requestedPurchaseProductId",
+  as: "requestedPurchaseProduct",
+});
+
+RequestedPurchaseProduct.hasOne(SIPLProduct, { foreignKey: "requestedPurchaseProductId", as: "siplProduct" });
+
 export {
   Client,
   User,

@@ -8,6 +8,11 @@ export const findById = async (id: number) => {
 };
 
 // find product by id
+export const findByIdAndPurchaseOrderId = async (id: number, purchaseOrderId: number) => {
+  return await models.RequestedPurchaseProduct.findOne({ where: { id, purchaseOrderId } });
+};
+
+// find product by id
 export const findByFilters = async (filter: WhereOptions) => {
   return await models.RequestedPurchaseProduct.findAll({ where: filter || {} });
 };

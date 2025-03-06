@@ -3,6 +3,7 @@ import * as poRepository from "../repositories/purchaseOrder.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
+import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 
 /**
@@ -20,12 +21,25 @@ export async function createSIPLService(siplData: any) {
     // Create SIPL
     let sipl: any = await siplRepository.createSIPL({ ...siplData }, transaction);
 
+    const productsWithSIPLId: any[] = [];
+
     // Create SIPL Products (if provided)
     if (siplData.products?.length) {
-      const productsWithSIPLId = siplData.products.map((product: any) => ({
-        ...product,
-        siplId: sipl.id,
-      }));
+      for (const product of siplData.products) {
+        const existingProduct = await requestedPurchaseProductsRepository.findByIdAndPurchaseOrderId(
+          product.requestedPurchaseProductId,
+          siplData.purchaseOrderId
+        );
+
+        if (!existingProduct) {
+          throw new Error(`Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
+        }
+
+        productsWithSIPLId.push({
+          ...product,
+          siplId: sipl.id,
+        });
+      }
 
       await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
     }
@@ -63,11 +77,8 @@ export async function handleCreateSlabs(slabData: any) {
     const slabs = inventoryProducts.map((inventoryProduct: any) => ({
       ...slabData, // Ensure each slab has unique data
       inventoryProductId: inventoryProduct.id,
-      serialNumber: `${slabData.serialNumber}-${Math.random().toString(36).substring(7)}`, // Ensuring uniqueness
       barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
     }));
-
-    console.log(slabData);
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);
 

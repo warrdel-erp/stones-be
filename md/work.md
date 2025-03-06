@@ -39,7 +39,9 @@
 34. sipl (po1 - sipl1, sipl2) according to PO ✔️
 35. supplier invoice no. (custom number) ✔️
 36. invoice no according to client ✔️
-37. update
+37. sipl product belongs to -> requested purchase product
+38. single SIPL by detail by ID
+39. vendor with type filter.
 
 ---
 

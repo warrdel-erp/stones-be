@@ -5,6 +5,7 @@ import * as poService from "../services/purchaseOrder.service";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
+import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 
 /**
  * Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
