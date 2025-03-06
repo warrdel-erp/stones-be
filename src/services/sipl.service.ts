@@ -94,3 +94,14 @@ export async function handleCreateSlabs(slabData: any) {
 export const getInvoiceNumber = async () => {
   return await siplRepository.getInvoiceNumber();
 };
+
+// get SIPL by ID
+export const getSIPLById = async (id: number) => {
+  const sipl = await siplRepository.findSIPLById(id);
+
+  if (!sipl) {
+    throw new Error("SIPL not found");
+  }
+
+  return sipl;
+};

@@ -135,3 +135,12 @@ export const getNewInvoiceNumber = catchAsync(async (req: Request, res: Response
   const data = await siplService.getInvoiceNumber();
   SuccessResponse(res, 200, "New invoice number fetched successfully.", data);
 });
+
+// Get SIPL by ID
+export const getSIPLById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const sipl = await siplService.getSIPLById(Number(id));
+
+  SuccessResponse(res, 200, "SIPL fetched successfully", sipl);
+});

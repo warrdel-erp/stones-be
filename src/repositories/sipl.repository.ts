@@ -6,12 +6,6 @@ export async function createSIPL(siplData: any, transaction?: Transaction) {
   return await models.SIPL.create(siplData, { transaction });
 }
 
-// // create SIPL Product
-// export async function createSIPLProducts(products: any[], siplId: number, transaction?: Transaction) {
-
-//   return await models.SIPLProduct.bulkCreate(productsWithSIPLId, { transaction });
-// }
-
 // Get latest invoice number
 export const getInvoiceNumber = async () => {
   let lastPO: any = await models.SIPL.findOne({
@@ -25,4 +19,27 @@ export const getInvoiceNumber = async () => {
     clientInvoiceNumber: lastPO ? lastPO?.clientInvoiceNumber + 1 : 1,
     poSiplNumber: lastPO ? lastPO?.poSiplNumber + 1 : 1,
   };
+};
+
+// Get SIPL by ID
+export const findSIPLById = async (id: number) => {
+  return await models.SIPL.findOne({
+    where: { id },
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+      },
+      {
+        model: models.SIPLProduct,
+        as: "siplProducts",
+        include: [
+          {
+            model: models.Product,
+            as: "product",
+          },
+        ],
+      },
+    ],
+  });
 };

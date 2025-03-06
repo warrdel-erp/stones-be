@@ -125,7 +125,7 @@ Notes.belongsTo(Bill, {
 });
 
 // PurchaseOrder-SIPL (one 'PurchaseOrder' have multiple 'SIPL') (one 'SIPL' have one 'PurchaseOrder')
-SIPL.belongsTo(PurchaseOrder, { foreignKey: "purchaseOrderId" });
+SIPL.belongsTo(PurchaseOrder, { foreignKey: "purchaseOrderId", as: "purchaseOrder" });
 PurchaseOrder.hasMany(SIPL, { foreignKey: "purchaseOrderId", as: "sipls" });
 
 // SIPL-User (SIPL have one 'User' as createdBy) (SIPL have one 'User' as updatedBy)
