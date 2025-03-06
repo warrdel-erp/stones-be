@@ -31,17 +31,17 @@
 26. send location, freight in PO, product in single PO
 27. number of invoices in all PO details
 28. vendor type national
-29. const data as Jatin sent list.
-30. fulfilled PO => how much sipl is created for given po product. in SINGLE PO, SINGLE SIPL
-31. Bifurcate data of vendor according to type (supplier, freight, vendor)
-32. in salesOrderProduct combination of inventoryProductId and salesOrderId
-33. po number,
-34. sipl (po1 - sipl1, sipl2) according to PO ✔️
-35. supplier invoice no. (custom number) ✔️
-36. invoice no according to client ✔️
-37. sipl product belongs to -> requested purchase product ✔️
-38. single SIPL by detail by ID
-39. vendor with type filter.
+29. const data as Jatin sent list. ✔️
+30. fulfilled PO => how much sipl is created for given po product. in SINGLE PO, SINGLE SIPL ✔️
+31. in salesOrderProduct combination of inventoryProductId and salesOrderId
+32. po number, ✔️
+33. sipl (po1 - sipl1, sipl2) according to PO ✔️
+34. supplier invoice no. (custom number) ✔️
+35. invoice no according to client ✔️
+36. sipl product belongs to -> requested purchase product ✔️
+37. single SIPL by detail by ID ✔️
+38. vendor with type filter.
+39.
 
 ---
 

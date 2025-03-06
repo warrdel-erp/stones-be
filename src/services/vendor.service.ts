@@ -5,6 +5,7 @@ import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
+import { WhereOptions } from "sequelize";
 
 // Service function to create a vendor.
 export const registerVendor = async (vendorData: any) => {
@@ -46,6 +47,6 @@ export const updateVendor = async (id: number, data: any) => {
 };
 
 // Get all vendors with pagination.
-export const fetchAllVendors = async (page: number, limit: number, search?: string) => {
-  return await vendorRepository.getAllVendors(page, limit, search);
+export const fetchAllVendors = async (page: number, limit: number, filter?: WhereOptions) => {
+  return await vendorRepository.getAllVendors(page, limit, filter);
 };

@@ -1,4 +1,4 @@
-import { Op, Transaction } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import Vendor from "../models/vendor";
 
 // Create a new vendor in the database.
@@ -20,10 +20,11 @@ export const updateVendorById = async (id: number, data: any) => {
 };
 
 // Get all vendors.
-export const getAllVendors = async (page: number, limit: number, search?: string) => {
+export const getAllVendors = async (page: number, limit: number, filter?: WhereOptions) => {
   const offset = (page - 1) * limit;
 
   const { rows: vendors, count: total } = await Vendor.findAndCountAll({
+    where: filter,
     limit,
     offset,
     order: [["createdAt", "DESC"]], // Sort by latest vendors

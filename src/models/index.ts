@@ -333,7 +333,7 @@ SIPLProduct.belongsTo(RequestedPurchaseProduct, {
   as: "requestedPurchaseProduct",
 });
 
-RequestedPurchaseProduct.hasOne(SIPLProduct, { foreignKey: "requestedPurchaseProductId", as: "siplProduct" });
+RequestedPurchaseProduct.hasMany(SIPLProduct, { foreignKey: "requestedPurchaseProductId", as: "siplProducts" });
 
 export {
   Client,
