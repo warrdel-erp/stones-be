@@ -4,7 +4,6 @@ import { AppError } from "../helper/appError";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
-import * as siplService from "../services/sipl.service";
 
 /**
  * Controller to handle PO creation.
@@ -70,7 +69,9 @@ export const getSIPLsByPO = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get new PO number
-export const getNewPoNumber = catchAsync(async (req: Request, res: Response) => {
-  const data = await poService.getPONumber();
+export const getNewPoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const data = await poService.getPONumber(clientId!);
   SuccessResponse(res, 200, "New PO number fetched successfully.", data);
 });

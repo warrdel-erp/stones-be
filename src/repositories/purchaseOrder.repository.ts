@@ -76,8 +76,12 @@ export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
 };
 
 // Get latest PO number
-export const getPoNumber = async () => {
-  const lastPO: any = await models.PurchaseOrder.findOne({ order: [["id", "DESC"]], attributes: ["clientPoNumber"] });
+export const getPoNumber = async (clientId: number) => {
+  const lastPO: any = await models.PurchaseOrder.findOne({
+    where: { clientId },
+    order: [["clientPoNumber", "DESC"]],
+    attributes: ["clientPoNumber"],
+  });
 
   return { clientPoNumber: lastPO ? lastPO?.clientPoNumber + 1 : 1 };
 };

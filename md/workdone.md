@@ -11,3 +11,4 @@
 
 1. inventory data.
 2. correct get all API with pagination.
+3. bill number auto increment, get last.

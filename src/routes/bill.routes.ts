@@ -9,6 +9,9 @@ router.post("/", authenticateUser, billController.createBill);
 // Route to get all clients
 router.get("/", authenticateUser, billController.getAllBills);
 
+// Get new PO number
+router.get("/newBillNumber", authenticateUser, billController.getNewBillNumber);
+
 // Route to get a single client
 router.get("/:id", authenticateUser, billController.getBillById);
 

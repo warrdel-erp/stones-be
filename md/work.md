@@ -41,7 +41,7 @@
 36. sipl product belongs to -> requested purchase product ✔️
 37. single SIPL by detail by ID ✔️
 38. vendor with type filter.
-39.
+39. bill no. auto generated and API to get new BILL number
 
 ---
 

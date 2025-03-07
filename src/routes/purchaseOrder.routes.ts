@@ -12,7 +12,7 @@ router.post("/", authenticateUser, poController.createPurchaseOrderController);
 router.get("/", authenticateUser, poController.getAllPurchaseOrders);
 
 // Get new PO number
-router.get("/newPoNumber", poController.getNewPoNumber);
+router.get("/newPoNumber", authenticateUser, poController.getNewPoNumber);
 
 // get one PO detail according to ID
 router.get("/:id", poController.getPurchaseOrderById);

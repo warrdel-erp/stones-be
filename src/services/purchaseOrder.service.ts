@@ -148,6 +148,6 @@ export const getSIPLsForPurchaseOrder = async (purchaseOrderId: number) => {
 };
 
 // Get new PO number
-export const getPONumber = async () => {
-  return await poRepository.getPoNumber();
+export const getPONumber = async (clientId: number) => {
+  return await poRepository.getPoNumber(clientId);
 };

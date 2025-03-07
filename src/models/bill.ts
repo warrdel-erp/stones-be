@@ -12,13 +12,9 @@ const Bill = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    billNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        name: "unique_bill_no_constraint",
-        msg: "unique bill_no",
-      },
+    clientBillNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     amount: {
       type: DataTypes.FLOAT,
@@ -74,11 +70,44 @@ const Bill = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Vendor,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "bills",
     timestamps: true,
+    indexes: [
+      {
+        fields: ["clientId", "clientBillNumber"],
+      },
+    ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientBillNumber` based on `clientId`
+Bill.beforeCreate(async (bill: any) => {
+  if (!bill.clientId) {
+    throw new Error("Client ID is required to generate clientBillNumber.");
+  }
+
+  let lastBillAccordingToClientBillNumber: any = await Bill.findOne({
+    where: { clientId: bill.clientId },
+    order: [["clientBillNumber", "DESC"]],
+  });
+
+  lastBillAccordingToClientBillNumber = lastBillAccordingToClientBillNumber?.get({ plain: true });
+
+  bill.clientBillNumber = !!lastBillAccordingToClientBillNumber
+    ? lastBillAccordingToClientBillNumber.clientBillNumber + 1
+    : 1;
+});
 
 export default Bill;

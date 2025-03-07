@@ -23,3 +23,8 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
     data: rows,
   };
 };
+
+// Get new bill number
+export const getBillNumber = async (clientId: number) => {
+  return await billRepository.getBillNumber(clientId);
+};

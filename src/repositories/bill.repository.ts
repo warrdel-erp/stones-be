@@ -21,3 +21,13 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
     order: [["createdAt", "DESC"]],
   });
 };
+
+// Get latest Bill number
+export const getBillNumber = async (clientId: number) => {
+  let lastBill: any = await models.Bill.findOne({
+    where: { clientId: clientId },
+    order: [["clientBillNumber", "DESC"]],
+  });
+
+  return { clientBillNumber: lastBill ? lastBill?.clientBillNumber + 1 : 1 };
+};
