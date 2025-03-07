@@ -7,14 +7,20 @@ export const createSalesOrder = async (data: any, transaction?: Transaction) => 
 };
 
 // Get all sales order
-export const getAllSalesOrders = async () => {
-  return await models.SalesOrder.findAll({
+export const getAllSalesOrders = async (page: number, limit: number) => {
+  const offset = (page - 1) * limit;
+  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
     include: [
       { model: models.Customer, as: "customer" },
       { model: models.User, as: "createdBy" },
       { model: models.CustomerAddress, as: "shippingAddress" },
     ],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
   });
+
+  return { data, total, page, limit };
 };
 
 // Get One SO

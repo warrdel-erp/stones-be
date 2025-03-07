@@ -69,51 +69,35 @@ User.hasMany(PurchaseOrder, { foreignKey: "userId" });
 PurchaseOrder.belongsTo(User, { foreignKey: "userId" });
 
 // PurchaseOrder-InternalNote (A 'PurchaseOrder' has ONE 'Note' as internalNote)
-PurchaseOrder.hasOne(Notes, {
+PurchaseOrder.hasMany(Notes, {
   foreignKey: "referenceId",
+  as: "notes",
   constraints: false,
-  scope: { referenceType: "PurchaseOrder" },
-  as: "internalNote",
 });
 
 Notes.belongsTo(PurchaseOrder, {
   foreignKey: "referenceId",
-  constraints: false,
   as: "purchaseOrder",
-});
-
-// PurchaseOrder-PrintableNote (A 'PurchaseOrder' has ONE 'Note' as printableNote)
-PurchaseOrder.hasOne(Notes, {
-  foreignKey: "referenceId",
   constraints: false,
-  scope: { referenceType: "PurchaseOrder" },
-  as: "printableNote",
-});
-
-Notes.belongsTo(PurchaseOrder, {
-  foreignKey: "referenceId",
-  constraints: false,
-  as: "purchaseOrderPrintable",
 });
 
 // Vender-Notes (one vendor can have one internal note)
 Vendor.hasMany(Notes, {
   foreignKey: "referenceId",
   as: "notes",
+  constraints: false,
 });
 
 Notes.belongsTo(Vendor, {
   foreignKey: "referenceId",
   as: "vendor",
+  constraints: false,
 });
 
 // Vender-Notes (one vendor can have one internal note)
-Bill.hasOne(Notes, {
+Bill.hasMany(Notes, {
   foreignKey: "referenceId",
   constraints: false,
-  scope: {
-    referenceType: "Bill",
-  },
 });
 
 Notes.belongsTo(Bill, {
@@ -254,25 +238,16 @@ Customer.hasMany(SalesOrder, { foreignKey: "customerId" });
 SalesOrder.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
 
 // SalesOrder-InternalNote (A 'SalesOrder' has ONE 'Note' as internalNote)
-SalesOrder.hasOne(Notes, {
+SalesOrder.hasMany(Notes, {
   foreignKey: "referenceId",
+  as: "note",
   constraints: false,
-  scope: { referenceType: "sales_order" },
-  as: "internalNote",
 });
 
 Notes.belongsTo(SalesOrder, {
   foreignKey: "referenceId",
-  constraints: false,
   as: "salesOrder",
-});
-
-// SalesOrder-Note (A 'SalesOrder' has ONE 'Note' as printableNote)
-SalesOrder.hasOne(Notes, {
-  foreignKey: "referenceId",
   constraints: false,
-  scope: { referenceType: "SalesOrder" },
-  as: "printableNote",
 });
 
 // Customer can have multiple addresses (one address belongs to one Customer)
@@ -331,6 +306,10 @@ SIPLProduct.belongsTo(RequestedPurchaseProduct, {
 });
 
 RequestedPurchaseProduct.hasMany(SIPLProduct, { foreignKey: "requestedPurchaseProductId", as: "siplProducts" });
+
+// Slab belongs to one SIPLProduct (One SIPLProduct can have multiple Slabs)
+Slab.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
+SIPLProduct.hasMany(Slab, { foreignKey: "siplProductId", as: "slabs" });
 
 export {
   Client,

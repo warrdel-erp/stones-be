@@ -43,10 +43,12 @@ export const createSalesOrder = async (data: any) => {
   }
 };
 
-export const getAllSalesOrders = async () => {
-  return await salesOrderRepository.getAllSalesOrders();
+// Get all sales orders
+export const getAllSalesOrders = async (page: number, limit: number) => {
+  return await salesOrderRepository.getAllSalesOrders(page, limit);
 };
 
+// Get sales order by ID
 export const getSalesOrderById = async (id: number) => {
   return await salesOrderRepository.getSalesOrderById(id);
 };

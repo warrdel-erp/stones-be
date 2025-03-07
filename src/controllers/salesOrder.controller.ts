@@ -9,14 +9,20 @@ export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Respons
   const userId = req.user?.id;
 
   const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, userId });
-
   SuccessResponse(res, 201, "Sales Order created successfully", salesOrder);
 });
 
 // Get all SO
 export const getAllSalesOrders = catchAsync(async (req: Request, res: Response) => {
-  const salesOrders = await salesOrderService.getAllSalesOrders();
-  SuccessResponse(res, 200, "Sales Orders retrieved successfully", salesOrders);
+  const { page = 1, limit = 10 } = req.query;
+
+  const result = await salesOrderService.getAllSalesOrders(Number(page), Number(limit));
+
+  SuccessResponse(res, 200, "Sales Orders retrieved successfully", result.data, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
 });
 
 // Get SO by ID

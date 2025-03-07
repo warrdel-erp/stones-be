@@ -10,9 +10,16 @@ export const createLoadingOrder = catchAsync(async (req: Request, res: Response)
 });
 
 // Get all LO
-export const getAllLoadingOrders = catchAsync(async (_req: Request, res: Response) => {
-  const loadingOrders = await loadingOrderService.getAllLoadingOrders();
-  SuccessResponse(res, 200, "Loading Orders retrieved successfully", loadingOrders);
+export const getAllLoadingOrders = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10, search } = req.query;
+
+  const result = await loadingOrderService.getAllLoadingOrders(Number(page), Number(limit));
+
+  SuccessResponse(res, 200, "Loading Orders retrieved successfully", result.data, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
 });
 
 // Get loading order by Id

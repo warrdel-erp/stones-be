@@ -1,5 +1,4 @@
 import { Transaction } from "sequelize";
-import { AppError } from "../helper/appError";
 import * as models from "../models";
 
 // Create new LO
@@ -8,10 +7,17 @@ export const createLoadingOrder = async (data: any) => {
 };
 
 // Get all LO
-export const getAllLoadingOrders = async () => {
-  return await models.LoadingOrder.findAll({
+export const getAllLoadingOrders = async (page: number, limit: number) => {
+  const offset = (page - 1) * limit;
+
+  const { rows: data, count: total } = await models.LoadingOrder.findAndCountAll({
     include: [{ model: models.SalesOrder, as: "salesOrder" }],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
   });
+
+  return { data, total, page, limit };
 };
 
 // Get loading order by Id

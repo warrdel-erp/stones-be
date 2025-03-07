@@ -20,8 +20,8 @@ export const createLoadingOrder = async (data: any) => {
 };
 
 // Get all LO
-export const getAllLoadingOrders = async () => {
-  return await loadingOrderRepository.getAllLoadingOrders();
+export const getAllLoadingOrders = async (page: number, limit: number) => {
+  return await loadingOrderRepository.getAllLoadingOrders(page, limit);
 };
 
 // Get loading order by Id

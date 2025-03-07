@@ -10,3 +10,4 @@
 ---
 
 1. inventory data.
+2. correct get all API with pagination.

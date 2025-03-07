@@ -13,9 +13,9 @@ router.post("/address", authenticateUser, customerAddressController.createCustom
 router.get("/:customerId/addresses", customerAddressController.getAddressesByCustomerId);
 
 // Update vendor.
-router.put("/:id", customerController.updateCustomerController);
+router.put("/:id", authenticateUser, customerController.updateCustomerController);
 
 // Get all vendors.
-router.get("/", customerController.getAllCustomersController);
+router.get("/", authenticateUser, customerController.getAllCustomersController);
 
 export default router;

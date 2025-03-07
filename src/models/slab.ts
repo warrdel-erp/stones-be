@@ -6,6 +6,7 @@ import InventoryProduct from "./inventoryProduct";
 import PurchaseOrder from "./purchaseOrder";
 import { SLAB_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
+import SIPLProduct from "./siplProduct";
 
 const Slab = sequelize.define(
   "slabs",
@@ -111,6 +112,16 @@ const Slab = sequelize.define(
       allowNull: false,
       references: {
         model: PurchaseOrder,
+        key: "id",
+      },
+      onDelete: "NO ACTION",
+      onUpdate: "CASCADE",
+    },
+    siplProductId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: SIPLProduct,
         key: "id",
       },
       onDelete: "NO ACTION",
