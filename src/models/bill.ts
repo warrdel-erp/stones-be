@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import Vendor from "./vendor";
 import { sequelize } from "../config/database";
 import User from "./user";
+import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 
 const Bill = sequelize.define(
   "bills",
@@ -46,7 +47,7 @@ const Bill = sequelize.define(
       allowNull: false,
     },
     referenceType: {
-      type: DataTypes.ENUM("sipl"), // Could be "sipl" or other types
+      type: DataTypes.ENUM(...Object.values(BILL_REFERENCE_TYPES)), // Could be "sipl" or other types
       allowNull: false,
     },
     referenceId: {

@@ -9,7 +9,7 @@ export const createProduct = async (productData: any) => {
 // Get all products
 export const getAllProducts = async (page: number, limit: number, search?: string) => {
   const offset = (page - 1) * limit;
-  const whereClause = search ? { productName: { [Op.like]: `%${search}%` } } : {};
+  const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
   const { rows: products, count: total } = await models.Product.findAndCountAll({
     where: whereClause,
     limit,

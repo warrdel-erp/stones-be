@@ -124,9 +124,16 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 });
 
 // Create slabs for SIPL
-export const createSlabHandler = catchAsync(async (req: Request, res: Response) => {
+export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const slabs = await siplService.handleCreateSlabs({ ...req.body, siplId: id });
+  const userId = req.user?.id;
+
+  const slabs = await siplService.handleCreateSlabs({
+    ...req.body,
+    siplId: Number(id),
+    createdBy: userId,
+    updatedBy: userId,
+  });
   res.status(201).json({ message: "Slabs created successfully", slabs });
 });
 
@@ -143,4 +150,11 @@ export const getSIPLById = catchAsync(async (req: Request, res: Response) => {
   const sipl = await siplService.getSIPLById(Number(id));
 
   SuccessResponse(res, 200, "SIPL fetched successfully", sipl);
+});
+
+// Get all SIPLs
+export const getAllSIPLs = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10 } = req.query;
+  const sipls = await siplService.getAllSIPLs(Number(page), Number(limit));
+  SuccessResponse(res, 200, "SIPLs fetched successfully", sipls);
 });

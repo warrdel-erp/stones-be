@@ -6,6 +6,7 @@ import * as inventoryRepository from "../services/inventory.service";
 import { checkUserLocationAccess } from "../services/user.service";
 
 export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { page = 1, limit = 10 } = req.query;
   const { locationId } = req.params;
   const userId = req.user?.id;
 
@@ -13,15 +14,21 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     return res.status(400).json({ error: "Location ID is required" });
   }
 
+  console.log("user ID", userId);
+
   // Check if user has access to this location.
-  checkUserLocationAccess(Number(locationId), userId!);
+  await checkUserLocationAccess(Number(locationId), userId!);
 
   // Get inventory data
-  const products = await inventoryRepository.fetchProductsWithSlabsByLocation(Number(locationId));
+  const data = await inventoryRepository.fetchProductsWithSlabsByLocation(
+    Number(page),
+    Number(limit),
+    Number(locationId)
+  );
 
-  if (!products.length) {
+  if (!data.products.length) {
     return res.status(404).json({ message: "No products found for this location" });
   }
 
-  SuccessResponse(res, 200, "Inventory data fetched successfully", products);
+  SuccessResponse(res, 200, "Inventory data fetched successfully", data);
 });

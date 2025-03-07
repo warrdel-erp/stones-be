@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import * as models from "../models";
 
 // Create new LO
@@ -39,8 +40,8 @@ export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) =>
 };
 
 // Update Loading Order
-export const updatePackagingList = async (id: number, data: any) => {
-  const packagingList = await models.PackagingList.findByPk(id);
+export const updatePackagingList = async (id: number, data: any, transaction?: Transaction) => {
+  const packagingList = await models.PackagingList.findByPk(id, { transaction });
   if (!packagingList) return null;
 
   await packagingList.update(data);

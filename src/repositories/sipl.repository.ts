@@ -21,10 +21,14 @@ export const getInvoiceNumber = async () => {
   };
 };
 
+// Get SIPL by ID with less data
+export const findSIPLByIdSimple = async (id: number) => {
+  return await models.SIPL.findByPk(id);
+};
+
 // Get SIPL by ID
 export const findSIPLById = async (id: number) => {
-  return await models.SIPL.findOne({
-    where: { id },
+  return await models.SIPL.findByPk(id, {
     include: [
       {
         model: models.PurchaseOrder,
@@ -41,5 +45,50 @@ export const findSIPLById = async (id: number) => {
         ],
       },
     ],
+  });
+};
+
+// Get all SIPLs
+export const getAllSIPLs = async (page: number, limit: number) => {
+  const offset = (page - 1) * limit;
+
+  return await models.SIPL.findAndCountAll({
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+};
+
+// Get SIPL by Product for inventory product
+export const getSIPLByProduct = async (productId: number, locationId: number) => {
+  return await models.SIPL.findAll({
+    include: [
+      {
+        model: models.Slab,
+        where: { productId }, // Filter only slabs belonging to the given product
+        required: true,
+        include: [
+          {
+            model: models.Product,
+            as: "product",
+            attributes: ["id", "name"],
+          },
+          {
+            model: models.Bin,
+            as: "bin",
+            required: true,
+            include: [
+              {
+                model: models.Warehouse,
+                as: "warehouse",
+                where: { locationId },
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    order: [["createdAt", "DESC"]],
   });
 };

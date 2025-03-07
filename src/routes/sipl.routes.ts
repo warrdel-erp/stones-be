@@ -22,4 +22,7 @@ router.get("/:id", authenticateUser, siplController.getSIPLById);
 // add slab to SIPL.
 router.post("/:id/addSlab", authenticateUser, siplController.createSlabHandler);
 
+// get all SIPLs
+router.get("/", authenticateUser, siplController.getAllSIPLs);
+
 export default router;

@@ -15,7 +15,7 @@ const Product = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    productName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },

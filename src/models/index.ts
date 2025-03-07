@@ -100,12 +100,11 @@ Notes.belongsTo(PurchaseOrder, {
 Vendor.hasMany(Notes, {
   foreignKey: "referenceId",
   as: "notes",
-  constraints: false,
 });
 
 Notes.belongsTo(Vendor, {
   foreignKey: "referenceId",
-  constraints: false,
+  as: "vendor",
 });
 
 // Vender-Notes (one vendor can have one internal note)

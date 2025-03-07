@@ -56,7 +56,7 @@ export const updateLoadingOrder = catchAsync(async (req: Request, res: Response)
 export const invoiceLoadingOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const updatedLoadingOrder = await loadingOrderService.invoiceLoadingOrder(Number(id), { invoiced: true });
+  const updatedLoadingOrder = await loadingOrderService.invoiceLoadingOrder(Number(id));
 
   SuccessResponse(res, 200, "Loading Order updated successfully", updatedLoadingOrder);
 });

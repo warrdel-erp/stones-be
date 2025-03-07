@@ -94,9 +94,8 @@ export const updateUserDefaultLocation = async (userId: number, locationId: numb
 };
 
 // Check does user have access to given location
-export const doesUserHaveLocation = async (userId: number, locationId: number) => {
-  const user = await models.User.findOne({
-    where: { id: userId },
+export const doesUserHaveLocation = async (locationId: number, userId: number) => {
+  const user = await models.User.findByPk(userId, {
     include: {
       model: models.Location,
       as: "locations",

@@ -66,6 +66,12 @@ export async function handleCreateSlabs(slabData: any) {
       throw new Error("Quantity must be at least 1.");
     }
 
+    const sipl: any = await siplRepository.findSIPLByIdSimple(slabData.siplId);
+
+    if (!sipl) {
+      throw new Error("SIPL not found.");
+    }
+
     // Create a new InventoryProduct for each Slab
     const inventoryProducts: any = await inventoryProductRepository.createInventoryProducts(
       slabData.binId,
@@ -73,10 +79,14 @@ export async function handleCreateSlabs(slabData: any) {
       transaction
     );
 
+    const lastSerialNumber = await slabRepository.getLastSerialNumber(sipl.purchaseOrderId, slabData.siplId);
+
     // Pair each slab with its own inventory product
-    const slabs = inventoryProducts.map((inventoryProduct: any) => ({
+    const slabs = inventoryProducts.map((inventoryProduct: any, index: number) => ({
       ...slabData, // Ensure each slab has unique data
       inventoryProductId: inventoryProduct.id,
+      purchaseOrderId: sipl.purchaseOrderId,
+      serialNumber: lastSerialNumber + index + 1,
       barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
     }));
 
@@ -104,4 +114,16 @@ export const getSIPLById = async (id: number) => {
   }
 
   return sipl;
+};
+
+// Get all SIPLs
+export const getAllSIPLs = async (page: number, limit: number) => {
+  const { rows, count } = await siplRepository.getAllSIPLs(page, limit);
+
+  return {
+    total: count,
+    page,
+    limit,
+    data: rows,
+  };
 };

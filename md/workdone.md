@@ -6,3 +6,7 @@
 6. customer apis.
 7. working on SO
 8. university deployment.
+
+---
+
+1. inventory data.

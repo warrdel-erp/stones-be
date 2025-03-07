@@ -7,7 +7,7 @@ import * as models from "../models";
 export const updateSlabStatusBySipl = async (siplId: number): Promise<number> => {
   const [updatedCount] = await Slab.update(
     { status: SLAB_STATUS.IN_INVENTORY },
-    { where: { siplId, status: SLAB_STATUS.INITIATE } } // Only update slabs that are initiated
+    { where: { siplId, status: SLAB_STATUS.INITIATE }, individualHooks: true } // Only update slabs that are initiated
   );
 
   return updatedCount;
@@ -15,7 +15,17 @@ export const updateSlabStatusBySipl = async (siplId: number): Promise<number> =>
 
 // Create slabs
 export const createSlabs = async (slabData: any, transaction?: Transaction) => {
-  return await models.Slab.bulkCreate(slabData, { transaction });
+  return await models.Slab.bulkCreate(slabData, { transaction, individualHooks: true });
+};
+
+export const getLastSerialNumber = async (purchaseOrderId: number, siplId: number) => {
+  const existingSlab: any = await Slab.findOne({
+    where: { siplId: siplId, purchaseOrderId: purchaseOrderId },
+    order: [["serialNumber", "DESC"]],
+    attributes: ["serialNumber"],
+  });
+
+  return existingSlab ? existingSlab.serialNumber : 0;
 };
 
 // Create slabs
@@ -25,7 +35,7 @@ export const getSlabByInventoryProductId = async (inventoryProductId: number, tr
 
 // update hold status of slab
 export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
-  return await Slab.update({ isHold }, { where: { id: slabId } });
+  return await Slab.update({ isHold }, { where: { id: slabId }, individualHooks: true });
 };
 
 // Update the status of a Slab based on inventoryProductId.
@@ -45,7 +55,7 @@ export const updateSlabStatusByInventoryProduct = async (
   }
 
   // Update the status
-  await Slab.update({ status }, { where: { inventoryProductId } });
+  await Slab.update({ status }, { where: { inventoryProductId }, individualHooks: true, transaction });
 
   return slab;
 };

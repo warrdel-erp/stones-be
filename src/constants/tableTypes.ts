@@ -1,3 +1,5 @@
+import { SIPL } from "../models";
+
 export const VENDOR_TYPES = {
   FREIGHT: "FREIGHT",
   SUPPLIER: "SUPPLIER",
@@ -45,4 +47,14 @@ export const PAYEE_TYPE = {
 export const PAYMENT_TYPE = {
   INCOMING: "incoming",
   OUTGOING: "outgoing",
+} as const;
+
+export const BILL_REFERENCE_TYPES = {
+  SIPL: "sipl",
+};
+
+export const SLAB_ENTRY_UNIT = {
+  METER: "meter",
+  FEET: "feet",
+  IN: "in",
 } as const;

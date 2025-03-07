@@ -3,6 +3,7 @@ import * as loadingOrderRepository from "../repositories/loadingOrder.repository
 import * as loadingOrderProductService from "../services/loadingOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as slabRepository from "../repositories/slab.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
 import { SLAB_STATUS } from "../constants";
 import { sequelize } from "../config/database";
 
@@ -39,7 +40,7 @@ export const updateLoadingOrder = async (id: number, data: any) => {
 };
 
 // Invoice Loading Order
-export const invoiceLoadingOrder = async (id: number, data: any) => {
+export const invoiceLoadingOrder = async (id: number) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -49,6 +50,7 @@ export const invoiceLoadingOrder = async (id: number, data: any) => {
       throw new AppError(`Loading order does not exists with given id: ${id}`, 400);
     }
 
+    // Check if loading order is invoiced then can't invoice it again.
     if (loadingOrder.invoiced) {
       throw new AppError("Cannot invoice Loading Order as it is already invoiced.", 400);
     }
@@ -58,10 +60,16 @@ export const invoiceLoadingOrder = async (id: number, data: any) => {
       throw new AppError("Loading order with id: ${id} does not have any product added. So it can't be invoiced", 400);
     }
 
-    loadingOrder = loadingOrder.get({ plain: true });
+    // If Packaging list exists then mark sold to packaging list products. otherwise mark sold to loading order products.
+    let soldSlabProducts: any[] = [];
+    if (loadingOrder.packagingList) {
+      soldSlabProducts = loadingOrder.packagingList.packagingListProducts;
+    } else {
+      soldSlabProducts = loadingOrder.loadingOrderProducts;
+    }
 
     // Mark corresponding slabs as SOLD
-    for (const loadingOrderProducts of loadingOrder?.loadingOrderProducts) {
+    for (const loadingOrderProducts of soldSlabProducts) {
       await slabRepository.updateSlabStatusByInventoryProduct(
         loadingOrderProducts.inventoryProductId,
         SLAB_STATUS.SOLD,
@@ -69,7 +77,16 @@ export const invoiceLoadingOrder = async (id: number, data: any) => {
       );
     }
 
-    loadingOrder = await loadingOrderRepository.updateLoadingOrder(id, data, transaction);
+    // if Packaging list exists then mark invoiced to packaging list.
+    if (loadingOrder.packagingList) {
+      await packagingListRepository.updatePackagingList(
+        loadingOrder.packagingList?.id,
+        { invoiced: true },
+        transaction
+      );
+    }
+
+    await loadingOrderRepository.updateLoadingOrder(id, { invoiced: true }, transaction);
 
     transaction.commit();
     return loadingOrder;

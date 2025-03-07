@@ -16,12 +16,19 @@ export const getAllLoadingOrders = async () => {
 
 // Get loading order by Id
 export const getLoadingOrderById = async (id: number) => {
-  return await models.LoadingOrder.findByPk(id, {
+  const loadingOrder = await models.LoadingOrder.findByPk(id, {
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
       { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+      {
+        model: models.PackagingList,
+        as: "packagingList",
+        include: [{ model: models.PackagingListProduct, as: "packagingListProducts" }],
+      },
     ],
   });
+
+  return loadingOrder?.get({ plain: true });
 };
 
 // Get loading order by Id

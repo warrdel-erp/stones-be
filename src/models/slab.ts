@@ -1,12 +1,11 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Product from "./product";
-// import InventoryProduct from "./inventory_product";
 import SIPL from "./sipl";
-import Bin from "./bin";
-import { SLAB_STATUS } from "../constants";
 import InventoryProduct from "./inventoryProduct";
 import PurchaseOrder from "./purchaseOrder";
+import { SLAB_STATUS } from "../constants";
+import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
 
 const Slab = sequelize.define(
   "slabs",
@@ -20,7 +19,7 @@ const Slab = sequelize.define(
       type: DataTypes.INTEGER,
     },
     entryUnit: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(SLAB_ENTRY_UNIT)),
       allowNull: true,
     },
     packageLength: {
@@ -129,11 +128,5 @@ const Slab = sequelize.define(
     ],
   }
 );
-
-Slab.beforeUpdate((slab: any) => {
-  Slab.findOne({
-    where: { siplId: slab.siplId, serialNumber: slab.serialNumber },
-  });
-});
 
 export default Slab;
