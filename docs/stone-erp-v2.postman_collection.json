@@ -600,6 +600,16 @@
 				{
 					"name": "New PO number",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -683,7 +693,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productName\": \"Kota Stone\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
+							"raw": "{\n  \"name\": \"Kota Stone 1\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -807,7 +817,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": \"BILL-20240228\",\n    \"amount\": 1500.75,\n    \"type\": \"freight\",\n    \"status\": \"pending\",\n    \"paid\": false,\n    \"dueDate\": \"2025-03-10\",\n    \"paymentTerms\": \"Net 30\",\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 10,\n    \"vendorId\": 1\n}\n",
+							"raw": "{\n    \"billNumber\": \"BILL-20240228\",\n    \"amount\": 1500.75,\n    \"type\": \"freight\",\n    \"status\": \"pending\",\n    \"paid\": false,\n    \"dueDate\": \"2025-03-10\",\n    \"paymentTerms\": \"Net 30\",\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"vendorId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -843,13 +853,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/bill",
+							"raw": "{{baseurl}}/api/bill?referenceId=1",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"bill"
+							],
+							"query": [
+								{
+									"key": "referenceId",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -875,6 +891,35 @@
 									"key": "id",
 									"value": ""
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new bill number",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/bill/newBillNumber",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"bill",
+								"newBillNumber"
 							]
 						}
 					},
