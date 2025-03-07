@@ -27,6 +27,7 @@ import packagingListRoute from "./routes/packagingList.routes";
 import requestedPurchaseProductRoute from "./routes/requestedPurchaseProduct.routes";
 import siplProductRoute from "./routes/siplProduct.routes";
 import paymentRoutes from "./routes/payment.routes";
+import ledgerAccountRoutes from "./routes/ledgerAccount.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +56,7 @@ app.use("/api/packagingList", packagingListRoute);
 app.use("/api/requestedPurchaseProduct", requestedPurchaseProductRoute);
 app.use("/api/siplProduct", siplProductRoute);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/ledgerAccount", ledgerAccountRoutes);
 
 // handler error globally.
 app.use(errorHandler);
