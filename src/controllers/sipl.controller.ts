@@ -6,6 +6,7 @@ import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
+import { sequelize } from "../config/database";
 
 /**
  * Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
@@ -68,69 +69,78 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
   const createdBy = req.user?.id; // Get user ID from request
   const clientId = req.user?.clientId;
 
-  // There is problem in adding transaction that sipl product needs id of requestedProductId but it is not been created/
+  // There is problem in adding transaction that sipl product needs id of requestedProductId but it is not been created
 
-  // Validate required fields
-  if (
-    !poDate ||
-    !purchaseLocationId ||
-    !shipmentLocationId ||
-    !supplierId ||
-    !products ||
-    !freightDetail ||
-    !clientInvoiceDate ||
-    !supplierInvoiceNumber ||
-    !supplierInvoiceDate
-  ) {
-    throw new AppError(
-      "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, purchaseLocationId, shipmentLocationId, supplierId, clientInvoiceDate",
-      400
-    );
-  }
+  const transaction = await sequelize.transaction();
 
-  const poData = {
-    poDate,
-    purchaseLocationId,
-    shipmentLocationId,
-    supplierId,
-    userId,
-    products,
-    freightDetail,
-    clientId,
-  };
+  try {
+    // Validate required fields
+    if (
+      !poDate ||
+      !purchaseLocationId ||
+      !shipmentLocationId ||
+      !supplierId ||
+      !products ||
+      !freightDetail ||
+      !clientInvoiceDate ||
+      !supplierInvoiceNumber ||
+      !supplierInvoiceDate
+    ) {
+      throw new AppError(
+        "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, purchaseLocationId, shipmentLocationId, supplierId, clientInvoiceDate",
+        400
+      );
+    }
 
-  const notesData = { internal: internalNote, printable: printableNote };
-
-  // Call service function
-  const newPO = await poService.registerPurchaseOrder(poData, notesData);
-
-  newPO.requestedPurchaseProduct = newPO.requestedPurchaseProduct.map((e: any) => {
-    const plain = e.get({ plain: true });
-
-    return {
-      ...plain,
-      requestedPurchaseProductId: plain.id,
+    const poData = {
+      poDate,
+      purchaseLocationId,
+      shipmentLocationId,
+      supplierId,
+      userId,
+      products,
+      freightDetail,
+      clientId,
     };
-  });
 
-  const siplData = {
-    purchaseOrderId: newPO.id,
-    clientId,
-    products: newPO.requestedPurchaseProduct,
-    freightDetail,
-    description,
-    supplierNotes,
-    createdBy,
-    container,
-    clientInvoiceDate,
-    supplierInvoiceNumber,
-    supplierInvoiceDate,
-    updatedBy: createdBy,
-  };
+    const notesData = { internal: internalNote, printable: printableNote };
 
-  const sipl = await siplService.createSIPLService(siplData);
+    // Call service function
+    const newPO = await poService.registerPurchaseOrder(poData, notesData, transaction);
 
-  SuccessResponse(res, 201, "SIPL with PO is been created successfully", { sipl, newPO });
+    // Set products payload as function expect.
+    newPO.requestedPurchaseProduct = newPO.requestedPurchaseProduct.map((e: any) => {
+      const { id, ...plain } = e.get({ plain: true });
+
+      return {
+        ...plain,
+        requestedPurchaseProductId: id,
+      };
+    });
+
+    const siplData = {
+      purchaseOrderId: newPO.id,
+      clientId,
+      products: newPO.requestedPurchaseProduct,
+      freightDetail,
+      description,
+      supplierNotes,
+      createdBy,
+      container,
+      clientInvoiceDate,
+      supplierInvoiceNumber,
+      supplierInvoiceDate,
+      updatedBy: createdBy,
+    };
+
+    const sipl = await siplService.createSIPLService(siplData, transaction);
+
+    transaction.commit();
+    SuccessResponse(res, 201, "SIPL with PO is been created successfully", { sipl, newPO });
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
 });
 
 // Create slabs for SIPL

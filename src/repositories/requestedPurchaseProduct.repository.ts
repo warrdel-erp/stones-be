@@ -1,15 +1,15 @@
-import { FindOptions, Sequelize, WhereOptions } from "sequelize";
+import { FindOptions, Sequelize, Transaction, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 
 // find product by id
-export const findById = async (id: number) => {
-  return await models.RequestedPurchaseProduct.findByPk(id);
+export const findById = async (id: number, transaction?: Transaction) => {
+  return await models.RequestedPurchaseProduct.findByPk(id, { transaction });
 };
 
 // find product by id
-export const findByIdAndPurchaseOrderId = async (id: number, purchaseOrderId: number) => {
-  return await models.RequestedPurchaseProduct.findOne({ where: { id, purchaseOrderId } });
+export const findByIdAndPurchaseOrderId = async (id: number, purchaseOrderId: number, transaction?: Transaction) => {
+  return await models.RequestedPurchaseProduct.findOne({ where: { id, purchaseOrderId }, transaction });
 };
 
 // find product by id

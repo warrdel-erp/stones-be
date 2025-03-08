@@ -32,9 +32,9 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
     // Create SIPL Products (if provided)
     if (siplData.products?.length) {
       for (const product of siplData.products) {
-        const existingProduct = await requestedPurchaseProductsRepository.findByIdAndPurchaseOrderId(
+        const existingProduct = await requestedPurchaseProductsRepository.findById(
           product.requestedPurchaseProductId,
-          siplData.purchaseOrderId
+          transaction
         );
 
         if (!existingProduct) {
