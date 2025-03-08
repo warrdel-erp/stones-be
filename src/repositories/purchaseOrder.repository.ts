@@ -58,6 +58,10 @@ export const getPurchaseOrderById = async (id: number) => {
         model: models.SIPL,
         as: "sipls",
       },
+      {
+        model: models.FreightDetail,
+        as: "freightDetail",
+      },
     ],
     where: { id },
   });
