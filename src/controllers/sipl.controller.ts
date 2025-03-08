@@ -47,7 +47,6 @@ export const createSIPLController = catchAsync(async (req: AuthRequest, res: Res
  * 1. create PO
  * 2. create SIPL with PO data
  */
-
 export const createDirectSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
   const {
     poDate,
@@ -68,6 +67,8 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 
   const createdBy = req.user?.id; // Get user ID from request
   const clientId = req.user?.clientId;
+
+  // There is problem in adding transaction that sipl product needs id of requestedProductId but it is not been created/
 
   // Validate required fields
   if (
@@ -103,10 +104,19 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
   // Call service function
   const newPO = await poService.registerPurchaseOrder(poData, notesData);
 
+  newPO.requestedPurchaseProduct = newPO.requestedPurchaseProduct.map((e: any) => {
+    const plain = e.get({ plain: true });
+
+    return {
+      ...plain,
+      requestedPurchaseProductId: plain.id,
+    };
+  });
+
   const siplData = {
     purchaseOrderId: newPO.id,
     clientId,
-    products,
+    products: newPO.requestedPurchaseProduct,
     freightDetail,
     description,
     supplierNotes,
@@ -120,7 +130,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 
   const sipl = await siplService.createSIPLService(siplData);
 
-  SuccessResponse(res, 201, "SIPL is been created successfully", { sipl, newPO });
+  SuccessResponse(res, 201, "SIPL with PO is been created successfully", { sipl, newPO });
 });
 
 // Create slabs for SIPL

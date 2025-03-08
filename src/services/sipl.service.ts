@@ -5,6 +5,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import { Transaction } from "sequelize";
 
 /**
  * Processes the inventory reception by updating slab statuses.
@@ -15,8 +16,13 @@ export const receiveInventory = async (siplId: number): Promise<number> => {
 };
 
 // Create SIPL
-export async function createSIPLService(siplData: any) {
-  const transaction = await sequelize.transaction();
+export async function createSIPLService(siplData: any, transaction?: Transaction) {
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction(); // Start a transaction
+  }
+
   try {
     // Create SIPL
     let sipl: any = await siplRepository.createSIPL({ ...siplData }, transaction);
@@ -32,7 +38,7 @@ export async function createSIPLService(siplData: any) {
         );
 
         if (!existingProduct) {
-          throw new Error(`Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
+          throw new Error(`Requested Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
         }
 
         productsWithSIPLId.push({
@@ -49,10 +55,10 @@ export async function createSIPLService(siplData: any) {
       await poRepository.createFreightDetail(siplData.freightDetail, { siplId: sipl.id }, transaction);
     }
 
-    await transaction.commit();
+    if (shouldCommitTransaction) await transaction.commit();
     return sipl;
   } catch (error: any) {
-    transaction.rollback();
+    if (shouldCommitTransaction) transaction.rollback();
     throw error;
   }
 }

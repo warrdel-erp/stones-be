@@ -3,12 +3,17 @@ import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as siplProductRepository from "../repositories/siplProducts.repository";
+import { Transaction } from "sequelize";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
  */
-export const registerPurchaseOrder = async (poData: any, notesData: any) => {
-  const transaction = await sequelize.transaction(); // Start a transaction
+export const registerPurchaseOrder = async (poData: any, notesData: any, transaction?: Transaction) => {
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction(); // Start a transaction
+  }
 
   try {
     // Create purchase order
@@ -63,10 +68,10 @@ export const registerPurchaseOrder = async (poData: any, notesData: any) => {
       );
     }
 
-    await transaction.commit(); // Commit transaction
+    if (shouldCommitTransaction) await transaction.commit(); // Commit transaction
     return { ...newPO.get({ plain: true }), internalNote, printableNote, freightDetail, requestedPurchaseProduct };
   } catch (error) {
-    transaction.rollback();
+    if (shouldCommitTransaction) transaction.rollback();
     throw error;
   }
 };
