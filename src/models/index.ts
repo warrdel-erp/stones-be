@@ -115,11 +115,11 @@ SIPL.belongsTo(User, { foreignKey: "updatedBy" });
 
 // FreightDetail optionally belongs to a SIPL
 FreightDetail.belongsTo(SIPL, { foreignKey: "siplId" });
-SIPL.hasOne(FreightDetail, { foreignKey: "siplId" });
+SIPL.hasOne(FreightDetail, { foreignKey: "siplId", as: "freightDetail" });
 
 // FreightDetail-PurchaseOrder ('FreightDetail' have one 'PurchaseOrder')
 FreightDetail.belongsTo(PurchaseOrder, { foreignKey: "purchaseOrderId" });
-PurchaseOrder.hasOne(FreightDetail, { foreignKey: "purchaseOrderId" });
+PurchaseOrder.hasOne(FreightDetail, { foreignKey: "purchaseOrderId", as: "freightDetail" });
 
 // FreightDetail-Vendor ('FreightDetail' have one 'Vendor' as freightForwarder)
 FreightDetail.belongsTo(Vendor, { foreignKey: "freightForwarderId" });
