@@ -61,12 +61,13 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
 
 // Get PO detail by ID
 export const getPurchaseOrderById = async (id: number) => {
-  let result = await models.PurchaseOrder.findOne({
+  let result: any = await models.PurchaseOrder.findOne({
     include: [
       { model: models.Vendor, as: "supplier" },
       {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProducts",
+
         include: [{ model: models.SIPLProduct, as: "siplProducts" }],
       },
       {
@@ -82,6 +83,7 @@ export const getPurchaseOrderById = async (id: number) => {
   });
 
   result = result?.get({ plain: true });
+
   return result;
 };
 

@@ -126,25 +126,14 @@ export const getPurchaseOrderById = async (id: number) => {
   const totalQuantity = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrder(id);
   const totalSiplQuantity = await siplProductRepository.getTotalQuantityByPurchaseOrder(id);
 
-  // const fulfilledBySipl = [];
-
-  // Remove duplicate product ids
-  // const productIds = Array.from(
-  //   new Set(purchaseOrder.requestedPurchaseProducts.map((product: any) => product.productId))
-  // );
-
-  // for (const productId of productIds) {
-  // const siplCalc = await siplProductRepository.getTotalQuantityByProductAndPO(Number(productId), id);
-  // const requestedProductCalc = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrderAndProduct(
-  //   id,
-  //   Number(productId)
-  // );
-  // fulfilledBySipl.push({
-  //   productId: productId,
-  //   siplTotalQuantity: siplCalc,
-  //   requestedTotalQuantity: requestedProductCalc,
-  // });
-  // }
+  // If requestedPurchaseProducts exist, compute totalQuantity per requestedPurchaseProduct
+  if (purchaseOrder?.requestedPurchaseProducts) {
+    purchaseOrder.requestedPurchaseProducts = purchaseOrder.requestedPurchaseProducts.map((rpp: any) => {
+      const fulfilledQuantityBySipl =
+        rpp.siplProducts?.reduce((sum: number, sp: any) => sum + (sp.quantity || 0), 0) || 0;
+      return { ...rpp, fulfilledQuantityBySipl };
+    });
+  }
 
   return {
     ...purchaseOrder,
