@@ -29,6 +29,16 @@ export const getLastSerialNumber = async (purchaseOrderId: number, siplId: numbe
   return existingSlab ? existingSlab.serialNumber : 0;
 };
 
+export const getLastSlabNumber = async (productId: number, siplId: number) => {
+  const existingSlab: any = await Slab.findOne({
+    where: { siplId, productId },
+    order: [["slabNumber", "DESC"]],
+    attributes: ["slabNumber"],
+  });
+
+  return existingSlab ? existingSlab.slabNumber : 0;
+};
+
 // Create slabs
 export const getSlabByInventoryProductId = async (inventoryProductId: number, transaction?: Transaction) => {
   return await models.Slab.findOne({ where: { inventoryProductId }, transaction });

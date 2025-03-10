@@ -93,6 +93,11 @@ export async function handleCreateSlabs(slabData: any) {
     );
 
     const lastSerialNumber = await slabRepository.getLastSerialNumber(sipl.purchaseOrderId, slabData.siplId);
+    let lastSlabNumber = await slabRepository.getLastSlabNumber(slabData.productId, slabData.siplId);
+
+    if (slabData.slabNumber > lastSlabNumber) {
+      lastSlabNumber = slabData.slabNumber;
+    }
 
     // Pair each slab with its own inventory product
     const slabs = inventoryProducts.map((inventoryProduct: any, index: number) => ({
@@ -100,6 +105,7 @@ export async function handleCreateSlabs(slabData: any) {
       inventoryProductId: inventoryProduct.id,
       purchaseOrderId: sipl.purchaseOrderId,
       serialNumber: lastSerialNumber + index + 1,
+      slabNumber: lastSlabNumber + index + 1,
       barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
     }));
 

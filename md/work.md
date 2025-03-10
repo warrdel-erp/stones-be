@@ -53,7 +53,7 @@
 45. check in add slab is given siplProductId belongs to given SIPLId ✔️
 46. Conditions for closing and canceling PO.
 
-47. total receiving and packaging quantity in sipl products.
+47. total receiving and packaging quantity in sipl products. ✔️
 48. slab no. auto increment.
 49. freight bill.
 50. receive inventory.

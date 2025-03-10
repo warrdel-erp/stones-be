@@ -19,6 +19,9 @@ const Slab = sequelize.define(
     serialNumber: {
       type: DataTypes.INTEGER,
     },
+    slabNumber: {
+      type: DataTypes.INTEGER,
+    },
     entryUnit: {
       type: DataTypes.ENUM(...Object.values(SLAB_ENTRY_UNIT)),
       allowNull: true,
@@ -139,6 +142,10 @@ const Slab = sequelize.define(
       {
         unique: true,
         fields: ["purchaseOrderId", "siplId", "serialNumber"],
+      },
+      {
+        unique: true,
+        fields: ["productId", "siplId", "slabNumber"],
       },
     ],
   }
