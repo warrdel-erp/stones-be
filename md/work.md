@@ -45,18 +45,18 @@
 
 40. Add freight detail in SIPL single data and PO. ✔️
 41. Receive inventory status in SIPL and receive date. ✔️
-42. Sales Tax data in general
+42. Sales Tax data in general ✔️
 
-43. Total square by SIPL in inventory details.
-    Length \* width / 144
-44. Slab in cart or not ✔️
+43. Slab in cart or not ✔️
 
-45. Total fulfilled of requestedProducts in single PO ✔️
-46. check in add slab is given siplProductId belongs to given SIPLId ✔️
-47. Conditions for closing and canceling PO.
-48. put constants in tables for better data fetching
+44. Total fulfilled of requestedProducts in single PO ✔️
+45. check in add slab is given siplProductId belongs to given SIPLId ✔️
+46. Conditions for closing and canceling PO.
 
-49.
+47. total receiving and packaging quantity in sipl products.
+48. slab no. auto increment.
+49. freight bill.
+50. receive inventory.
 
 ---
 
@@ -66,4 +66,4 @@ remove any types
 
 in product model (product.productName => product.name)
 
-create flow diagram for every flow
+create flow diagram for every flow 48. put constants in tables for better data fetching

@@ -120,7 +120,22 @@ export const getInvoiceNumber = async () => {
 
 // get SIPL by ID
 export const getSIPLById = async (id: number) => {
-  const sipl = await siplRepository.findSIPLById(id);
+  let sipl: any = await siplRepository.findSIPLById(id);
+
+  sipl = sipl?.get({ plain: true });
+
+  // Calculate totalReceivedQuantity, totalPackagingQuantity
+  sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
+    return {
+      ...siplProduct,
+      totalReceivedQuantity: Number(
+        siplProduct.slabs.reduce((a: number, b: any) => a + b.receivingWidth * b.receivingLength, 0).toFixed(2)
+      ),
+      totalPackagingQuantity: Number(
+        siplProduct.slabs.reduce((a: number, b: any) => a + b.packageWidth * b.packageLength, 0).toFixed(2)
+      ),
+    };
+  });
 
   if (!sipl) {
     throw new Error("SIPL not found");
