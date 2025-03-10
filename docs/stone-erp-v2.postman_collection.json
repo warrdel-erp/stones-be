@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\":2\n}\n",
+							"raw": "{\n    \"locationId\":3\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -534,7 +534,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/purchaseOrder?fromDate=2024-06-01",
+							"raw": "{{baseurl}}/api/purchaseOrder?toDate=2025-04-01",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -545,12 +545,12 @@
 							"query": [
 								{
 									"key": "fromDate",
-									"value": "2024-06-01"
+									"value": "2025-03-23",
+									"disabled": true
 								},
 								{
 									"key": "toDate",
-									"value": "2024-02-28",
-									"disabled": true
+									"value": "2025-04-01"
 								},
 								{
 									"key": "status",
@@ -744,7 +744,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Kota Stone 1\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 2\n}\n",
+							"raw": "{\n  \"name\": \"Kota Stone 2\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -843,6 +843,14 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product by id",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
@@ -1413,7 +1421,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"isHold\": false\n}",
+							"raw": "{\n    \"isInCart\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1421,7 +1429,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/slab/:slabId/hold",
+							"raw": "{{baseurl}}/api/slab/:slabId/cart",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1429,12 +1437,82 @@
 								"api",
 								"slab",
 								":slabId",
-								"hold"
+								"cart"
 							],
 							"variable": [
 								{
 									"key": "slabId",
 									"value": "18"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remeasure",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"length\": 2,\n    \"width\": 1.4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/:slabId/remeasure",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								":slabId",
+								"remeasure"
+							],
+							"variable": [
+								{
+									"key": "slabId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get slab by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/slab/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
 								}
 							]
 						}
@@ -2555,6 +2633,36 @@
 								{
 									"key": "id",
 									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "notes",
+			"item": [
+				{
+					"name": "get all notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/notes",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"notes"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "printable",
+									"disabled": true
 								}
 							]
 						}

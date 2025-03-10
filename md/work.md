@@ -51,10 +51,12 @@
     Length \* width / 144
 44. Slab in cart or not ✔️
 
-45. Total fulfilled of requestedProducts in single PO
+45. Total fulfilled of requestedProducts in single PO ✔️
 46. check in add slab is given siplProductId belongs to given SIPLId ✔️
 47. Conditions for closing and canceling PO.
 48. put constants in tables for better data fetching
+
+49.
 
 ---
 
