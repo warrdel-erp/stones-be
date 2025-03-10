@@ -1,12 +1,11 @@
-import PurchaseOrder from "../models/purchaseOrder";
-import { Op, Sequelize, Transaction } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 
 /**
  * Create a new Purchase Order in the database.
  */
 export const createPurchaseOrder = async (poData: any, transaction?: Transaction) => {
-  return await PurchaseOrder.create(poData, { transaction, hooks: true });
+  return await models.PurchaseOrder.create(poData, { transaction, hooks: true });
 };
 
 // create SIPL Product
@@ -33,10 +32,11 @@ export async function createFreightDetail(
 }
 
 // Get po with pagination
-export const getAllPurchaseOrders = async (page: number, limit: number) => {
+export const getAllPurchaseOrders = async (page: number, limit: number, filter?: WhereOptions) => {
   const offset = (page - 1) * limit;
 
-  return await PurchaseOrder.findAndCountAll({
+  return await models.PurchaseOrder.findAndCountAll({
+    where: filter,
     include: [{ model: models.Vendor, as: "supplier", attributes: ["name"] }],
     limit,
     offset,
@@ -46,7 +46,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number) => {
 
 // Get PO detail by ID
 export const getPurchaseOrderById = async (id: number) => {
-  let result = await PurchaseOrder.findOne({
+  let result = await models.PurchaseOrder.findOne({
     include: [
       { model: models.Vendor, as: "supplier" },
       {
@@ -89,3 +89,10 @@ export const getPoNumber = async (clientId: number) => {
 
   return { clientPoNumber: lastPO ? lastPO?.clientPoNumber + 1 : 1 };
 };
+
+export async function updatePurchaseOrderStatus(purchaseOrderId: number, status: string, transaction?: any) {
+  return await models.PurchaseOrder.update(
+    { status },
+    { where: { id: purchaseOrderId }, transaction, returning: true }
+  );
+}

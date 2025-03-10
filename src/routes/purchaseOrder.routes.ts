@@ -27,4 +27,7 @@ router.put(
   requestedPurchaseProductController.upsertRequestedPurchaseProducts
 );
 
+// update po status.
+router.patch("/:id/status", poController.updatePurchaseOrderStatus);
+
 export default router;

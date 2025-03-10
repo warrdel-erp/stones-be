@@ -7,12 +7,19 @@ import * as requestedPurchaseProductsRepository from "../repositories/requestedP
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
 
-/**
- * Processes the inventory reception by updating slab statuses.
- * @param siplId - The SIPL ID.
- */
+// Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number): Promise<number> => {
-  return await slabRepository.updateSlabStatusBySipl(siplId);
+  const transaction = await sequelize.transaction();
+  try {
+    const updatedSIPL = await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
+
+    const updatedSlab = await slabRepository.updateSlabStatusBySipl(siplId, transaction);
+    transaction.commit();
+    return updatedSlab;
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
 };
 
 // Create SIPL

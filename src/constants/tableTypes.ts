@@ -58,3 +58,9 @@ export const SLAB_ENTRY_UNIT = {
   FEET: "feet",
   IN: "in",
 } as const;
+
+export const PO_STATUS = {
+  OPEN: "open",
+  CLOSED: "closed",
+  CANCELED: "canceled",
+};

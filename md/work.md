@@ -40,8 +40,20 @@
 35. invoice no according to client ✔️
 36. sipl product belongs to -> requested purchase product ✔️
 37. single SIPL by detail by ID ✔️
-38. vendor with type filter.
-39. bill no. auto generated and API to get new BILL number
+38. vendor with type filter. ✔️
+39. bill no. auto generated and API to get new BILL number ✔️
+
+40. Add freight detail in SIPL single data and PO. ✔️
+41. Receive inventory status in SIPL and receive date. ✔️
+42. Sales Tax data in general
+
+43. Total square by SIPL in inventory details.
+    Length \* width / 144
+44. Slab in cart or not ✔️
+
+45. Total fulfilled of requestedProducts in single PO
+46. check in add slab is given siplProductId belongs to given SIPLId ✔️
+47. Conditions for closing and canceling PO.
 
 ---
 
@@ -50,3 +62,5 @@ model typescript support
 remove any types
 
 in product model (product.productName => product.name)
+
+create flow diagram for every flow

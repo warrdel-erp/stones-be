@@ -1,4 +1,4 @@
-import { FindOptions, Transaction } from "sequelize";
+import { FindOptions, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 
@@ -7,8 +7,30 @@ export const createBulkSIPLProducts = async (data: any, transaction: Transaction
 };
 
 // find product by id
-export const findById = async (id: number) => {
-  return await models.SIPLProduct.findByPk(id);
+export const findOne = async (filter: WhereOptions) => {
+  return await models.SIPLProduct.findOne({ where: filter });
+};
+
+export const findByProductIdAndSiplId = async (siplProductId: number, productId: number, siplId: number) => {
+  console.log(productId, siplId);
+  const result = await models.SIPLProduct.findOne({
+    where: {
+      id: siplProductId,
+      siplId,
+    },
+    include: [
+      {
+        model: models.RequestedPurchaseProduct,
+        as: "requestedPurchaseProduct",
+        where: {
+          productId,
+        },
+        required: true,
+      },
+    ],
+  });
+
+  return result;
 };
 
 // Delete product by id

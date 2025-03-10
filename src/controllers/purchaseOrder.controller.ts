@@ -30,10 +30,9 @@ export const createPurchaseOrderController = catchAsync(async (req: AuthRequest,
 
 // Get all po with pagination.
 export const getAllPurchaseOrders = catchAsync(async (req: AuthRequest, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
+  const { page = 1, limit = 10, ...filter } = req.query;
 
-  const result = await poService.getAllPurchaseOrders(page, limit);
+  const result = await poService.getAllPurchaseOrders(Number(page), Number(limit), filter);
   SuccessResponse(res, 200, "Purchase Orders fetched successfully", result);
 });
 
@@ -74,4 +73,21 @@ export const getNewPoNumber = catchAsync(async (req: AuthRequest, res: Response)
 
   const data = await poService.getPONumber(clientId!);
   SuccessResponse(res, 200, "New PO number fetched successfully.", data);
+});
+
+// 🔹 Update PurchaseOrder Status
+export const updatePurchaseOrderStatus = catchAsync(async (req: Request, res: Response) => {
+  const purchaseOrderId = parseInt(req.params.id);
+  const { status } = req.body;
+
+  if (!purchaseOrderId) {
+    throw new AppError("po id is required", 400);
+  }
+
+  if (!status) {
+    throw new AppError("Status is required", 400);
+  }
+
+  const updatedPurchaseOrder = await poService.updatePurchaseOrderStatusService(purchaseOrderId, status);
+  SuccessResponse(res, 200, "PurchaseOrder status updated successfully", updatedPurchaseOrder);
 });

@@ -2,15 +2,13 @@ import { Request, Response } from "express";
 import catchAsync from "../helper/asyncCatch";
 import * as siplService from "../services/sipl.service";
 import * as poService from "../services/purchaseOrder.service";
+import * as siplProductService from "../services/siplProduct.service";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
-import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import { sequelize } from "../config/database";
 
-/**
- * Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
- */
+// Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
 export const receiveInventoryController = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params; // Get SIPL ID from request parameters
 
@@ -147,12 +145,31 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 
 // Create slabs for SIPL
 export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const { siplId } = req.params;
   const userId = req.user?.id;
+
+  const { siplProductId, productId } = req.body;
+
+  if (!siplProductId) {
+    throw new AppError("siplProductId is required.", 400);
+  }
+
+  const siplProduct: any = await siplProductService.findSiplProductByProductId(
+    siplProductId,
+    productId,
+    Number(siplId)
+  );
+
+  if (!siplProduct) {
+    throw new AppError(
+      `Either SIPL product '${siplProductId}' does not exists, or it does not belongs to given product '${productId}' or SIPL '${siplId}'`,
+      400
+    );
+  }
 
   const slabs = await siplService.handleCreateSlabs({
     ...req.body,
-    siplId: Number(id),
+    siplId: Number(siplId),
     createdBy: userId,
     updatedBy: userId,
   });

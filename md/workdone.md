@@ -14,3 +14,4 @@
 3. bill number auto increment, get last.
 4. accounts listing.
 5. more api modification according to Jatin.
+6. slab remeasurement

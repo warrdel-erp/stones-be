@@ -23,6 +23,7 @@ import SalesOrderProduct from "./salesOrderProduct.model";
 import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
+import SlabRemeasurement from "./SlabRemeasurement.model";
 import Transaction from "./transaction.model";
 import User from "./user";
 import Vendor from "./vendor";
@@ -311,6 +312,10 @@ RequestedPurchaseProduct.hasMany(SIPLProduct, { foreignKey: "requestedPurchasePr
 Slab.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
 SIPLProduct.hasMany(Slab, { foreignKey: "siplProductId", as: "slabs" });
 
+// Establish one-to-many relationship
+Slab.hasMany(SlabRemeasurement, { foreignKey: "slabId", as: "remeasurements" });
+SlabRemeasurement.belongsTo(Slab, { foreignKey: "slabId", as: "slab" });
+
 export {
   Client,
   User,
@@ -341,4 +346,5 @@ export {
   SalesOrder,
   SalesOrderProduct,
   Payment,
+  SlabRemeasurement,
 };

@@ -4,6 +4,7 @@ import Location from "./location";
 import User from "./user";
 import Vendor from "./vendor";
 import Client from "./client";
+import { PO_STATUS } from "../constants/tableTypes";
 
 const PurchaseOrder = sequelize.define(
   "PurchaseOrder",
@@ -20,6 +21,10 @@ const PurchaseOrder = sequelize.define(
     clientPoNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
+    status: {
+      type: DataTypes.ENUM(...Object.values(PO_STATUS)),
+      defaultValue: PO_STATUS.OPEN,
     },
     purchaseLocationId: {
       type: DataTypes.INTEGER,

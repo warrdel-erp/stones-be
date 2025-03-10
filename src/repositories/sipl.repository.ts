@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, where } from "sequelize";
 import * as models from "../models";
 
 // Create SIPL
@@ -104,5 +104,13 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
       },
     ],
     order: [["createdAt", "DESC"]],
+  });
+};
+
+// update SIPL
+export const updateSIPL = async (id: number, data: any, transaction: Transaction) => {
+  await models.SIPL.update(data, {
+    where: { id },
+    transaction,
   });
 };

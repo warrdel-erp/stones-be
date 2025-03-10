@@ -67,6 +67,10 @@ const SIPL = sequelize.define(
         key: "id",
       },
     },
+    inventoryReceived: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     purchaseOrderId: {
       type: DataTypes.INTEGER,
       references: {

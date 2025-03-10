@@ -4,10 +4,10 @@ import { Transaction } from "sequelize";
 import * as models from "../models";
 
 // Finds all slabs by SIPL ID and updates their status.
-export const updateSlabStatusBySipl = async (siplId: number): Promise<number> => {
+export const updateSlabStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
   const [updatedCount] = await Slab.update(
     { status: SLAB_STATUS.IN_INVENTORY },
-    { where: { siplId, status: SLAB_STATUS.INITIATE }, individualHooks: true } // Only update slabs that are initiated
+    { where: { siplId, status: SLAB_STATUS.INITIATE }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
 
   return updatedCount;
@@ -38,6 +38,11 @@ export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
   return await Slab.update({ isHold }, { where: { id: slabId }, individualHooks: true });
 };
 
+// update hold status of slab
+export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) => {
+  return await Slab.update({ isInCart }, { where: { id: slabId }, individualHooks: true });
+};
+
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
@@ -58,4 +63,23 @@ export const updateSlabStatusByInventoryProduct = async (
   await Slab.update({ status }, { where: { inventoryProductId }, individualHooks: true, transaction });
 
   return slab;
+};
+
+// Find by id
+export const findByIdSimple = async (slabId: number) => {
+  const slab = await models.Slab.findByPk(slabId);
+  return slab?.get({ plain: true });
+};
+
+// Find by id
+export const findByIdWithLogs = async (slabId: number) => {
+  const slab = await models.Slab.findByPk(slabId, {
+    include: [
+      {
+        model: models.SlabRemeasurement,
+        as: "remeasurements",
+      },
+    ],
+  });
+  return slab?.get({ plain: true });
 };

@@ -3,7 +3,7 @@ import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as siplProductRepository from "../repositories/siplProducts.repository";
-import { Transaction } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -76,11 +76,13 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
   }
 };
 
-export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10) => {
+export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, filter?: WhereOptions) => {
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
-  let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(page, limit);
+  // filter.tab
+
+  let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(page, limit, filter);
 
   // Add totalQuantity to each PO
   const poTotalQuantity: any[] = await requestedPurchaseProductRepository.getTotalQuantityForAllPOs();
@@ -156,3 +158,14 @@ export const getSIPLsForPurchaseOrder = async (purchaseOrderId: number) => {
 export const getPONumber = async (clientId: number) => {
   return await poRepository.getPoNumber(clientId);
 };
+
+// update po status.
+export async function updatePurchaseOrderStatusService(purchaseOrderId: number, status: string) {
+  const [updatedCount, updatedPurchaseOrders] = await poRepository.updatePurchaseOrderStatus(purchaseOrderId, status);
+
+  if (updatedCount === 0) {
+    throw new Error("PurchaseOrder not found or already has the same status");
+  }
+
+  return updatedPurchaseOrders[0];
+}
