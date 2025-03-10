@@ -14,8 +14,6 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     return res.status(400).json({ error: "Location ID is required" });
   }
 
-  console.log("user ID", userId);
-
   // Check if user has access to this location.
   await checkUserLocationAccess(Number(locationId), userId!);
 

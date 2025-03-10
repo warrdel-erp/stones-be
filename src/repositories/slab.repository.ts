@@ -2,6 +2,7 @@ import Slab from "../models/slab";
 import { SLAB_STATUS } from "../constants";
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { sequelize } from "../config/database";
 
 // Finds all slabs by SIPL ID and updates their status.
 export const updateSlabStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
@@ -82,4 +83,15 @@ export const findByIdWithLogs = async (slabId: number) => {
     ],
   });
   return slab?.get({ plain: true });
+};
+
+export const getTotalAreaBySIPL = async (siplId: number) => {
+  return await models.Slab.findAll({
+    attributes: ["siplId", [sequelize.fn("SUM", sequelize.literal("receivingLength * receivingWidth")), "totalArea"]],
+    where: {
+      siplId: siplId, // Filter slabs by the given SIPL IDs
+    },
+    group: ["siplId"],
+    raw: true,
+  });
 };

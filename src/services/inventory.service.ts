@@ -1,23 +1,27 @@
 import * as productRepository from "../repositories/product.repository";
 import * as siplRepository from "../repositories/sipl.repository";
+import * as slabRepository from "../repositories/slab.repository";
 
 export const fetchProductsWithSlabsByLocation = async (page: number, limit: number, locationId: number) => {
   const data: any = await productRepository.getAllProducts(page, limit);
 
-  let index = 0;
+  const finalData = await Promise.all(
+    data.products.map(async (product: any) => {
+      product = product.get({ plain: true });
 
-  const finalData = [];
+      product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
 
-  for (let product of data.products) {
-    product = product.get({ plain: true });
+      await Promise.all(
+        product.sipls.map(async (sipl: any, index: number) => {
+          const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id);
+          product.sipls[index] = sipl.get({ plain: true });
+          product.sipls[index].totalArea = totalArea[0]?.totalArea;
+        })
+      );
 
-    product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
+      return product;
+    })
+  );
 
-    finalData.push(product);
-
-    index++;
-  }
-
-  // return await productRepository.getProductsWithSlabsByLocation(locationId);
-  return data;
+  return { products: finalData, total: data.total };
 };

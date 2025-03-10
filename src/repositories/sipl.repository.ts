@@ -1,5 +1,6 @@
-import { Transaction, where } from "sequelize";
+import { Sequelize, Transaction, where } from "sequelize";
 import * as models from "../models";
+import { sequelize } from "../config/database";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
@@ -75,7 +76,7 @@ export const getAllSIPLs = async (page: number, limit: number) => {
 
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
-  return await models.SIPL.findAll({
+  const SIPLs = await models.SIPL.findAll({
     include: [
       {
         model: models.Slab,
@@ -105,6 +106,7 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
     ],
     order: [["createdAt", "DESC"]],
   });
+  return SIPLs;
 };
 
 // update SIPL
