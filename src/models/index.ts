@@ -23,7 +23,7 @@ import SalesOrderProduct from "./salesOrderProduct.model";
 import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
-import SlabRemeasurement from "./SlabRemeasurement.model";
+import SlabRemeasurement from "./slabRemeasurement.model";
 import Transaction from "./transaction.model";
 import User from "./user";
 import Vendor from "./vendor";
