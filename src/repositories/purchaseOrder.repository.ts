@@ -1,4 +1,4 @@
-import { Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 
 /**
@@ -32,11 +32,26 @@ export async function createFreightDetail(
 }
 
 // Get po with pagination
-export const getAllPurchaseOrders = async (page: number, limit: number, filter?: WhereOptions) => {
+export const getAllPurchaseOrders = async (page: number, limit: number, filter: { [k: string]: string }) => {
   const offset = (page - 1) * limit;
 
+  const { fromDate, toDate, ...otherFilters } = filter;
+
+  const dateRange: any = {};
+
+  if (fromDate && toDate) {
+    dateRange.poDate = { [Op.between]: [fromDate, toDate] };
+  } else if (fromDate) {
+    dateRange.poDate = { [Op.gte]: fromDate };
+  } else if (toDate) {
+    dateRange.poDate = { [Op.lte]: toDate };
+  }
+
   return await models.PurchaseOrder.findAndCountAll({
-    where: filter,
+    where: {
+      ...otherFilters,
+      ...dateRange,
+    },
     include: [{ model: models.Vendor, as: "supplier", attributes: ["name"] }],
     limit,
     offset,

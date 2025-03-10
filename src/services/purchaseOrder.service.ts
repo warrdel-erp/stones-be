@@ -76,13 +76,17 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
   }
 };
 
-export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, filter?: WhereOptions) => {
+export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, filter?: { [k: string]: string }) => {
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
   // filter.tab
 
-  let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(page, limit, filter);
+  let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(
+    page,
+    limit,
+    filter || {}
+  );
 
   // Add totalQuantity to each PO
   const poTotalQuantity: any[] = await requestedPurchaseProductRepository.getTotalQuantityForAllPOs();
