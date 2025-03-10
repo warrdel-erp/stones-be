@@ -534,13 +534,29 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/purchaseOrder",
+							"raw": "{{baseurl}}/api/purchaseOrder?fromDate=2024-06-01",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"purchaseOrder"
+							],
+							"query": [
+								{
+									"key": "fromDate",
+									"value": "2024-06-01"
+								},
+								{
+									"key": "toDate",
+									"value": "2024-02-28",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "closed",
+									"disabled": true
+								}
 							]
 						}
 					},
