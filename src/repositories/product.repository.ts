@@ -14,14 +14,27 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
     where: whereClause,
     limit,
     offset,
+    include: [{ model: models.ProductCategory, as: "category" }],
     order: [["createdAt", "DESC"]],
   });
 
   return { products, total, page, limit };
 };
 
-export const getProductById = async (id: number) => {
+// get product by id
+export const getProductByIdSimple = async (id: number) => {
   return (await models.Product.findByPk(id))?.get({ plain: true });
+};
+
+// get product details by id
+export const getProductById = async (id: number) => {
+  return await models.Product.findOne({
+    where: { id },
+    include: [
+      { model: models.Slab, as: "slabs" },
+      { model: models.ProductCategory, as: "category" },
+    ],
+  });
 };
 
 // Update product by ID

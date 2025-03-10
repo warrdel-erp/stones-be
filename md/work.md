@@ -54,6 +54,7 @@
 45. Total fulfilled of requestedProducts in single PO
 46. check in add slab is given siplProductId belongs to given SIPLId ✔️
 47. Conditions for closing and canceling PO.
+48. put constants in tables for better data fetching
 
 ---
 

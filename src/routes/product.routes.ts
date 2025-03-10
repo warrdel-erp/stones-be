@@ -12,4 +12,7 @@ router.get("/", authenticateUser, productController.getProducts);
 // Update product
 router.put("/:id", authenticateUser, productController.updateProductById);
 
+// Get Product by id
+router.get("/:id", productController.getProductById);
+
 export default router;

@@ -4,7 +4,7 @@ import { AppError } from "../helper/appError";
 import { SLAB_STATUS } from "../constants";
 
 export async function createSlabLogService(slabLogData: any) {
-  const slab = await slabRepository.findByIdSimple(slabLogData.siplId);
+  const slab = await slabRepository.findByIdSimple(slabLogData.slabId);
 
   if (!slab) {
     throw new AppError("Slab not found", 400);

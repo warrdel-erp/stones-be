@@ -1,3 +1,5 @@
+import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
 
@@ -9,7 +11,19 @@ export const addProduct = async (productData: any, userId: number) => {
 
 // Fetch all products
 export const fetchAllProducts = async (page: number, limit: number, search?: string) => {
-  return productRepository.getAllProducts(page, limit, search);
+  let products = await productRepository.getAllProducts(page, limit, search);
+
+  products.products = products.products.map((product: any) => {
+    product = product.get({ plain: true });
+
+    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+
+    return product;
+  });
+
+  return products;
 };
 
 // Update product details
@@ -19,4 +33,21 @@ export const modifyProduct = async (productId: number, updateData: any, userId: 
 
   if (!updatedProduct) throw new AppError("User not found or update failed", 400);
   return updatedProduct;
+};
+
+// Get product by id
+export const fetchProductById = async (id: number) => {
+  let product: any = await productRepository.getProductById(id);
+
+  if (!product) {
+    throw new AppError("Product not found", 404);
+  }
+
+  product = product.get({ plain: true });
+
+  product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+  product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+  product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+
+  return product;
 };

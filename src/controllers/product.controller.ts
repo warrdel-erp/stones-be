@@ -3,7 +3,10 @@ import catchAsync from "../helper/asyncCatch";
 import * as productService from "../services/product.service";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 
+// Create a new product
 export const createProduct = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
 
@@ -32,4 +35,13 @@ export const updateProductById = catchAsync(async (req: AuthRequest, res: Respon
   const updatedProduct = await productService.modifyProduct(Number(id), req.body, userId!);
 
   return SuccessResponse(res, 200, "Product updated successfully", updatedProduct);
+});
+
+// Get product by id
+export const getProductById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const product: any = await productService.fetchProductById(Number(id));
+
+  return SuccessResponse(res, 200, "Product fetched successfully", product);
 });

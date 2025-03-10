@@ -15,7 +15,7 @@ const PurchaseOrder = sequelize.define(
       primaryKey: true,
     },
     poDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     clientPoNumber: {

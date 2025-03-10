@@ -141,7 +141,7 @@ Product.hasMany(RequestedPurchaseProduct, { foreignKey: "productId" });
 RequestedPurchaseProduct.belongsTo(Product, { foreignKey: "productId" });
 
 // Product-ProductCategory (one 'Product' have one 'Category') (one 'Category' have multiple 'Product')
-Product.belongsTo(ProductCategory, { foreignKey: "categoryId" });
+Product.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
 ProductCategory.hasMany(Product, { foreignKey: "categoryId" });
 
 // Product-ProductSubCategory (one 'Product' have one 'SubCategory') (one 'SubCategory' have multiple 'Product')

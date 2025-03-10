@@ -1,3 +1,5 @@
+import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 import * as productRepository from "../repositories/product.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
@@ -8,6 +10,10 @@ export const fetchProductsWithSlabsByLocation = async (page: number, limit: numb
   const finalData = await Promise.all(
     data.products.map(async (product: any) => {
       product = product.get({ plain: true });
+
+      product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+      product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+      product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
 
       product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
 
