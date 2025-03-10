@@ -33,7 +33,11 @@ export const getAllPurchaseOrders = catchAsync(async (req: AuthRequest, res: Res
   const { page = 1, limit = 10, ...filter }: any = req.query;
 
   const result = await poService.getAllPurchaseOrders(Number(page), Number(limit), filter);
-  SuccessResponse(res, 200, "Purchase Orders fetched successfully", result);
+  SuccessResponse(res, 200, "Purchase Orders fetched successfully", result.data, {
+    limit: result.pagination.limit,
+    page: result.pagination.page,
+    total: result.pagination.total,
+  });
 });
 
 // get PO detail by id
