@@ -670,6 +670,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "update PO status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"CLOSED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/purchaseOrder/:Id/status",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"purchaseOrder",
+								":Id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "Id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1049,7 +1084,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"meters\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"binId\": 1,\n  \"quantity\": 10\n}\n",
+							"raw": "{\n  \"entryUnit\": \"meter\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 345,\n  \"binId\": 1,\n  \"quantity\": 10\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1070,7 +1105,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "36"
 								}
 							]
 						}
@@ -1134,7 +1169,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "37"
 								}
 							]
 						}
@@ -1302,6 +1337,51 @@
 			"item": [
 				{
 					"name": "hold-unhold",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isHold\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/:slabId/hold",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								":slabId",
+								"hold"
+							],
+							"variable": [
+								{
+									"key": "slabId",
+									"value": "18"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cart",
 					"request": {
 						"auth": {
 							"type": "bearer",
