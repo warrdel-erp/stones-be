@@ -6,6 +6,7 @@ import {
   PAYMENT_TERMS,
   PRODUCT_COLORS,
   PRODUCT_KIND,
+  SALES_TAX,
   SHIPMENT_TERMS,
   THICKNESS,
   UNITS_OF_MEASUREMENT,
@@ -34,5 +35,6 @@ export const getGeneralData = async () => {
     finish: FINISH,
     group: GROUPS,
     kind: PRODUCT_KIND,
+    salesTax: SALES_TAX,
   };
 };
