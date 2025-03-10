@@ -80,9 +80,9 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
-  if (filter) {
-    filter.tab = "PAYMENT_PENDING";
-  }
+  // if (filter) {
+  //   filter.tab = "PAYMENT_PENDING";
+  // }
 
   let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(
     page,
