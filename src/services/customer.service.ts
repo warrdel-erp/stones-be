@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -7,7 +8,7 @@ import * as customerRepository from "../repositories/customer.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 
 // Service function to create a customer.
-export const registerCustomer = async (customerData: any) => {
+export const registerCustomer = async (customerData: any, clientId: number) => {
   const transaction = await sequelize.transaction();
   try {
     if (!customerData.name || !customerData.email) {
@@ -18,14 +19,7 @@ export const registerCustomer = async (customerData: any) => {
     const newCustomer: any = await customerRepository.createCustomer(customerData, transaction);
 
     // Create Ledger Account data
-    const ledgerAccountData: LedgerAccount = {
-      subHeaderId: 1002,
-      type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
-      referenceId: newCustomer.id,
-    };
-
-    const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
+    const ledgerAccount = await createLedgerAccountForCustomer(clientId, newCustomer, transaction);
 
     transaction.commit();
     return { customer: newCustomer, ledgerAccount };
@@ -47,3 +41,16 @@ export const updateCustomer = async (id: number, data: any) => {
 export const fetchAllCustomers = async (page: number, limit: number, search?: string) => {
   return await customerRepository.getAllCustomers(page, limit, search);
 };
+
+async function createLedgerAccountForCustomer(clientId: number, newCustomer: any, transaction: Transaction) {
+  const ledgerAccountData: LedgerAccount = {
+    subHeaderId: 1002,
+    clientId,
+    type: LEDGER_ACCOUNT_TYPES.DEBIT,
+    referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+    referenceId: newCustomer.id,
+  };
+
+  const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
+  return ledgerAccount;
+}

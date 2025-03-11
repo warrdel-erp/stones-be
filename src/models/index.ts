@@ -1,4 +1,5 @@
 import Bill from "./bill";
+import BillItem from "./billItem";
 import Bin from "./bin";
 import Client from "./client";
 import Customer from "./customer.model";
@@ -316,6 +317,14 @@ SIPLProduct.hasMany(Slab, { foreignKey: "siplProductId", as: "slabs" });
 Slab.hasMany(SlabRemeasurement, { foreignKey: "slabId", as: "remeasurements" });
 SlabRemeasurement.belongsTo(Slab, { foreignKey: "slabId", as: "slab" });
 
+// 🔹 One Bill can have Many items
+Bill.hasMany(BillItem, { foreignKey: "billId", as: "billItems" });
+BillItem.belongsTo(Bill, { foreignKey: "billId", as: "bill" });
+
+// Many bill items could be created against one ledger account
+LedgerAccount.hasMany(BillItem, { foreignKey: "ledgerAccountId", as: "billItems" });
+BillItem.belongsTo(LedgerAccount, { foreignKey: "ledgerAccountId", as: "ledgerAccount" });
+
 export {
   Client,
   User,
@@ -347,4 +356,5 @@ export {
   SalesOrderProduct,
   Payment,
   SlabRemeasurement,
+  BillItem,
 };

@@ -1,5 +1,7 @@
+import { Response } from "express";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
+import { AuthRequest } from "../middleware/authMiddleware";
 import * as ledgerAccountService from "../services/ledgerAccount.service";
 
 // Create ledger account.
@@ -26,6 +28,15 @@ export const getLedgerAccountById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const ledgerAccount = await ledgerAccountService.getLedgerAccountById(Number(id));
   return SuccessResponse(res, 200, "Ledger Account details fetched", ledgerAccount);
+});
+
+export const getLedgerAccountsForFreightItems = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  console.log("clientId", clientId);
+
+  const ledgerAccount = await ledgerAccountService.getLedgerAccountsForFreightItems(Number(clientId));
+  return SuccessResponse(res, 200, "Ledger Accounts for freightItems", ledgerAccount);
 });
 
 // export const updateLedgerAccount = catchAsync(async (req, res) => {

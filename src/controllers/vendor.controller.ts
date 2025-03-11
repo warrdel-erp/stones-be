@@ -8,9 +8,10 @@ import { AuthRequest } from "../middleware/authMiddleware";
 export const createVendorController = catchAsync(async (req: AuthRequest, res: Response) => {
   const vendorData = req.body;
   const userId = req.user?.id;
+  const clientId = req.user?.clientId;
 
   // Call service function
-  const newVendor = await vendorService.registerVendor({ ...vendorData, createdBy: userId });
+  const newVendor = await vendorService.registerVendor({ ...vendorData, createdBy: userId }, Number(clientId));
 
   return SuccessResponse(res, 201, "Vendor created successfully.", newVendor);
 });

@@ -8,7 +8,7 @@ import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
 
 // Service function to create a vendor.
-export const registerVendor = async (vendorData: any) => {
+export const registerVendor = async (vendorData: any, clientId: number) => {
   const transaction = await sequelize.transaction();
   try {
     if (!vendorData.name || !vendorData.email) {
@@ -21,6 +21,7 @@ export const registerVendor = async (vendorData: any) => {
     // Create Ledger Account data
     const ledgerAccountData: LedgerAccount = {
       name: newVendor.name,
+      clientId,
       subHeaderId: 1002,
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,

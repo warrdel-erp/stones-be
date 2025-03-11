@@ -3,6 +3,7 @@ import Vendor from "./vendor";
 import { sequelize } from "../config/database";
 import User from "./user";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_TERMS } from "../constants";
 
 const Bill = sequelize.define(
   "bills",
@@ -12,34 +13,33 @@ const Bill = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    billNumber: {
+      type: DataTypes.INTEGER,
+    },
     clientBillNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
-    },
-    amount: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
     },
     type: {
       type: DataTypes.ENUM("freight"),
       allowNull: false,
     },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "pending",
-    },
-    paid: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    dueDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
+    // status: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    //   defaultValue: "pending",
+    // },
+    // paid: {
+    //   type: DataTypes.BOOLEAN,
+    //   allowNull: false,
+    //   defaultValue: false,
+    // },
+    // dueDate: {
+    //   type: DataTypes.DATE,
+    //   allowNull: false,
+    // },
     paymentTerms: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...PAYMENT_TERMS.map((e) => String(e.id))),
       allowNull: false,
     },
     referenceType: {

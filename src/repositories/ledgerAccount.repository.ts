@@ -1,10 +1,17 @@
-import { Op, Transaction } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import * as models from "../models";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
+import { FREIGHT_BILL_ACCOUNT_KEYS } from "../constants/coa";
 
 // Create ledger account.
 export const createLedgerAccount = async (data: LedgerAccount, transaction?: Transaction) => {
   return await models.LedgerAccount.create(data, { transaction });
+};
+
+// Create ledger account.
+export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction?: Transaction) => {
+  const accounts = await models.LedgerAccount.bulkCreate(data, { transaction, returning: true });
+  return accounts;
 };
 
 // Get all ledger accounts.
@@ -18,6 +25,17 @@ export const getLedgerAccounts = async (page: number, limit: number, filters: an
     limit,
     offset,
     order: [["id", "DESC"]],
+  });
+};
+
+export const getLedgerAccountsForFreightItems = async (clientId: number) => {
+  return await models.LedgerAccount.findAll({
+    where: {
+      clientId,
+      key: {
+        [Op.in]: Object.values(FREIGHT_BILL_ACCOUNT_KEYS),
+      },
+    },
   });
 };
 

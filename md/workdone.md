@@ -15,3 +15,10 @@
 4. accounts listing.
 5. more api modification according to Jatin.
 6. slab remeasurement
+
+---
+
+1. slab no. auto increment.
+2. total receiving and packaging quantity in sipl products.
+3. Slab in cart or not
+4. Total fulfilled of requestedProducts in single PO

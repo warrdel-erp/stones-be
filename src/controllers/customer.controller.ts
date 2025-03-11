@@ -8,9 +8,10 @@ import * as customerService from "../services/customer.service";
 export const createCustomerController = catchAsync(async (req: AuthRequest, res: Response) => {
   const customerData = req.body;
   const userId = req.user?.id;
+  const clientId = req.user?.clientId;
 
   // Call service function
-  const newCustomer = await customerService.registerCustomer({ ...customerData, createdBy: userId });
+  const newCustomer = await customerService.registerCustomer({ ...customerData, createdBy: userId }, Number(clientId));
 
   return SuccessResponse(res, 201, "Customer created successfully.", newCustomer);
 });

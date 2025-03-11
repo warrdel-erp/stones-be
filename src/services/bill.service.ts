@@ -1,7 +1,39 @@
 import * as billRepository from "../repositories/bill.repository";
+import { sequelize } from "../config/database";
+import * as billItemRepository from "../repositories/billItems.repository";
 
 export const createBill = async (billData: any) => {
-  return await billRepository.createBill(billData);
+  if (!billData.items || !Array.isArray(billData.items)) {
+    throw new Error("Bill items are required.");
+  }
+
+  const transaction = await sequelize.transaction();
+
+  const billItems: any[] = [];
+
+  try {
+    const bill: any = await billRepository.createBill(billData, transaction);
+
+    for (const item of billData.items) {
+      const billItem = await billItemRepository.createBillItem(
+        {
+          service: item.service,
+          amount: item.amount,
+          ledgerAccountId: item.ledgerAccountId,
+          billId: bill.id,
+        },
+        transaction
+      );
+
+      billItems.push(billItem);
+    }
+
+    await transaction.commit();
+    return { bill, billItems };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 // get one bill by id

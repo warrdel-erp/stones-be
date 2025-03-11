@@ -2,9 +2,12 @@ import { DataTypes, Sequelize } from "sequelize";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
+import Client from "./client";
 
 export type LedgerAccount = {
   name?: string;
+  clientId: number;
+  key?: string;
   type: (typeof LEDGER_ACCOUNT_TYPES)[keyof typeof LEDGER_ACCOUNT_TYPES];
   openingBalance?: number;
   openingDate?: Date;
@@ -24,10 +27,10 @@ const LedgerAccount = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: {
-        name: "unique_name_no_constraint",
-        msg: "unique name_no",
-      },
+    },
+    key: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     type: {
       type: DataTypes.ENUM(...Object.values(LEDGER_ACCOUNT_TYPES)),
@@ -55,10 +58,26 @@ const LedgerAccount = sequelize.define(
       type: DataTypes.ENUM(...Object.values(LEDGER_ACCOUNT_REFERENCE_TYPES)),
       allowNull: true, // Null for general accounts, required if referenceId exists
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "ledger_accounts",
     timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "key"],
+      },
+    ],
   }
 );
 

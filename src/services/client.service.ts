@@ -1,6 +1,11 @@
 import bcrypt from "bcryptjs";
 import { AppError } from "../helper/appError";
 import * as clientRepository from "../repositories/client.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import { LedgerAccount } from "../models/ledgerAccount.model";
+import { FREIGHT_BILL_ACCOUNT_KEYS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { Transaction } from "sequelize";
+import { sequelize } from "../config/database";
 
 /**
  * Register Client
@@ -8,17 +13,30 @@ import * as clientRepository from "../repositories/client.repository";
 export async function registerClient(clientData: any) {
   const { email, password } = clientData;
 
-  // Check if client exists
-  const existingClient = await clientRepository.findClientByEmail(email);
-  if (existingClient) {
-    throw new AppError("Client already exists", 400);
+  const transaction = await sequelize.transaction();
+  try {
+    // Check if client exists
+    const existingClient = await clientRepository.findClientByEmail(email);
+    if (existingClient) {
+      throw new AppError("Client already exists", 400);
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create client
+    const client = await clientRepository.createClient({ ...clientData, password: hashedPassword }, transaction);
+
+    const id = client.getDataValue("id");
+    // Create default ledger accounts for client.
+    const defaultLedgerAccount = await createDefaultLedgerAccountsForClient(id, transaction);
+
+    transaction.commit();
+    return { client, defaultLedgerAccount };
+  } catch (error) {
+    transaction.rollback();
+    throw error;
   }
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Create client
-  return await clientRepository.createClient({ ...clientData, password: hashedPassword });
 }
 
 /**
@@ -35,4 +53,29 @@ export const modifyClient = async (id: number, updateData: any) => {
   const updatedClient = await clientRepository.updateClient(id, updateData);
   if (!updatedClient) throw new AppError("User not found or update failed", 400);
   return updatedClient;
+};
+
+const createDefaultLedgerAccountsForClient = async (clientId: number, transaction: Transaction) => {
+  const data: LedgerAccount[] = [
+    {
+      name: "Freight-In",
+      clientId,
+      key: FREIGHT_BILL_ACCOUNT_KEYS.FREIGHT_IN,
+      subHeaderId: 78,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Brokerage Charges",
+      clientId,
+      key: FREIGHT_BILL_ACCOUNT_KEYS.BROKERAGE_CHARGES,
+      subHeaderId: 79,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+  ] as const;
+
+  return await ledgerAccountRepository.createBulkLedgerAccount(data, transaction);
 };

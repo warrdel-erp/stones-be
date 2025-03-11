@@ -12,6 +12,10 @@ export const getLedgerAccountById = async (id: number) => {
   return ledgerAccountRepository.getLedgerAccountById(id);
 };
 
+export const getLedgerAccountsForFreightItems = async (clientId: number) => {
+  return ledgerAccountRepository.getLedgerAccountsForFreightItems(clientId);
+};
+
 // export const updateLedgerAccount = async (id: number, data: any) => {
 //   return ledgerAccountRepository.updateLedgerAccount(id, data);
 // };

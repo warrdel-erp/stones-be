@@ -54,16 +54,14 @@
 46. Conditions for closing and canceling PO.
 
 47. total receiving and packaging quantity in sipl products. ✔️
-48. slab no. auto increment.
+48. slab no. auto increment. ✔️
 49. freight bill.
-50. receive inventory.
+50. receive inventory data.
 
 ---
 
-payload validations.
-model typescript support
-remove any types
-
-in product model (product.productName => product.name)
-
-create flow diagram for every flow 48. put constants in tables for better data fetching
+1. payload validations(req.body should not be passed directly to service.) .
+2. model typescript support
+3. remove any types
+4. in product model (product.productName => product.name)
+5. create flow diagram for every flow 48. put constants in tables for better data fetching
