@@ -893,7 +893,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"billNumber\": 1001,\n  \"type\": \"freight\",\n  \"paymentTerms\": 1,\n  \"referenceType\": \"sipl\",\n  \"referenceId\": 1,\n  \"vendorId\": 1,\n  \"items\": [\n    {\n      \"service\": \"Logistics Service\",\n      \"amount\": 1500,\n      \"ledgerAccountId\": 4\n    },\n    {\n      \"service\": \"Handling Charges\",\n      \"amount\": 500,\n      \"ledgerAccountId\": 3\n    }\n  ]\n}\n",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1097,7 +1097,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 2,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
+							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 2,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        },\n        {\n            \"productId\": 2,\n            \"quantity\": 105,\n            \"unitPrice\": 70.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1135,7 +1135,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"meter\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 30,\n  \"binId\": 1,\n  \"slabNumber\": 4,\n  \"quantity\": 2\n}\n",
+							"raw": "{\n  \"entryUnit\": \"meter\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 2,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 3\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1156,7 +1156,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "39"
+									"value": "2"
 								}
 							]
 						}
@@ -1262,6 +1262,14 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "get receive inventory data",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
