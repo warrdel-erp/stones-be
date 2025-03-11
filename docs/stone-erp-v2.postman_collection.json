@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Tech Solutions Ltd 2\",\n  \"password\": \"SecurePass123\",\n  \"email\": \"contact4513@techsolutions.com\",\n  \"locationShortName\": \"TSL\",\n  \"clientType\": \"Enterprise\",\n  \"address\": \"456 Innovation Drive, Suite 800\",\n  \"country\": \"USA\",\n  \"city\": \"San Francisco\",\n  \"pincode\": \"94107\",\n  \"tax\": \"GST987654\",\n  \"priceLevel\": \"Gold\",\n  \"paymentTerms\": \"Net 45\",\n  \"licenseNumber\": \"LIC-567890\",\n  \"userCount\": 10\n}\n",
+							"raw": "{\n  \"name\": \"Tech Solutions Ltd 1\",\n  \"password\": \"SecurePass123\",\n  \"email\": \"contact@techsolutions.com\",\n  \"locationShortName\": \"TSL\",\n  \"clientType\": \"Enterprise\",\n  \"address\": \"456 Innovation Drive, Suite 800\",\n  \"country\": \"USA\",\n  \"city\": \"San Francisco\",\n  \"pincode\": \"94107\",\n  \"tax\": \"GST987654\",\n  \"priceLevel\": \"Gold\",\n  \"paymentTerms\": \"Net 45\",\n  \"licenseNumber\": \"LIC-567890\",\n  \"userCount\": 10\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -372,7 +372,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"ABC Supplier\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"SUPPLIER\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":\"30\",\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
+							"raw": "{\n    \"name\": \"ABC Supplier1\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":\"30\",\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -744,7 +744,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Kota Stone 2\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 1\n}\n",
+							"raw": "{\n  \"name\": \"Kota Stone 1\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -850,7 +850,24 @@
 					"name": "get product by id",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/product/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"product",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -876,7 +893,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": \"BILL-20240228\",\n    \"amount\": 1500.75,\n    \"type\": \"freight\",\n    \"status\": \"pending\",\n    \"paid\": false,\n    \"dueDate\": \"2025-03-10\",\n    \"paymentTerms\": \"Net 30\",\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"vendorId\": 1\n}\n",
+							"raw": "{\n  \"billNumber\": 1001,\n  \"type\": \"freight\",\n  \"paymentTerms\": 1,\n  \"referenceType\": \"sipl\",\n  \"referenceId\": 1,\n  \"vendorId\": 1,\n  \"items\": [\n    {\n      \"service\": \"Logistics Service\",\n      \"amount\": 1500,\n      \"ledgerAccountId\": 4\n    },\n    {\n      \"service\": \"Handling Charges\",\n      \"amount\": 500,\n      \"ledgerAccountId\": 3\n    }\n  ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -992,6 +1009,16 @@
 				{
 					"name": "receive inventory",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"url": {
@@ -1008,7 +1035,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "36"
 								}
 							]
 						}
@@ -1070,7 +1097,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
+							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 2,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1,\n        \"purchaseOrderId\": 2\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1108,7 +1135,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"meter\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 345,\n  \"binId\": 1,\n  \"quantity\": 10\n}\n",
+							"raw": "{\n  \"entryUnit\": \"meter\",\n  \"packageLength\": 2.5,\n  \"packageWidth\": 1.2,\n  \"receivingLength\": 2.4,\n  \"receivingWidth\": 1.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 30,\n  \"binId\": 1,\n  \"slabNumber\": 4,\n  \"quantity\": 2\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1129,7 +1156,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "36"
+									"value": "39"
 								}
 							]
 						}
@@ -1193,7 +1220,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "37"
+									"value": "39"
 								}
 							]
 						}
@@ -1497,6 +1524,16 @@
 				{
 					"name": "get slab by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1512,7 +1549,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": ""
+									"value": "1"
 								}
 							]
 						}
@@ -2634,6 +2671,35 @@
 									"key": "id",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "for freight items",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/ledgerAccount/forFreightItems",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"ledgerAccount",
+								"forFreightItems"
 							]
 						}
 					},
