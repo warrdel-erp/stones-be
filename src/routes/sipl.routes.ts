@@ -17,6 +17,9 @@ router.post("/createDirectSipl", authenticateUser, siplController.createDirectSI
 router.get("/newInvoiceNumber", authenticateUser, siplController.getNewInvoiceNumber);
 
 // get SIPL by ID
+router.get("/:id/getReceiveInventoryData", authenticateUser, siplController.getReceiveInventoryData);
+
+// get SIPL by ID
 router.get("/:id", authenticateUser, siplController.getSIPLById);
 
 // add slab to SIPL.

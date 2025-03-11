@@ -188,10 +188,11 @@ Vendor.hasMany(Bill, { foreignKey: "vendorId" });
 Bill.belongsTo(Vendor, { foreignKey: "vendorId" });
 
 // Bill have reference to SIPL
-SIPL.hasOne(Bill, {
+SIPL.hasMany(Bill, {
   foreignKey: "referenceId",
   constraints: false,
   scope: { referenceType: "sipl" },
+  as: "bills",
 });
 
 Bill.belongsTo(SIPL, {

@@ -197,3 +197,11 @@ export const getAllSIPLs = catchAsync(async (req: Request, res: Response) => {
   const sipls = await siplService.getAllSIPLs(Number(page), Number(limit));
   SuccessResponse(res, 200, "SIPLs fetched successfully", sipls);
 });
+// Get all SIPLs
+export const getReceiveInventoryData = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const sipls = await siplService.getsSiplCalculations(Number(id));
+
+  SuccessResponse(res, 200, "Inventory data fetched successfully", sipls);
+});

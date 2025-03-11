@@ -161,3 +161,78 @@ export const getAllSIPLs = async (page: number, limit: number) => {
     data: rows,
   };
 };
+
+export const getsSiplCalculations = async (siplId: number) => {
+  const siplData = (await siplRepository.findSIPLById(siplId))?.get({ plain: true });
+
+  // Calculate other bills total amount.
+  const totalBillsCharges = siplData.bills.reduce(
+    (total: number, bill: any) =>
+      total + bill.billItems.reduce((sum: number, billItem: any) => sum + Number(billItem.amount), 0),
+    0
+  );
+
+  // Calculate total area of slabs that packaged.
+  const totalPackagingArea = siplData.siplProducts.reduce(
+    (sum: number, siplProduct: any) =>
+      sum + siplProduct.slabs.reduce((total: number, slab: any) => total + slab.packageLength * slab.packageWidth, 0),
+    0
+  );
+
+  // Calculate total area of slabs that received.
+  const totalReceivingArea = siplData.siplProducts.reduce(
+    (sum: number, siplProduct: any) =>
+      sum +
+      siplProduct.slabs.reduce((total: number, slab: any) => total + slab.receivingLength * slab.receivingWidth, 0),
+    0
+  );
+
+  // Unit bill price as per total area of all product's slab.
+  const unitBillPrice = Number((totalBillsCharges / totalReceivingArea).toFixed(2));
+
+  // Calculation according to product.
+  const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
+    // total received area as per product.
+    const totalReceivedAreaPerProduct = Number(
+      siplProduct.slabs.reduce((a: number, b: any) => a + Number(b.receivingWidth * b.receivingLength), 0).toFixed(2)
+    );
+
+    // total packaging area as per product.
+    const totalPackagingAreaPerProduct = Number(
+      siplProduct.slabs.reduce((a: number, b: any) => a + Number(b.packageWidth * b.packageLength), 0).toFixed(2)
+    );
+
+    // Total SIPL price as per product.
+    const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
+
+    const unitCost = Number((totalSIPLProductPrice / totalPackagingAreaPerProduct).toFixed(2));
+
+    // Total unit charge is self unit charge + bill charge per unit area.
+    const landedUnitCost = unitCost + unitBillPrice;
+
+    return {
+      siplProductId: siplProduct.id,
+      product: {
+        id: siplProduct.product.id,
+        name: siplProduct.product.name,
+      },
+
+      totalSlabs: siplProduct.slabs.length,
+      totalPrice: totalSIPLProductPrice,
+
+      totalReceivedArea: totalReceivedAreaPerProduct,
+      totalPackagingArea: totalPackagingAreaPerProduct,
+
+      unitCost,
+      landedUnitCost,
+    };
+  });
+
+  return {
+    dataAccordingToProduct,
+    totalBillsCharges,
+    totalPackagingArea,
+    totalReceivingArea,
+    unitBillCharge: unitBillPrice,
+  };
+};
