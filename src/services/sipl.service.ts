@@ -173,18 +173,27 @@ export const getsSiplCalculations = async (siplId: number) => {
   );
 
   // Calculate total area of slabs that packaged.
-  const totalPackagingArea = siplData.siplProducts.reduce(
-    (sum: number, siplProduct: any) =>
-      sum + siplProduct.slabs.reduce((total: number, slab: any) => total + slab.packageLength * slab.packageWidth, 0),
-    0
+  const totalPackagingArea = Number(
+    siplData.siplProducts
+      .reduce(
+        (sum: number, siplProduct: any) =>
+          sum +
+          siplProduct.slabs.reduce((total: number, slab: any) => total + slab.packageLength * slab.packageWidth, 0),
+        0
+      )
+      .toFixed(2)
   );
 
   // Calculate total area of slabs that received.
-  const totalReceivingArea = siplData.siplProducts.reduce(
-    (sum: number, siplProduct: any) =>
-      sum +
-      siplProduct.slabs.reduce((total: number, slab: any) => total + slab.receivingLength * slab.receivingWidth, 0),
-    0
+  const totalReceivingArea = Number(
+    siplData.siplProducts
+      .reduce(
+        (sum: number, siplProduct: any) =>
+          sum +
+          siplProduct.slabs.reduce((total: number, slab: any) => total + slab.receivingLength * slab.receivingWidth, 0),
+        0
+      )
+      .toFixed(2)
   );
 
   // Unit bill price as per total area of all product's slab.
