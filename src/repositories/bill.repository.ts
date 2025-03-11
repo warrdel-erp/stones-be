@@ -6,7 +6,14 @@ export const createBill = async (billData: any, transaction?: Transaction) => {
 };
 
 export const getOneBill = async (id: number) => {
-  return await models.Bill.findByPk(id);
+  return await models.Bill.findByPk(id, {
+    include: [
+      {
+        model: models.BillItem,
+        as: "billItems",
+      },
+    ],
+  });
 };
 
 export const getAllBills = async (page: number, limit: number, filters?: { [key: string]: any }) => {
