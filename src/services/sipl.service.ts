@@ -154,11 +154,10 @@ export const getSIPLById = async (id: number) => {
     };
   });
 
-  sipl.totalQuantity = sipl.siplProducts.reduce((total: number, siplProduct: any) => total + siplProduct.quantity, 0);
-  sipl.totalAmount = sipl.siplProducts.reduce(
-    (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
-    0
-  );
+  const calculations = await getSiplCalculations(id);
+  sipl.totalBillsCharges = calculations.totalBillsCharges;
+  sipl.totalQuantity = calculations.totalQuantity;
+  sipl.totalAmount = calculations.totalAmount;
 
   return sipl;
 };
@@ -195,6 +194,18 @@ export const getSiplCalculations = async (siplId: number) => {
         0
       )
       .toFixed(2)
+  );
+
+  // Total quantity exists in a SIPL
+  const totalQuantity = siplData.siplProducts.reduce(
+    (total: number, siplProduct: any) => total + siplProduct.quantity,
+    0
+  );
+
+  // Total amount of a SIPL
+  const totalAmount = siplData.siplProducts.reduce(
+    (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
+    0
   );
 
   // Calculate total area of slabs that received.
@@ -257,6 +268,8 @@ export const getSiplCalculations = async (siplId: number) => {
     totalBillsCharges,
     totalPackagingArea,
     totalReceivingArea,
+    totalQuantity,
+    totalAmount,
     unitBillCharge: unitBillPrice,
     inventoryReceived: siplData.inventoryReceived,
   };
