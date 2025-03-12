@@ -17,6 +17,14 @@ const SIPL = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
+    dueDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    shipDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
     clientInvoiceDate: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -26,7 +34,7 @@ const SIPL = sequelize.define(
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     supplierInvoiceNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     supplierInvoiceDate: {

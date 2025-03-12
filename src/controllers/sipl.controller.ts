@@ -62,6 +62,10 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
     supplierInvoiceNumber,
     supplierInvoiceDate,
     supplierSo,
+    etaDate,
+    expiryDate,
+    dueDate,
+    shipDate,
   } = req.body;
   const { internalNote, printableNote } = req.body; // Extract notes separately
 
@@ -83,10 +87,12 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       !freightDetail ||
       !clientInvoiceDate ||
       !supplierInvoiceNumber ||
-      !supplierInvoiceDate
+      !supplierInvoiceDate ||
+      !shipDate ||
+      !dueDate
     ) {
       throw new AppError(
-        "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, purchaseLocationId, shipmentLocationId, supplierId, clientInvoiceDate",
+        "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, purchaseLocationId, shipmentLocationId, supplierId, clientInvoiceDate, dueDate, shipDate",
         400
       );
     }
@@ -100,6 +106,8 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       products,
       freightDetail,
       clientId,
+      etaDate,
+      expiryDate,
     };
 
     const notesData = { internal: internalNote, printable: printableNote };
@@ -133,6 +141,8 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       updatedBy: createdBy,
       purchaseLocationId,
       shipmentLocationId,
+      dueDate,
+      shipDate,
     };
 
     const sipl = await siplService.createSIPLService(siplData, transaction);
