@@ -90,8 +90,14 @@ export const findSIPLById = async (id: number) => {
         as: "siplProducts",
         include: [
           {
-            model: models.Product,
-            as: "product",
+            model: models.RequestedPurchaseProduct,
+            as: "requestedPurchaseProduct",
+            include: [
+              {
+                model: models.Product,
+                as: "product",
+              },
+            ],
           },
           {
             model: models.Slab,
