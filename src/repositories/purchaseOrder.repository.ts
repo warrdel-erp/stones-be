@@ -88,6 +88,13 @@ export const getPurchaseOrderById = async (id: number) => {
       {
         model: models.SIPL,
         as: "sipls",
+        include: [
+          {
+            model: models.SIPLProduct,
+            as: "siplProducts",
+            attributes: ["id", "quantity", "unitPrice"],
+          },
+        ],
       },
       {
         model: models.FreightDetail,

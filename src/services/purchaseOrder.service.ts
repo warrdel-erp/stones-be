@@ -136,11 +136,13 @@ export const getPurchaseOrderById = async (id: number) => {
   }
 
   // if sipl exists then calculate total amount for every sipl
-  if (purchaseOrder?.sipl) {
+  if (purchaseOrder?.sipls) {
     purchaseOrder.sipls = purchaseOrder.sipls.map((sipl: any) => {
       // Total amount of a SIPL
+
+      console.log("sipl", sipl);
       sipl.totalAmount = sipl.siplProducts.reduce(
-        (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
+        (total: number, siplProduct: any) => total + siplProduct.quantity * Number(siplProduct.unitPrice),
         0
       );
 
