@@ -48,6 +48,7 @@ export const findSIPLById = async (id: number) => {
         model: models.Bill,
         where: { type: "freight" },
         as: "bills",
+        required: false,
         include: [
           {
             model: models.BillItem,
