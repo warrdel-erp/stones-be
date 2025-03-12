@@ -80,6 +80,11 @@ const Vendor = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
+      defaultValue: "active",
+    },
     remitState: {
       type: DataTypes.STRING,
       allowNull: false,
