@@ -62,6 +62,18 @@ PurchaseOrder.belongsTo(Location, {
   foreignKey: "shipmentLocationId",
 });
 
+// SIPL-PurchaseLocation (one 'SIPL' have one 'purchaseLocation')
+SIPL.belongsTo(Location, {
+  as: "purchaseLocation",
+  foreignKey: "purchaseLocationId",
+});
+
+// SIPL-ShipmentLocation (one 'SIPL' have one 'shipmentLocation')
+SIPL.belongsTo(Location, {
+  as: "shipmentLocation",
+  foreignKey: "shipmentLocationId",
+});
+
 // (one PO have one Supplier) , (one Vendor as (Supplier) has many POs)
 PurchaseOrder.belongsTo(Vendor, { foreignKey: "supplierId", as: "supplier" });
 Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId" });

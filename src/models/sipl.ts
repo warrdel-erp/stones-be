@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import User from "./user";
 import PurchaseOrder from "./purchaseOrder";
 import Client from "./client";
+import Location from "./location";
 
 const SIPL = sequelize.define(
   "SIPL",
@@ -77,6 +78,24 @@ const SIPL = sequelize.define(
         model: PurchaseOrder,
         key: "id",
       },
+    },
+    purchaseLocationId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
+    shipmentLocationId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
     clientId: {
       type: DataTypes.INTEGER,
