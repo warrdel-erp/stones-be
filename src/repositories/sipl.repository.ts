@@ -118,6 +118,7 @@ export const findSIPLById = async (id: number) => {
                           {
                             model: models.Location,
                             as: "location",
+                            attributes: ["location"],
                           },
                         ],
                       },
