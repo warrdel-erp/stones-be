@@ -52,7 +52,23 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
       ...otherFilters,
       ...dateRange,
     },
-    include: [{ model: models.Vendor, as: "supplier", attributes: ["name"] }],
+    include: [
+      {
+        model: models.Vendor,
+        as: "supplier",
+        attributes: ["name"],
+      },
+      {
+        model: models.Location,
+        as: "shipmentLocation",
+        attributes: ["location"],
+      },
+      {
+        model: models.Location,
+        as: "purchaseLocation",
+        attributes: ["location"],
+      },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
