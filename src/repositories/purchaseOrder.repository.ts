@@ -78,6 +78,10 @@ export const getPurchaseOrderById = async (id: number) => {
         model: models.FreightDetail,
         as: "freightDetail",
       },
+      {
+        model: models.Notes,
+        as: "notes",
+      },
     ],
     where: { id },
   });
