@@ -169,7 +169,7 @@ export const getAllSIPLs = async (page: number, limit: number) => {
   };
 };
 
-export const getsSiplCalculations = async (siplId: number) => {
+export const getSiplCalculations = async (siplId: number) => {
   const siplData = (await siplRepository.findSIPLById(siplId))?.get({ plain: true });
 
   // Calculate other bills total amount.
@@ -250,5 +250,6 @@ export const getsSiplCalculations = async (siplId: number) => {
     totalPackagingArea,
     totalReceivingArea,
     unitBillCharge: unitBillPrice,
+    inventoryReceived: siplData.inventoryReceived,
   };
 };
