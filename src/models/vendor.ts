@@ -117,7 +117,7 @@ const Vendor = sequelize.define(
       allowNull: false,
     },
     paymentTerms: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     createdBy: {

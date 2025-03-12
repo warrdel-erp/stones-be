@@ -6,7 +6,7 @@ import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
-import { VENDOR_SCOP } from "../constants";
+import { PAYMENT_TERMS, VENDOR_SCOP } from "../constants";
 
 // Service function to create a vendor.
 export const registerVendor = async (vendorData: any, clientId: number) => {
@@ -55,6 +55,7 @@ export const fetchAllVendors = async (page: number, limit: number, filter?: Wher
   vendors.vendors = vendors.vendors.map((vendor: any) => {
     vendor = vendor.get({ plain: true });
     vendor.vendorScope = VENDOR_SCOP.find((k) => k.id == vendor.vendorScope)?.value;
+    vendor.paymentTerms = PAYMENT_TERMS.find((k) => k.id == vendor.paymentTerms)?.value;
 
     return vendor;
   }) as any;
