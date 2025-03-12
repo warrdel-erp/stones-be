@@ -155,6 +155,10 @@ export const getSIPLById = async (id: number) => {
   });
 
   sipl.totalQuantity = sipl.siplProducts.reduce((total: number, siplProduct: any) => total + siplProduct.quantity, 0);
+  sipl.totalAmount = sipl.siplProducts.reduce(
+    (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
+    0
+  );
 
   return sipl;
 };
