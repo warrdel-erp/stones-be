@@ -6,6 +6,7 @@ import * as siplProductsRepository from "../repositories/siplProducts.repository
 import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
+import { AppError } from "../helper/appError";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number): Promise<number> => {
@@ -37,25 +38,27 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
     const productsWithSIPLId: any[] = [];
 
     // Create SIPL Products (if provided)
-    if (siplData.products?.length) {
-      for (const product of siplData.products) {
-        const existingProduct = await requestedPurchaseProductsRepository.findById(
-          product.requestedPurchaseProductId,
-          transaction
-        );
+    if (!siplData.products?.length) {
+      throw new AppError("SIPL could not be created without products.", 400);
+    }
 
-        if (!existingProduct) {
-          throw new Error(`Requested Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
-        }
+    for (const product of siplData.products) {
+      const existingProduct = await requestedPurchaseProductsRepository.findById(
+        product.requestedPurchaseProductId,
+        transaction
+      );
 
-        productsWithSIPLId.push({
-          ...product,
-          siplId: sipl.id,
-        });
+      if (!existingProduct) {
+        throw new Error(`Requested Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
       }
 
-      await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
+      productsWithSIPLId.push({
+        ...product,
+        siplId: sipl.id,
+      });
     }
+
+    await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
 
     // Create Freight Detail (if provided)
     if (siplData.freightDetail) {
@@ -127,6 +130,10 @@ export const getInvoiceNumber = async () => {
 // get SIPL by ID
 export const getSIPLById = async (id: number) => {
   let sipl: any = await siplRepository.findSIPLById(id);
+
+  if (!sipl) {
+    throw new AppError("SIPL does not found", 400);
+  }
 
   sipl = sipl?.get({ plain: true });
 
