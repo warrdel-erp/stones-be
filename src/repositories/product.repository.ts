@@ -14,7 +14,16 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
     where: whereClause,
     limit,
     offset,
-    include: [{ model: models.ProductCategory, as: "category" }],
+    include: [
+      {
+        model: models.ProductCategory,
+        as: "category",
+      },
+      {
+        model: models.ProductSubCategory,
+        as: "subCategory",
+      },
+    ],
     order: [["createdAt", "DESC"]],
   });
 
