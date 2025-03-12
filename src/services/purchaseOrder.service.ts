@@ -135,6 +135,21 @@ export const getPurchaseOrderById = async (id: number) => {
     });
   }
 
+  // if sipl exists then calculate total amount for every sipl
+  if (purchaseOrder?.sipl) {
+    purchaseOrder.sipls = purchaseOrder.sipls.map((sipl: any) => {
+      // Total amount of a SIPL
+      sipl.totalAmount = sipl.siplProducts.reduce(
+        (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
+        0
+      );
+
+      return {
+        ...sipl,
+      };
+    });
+  }
+
   return {
     ...purchaseOrder,
     totalRequestedQuantity: totalQuantity,

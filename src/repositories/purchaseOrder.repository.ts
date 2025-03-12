@@ -83,7 +83,6 @@ export const getPurchaseOrderById = async (id: number) => {
       {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProducts",
-
         include: [{ model: models.SIPLProduct, as: "siplProducts" }],
       },
       {
