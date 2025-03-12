@@ -24,6 +24,12 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
 
   return await models.Bill.findAndCountAll({
     where: whereClause,
+    include: [
+      {
+        model: models.BillItem,
+        as: "billItems",
+      },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],
