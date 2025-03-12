@@ -56,7 +56,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
       {
         model: models.Vendor,
         as: "supplier",
-        attributes: ["name"],
+        attributes: ["name", "vendorScope"],
       },
       {
         model: models.Location,

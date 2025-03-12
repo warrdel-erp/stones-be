@@ -4,6 +4,7 @@ import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as siplProductRepository from "../repositories/siplProducts.repository";
 import { Transaction, WhereOptions } from "sequelize";
+import { VENDOR_SCOP } from "../constants";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -96,6 +97,10 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
 
   rows = rows.map((e) => {
     const plainPo = e.get({ plain: true }); // Convert Sequelize instance to plain object
+
+    // Get vendor scope for purchaseOrder
+    e.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == e.supplier.vendorScope)?.value;
+
     return {
       ...plainPo,
       totalQuantity: Number(poTotalQuantity?.find?.((k) => plainPo.id == k.purchaseOrderId)?.totalQuantity || 0),
@@ -122,6 +127,9 @@ export const getPurchaseOrderById = async (id: number) => {
     return null; // Handle case where PO does not exist
   }
 
+  // Get vendor scope for purchaseOrder
+  purchaseOrder.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
+
   // Fetch total quantity of requested products for this PO
   const totalQuantity = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrder(id);
   const totalSiplQuantity = await siplProductRepository.getTotalQuantityByPurchaseOrder(id);
@@ -140,7 +148,6 @@ export const getPurchaseOrderById = async (id: number) => {
     purchaseOrder.sipls = purchaseOrder.sipls.map((sipl: any) => {
       // Total amount of a SIPL
 
-      console.log("sipl", sipl);
       sipl.totalAmount = sipl.siplProducts.reduce(
         (total: number, siplProduct: any) => total + siplProduct.quantity * Number(siplProduct.unitPrice),
         0
@@ -156,7 +163,6 @@ export const getPurchaseOrderById = async (id: number) => {
     ...purchaseOrder,
     totalRequestedQuantity: totalQuantity,
     totalSiplQuantity,
-    // fulfilledBySipl,
   };
 };
 
