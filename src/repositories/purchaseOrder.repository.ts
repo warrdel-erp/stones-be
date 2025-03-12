@@ -77,10 +77,27 @@ export const getPurchaseOrderById = async (id: number) => {
       {
         model: models.FreightDetail,
         as: "freightDetail",
+        include: [
+          {
+            model: models.Vendor,
+            as: "freightForwarder",
+            attributes: ["name"],
+          },
+        ],
       },
       {
         model: models.Notes,
         as: "notes",
+      },
+      {
+        model: models.Location,
+        as: "shipmentLocation",
+        attributes: ["location"],
+      },
+      {
+        model: models.Location,
+        as: "purchaseLocation",
+        attributes: ["location"],
       },
     ],
     where: { id },

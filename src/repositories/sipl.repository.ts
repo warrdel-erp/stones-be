@@ -1,4 +1,4 @@
-import { Sequelize, Transaction, where } from "sequelize";
+import { Transaction } from "sequelize";
 import * as models from "../models";
 
 // Create SIPL
