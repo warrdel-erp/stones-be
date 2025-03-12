@@ -81,30 +81,52 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
-  // if (filter) {
-  //   filter.tab = "PAYMENT_PENDING";
-  // }
-
   let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(
     page,
     limit,
     filter || {}
   );
 
-  // Add totalQuantity to each PO
-  const poTotalQuantity: any[] = await requestedPurchaseProductRepository.getTotalQuantityForAllPOs();
-  const totalSiplProduct: any[] = await siplProductRepository.getTotalQuantityForAllPO();
-
   rows = rows.map((e) => {
-    const plainPo = e.get({ plain: true }); // Convert Sequelize instance to plain object
+    const purchaseOrder = e.get({ plain: true }); // Convert Sequelize instance to plain object
 
     // Get vendor scope for purchaseOrder
-    e.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == e.supplier.vendorScope)?.value;
+    purchaseOrder.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
+
+    // Calculate total requested all product's quantity
+    purchaseOrder.totalQuantity = purchaseOrder.requestedPurchaseProducts.reduce(
+      (total: number, requestedPurchaseProduct: any) => total + requestedPurchaseProduct.quantity,
+      0
+    );
+
+    // Calculate total requested all product's area
+    purchaseOrder.totalAmount = purchaseOrder.requestedPurchaseProducts.reduce(
+      (total: number, requestedPurchaseProduct: any) =>
+        total + requestedPurchaseProduct.quantity * Number(requestedPurchaseProduct.unitPrice),
+      0
+    );
+
+    // Calculate total quantity in SIPL for this PO
+    purchaseOrder.totalSiplQuantity = purchaseOrder.requestedPurchaseProducts.reduce(
+      (total: number, requestedPurchaseProduct: any) =>
+        total +
+        requestedPurchaseProduct.siplProducts.reduce((sum: number, siplProduct: any) => sum + siplProduct.quantity, 0),
+      0
+    );
+
+    // Calculate total quantity in SIPL for this PO
+    purchaseOrder.totalSiplAmount = purchaseOrder.requestedPurchaseProducts.reduce(
+      (total: number, requestedPurchaseProduct: any) =>
+        total +
+        requestedPurchaseProduct.siplProducts.reduce(
+          (sum: number, siplProduct: any) => sum + siplProduct.quantity * Number(siplProduct.unitPrice),
+          0
+        ),
+      0
+    );
 
     return {
-      ...plainPo,
-      totalQuantity: Number(poTotalQuantity?.find?.((k) => plainPo.id == k.purchaseOrderId)?.totalQuantity || 0),
-      totalSiplQuantity: Number(totalSiplProduct?.find?.((k) => plainPo.id == k.purchaseOrderId)?.totalQuantity || 0),
+      ...purchaseOrder,
     };
   });
 

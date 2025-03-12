@@ -59,6 +59,16 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
         attributes: ["name", "vendorScope"],
       },
       {
+        model: models.RequestedPurchaseProduct,
+        as: "requestedPurchaseProducts",
+        include: [
+          {
+            model: models.SIPLProduct,
+            as: "siplProducts",
+          },
+        ],
+      },
+      {
         model: models.Location,
         as: "shipmentLocation",
         attributes: ["location"],
@@ -67,6 +77,10 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
         model: models.Location,
         as: "purchaseLocation",
         attributes: ["location"],
+      },
+      {
+        model: models.SIPL,
+        as: "sipls",
       },
     ],
     limit,
