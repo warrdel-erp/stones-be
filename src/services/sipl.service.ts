@@ -137,6 +137,10 @@ export const getSIPLById = async (id: number) => {
 
   sipl = sipl?.get({ plain: true });
 
+  if (!sipl) {
+    throw new Error("SIPL not found");
+  }
+
   // Calculate totalReceivedQuantity, totalPackagingQuantity
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
     return {
@@ -150,9 +154,7 @@ export const getSIPLById = async (id: number) => {
     };
   });
 
-  if (!sipl) {
-    throw new Error("SIPL not found");
-  }
+  sipl.totalQuantity = sipl.siplProducts.reduce((total: number, siplProduct: any) => total + siplProduct.quantity, 0);
 
   return sipl;
 };

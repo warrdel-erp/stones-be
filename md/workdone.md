@@ -22,3 +22,8 @@
 2. total receiving and packaging quantity in sipl products.
 3. Slab in cart or not
 4. Total fulfilled of requestedProducts in single PO
+
+---
+
+1. long meeting with Jatin.
+2. some miner data and changes.
