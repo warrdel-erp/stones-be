@@ -233,6 +233,8 @@ export const getSiplCalculations = async (siplId: number) => {
         name: siplProduct.product.name,
       },
 
+      siplProductQuantity: siplProduct.quantity,
+
       totalSlabs: siplProduct.slabs.length,
       totalPrice: totalSIPLProductPrice,
 

@@ -4,7 +4,17 @@ import * as models from "../models";
 
 // find product by id
 export const findById = async (id: number, transaction?: Transaction) => {
-  return await models.RequestedPurchaseProduct.findByPk(id, { transaction });
+  return (
+    await models.RequestedPurchaseProduct.findByPk(id, {
+      include: [
+        {
+          model: models.SIPLProduct,
+          as: "siplProducts",
+        },
+      ],
+      transaction,
+    })
+  )?.get({ plain: true });
 };
 
 // find product by id

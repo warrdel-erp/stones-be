@@ -1,6 +1,5 @@
 import { Sequelize, Transaction, where } from "sequelize";
 import * as models from "../models";
-import { sequelize } from "../config/database";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {

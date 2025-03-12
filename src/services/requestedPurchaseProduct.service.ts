@@ -9,13 +9,20 @@ export const upsertRequestedPurchaseProducts = async (products: Array<any>, purc
       // Check if product exists
       const existingProduct = await requestedPurchaseProductRepository.findById(product.id);
 
-      if (existingProduct) {
-        // Update existing product (productId & purchaseOrderId will be protected by the model hook)
-        await requestedPurchaseProductRepository.updateProduct(product.id, product);
-        upsertedProducts.push(existingProduct);
-      } else {
+      if (!existingProduct) {
         throw new AppError(`Invalid Id '${product.id}'`, 400);
       }
+
+      if (existingProduct.siplProducts.length && product.productId != existingProduct.productId) {
+        throw new AppError(
+          `SIPL product is been created against requested product '${product.id}' So It's product could not be changed.`,
+          400
+        );
+      }
+
+      // Update existing product (productId & purchaseOrderId will be protected by the model hook)
+      await requestedPurchaseProductRepository.updateProduct(product.id, product);
+      upsertedProducts.push(existingProduct);
     } else {
       // Create new product
       const newProduct = await requestedPurchaseProductRepository.createProduct({
