@@ -108,6 +108,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       freightDetail,
       clientId,
       etaDate,
+      container,
       expiryDate,
     };
 
