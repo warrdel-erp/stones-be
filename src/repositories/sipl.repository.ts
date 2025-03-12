@@ -102,6 +102,30 @@ export const findSIPLById = async (id: number) => {
           {
             model: models.Slab,
             as: "slabs",
+            include: [
+              {
+                model: models.InventoryProduct,
+                as: "inventoryProduct",
+                include: [
+                  {
+                    model: models.Bin,
+                    as: "bin",
+                    include: [
+                      {
+                        model: models.Warehouse,
+                        as: "warehouse",
+                        include: [
+                          {
+                            model: models.Location,
+                            as: "location",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

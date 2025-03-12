@@ -185,7 +185,7 @@ SIPL.hasMany(Slab, { foreignKey: "siplId" });
 
 // One Location has One Warehouse
 Location.hasOne(Warehouse, { foreignKey: "locationId" });
-Warehouse.belongsTo(Location, { foreignKey: "locationId" });
+Warehouse.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 
 // One Warehouse has Many Bins
 Warehouse.hasMany(Bin, { foreignKey: "warehouseId" });
@@ -233,7 +233,7 @@ Bin.hasMany(InventoryProduct, { foreignKey: "binId" });
 InventoryProduct.belongsTo(Bin, { foreignKey: "binId" });
 
 // One to One relation.
-Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId" });
+Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 
 // One Ledger account have multiple transaction (one transaction belongs to one Account)
