@@ -81,6 +81,7 @@ const SIPL = sequelize.define(
     },
     purchaseLocationId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: Location,
         key: "id",
@@ -90,6 +91,7 @@ const SIPL = sequelize.define(
     },
     shipmentLocationId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: Location,
         key: "id",
