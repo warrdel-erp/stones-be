@@ -39,7 +39,10 @@ export const getProductByIdSimple = async (id: number) => {
 export const getProductById = async (id: number) => {
   return await models.Product.findOne({
     where: { id },
-    include: [{ model: models.Slab, as: "slabs" }],
+    include: [
+      { model: models.Slab, as: "slabs" },
+      { model: models.ProductCategory, as: "category" },
+    ],
   });
 };
 

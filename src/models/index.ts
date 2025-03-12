@@ -136,7 +136,7 @@ FreightDetail.belongsTo(PurchaseOrder, { foreignKey: "purchaseOrderId" });
 PurchaseOrder.hasOne(FreightDetail, { foreignKey: "purchaseOrderId", as: "freightDetail" });
 
 // FreightDetail-Vendor ('FreightDetail' have one 'Vendor' as freightForwarder)
-FreightDetail.belongsTo(Vendor, { foreignKey: "freightForwarderId" });
+FreightDetail.belongsTo(Vendor, { foreignKey: "freightForwarderId", as: "freightForwarder" });
 Vendor.hasMany(FreightDetail, { foreignKey: "freightForwarderId" });
 
 // PurchaseOrder-requestedPurchaseProduct (one 'PurchaseOrder' have multiple 'RequestedPurchaseProduct')
@@ -158,7 +158,7 @@ Product.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" })
 ProductCategory.hasMany(Product, { foreignKey: "categoryId" });
 
 // Product-ProductSubCategory (one 'Product' have one 'SubCategory') (one 'SubCategory' have multiple 'Product')
-Product.belongsTo(ProductSubCategory, { foreignKey: "subCategoryId" });
+Product.belongsTo(ProductSubCategory, { foreignKey: "subCategoryId", as: "subCategory" });
 ProductSubCategory.hasMany(Product, { foreignKey: "subCategoryId" });
 
 // Product-User (One 'Product' Belongs to one User) (One User can have multiple 'Products')
