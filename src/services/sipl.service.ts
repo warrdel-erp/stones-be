@@ -174,6 +174,15 @@ export const getSIPLById = async (id: number) => {
     };
   });
 
+  // Calculate total for every bill.
+  sipl.bills = sipl.bills.map((bill: any) => {
+    const total = bill.billItems.reduce((total: number, billItem: any) => total + Number(billItem.amount), 0);
+    return {
+      ...bill,
+      total,
+    };
+  });
+
   const calculations = await getSiplCalculations(id);
   sipl.totalBillsCharges = calculations.totalBillsCharges;
   sipl.totalQuantity = calculations.totalQuantity;
