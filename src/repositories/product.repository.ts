@@ -42,6 +42,10 @@ export const getProductById = async (id: number) => {
     include: [
       { model: models.Slab, as: "slabs" },
       { model: models.ProductCategory, as: "category" },
+      {
+        model: models.ProductSubCategory,
+        as: "subCategory",
+      },
     ],
   });
 };
