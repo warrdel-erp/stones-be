@@ -184,11 +184,11 @@ export const getSIPLById = async (id: number) => {
   });
 
   const calculations = await getSiplCalculations(id);
-  sipl.totalBillsCharges = calculations.totalBillsCharges;
-  sipl.totalQuantity = calculations.totalQuantity;
-  sipl.totalAmount = calculations.totalAmount;
+  // sipl.totalBillsCharges = calculations.totalBillsCharges;
+  // sipl.totalQuantity = calculations.totalQuantity;
+  // sipl.totalAmount = calculations.totalAmount;
 
-  return sipl;
+  return { ...sipl, ...calculations };
 };
 
 // Get all SIPLs
