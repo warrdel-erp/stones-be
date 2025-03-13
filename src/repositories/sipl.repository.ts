@@ -84,6 +84,11 @@ export const findSIPLById = async (id: number) => {
         required: false,
         include: [
           {
+            model: models.Vendor,
+            as: "vendor",
+            attributes: ["name"],
+          },
+          {
             model: models.BillItem,
             as: "billItems",
           },

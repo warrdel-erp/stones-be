@@ -33,8 +33,6 @@ export const getLedgerAccountById = catchAsync(async (req, res) => {
 export const getLedgerAccountsForFreightItems = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
 
-  console.log("clientId", clientId);
-
   const ledgerAccount = await ledgerAccountService.getLedgerAccountsForFreightItems(Number(clientId));
   return SuccessResponse(res, 200, "Ledger Accounts for freightItems", ledgerAccount);
 });

@@ -197,8 +197,8 @@ Slab.belongsTo(Bin, { foreignKey: "binId" });
 Bin.hasMany(Slab, { foreignKey: "binId" });
 
 // (one Vendor has many Bills) (One Bill belongs to one Ven)
-Vendor.hasMany(Bill, { foreignKey: "vendorId" });
-Bill.belongsTo(Vendor, { foreignKey: "vendorId" });
+Vendor.hasMany(Bill, { foreignKey: "vendorId", as: "bill" });
+Bill.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
 // Bill have reference to SIPL
 SIPL.hasMany(Bill, {
