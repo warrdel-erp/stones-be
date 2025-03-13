@@ -13,8 +13,21 @@ const Bill = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    billNumber: {
-      type: DataTypes.INTEGER,
+    invoice: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    invoiceDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    dueDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    billDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
     },
     clientBillNumber: {
       type: DataTypes.INTEGER,
