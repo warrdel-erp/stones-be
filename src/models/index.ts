@@ -2,6 +2,7 @@ import Bill from "./bill";
 import BillItem from "./billItem";
 import Bin from "./bin";
 import Client from "./client";
+import Container from "./container";
 import Customer from "./customer.model";
 import CustomerAddress from "./customerAddress.model";
 import FreightDetail from "./freightDetail";
@@ -326,17 +327,25 @@ RequestedPurchaseProduct.hasMany(SIPLProduct, { foreignKey: "requestedPurchasePr
 Slab.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
 SIPLProduct.hasMany(Slab, { foreignKey: "siplProductId", as: "slabs" });
 
-// Establish one-to-many relationship
+// Establish one-to-many relationship.
 Slab.hasMany(SlabRemeasurement, { foreignKey: "slabId", as: "remeasurements" });
 SlabRemeasurement.belongsTo(Slab, { foreignKey: "slabId", as: "slab" });
 
-// 🔹 One Bill can have Many items
+// 🔹 One Bill can have Many items.
 Bill.hasMany(BillItem, { foreignKey: "billId", as: "billItems" });
 BillItem.belongsTo(Bill, { foreignKey: "billId", as: "bill" });
 
-// Many bill items could be created against one ledger account
+// Many bill items could be created against one ledger account.
 LedgerAccount.hasMany(BillItem, { foreignKey: "ledgerAccountId", as: "billItems" });
 BillItem.belongsTo(LedgerAccount, { foreignKey: "ledgerAccountId", as: "ledgerAccount" });
+
+// One SIPL can have multiple Container.
+SIPL.hasMany(Container, { foreignKey: "referenceId", constraints: false, as: "containers" });
+Container.belongsTo(SIPL, { foreignKey: "referenceId", constraints: false, as: "sipl" });
+
+// One purchase order can have one container.
+PurchaseOrder.hasOne(Container, { foreignKey: "referenceId", constraints: false, as: "container" });
+Container.belongsTo(PurchaseOrder, { foreignKey: "referenceId", constraints: false, as: "purchaseOrder" });
 
 export {
   Client,
@@ -370,4 +379,5 @@ export {
   Payment,
   SlabRemeasurement,
   BillItem,
+  Container,
 };

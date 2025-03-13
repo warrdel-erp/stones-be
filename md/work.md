@@ -55,8 +55,9 @@
 
 47. total receiving and packaging quantity in sipl products. ✔️
 48. slab no. auto increment. ✔️
-49. freight bill.
-50. receive inventory data.
+49. freight bill. ✔️
+50. receive inventory data. ✔️
+51. container saprate model
 
 ---
 

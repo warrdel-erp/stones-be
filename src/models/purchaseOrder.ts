@@ -65,10 +65,6 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    container: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     expiryDate: {
       type: DataTypes.DATE,
       allowNull: true,

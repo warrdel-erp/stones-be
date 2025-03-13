@@ -29,6 +29,7 @@ import siplProductRoute from "./routes/siplProduct.routes";
 import paymentRoutes from "./routes/payment.routes";
 import ledgerAccountRoutes from "./routes/ledgerAccount.routes";
 import notesRoutes from "./routes/note.routes";
+import containerRoutes from "./routes/container.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,6 +60,7 @@ app.use("/api/siplProduct", siplProductRoute);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/ledgerAccount", ledgerAccountRoutes);
 app.use("/api/notes", notesRoutes);
+app.use("/api/container", containerRoutes);
 
 // handler error globally.
 app.use(errorHandler);

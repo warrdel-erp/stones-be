@@ -3,7 +3,8 @@ import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as siplProductRepository from "../repositories/siplProducts.repository";
-import { Transaction, WhereOptions } from "sequelize";
+import * as containerService from "../services/container.service";
+import { Transaction } from "sequelize";
 import { VENDOR_SCOP } from "../constants";
 
 /**
@@ -20,6 +21,15 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     // Create purchase order
     const newPO: any = await poRepository.createPurchaseOrder(poData, transaction);
 
+    // Create corresponding container.
+    let container;
+    if (poData.container) {
+      container = await containerService.createContainer({
+        number: poData.container,
+        referenceType: "purchase_order",
+        referenceId: newPO.id,
+      });
+    }
     let freightDetail;
 
     // Create Freight Detail (if provided)

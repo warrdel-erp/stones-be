@@ -41,6 +41,13 @@ export const createSIPLController = catchAsync(async (req: AuthRequest, res: Res
   res.status(201).json({ success: true, data: sipl });
 });
 
+export const addContainer = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const container = await siplService.addContainer(req.body, Number(id));
+  SuccessResponse(res, 201, "Container added successfully", container);
+});
+
 /**
  * create Direct SIPL meaning (first create PO)
  * 1. create PO

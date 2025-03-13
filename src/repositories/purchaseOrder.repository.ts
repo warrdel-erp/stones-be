@@ -59,6 +59,10 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
         attributes: ["name", "vendorScope"],
       },
       {
+        model: models.Container,
+        as: "container",
+      },
+      {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProducts",
         include: [
@@ -93,7 +97,14 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
 export const getPurchaseOrderById = async (id: number) => {
   let result: any = await models.PurchaseOrder.findOne({
     include: [
-      { model: models.Vendor, as: "supplier" },
+      {
+        model: models.Vendor,
+        as: "supplier",
+      },
+      {
+        model: models.Container,
+        as: "container",
+      },
       {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProducts",
@@ -107,6 +118,10 @@ export const getPurchaseOrderById = async (id: number) => {
             model: models.SIPLProduct,
             as: "siplProducts",
             attributes: ["id", "quantity", "unitPrice"],
+          },
+          {
+            model: models.Container,
+            as: "containers",
           },
         ],
       },

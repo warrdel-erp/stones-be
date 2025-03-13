@@ -5,6 +5,8 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as containerRepository from "../repositories/container.repository";
+
 import { Transaction } from "sequelize";
 import { AppError } from "../helper/appError";
 
@@ -34,6 +36,11 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
   try {
     // Create SIPL
     let sipl: any = await siplRepository.createSIPL({ ...siplData }, transaction);
+
+    let container;
+    if (siplData.container) {
+      container = await addContainer({ number: siplData.container }, sipl.id, transaction);
+    }
 
     const productsWithSIPLId: any[] = [];
 
@@ -66,12 +73,25 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
     }
 
     if (shouldCommitTransaction) await transaction.commit();
-    return sipl;
+    return { sipl, container };
   } catch (error: any) {
     if (shouldCommitTransaction) transaction.rollback();
     throw error;
   }
 }
+
+export const addContainer = async (containerData: Object, siplId: number, transaction?: Transaction) => {
+  const container = await containerRepository.createContainer(
+    {
+      ...containerData,
+      referenceType: "sipl",
+      referenceId: siplId,
+    },
+    transaction
+  );
+
+  return container;
+};
 
 // Create slabs for SIPL
 export async function handleCreateSlabs(slabData: any) {
