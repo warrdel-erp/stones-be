@@ -27,3 +27,7 @@
 
 1. long meeting with Jatin.
 2. some miner data and changes.
+
+---
+
+1. kuldeep error resolved.

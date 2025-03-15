@@ -57,7 +57,12 @@
 48. slab no. auto increment. ✔️
 49. freight bill. ✔️
 50. receive inventory data. ✔️
-51. container saprate model
+51. container saprate model ✔️
+52. update slabs.
+53. product more data like single slab price.
+54. product tabs.
+55. Set default user location error for not access.
+56. SIPL detail Notes Populate.
 
 ---
 

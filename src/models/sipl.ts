@@ -26,7 +26,7 @@ const SIPL = sequelize.define(
       allowNull: false,
     },
     clientInvoiceDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     poSiplNumber: {
