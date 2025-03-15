@@ -19,6 +19,10 @@ const BillItem = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
     ledgerAccountId: {
       type: DataTypes.INTEGER,
       allowNull: false,

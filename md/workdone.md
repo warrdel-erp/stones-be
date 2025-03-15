@@ -32,3 +32,4 @@
 
 1. kuldeep error resolved.
 2. create ledger account API modifications.
+3. meeting with ram for setup.

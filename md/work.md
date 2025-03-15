@@ -63,6 +63,7 @@
 54. product tabs.
 55. Set default user location error for not access.
 56. SIPL detail Notes Populate.
+57. drawer data in inventory.
 
 ---
 

@@ -67,15 +67,21 @@ const Product = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+    singleSlabPrice: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
     },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+    bundlePrice: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    reorderQuantity: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    safetyQuantity: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
     },
     createdBy: {
       type: DataTypes.INTEGER,
