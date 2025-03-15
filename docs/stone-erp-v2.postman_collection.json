@@ -895,7 +895,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 2,\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 3,\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1232,7 +1232,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "3"
 								}
 							]
 						}
@@ -1316,8 +1316,27 @@
 				{
 					"name": "Add container",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"number\": 5435\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{baseurl}}/api/sipl/:id/addContainer",
 							"host": [
@@ -1332,7 +1351,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": ""
+									"value": "3"
 								}
 							]
 						}
@@ -2778,6 +2797,43 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "create new ledger account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cash Account\",\n  \"clientId\": 1,\n  \"key\": \"CASH001\",\n  \"type\": \"dr\", \n  \"openingBalance\": 10000.50,\n  \"openingDate\": \"2025-03-11T00:00:00.000Z\",\n  \"subHeaderId\": 80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/ledgerAccount",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"ledgerAccount"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2851,7 +2907,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "2"
 								}
 							]
 						}

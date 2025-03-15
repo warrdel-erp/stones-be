@@ -2,7 +2,7 @@ import { AppError } from "../helper/appError";
 import * as vendorRepository from "../repositories/vendor.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
-import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
@@ -23,13 +23,12 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
     const ledgerAccountData: LedgerAccount = {
       name: newVendor.name,
       clientId,
-      subHeaderId: 1002,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "trade_payables")?.id!,
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,
       referenceId: newVendor.id,
     };
 
-    // console.log(vendorData.a.b.c);
     const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
 
     transaction.commit();

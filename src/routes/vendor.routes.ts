@@ -8,12 +8,12 @@ const router = Router();
 router.post("/", authenticateUser, vendorController.createVendorController);
 
 // Update vendor.
-router.put("/:id", vendorController.updateVendorController);
+router.put("/:id", authenticateUser, vendorController.updateVendorController);
 
 // Get all vendors.
-router.get("/", vendorController.getAllVendorsController);
+router.get("/", authenticateUser, vendorController.getAllVendorsController);
 
 // Get vendor by ID.
-router.get("/:id", vendorController.getVendorById); // Get vendor by ID
+router.get("/:id", authenticateUser, vendorController.getVendorById); // Get vendor by ID
 
 export default router;

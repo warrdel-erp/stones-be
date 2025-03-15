@@ -1,5 +1,5 @@
 import { DataTypes, Sequelize } from "sequelize";
-import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import Client from "./client";
@@ -47,7 +47,7 @@ const LedgerAccount = sequelize.define(
       defaultValue: DataTypes.NOW,
     },
     subHeaderId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.ENUM(...COA_SUB_HEADERS.map((e) => String(e.id))),
       allowNull: false,
     },
     referenceId: {
