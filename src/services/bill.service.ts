@@ -17,9 +17,7 @@ export const createBill = async (billData: any) => {
     for (const item of billData.items) {
       const billItem = await billItemRepository.createBillItem(
         {
-          service: item.service,
-          amount: item.amount,
-          ledgerAccountId: item.ledgerAccountId,
+          ...item,
           billId: bill.id,
         },
         transaction
