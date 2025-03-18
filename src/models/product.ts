@@ -6,6 +6,7 @@ import ProductSubCategory from "./productSubCategory";
 import { PRODUCT_COLORS } from "../constants";
 import { AppError } from "../helper/appError";
 import { CustomUpdateOptions } from "../types/custom";
+import Bin from "./bin";
 
 const Product = sequelize.define(
   "products",
@@ -82,6 +83,16 @@ const Product = sequelize.define(
     safetyQuantity: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
+    },
+    binId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Bin,
+        key: "id",
+      },
+      onDelete: "NO ACTION",
+      onUpdate: "CASCADE",
     },
     createdBy: {
       type: DataTypes.INTEGER,

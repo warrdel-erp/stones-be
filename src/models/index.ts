@@ -347,6 +347,9 @@ Container.belongsTo(SIPL, { foreignKey: "referenceId", constraints: false, as: "
 PurchaseOrder.hasOne(Container, { foreignKey: "referenceId", constraints: false, as: "container" });
 Container.belongsTo(PurchaseOrder, { foreignKey: "referenceId", constraints: false, as: "purchaseOrder" });
 
+Product.belongsTo(Bin, { foreignKey: "binId", as: "bin" });
+Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
+
 export {
   Client,
   User,

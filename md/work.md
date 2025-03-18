@@ -72,3 +72,5 @@
 3. remove any types
 4. in product model (product.productName => product.name)
 5. create flow diagram for every flow 48. put constants in tables for better data fetching
+6. Restructure sipl calculations acc
+7. Set value in getting model
