@@ -65,6 +65,7 @@
 56. SIPL detail Notes Populate.
 57. drawer data in inventory.
 58. keep everything in SIPL as in PO
+59. add address in customer creation.
 
 ---
 

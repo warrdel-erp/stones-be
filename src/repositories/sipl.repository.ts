@@ -177,6 +177,7 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
       {
         model: models.Slab,
         where: { productId }, // Filter only slabs belonging to the given product
+        as: "slabs",
         required: true,
         include: [
           {
