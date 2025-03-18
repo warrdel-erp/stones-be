@@ -476,6 +476,42 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "vendor according to SIPL.",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/vendor/sipl/:siplId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"vendor",
+								"sipl",
+								":siplId"
+							],
+							"variable": [
+								{
+									"key": "siplId",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -746,7 +782,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Kota Stone 2\",\n  \"subCategory\": \"Marble\",\n  \"baseColor\": \"Gray\",\n  \"group\": \"Natural Stones\",\n  \"origin\": 1,\n  \"uom\": 1, \n  \"kind\": \"1\", \n  \"weight\": 10.5,\n  \"finish\": \"Polished\",\n  \"thickness\": 2.5,\n  \"paymentTerms\":1,\n  \"notes\": \"High quality granite slab\",\n  \"specialInstruction\": \"Handle with care\",\n  \"disclaimer\": \"Color may vary slightly\",\n  \"categoryId\": 1\n}\n",
+							"raw": "{\n    \"name\": \"Kota Stone 2\",\n    \"subCategory\": \"Marble\",\n    \"baseColor\": \"Gray\",\n    \"group\": \"Natural Stones\",\n    \"origin\": 1,\n    \"uom\": 1,\n    \"kind\": \"1\",\n    \"weight\": 10.5,\n    \"finish\": \"Polished\",\n    \"thickness\": 2.5,\n    \"paymentTerms\": 1,\n    \"notes\": \"High quality granite slab\",\n    \"specialInstruction\": \"Handle with care\",\n    \"disclaimer\": \"Color may vary slightly\",\n    \"categoryId\": 1,\n    \"singleSlabPrice\": 12,\n    \"bundlePrice\": 10,\n    \"reorderQuantity\": 43,\n    \"safetyQuantity\": 43\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -851,6 +887,16 @@
 				{
 					"name": "get product by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -895,7 +941,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 3,\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 3,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1047,7 +1093,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "36"
+									"value": "4"
 								}
 							]
 						}
@@ -1255,7 +1301,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/sipl?limit=10&page=1",
+							"raw": "{{baseurl}}/api/sipl",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1266,11 +1312,13 @@
 							"query": [
 								{
 									"key": "limit",
-									"value": "10"
+									"value": "10",
+									"disabled": true
 								},
 								{
 									"key": "page",
-									"value": "1"
+									"value": "1",
+									"disabled": true
 								}
 							]
 						}
@@ -2006,7 +2054,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 11\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 12\n    }\n \n]",
+							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 11\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 12\n    }\n]",
 							"options": {
 								"raw": {
 									"language": "json"
