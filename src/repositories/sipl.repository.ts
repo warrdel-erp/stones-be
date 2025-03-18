@@ -91,6 +91,12 @@ export const findSIPLById = async (id: number) => {
           {
             model: models.BillItem,
             as: "billItems",
+            include: [
+              {
+                model: models.LedgerAccount,
+                as: "ledgerAccount",
+              },
+            ],
           },
         ],
       },
