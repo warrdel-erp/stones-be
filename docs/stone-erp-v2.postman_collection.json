@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\":3\n}\n",
+							"raw": "{\n    \"locationId\":1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -430,6 +430,16 @@
 				{
 					"name": "Get all vendors",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -507,6 +517,42 @@
 								{
 									"key": "siplId",
 									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "all bills for vendor payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/vendor/:vendorId/paymentBills",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"vendor",
+								":vendorId",
+								"paymentBills"
+							],
+							"variable": [
+								{
+									"key": "vendorId",
+									"value": "1"
 								}
 							]
 						}
@@ -912,7 +958,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "2"
 								}
 							]
 						}
@@ -941,7 +987,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 3,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 1,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 4\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 3\n        }\n    ]\n}",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 4,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -977,7 +1023,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/bill?referenceId=1",
+							"raw": "{{baseurl}}/api/bill?vendorId",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -988,7 +1034,12 @@
 							"query": [
 								{
 									"key": "referenceId",
-									"value": "1"
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "vendorId",
+									"value": null
 								}
 							]
 						}
@@ -2054,7 +2105,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 11\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 12\n    }\n]",
+							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 11\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 12\n    }\n]\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2686,7 +2737,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"paymentType\": \"outgoing\",  \n  \"payeeId\": 1,  \n  \"payeeType\": \"vendor\",  \n  \"invoiceId\": 1,  \n  \"amount\": 1500.75,  \n  \"paymentMethod\": \"cash\",  \n  \"transactionId\": \"TXN123456789\",  \n  \"status\": \"completed\",  \n  \"userId\": 1  \n}\n",
+							"raw": "{\n  \"paymentType\": \"outgoing\",  \n  \"payeeId\": 1,  \n  \"payeeType\": \"vendor\",   \n  \"amount\": 23,  \n  \"paymentMethod\": \"cash\",  \n  \"transactionId\": \"TN1245689\",  \n  \"status\": \"completed\",  \n  \"userId\": 1,\n  \"bills\": [\n    {\n        \"referenceId\":1,\n        \"amount\":23\n    }\n  ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2992,6 +3043,40 @@
 									"key": "id",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "master",
+			"item": [
+				{
+					"name": "vendors",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/master/vendors",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"master",
+								"vendors"
 							]
 						}
 					},
