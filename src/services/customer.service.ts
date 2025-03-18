@@ -1,6 +1,6 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
-import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import { LedgerAccount } from "../models/ledgerAccount.model";
@@ -44,7 +44,7 @@ export const fetchAllCustomers = async (page: number, limit: number, search?: st
 
 async function createLedgerAccountForCustomer(clientId: number, newCustomer: any, transaction: Transaction) {
   const ledgerAccountData: LedgerAccount = {
-    subHeaderId: 1002,
+    subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!,
     clientId,
     type: LEDGER_ACCOUNT_TYPES.DEBIT,
     referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
