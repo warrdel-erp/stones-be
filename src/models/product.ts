@@ -114,10 +114,6 @@ const Product = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
       allowNull: false,

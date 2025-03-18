@@ -90,6 +90,29 @@ export const findByIdWithLogs = async (slabId: number) => {
         model: models.SlabRemeasurement,
         as: "remeasurements",
       },
+      {
+        model: models.SIPL,
+        as: "sipl",
+        attributes: ["id"],
+        include: [
+          {
+            model: models.PurchaseOrder,
+            as: "purchaseOrder",
+            attributes: ["id"],
+            include: [
+              {
+                model: models.Vendor,
+                as: "supplier",
+                attributes: ["name"],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        model: models.Product,
+        as: "product",
+      },
     ],
   });
   return slab?.get({ plain: true });

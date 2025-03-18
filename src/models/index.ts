@@ -181,8 +181,8 @@ Slab.belongsTo(Product, { foreignKey: "productId" });
 Product.hasMany(Slab, { foreignKey: "productId" });
 
 // Slab-SIPL (one 'Slab' belongs to one 'SIPL') (one 'SIPL' have multiple 'Slabs' )
-Slab.belongsTo(SIPL, { foreignKey: "siplId" });
-SIPL.hasMany(Slab, { foreignKey: "siplId" });
+Slab.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
+SIPL.hasMany(Slab, { foreignKey: "siplId", as: "slabs" });
 
 // One Location has One Warehouse
 Location.hasOne(Warehouse, { foreignKey: "locationId" });
