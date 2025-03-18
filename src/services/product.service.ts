@@ -1,4 +1,4 @@
-import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { PRODUCT_KIND, THICKNESS, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
@@ -49,6 +49,7 @@ export const fetchProductById = async (id: number) => {
   product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
   product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
   product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+  product.thickness = THICKNESS.find((e) => e.id == product.thickness)?.value;
 
   product.inventoryBalance = await getInventoryBalance(id);
 
