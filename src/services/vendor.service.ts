@@ -72,3 +72,8 @@ export const getVendorById = async (id: number) => {
 
   return vendor;
 };
+
+//
+export const vendorAccordingToSIPL = async (id: number) => {
+  return await vendorRepository.findVendorAccordingToSIPL(id);
+};

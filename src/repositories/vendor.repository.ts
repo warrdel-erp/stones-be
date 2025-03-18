@@ -1,5 +1,7 @@
-import { Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
+import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { run } from "node:test";
 
 // Create a new vendor in the database.
 export const createVendor = async (vendorData: any, transaction?: Transaction) => {
@@ -45,6 +47,44 @@ export const findVendorById = async (id: number) => {
       {
         model: models.Notes,
         as: "notes",
+      },
+    ],
+  });
+};
+
+export const findVendorAccordingToSIPL = async (id: number) => {
+  return await models.Vendor.findAll({
+    where: {
+      [Op.or]: [
+        { "$purchaseOrder.sipls.id$": id }, // Alias-based filtering
+        { "$bills.referenceId$": id },
+      ],
+    },
+    attributes: ["id", "name", "type"],
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        attributes: ["id"],
+        include: [
+          {
+            model: models.SIPL,
+            as: "sipls",
+            required: true,
+            attributes: ["id"],
+            where: { id },
+          },
+        ],
+      },
+      {
+        model: models.Bill,
+        as: "bills",
+        attributes: ["id", "referenceId"],
+        required: false,
+        where: {
+          referenceType: BILL_REFERENCE_TYPES.SIPL,
+          referenceId: id,
+        },
       },
     ],
   });

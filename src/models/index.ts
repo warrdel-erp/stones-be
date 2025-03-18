@@ -77,7 +77,7 @@ SIPL.belongsTo(Location, {
 
 // (one PO have one Supplier) , (one Vendor as (Supplier) has many POs)
 PurchaseOrder.belongsTo(Vendor, { foreignKey: "supplierId", as: "supplier" });
-Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId" });
+Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId", as: "purchaseOrder" });
 
 // PurchaseOrder-User (one 'User' have multiple 'PurchaseOrder') (one 'PurchaseOrder' have one 'User')
 User.hasMany(PurchaseOrder, { foreignKey: "userId" });
@@ -197,7 +197,7 @@ Slab.belongsTo(Bin, { foreignKey: "binId" });
 Bin.hasMany(Slab, { foreignKey: "binId" });
 
 // (one Vendor has many Bills) (One Bill belongs to one Ven)
-Vendor.hasMany(Bill, { foreignKey: "vendorId", as: "bill" });
+Vendor.hasMany(Bill, { foreignKey: "vendorId", as: "bills" });
 Bill.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
 // Bill have reference to SIPL

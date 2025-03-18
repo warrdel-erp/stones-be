@@ -13,6 +13,9 @@ router.put("/:id", authenticateUser, vendorController.updateVendorController);
 // Get all vendors.
 router.get("/", authenticateUser, vendorController.getAllVendorsController);
 
+// Get vendors according to SIPLs
+router.get("/sipl/:siplId", authenticateUser, vendorController.vendorAccordingToSIPL); // Get vendor by ID
+
 // Get vendor by ID.
 router.get("/:id", authenticateUser, vendorController.getVendorById); // Get vendor by ID
 

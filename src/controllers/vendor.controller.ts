@@ -48,3 +48,10 @@ export const getVendorById = catchAsync(async (req: Request, res: Response) => {
 
   SuccessResponse(res, 200, "Vendor fetched successfully", vendor);
 });
+
+export const vendorAccordingToSIPL = catchAsync(async (req: Request, res: Response) => {
+  const { siplId } = req.params;
+
+  const data = await vendorService.vendorAccordingToSIPL(Number(siplId));
+  SuccessResponse(res, 200, "vendors according to SIPL fetched successfully", data);
+});
