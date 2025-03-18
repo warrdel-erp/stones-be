@@ -1,6 +1,7 @@
 import * as billRepository from "../repositories/bill.repository";
 import { sequelize } from "../config/database";
 import * as billItemRepository from "../repositories/billItems.repository";
+import * as siplService from "../services/sipl.service";
 
 export const createBill = async (billData: any) => {
   if (!billData.items || !Array.isArray(billData.items)) {
@@ -68,3 +69,17 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
 export const getBillNumber = async (clientId: number) => {
   return await billRepository.getBillNumber(clientId);
 };
+
+export async function billForVendor(vendorId: number) {
+  let bills = await billRepository.getAllBillsForVendor({ vendorId });
+
+  bills = bills.map((bill: any) => {
+    bill = bill.get({ plain: true });
+    bill.total = bill.billItems.reduce((total: number, billItem: any) => total + Number(billItem.amount), 0);
+
+    return {
+      ...bill,
+    };
+  }) as any;
+  return bills;
+}

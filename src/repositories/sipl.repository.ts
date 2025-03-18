@@ -206,6 +206,21 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
   return SIPLs;
 };
 
+export const getSIPLByVendor = async (supplierId: number) => {
+  return await models.SIPL.findAll({
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        required: true,
+        where: {
+          supplierId,
+        },
+      },
+    ],
+  });
+};
+
 // update SIPL
 export const updateSIPL = async (id: number, data: any, transaction: Transaction) => {
   await models.SIPL.update(data, {

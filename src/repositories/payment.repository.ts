@@ -1,7 +1,8 @@
+import { Transaction } from "sequelize";
 import * as models from "../models";
 
-export const createPayment = async (paymentData: any) => {
-  return await models.Payment.create(paymentData);
+export const createPayment = async (paymentData: any, transaction: Transaction) => {
+  return await models.Payment.create(paymentData, { transaction });
 };
 
 export const getAllPayments = async (filters: any = {}) => {

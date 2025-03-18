@@ -33,3 +33,8 @@
 17. lead time in create product[REMOVE]
     special pricing.
     leads.
+
+---
+
+1. can bill be partially paid if yes then when will we consider it as totally paid.
+2. do we've to keep record of payment group in payment because we are paying multiple bills in once.

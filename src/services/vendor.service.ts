@@ -1,6 +1,8 @@
 import { AppError } from "../helper/appError";
 import * as vendorRepository from "../repositories/vendor.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as billService from "../services/bill.service";
+import * as siplService from "../services/sipl.service";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -73,7 +75,21 @@ export const getVendorById = async (id: number) => {
   return vendor;
 };
 
-//
+// vendors according to SIPL.
 export const vendorAccordingToSIPL = async (id: number) => {
   return await vendorRepository.findVendorAccordingToSIPL(id);
+};
+
+// Vendor for master.
+export const getVendorsForMaster = async (clientId: number) => {
+  return await vendorRepository.getVendorsForMaster(clientId);
+};
+
+// get all bills with pagination and filters
+export const getAllBillsForVendor = async (vendorId: number) => {
+  const bills = await billService.billForVendor(vendorId);
+
+  const sipls = await siplService.getSIPLByVendor(vendorId);
+
+  return { bills, sipls };
 };

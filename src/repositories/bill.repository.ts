@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, where } from "sequelize";
 import * as models from "../models";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
@@ -32,6 +32,22 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
     ],
     limit,
     offset,
+    order: [["createdAt", "DESC"]],
+  });
+};
+
+export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => {
+  // Build where clause dynamically if filters are provided
+  let whereClause = filters ? { ...filters } : {};
+
+  return await models.Bill.findAll({
+    where: whereClause,
+    include: [
+      {
+        model: models.BillItem,
+        as: "billItems",
+      },
+    ],
     order: [["createdAt", "DESC"]],
   });
 };

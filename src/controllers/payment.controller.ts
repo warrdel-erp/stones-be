@@ -6,8 +6,9 @@ import { AppError } from "../helper/appError";
 
 // create Payment
 export const createPayment = catchAsync(async (req: Request, res: Response) => {
-  const payment = await paymentService.createPayment(req.body);
-  return SuccessResponse(res, 201, "Payment created successfully", payment);
+  const { bills, ...payment } = req.body;
+  const newPayment = await paymentService.processPayment(payment, bills);
+  return SuccessResponse(res, 201, "Payment processed successfully", newPayment);
 });
 
 // get all payments

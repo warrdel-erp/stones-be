@@ -55,3 +55,10 @@ export const vendorAccordingToSIPL = catchAsync(async (req: Request, res: Respon
   const data = await vendorService.vendorAccordingToSIPL(Number(siplId));
   SuccessResponse(res, 200, "vendors according to SIPL fetched successfully", data);
 });
+
+export const getAllBillsForVendor = catchAsync(async (req: Request, res: Response) => {
+  const { vendorId } = req.params;
+  const bills = await vendorService.getAllBillsForVendor(Number(vendorId));
+
+  SuccessResponse(res, 200, "Bills fetched successfully", bills);
+});

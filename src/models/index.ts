@@ -15,6 +15,7 @@ import Notes from "./note";
 import PackagingList from "./packagingList.model";
 import PackagingListProduct from "./packagingListProduct.model";
 import Payment from "./payment.model";
+import PaymentBill from "./paymentBills.model";
 import Product from "./product";
 import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
@@ -226,7 +227,7 @@ Bill.belongsTo(User, { foreignKey: "createdBy" });
 User.hasMany(Bill, { foreignKey: "createdBy", as: "bills" });
 
 // User can have multiple vendors (One vendor belongs to one User)
-Vendor.belongsTo(User, { foreignKey: "createdBy" });
+Vendor.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 User.hasMany(Vendor, { foreignKey: "createdBy", as: "vendors" });
 
 // One Bin can have multiple products.
@@ -350,6 +351,10 @@ Container.belongsTo(PurchaseOrder, { foreignKey: "referenceId", constraints: fal
 Product.belongsTo(Bin, { foreignKey: "binId", as: "bin" });
 Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
 
+// payment can have multiple bills and one bill can have multiple payments so this is an association table.
+PaymentBill.belongsTo(Payment, { foreignKey: "paymentId", as: "payment" });
+Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBill" });
+
 export {
   Client,
   User,
@@ -383,4 +388,5 @@ export {
   SlabRemeasurement,
   BillItem,
   Container,
+  PaymentBill,
 };

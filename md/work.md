@@ -66,6 +66,25 @@
 57. drawer data in inventory.
 58. keep everything in SIPL as in PO
 59. add address in customer creation.
+60. Payment:
+
+    1. Vendors according to SIPL for ✔️
+    2. Pending bills according to vendor.
+    3. New Transaction no.
+    4. Reference No. Reference date.
+
+61. Master:
+
+    1. Master vendor list
+
+62. Customer:
+
+    1. Add dress with customer creation.
+
+63. Sales order:
+    1. Add slabs with creation of SO.
+    2. API
+    3. Slabs list by product.
 
 ---
 

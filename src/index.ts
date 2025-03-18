@@ -30,6 +30,7 @@ import paymentRoutes from "./routes/payment.routes";
 import ledgerAccountRoutes from "./routes/ledgerAccount.routes";
 import notesRoutes from "./routes/note.routes";
 import containerRoutes from "./routes/container.routes";
+import masterRoutes from "./routes/master.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -61,6 +62,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/ledgerAccount", ledgerAccountRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/container", containerRoutes);
+app.use("/api/master", masterRoutes);
 
 // handler error globally.
 app.use(errorHandler);

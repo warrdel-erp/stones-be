@@ -89,3 +89,18 @@ export const findVendorAccordingToSIPL = async (id: number) => {
     ],
   });
 };
+
+export const getVendorsForMaster = async (clientId: number) => {
+  return await models.Vendor.findAll({
+    attributes: ["id", "name"], // Fetch only id and name
+    where: { status: "active" }, // Fetch only active vendors
+    include: [
+      {
+        model: models.User,
+        as: "user",
+        attributes: [],
+        where: { clientId },
+      },
+    ],
+  });
+};

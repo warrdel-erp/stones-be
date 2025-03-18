@@ -184,9 +184,6 @@ export const getSIPLById = async (id: number) => {
   });
 
   const calculations = await getSiplCalculations(id);
-  // sipl.totalBillsCharges = calculations.totalBillsCharges;
-  // sipl.totalQuantity = calculations.totalQuantity;
-  // sipl.totalAmount = calculations.totalAmount;
 
   return { ...sipl, ...calculations };
 };
@@ -302,4 +299,19 @@ export const getSiplCalculations = async (siplId: number) => {
     unitBillCharge: unitBillPrice,
     inventoryReceived: siplData.inventoryReceived,
   };
+};
+
+export const getSIPLByVendor = async (vendorId: number) => {
+  let sipls: any[] = await siplRepository.getSIPLByVendor(vendorId);
+
+  sipls = await Promise.all(
+    sipls.map(async (sipl) => {
+      sipl = sipl.get({ plain: true });
+      const calculations = await getSiplCalculations(sipl.id);
+
+      return { ...sipl, ...calculations };
+    })
+  );
+
+  return sipls;
 };

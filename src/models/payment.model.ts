@@ -23,10 +23,6 @@ const Payment = sequelize.define(
       type: DataTypes.ENUM(...Object.values(PAYEE_TYPE)), // Future-proofing
       allowNull: false,
     },
-    invoiceId: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Nullable because some payments might not be tied to an invoice
-    },
     amount: {
       type: DataTypes.FLOAT,
       allowNull: false,
