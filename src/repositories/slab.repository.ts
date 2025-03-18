@@ -1,6 +1,6 @@
 import Slab from "../models/slab";
 import { SLAB_STATUS } from "../constants";
-import { Transaction } from "sequelize";
+import { col, fn, literal, Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 
@@ -104,4 +104,35 @@ export const getTotalAreaBySIPL = async (siplId: number) => {
     group: ["siplId"],
     raw: true,
   });
+};
+
+export const getInStockSlabsData = async (productId: number) => {
+  const data = await models.Slab.findAll({
+    where: {
+      productId,
+      status: SLAB_STATUS.IN_INVENTORY,
+    },
+    attributes: [
+      [fn("COUNT", col("id")), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
+    ],
+  });
+
+  return data;
+};
+
+// Get data
+export const getAllocatedHoldSlabsData = async (productId: number) => {
+  const data = await models.Slab.findAll({
+    where: {
+      productId,
+      [Op.or]: [{ status: SLAB_STATUS.ALLOCATED }, { isHold: true }],
+    },
+    attributes: [
+      [fn("COUNT", col("id")), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
+    ],
+  });
+
+  return data;
 };

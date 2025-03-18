@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
 import catchAsync from "../helper/asyncCatch";
-import * as productService from "../services/product.service";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
-import { COUNTRIES } from "../constants/countries";
+import * as productService from "../services/product.service";
 
 // Create a new product
 export const createProduct = catchAsync(async (req: AuthRequest, res: Response) => {

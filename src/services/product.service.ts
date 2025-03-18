@@ -2,6 +2,7 @@ import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
+import * as slabRepository from "../repositories/slab.repository";
 
 // Create a new product.
 export const addProduct = async (productData: any, userId: number) => {
@@ -49,5 +50,18 @@ export const fetchProductById = async (id: number) => {
   product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
   product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
 
+  product.inventoryBalance = await getInventoryBalance(id);
+
   return product;
+};
+
+// get inventory balance.
+export const getInventoryBalance = async (productId: number) => {
+  const inStock = await slabRepository.getInStockSlabsData(productId);
+  const allocatedHold = await slabRepository.getAllocatedHoldSlabsData(productId);
+
+  return {
+    inStock,
+    allocatedHold,
+  };
 };

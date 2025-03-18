@@ -21,7 +21,7 @@ const BillItem = sequelize.define(
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     ledgerAccountId: {
       type: DataTypes.INTEGER,

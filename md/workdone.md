@@ -33,3 +33,5 @@
 1. kuldeep error resolved.
 2. create ledger account API modifications.
 3. meeting with ram for setup.
+4. product pricing and safety quantity.
+5. inventory balance (IN PROGRESS)
