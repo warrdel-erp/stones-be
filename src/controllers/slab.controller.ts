@@ -47,3 +47,11 @@ export const createSlabLog = catchAsync(async (req: Request, res: Response) => {
   const slabLog = await slabRemeasurementService.createSlabLogService({ ...req.body, slabId });
   SuccessResponse(res, 201, "Slab log created successfully", slabLog);
 });
+
+// Get all slabs with filter
+export const getAllSlabs = catchAsync(async (req: Request, res: Response) => {
+  const filters = req.query;
+
+  const slabs = await slabService.fetchAllSlabs(filters);
+  return SuccessResponse(res, 200, "Slabs fetched successfully", slabs);
+});

@@ -70,16 +70,16 @@
 
     1. Vendors according to SIPL for ✔️
     2. Pending bills according to vendor. ✔️
-    3. New Transaction no.
+    3. New Transaction no. ✔️
     4. Reference No. Reference date.
 
 61. Master:
 
-    1. Master vendor list
+    1. Master vendor list ✔️
 
 62. Customer:
 
-    1. Add dress with customer creation.
+    1. Address with customer creation. ✔️
 
 63. Sales order:
     1. Add slabs with creation of SO.

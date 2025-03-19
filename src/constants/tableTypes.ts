@@ -10,13 +10,13 @@ export const LEDGER_ACCOUNT_REFERENCE_TYPES = {
   VENDOR: "VENDOR",
 };
 
-export const TRANSACTION_REFERENCE_TYPES = {
+export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SIPL: "SIPL",
   PAYMENT: "PAYMENT",
   SALES_ORDER: "SALES_ORDER",
 };
 
-export const TRANSACTION_TYPES = {
+export const JOURNAL_ENTRY_TYPE = {
   DR: "dr",
   CR: "cr",
 };

@@ -27,7 +27,7 @@ import SIPL from "./sipl";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
 import SlabRemeasurement from "./slabRemeasurement.model";
-import Transaction from "./transaction.model";
+import JournalEntry from "./journalEntry.model";
 import User from "./user";
 import Vendor from "./vendor";
 import Warehouse from "./warehouse";
@@ -239,8 +239,8 @@ Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "invent
 InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 
 // One Ledger account have multiple transaction (one transaction belongs to one Account)
-LedgerAccount.hasMany(Transaction, { foreignKey: "ledgerId", as: "transactions" });
-Transaction.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
+LedgerAccount.hasMany(JournalEntry, { foreignKey: "ledgerId", as: "transactions" });
+JournalEntry.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
 
 // User can create multiple customers (Customer can belongs to one User)
 User.hasMany(Customer, { foreignKey: "userId", as: "customers" });
@@ -375,7 +375,7 @@ export {
   ProductSubCategory,
   InventoryProduct,
   LedgerAccount,
-  Transaction,
+  JournalEntry,
   Customer,
   CustomerAddress,
   LoadingOrder,

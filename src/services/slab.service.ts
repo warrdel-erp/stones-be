@@ -1,3 +1,4 @@
+import { WhereOptions } from "sequelize";
 import * as slabRepository from "../repositories/slab.repository";
 
 export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
@@ -13,3 +14,8 @@ export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) =>
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
 }
+
+// Get all slabs.
+export const fetchAllSlabs = async (filters?: WhereOptions) => {
+  return await slabRepository.getAllSlabs(filters);
+};

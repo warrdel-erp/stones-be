@@ -1,6 +1,6 @@
 import Slab from "../models/slab";
 import { SLAB_STATUS } from "../constants";
-import { col, fn, literal, Op, Transaction } from "sequelize";
+import { col, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 
@@ -116,6 +116,15 @@ export const findByIdWithLogs = async (slabId: number) => {
     ],
   });
   return slab?.get({ plain: true });
+};
+
+/**
+ * Fetch all slabs.
+ */
+export const getAllSlabs = async (filters?: WhereOptions) => {
+  return await Slab.findAll({
+    where: filters,
+  });
 };
 
 export const getTotalAreaBySIPL = async (siplId: number) => {

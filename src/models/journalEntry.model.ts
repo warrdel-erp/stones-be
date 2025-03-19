@@ -1,10 +1,17 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import { TRANSACTION_REFERENCE_TYPES, TRANSACTION_TYPES } from "../constants/tableTypes";
+import { JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 
-const Transaction = sequelize.define(
-  "Transaction",
+export type JournalEntry = {
+  amount: number;
+  type: (typeof JOURNAL_ENTRY_TYPE)[keyof typeof JOURNAL_ENTRY_TYPE];
+  ledgerId: number;
+  referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
+};
+
+const JournalEntry = sequelize.define(
+  "JournalEntry",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -16,7 +23,7 @@ const Transaction = sequelize.define(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM(...Object.values(TRANSACTION_TYPES)), // Credit or Debit
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_TYPE)), // Credit or Debit
       allowNull: false,
     },
     ledgerId: {
@@ -33,14 +40,14 @@ const Transaction = sequelize.define(
       allowNull: true, // Nullable for general transactions
     },
     referenceType: {
-      type: DataTypes.ENUM(...Object.values(TRANSACTION_REFERENCE_TYPES)),
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_REFERENCE_TYPES)),
       allowNull: true, // Required only if referenceId is used
     },
   },
   {
-    tableName: "transactions",
+    tableName: "journal_entry",
     timestamps: false,
   }
 );
 
-export default Transaction;
+export default JournalEntry;
