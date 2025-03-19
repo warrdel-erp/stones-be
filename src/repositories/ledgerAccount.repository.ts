@@ -1,4 +1,4 @@
-import { Op, Sequelize, Transaction } from "sequelize";
+import { Op, Sequelize, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { FREIGHT_BILL_ACCOUNT_KEYS } from "../constants/coa";
@@ -12,6 +12,10 @@ export const createLedgerAccount = async (data: LedgerAccount, transaction?: Tra
 export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction?: Transaction) => {
   const accounts = await models.LedgerAccount.bulkCreate(data, { transaction, returning: true });
   return accounts;
+};
+
+export const getLedgerAccountByFilter = async (filter: WhereOptions) => {
+  return await models.LedgerAccount.findOne({ where: filter });
 };
 
 // Get all ledger accounts.

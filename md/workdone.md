@@ -35,3 +35,9 @@
 3. meeting with ram for setup.
 4. product pricing and safety quantity.
 5. inventory balance (IN PROGRESS)
+
+---
+
+1. customer address.
+2. transaction number.
+3. slabs data for SO.

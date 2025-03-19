@@ -5,10 +5,17 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as containerRepository from "../repositories/container.repository";
+import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import _ from "lodash";
 
 import { Transaction } from "sequelize";
 import { AppError } from "../helper/appError";
+import { JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
+import { COA_SUB_HEADERS } from "../constants/coa";
+import { JournalEntry } from "../models/journalEntry.model";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number): Promise<number> => {
@@ -35,7 +42,7 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
 
   try {
     // Create SIPL
-    let sipl: any = await siplRepository.createSIPL({ ...siplData }, transaction);
+    let sipl: any = await siplRepository.createSIPL(siplData, transaction);
 
     let container;
     if (siplData.container) {
@@ -67,13 +74,17 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
 
     await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
 
+    // Create Journal entry for SIPL START.
+    const siplJournalEntry = await createJournalEntryForSIPL(sipl.id, siplData, transaction);
+    // Create Journal entry for SIPL END.
+
     // Create Freight Detail (if provided)
     if (siplData.freightDetail) {
       await poRepository.createFreightDetail(siplData.freightDetail, { siplId: sipl.id }, transaction);
     }
 
     if (shouldCommitTransaction) await transaction.commit();
-    return { sipl, container };
+    return { sipl, container, siplJournalEntry };
   } catch (error: any) {
     if (shouldCommitTransaction) transaction.rollback();
     throw error;
@@ -92,6 +103,45 @@ export const addContainer = async (containerData: Object, siplId: number, transa
 
   return container;
 };
+
+async function createJournalEntryForSIPL(siplId: number, siplData: any, transaction: Transaction) {
+  const calculations = await getSiplCalculations(siplId, transaction);
+
+  const po = await purchaseOrderRepository.getPOWithVendorLedgerAccount(siplData.purchaseOrderId, transaction);
+
+  const siplJournalEntry = await journalEntryRepository.create(
+    {
+      amount: calculations.totalAmount,
+      ledgerId: po.supplier.ledgerAccount.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    },
+    transaction
+  );
+
+  // Get in_inventory ledger account id for products entry.
+  const ledgerAccountForProducts: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: COA_SUB_HEADERS.find((e) => e.key == "in_transit")?.key,
+    clientId: siplData.clientId,
+  });
+
+  // Create Journal entry data.
+  const arr: JournalEntry[] = calculations.dataAccordingToProduct.map((productCalc: any) => {
+    return {
+      amount: productCalc.totalPrice,
+      ledgerId: ledgerAccountForProducts.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    };
+  });
+
+  // create journal entry for products.
+  const productJournalEntry = await journalEntryRepository.createBulk(arr, transaction);
+
+  return { siplJournalEntry, productJournalEntry };
+}
 
 // Create slabs for SIPL
 export async function handleCreateSlabs(slabData: any) {
@@ -200,8 +250,8 @@ export const getAllSIPLs = async (page: number, limit: number) => {
   };
 };
 
-export const getSiplCalculations = async (siplId: number) => {
-  const siplData = (await siplRepository.findSIPLById(siplId))?.get({ plain: true });
+export const getSiplCalculations = async (siplId: number, transaction?: Transaction) => {
+  const siplData = (await siplRepository.findSIPLById(siplId, transaction))?.get({ plain: true });
 
   // Calculate other bills total amount.
   const totalBillsCharges = siplData.bills.reduce(

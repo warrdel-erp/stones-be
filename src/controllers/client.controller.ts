@@ -5,7 +5,6 @@ import { SuccessResponse } from "../helper/response";
 
 export const registerClientHandler = catchAsync(async (req: Request, res: Response) => {
   const client = await clientService.registerClient(req.body);
-
   SuccessResponse(res, 201, "Client registered successfully", client);
 });
 

@@ -162,6 +162,29 @@ export const getPurchaseOrderById = async (id: number) => {
   return result;
 };
 
+// Get po by id
+export const getPOWithVendorLedgerAccount = async (id: number, transaction?: Transaction) => {
+  return (
+    await models.PurchaseOrder.findByPk(id, {
+      include: [
+        {
+          model: models.Vendor,
+          as: "supplier",
+          attributes: ["id"],
+          include: [
+            {
+              model: models.LedgerAccount,
+              as: "ledgerAccount",
+              attributes: ["id"],
+            },
+          ],
+        },
+      ],
+      transaction,
+    })
+  )?.get({ plain: true });
+};
+
 // get SIPLs for a PO.
 export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
   return await models.SIPL.findAll({

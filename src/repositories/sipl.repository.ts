@@ -27,7 +27,7 @@ export const findSIPLByIdSimple = async (id: number) => {
 };
 
 // Get SIPL by ID
-export const findSIPLById = async (id: number) => {
+export const findSIPLById = async (id: number, transaction?: Transaction) => {
   return await models.SIPL.findByPk(id, {
     include: [
       {
@@ -156,6 +156,7 @@ export const findSIPLById = async (id: number) => {
         attributes: ["location"],
       },
     ],
+    transaction,
   });
 };
 

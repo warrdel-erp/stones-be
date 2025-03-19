@@ -7,6 +7,7 @@ export type JournalEntry = {
   amount: number;
   type: (typeof JOURNAL_ENTRY_TYPE)[keyof typeof JOURNAL_ENTRY_TYPE];
   ledgerId: number;
+  referenceId?: number;
   referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
 };
 

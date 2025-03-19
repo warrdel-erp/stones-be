@@ -76,9 +76,13 @@ SIPL.belongsTo(Location, {
   foreignKey: "shipmentLocationId",
 });
 
-// (one PO have one Supplier) , (one Vendor as (Supplier) has many POs)
+// (one PO have one Supplier) , (one Vendor as (Supplier) has many POs).
 PurchaseOrder.belongsTo(Vendor, { foreignKey: "supplierId", as: "supplier" });
 Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId", as: "purchaseOrder" });
+
+// Ledger account belongs to one Vendor and one vendor has one ledger account.
+LedgerAccount.belongsTo(Vendor, { foreignKey: "referenceId", as: "vendor" });
+Vendor.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount" });
 
 // PurchaseOrder-User (one 'User' have multiple 'PurchaseOrder') (one 'PurchaseOrder' have one 'User')
 User.hasMany(PurchaseOrder, { foreignKey: "userId" });
