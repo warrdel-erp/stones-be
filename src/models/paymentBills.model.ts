@@ -30,7 +30,7 @@ const PaymentBill = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["paymentId", "billId"], // Ensures a bill is not linked multiple times to the same payment
+        fields: ["paymentId", "referenceId"], // Ensures a bill is not linked multiple times to the same payment
       },
     ],
   }
