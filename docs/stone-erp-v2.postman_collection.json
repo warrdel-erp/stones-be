@@ -1747,6 +1747,48 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/slab?productId=1&isHold=false&status=IN_INVENTORY",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "1"
+								},
+								{
+									"key": "isHold",
+									"value": "false"
+								},
+								{
+									"key": "status",
+									"value": "IN_INVENTORY"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
