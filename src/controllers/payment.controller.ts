@@ -3,11 +3,14 @@ import * as paymentService from "../services/payment.service";
 import { SuccessResponse } from "../helper/response";
 import catchAsync from "../helper/asyncCatch";
 import { AppError } from "../helper/appError";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 // create Payment
-export const createPayment = catchAsync(async (req: Request, res: Response) => {
+export const createPayment = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
   const { bills, ...payment } = req.body;
-  const newPayment = await paymentService.processPayment(payment, bills);
+  const newPayment = await paymentService.processPayment({ ...payment, clientId }, bills);
   return SuccessResponse(res, 201, "Payment processed successfully", newPayment);
 });
 
@@ -22,4 +25,12 @@ export const getPaymentById = catchAsync(async (req: Request, res: Response) => 
   const payment = await paymentService.getPayment(Number(req.params.id));
   if (!payment) throw new AppError("Payment not found", 404);
   return SuccessResponse(res, 200, "Payment retrieved successfully", payment);
+});
+
+// Get new Bill number
+export const getNewTransactionNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const data = await paymentService.getTransactionNumber(clientId!);
+  SuccessResponse(res, 200, "New Bill number fetched successfully.", data);
 });

@@ -29,3 +29,13 @@ export const updatePaymentStatus = async (id: number, status: string) => {
 export const deletePayment = async (id: number) => {
   return await models.Payment.destroy({ where: { id } });
 };
+
+// Get latest Bill number
+export const getTransactionNumber = async (clientId: number) => {
+  let lastPayment: any = await models.Payment.findOne({
+    where: { clientId },
+    order: [["clientTransactionNo", "DESC"]],
+  });
+
+  return { clientTransactionNo: lastPayment ? lastPayment?.clientTransactionNo + 1 : 1 };
+};

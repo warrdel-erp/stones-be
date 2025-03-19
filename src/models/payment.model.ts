@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { PAYEE_TYPE, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_TYPE } from "../constants/tableTypes";
 import User from "./user";
+import Client from "./client";
 
 const Payment = sequelize.define(
   "Payment",
@@ -31,13 +32,9 @@ const Payment = sequelize.define(
       type: DataTypes.ENUM(...Object.values(PAYMENT_METHOD)),
       allowNull: false,
     },
-    transactionId: {
-      type: DataTypes.STRING,
-      unique: {
-        name: "unique_transaction_constraint",
-        msg: "unique transaction",
-      },
-      allowNull: false,
+    clientTransactionNo: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // not null handled by hook
     },
     status: {
       type: DataTypes.ENUM(...Object.values(PAYMENT_STATUS)),
@@ -56,11 +53,42 @@ const Payment = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "payments",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "clientTransactionNo"],
+      },
+    ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+Payment.beforeCreate(async (payment: any) => {
+  if (!payment.clientId) {
+    throw new Error("Client ID is required to generate transaction number");
+  }
+
+  console.log("object", payment);
+
+  const lastSIPLAccordingToPO: any = await Payment.findOne({
+    where: { clientId: payment.clientId },
+    order: [["clientTransactionNo", "DESC"]],
+  });
+
+  payment.clientTransactionNo = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.clientTransactionNo + 1 : 1;
+});
 
 export default Payment;

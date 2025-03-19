@@ -69,7 +69,7 @@
 60. Payment:
 
     1. Vendors according to SIPL for ✔️
-    2. Pending bills according to vendor.
+    2. Pending bills according to vendor. ✔️
     3. New Transaction no.
     4. Reference No. Reference date.
 

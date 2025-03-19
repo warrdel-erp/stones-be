@@ -55,3 +55,8 @@ export const getPayment = async (id: number) => {
 export const deletePayment = async (id: number) => {
   return await paymentRepository.deletePayment(id);
 };
+
+// Get new bill number
+export const getTransactionNumber = async (clientId: number) => {
+  return await paymentRepository.getTransactionNumber(clientId);
+};
