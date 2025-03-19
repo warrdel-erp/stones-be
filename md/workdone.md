@@ -41,3 +41,4 @@
 1. customer address.
 2. transaction number.
 3. slabs data for SO.
+4. journal entries for SIPL.
