@@ -6,6 +6,11 @@ export const createCustomerAddress = async (data: any, transaction?: Transaction
   return await models.CustomerAddress.create(data, { transaction });
 };
 
+// Create multiple addresses
+export const createBulkCustomerAddress = async (data: any, transaction?: Transaction) => {
+  return await models.CustomerAddress.bulkCreate(data, { transaction });
+};
+
 export const getAddressesByCustomerId = async (
   customerId: number,
   addressType?: (typeof CUSTOMER_ADDRESS_TYPES)[keyof typeof CUSTOMER_ADDRESS_TYPES]

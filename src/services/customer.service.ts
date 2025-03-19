@@ -6,9 +6,10 @@ import { AppError } from "../helper/appError";
 import { LedgerAccount } from "../models/ledgerAccount.model";
 import * as customerRepository from "../repositories/customer.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as customerAddressService from "../services/customerAddress.service";
 
 // Service function to create a customer.
-export const registerCustomer = async (customerData: any, clientId: number) => {
+export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
   const transaction = await sequelize.transaction();
   try {
     if (!customerData.name || !customerData.email) {
@@ -18,11 +19,22 @@ export const registerCustomer = async (customerData: any, clientId: number) => {
     // Create customer
     const newCustomer: any = await customerRepository.createCustomer(customerData, transaction);
 
+    // Associate customer id to address.
+    addresses = addresses.map((address) => {
+      return {
+        ...address,
+        customerId: newCustomer.id,
+      };
+    });
+
+    // create addresses for customer.
+    const newAddresses = await customerAddressService.createBulkCustomerAddress(addresses, transaction);
+
     // Create Ledger Account data
     const ledgerAccount = await createLedgerAccountForCustomer(clientId, newCustomer, transaction);
 
     transaction.commit();
-    return { customer: newCustomer, ledgerAccount };
+    return { customer: newCustomer, addresses: newAddresses, ledgerAccount };
   } catch (error) {
     transaction.rollback();
     throw error;

@@ -5,11 +5,13 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
+// Create a new customer
 router.post("/", authenticateUser, customerController.createCustomerController);
 
 // create address for customer
 router.post("/address", authenticateUser, customerAddressController.createCustomerAddress);
 
+// Get all addresses of customer
 router.get("/:customerId/addresses", customerAddressController.getAddressesByCustomerId);
 
 // Update vendor.
