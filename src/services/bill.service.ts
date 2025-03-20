@@ -1,7 +1,7 @@
-import * as billRepository from "../repositories/bill.repository";
 import { sequelize } from "../config/database";
+import * as billRepository from "../repositories/bill.repository";
 import * as billItemRepository from "../repositories/billItems.repository";
-import * as siplService from "../services/sipl.service";
+import * as journalEntryService from "./journalEntry.service";
 
 export const createBill = async (billData: any) => {
   if (!billData.items || !Array.isArray(billData.items)) {
@@ -23,6 +23,9 @@ export const createBill = async (billData: any) => {
         },
         transaction
       );
+
+      // Create journal entry for freight bill item.
+      await journalEntryService.createJournalEntryForFreightBillItem(item, billData, transaction);
 
       billItems.push(billItem);
     }

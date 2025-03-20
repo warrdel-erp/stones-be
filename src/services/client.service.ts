@@ -78,7 +78,7 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
     {
       name: "Inventory Int Transit",
       clientId,
-      key: "in_transit",
+      key: "inventory_in_transit",
       subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "in_transit")?.id!,
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       openingBalance: 0,

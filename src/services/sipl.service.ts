@@ -1,29 +1,27 @@
 import { sequelize } from "../config/database";
-import * as poRepository from "../repositories/purchaseOrder.repository";
-import * as siplRepository from "../repositories/sipl.repository";
-import * as slabRepository from "../repositories/slab.repository";
-import * as siplProductsRepository from "../repositories/siplProducts.repository";
-import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
-import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
-import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as containerRepository from "../repositories/container.repository";
-import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
-import * as journalEntryRepository from "../repositories/journalEntry.repository";
-import _ from "lodash";
-
 import { Transaction } from "sequelize";
 import { AppError } from "../helper/appError";
-import { JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
-import { COA_SUB_HEADERS } from "../constants/coa";
-import { JournalEntry } from "../models/journalEntry.model";
+import * as containerRepository from "../repositories/container.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as poRepository from "../repositories/purchaseOrder.repository";
+import * as requestedPurchaseProductsRepository from "../repositories/requestedPurchaseProduct.repository";
+import * as siplRepository from "../repositories/sipl.repository";
+import * as siplProductsRepository from "../repositories/siplProducts.repository";
+import * as slabRepository from "../repositories/slab.repository";
+import * as journalEntryService from "../services/journalEntry.service";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
   try {
-    const updatedSIPL = await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
-
+    // Update the status of all slabs in the SIPL to IN_INVENTORY.
     const updatedSlab = await slabRepository.updateSlabStatusBySipl(siplId, transaction);
+
+    // Update SIPL inventoryReceived status.
+    await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
+
+    const calculations = await getSiplCalculations(siplId, transaction);
+
     transaction.commit();
     return updatedSlab;
   } catch (error) {
@@ -75,7 +73,7 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
     await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
 
     // Create Journal entry for SIPL START.
-    const siplJournalEntry = await createJournalEntryForSIPL(sipl.id, siplData, transaction);
+    const siplJournalEntry = await journalEntryService.createJournalEntryForSIPL(sipl.id, siplData, transaction);
     // Create Journal entry for SIPL END.
 
     // Create Freight Detail (if provided)
@@ -103,45 +101,6 @@ export const addContainer = async (containerData: Object, siplId: number, transa
 
   return container;
 };
-
-async function createJournalEntryForSIPL(siplId: number, siplData: any, transaction: Transaction) {
-  const calculations = await getSiplCalculations(siplId, transaction);
-
-  const po = await purchaseOrderRepository.getPOWithVendorLedgerAccount(siplData.purchaseOrderId, transaction);
-
-  const siplJournalEntry = await journalEntryRepository.create(
-    {
-      amount: calculations.totalAmount,
-      ledgerId: po.supplier.ledgerAccount.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
-      referenceId: siplId,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-    },
-    transaction
-  );
-
-  // Get in_inventory ledger account id for products entry.
-  const ledgerAccountForProducts: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-    key: COA_SUB_HEADERS.find((e) => e.key == "in_transit")?.key,
-    clientId: siplData.clientId,
-  });
-
-  // Create Journal entry data.
-  const arr: JournalEntry[] = calculations.dataAccordingToProduct.map((productCalc: any) => {
-    return {
-      amount: productCalc.totalPrice,
-      ledgerId: ledgerAccountForProducts.id,
-      type: JOURNAL_ENTRY_TYPE.DR,
-      referenceId: siplId,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-    };
-  });
-
-  // create journal entry for products.
-  const productJournalEntry = await journalEntryRepository.createBulk(arr, transaction);
-
-  return { siplJournalEntry, productJournalEntry };
-}
 
 // Create slabs for SIPL
 export async function handleCreateSlabs(slabData: any) {

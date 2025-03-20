@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import { JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
+import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 
 export type JournalEntry = {
@@ -8,6 +8,7 @@ export type JournalEntry = {
   type: (typeof JOURNAL_ENTRY_TYPE)[keyof typeof JOURNAL_ENTRY_TYPE];
   ledgerId: number;
   referenceId?: number;
+  processType: (typeof JOURNAL_ENTRY_PROCESS_TYPE)[keyof typeof JOURNAL_ENTRY_PROCESS_TYPE];
   referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
 };
 
@@ -35,6 +36,10 @@ const JournalEntry = sequelize.define(
         key: "id",
       },
       onDelete: "RESTRICT",
+    },
+    processType: {
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_PROCESS_TYPE)),
+      allowNull: false,
     },
     referenceId: {
       type: DataTypes.INTEGER,

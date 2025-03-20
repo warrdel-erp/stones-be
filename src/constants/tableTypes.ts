@@ -16,6 +16,11 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SALES_ORDER: "SALES_ORDER",
 };
 
+export const JOURNAL_ENTRY_PROCESS_TYPE = {
+  CREATE_SIPL: "create_sipl",
+  ADD_FREIGHT_BILL: "add_freight_bill",
+};
+
 export const JOURNAL_ENTRY_TYPE = {
   DR: "dr",
   CR: "cr",

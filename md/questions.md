@@ -38,3 +38,8 @@
 
 1. can bill be partially paid if yes then when will we consider it as totally paid.
 2. do we've to keep record of payment group in payment because we are paying multiple bills in once.
+
+---
+
+1. when add freight journal entry then which reference to keep bill or SIPL.
+2. we are adding journal entries for freight bill as received area, but what freight bill is been added before slabs.

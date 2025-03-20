@@ -1012,7 +1012,13 @@ export const LEDGER_ACCOUNT_TYPES = {
   DEBIT: "dr",
 } as const;
 
-export const FREIGHT_BILL_ACCOUNT_KEYS = {
+export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   FREIGHT_IN: "freight_in",
   BROKERAGE_CHARGES: "brokerage_charges",
+  INVENTORY_IN_TRANSIT: "inventory_in_transit",
+} as const;
+
+export const FREIGHT_BILL_ACCOUNT_KEYS = {
+  FREIGHT_IN: DEFAULT_LEDGER_ACCOUNT_KEYS.FREIGHT_IN,
+  BROKERAGE_CHARGES: DEFAULT_LEDGER_ACCOUNT_KEYS.BROKERAGE_CHARGES,
 } as const;
