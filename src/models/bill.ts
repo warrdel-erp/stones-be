@@ -37,20 +37,6 @@ const Bill = sequelize.define(
       type: DataTypes.ENUM("freight"),
       allowNull: false,
     },
-    // status: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false,
-    //   defaultValue: "pending",
-    // },
-    // paid: {
-    //   type: DataTypes.BOOLEAN,
-    //   allowNull: false,
-    //   defaultValue: false,
-    // },
-    // dueDate: {
-    //   type: DataTypes.DATE,
-    //   allowNull: false,
-    // },
     paymentTerms: {
       type: DataTypes.ENUM(...PAYMENT_TERMS.map((e) => String(e.id))),
       allowNull: false,

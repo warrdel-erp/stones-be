@@ -3,6 +3,7 @@ import * as billRepository from "../repositories/bill.repository";
 import * as billItemRepository from "../repositories/billItems.repository";
 import * as journalEntryService from "./journalEntry.service";
 
+import * as siplService from "./sipl.service";
 export const createBill = async (billData: any) => {
   if (!billData.items || !Array.isArray(billData.items)) {
     throw new Error("Bill items are required.");
@@ -15,6 +16,9 @@ export const createBill = async (billData: any) => {
   try {
     const bill: any = await billRepository.createBill(billData, transaction);
 
+    // Get SIPL calculations.
+    const siplCalculations = await siplService.getSiplCalculations(billData.referenceId, transaction);
+
     for (const item of billData.items) {
       const billItem = await billItemRepository.createBillItem(
         {
@@ -24,8 +28,12 @@ export const createBill = async (billData: any) => {
         transaction
       );
 
+      /**
+       * Create entries for received products in SIPL.
+       */
+
       // Create journal entry for freight bill item.
-      await journalEntryService.createJournalEntryForFreightBillItem(item, billData, transaction);
+      await journalEntryService.createJournalEntryForFreightBillItem(item, billData, siplCalculations, transaction);
 
       billItems.push(billItem);
     }

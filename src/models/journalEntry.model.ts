@@ -52,7 +52,7 @@ const JournalEntry = sequelize.define(
   },
   {
     tableName: "journal_entry",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

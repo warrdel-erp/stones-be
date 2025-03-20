@@ -9,9 +9,12 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 // Processes the inventory reception by updating slab statuses.
-export const receiveInventory = async (siplId: number): Promise<number> => {
+export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
   try {
     // Update the status of all slabs in the SIPL to IN_INVENTORY.
@@ -20,7 +23,10 @@ export const receiveInventory = async (siplId: number): Promise<number> => {
     // Update SIPL inventoryReceived status.
     await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
 
-    const calculations = await getSiplCalculations(siplId, transaction);
+    // Create Journal entry for Inventory Reception START.
+
+    // Get in_inventory ledger account id for products entry.
+    await journalEntryService.createJournalEntryForReceiveInventory(siplId, clientId, transaction);
 
     transaction.commit();
     return updatedSlab;
@@ -209,6 +215,7 @@ export const getAllSIPLs = async (page: number, limit: number) => {
   };
 };
 
+// get common calculations for SIPL
 export const getSiplCalculations = async (siplId: number, transaction?: Transaction) => {
   const siplData = (await siplRepository.findSIPLById(siplId, transaction))?.get({ plain: true });
 
@@ -318,7 +325,7 @@ export const getSIPLByVendor = async (vendorId: number) => {
       sipl = sipl.get({ plain: true });
       const calculations = await getSiplCalculations(sipl.id);
 
-      return { ...sipl, ...calculations };
+      return { ...sipl, totalAmount: calculations.totalAmount };
     })
   );
 

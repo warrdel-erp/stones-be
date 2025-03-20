@@ -216,6 +216,7 @@ SIPL.hasMany(Bill, {
 Bill.belongsTo(SIPL, {
   foreignKey: "referenceId",
   constraints: false,
+  as: "sipl",
 });
 
 // user have one default location ,One location could be default for many users.

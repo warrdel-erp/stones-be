@@ -83,8 +83,11 @@
     1. Address with customer creation. ✔️
 
 62. Sales order:
+
     1. Add slabs with creation of SO.
     2. Slabs list by product. ✔️
+
+63. keep total of bill items in bill
 
 ---
 

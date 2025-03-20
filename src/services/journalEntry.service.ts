@@ -3,6 +3,7 @@ import * as journalEntryRepository from "../repositories/journalEntry.repository
 import * as siplService from "./sipl.service";
 import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as siplRepository from "../repositories/sipl.repository";
 import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
@@ -11,6 +12,7 @@ import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 export async function createJournalEntryForFreightBillItem(
   freightBillItemData: any,
   freightBillData: any,
+  calculations: any,
   transaction: Transaction
 ) {
   /**
@@ -27,11 +29,6 @@ export async function createJournalEntryForFreightBillItem(
     },
     transaction
   );
-
-  /**
-   * Create entries for received products in SIPL.
-   */
-  const calculations = await siplService.getSiplCalculations(freightBillData.referenceId, transaction);
 
   // Unit freight item cost (amount / total received area of all products in sipl).
   const unitFreightItemCost = freightBillItemData.amount / calculations.totalReceivingArea;
@@ -98,3 +95,51 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
 
   return { siplJournalEntry, productJournalEntry };
 }
+
+// create journal entry for receive inventory.
+export const createJournalEntryForReceiveInventory = async (
+  siplId: number,
+  clientId: number,
+  transaction: Transaction
+) => {
+  const calculations = await siplService.getSiplCalculations(siplId, transaction);
+
+  const siplData = (await siplRepository.findSIPLById(siplId, transaction))?.get({ plain: true });
+
+  const ledgerAccountForProducts: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
+    clientId,
+  });
+
+  for (const productCalc of calculations.dataAccordingToProduct) {
+    // Create journal entry for product.
+    await journalEntryRepository.create(
+      {
+        amount: productCalc.totalPrice,
+        ledgerId: ledgerAccountForProducts.id,
+        type: JOURNAL_ENTRY_TYPE.CR,
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+        referenceId: siplId,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      },
+      transaction
+    );
+
+    // Create journal entry for freight bill item.
+    for (const bill of siplData.bills) {
+      for (const billItem of bill.billItems) {
+        // Unit freight item cost (amount / total received area of all products in sipl).
+        const unitFreightItemCost = billItem.amount / calculations.totalReceivingArea;
+
+        await journalEntryRepository.create({
+          amount: unitFreightItemCost * productCalc.totalReceivedArea,
+          ledgerId: billItem.ledgerAccountId,
+          type: JOURNAL_ENTRY_TYPE.CR,
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+          referenceId: bill.referenceId,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+        });
+      }
+    }
+  }
+};

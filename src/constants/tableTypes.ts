@@ -19,6 +19,7 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
 export const JOURNAL_ENTRY_PROCESS_TYPE = {
   CREATE_SIPL: "create_sipl",
   ADD_FREIGHT_BILL: "add_freight_bill",
+  RECEIVE_INVENTORY: "receive_inventory",
 };
 
 export const JOURNAL_ENTRY_TYPE = {
@@ -56,7 +57,7 @@ export const PAYMENT_TYPE = {
 
 export const BILL_REFERENCE_TYPES = {
   SIPL: "sipl",
-};
+} as const;
 
 export const SLAB_ENTRY_UNIT = {
   METER: "meter",

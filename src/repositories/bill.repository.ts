@@ -47,6 +47,16 @@ export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => 
         model: models.BillItem,
         as: "billItems",
       },
+      {
+        model: models.SIPL,
+        as: "sipl",
+        include: [
+          {
+            model: models.PurchaseOrder,
+            as: "purchaseOrder",
+          },
+        ],
+      },
     ],
     order: [["createdAt", "DESC"]],
   });

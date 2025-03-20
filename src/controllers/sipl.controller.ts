@@ -9,14 +9,16 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { sequelize } from "../config/database";
 
 // Controller to handle receiving inventory (updating slabs to IN_INVENTORY).
-export const receiveInventoryController = catchAsync(async (req: Request, res: Response) => {
+export const receiveInventoryController = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params; // Get SIPL ID from request parameters
+
+  const clientId = req.user?.clientId; // Get client ID from request
 
   if (!id) {
     throw new AppError("SIPL ID is required.", 400);
   }
 
-  const updatedCount = await siplService.receiveInventory(Number(id));
+  const updatedCount = await siplService.receiveInventory(Number(id), clientId!);
 
   if (updatedCount === 0) {
     throw new AppError("No slabs found or already in inventory.", 404);

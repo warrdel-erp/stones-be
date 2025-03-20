@@ -5,10 +5,11 @@ import * as billService from "../services/bill.service";
 import * as siplService from "../services/sipl.service";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
-import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { BILL_REFERENCE_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
 import { PAYMENT_TERMS, VENDOR_SCOP } from "../constants";
+import _ from "lodash";
 
 // Service function to create a vendor.
 export const registerVendor = async (vendorData: any, clientId: number) => {
@@ -91,5 +92,39 @@ export const getAllBillsForVendor = async (vendorId: number) => {
 
   const sipls = await siplService.getSIPLByVendor(vendorId);
 
-  return { bills, sipls };
+  const returnBillData = bills.map((bill: any) => {
+    return {
+      type: bill.type,
+      sipl:
+        bill.referenceType == BILL_REFERENCE_TYPES.SIPL
+          ? bill.sipl.purchaseOrder.clientPoNumber + "-" + bill.sipl.poSiplNumber
+          : null,
+      invoice: bill.invoice,
+      invoiceDate: bill.invoiceDate,
+      dueDate: bill.dueDate,
+      invoiceAmount: bill.total,
+      transaction: bill.clientBillNumber,
+    };
+  });
+
+  const returnSIPLData = sipls.map((sipl: any) => {
+    return {
+      type: "sipl",
+      sipl: sipl.purchaseOrder.clientPoNumber + "-" + sipl.poSiplNumber,
+      invoice: sipl.supplierInvoiceNumber,
+      invoiceDate: sipl.supplierInvoiceDate,
+      dueDate: sipl.dueDate,
+      invoiceAmount: sipl.totalAmount,
+      transaction: sipl.clientInvoiceNumber,
+    };
+  });
+
+  const finalArr = returnBillData.concat(returnSIPLData);
+
+  const finalData = {
+    total: _.sumBy(finalArr, "invoiceAmount"),
+    data: finalArr,
+  };
+
+  return finalData;
 };
