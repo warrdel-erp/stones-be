@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Tech Solutions Ltd 1\",\n  \"password\": \"SecurePass123\",\n  \"email\": \"contact@techsolutions.com\",\n  \"locationShortName\": \"TSL\",\n  \"clientType\": \"Enterprise\",\n  \"address\": \"456 Innovation Drive, Suite 800\",\n  \"country\": \"USA\",\n  \"city\": \"San Francisco\",\n  \"pincode\": \"94107\",\n  \"tax\": \"GST987654\",\n  \"priceLevel\": \"Gold\",\n  \"paymentTerms\": \"Net 45\",\n  \"licenseNumber\": \"LIC-567890\",\n  \"userCount\": 10\n}\n",
+							"raw": "{\n  \"name\": \"Tech Solutions Ltd 1\",\n  \"password\": \"SecurePass123\",\n  \"email\": \"contact1@techsolutions.com\",\n  \"locationShortName\": \"TSL\",\n  \"clientType\": \"Enterprise\",\n  \"address\": \"456 Innovation Drive, Suite 800\",\n  \"country\": \"USA\",\n  \"city\": \"San Francisco\",\n  \"pincode\": \"94107\",\n  \"tax\": \"GST987654\",\n  \"priceLevel\": \"Gold\",\n  \"paymentTerms\": \"Net 45\",\n  \"licenseNumber\": \"LIC-567890\",\n  \"userCount\": 10\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\":1\n}\n",
+							"raw": "{\n    \"locationId\": 3\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -167,7 +167,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"user2@gmail.com\",\n    \"password\": \"user\"\n}",
+							"raw": "{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"user\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -372,7 +372,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Ace drayage\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
+							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -552,7 +552,7 @@
 							"variable": [
 								{
 									"key": "vendorId",
-									"value": "1"
+									"value": "2"
 								}
 							]
 						}
@@ -987,7 +987,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 4,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 35,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 50,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 2,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 55,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 340,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1023,7 +1023,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/bill?vendorId",
+							"raw": "{{baseurl}}/api/bill",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1039,7 +1039,8 @@
 								},
 								{
 									"key": "vendorId",
-									"value": null
+									"value": null,
+									"disabled": true
 								}
 							]
 						}
@@ -1144,7 +1145,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "1"
 								}
 							]
 						}
@@ -1206,7 +1207,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"dueDate\": \"2025-04-01\",\n    \"shipDate\": \"2025-04-01\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 2,\n    \"supplierSo\":\"23423\",\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 3,\n            \"quantity\": 10,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 2 description\",\n            \"supplierNote\": \"Supplier note for product 2\"\n        },\n        {\n            \"productId\": 4,\n            \"quantity\": 105,\n            \"unitPrice\": 70.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"dueDate\": \"2025-04-01\",\n    \"shipDate\": \"2025-04-01\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"supplierSo\":\"23423\",\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 543,\n            \"unitPrice\": 13.4,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 2\"\n        },\n        {\n            \"productId\": 2,\n            \"quantity\": 4644,\n            \"unitPrice\": 56.76,\n            \"description\": \"Product 2 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1244,7 +1245,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 5,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 3\n}\n",
+							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 3,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 12\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1265,7 +1266,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "2"
 								}
 							]
 						}
@@ -2775,11 +2776,21 @@
 				{
 					"name": "create",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"paymentType\": \"outgoing\",  \n  \"payeeId\": 1,  \n  \"payeeType\": \"vendor\",   \n  \"amount\": 23,  \n  \"paymentMethod\": \"cash\",  \n  \"transactionId\": \"TN1245689\",  \n  \"status\": \"completed\",  \n  \"userId\": 1,\n  \"bills\": [\n    {\n        \"referenceId\":1,\n        \"amount\":23\n    }\n  ]\n}\n",
+							"raw": "{\n    \"paymentType\": \"outgoing\",\n    \"payeeId\": 2,\n    \"payeeType\": \"vendor\",\n    \"amount\": 14,\n    \"paymentMethod\": \"cash\",\n    \"referenceNo\": 23,\n    \"referenceDate\":\"3023-11-05\",\n    \"transactionId\": \"TN1245689\",\n    \"status\": \"completed\",\n    \"userId\": 1,\n    \"remark\": \"this si remark\",\n    \"bills\": [\n        {\n            \"referenceId\": 1,\n            \"referenceType\": \"BILL\",\n            \"amount\": 14,\n            \"description\": \"this is description\"\n        }\n        // {\n        //     \"referenceId\": 1,\n        //     \"referenceType\": \"SIPL\",\n        //     \"amount\": 23\n        // }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2845,6 +2856,16 @@
 				{
 					"name": "get new transaction number",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
