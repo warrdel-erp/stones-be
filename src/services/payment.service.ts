@@ -1,7 +1,10 @@
 import { sequelize } from "../config/database";
+import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import * as paymentRepository from "../repositories/payment.repository";
 import * as paymentBillsRepository from "../repositories/paymentBills.repository";
+import * as billRepository from "../repositories/bill.repository";
+import * as siplRepository from "../repositories/sipl.repository";
 
 // Create a new payment
 export const processPayment = async (paymentData: any, billsData: any[]) => {
@@ -18,6 +21,7 @@ export const processPayment = async (paymentData: any, billsData: any[]) => {
 
   // Begin transaction
   const transaction = await sequelize.transaction();
+
   try {
     // Step 1: Create Payment
     const payment: any = await paymentRepository.createPayment(paymentData, transaction);
@@ -26,7 +30,9 @@ export const processPayment = async (paymentData: any, billsData: any[]) => {
     const paymentBills = billsData.map((bill) => ({
       paymentId: payment.id,
       referenceId: bill.referenceId,
+      referenceType: bill.referenceType,
       amount: bill.amount,
+      description: bill.description,
     }));
 
     // Step 3: Insert Payment Bills
@@ -59,4 +65,29 @@ export const deletePayment = async (id: number) => {
 // Get new bill number
 export const getTransactionNumber = async (clientId: number) => {
   return await paymentRepository.getTransactionNumber(clientId);
+};
+
+// Check if all bills belong to the vendor
+export const checkIfBillsBelongToVendor = async (vendorId: number, bills: any[]) => {
+  // Check bills.
+  const billsIdArr = bills
+    .filter((bill: any) => bill.referenceType.toLowerCase() == PAYMENT_BILL_REFERENCE_TYPES.BILL)
+    .map((bill: any) => bill.referenceId);
+
+  const areBillsBelongingToVendor = await billRepository.areBillsBelongingToVendor(vendorId, billsIdArr);
+
+  if (!areBillsBelongingToVendor) {
+    throw new AppError("Some bills do not belong to the vendor", 400);
+  }
+
+  // Check SIPLs
+  const siplIdsArr = bills
+    .filter((bill: any) => bill.referenceType.toLowerCase() == PAYMENT_BILL_REFERENCE_TYPES.SIPL)
+    .map((bill: any) => bill.referenceId);
+
+  const areSIPLsBelongingToVendor = await siplRepository.areSIPLsBelongingToVendor(vendorId, siplIdsArr);
+
+  if (!areSIPLsBelongingToVendor) {
+    throw new AppError("Some SIPLs do not belong to the vendor", 400);
+  }
 };

@@ -70,3 +70,8 @@ export const PO_STATUS = {
   CLOSED: "closed",
   CANCELED: "canceled",
 };
+
+export const PAYMENT_BILL_REFERENCE_TYPES = {
+  SIPL: "sipl",
+  BILL: "bill",
+} as const;

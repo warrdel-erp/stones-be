@@ -1,4 +1,4 @@
-import { Transaction, where } from "sequelize";
+import { Op, Transaction, where } from "sequelize";
 import * as models from "../models";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
@@ -70,4 +70,18 @@ export const getBillNumber = async (clientId: number) => {
   });
 
   return { clientBillNumber: lastBill ? lastBill?.clientBillNumber + 1 : 1 };
+};
+
+// does all given bills belong to the given vendor
+export const areBillsBelongingToVendor = async (vendorId: number, billIds: number[]): Promise<boolean> => {
+  const count = await models.Bill.count({
+    where: {
+      id: {
+        [Op.in]: billIds, // Get only bills that match the given IDs
+      },
+      vendorId, // Ensure the vendorId matches
+    },
+  });
+
+  return count === billIds.length; // If count matches the number of IDs, all belong to vendor
 };

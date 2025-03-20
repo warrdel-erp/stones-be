@@ -40,9 +40,17 @@ const Payment = sequelize.define(
       type: DataTypes.ENUM(...Object.values(PAYMENT_STATUS)),
       defaultValue: PAYMENT_STATUS.PENDING,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+    remark: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    referenceNo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    referenceDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
     userId: {
       type: DataTypes.INTEGER,

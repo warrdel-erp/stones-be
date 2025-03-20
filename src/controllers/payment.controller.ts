@@ -4,14 +4,26 @@ import { SuccessResponse } from "../helper/response";
 import catchAsync from "../helper/asyncCatch";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { PAYEE_TYPE, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import * as billRepository from "../repositories/bill.repository";
 
 // create Payment
 export const createPayment = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
 
   const { bills, ...payment } = req.body;
+
+  if (!bills) {
+    throw new AppError("Bills are required", 400);
+  }
+
+  // If payee type is vendor then check if all bills belong to the vendor
+  if (payment.payeeType == PAYEE_TYPE.VENDOR) {
+    await paymentService.checkIfBillsBelongToVendor(payment.payeeId, bills);
+  }
+
   const newPayment = await paymentService.processPayment({ ...payment, clientId }, bills);
-  return SuccessResponse(res, 201, "Payment processed successfully", newPayment);
+  return SuccessResponse(res, 201, "Payment processed successfully", "newPayment");
 });
 
 // get all payments

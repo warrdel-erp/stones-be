@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 
 // Create SIPL
@@ -228,4 +228,25 @@ export const updateSIPL = async (id: number, data: any, transaction: Transaction
     where: { id },
     transaction,
   });
+};
+
+// does all given bills belong to the given vendor
+export const areSIPLsBelongingToVendor = async (supplierId: number, siplIds: number[]): Promise<boolean> => {
+  const count = await models.SIPL.count({
+    where: {
+      id: {
+        [Op.in]: siplIds, // Get only sipl that match the given IDs
+      },
+    },
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        where: { supplierId },
+        required: true,
+      },
+    ],
+  });
+
+  return count === siplIds.length; // If count matches the number of IDs, all belong to vendor
 };
