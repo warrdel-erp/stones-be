@@ -987,7 +987,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 2,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 55,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 340,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 2,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 653,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 400,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1245,7 +1245,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 3,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 12\n}\n",
+							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 4,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 5\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1785,6 +1785,50 @@
 								{
 									"key": "status",
 									"value": "IN_INVENTORY"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update slab",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"packageLength\": 4,\n    \"packageWidth\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/:slabId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								":slabId"
+							],
+							"variable": [
+								{
+									"key": "slabId",
+									"value": "1"
 								}
 							]
 						}
