@@ -11,6 +11,9 @@ router.put("/:slabId/hold", authenticateUser, slabController.updateSlabHoldStatu
 // put and remove slab to cart
 router.put("/:slabId/cart", authenticateUser, slabController.updateSlabCartStatus);
 
+// Update slab
+router.put("/:slabId", authenticateUser, slabController.updateSlab);
+
 // Create a new Remeasurement
 router.post("/:slabId/remeasure", authenticateUser, slabController.createSlabLog);
 

@@ -171,6 +171,20 @@ export const getAllSIPLs = async (page: number, limit: number) => {
   });
 };
 
+export const findSIPLBySlabId = async (slabId: number) => {
+  const sipl = await models.SIPL.findOne({
+    include: [
+      {
+        model: models.Slab,
+        as: "slabs",
+        where: { id: slabId },
+        required: true,
+      },
+    ],
+  });
+  return sipl?.get({ plain: true });
+};
+
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({

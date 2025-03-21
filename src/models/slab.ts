@@ -151,4 +151,11 @@ const Slab = sequelize.define(
   }
 );
 
+Slab.beforeUpdate((slab) => {
+  delete slab.dataValues.id;
+  delete slab.dataValues.serialNumber;
+  delete slab.dataValues.siplId;
+  delete slab.dataValues.siplProductId;
+});
+
 export default Slab;

@@ -88,6 +88,7 @@
     2. Slabs list by product. ✔️
 
 63. keep total of bill items in bill
+64. keep process(sipl), subprocess(inventory receive), referenceId and referenceType(product, slab) in ledgerEntry
 
 ---
 

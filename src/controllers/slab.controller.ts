@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import * as slabService from "../services/slab.service";
 import * as slabRemeasurementService from "../services/slabRemeasurement.service";
 import { SuccessResponse } from "../helper/response";
+import { AppError } from "../helper/appError";
 
 export const updateSlabHoldStatus = catchAsync(async (req: Request, res: Response) => {
   const { slabId } = req.params;
@@ -54,4 +55,23 @@ export const getAllSlabs = catchAsync(async (req: Request, res: Response) => {
 
   const slabs = await slabService.fetchAllSlabs(filters);
   return SuccessResponse(res, 200, "Slabs fetched successfully", slabs);
+});
+
+// Update slab
+export const updateSlab = catchAsync(async (req: Request, res: Response) => {
+  const { slabId } = req.params;
+  const updateData = req.body;
+
+  if (!slabId || isNaN(Number(slabId))) {
+    throw new AppError("Invalid slab ID", 400);
+  }
+
+  // Update slab
+  const updatedSlab = await slabService.updateSlab(Number(slabId), updateData);
+
+  if (!updatedSlab) {
+    throw new AppError("Slab not found", 404);
+  }
+
+  return SuccessResponse(res, 200, "Slab updated successfully", updatedSlab);
 });

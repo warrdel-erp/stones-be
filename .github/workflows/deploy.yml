@@ -1,29 +1,29 @@
-name: Deploy to AWS EC2
+# name: Deploy to AWS EC2
 
-on:
-  push:
-    branches:
-      - release-phase1-202406 # Change to your branch name
+# on:
+#   push:
+#     branches:
+#       - release-phase1-202406 # Change to your branch name
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
-          chmod 600 key.pem
+#       - name: Set up SSH key
+#         run: |
+#           echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+#           chmod 600 key.pem
 
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem -p 44084 support@13.235.224.206 << 'EOF'
-            cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app
-            sudo git pull
-            sudo pnpm install
-            pnpm build
-            pm2 restart stone-be
-          EOF
+#       - name: Deploy to EC2
+#         run: |
+#           ssh -o StrictHostKeyChecking=no -i key.pem -p 44084 support@13.235.224.206 << 'EOF'
+#             cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app
+#             sudo git pull
+#             sudo pnpm install
+#             pnpm build
+#             pm2 restart stone-be
+#           EOF

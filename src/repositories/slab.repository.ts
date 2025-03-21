@@ -168,3 +168,8 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
 
   return data;
 };
+
+// update slab
+export const updateSlabById = async (slabId: number, updateData: any) => {
+  return await models.Slab.update(updateData, { where: { id: slabId }, individualHooks: true });
+};
