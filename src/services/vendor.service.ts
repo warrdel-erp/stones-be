@@ -143,6 +143,7 @@ export const getAllBillsForVendor = async (vendorId: number) => {
 
   const finalData = {
     total: _.sumBy(finalArr, "invoiceAmount"),
+    totalPaid: _.sumBy(finalArr, "paidAmount"),
     data: finalArr,
   };
 
