@@ -4,6 +4,7 @@ import * as siplService from "./sipl.service";
 import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as siplRepository from "../repositories/sipl.repository";
+import * as slabService from "../services/slab.service";
 import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
@@ -142,4 +143,34 @@ export const createJournalEntryForReceiveInventory = async (
       }
     }
   }
+
+  // Create Journal entry for slabs
+  const ledgerAccountForSlabs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+    clientId,
+  });
+
+  await Promise.all(
+    calculations.dataAccordingToProduct.map(async (productCalc: any) => {
+      const slabs = await slabService.fetchAllSlabs({ siplId, productId: productCalc.product.id });
+
+      await Promise.all(
+        slabs.map(async (slab: any) => {
+          slab = slab.get({ plain: true });
+
+          await journalEntryRepository.create(
+            {
+              amount: slab.receivingLength * slab.receivingWidth * productCalc.landedUnitCost,
+              ledgerId: ledgerAccountForSlabs.id,
+              type: JOURNAL_ENTRY_TYPE.DR,
+              processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+              referenceId: siplId,
+              referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+            },
+            transaction
+          );
+        })
+      );
+    })
+  );
 };

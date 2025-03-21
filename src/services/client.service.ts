@@ -3,7 +3,12 @@ import { AppError } from "../helper/appError";
 import * as clientRepository from "../repositories/client.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import { LedgerAccount } from "../models/ledgerAccount.model";
-import { COA_SUB_HEADERS, FREIGHT_BILL_ACCOUNT_KEYS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import {
+  COA_SUB_HEADERS,
+  DEFAULT_LEDGER_ACCOUNT_KEYS,
+  FREIGHT_BILL_ACCOUNT_KEYS,
+  LEDGER_ACCOUNT_TYPES,
+} from "../constants/coa";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 
@@ -78,8 +83,17 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
     {
       name: "Inventory Int Transit",
       clientId,
-      key: "inventory_in_transit",
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
       subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "in_transit")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Finished Goods",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "merchandise")?.id!,
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       openingBalance: 0,
       openingDate: new Date(),

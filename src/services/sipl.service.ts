@@ -280,7 +280,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
 
-    const unitCost = Number((totalSIPLProductPrice / totalPackagingAreaPerProduct).toFixed(2));
+    const unitCost = Number((totalSIPLProductPrice / totalReceivedAreaPerProduct).toFixed(2));
 
     // Total unit charge is self unit charge + bill charge per unit area.
     const landedUnitCost = unitCost + unitBillPrice;

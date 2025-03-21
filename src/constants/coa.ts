@@ -1016,6 +1016,7 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   FREIGHT_IN: "freight_in",
   BROKERAGE_CHARGES: "brokerage_charges",
   INVENTORY_IN_TRANSIT: "inventory_in_transit",
+  FINISHED_GOODS: "finished_goods",
 } as const;
 
 export const FREIGHT_BILL_ACCOUNT_KEYS = {
