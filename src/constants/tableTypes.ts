@@ -8,7 +8,7 @@ export const VENDOR_TYPES = {
 export const LEDGER_ACCOUNT_REFERENCE_TYPES = {
   CUSTOMER: "CUSTOMER",
   VENDOR: "VENDOR",
-};
+} as const;
 
 export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SIPL: "SIPL",

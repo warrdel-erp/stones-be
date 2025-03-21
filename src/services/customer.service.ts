@@ -20,12 +20,14 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
     const newCustomer: any = await customerRepository.createCustomer(customerData, transaction);
 
     // Associate customer id to address.
-    addresses = addresses.map((address) => {
-      return {
-        ...address,
-        customerId: newCustomer.id,
-      };
-    });
+    if (Array.isArray(addresses)) {
+      addresses = addresses.map((address) => {
+        return {
+          ...address,
+          customerId: newCustomer.id,
+        };
+      });
+    }
 
     // create addresses for customer.
     const newAddresses = await customerAddressService.createBulkCustomerAddress(addresses, transaction);
