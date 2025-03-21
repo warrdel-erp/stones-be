@@ -104,7 +104,9 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         PAYMENT_BILL_REFERENCE_TYPES.BILL
       );
       return {
-        type: bill.type,
+        id: bill.id,
+        type: "bill",
+        subtype: bill.type,
         sipl:
           bill.referenceType == BILL_REFERENCE_TYPES.SIPL
             ? bill.sipl.purchaseOrder.clientPoNumber + "-" + bill.sipl.poSiplNumber
@@ -127,7 +129,9 @@ export const getAllBillsForVendor = async (vendorId: number) => {
       );
 
       return {
+        id: sipl.id,
         type: "sipl",
+        subtype: "",
         sipl: sipl.purchaseOrder.clientPoNumber + "-" + sipl.poSiplNumber,
         invoice: sipl.supplierInvoiceNumber,
         invoiceDate: sipl.supplierInvoiceDate,
