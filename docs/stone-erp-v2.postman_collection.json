@@ -1834,6 +1834,44 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "bulk update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"id\": 3,\n        \"slabNumber\": 9,\n        \"packageLength\": 125,\n        \"packageWidth\": 12,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"3\",\n        \"lot\": \"1\",\n        \"bin\": 1\n    },\n    {\n        \"id\": 4,\n        \"slabNumber\": 10,\n        \"packageLength\": 120,\n        \"packageWidth\": 12,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"1\",\n        \"lot\": \"2\",\n        \"bin\": 1\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/bulkUpdate",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								"bulkUpdate"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
