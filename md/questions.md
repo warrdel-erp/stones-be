@@ -27,8 +27,8 @@
 14. PO listing:
     1. Total[total-of-sipls] and paid[total-paid-of-SIPLs] in PO list?
 15. what is reorderQuantity unit in product.
-16. inventory balance explanation?
-    1. in-stock[total-which-is-not-sold-or-initiated]
+16. inventory balance explanation? **What is role of inCart**
+    1. in-stock[total-which-is-not-sold-or-initiated] -> **IN_INVENTORY or ALLOCATED**
     2. available[not-hold-or-allocated-or-sold-initiated]
 17. lead time in create product[REMOVE]
     special pricing.

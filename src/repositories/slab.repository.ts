@@ -142,7 +142,9 @@ export const getInStockSlabsData = async (productId: number) => {
   const data = await models.Slab.findAll({
     where: {
       productId,
-      status: SLAB_STATUS.IN_INVENTORY,
+      status: {
+        [Op.or]: [SLAB_STATUS.IN_INVENTORY, SLAB_STATUS.ALLOCATED],
+      },
     },
     attributes: [
       [fn("COUNT", col("id")), "count"],
@@ -159,6 +161,22 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
     where: {
       productId,
       [Op.or]: [{ status: SLAB_STATUS.ALLOCATED }, { isHold: true }],
+    },
+    attributes: [
+      [fn("COUNT", col("id")), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
+    ],
+  });
+
+  return data;
+};
+
+// Get data
+export const getAvailableSlabsData = async (productId: number) => {
+  const data = await models.Slab.findAll({
+    where: {
+      productId,
+      [Op.and]: [{ status: SLAB_STATUS.IN_INVENTORY }, { isHold: false }],
     },
     attributes: [
       [fn("COUNT", col("id")), "count"],

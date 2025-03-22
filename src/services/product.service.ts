@@ -60,9 +60,11 @@ export const fetchProductById = async (id: number) => {
 export const getInventoryBalance = async (productId: number) => {
   const inStock = await slabRepository.getInStockSlabsData(productId);
   const allocatedHold = await slabRepository.getAllocatedHoldSlabsData(productId);
+  const available = await slabRepository.getAvailableSlabsData(productId);
 
   return {
     inStock,
     allocatedHold,
+    available,
   };
 };
