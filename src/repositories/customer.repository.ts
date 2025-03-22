@@ -24,10 +24,30 @@ export const getAllCustomers = async (page: number, limit: number, search?: stri
   const offset = (page - 1) * limit;
 
   const { rows: customers, count: total } = await models.Customer.findAndCountAll({
+    include: [
+      {
+        model: models.CustomerAddress,
+        as: "addresses",
+      },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]], // Sort by latest customers
   });
 
   return { customers, total, page, limit };
+};
+
+// Get all customers.
+export const getCustomerById = async (id: number) => {
+  const data = await models.Customer.findByPk(id, {
+    include: [
+      {
+        model: models.CustomerAddress,
+        as: "addresses",
+      },
+    ],
+  });
+
+  return data?.get({ plain: true });
 };

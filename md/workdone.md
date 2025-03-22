@@ -44,3 +44,4 @@
 4. make payment calculations.
 5. journal entries for SIPL till inventory received.
 6. slab update(if not received).
+7. inventory balance.

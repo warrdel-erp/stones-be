@@ -20,4 +20,7 @@ router.put("/:id", authenticateUser, customerController.updateCustomerController
 // Get all vendors.
 router.get("/", authenticateUser, customerController.getAllCustomersController);
 
+// Get vendor by id.
+router.get("/:id", authenticateUser, customerController.getCustomerByIdController);
+
 export default router;

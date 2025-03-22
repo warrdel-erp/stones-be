@@ -278,6 +278,10 @@ Notes.belongsTo(SalesOrder, {
 SalesOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
 CustomerAddress.hasMany(SalesOrder, { foreignKey: "shippingAddressId" });
 
+// One Customer can have multiple addresses
+CustomerAddress.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" });
+
 // One SO can have multiple Loading Orders (one Loading Order belongs to just one SO)
 SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "loadingOrders" });
 LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });

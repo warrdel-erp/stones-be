@@ -43,3 +43,11 @@ export const getAllCustomersController = catchAsync(async (req: Request, res: Re
     limit: result.limit,
   });
 });
+
+// Get customer by id
+export const getCustomerByIdController = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const customer = await customerService.fetchCustomerById(Number(id));
+  return SuccessResponse(res, 200, "Customer retrieved successfully", customer);
+});

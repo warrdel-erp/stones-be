@@ -372,7 +372,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Supplier 1\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
+							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Supplier 2\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -552,7 +552,7 @@
 							"variable": [
 								{
 									"key": "vendorId",
-									"value": "2"
+									"value": "1"
 								}
 							]
 						}
@@ -1145,7 +1145,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "2"
 								}
 							]
 						}
@@ -1207,7 +1207,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"dueDate\": \"2025-04-01\",\n    \"shipDate\": \"2025-04-01\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"supplierSo\":\"23423\",\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 543,\n            \"unitPrice\": 13.4,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 2\"\n        },\n        {\n            \"productId\": 2,\n            \"quantity\": 4644,\n            \"unitPrice\": 56.76,\n            \"description\": \"Product 2 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"poDate\": \"2025-04-01T00:00:00.000Z\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceNumber\": 453,\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"container\": \"SIPL-001\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"dueDate\": \"2025-04-01\",\n    \"shipDate\": \"2025-04-01\",\n    //   \n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 2,\n    \"supplierId\": 1,\n    \"supplierSo\":\"23423\",\n    \"internalNote\": \"This PO is urgent and should be processed immediately.\",\n    \"printableNote\": \"Deliver on weekdays between 9 AM - 5 PM.\",\n    //   \n    \"products\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 200,\n            \"unitPrice\": 34.4,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 2\"\n        },\n        {\n            \"productId\": 2,\n            \"quantity\": 800,\n            \"unitPrice\": 12.12,\n            \"description\": \"Product 2 description\",\n            \"supplierNote\": \"Supplier note for product 1\"\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 2\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1596,7 +1596,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"isHold\": false\n}",
+							"raw": "{\n    \"isHold\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2031,6 +2031,14 @@
 								"address"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer by ID",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}

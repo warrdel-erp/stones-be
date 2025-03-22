@@ -68,3 +68,8 @@ async function createLedgerAccountForCustomer(clientId: number, newCustomer: any
   const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
   return ledgerAccount;
 }
+
+// Get customer by id
+export const fetchCustomerById = async (id: number) => {
+  return await customerRepository.getCustomerById(id);
+};
