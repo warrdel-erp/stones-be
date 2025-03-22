@@ -198,6 +198,10 @@ export const getAvailableSlabsData = async (productId: number) => {
 };
 
 // update slab
-export const updateSlabById = async (slabId: number, updateData: any) => {
-  return await models.Slab.update(updateData, { where: { id: slabId }, individualHooks: true });
+export const updateSlabById = async (slabId: number, updateData: any, transaction?: Transaction) => {
+  return await models.Slab.update(updateData, {
+    where: { id: slabId },
+    individualHooks: true,
+    transaction,
+  });
 };

@@ -11,6 +11,9 @@ router.put("/:slabId/hold", authenticateUser, slabController.updateSlabHoldStatu
 // put and remove slab to cart
 router.put("/:slabId/cart", authenticateUser, slabController.updateSlabCartStatus);
 
+// Bulk update slabs
+router.put("/bulkUpdate", authenticateUser, slabController.bulkUpdateSlabs);
+
 // Update slab
 router.put("/:slabId", authenticateUser, slabController.updateSlab);
 
