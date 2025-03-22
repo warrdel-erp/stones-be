@@ -34,3 +34,14 @@ export const getSalesOrderById = async (id: number) => {
     ],
   });
 };
+
+// Get latest SO number
+export const getSoNumber = async (clientId: number) => {
+  const lastSO: any = await models.SalesOrder.findOne({
+    where: { clientId },
+    order: [["clientSoNumber", "DESC"]],
+    attributes: ["clientSoNumber"],
+  });
+
+  return { clientSoNumber: lastSO ? lastSO?.clientSoNumber + 1 : 1 };
+};

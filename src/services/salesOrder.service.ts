@@ -52,3 +52,8 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
 export const getSalesOrderById = async (id: number) => {
   return await salesOrderRepository.getSalesOrderById(id);
 };
+
+// Get new PO number
+export const getSONumber = async (clientId: number) => {
+  return await salesOrderRepository.getSoNumber(clientId);
+};

@@ -7,8 +7,9 @@ import { AuthRequest } from "../middleware/authMiddleware";
 // Create new SO
 export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
+  const clientId = req.user?.clientId;
 
-  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, userId });
+  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, userId, clientId });
   SuccessResponse(res, 201, "Sales Order created successfully", salesOrder);
 });
 
@@ -35,4 +36,13 @@ export const getSalesOrderById = catchAsync(async (req: Request, res: Response) 
   }
 
   SuccessResponse(res, 200, "Sales Order retrieved successfully", salesOrder);
+});
+
+// Get new SO number
+export const getNewSoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  console.log("clientId", clientId);
+
+  const data = await salesOrderService.getSONumber(clientId!);
+  SuccessResponse(res, 200, "New SO number fetched successfully.", data);
 });

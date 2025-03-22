@@ -12,6 +12,10 @@ const SalesOrder = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clientSoNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
     soDate: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -58,11 +62,42 @@ const SalesOrder = sequelize.define(
         key: "id",
       },
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: models.Client,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "sales_orders",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "clientSoNumber"],
+      },
+    ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+SalesOrder.beforeCreate(async (salesOrder: any) => {
+  if (!salesOrder.clientId) {
+    throw new Error("Client ID is required to generate clientSONumber.");
+  }
+
+  let lastSOAccordingToClient: any = await SalesOrder.findOne({
+    where: { clientId: salesOrder.clientId },
+    order: [["clientSoNumber", "DESC"]],
+  });
+
+  lastSOAccordingToClient = lastSOAccordingToClient?.get({ plain: true });
+
+  salesOrder.clientSoNumber = !!lastSOAccordingToClient ? lastSOAccordingToClient.clientSoNumber + 1 : 1;
+});
 
 export default SalesOrder;
