@@ -112,6 +112,16 @@ export const findByIdWithLogs = async (slabId: number) => {
       {
         model: models.Product,
         as: "product",
+        include: [
+          {
+            model: models.ProductCategory,
+            as: "category",
+          },
+          {
+            model: models.ProductSubCategory,
+            as: "subCategory",
+          },
+        ],
       },
     ],
   });
