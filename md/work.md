@@ -90,6 +90,8 @@
 63. keep total of bill items in bill
 64. subReferenceId and subReferenceId ✔️
 
+65. fix clientPOnumber
+
 ---
 
 1. payload validations(req.body should not be passed directly to service.) .

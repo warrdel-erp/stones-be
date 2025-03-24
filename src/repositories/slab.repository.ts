@@ -124,21 +124,21 @@ export const findByIdWithLogs = async (slabId: number) => {
         ],
       },
     ],
-    attributes: {
-      include: [
-        [
-          fn(
-            "CONCAT",
-            col("SIPL.PurchaseOrder.clientPoNumber"),
-            "-",
-            col("SIPL.poSiplNumber"),
-            "-",
-            col("slabs.serialNumber")
-          ),
-          "combinedSerialNumber",
-        ],
-      ],
-    },
+    // attributes: {
+    //   include: [
+    //     [
+    //       fn(
+    //         "CONCAT",
+    //         col("SIPL.PurchaseOrder.clientPoNumber"),
+    //         "-",
+    //         col("SIPL.poSiplNumber"),
+    //         "-",
+    //         col("slabs.serialNumber")
+    //       ),
+    //       "combinedSerialNumber",
+    //     ],
+    //   ],
+    // },
   });
   return slab?.get({ plain: true });
 };
@@ -167,21 +167,21 @@ export const getAllSlabs = async (filters?: WhereOptions) => {
         as: "bin",
       },
     ],
-    attributes: {
-      include: [
-        [
-          fn(
-            "CONCAT",
-            col("SIPL.PurchaseOrder.clientPoNumber"),
-            "-",
-            col("SIPL.poSiplNumber"),
-            "-",
-            col("slabs.serialNumber")
-          ),
-          "combinedSerialNumber",
-        ],
-      ],
-    },
+    // attributes: {
+    //   include: [
+    //     [
+    //       fn(
+    //         "CONCAT",
+    //         col("SIPL.PurchaseOrder.clientPoNumber"),
+    //         "-",
+    //         col("SIPL.poSiplNumber"),
+    //         "-",
+    //         col("slabs.serialNumber")
+    //       ),
+    //       "combinedSerialNumber",
+    //     ],
+    //   ],
+    // },
   });
 };
 
