@@ -38,7 +38,7 @@ const Bill = sequelize.define(
       allowNull: false,
     },
     paymentTerms: {
-      type: DataTypes.ENUM(...PAYMENT_TERMS.map((e) => String(e.id))),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     referenceType: {
