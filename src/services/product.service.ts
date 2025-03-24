@@ -27,6 +27,17 @@ export const fetchAllProducts = async (page: number, limit: number, search?: str
   return products;
 };
 
+// Fetch all products
+export const fetchProductsDataByTabs = async (tab: string, productId: number) => {
+  let data: any[] = [];
+
+  if (tab.toLowerCase() === "inventory") {
+    data = await slabRepository.getAllSlabs({ productId });
+  }
+
+  return data;
+};
+
 // Update product details
 export const modifyProduct = async (productId: number, updateData: any, userId: number) => {
   // update product

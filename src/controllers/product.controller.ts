@@ -25,6 +25,15 @@ export const getProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get all products
+export const getProductsTabsData = catchAsync(async (req: Request, res: Response) => {
+  const { tab, productId } = req.params;
+
+  const result = await productService.fetchProductsDataByTabs(tab, Number(productId));
+
+  SuccessResponse(res, 200, "Users retrieved successfully", result);
+});
+
 // Update product
 export const updateProductById = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;

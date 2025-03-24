@@ -372,7 +372,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Supplier 2\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
+							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Freight\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -958,10 +958,18 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "1"
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "tab data",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
@@ -1145,7 +1153,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "1"
 								}
 							]
 						}
@@ -1245,7 +1253,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 4,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 5\n}\n",
+							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 2,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 12\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1266,7 +1274,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "1"
 								}
 							]
 						}
@@ -1617,7 +1625,7 @@
 							"variable": [
 								{
 									"key": "slabId",
-									"value": "18"
+									"value": "2"
 								}
 							]
 						}
@@ -1742,7 +1750,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "13"
 								}
 							]
 						}
@@ -1765,7 +1773,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/slab?productId=1&isHold=false&status=IN_INVENTORY",
+							"raw": "{{baseurl}}/api/slab",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1776,15 +1784,18 @@
 							"query": [
 								{
 									"key": "productId",
-									"value": "1"
+									"value": "1",
+									"disabled": true
 								},
 								{
 									"key": "isHold",
-									"value": "false"
+									"value": "false",
+									"disabled": true
 								},
 								{
 									"key": "status",
-									"value": "IN_INVENTORY"
+									"value": "IN_INVENTORY",
+									"disabled": true
 								}
 							]
 						}
@@ -1793,6 +1804,9 @@
 				},
 				{
 					"name": "update slab",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -1804,7 +1818,7 @@
 								}
 							]
 						},
-						"method": "PUT",
+						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -1852,7 +1866,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"id\": 3,\n        \"slabNumber\": 9,\n        \"packageLength\": 125,\n        \"packageWidth\": 12,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"3\",\n        \"lot\": \"1\",\n        \"bin\": 1\n    },\n    {\n        \"id\": 4,\n        \"slabNumber\": 10,\n        \"packageLength\": 120,\n        \"packageWidth\": 12,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"1\",\n        \"lot\": \"2\",\n        \"bin\": 1\n    }\n]",
+							"raw": "[\n    {\n        \"id\": 3,\n        \"slabNumber\": 9,\n        \"packageLength\": 125,\n        \"packageWidth\": 15,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"3\",\n        \"lot\": \"1\",\n        \"bin\": 1\n    },\n    {\n        \"id\": 4,\n        \"slabNumber\": 10,\n        \"packageLength\": 125,\n        \"packageWidth\": 12,\n        \"receivingLength\": 120,\n        \"receivingWidth\": 12,\n        \"block\": \"1\",\n        \"lot\": \"2\",\n        \"bin\": 1\n    }\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2075,8 +2089,29 @@
 				{
 					"name": "Get customer by ID",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/customer/1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								"1"
+							]
+						}
 					},
 					"response": []
 				}
@@ -2330,14 +2365,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/purchaseOrder/newPoNumber",
+							"raw": "{{baseurl}}/api/salesOrder/newSoNumber",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
-								"purchaseOrder",
-								"newPoNumber"
+								"salesOrder",
+								"newSoNumber"
 							]
 						}
 					},

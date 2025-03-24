@@ -149,6 +149,39 @@ export const findByIdWithLogs = async (slabId: number) => {
 export const getAllSlabs = async (filters?: WhereOptions) => {
   return await Slab.findAll({
     where: filters,
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipl",
+        attributes: ["id"],
+        include: [
+          {
+            model: models.PurchaseOrder,
+            as: "purchaseOrder",
+            attributes: ["id"],
+          },
+        ],
+      },
+      {
+        model: models.Bin,
+        as: "bin",
+      },
+    ],
+    attributes: {
+      include: [
+        [
+          fn(
+            "CONCAT",
+            col("SIPL.PurchaseOrder.clientPoNumber"),
+            "-",
+            col("SIPL.poSiplNumber"),
+            "-",
+            col("slabs.serialNumber")
+          ),
+          "combinedSerialNumber",
+        ],
+      ],
+    },
   });
 };
 
