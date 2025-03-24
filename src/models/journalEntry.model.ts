@@ -53,7 +53,7 @@ const JournalEntry = sequelize.define(
       allowNull: true, // Nullable for general transactions
     },
     subReferenceType: {
-      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_REFERENCE_TYPES)),
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_SUB_REFERENCE_TYPES)),
       allowNull: true, // Required only if referenceId is used
     },
     referenceId: {
