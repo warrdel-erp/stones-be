@@ -20,6 +20,7 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
     // Create customer
     const newCustomer: any = await customerRepository.createCustomer(customerData, transaction);
 
+    let newAddresses: any[] = [];
     // Associate customer id to address.
     if (Array.isArray(addresses)) {
       addresses = addresses.map((address) => {
@@ -28,10 +29,10 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
           customerId: newCustomer.id,
         };
       });
-    }
 
-    // create addresses for customer.
-    const newAddresses = await customerAddressService.createBulkCustomerAddress(addresses, transaction);
+      // create addresses for customer.
+      newAddresses = await customerAddressService.createBulkCustomerAddress(addresses, transaction);
+    }
 
     // Create Ledger Account data
     const ledgerAccount = await createLedgerAccountForCustomer(clientId, newCustomer, transaction);
