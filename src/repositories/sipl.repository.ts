@@ -1,4 +1,4 @@
-import { Op, Transaction } from "sequelize";
+import { col, fn, Op, Transaction } from "sequelize";
 import * as models from "../models";
 
 // Create SIPL
@@ -156,6 +156,9 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
         attributes: ["location"],
       },
     ],
+    attributes: {
+      include: [[fn("CONCAT", col("PurchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
+    },
     transaction,
   });
 };
