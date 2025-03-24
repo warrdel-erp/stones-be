@@ -81,3 +81,8 @@ export const PAYMENT_BILL_REFERENCE_TYPES = {
   SIPL: "sipl",
   BILL: "bill",
 } as const;
+
+export const DELIVERY_TYPES = {
+  PICKUP: "pickup",
+  DELIVERY: "delivery",
+} as const;

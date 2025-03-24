@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import User from "./user";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
+import { DELIVERY_TYPES } from "../constants/tableTypes";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -33,6 +34,10 @@ const SalesOrder = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "pending", // Example: pending, confirmed, shipped, completed, canceled
+    },
+    deliveryType: {
+      type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
+      allowNull: false,
     },
     taxId: {
       type: DataTypes.INTEGER,
