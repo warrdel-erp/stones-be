@@ -14,6 +14,22 @@ const Location = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    contactName: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    contactNumber: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      validate: { max: 10, min: 10 },
+    },
+    contactMail: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
+    },
     address: {
       type: DataTypes.TEXT,
       allowNull: false,

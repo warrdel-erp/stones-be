@@ -46,3 +46,4 @@
 6. slab update(if not received).
 7. inventory balance.
 8. changes in journal entry for sub reference connection
+9. location more fields

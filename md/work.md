@@ -58,15 +58,15 @@
 47. slab no. auto increment. ✔️
 48. freight bill. ✔️
 49. receive inventory data. ✔️
-50. container saprate model ✔️
-51. update slabs.
+50. container separate model ✔️
+51. update slabs. ✔️
 52. product more data like single slab price. ✔️
-53. product tabs.
+53. product tabs. 👨‍💻
 54. Set default user location error for not access.
-55. SIPL detail Notes Populate.
-56. drawer data in inventory.
+55. SIPL detail Notes Populate. ✔️
+56. drawer data in inventory. ✔️
 57. keep everything in SIPL as in PO
-58. add address in customer creation.
+58. add address in customer creation. ✔️
 59. Payment:
 
     1. Vendors according to SIPL for ✔️
@@ -88,7 +88,7 @@
     2. Slabs list by product. ✔️
 
 63. keep total of bill items in bill
-64. subReferenceId and subReferenceId
+64. subReferenceId and subReferenceId ✔️
 
 ---
 
