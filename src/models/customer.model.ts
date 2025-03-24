@@ -56,7 +56,7 @@ const Customer = sequelize.define(
       defaultValue: false,
     },
     salesTax: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     paymentTerms: {

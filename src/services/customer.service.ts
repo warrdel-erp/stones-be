@@ -7,6 +7,7 @@ import { LedgerAccount } from "../models/ledgerAccount.model";
 import * as customerRepository from "../repositories/customer.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as customerAddressService from "../services/customerAddress.service";
+import { SALES_TAX } from "../constants";
 
 // Service function to create a customer.
 export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
@@ -53,7 +54,15 @@ export const updateCustomer = async (id: number, data: any) => {
 
 // Get all customers with pagination.
 export const fetchAllCustomers = async (page: number, limit: number, search?: string) => {
-  return await customerRepository.getAllCustomers(page, limit, search);
+  let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, search);
+
+  customers = customers.map((customer: any) => {
+    customer.get({ plain: true });
+    customer.salesTax = SALES_TAX.find((e) => e.id == customer.salesTax);
+    return customer;
+  });
+
+  return { customers, ...pagination };
 };
 
 async function createLedgerAccountForCustomer(clientId: number, newCustomer: any, transaction: Transaction) {
