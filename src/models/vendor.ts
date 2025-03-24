@@ -36,7 +36,7 @@ const Vendor = sequelize.define(
     },
     vendorScope: {
       type: DataTypes.ENUM(...VENDOR_SCOP.map((scope) => String(scope.id))),
-      allowNull: false,
+      allowNull: true,
     },
     contactName: {
       type: DataTypes.STRING,
@@ -70,7 +70,7 @@ const Vendor = sequelize.define(
     },
     remitAddress: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     remitSuite: {
       type: DataTypes.STRING,
@@ -78,7 +78,7 @@ const Vendor = sequelize.define(
     },
     remitCity: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
@@ -87,19 +87,19 @@ const Vendor = sequelize.define(
     },
     remitState: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     remitZip: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     remitCountry: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     shippingAddress: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     shippingSuite: {
       type: DataTypes.STRING,
@@ -107,19 +107,19 @@ const Vendor = sequelize.define(
     },
     shippingCity: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     shippingState: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     shippingZip: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     shippingCountry: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     paymentTerms: {
       type: DataTypes.INTEGER,

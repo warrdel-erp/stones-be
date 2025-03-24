@@ -5,7 +5,12 @@ import * as purchaseOrderRepository from "../repositories/purchaseOrder.reposito
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabService from "../services/slab.service";
-import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
+import {
+  JOURNAL_ENTRY_PROCESS_TYPE,
+  JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
+  JOURNAL_ENTRY_TYPE,
+} from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
@@ -25,6 +30,12 @@ export async function createJournalEntryForFreightBillItem(
       ledgerId: freightBillItemData.ledgerAccountId,
       type: JOURNAL_ENTRY_TYPE.CR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
+
+      // Sub reference is the bill item.
+      subReferenceId: freightBillItemData.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM,
+
+      // reference is the SIPL.
       referenceId: freightBillData.referenceId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
     },
@@ -41,6 +52,12 @@ export async function createJournalEntryForFreightBillItem(
       ledgerId: freightBillItemData.ledgerAccountId,
       type: JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
+
+      // Sub reference is the product.
+      subReferenceId: productCalc.product.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
+
+      // reference is the SIPL.
       referenceId: freightBillData.referenceId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
     };
@@ -66,8 +83,8 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
       amount: calculations.totalAmount,
       ledgerId: po.supplier.ledgerAccount.id,
       type: JOURNAL_ENTRY_TYPE.CR,
-      referenceId: siplId,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.CREATE_SIPL,
+      referenceId: siplId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
     },
     transaction
@@ -85,8 +102,14 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
       amount: productCalc.totalPrice,
       ledgerId: ledgerAccountForProducts.id,
       type: JOURNAL_ENTRY_TYPE.DR,
-      referenceId: siplId,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.CREATE_SIPL,
+
+      // Sub reference is the product.
+      subReferenceId: productCalc.product.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
+
+      // reference is the SIPL.
+      referenceId: siplId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
     };
   });
@@ -120,6 +143,12 @@ export const createJournalEntryForReceiveInventory = async (
         ledgerId: ledgerAccountForProducts.id,
         type: JOURNAL_ENTRY_TYPE.CR,
         processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+
+        // Sub reference is the product.
+        subReferenceId: productCalc.product.id,
+        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
+
+        // reference is the SIPL.
         referenceId: siplId,
         referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
       },
@@ -137,6 +166,12 @@ export const createJournalEntryForReceiveInventory = async (
           ledgerId: billItem.ledgerAccountId,
           type: JOURNAL_ENTRY_TYPE.CR,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+
+          // Sub reference is the bill item.
+          subReferenceId: billItem.id,
+          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM,
+
+          // reference is the SIPL.
           referenceId: bill.referenceId,
           referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
         });
@@ -164,6 +199,12 @@ export const createJournalEntryForReceiveInventory = async (
               ledgerId: ledgerAccountForSlabs.id,
               type: JOURNAL_ENTRY_TYPE.DR,
               processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+
+              // Sub reference is the slab.
+              subReferenceId: slab.id,
+              subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+
+              // reference is the SIPL.
               referenceId: siplId,
               referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
             },

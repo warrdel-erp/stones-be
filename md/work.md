@@ -72,7 +72,7 @@
     1. Vendors according to SIPL for ✔️
     2. Pending bills according to vendor. ✔️
     3. New Transaction no. ✔️
-    4. Reference No. Reference date.
+    4. Reference No. Reference date. ✔️
 
 60. Master:
 
@@ -88,7 +88,7 @@
     2. Slabs list by product. ✔️
 
 63. keep total of bill items in bill
-64. keep process(sipl), subprocess(inventory receive), referenceId and referenceType(product, slab) in ledgerEntry
+64. subReferenceId and subReferenceId
 
 ---
 

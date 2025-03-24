@@ -1,15 +1,22 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
+import {
+  JOURNAL_ENTRY_PROCESS_TYPE,
+  JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
+  JOURNAL_ENTRY_TYPE,
+} from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 
 export type JournalEntry = {
   amount: number;
   type: (typeof JOURNAL_ENTRY_TYPE)[keyof typeof JOURNAL_ENTRY_TYPE];
   ledgerId: number;
-  referenceId?: number;
   processType: (typeof JOURNAL_ENTRY_PROCESS_TYPE)[keyof typeof JOURNAL_ENTRY_PROCESS_TYPE];
+  referenceId?: number;
   referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
+  subReferenceId?: number;
+  subReferenceType?: (typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES];
 };
 
 const JournalEntry = sequelize.define(
@@ -40,6 +47,14 @@ const JournalEntry = sequelize.define(
     processType: {
       type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_PROCESS_TYPE)),
       allowNull: false,
+    },
+    subReferenceId: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Nullable for general transactions
+    },
+    subReferenceType: {
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_REFERENCE_TYPES)),
+      allowNull: true, // Required only if referenceId is used
     },
     referenceId: {
       type: DataTypes.INTEGER,

@@ -45,3 +45,4 @@
 5. journal entries for SIPL till inventory received.
 6. slab update(if not received).
 7. inventory balance.
+8. changes in journal entry for sub reference connection

@@ -14,18 +14,24 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SIPL: "SIPL",
   PAYMENT: "PAYMENT",
   SALES_ORDER: "SALES_ORDER",
-};
+} as const;
+
+export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
+  PRODUCT: "product",
+  SLAB: "slab",
+  BILL_ITEM: "bill_item",
+} as const;
 
 export const JOURNAL_ENTRY_PROCESS_TYPE = {
   CREATE_SIPL: "create_sipl",
   ADD_FREIGHT_BILL: "add_freight_bill",
   RECEIVE_INVENTORY: "receive_inventory",
-};
+} as const;
 
 export const JOURNAL_ENTRY_TYPE = {
   DR: "dr",
   CR: "cr",
-};
+} as const;
 
 export const CUSTOMER_ADDRESS_TYPES = {
   SHIPPING: "SHIPPING",
