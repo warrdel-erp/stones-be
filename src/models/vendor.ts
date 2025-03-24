@@ -137,7 +137,7 @@ const Vendor = sequelize.define(
     },
     currency: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       defaultValue: "USD",
     },
     defaultPaymentMethod: {
