@@ -2,6 +2,7 @@ import { sequelize } from "../config/database";
 import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as notesRepository from "../repositories/notes.repository";
+import { removeDuplicates } from "../helper";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -57,7 +58,26 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
 
 // Get sales order by ID
 export const getSalesOrderById = async (id: number) => {
-  return await salesOrderRepository.getSalesOrderById(id);
+  const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
+
+  let products = removeDuplicates(
+    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
+  );
+
+  // Map slabs to products
+  salesOrder.products = products.map((product) => {
+    const salesOrderProduct = salesOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
+    );
+    // .map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab);
+
+    return { ...product, salesOrderProduct };
+  });
+
+  // delete salesOrder.salesOrderProducts because it is in products;
+  delete salesOrder.salesOrderProducts;
+
+  return { salesOrder };
 };
 
 // Get new PO number
