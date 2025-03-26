@@ -17,6 +17,10 @@ export const fetchProductsWithSlabsByLocation = async (page: number, limit: numb
 
       product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
 
+      if (!product.sipls.length) {
+        return undefined;
+      }
+
       await Promise.all(
         product.sipls.map(async (sipl: any, index: number) => {
           const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id);
