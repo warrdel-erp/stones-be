@@ -7,7 +7,7 @@ export const createProduct = async (productData: any) => {
 };
 
 // Get all products
-export const getAllProducts = async (page: number, limit: number, search?: string) => {
+export const getAllProducts = async (page: number, limit: number, search?: string, onlyWithSlabs?: boolean) => {
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
@@ -25,7 +25,7 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
       {
         model: models.Slab,
         as: "slabs",
-        required: true,
+        required: onlyWithSlabs,
       },
     ],
     limit,
