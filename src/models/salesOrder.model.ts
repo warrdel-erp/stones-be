@@ -26,10 +26,6 @@ const SalesOrder = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    specialInstruction: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     status: {
       type: DataTypes.STRING,
       allowNull: false,

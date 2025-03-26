@@ -1,11 +1,18 @@
 import { sequelize } from "../config/database";
 import * as salesOrderRepository from "../repositories/salesOrder.repository";
+import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as notesRepository from "../repositories/notes.repository";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
   try {
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
+
+    const salesOrderProducts = await salesOrderProductService.upsertSalesOrderProducts(
+      data.products,
+      salesOrder.id,
+      transaction
+    );
 
     // Create internal note (if provided)
     let internalNote: any = null;
@@ -36,7 +43,7 @@ export const createSalesOrder = async (data: any) => {
     }
 
     await transaction.commit();
-    return salesOrder;
+    return { salesOrder, salesOrderProducts };
   } catch (error) {
     await transaction.rollback();
     throw error;

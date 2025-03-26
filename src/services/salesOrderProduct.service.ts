@@ -3,12 +3,17 @@ import * as slabRepository from "../repositories/slab.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { SLAB_STATUS } from "../constants";
+import { Transaction } from "sequelize";
 
 //  Create or update multiple SalesOrderProduct entries.
-export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number) => {
+export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
   const upsertedProducts = [];
 
-  const transaction = await sequelize.transaction();
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
 
   try {
     for (const product of products) {
@@ -58,10 +63,14 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
       }
     }
 
-    transaction.commit();
+    if (shouldCommitTransaction) {
+      transaction.commit();
+    }
     return upsertedProducts;
   } catch (error) {
-    transaction.rollback();
+    if (shouldCommitTransaction) {
+      transaction.rollback();
+    }
     throw error;
   }
 };

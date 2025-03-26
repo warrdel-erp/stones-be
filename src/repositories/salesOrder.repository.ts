@@ -14,6 +14,8 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
       { model: models.Customer, as: "customer" },
       { model: models.User, as: "createdBy" },
       { model: models.CustomerAddress, as: "shippingAddress" },
+      { model: models.Location, as: "soLocation" },
+      { model: models.Notes, as: "notes" },
     ],
     limit,
     offset,

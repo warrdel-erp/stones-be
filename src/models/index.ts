@@ -262,7 +262,7 @@ SalesOrder.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
 // SalesOrder-InternalNote (A 'SalesOrder' has ONE 'Note' as internalNote)
 SalesOrder.hasMany(Notes, {
   foreignKey: "referenceId",
-  as: "note",
+  as: "notes",
   constraints: false,
 });
 
