@@ -10,10 +10,9 @@ export const createProduct = async (productData: any) => {
 export const getAllProducts = async (page: number, limit: number, search?: string) => {
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
+
   const { rows: products, count: total } = await models.Product.findAndCountAll({
     where: whereClause,
-    limit,
-    offset,
     include: [
       {
         model: models.ProductCategory,
@@ -23,9 +22,19 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
         model: models.ProductSubCategory,
         as: "subCategory",
       },
+      {
+        model: models.Slab,
+        as: "slabs",
+        required: true,
+      },
     ],
+    limit,
+    offset,
+    distinct: true,
     order: [["createdAt", "DESC"]],
   });
+
+  console.log(total);
 
   return { products, total, page, limit };
 };

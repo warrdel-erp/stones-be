@@ -28,5 +28,9 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     return res.status(404).json({ message: "No products found for this location" });
   }
 
-  SuccessResponse(res, 200, "Inventory data fetched successfully", data);
+  SuccessResponse(res, 200, "Inventory data fetched successfully", data.products, {
+    total: data.total,
+    page: Number(page),
+    limit: Number(limit),
+  });
 });
