@@ -84,6 +84,13 @@ const SalesOrder = sequelize.define(
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
+    soLocationId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+    },
   },
   {
     tableName: "sales_orders",
