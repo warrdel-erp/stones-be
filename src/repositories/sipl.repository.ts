@@ -219,7 +219,6 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
               },
             ],
           },
-          {},
         ],
       },
       {
