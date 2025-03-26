@@ -7,7 +7,7 @@ import * as slabRepository from "../repositories/slab.repository";
 export const fetchProductsWithSlabsByLocation = async (page: number, limit: number, locationId: number) => {
   const data: any = await productRepository.getAllProducts(page, limit);
 
-  const finalData = await Promise.all(
+  let finalData = await Promise.all(
     data.products.map(async (product: any) => {
       product = product.get({ plain: true });
 
@@ -32,6 +32,8 @@ export const fetchProductsWithSlabsByLocation = async (page: number, limit: numb
       return product;
     })
   );
+
+  finalData = finalData.filter((e) => e);
 
   return { products: finalData, total: data.total };
 };
