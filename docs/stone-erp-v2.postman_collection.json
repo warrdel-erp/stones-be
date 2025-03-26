@@ -1210,7 +1210,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"purchaseOrderId\": 1,\n    \"dueDate\": \"2025-03-01\",\n    \"shipDate\": \"2025-03-01\",\n    \"shipmentLocationId\":1,\n    \"purchaseLocationId\":1,\n    \"supplierSo\":\"1234\",\n    \"products\": [\n        {\n            \"quantity\": 70,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\",\n            \"requestedPurchaseProductId\": 1\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"purchaseOrderId\": 1,\n    \"dueDate\": \"2025-03-01\",\n    \"shipDate\": \"2025-03-01\",\n    \"shipmentLocationId\":1,\n    \"purchaseLocationId\":1,\n    \"supplierSo\":\"1234\",\n    \"products\": [\n        {\n            \"quantity\": 70,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\",\n            \"requestedPurchaseProductId\": 5\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1286,7 +1286,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 1,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 12\n}\n",
+							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 1,\n  \"siplProductId\": 8,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 12\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1371,7 +1371,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "5"
 								}
 							]
 						}
@@ -1966,7 +1966,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe\",\n    \"type\": \"Retail\",\n    \"contactName\": \"Jane Smith\",\n    \"printName\": \"Doe Inc.\",\n    \"parentCustomer\": null,\n    \"primaryPhoneNumber\": \"1234567890\",\n    \"secondaryPhoneNumber\": \"0987654321\",\n    \"landlineNumber\": \"123-456-789\",\n    \"accEmail\": \"john@example.com\",\n    \"email\": \"john@example.com\",\n    \"priceLevel\": \"Gold\",\n    \"taxExempt\": true,\n    \"salesTax\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"exemptCerti\": \"EX-12345\",\n    \"exemptExipry\": \"2026-12-31\",\n    \"internalNotes\": \"Customer prefers email communication.\",\n    \"deliveryNotes\": \"Deliver before 10 AM.\",\n    \"poRequired\": true,\n    \"applyFinanceCharges\": false,\n    \"preferredDocSend\": \"email\",\n    \"daysForGrace\": 5,\n    \"daysForHold\": 10,\n    \"customerSince\": \"2020-01-15\",\n    \"einNumber\": \"98-7654321\",\n    \"reason\": \"Loyal Customer\",\n    \"createdAt\": \"2025-02-28T12:00:00Z\",\n    \"updatedAt\": \"2025-02-28T12:00:00Z\",\n    \"deletedAt\": null,\n    \"status\": \"active\",\n    \"addresses\": {\n        \"address\": \"123 Main Street\",\n        \"suit\": \"Apt 4B\",\n        \"unit\": \"Building 2\",\n        \"city\": \"New York\",\n        \"state\": \"NY\",\n        \"zip\": \"10001\",\n        \"countryId\": 1,\n        \"addressType\": \"shipping\",\n        \"customerId\": 1\n    }\n}",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"type\": \"Retail\",\n    \"contactName\": \"Jane Smith\",\n    \"printName\": \"Doe Inc.\",\n    \"parentCustomer\": null,\n    \"primaryPhoneNumber\": \"1234567890\",\n    \"secondaryPhoneNumber\": \"0987654321\",\n    \"landlineNumber\": \"123-456-789\",\n    \"accEmail\": \"john@example.com\",\n    \"email\": \"john@example.com\",\n    \"priceLevel\": \"Gold\",\n    \"taxExempt\": true,\n    \"salesTax\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"exemptCerti\": \"EX-12345\",\n    \"exemptExipry\": \"2026-12-31\",\n    \"internalNotes\": \"Customer prefers email communication.\",\n    \"deliveryNotes\": \"Deliver before 10 AM.\",\n    \"poRequired\": true,\n    \"applyFinanceCharges\": false,\n    \"preferredDocSend\": \"email\",\n    \"daysForGrace\": 5,\n    \"daysForHold\": 10,\n    \"customerSince\": \"2020-01-15\",\n    \"einNumber\": \"98-7654321\",\n    \"reason\": \"Loyal Customer\",\n    \"createdAt\": \"2025-02-28T12:00:00Z\",\n    \"updatedAt\": \"2025-02-28T12:00:00Z\",\n    \"deletedAt\": null,\n    \"status\": \"active\",\n    \"addresses\": [\n        {\n            \"address\": \"123 Main Street\",\n            \"suit\": \"Apt 4B\",\n            \"unit\": \"Building 2\",\n            \"city\": \"New York\",\n            \"state\": \"NY\",\n            \"zip\": \"10001\",\n            \"countryId\": 1,\n            \"addressType\": \"shipping\",\n            \"customerId\": 1\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2170,7 +2170,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"soDate\": \"2025-02-28\",\n  \"customerPo\": \"PO123456\",\n  \"shipTo\": \"Warehouse B, 567 Industrial Road\",\n  \"specialInstruction\": \"Handle with care\",\n  \"deliveryType\": \"delivery\",\n  \"status\": \"pending\",\n  \"taxId\": 3,\n  \"userId\": 1,\n  \"customerId\": 1,\n  \"shippingAddressId\": 1,\n  \"internalNote\":\"This is internal note for SO\",\n  \"printableNote\":\"This is printable note for SO\",\n  \"products\":[\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 13\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 14\n        }\n    ]\n}\n",
+							"raw": "{\n  \"soDate\": \"2025-02-28\",\n  \"customerPo\": \"PO123456\",\n  \"customerPoDate\": \"2025-02-28\",\n  \"specialInstruction\": \"Handle with care\",\n  \"deliveryType\": \"delivery\",\n  \"status\": \"pending\",\n  \"customerId\": 1,\n  \"shippingAddressId\": 1,\n  \"paymerntTerms\": 1, \n  \"internalNote\":\"This is internal note for SO\",\n  \"printableNote\":\"This is printable note for SO\",\n  \"products\":[\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 15\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 16\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
