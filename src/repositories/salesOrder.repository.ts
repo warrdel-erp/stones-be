@@ -33,6 +33,28 @@ export const getSalesOrderById = async (id: number) => {
       { model: models.Customer, as: "customer" },
       { model: models.User, as: "createdBy" },
       { model: models.CustomerAddress, as: "shippingAddress" },
+      {
+        model: models.SalesOrderProduct,
+        as: "salesOrderProducts",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Slab,
+                as: "slab",
+                include: [
+                  {
+                    model: models.Product,
+                    as: "product",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ],
   });
 };
