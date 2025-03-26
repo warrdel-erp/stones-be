@@ -77,7 +77,7 @@ export const getSalesOrderById = async (id: number) => {
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
 
-  return { salesOrder };
+  return salesOrder;
 };
 
 // Get new PO number
