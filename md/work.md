@@ -92,6 +92,27 @@
 
 65. fix clientPOnumber
 
+66. Sipl serial number
+67. Slab serial number
+68. Unit landed cost in sipl page items.
+
+69. Total in by qty in fright bill tab in SIPL page.
+70. Total landed cost in receive inventory
+
+71. Barcode of slab.
+
+72. Slabs selling price during receive inventory.
+
+73. Inventory balance in SF
+
+74. Is payment method in payment page from BE
+
+75. In freight bills creation .Based on RQ and based on billed qty (but final calculations will be gone with received qty.)
+
+76. Delivery location can different for SO, LO, PL
+
+77. Account number in ledger account
+
 ---
 
 1. payload validations(req.body should not be passed directly to service.) .

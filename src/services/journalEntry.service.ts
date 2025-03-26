@@ -91,10 +91,13 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
   );
 
   // Get in_inventory ledger account id for products entry.
-  const ledgerAccountForProducts: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-    key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
-    clientId: siplData.clientId,
-  });
+  const ledgerAccountForProducts: any = await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
+      clientId: siplData.clientId,
+    },
+    transaction
+  );
 
   // Create Journal entry data.
   const arr: JournalEntry[] = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {

@@ -14,8 +14,8 @@ export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction
   return accounts;
 };
 
-export const getLedgerAccountByFilter = async (filter: WhereOptions) => {
-  return await models.LedgerAccount.findOne({ where: filter });
+export const getLedgerAccountByFilter = async (filter: WhereOptions, transaction?: Transaction) => {
+  return await models.LedgerAccount.findOne({ where: filter, transaction });
 };
 
 // Get all ledger accounts.

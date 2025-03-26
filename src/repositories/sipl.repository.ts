@@ -156,9 +156,9 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
         attributes: ["location"],
       },
     ],
-    // attributes: {
-    //   include: [[fn("CONCAT", col("PurchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
-    // },
+    attributes: {
+      include: [[fn("CONCAT", col("PurchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
+    },
     transaction,
   });
 };
@@ -191,6 +191,9 @@ export const findSIPLBySlabId = async (slabId: number) => {
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({
+    attributes: {
+      include: [[fn("CONCAT", col("PurchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
+    },
     include: [
       {
         model: models.Slab,
@@ -216,7 +219,13 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
               },
             ],
           },
+          {},
         ],
+      },
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        attributes: [],
       },
     ],
     order: [["createdAt", "DESC"]],

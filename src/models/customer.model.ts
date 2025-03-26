@@ -115,6 +115,14 @@ const Customer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    customerPoDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    expDeliveryDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: false,
