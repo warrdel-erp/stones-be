@@ -2170,7 +2170,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"soDate\": \"2025-02-28\",\n  \"expDeliveryDate\":\"2025-02-28\",\n  \"deliveryNotes\":\"this is deliveryNotes\",\n  \"customerPo\": \"PO123456\",\n  \"customerPoDate\": \"2025-02-28\",\n  \"specialInstruction\": \"Handle with care\",\n  \"deliveryType\": \"delivery\",\n  \"status\": \"pending\",\n  \"customerId\": 1,\n  \"shippingAddressId\": 1,\n  \"paymerntTerms\": 1, \n  \"soLocationId\":1,\n  \"internalNote\":\"This is internal note for SO\",\n  \"printableNote\":\"This is printable note for SO\",\n  \"products\":[\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 15\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 16\n        }\n    ]\n}\n",
+							"raw": "{\n    \"soDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"this is deliveryNotes\",\n    \"customerPo\": \"PO123456\",\n    \"customerPoDate\": \"2025-02-28\",\n    \"specialInstruction\": \"Handle with care\",\n    \"deliveryType\": \"delivery\",\n    \"status\": \"pending\",\n    \"customerId\": 1,\n    \"shippingAddressId\": 1,\n    \"paymerntTerms\": 1,\n    \"soLocationId\": 1,\n    \"internalNote\": \"This is internal note for SO\",\n    \"printableNote\": \"This is printable note for SO\",\n    \"products\": [\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 8,\n            \"taxApplied\": true\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 7\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"

@@ -15,6 +15,10 @@ const SalesOrderProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    taxApplied: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
     inventoryProductId: {
       type: DataTypes.INTEGER,
       allowNull: false,
