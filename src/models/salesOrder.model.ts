@@ -39,8 +39,24 @@ const SalesOrder = sequelize.define(
       type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
       allowNull: false,
     },
+    deliveryNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    paymentTerms: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     taxId: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    customerPoDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    expDeliveryDate: {
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     userId: {

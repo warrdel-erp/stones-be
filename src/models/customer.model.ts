@@ -75,10 +75,6 @@ const Customer = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    deliveryNotes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     poRequired: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -113,14 +109,6 @@ const Customer = sequelize.define(
     },
     status: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    customerPoDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    expDeliveryDate: {
-      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     createdBy: {
