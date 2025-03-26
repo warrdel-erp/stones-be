@@ -5,7 +5,7 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
 
 export const fetchProductsWithSlabsByLocation = async (page: number, limit: number, locationId: number) => {
-  const data: any = await productRepository.getAllProducts(page, limit);
+  const data: any = await productRepository.getAllProducts(page, limit, undefined, true);
 
   // Map data accordingly product -> sipl -> slab
   let finalData = await Promise.all(
