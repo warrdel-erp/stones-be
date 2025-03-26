@@ -43,10 +43,6 @@ const SalesOrder = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    taxId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     customerPoDate: {
       type: DataTypes.DATEONLY,
       allowNull: true,
