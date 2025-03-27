@@ -3,6 +3,8 @@ import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
 import { AppError } from "../helper/appError";
 import Client from "./client";
+import CustomerAddress from "./customerAddress.model";
+import { DELIVERY_TYPES } from "../constants/tableTypes";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -17,9 +19,13 @@ const LoadingOrder = sequelize.define(
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     loDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       defaultValue: DataTypes.NOW,
       allowNull: false,
+    },
+    expDeliveryDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
     paymentTerms: {
       type: DataTypes.STRING,
@@ -28,6 +34,18 @@ const LoadingOrder = sequelize.define(
     deliveryNotes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    deliveryType: {
+      type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
+      allowNull: false,
+    },
+    shippingAddressId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: CustomerAddress,
+        key: "id",
+      },
     },
     invoiced: {
       type: DataTypes.BOOLEAN,
