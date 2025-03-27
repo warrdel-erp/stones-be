@@ -5,8 +5,10 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 // Create new LO
-export const createLoadingOrder = catchAsync(async (req: Request, res: Response) => {
-  const loadingOrder = await loadingOrderService.createLoadingOrder(req.body);
+export const createLoadingOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const loadingOrder = await loadingOrderService.createLoadingOrder({ ...req.body, clientId });
   SuccessResponse(res, 201, "Loading Order created successfully", loadingOrder);
 });
 

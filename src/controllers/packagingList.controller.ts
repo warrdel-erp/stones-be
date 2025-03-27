@@ -8,14 +8,15 @@ import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 // Create new PL
-export const createPackagingList = catchAsync(async (req: Request, res: Response) => {
+export const createPackagingList = catchAsync(async (req: AuthRequest, res: Response) => {
   const { loadingOrderId } = req.body;
+  const clientId = req.user?.clientId;
 
   // Check if loading order is invoiced then can't create packaging list.
   await loadingOrderService.checkIfLoadingOrderInvoiced(loadingOrderId, "create packaging list");
 
   // Create packaging list.
-  const packagingList = await packagingListService.createPackagingList(req.body);
+  const packagingList = await packagingListService.createPackagingList({ ...req.body, clientId });
 
   SuccessResponse(res, 201, "Packaging List created successfully", packagingList);
 });
