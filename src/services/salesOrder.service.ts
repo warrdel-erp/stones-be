@@ -60,6 +60,24 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
 export const getSalesOrderById = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
 
+  // Calculate total amount added in SO.
+  salesOrder.totalAmount = salesOrder.salesOrderProducts.reduce(
+    (total: number, salesOrderProduct: any) =>
+      total +
+      salesOrderProduct.inventoryProduct.slab.receivingLength *
+        salesOrderProduct.inventoryProduct.slab.receivingWidth *
+        salesOrderProduct.unitPrice,
+    0
+  );
+
+  // Calculate total qty added in SO.
+  salesOrder.totalQty = salesOrder.salesOrderProducts.reduce(
+    (total: number, salesOrderProduct: any) =>
+      total +
+      salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth,
+    0
+  );
+
   let products = removeDuplicates(
     salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
   );
