@@ -2443,7 +2443,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"loDate\": \"2025-02-28T12:00:00.000Z\",\n    \"paymentTerms\": \"Net 30\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"salesOrderId\": 2,\n    \"products\": [\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 8\n        },\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 9\n        }\n    ]\n}",
+							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 2,\n    \"products\": [\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 8\n        },\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 9\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
