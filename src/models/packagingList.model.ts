@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import LoadingOrder from "./loadingOrder.model";
+import Client from "./client";
 
 const PackagingList = sequelize.define(
   "PackagingList",
@@ -9,6 +10,10 @@ const PackagingList = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    clientPlNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     status: {
       type: DataTypes.STRING,
@@ -25,6 +30,15 @@ const PackagingList = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "packaging_lists",
@@ -34,8 +48,29 @@ const PackagingList = sequelize.define(
         unique: true,
         fields: ["loadingOrderId"], // Ensures database enforces uniqueness
       },
+      {
+        unique: true,
+        fields: ["clientId", "clientPlNumber"],
+      },
     ],
   }
 );
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+PackagingList.beforeCreate(async (packagingList: any) => {
+  if (!packagingList.clientId) {
+    throw new Error("Client ID is required to generate clientPlNumber.");
+  }
+
+  let lastPLAccordingToClient: any = await PackagingList.findOne({
+    where: { clientId: packagingList.clientId },
+    order: [["clientPlNumber", "DESC"]],
+  });
+
+  lastPLAccordingToClient = lastPLAccordingToClient?.get({ plain: true });
+
+  packagingList.clientPlNumber = !!lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
+});
+
 
 export default PackagingList;

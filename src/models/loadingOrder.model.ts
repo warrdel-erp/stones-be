@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
 import { AppError } from "../helper/appError";
+import Client from "./client";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -10,6 +11,10 @@ const LoadingOrder = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    clientLoNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     loDate: {
       type: DataTypes.DATE,
@@ -38,10 +43,25 @@ const LoadingOrder = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "loading_orders",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "clientLoNumber"],
+      },
+    ]
   }
 );
 
@@ -53,5 +73,22 @@ LoadingOrder.beforeUpdate(async (loadingOrder, options) => {
     throw new AppError("Cannot update Loading Order as it is already invoiced.", 400);
   }
 });
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+LoadingOrder.beforeCreate(async (loadingOrder: any) => {
+  if (!loadingOrder.clientId) {
+    throw new Error("Client ID is required to generate clientLoNumber.");
+  }
+
+  let lastLOAccordingToClient: any = await LoadingOrder.findOne({
+    where: { clientId: loadingOrder.clientId },
+    order: [["clientLoNumber", "DESC"]],
+  });
+
+  lastLOAccordingToClient = lastLOAccordingToClient?.get({ plain: true });
+
+  loadingOrder.clientLoNumber = !!lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
+});
+
 
 export default LoadingOrder;

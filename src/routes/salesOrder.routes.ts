@@ -21,7 +21,7 @@ router.put("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProdu
 // Update requested sales order product
 router.get("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProductController.getSalesOrderProducts);
 
-// Get new PO number
+// Get new SO number
 router.get("/newSoNumber", authenticateUser, salesOrderController.getNewSoNumber);
 
 // Get SO by Id

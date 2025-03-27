@@ -5,32 +5,36 @@ import * as loadingOrderProductController from "../controllers/loadingOrderProdu
 
 const router = Router();
 
-// Create new LO
+// Create new LO.
 router.post("/", authenticateUser, loadingOrderController.createLoadingOrder);
 
-// Get all LO
+// Get all LO.
 router.get("/", authenticateUser, loadingOrderController.getAllLoadingOrders);
 
-// Get loading order by Id
-router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById);
-
-// Update Loading Order
+// Update Loading Order.
 router.put("/:id", authenticateUser, loadingOrderController.updateLoadingOrder);
 
-// Update requested loading order product
+// Update requested loading order product.
 router.put(
   "/:loadingOrderId/loadingOrderProduct",
   authenticateUser,
   loadingOrderProductController.upsertLoadingOrderProducts
 );
 
-// Update requested loading order product
+// Update requested loading order product.
 router.get(
   "/:loadingOrderId/loadingOrderProduct",
   authenticateUser,
   loadingOrderProductController.getLoadingOrderProducts
 );
 
+// Get new SO number.
+router.get("/newLoNumber", authenticateUser, loadingOrderController.getNewLoNumber);
+
+// Create invoice.
 router.put("/:id/createInvoice", authenticateUser, loadingOrderController.invoiceLoadingOrder);
+
+// Get loading order by Id
+router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById);
 
 export default router;

@@ -47,3 +47,14 @@ export const updatePackagingList = async (id: number, data: any, transaction?: T
   await packagingList.update(data);
   return packagingList;
 };
+
+// Get latest PL number
+export const getPlNumber = async (clientId: number) => {
+  const lastPL: any = await models.PackagingList.findOne({
+    where: { clientId },
+    order: [["clientPlNumber", "DESC"]],
+    attributes: ["clientPlNumber"],
+  });
+
+  return { clientPlNumber: lastPL ? lastPL?.clientPlNumber + 1 : 1 };
+};

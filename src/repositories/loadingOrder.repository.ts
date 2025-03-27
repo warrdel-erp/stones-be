@@ -58,3 +58,14 @@ export const updateLoadingOrder = async (id: number, data: any, transaction?: Tr
   const loadingOrder = await models.LoadingOrder.update(data, { where: { id }, transaction, individualHooks: true });
   return loadingOrder;
 };
+
+// Get latest SO number
+export const getLoNumber = async (clientId: number) => {
+  const lastLO: any = await models.LoadingOrder.findOne({
+    where: { clientId },
+    order: [["clientLoNumber", "DESC"]],
+    attributes: ["clientLoNumber"],
+  });
+
+  return { clientLoNumber: lastLO ? lastLO?.clientLoNumber + 1 : 1 };
+};

@@ -110,3 +110,8 @@ export const checkIfLoadingOrderInvoiced = async (loadingOrderId: number, operat
 
   return loadingOrder;
 };
+
+// Get new LO number
+export const getLONumber = async (clientId: number) => {
+  return await loadingOrderRepository.getLoNumber(clientId);
+};

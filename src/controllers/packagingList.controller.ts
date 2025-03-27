@@ -5,6 +5,7 @@ import catchAsync from "../helper/asyncCatch";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 // Create new PL
 export const createPackagingList = catchAsync(async (req: Request, res: Response) => {
@@ -69,4 +70,13 @@ export const updatePackagingList = catchAsync(async (req: Request, res: Response
   }
 
   SuccessResponse(res, 200, "Packaging List updated successfully", updatedPackagingList);
+});
+
+
+// Get new PL number
+export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const data = await packagingListService.getPLNumber(clientId!);
+  SuccessResponse(res, 200, "New PL number fetched successfully.", data);
 });

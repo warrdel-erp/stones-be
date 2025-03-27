@@ -32,3 +32,8 @@ export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) =>
 export const updatePackagingList = async (id: number, data: any) => {
   return await packagingListRepository.updatePackagingList(id, data);
 };
+
+// Get new PL number
+export const getPLNumber = async (clientId: number) => {
+  return await packagingListRepository.getPlNumber(clientId);
+};

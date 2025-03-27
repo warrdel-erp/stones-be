@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 // Create new LO
 export const createLoadingOrder = catchAsync(async (req: Request, res: Response) => {
@@ -66,4 +67,12 @@ export const invoiceLoadingOrder = catchAsync(async (req: Request, res: Response
   const updatedLoadingOrder = await loadingOrderService.invoiceLoadingOrder(Number(id));
 
   SuccessResponse(res, 200, "Loading Order updated successfully", updatedLoadingOrder);
+});
+
+// Get new SO number
+export const getNewLoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const data = await loadingOrderService.getLONumber(clientId!);
+  SuccessResponse(res, 200, "New LO number fetched successfully.", data);
 });

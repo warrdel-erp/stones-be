@@ -11,8 +11,8 @@ router.post("/", authenticateUser, packagingListController.createPackagingList);
 // Get all PL
 router.get("/", authenticateUser, packagingListController.getAllPackagingLists);
 
-// Get Packaging List by Id
-router.get("/:id", authenticateUser, packagingListController.getPackagingListById);
+// Get new SO number.
+router.get("/newPlNumber", authenticateUser, packagingListController.getNewPlNumber);
 
 // Update Packaging List
 router.put("/:id", authenticateUser, packagingListController.updatePackagingList);
@@ -30,5 +30,9 @@ router.get(
   authenticateUser,
   packagingListProductController.getPackagingListProducts
 );
+
+// Get Packaging List by Id
+router.get("/:id", authenticateUser, packagingListController.getPackagingListById);
+
 
 export default router;
