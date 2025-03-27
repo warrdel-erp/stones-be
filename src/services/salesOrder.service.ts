@@ -64,9 +64,10 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.totalAmount = salesOrder.salesOrderProducts.reduce(
     (total: number, salesOrderProduct: any) =>
       total +
-      salesOrderProduct.inventoryProduct.slab.receivingLength *
+      (salesOrderProduct.inventoryProduct.slab.receivingLength *
         salesOrderProduct.inventoryProduct.slab.receivingWidth *
-        salesOrderProduct.unitPrice,
+        salesOrderProduct.unitPrice) /
+        144,
     0
   );
 
@@ -74,7 +75,9 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.totalQty = salesOrder.salesOrderProducts.reduce(
     (total: number, salesOrderProduct: any) =>
       total +
-      salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth,
+      (salesOrderProduct.inventoryProduct.slab.receivingLength *
+        salesOrderProduct.inventoryProduct.slab.receivingWidth) /
+        144,
     0
   );
 
