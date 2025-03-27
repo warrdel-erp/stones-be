@@ -862,9 +862,16 @@
 							]
 						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "onlyWithSlabs",
+								"value": "false",
+								"type": "text",
+								"disabled": true
+							}
+						],
 						"url": {
-							"raw": "{{baseurl}}/api/product?limit=100&page=1",
+							"raw": "{{baseurl}}/api/product?limit=100&page=1&onlyWithSlabs=0",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -880,6 +887,10 @@
 								{
 									"key": "page",
 									"value": "1"
+								},
+								{
+									"key": "onlyWithSlabs",
+									"value": "0"
 								}
 							]
 						}
@@ -1806,7 +1817,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/slab",
+							"raw": "{{baseurl}}/api/slab?status=IN_INVENTORY",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1827,8 +1838,7 @@
 								},
 								{
 									"key": "status",
-									"value": "IN_INVENTORY",
-									"disabled": true
+									"value": "IN_INVENTORY"
 								}
 							]
 						}
@@ -2246,7 +2256,7 @@
 							"variable": [
 								{
 									"key": "SOId",
-									"value": "1"
+									"value": "15"
 								}
 							]
 						}
@@ -2664,6 +2674,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "New LO number",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder/newLoNumber",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder",
+								"newLoNumber"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2890,6 +2929,35 @@
 									"key": "packagingListId",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New PL number",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/packagingList/newPlNumber",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"packagingList",
+								"newPlNumber"
 							]
 						}
 					},
