@@ -4,18 +4,29 @@ import * as loadingOrderProductRepository from "../repositories/loadingOrderProd
 import * as loadingOrderService from "../services/loadingOrder.service";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
+import { Transaction } from "sequelize";
 
 //  Create or update multiple SalesOrderProduct entries.
-export const upsertPackagingListProducts = async (products: any[], packagingListId: number) => {
+export const upsertPackagingListProducts = async (
+  products: any[],
+  packagingListId: number,
+  transaction?: Transaction
+) => {
   const upsertedProducts = [];
 
-  const transaction = await sequelize.transaction();
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction(); // Start a transaction
+  }
 
   try {
     // Get packaging list by given id
-    const packagingList = (await packagingListRepository.getPackagingListByIdSimple(packagingListId))?.get({
-      plain: true,
-    });
+    const packagingList = (await packagingListRepository.getPackagingListByIdSimple(packagingListId, transaction))?.get(
+      {
+        plain: true,
+      }
+    );
 
     if (!packagingList) {
       throw new AppError("Invalid Packaging List Id", 400);
@@ -63,10 +74,10 @@ export const upsertPackagingListProducts = async (products: any[], packagingList
       }
     }
 
-    transaction.commit();
+    shouldCommitTransaction && transaction.commit();
     return upsertedProducts;
   } catch (error) {
-    transaction.rollback();
+    shouldCommitTransaction && transaction.rollback();
     throw error;
   }
 };

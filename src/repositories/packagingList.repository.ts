@@ -2,8 +2,8 @@ import { Transaction } from "sequelize";
 import * as models from "../models";
 
 // Create new LO
-export const createPackagingList = async (data: any) => {
-  return await models.PackagingList.create(data);
+export const createPackagingList = async (data: any, transaction?: Transaction) => {
+  return await models.PackagingList.create(data, { transaction });
 };
 
 // Get all LO
@@ -24,8 +24,8 @@ export const getPackagingListById = async (id: number) => {
 };
 
 // Get packaging list by Id
-export const getPackagingListByIdSimple = async (id: number) => {
-  return await models.PackagingList.findByPk(id);
+export const getPackagingListByIdSimple = async (id: number, transaction?: Transaction) => {
+  return await models.PackagingList.findByPk(id, { transaction });
 };
 
 // Get packaging list by LO id

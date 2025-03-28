@@ -3,6 +3,7 @@ import * as loadingOrderRepository from "../repositories/loadingOrder.repository
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
+import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
 
 //  Create or update multiple SalesOrderProduct entries.
 export const upsertLoadingOrderProducts = async (products: any[], loadingOrderId: number) => {
@@ -18,7 +19,7 @@ export const upsertLoadingOrderProducts = async (products: any[], loadingOrderId
       throw new AppError("Invalid Loading Order Id", 400);
     }
 
-    if (loadingOrder.invoiced) {
+    if (loadingOrder.stage === LOADING_ORDER_STAGES.INVOICED) {
       throw new AppError("Cannot add products to Loading Order as it is already invoiced.", 400);
     }
 

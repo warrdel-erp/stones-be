@@ -50,8 +50,8 @@ export const getLoadingOrdersBySalesOrderId = catchAsync(async (req: Request, re
 export const updateLoadingOrder = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  // Remove invoiced key if present because it should not change invoice key. it should only be changed by it's specific API.
-  const { invoiced, ...data } = req.body;
+  // Remove stage key if present because it should not change stage key. it should only be changed by it's specific API.
+  const { stage, ...data } = req.body;
 
   const updatedLoadingOrder = await loadingOrderService.updateLoadingOrder(Number(id), data);
 

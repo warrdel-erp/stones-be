@@ -4,7 +4,7 @@ import SalesOrder from "./salesOrder.model";
 import { AppError } from "../helper/appError";
 import Client from "./client";
 import CustomerAddress from "./customerAddress.model";
-import { DELIVERY_TYPES } from "../constants/tableTypes";
+import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -39,6 +39,11 @@ const LoadingOrder = sequelize.define(
       type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
       allowNull: false,
     },
+    stage: {
+      type: DataTypes.ENUM(...Object.values(LOADING_ORDER_STAGES)),
+      defaultValue: LOADING_ORDER_STAGES.INITIATED,
+      // allowNull: false,
+    },
     shippingAddressId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -46,10 +51,6 @@ const LoadingOrder = sequelize.define(
         model: CustomerAddress,
         key: "id",
       },
-    },
-    invoiced: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
     },
     salesOrderId: {
       type: DataTypes.INTEGER,
@@ -79,7 +80,7 @@ const LoadingOrder = sequelize.define(
         unique: true,
         fields: ["clientId", "clientLoNumber"],
       },
-    ]
+    ],
   }
 );
 
@@ -107,6 +108,5 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
 
   loadingOrder.clientLoNumber = !!lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
 });
-
 
 export default LoadingOrder;

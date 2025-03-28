@@ -86,3 +86,9 @@ export const DELIVERY_TYPES = {
   PICKUP: "pickup",
   DELIVERY: "delivery",
 } as const;
+
+export const LOADING_ORDER_STAGES = {
+  INITIATED: "initiated",
+  PACKAGING_LIST: "packagingList",
+  INVOICED: "invoiced",
+} as const;

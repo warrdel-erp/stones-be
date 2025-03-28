@@ -73,7 +73,6 @@ export const updatePackagingList = catchAsync(async (req: Request, res: Response
   SuccessResponse(res, 200, "Packaging List updated successfully", updatedPackagingList);
 });
 
-
 // Get new PL number
 export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;

@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 
 // Create new LO
@@ -21,6 +21,19 @@ export const getAllLoadingOrders = async (page: number, limit: number) => {
   });
 
   return { data, total, page, limit };
+};
+
+// Get all LO without pagination
+export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions) => {
+  const loadingOrders = await models.LoadingOrder.findAll({
+    where: filters,
+    include: [
+      { model: models.SalesOrder, as: "salesOrder" },
+      { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+    ],
+  });
+
+  return loadingOrders;
 };
 
 // Get loading order by Id

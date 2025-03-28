@@ -1,6 +1,7 @@
 import { sequelize } from "../config/database";
 import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
+import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
 import { removeDuplicates } from "../helper";
 import _ from "lodash";
@@ -73,7 +74,9 @@ export const getSalesOrderById = async (id: number) => {
   );
 
   // add total to loadingOrders.
-  salesOrder.loadingOrders = loadingOrderWithTotalAmount(salesOrder.loadingOrders);
+  salesOrder.loadingOrders = await loadingOrderService.getAllLoadingOrdersWithoutPagination({
+    salesOrderId: id,
+  });
 
   // Calculate total qty added in SO.
   salesOrder.totalQty = salesOrder.salesOrderProducts.reduce(
@@ -109,16 +112,3 @@ export const getSalesOrderById = async (id: number) => {
 export const getSONumber = async (clientId: number) => {
   return await salesOrderRepository.getSoNumber(clientId);
 };
-
-function loadingOrderWithTotalAmount(loadingOrders: any) {
-  return loadingOrders.map((loadingOrder: any) => {
-    // Calculate total amount added in LO.
-    loadingOrder.totalAmount = _.sumBy(
-      loadingOrder.loadingOrderProducts,
-      (loadingOrderProduct: any) =>
-        (loadingOrderProduct.remeasureLength * loadingOrderProduct.remeasureWidth * loadingOrderProduct.unitPrice) / 144
-    );
-
-    return loadingOrder;
-  });
-}

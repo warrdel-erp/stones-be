@@ -1,16 +1,33 @@
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as packagingListProductService from "../services/packagingListProduct.service";
+import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
+import { sequelize } from "../config/database";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
-  let packagingList: any = await packagingListRepository.createPackagingList(data);
-  packagingList = packagingList.get({ plain: true });
+  const transaction = await sequelize.transaction();
 
-  if (data?.products) {
-    await packagingListProductService.upsertPackagingListProducts(data.products, packagingList.id);
+  try {
+    let packagingList: any = await packagingListRepository.createPackagingList(data, transaction);
+    packagingList = packagingList.get({ plain: true });
+
+    if (data?.products) {
+      await packagingListProductService.upsertPackagingListProducts(data.products, packagingList.id, transaction);
+    }
+
+    await loadingOrderRepository.updateLoadingOrder(
+      data.loadingOrderId,
+      { stage: LOADING_ORDER_STAGES.PACKAGING_LIST },
+      transaction
+    );
+
+    transaction.commit();
+    return packagingList;
+  } catch (error) {
+    transaction.rollback();
+    throw error;
   }
-
-  return packagingList;
 };
 
 // Get all PL
