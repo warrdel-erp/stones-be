@@ -85,6 +85,10 @@ const LoadingOrderProduct = sequelize.define(
 
 // Hook to prevent updating inventoryProductId and salesOrderId by removing them from update payload
 LoadingOrderProduct.beforeUpdate((product: any) => {
+  // only can change inventoryProductId if it is swapping.
+  if (!product.dataValues.isSwapping) {
+    delete product.dataValues.inventoryProductId;
+  }
   delete product.dataValues.salesOrderProductId;
   delete product.dataValues.loadingOrderId;
 });
