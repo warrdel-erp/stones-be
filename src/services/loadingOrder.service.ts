@@ -11,6 +11,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
+import { removeDuplicates } from "../helper";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -62,6 +63,25 @@ export const getLoadingOrderById = async (id: number) => {
       (loadingOrderProduct.remeasureLength * loadingOrderProduct.remeasureWidth * loadingOrderProduct.unitPrice) / 144,
     0
   );
+
+  let products = removeDuplicates(
+    loadingOrder?.loadingOrderProducts.map(
+      (loadingOrderProduct: any) => loadingOrderProduct.inventoryProduct.slab.product
+    )
+  );
+
+  // Map slabs to products
+  loadingOrder.products = products.map((product) => {
+    const loadingOrderProduct = loadingOrder.loadingOrderProducts.filter(
+      (loadingOrderProduct: any) => loadingOrderProduct.inventoryProduct.slab.product.id === product.id
+    );
+    // .map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab);
+
+    return { ...product, loadingOrderProduct };
+  });
+
+  // delete salesOrder.salesOrderProducts because it is in products;
+  delete loadingOrder.salesOrderProducts;
 
   return loadingOrder;
 };

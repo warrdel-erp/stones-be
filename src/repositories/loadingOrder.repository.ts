@@ -41,7 +41,28 @@ export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await models.LoadingOrder.findByPk(id, {
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
-      { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+      {
+        model: models.LoadingOrderProduct,
+        as: "loadingOrderProducts",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Slab,
+                as: "slab",
+                include: [
+                  {
+                    model: models.Product,
+                    as: "product",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         model: models.PackagingList,
         as: "packagingList",

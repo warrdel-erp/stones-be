@@ -42,7 +42,7 @@ const LoadingOrder = sequelize.define(
     stage: {
       type: DataTypes.ENUM(...Object.values(LOADING_ORDER_STAGES)),
       defaultValue: LOADING_ORDER_STAGES.INITIATED,
-      // allowNull: false,
+      allowNull: false,
     },
     shippingAddressId: {
       type: DataTypes.INTEGER,
