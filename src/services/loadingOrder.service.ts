@@ -1,22 +1,36 @@
 import { AppError } from "../helper/appError";
+import { SLAB_STATUS } from "../constants";
+import { sequelize } from "../config/database";
+
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as loadingOrderProductService from "../services/loadingOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
-import { SLAB_STATUS } from "../constants";
-import { sequelize } from "../config/database";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
   let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data);
   loadingOrder = loadingOrder.get({ plain: true });
 
+  let createdProducts = [];
+
   if (data?.products) {
-    await loadingOrderProductService.upsertLoadingOrderProducts(data.products, loadingOrder.id);
+    const SOProductIds = data.products.map((e: any) => e.salesOrderProductId);
+    const doesBelongToSO = await salesOrderProductRepository.areSOProductsBelongingToSO(
+      SOProductIds,
+      data.salesOrderId
+    );
+
+    if (!doesBelongToSO) {
+      throw new AppError("All salesOrderProductIds does not belongs to given SO", 400);
+    }
+
+    createdProducts = await loadingOrderProductService.upsertLoadingOrderProducts(data.products, loadingOrder.id);
   }
 
-  return loadingOrder;
+  return { ...loadingOrder, products: createdProducts };
 };
 
 // Get all LO

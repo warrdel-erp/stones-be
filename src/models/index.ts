@@ -367,6 +367,10 @@ Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
 PaymentBill.belongsTo(Payment, { foreignKey: "paymentId", as: "payment" });
 Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBill" });
 
+// Loading order belongs to one SalesOrderProduct (one SalesOrderProduct can have one loadingOrderProduct)
+LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
+SalesOrderProduct.hasOne(LoadingOrderProduct, { foreignKey: "salesOrderProductId", as: "loadingOrderProduct" });
+
 export {
   Client,
   User,

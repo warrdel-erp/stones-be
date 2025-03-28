@@ -12,7 +12,7 @@ const SalesOrderProduct = sequelize.define(
       primaryKey: true,
     },
     unitPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(10, 3),
       allowNull: false,
     },
     taxApplied: {

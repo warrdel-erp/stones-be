@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 
 //  Find SalesOrderProduct by ID and salesOrderId.
@@ -7,6 +7,10 @@ export const findByIdAndSalesOrderId = async (
   transaction?: Transaction
 ) => {
   return models.SalesOrderProduct.findOne({ where: { id, salesOrderId }, transaction });
+};
+
+export const findByIdSimple = async (id: number, transaction?: Transaction) => {
+  return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
 };
 
 //  Find SalesOrderProduct by ID and salesOrderId.
@@ -42,4 +46,18 @@ export const getSalesOrderProductsBySalesOrderId = async (salesOrderId: number) 
       },
     ],
   });
+};
+
+// does all given bills belong to the given vendor
+export const areSOProductsBelongingToSO = async (SOProductIds: number[], salesOrderId: number): Promise<boolean> => {
+  const count = await models.SalesOrderProduct.count({
+    where: {
+      id: {
+        [Op.in]: SOProductIds, // Get only SOProduct that match the given IDs
+      },
+      salesOrderId, // Ensure the salesOrderId matches
+    },
+  });
+
+  return count === SOProductIds.length; // If count matches the number of IDs, all belong to salesOrder
 };

@@ -38,22 +38,25 @@ export const upsertLoadingOrderProducts = async (products: any[], loadingOrderId
           throw new AppError(`Invalid Id '${product.id}' or product does not belongs to given LO`, 400);
         }
       } else {
-        const salesOrderProduct = await salesOrderProductRepository.findByInventoryProductIdAndSalesOrderId({
-          inventoryProductId: product.inventoryProductId,
-          salesOrderId: loadingOrder.salesOrderId,
-        });
+        const salesOrderProduct = await salesOrderProductRepository.findByIdSimple(
+          product.salesOrderProductId,
+          transaction
+        );
 
         if (!salesOrderProduct) {
-          throw new AppError(
-            `Inventory Product with ID: ${product.inventoryProductId} is not exists in parent Sales Order, So can't be added in Loading Order`,
-            400
-          );
+          throw new AppError(`Sales order does not exists with given Id: ${product.salesOrderProductId}`, 400);
         }
 
         const newProduct = await loadingOrderProductRepository.createLoadingOrderProduct(
-          { ...product, loadingOrderId },
+          {
+            ...product,
+            loadingOrderId,
+            inventoryProductId: salesOrderProduct.inventoryProductId,
+            unitPrice: salesOrderProduct.unitPrice,
+          },
           transaction
         );
+
         upsertedProducts.push(newProduct);
       }
     }

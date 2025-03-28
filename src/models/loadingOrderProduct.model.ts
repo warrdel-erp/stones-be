@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct";
 import LoadingOrder from "./loadingOrder.model";
+import SalesOrderProduct from "./salesOrderProduct.model";
 
 const LoadingOrderProduct = sequelize.define(
   "LoadingOrderProduct",
@@ -22,6 +23,14 @@ const LoadingOrderProduct = sequelize.define(
     slabPicked: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    isSwapped: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    unitPrice: {
+      type: DataTypes.DECIMAL(10, 3),
+      allowNull: false,
     },
     status: {
       type: DataTypes.STRING,
@@ -48,6 +57,15 @@ const LoadingOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    salesOrderProductId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: SalesOrderProduct,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "loading_order_products",
@@ -56,6 +74,10 @@ const LoadingOrderProduct = sequelize.define(
       {
         unique: true,
         fields: ["loadingOrderId", "inventoryProductId"], // Composite unique constraint
+      },
+      {
+        unique: true,
+        fields: ["salesOrderProductId"], // Composite unique constraint
       },
     ],
   }

@@ -111,7 +111,12 @@
 
 76. Delivery location can different for SO, LO, PL
 
-77. Account number in ledger account
+<!-- 77. Account number in ledger account  -->
+
+78. salesOrderProduct is lo been created.
+79. soData -> Lo slabs, LO total qty, LO amount, LO total tax., sales tax populate in SO customer.
+80. Add tax calculation to every product.
+81. paid amount in SIPL
 
 ---
 
