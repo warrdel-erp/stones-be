@@ -14,7 +14,7 @@ export const createLoadingOrder = catchAsync(async (req: AuthRequest, res: Respo
 
 // Get all LO
 export const getAllLoadingOrders = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, search } = req.query;
+  const { page = 1, limit = 10 } = req.query;
 
   const result = await loadingOrderService.getAllLoadingOrders(Number(page), Number(limit));
 

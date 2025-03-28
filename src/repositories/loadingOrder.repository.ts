@@ -11,7 +11,10 @@ export const getAllLoadingOrders = async (page: number, limit: number) => {
   const offset = (page - 1) * limit;
 
   const { rows: data, count: total } = await models.LoadingOrder.findAndCountAll({
-    include: [{ model: models.SalesOrder, as: "salesOrder" }],
+    include: [
+      { model: models.SalesOrder, as: "salesOrder" },
+      { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],

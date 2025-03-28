@@ -40,7 +40,17 @@ export const getAllLoadingOrders = async (page: number, limit: number) => {
 
 // Get loading order by Id
 export const getLoadingOrderById = async (id: number) => {
-  return await loadingOrderRepository.getLoadingOrderById(id);
+  const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
+
+  // Calculate total amount added in LO.
+  loadingOrder.totalAmount = loadingOrder.loadingOrderProducts.reduce(
+    (total: number, loadingOrderProduct: any) =>
+      total +
+      (loadingOrderProduct.remeasureLength * loadingOrderProduct.remeasureWidth * loadingOrderProduct.unitPrice) / 144,
+    0
+  );
+
+  return loadingOrder;
 };
 
 // Get loading order by SO id
