@@ -4,6 +4,7 @@ import * as loadingOrderRepository from "../repositories/loadingOrder.repository
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
+import { removeDuplicatesWithUnitPrice } from "../helper";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
@@ -59,8 +60,40 @@ export const getAllPackagingLists = async () => {
 
 // Get packaging list by Id
 export const getPackagingListById = async (id: number) => {
-  return await packagingListRepository.getPackagingListById(id);
+  const packagingList = await packagingListRepository.getPackagingListById(id);
+
+  if (!packagingList) {
+    throw new AppError("Invalid Id", 400);
+  }
+  packagingList.products = getPackagingListProductAccordingToIdAndUnitPrice(packagingList);
+
+  delete packagingList.salesOrderProducts;
+
+  return packagingList;
 };
+
+function getPackagingListProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+  let products = removeDuplicatesWithUnitPrice(
+    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
+      ...salesOrderProduct.inventoryProduct.slab.product,
+      unitPrice: salesOrderProduct.unitPrice,
+    }))
+  );
+
+  // Map slabs to products
+  const newProducts = products.map((product) => {
+    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id
+        &&
+        salesOrderProduct.unitPrice === product.unitPrice
+    );
+
+    return { ...product, salesOrderProduct };
+  });
+
+  return newProducts;
+}
 
 // Get packaging list by LO id
 export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) => {

@@ -11,7 +11,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
-import { removeDuplicates } from "../helper";
+import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -35,6 +35,8 @@ export const createLoadingOrder = async (data: any) => {
 
   return { ...loadingOrder, products: updatedProducts };
 };
+
+
 
 // Get all LO
 export const getAllLoadingOrders = async (page: number, limit: number) => {
@@ -63,24 +65,52 @@ export const getLoadingOrderById = async (id: number) => {
     0
   );
 
-  let products = removeDuplicates(
-    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
-  );
+  // let products = removeDuplicates(
+  //   loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
+  // );
 
-  // Map slabs to products
-  loadingOrder.products = products.map((product) => {
-    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
-    );
+  // // Map slabs to products
+  // loadingOrder.products = products.map((product) => {
+  //   const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+  //     (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
+  //   );
 
-    return { ...product, salesOrderProduct };
-  });
+  //   return { ...product, salesOrderProduct };
+  // });
+
+  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete loadingOrder.salesOrderProducts;
 
   return loadingOrder;
 };
+
+function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+  let products = removeDuplicatesWithUnitPrice(
+    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
+      ...salesOrderProduct.inventoryProduct.slab.product,
+      unitPrice: salesOrderProduct.unitPrice,
+    }))
+  );
+
+  // console.log(loadingOrder)
+
+  // Map slabs to products
+  const newProducts = products.map((product) => {
+    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id
+        &&
+        salesOrderProduct.unitPrice === product.unitPrice
+    );
+
+    return { ...product, salesOrderProduct };
+  });
+
+  return newProducts;
+}
+
 
 // Get loading order by SO id
 export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {

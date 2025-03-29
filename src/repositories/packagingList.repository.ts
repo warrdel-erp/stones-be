@@ -15,12 +15,35 @@ export const getAllPackagingLists = async () => {
 
 // Get packaging list by Id
 export const getPackagingListById = async (id: number) => {
-  return await models.PackagingList.findByPk(id, {
+  return (await models.PackagingList.findByPk(id, {
     include: [
       { model: models.LoadingOrder, as: "loadingOrder" },
       { model: models.PackagingListProduct, as: "packagingListProducts" },
+      {
+        model: models.SalesOrderProduct,
+        as: "salesOrderProducts",
+        required: false,
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Slab,
+                as: "slab",
+                include: [
+                  {
+                    model: models.Product,
+                    as: "product",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ],
-  });
+  }))?.get({ plain: true });
 };
 
 // Get packaging list by Id
