@@ -33,6 +33,7 @@ export const getSalesOrderById = async (id: number) => {
       { model: models.Customer, as: "customer" },
       { model: models.User, as: "createdBy" },
       { model: models.CustomerAddress, as: "shippingAddress" },
+      { model: models.Notes, as: "notes" },
       {
         model: models.SalesOrderProduct,
         as: "salesOrderProducts",
