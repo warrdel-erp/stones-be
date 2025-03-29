@@ -3,7 +3,7 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
-import { removeDuplicates } from "../helper";
+import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
@@ -92,16 +92,20 @@ export const getSalesOrderById = async (id: number) => {
     0
   );
 
-  let products = removeDuplicates(
-    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
+  let products = removeDuplicatesWithUnitPrice(
+    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
+      ...salesOrderProduct.inventoryProduct.slab.product,
+      unitPrice: salesOrderProduct.unitPrice,
+    }))
   );
 
   // Map slabs to products
   salesOrder.products = products.map((product) => {
     const salesOrderProduct = salesOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
+        salesOrderProduct.unitPrice === product.unitPrice
     );
-    // .map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab);
 
     return { ...product, salesOrderProduct };
   });
