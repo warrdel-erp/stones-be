@@ -5,12 +5,12 @@ import { WhereOptions } from "sequelize";
 import _ from "lodash";
 
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
-import * as loadingOrderProductService from "../services/loadingOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
+import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
+import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { removeDuplicates } from "../helper";
 
 // Create new LO
@@ -18,23 +18,20 @@ export const createLoadingOrder = async (data: any) => {
   let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data);
   loadingOrder = loadingOrder.get({ plain: true });
 
-  let createdProducts = [];
+  let updatedProducts = [];
 
-  if (data?.products) {
-    const SOProductIds = data.products.map((e: any) => e.salesOrderProductId);
-    const doesBelongToSO = await salesOrderProductRepository.areSOProductsBelongingToSO(
-      SOProductIds,
-      data.salesOrderId
-    );
+  if (data?.soProducts) {
+    // Set loadingOrderId and stage to loadingOrder for each product.
+    data.soProducts = data.soProducts.map((e: any) => ({
+      ...e,
+      loadingOrderId: loadingOrder.id,
+      stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+    }));
 
-    if (!doesBelongToSO) {
-      throw new AppError("All salesOrderProductIds does not belongs to given SO", 400);
-    }
-
-    createdProducts = await loadingOrderProductService.upsertLoadingOrderProducts(data.products, loadingOrder.id);
+    updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(data.soProducts, data.salesOrderId);
   }
 
-  return { ...loadingOrder, products: createdProducts };
+  return { ...loadingOrder, products: updatedProducts };
 };
 
 // Get all LO

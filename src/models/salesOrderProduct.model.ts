@@ -1,10 +1,13 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import SalesOrder from "./salesOrder.model";
 import InventoryProduct from "./inventoryProduct";
+import PackagingList from "./packagingList.model";
+import LoadingOrder from "./loadingOrder.model";
+import SalesOrder from "./salesOrder.model";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 const SalesOrderProduct = sequelize.define(
-  "SalesOrderProduct",
+  "sales_order_products",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -16,8 +19,33 @@ const SalesOrderProduct = sequelize.define(
       allowNull: false,
     },
     taxApplied: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: false,
+    },
+    picked: {
       type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    loRemeasureLength: {
+      type: DataTypes.FLOAT,
       allowNull: true,
+    },
+    loRemeasureWidth: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    plRemeasureLength: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    plRemeasureWidth: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    stage: {
+      type: DataTypes.ENUM(...Object.values(SALE_ORDER_PRODUCT_STAGES)), // Sales Order, Loading Order, Packaging List
+      allowNull: false,
     },
     inventoryProductId: {
       type: DataTypes.INTEGER,
@@ -27,7 +55,7 @@ const SalesOrderProduct = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     },
     salesOrderId: {
       type: DataTypes.INTEGER,
@@ -39,23 +67,31 @@ const SalesOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    loadingOrderId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: LoadingOrder,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    packagingListId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: PackagingList,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "sales_order_products",
-    timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ["salesOrderId", "inventoryProductId"], // Composite unique constraint
-      },
-    ],
+    timestamps: false,
   }
 );
-
-// Hook to prevent updating inventoryProductId and salesOrderId by removing them from update payload
-SalesOrderProduct.beforeUpdate((product: any) => {
-  delete product.dataValues.inventoryProductId;
-  delete product.dataValues.salesOrderId;
-});
 
 export default SalesOrderProduct;

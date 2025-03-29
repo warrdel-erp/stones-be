@@ -371,6 +371,12 @@ Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBill" });
 LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
 SalesOrderProduct.hasOne(LoadingOrderProduct, { foreignKey: "salesOrderProductId", as: "loadingOrderProduct" });
 
+SalesOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+LoadingOrder.hasMany(SalesOrderProduct, { foreignKey: "loadingOrderId", as: "salesOrderProducts" });
+
+SalesOrderProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
+PackagingList.hasMany(SalesOrderProduct, { foreignKey: "packagingListId", as: "salesOrderProducts" });
+
 export {
   Client,
   User,

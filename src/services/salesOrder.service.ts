@@ -5,11 +5,15 @@ import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
 import { removeDuplicates } from "../helper";
 import _ from "lodash";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
   try {
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
+
+    // Set stage to salesOrder for each product.
+    data.products = data.products.map((product: any) => ({ ...product, stage: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER }));
 
     const salesOrderProducts = await salesOrderProductService.upsertSalesOrderProducts(
       data.products,
@@ -46,7 +50,7 @@ export const createSalesOrder = async (data: any) => {
     }
 
     await transaction.commit();
-    return { salesOrder, salesOrderProducts };
+    return { salesOrder, salesOrderProducts, internalNote, printableNote };
   } catch (error) {
     await transaction.rollback();
     throw error;

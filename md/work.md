@@ -118,6 +118,8 @@
 80. Add tax calculation to every product.
 81. paid amount in SIPL
 
+82. clear loProduct and plProduct after SOproduct creation.
+
 ---
 
 1. payload validations(req.body should not be passed directly to service.) .

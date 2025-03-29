@@ -57,7 +57,11 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
         );
 
         // If a product is added in SO then status is changed to ALLOCATED for that slab.
-        slabRepository.updateSlabStatusByInventoryProduct(product.inventoryProductId, SLAB_STATUS.ALLOCATED);
+        await slabRepository.updateSlabStatusByInventoryProduct(
+          product.inventoryProductId,
+          SLAB_STATUS.ALLOCATED,
+          transaction
+        );
 
         upsertedProducts.push(newProduct);
       }
