@@ -30,6 +30,7 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
       { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+      { model: models.PackagingList, as: "packagingList" },
     ],
   });
 
@@ -40,7 +41,14 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await models.LoadingOrder.findByPk(id, {
     include: [
-      { model: models.SalesOrder, as: "salesOrder" },
+      {
+        model: models.SalesOrder,
+        as: "salesOrder",
+        include: [
+          { model: models.Customer, as: "customer" },
+          { model: models.CustomerAddress, as: "shippingAddress" },
+        ],
+      },
       {
         model: models.LoadingOrderProduct,
         as: "loadingOrderProducts",

@@ -34,16 +34,6 @@ export const getSalesOrderById = async (id: number) => {
       { model: models.User, as: "createdBy" },
       { model: models.CustomerAddress, as: "shippingAddress" },
       {
-        model: models.LoadingOrder,
-        as: "loadingOrders",
-        include: [
-          {
-            model: models.LoadingOrderProduct,
-            as: "loadingOrderProducts",
-          },
-        ],
-      },
-      {
         model: models.SalesOrderProduct,
         as: "salesOrderProducts",
         include: [
