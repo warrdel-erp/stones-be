@@ -53,10 +53,8 @@ export const getSalesOrderById = async (id: number) => {
               },
             ],
           },
-          {
-            model: models.LoadingOrderProduct,
-            as: "loadingOrderProduct",
-          },
+          { model: models.LoadingOrder, as: "loadingOrder" },
+          { model: models.PackagingList, as: "packagingList" },
         ],
       },
     ],

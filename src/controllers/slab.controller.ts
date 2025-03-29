@@ -16,8 +16,6 @@ export const updateSlabHoldStatus = catchAsync(async (req: Request, res: Respons
   const result = await slabService.updateSlabHoldStatus(Number(slabId), isHold);
 
   SuccessResponse(res, 200, "Slab Hold status Updated successfully", result);
-
-  return res.json(result);
 });
 
 export const updateSlabCartStatus = catchAsync(async (req: Request, res: Response) => {

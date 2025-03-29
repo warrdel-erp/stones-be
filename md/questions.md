@@ -46,4 +46,8 @@
 3. Account of vendor.
 4. Closing balance of vendor.
 5. Why keys are different as invoice to transaction.
-6. Why fulfilled is in percentage in LO it must be as string og stage.
+6. Why fulfilled is in percentage in LO it must be as string og stage.[done]
+
+---
+
+1. If soProduct is swapped to another LO product then what will happen to that LO product.

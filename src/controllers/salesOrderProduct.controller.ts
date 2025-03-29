@@ -26,3 +26,16 @@ export const getSalesOrderProducts = catchAsync(async (req, res) => {
 
   return SuccessResponse(res, 200, "Sales Order Products fetched successfully", salesOrderProducts);
 });
+
+export const updateSoProductPickedStatus = catchAsync(async (req: Request, res: Response) => {
+  const { soProductId } = req.params;
+  const { picked } = req.body;
+
+  if (typeof picked !== "boolean") {
+    return res.status(400).json({ error: "`picked` must be true or false" });
+  }
+
+  const result = await salesOrderProductService.updatePickedStatus(Number(soProductId), picked);
+
+  SuccessResponse(res, 200, "SO Product picked status Updated successfully", result);
+});

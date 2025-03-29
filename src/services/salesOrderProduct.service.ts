@@ -83,3 +83,7 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
 export const getSalesOrderProducts = async (salesOrderId: number) => {
   return await salesOrderProductRepository.getSalesOrderProductsBySalesOrderId(salesOrderId);
 };
+
+export const updatePickedStatus = async (soProductId: number, picked: boolean) => {
+  return await salesOrderProductRepository.updatePickedStatus(soProductId, picked);
+};

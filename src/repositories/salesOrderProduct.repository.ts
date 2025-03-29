@@ -61,3 +61,8 @@ export const areSOProductsBelongingToSO = async (SOProductIds: number[], salesOr
 
   return count === SOProductIds.length; // If count matches the number of IDs, all belong to salesOrder
 };
+
+// update hold status of slab
+export const updatePickedStatus = async (id: number, picked: boolean) => {
+  return await models.SalesOrderProduct.update({ picked }, { where: { id } });
+};
