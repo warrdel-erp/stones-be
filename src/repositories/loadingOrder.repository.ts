@@ -1,5 +1,6 @@
 import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -52,6 +53,7 @@ export const getLoadingOrderById = async (id: number) => {
       {
         model: models.SalesOrderProduct,
         as: "salesOrderProducts",
+        required: false,
         include: [
           {
             model: models.InventoryProduct,

@@ -53,7 +53,6 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
-  console.log("rererererererererer");
   // Calculate total amount added in SO.
   loadingOrder.totalAmount = loadingOrder.salesOrderProducts.reduce(
     (total: number, salesOrderProduct: any) =>
