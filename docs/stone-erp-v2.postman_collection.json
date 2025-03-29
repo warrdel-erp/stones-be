@@ -1318,7 +1318,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "5"
+									"value": "1"
 								}
 							]
 						}
@@ -2443,7 +2443,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 2,\n    \"products\": [\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 8\n        },\n        {\n            \"remeasureLength\": 12,\n            \"remeasureWidth\": 14,\n            \"inventoryProductId\": 9\n        }\n    ]\n}",
+							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 23,\n    \"soProducts\": [\n        {\n            \"id\":1,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        },\n        {\n            \"id\":2,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2507,14 +2507,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/loadingOrder/2",
+							"raw": "{{baseurl}}/api/loadingOrder/:id",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"loadingOrder",
-								"2"
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "11"
+								}
 							]
 						}
 					},
@@ -2575,7 +2581,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"remeasureLength\": 12,\n        \"remeasureWidth\": 14,\n        \"inventoryProductId\": 6\n    }\n    // {\n    //     \"id\": 2,\n    //     \"remeasureLength\": 12,\n    //     \"remeasureWidth\": 14,\n    //     \"inventoryProductId\": 7\n    // }\n]",
+							"raw": "[\n    {\n        \"remeasureLength\": 13,\n        \"remeasureWidth\": 14,\n        \"salesOrderProductId\": 9\n    }\n    // {\n    //     \"id\": 2,\n    //     \"remeasureLength\": 12,\n    //     \"remeasureWidth\": 14,\n    //     \"inventoryProductId\": 7\n    // }\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2596,7 +2602,7 @@
 							"variable": [
 								{
 									"key": "loadingOrderId",
-									"value": "2"
+									"value": "11"
 								}
 							]
 						}
@@ -2726,7 +2732,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"loDate\": \"2025-02-28T12:00:00.000Z\",\n    \"paymentTerms\": \"Net 30\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"loadingOrderId\": 2\n    // \"products\": [\n    //     {\n    //         \"remeasureLength\": 12,\n    //         \"remeasureWidth\": 14,\n    //         \"inventoryProductId\": 8\n    //     },\n    //     {\n    //         \"remeasureLength\": 12,\n    //         \"remeasureWidth\": 14,\n    //         \"inventoryProductId\": 9\n    //     }\n    // ]\n}",
+							"raw": "{\n    \"plDate\": \"2025-02-28T12:00:00.000Z\",\n    \"paymentTerms\": \"Net 30\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"loadingOrderId\": 13,\n    \"soProducts\": [\n        {\n            \"id\":1,\n            \"plRemeasureLength\": 12,\n            \"plRemeasureWidth\": 14\n        },\n        {\n            \"id\":2,\n            \"plRemeasureLength\": 12,\n            \"plRemeasureWidth\": 14\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
