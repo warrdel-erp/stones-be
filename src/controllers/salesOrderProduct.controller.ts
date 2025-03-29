@@ -39,3 +39,12 @@ export const updateSoProductPickedStatus = catchAsync(async (req: Request, res: 
 
   SuccessResponse(res, 200, "SO Product picked status Updated successfully", result);
 });
+
+export const swapSalesOrderProduct = catchAsync(async (req: Request, res: Response) => {
+  const { soProductId } = req.params;
+  const { newInventoryProductId } = req.body;
+
+  const data = await salesOrderProductService.swapSalesOrderProduct(Number(soProductId), newInventoryProductId);
+
+  return SuccessResponse(res, 200, "Sales Order Product swapped successfully", data);
+});

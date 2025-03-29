@@ -1,9 +1,11 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { SLAB_STATUS } from "../constants";
 import { Transaction } from "sequelize";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 //  Create or update multiple SalesOrderProduct entries.
 export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
@@ -86,4 +88,57 @@ export const getSalesOrderProducts = async (salesOrderId: number) => {
 
 export const updatePickedStatus = async (soProductId: number, picked: boolean) => {
   return await salesOrderProductRepository.updatePickedStatus(soProductId, picked);
+};
+
+export const swapSalesOrderProduct = async (salesOrderProductId: number, newInventoryProductId: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const salesOrderProduct = await salesOrderProductRepository.findByIdSimple(salesOrderProductId);
+
+    if (!salesOrderProduct) {
+      throw new Error("Sales Order Product not found.");
+    }
+
+    if (salesOrderProduct.picked) {
+      throw new Error("Product cannot be swapped as it is already picked.");
+    }
+
+    if (salesOrderProduct.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED) {
+      throw new Error("Product cannot be swapped as it is already invoiced.");
+    }
+
+    // Store Swap History
+    await soProductSwapHistoryRepository.createSoProductSwapHistory(
+      {
+        inventoryProductId: newInventoryProductId,
+        salesProductId: salesOrderProductId,
+      },
+      transaction
+    );
+
+    // Update Sales Order Product
+    await salesOrderProductRepository.updateSalesOrderProduct(
+      salesOrderProductId,
+      {
+        inventoryProductId: newInventoryProductId,
+      },
+      transaction
+    );
+
+    // set new slab status as ALLOCATED
+    await slabRepository.updateSlabStatusByInventoryProduct(newInventoryProductId, SLAB_STATUS.ALLOCATED, transaction);
+
+    // reset old slab status as IN_INVENTORY
+    await slabRepository.updateSlabStatusByInventoryProduct(
+      salesOrderProduct.inventoryProductId,
+      SLAB_STATUS.IN_INVENTORY,
+      transaction
+    );
+
+    transaction.commit();
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
 };

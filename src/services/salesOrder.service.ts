@@ -66,49 +66,17 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
 export const getSalesOrderById = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
 
-  // Calculate total amount added in SO.
-  salesOrder.totalAmount = salesOrder.salesOrderProducts.reduce(
-    (total: number, salesOrderProduct: any) =>
-      total +
-      (salesOrderProduct.inventoryProduct.slab.receivingLength *
-        salesOrderProduct.inventoryProduct.slab.receivingWidth *
-        salesOrderProduct.unitPrice) /
-        144,
-    0
-  );
-
   // add total to loadingOrders.
   salesOrder.loadingOrders = await loadingOrderService.getAllLoadingOrdersWithoutPagination({
     salesOrderId: id,
   });
 
-  // Calculate total qty added in SO.
-  salesOrder.totalQty = salesOrder.salesOrderProducts.reduce(
-    (total: number, salesOrderProduct: any) =>
-      total +
-      (salesOrderProduct.inventoryProduct.slab.receivingLength *
-        salesOrderProduct.inventoryProduct.slab.receivingWidth) /
-        144,
-    0
-  );
+  // Total amount and total quantity calculation.
+  salesOrder.totalAmount = getTotalAmount(salesOrder);
+  salesOrder.totalQty = getTotalQuantity(salesOrder);
 
-  let products = removeDuplicatesWithUnitPrice(
-    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct.inventoryProduct.slab.product,
-      unitPrice: salesOrderProduct.unitPrice,
-    }))
-  );
-
-  // Map slabs to products
-  salesOrder.products = products.map((product) => {
-    const salesOrderProduct = salesOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
-    );
-
-    return { ...product, salesOrderProduct };
-  });
+  // Group Products by productId and unit price.
+  salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
@@ -120,3 +88,47 @@ export const getSalesOrderById = async (id: number) => {
 export const getSONumber = async (clientId: number) => {
   return await salesOrderRepository.getSoNumber(clientId);
 };
+
+function getTotalQuantity(salesOrder: any) {
+  return (
+    _.sumBy(
+      salesOrder.salesOrderProducts,
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth
+    ) / 144
+  );
+}
+
+function getTotalAmount(salesOrder: any) {
+  return (
+    _.sumBy(
+      salesOrder.salesOrderProducts,
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.receivingLength *
+        salesOrderProduct.inventoryProduct.slab.receivingWidth *
+        salesOrderProduct.unitPrice
+    ) / 144
+  );
+}
+
+function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
+  let products = removeDuplicatesWithUnitPrice(
+    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
+      ...salesOrderProduct.inventoryProduct.slab.product,
+      unitPrice: salesOrderProduct.unitPrice,
+    }))
+  );
+
+  // Map slabs to products
+  const newProducts = products.map((product) => {
+    const salesOrderProduct = salesOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
+        salesOrderProduct.unitPrice === product.unitPrice
+    );
+
+    return { ...product, salesOrderProduct };
+  });
+
+  return newProducts;
+}

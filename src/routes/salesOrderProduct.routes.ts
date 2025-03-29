@@ -7,4 +7,7 @@ const router = express.Router();
 // hold-unHold slab
 router.put("/:soProductId/pick", authenticateUser, salesOrderProductController.updateSoProductPickedStatus);
 
+// swap
+router.put("/:soProductId/swap", authenticateUser, salesOrderProductController.swapSalesOrderProduct);
+
 export default router;

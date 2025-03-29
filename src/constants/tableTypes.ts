@@ -97,4 +97,5 @@ export const SALE_ORDER_PRODUCT_STAGES = {
   SALES_ORDER: "saleOrder",
   LOADING_ORDER: "loadingOrder",
   PACKAGING_LIST: "packagingList",
+  INVOICED: "invoiced",
 } as const;

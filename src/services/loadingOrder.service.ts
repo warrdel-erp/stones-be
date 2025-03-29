@@ -29,6 +29,8 @@ export const createLoadingOrder = async (data: any) => {
     }));
 
     updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(data.soProducts, data.salesOrderId);
+  } else {
+    throw new AppError("SO products are required.", 400);
   }
 
   return { ...loadingOrder, products: updatedProducts };
@@ -173,9 +175,9 @@ function loadingOrderWithTotalAmount(loadingOrders: any) {
 
     // Calculate total amount added in LO.
     loadingOrder.totalAmount = _.sumBy(
-      loadingOrder.loadingOrderProducts,
-      (loadingOrderProduct: any) =>
-        (loadingOrderProduct.remeasureLength * loadingOrderProduct.remeasureWidth * loadingOrderProduct.unitPrice) / 144
+      loadingOrder.salesOrderProducts,
+      (salesOrderProduct: any) =>
+        (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
     );
 
     return loadingOrder;

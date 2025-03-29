@@ -47,3 +47,10 @@
 7. inventory balance.
 8. changes in journal entry for sub reference connection
 9. location more fields
+
+---
+
+1. SO structure change.
+2. data manipulation for SO, LO, PL.
+3. Pick SO product.
+4. swap SO product.

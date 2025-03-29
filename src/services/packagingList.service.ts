@@ -3,6 +3,7 @@ import * as salesOrderProductService from "../services/salesOrderProduct.service
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
+import { AppError } from "../helper/appError";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
@@ -32,6 +33,8 @@ export const createPackagingList = async (data: any) => {
         loadingOrder.salesOrderId,
         transaction
       );
+    } else {
+      throw new AppError("SO products are required.", 400);
     }
 
     // Update loading order stage to packagingList.
