@@ -53,28 +53,26 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
+  console.log("rererererererererer");
   // Calculate total amount added in SO.
-  loadingOrder.totalAmount = loadingOrder.loadingOrderProducts.reduce(
-    (total: number, loadingOrderProduct: any) =>
+  loadingOrder.totalAmount = loadingOrder.salesOrderProducts.reduce(
+    (total: number, salesOrderProduct: any) =>
       total +
-      (loadingOrderProduct.remeasureLength * loadingOrderProduct.remeasureWidth * loadingOrderProduct.unitPrice) / 144,
+      (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144,
     0
   );
 
   let products = removeDuplicates(
-    loadingOrder?.loadingOrderProducts.map(
-      (loadingOrderProduct: any) => loadingOrderProduct.inventoryProduct.slab.product
-    )
+    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
   );
 
   // Map slabs to products
   loadingOrder.products = products.map((product) => {
-    const loadingOrderProduct = loadingOrder.loadingOrderProducts.filter(
-      (loadingOrderProduct: any) => loadingOrderProduct.inventoryProduct.slab.product.id === product.id
+    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
     );
-    // .map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab);
 
-    return { ...product, loadingOrderProduct };
+    return { ...product, salesOrderProduct };
   });
 
   // delete salesOrder.salesOrderProducts because it is in products;
