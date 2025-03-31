@@ -3,8 +3,8 @@ import * as models from "../models";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 // Create new LO
-export const createLoadingOrder = async (data: any) => {
-  return await models.LoadingOrder.create(data);
+export const createLoadingOrder = async (data: any, transaction?: Transaction) => {
+  return await models.LoadingOrder.create(data, { transaction });
 };
 
 // Get all LO
@@ -47,8 +47,32 @@ export const getLoadingOrderById = async (id: number) => {
         model: models.SalesOrder,
         as: "salesOrder",
         include: [
-          { model: models.Customer, as: "customer", attributes: ["id", "name"] },
+          {
+            model: models.Customer,
+            as: "customer",
+            attributes: ["id", "name"],
+            include: [{ model: models.CustomerAddress, as: "addresses" }],
+          },
           { model: models.CustomerAddress, as: "shippingAddress" },
+          {
+            model: models.SalesOrderProduct,
+            as: "salesOrderProducts",
+            attributes: ["id"],
+            include: [
+              {
+                model: models.InventoryProduct,
+                as: "inventoryProduct",
+                attributes: ["id"],
+                include: [
+                  {
+                    model: models.Slab,
+                    as: "slab",
+                    attributes: ["id", "receivingLength", "receivingWidth"],
+                  },
+                ],
+              },
+            ],
+          },
           { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
         ],
       },

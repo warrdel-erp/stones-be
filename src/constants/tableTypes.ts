@@ -107,3 +107,16 @@ export const SALES_ORDER_STATUS = {
   CANCELLED: "cancelled",
   CLOSED: "closed",
 };
+
+// "internal", "printable"
+export const NOTES_TYPE = {
+  INTERNAL: "internal",
+  PRINTABLE: "printable",
+};
+
+// sales_order, purchase_order
+export const NOTES_REFERENCE_TYPES = {
+  SALES_ORDER: "sales_order",
+  PURCHASE_ORDER: "purchase_order",
+  LOADING_ORDER: "loading_order",
+};

@@ -3,7 +3,7 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
-import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
+import { removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { SALES_TAX, SCOP } from "../constants";

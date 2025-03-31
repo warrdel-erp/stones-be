@@ -1,7 +1,9 @@
 import { AppError } from "../helper/appError";
-import { PAYMENT_TERMS, SALES_TAX, SLAB_STATUS } from "../constants";
+import { PAYMENT_TERMS, SLAB_STATUS } from "../constants";
+import * as notesRepository from "../repositories/notes.repository";
+
 import { sequelize } from "../config/database";
-import { WhereOptions } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import _ from "lodash";
 
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
@@ -12,30 +14,50 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import {
+  LOADING_ORDER_STAGES,
+  NOTES_REFERENCE_TYPES,
+  NOTES_TYPE,
+  SALE_ORDER_PRODUCT_STAGES,
+} from "../constants/tableTypes";
 import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
-  let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data);
-  loadingOrder = loadingOrder.get({ plain: true });
+  const transaction = await sequelize.transaction();
 
-  let updatedProducts = [];
+  try {
+    let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data, transaction);
+    loadingOrder = loadingOrder.get({ plain: true });
 
-  if (data?.soProducts) {
-    // Set loadingOrderId and stage to loadingOrder for each product.
-    data.soProducts = data.soProducts.map((e: any) => ({
-      ...e,
-      loadingOrderId: loadingOrder.id,
-      stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
-    }));
+    let updatedProducts = [];
 
-    updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(data.soProducts, data.salesOrderId);
-  } else {
-    throw new AppError("SO products are required.", 400);
+    if (data?.soProducts) {
+      // Set loadingOrderId and stage to loadingOrder for each product.
+      data.soProducts = data.soProducts.map((e: any) => ({
+        ...e,
+        loadingOrderId: loadingOrder.id,
+        stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+      }));
+
+      updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(
+        data.soProducts,
+        data.salesOrderId,
+        transaction
+      );
+    } else {
+      throw new AppError("SO products are required.", 400);
+    }
+
+    // Create internal note (if provided)
+    let { internalNote, printableNote } = await createLONotes(data, loadingOrder, transaction);
+
+    transaction.commit();
+    return { ...loadingOrder, products: updatedProducts, internalNote, printableNote };
+  } catch (error) {
+    transaction.rollback();
+    throw error;
   }
-
-  return { ...loadingOrder, products: updatedProducts };
 };
 
 // Get all LO
@@ -71,6 +93,36 @@ export const getLoadingOrderById = async (id: number) => {
 
   return loadingOrder;
 };
+
+async function createLONotes(data: any, loadingOrder: any, transaction: Transaction) {
+  let internalNote: any = null;
+  if (data?.internalNote) {
+    internalNote = await notesRepository.createNote(
+      {
+        description: data?.internalNote,
+        type: NOTES_TYPE.INTERNAL,
+        referenceType: NOTES_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder?.id,
+      },
+      transaction
+    );
+  }
+
+  // Create printable note (if provided)
+  let printableNote: any = null;
+  if (data?.printableNote) {
+    printableNote = await notesRepository.createNote(
+      {
+        description: data?.printableNote,
+        type: NOTES_TYPE.INTERNAL,
+        referenceType: NOTES_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder?.id,
+      },
+      transaction
+    );
+  }
+  return { internalNote, printableNote };
+}
 
 function getTotalLoAmount(salesOrderProducts: any[]) {
   return _.sumBy(
@@ -114,7 +166,7 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
       ...product,
       salesOrderProduct,
       totalQuantity: getTotalLoQuantity(salesOrderProduct),
-      soQuantity: salesOrderService.getTotalQuantity(salesOrderProduct),
+      soQuantity: salesOrderService.getTotalQuantity(loadingOrder.salesOrder.salesOrderProducts),
     };
   });
 

@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import { NOTES_REFERENCE_TYPES, NOTES_TYPE } from "../constants/tableTypes";
 
 const Notes = sequelize.define(
   "Notes",
@@ -14,11 +15,11 @@ const Notes = sequelize.define(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM("internal", "printable"),
+      type: DataTypes.ENUM(...Object.values(NOTES_TYPE)),
       allowNull: false,
     },
     referenceType: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(NOTES_REFERENCE_TYPES)),
       allowNull: false,
     },
     referenceId: {
