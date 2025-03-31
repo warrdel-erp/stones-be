@@ -6,7 +6,7 @@ import * as notesRepository from "../repositories/notes.repository";
 import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
-import { SALES_TAX } from "../constants";
+import { SALES_TAX, SCOP } from "../constants";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -66,6 +66,7 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
     salesOrder = salesOrder.get({ plain: true });
 
     salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
+    salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
 
     return salesOrder;
   }) as any;
@@ -83,6 +84,7 @@ export const getSalesOrderById = async (id: number) => {
   });
 
   salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
+  salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
 
   // Total amount and total quantity calculation.
   salesOrder.totalAmount = getTotalAmount(salesOrder);
