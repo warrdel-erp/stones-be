@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { sequelize } from "../config/database";
 
 // Create new Sales Order
 export const createSalesOrder = async (data: any, transaction?: Transaction) => {
@@ -10,8 +11,21 @@ export const createSalesOrder = async (data: any, transaction?: Transaction) => 
 export const getAllSalesOrders = async (page: number, limit: number) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+    attributes: {
+      include: [
+        [
+          // Count the number of associated Loading Orders
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM loading_orders AS lo
+            WHERE lo.salesOrderId = SalesOrder.id
+          )`),
+          "loadingOrderCount",
+        ],
+      ],
+    },
     include: [
-      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope"] },
+      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope", "daysForHold"] },
       { model: models.User, as: "createdBy", attributes: ["id", "username"] },
       { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
       { model: models.Notes, as: "notes" },
