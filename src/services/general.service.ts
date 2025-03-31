@@ -10,7 +10,7 @@ import {
   SHIPMENT_TERMS,
   THICKNESS,
   UNITS_OF_MEASUREMENT,
-  VENDOR_SCOP,
+  SCOP,
 } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import * as productCategoryRepository from "../repositories/productCategory.repository";
@@ -29,7 +29,7 @@ export const getGeneralData = async () => {
     deliveryType: DELIVERY_TYPE,
     paymentTerms: PAYMENT_TERMS,
     shipmentTerms: SHIPMENT_TERMS,
-    vendorScope: VENDOR_SCOP,
+    scope: SCOP,
     languages: LANGUAGES,
     thickness: THICKNESS,
     finish: FINISH,

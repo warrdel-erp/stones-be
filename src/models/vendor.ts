@@ -3,7 +3,7 @@ import { sequelize } from "../config/database";
 import Notes from "./note";
 import { VENDOR_TYPES } from "../constants/tableTypes";
 import User from "./user";
-import { VENDOR_SCOP } from "../constants";
+import { SCOP } from "../constants";
 import Location from "./location";
 
 const Vendor = sequelize.define(
@@ -35,7 +35,7 @@ const Vendor = sequelize.define(
       allowNull: false,
     },
     vendorScope: {
-      type: DataTypes.ENUM(...VENDOR_SCOP.map((scope) => String(scope.id))),
+      type: DataTypes.ENUM(...SCOP.map((scope) => String(scope.id))),
       allowNull: true,
     },
     contactName: {

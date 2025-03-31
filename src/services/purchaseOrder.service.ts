@@ -5,7 +5,7 @@ import * as requestedPurchaseProductRepository from "../repositories/requestedPu
 import * as siplProductRepository from "../repositories/siplProducts.repository";
 import * as containerService from "../services/container.service";
 import { Transaction } from "sequelize";
-import { VENDOR_SCOP } from "../constants";
+import { SCOP } from "../constants";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -101,7 +101,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
     const purchaseOrder = e.get({ plain: true }); // Convert Sequelize instance to plain object
 
     // Get vendor scope for purchaseOrder
-    purchaseOrder.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
+    purchaseOrder.supplier.vendorScope = SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
 
     // Calculate total requested all product's quantity
     purchaseOrder.totalQuantity = purchaseOrder.requestedPurchaseProducts.reduce(
@@ -160,7 +160,7 @@ export const getPurchaseOrderById = async (id: number) => {
   }
 
   // Get vendor scope for purchaseOrder
-  purchaseOrder.supplier.vendorScope = VENDOR_SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
+  purchaseOrder.supplier.vendorScope = SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
 
   // Fetch total quantity of requested products for this PO
   const totalQuantity = await requestedPurchaseProductRepository.getTotalQuantityByPurchaseOrder(id);

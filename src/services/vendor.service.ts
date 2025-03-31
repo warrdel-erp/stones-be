@@ -12,7 +12,7 @@ import {
 } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
-import { PAYMENT_TERMS, VENDOR_SCOP } from "../constants";
+import { PAYMENT_TERMS, SCOP } from "../constants";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import _ from "lodash";
 
@@ -61,7 +61,7 @@ export const fetchAllVendors = async (page: number, limit: number, filter?: Wher
 
   vendors.vendors = vendors.vendors.map((vendor: any) => {
     vendor = vendor.get({ plain: true });
-    vendor.vendorScope = VENDOR_SCOP.find((k) => k.id == vendor.vendorScope)?.value;
+    vendor.vendorScope = SCOP.find((k) => k.id == vendor.vendorScope)?.value;
     vendor.paymentTerms = PAYMENT_TERMS.find((k) => k.id == vendor.paymentTerms)?.value;
 
     return vendor;

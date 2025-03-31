@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
+import { SCOP } from "../constants";
 
 const Customer = sequelize.define(
   "Customer",
@@ -109,6 +110,10 @@ const Customer = sequelize.define(
     },
     status: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    scope: {
+      type: DataTypes.ENUM(...SCOP.map((scope) => String(scope.id))),
       allowNull: true,
     },
     createdBy: {

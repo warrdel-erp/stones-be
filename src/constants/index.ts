@@ -70,7 +70,7 @@ export const SHIPMENT_TERMS = [
   { id: 9, value: "Consignment" },
 ] as const;
 
-export const VENDOR_SCOP = [
+export const SCOP = [
   { id: 1, value: "National" },
   { id: 2, value: "International" },
 ] as const;
