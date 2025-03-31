@@ -68,6 +68,8 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
     salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
     salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
 
+    salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
+
     return salesOrder;
   }) as any;
 
@@ -87,8 +89,8 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
 
   // Total amount and total quantity calculation.
-  salesOrder.totalAmount = getTotalAmount(salesOrder);
-  salesOrder.totalQty = getTotalQuantity(salesOrder);
+  salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
+  salesOrder.totalQty = getTotalQuantity(salesOrder.salesOrderProducts);
 
   // Group Products by productId and unit price.
   salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
@@ -104,20 +106,20 @@ export const getSONumber = async (clientId: number) => {
   return await salesOrderRepository.getSoNumber(clientId);
 };
 
-function getTotalQuantity(salesOrder: any) {
+function getTotalQuantity(salesOrderProducts: any[]) {
   return (
     _.sumBy(
-      salesOrder.salesOrderProducts,
+      salesOrderProducts,
       (salesOrderProduct: any) =>
         salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth
     ) / 144
   );
 }
 
-function getTotalAmount(salesOrder: any) {
+function getTotalAmount(salesOrderProducts: any) {
   return (
     _.sumBy(
-      salesOrder.salesOrderProducts,
+      salesOrderProducts,
       (salesOrderProduct: any) =>
         salesOrderProduct.inventoryProduct.slab.receivingLength *
         salesOrderProduct.inventoryProduct.slab.receivingWidth *

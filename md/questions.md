@@ -53,3 +53,5 @@
 1. If soProduct is swapped to another LO product then what will happen to that LO product.
 2. what is different between SO status (completed, cancelled, closed)
 3. is it possible there is different number of product in loadingOrder and packagingList. If yes then what will happen to slabs in LO during invoicing.
+4. if slab is swapped then where it's remeasures will be stored.
+5. if PL is been created then can we swap of pick from LO.

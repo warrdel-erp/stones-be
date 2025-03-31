@@ -11,11 +11,29 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
     include: [
-      { model: models.Customer, as: "customer" },
-      { model: models.User, as: "createdBy" },
-      { model: models.CustomerAddress, as: "shippingAddress" },
-      { model: models.Location, as: "soLocation" },
+      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope"] },
+      { model: models.User, as: "createdBy", attributes: ["id", "username"] },
+      { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
       { model: models.Notes, as: "notes" },
+      {
+        model: models.SalesOrderProduct,
+        as: "salesOrderProducts",
+        attributes: ["id", "unitPrice"],
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            attributes: ["id"],
+            include: [
+              {
+                model: models.Slab,
+                as: "slab",
+                attributes: ["id", "receivingLength", "receivingWidth"],
+              },
+            ],
+          },
+        ],
+      },
     ],
     limit,
     offset,

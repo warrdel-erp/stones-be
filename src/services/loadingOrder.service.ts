@@ -149,7 +149,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       // Update stage to INVOICED in Sales Order Product.
       await salesOrderProductRepository.updateSalesOrderProduct(
         salesOrderProduct.id,
-        { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED },
+        { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED, picked: true },
         transaction
       );
     }
