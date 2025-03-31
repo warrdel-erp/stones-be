@@ -97,9 +97,8 @@ export const getSalesOrderById = async (id: number) => {
     (e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.SALES_ORDER
   );
 
+  // calculate total remaining quantity.
   salesOrder.totalRemainingQty = getTotalQuantity(totalRemainingSoProducts);
-
-  salesOrder.totalQty = getTotalQuantity(salesOrder.salesOrderProducts);
 
   // Group Products by productId and unit price.
   salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
