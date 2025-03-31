@@ -101,6 +101,7 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
       soInvoice = soInvoice.get({ plain: true });
 
       return {
+        id: soInvoice.id,
         dueDate: soInvoice.loadingOrder.expDeliveryDate,
         amount: soInvoice.amount,
         paidAmount,
