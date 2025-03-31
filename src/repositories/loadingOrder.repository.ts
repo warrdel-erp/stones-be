@@ -57,7 +57,7 @@ export const getLoadingOrderById = async (id: number) => {
           {
             model: models.SalesOrderProduct,
             as: "salesOrderProducts",
-            attributes: ["id"],
+            attributes: ["id", "unitPrice"],
             include: [
               {
                 model: models.InventoryProduct,
@@ -72,6 +72,7 @@ export const getLoadingOrderById = async (id: number) => {
                       {
                         model: models.Product,
                         as: "product",
+                        attributes: ["id"],
                       },
                     ],
                   },
