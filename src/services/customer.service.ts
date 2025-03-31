@@ -1,13 +1,14 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
-import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { LEDGER_ACCOUNT_REFERENCE_TYPES, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import { LedgerAccount } from "../models/ledgerAccount.model";
 import * as customerRepository from "../repositories/customer.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as customerAddressService from "../services/customerAddress.service";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+import * as paymentBillRepository from "../repositories/paymentBills.repository";
 
 import { SALES_TAX } from "../constants";
 
@@ -86,9 +87,30 @@ export const fetchCustomerById = async (id: number) => {
   return await customerRepository.getCustomerById(id);
 };
 
-/**
- * Get invoices for a customer
- */
+// Get invoices for a customer
 export const getInvoicesByCustomerId = async (customerId: number) => {
-  return await soInvoiceRepository.getAllInvoices({ customerId });
+  let invoices: any = await soInvoiceRepository.getAllInvoices({ customerId });
+
+  const finalData = await Promise.all(
+    invoices.map(async (soInvoice: any) => {
+      const paidAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
+        soInvoice.id,
+        PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE
+      );
+
+      soInvoice = soInvoice.get({ plain: true });
+
+      return {
+        dueDate: soInvoice.loadingOrder.expDeliveryDate,
+        amount: soInvoice.amount,
+        paidAmount,
+        invoiceDate: soInvoice.createdAt,
+        invoice: soInvoice.clientSoInvoiceNumber,
+        loNumber: soInvoice.loadingOrder.clientLoNumber,
+        loDate: soInvoice.loadingOrder.loDate,
+      };
+    })
+  );
+
+  return finalData;
 };

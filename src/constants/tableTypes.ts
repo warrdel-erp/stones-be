@@ -80,6 +80,7 @@ export const PO_STATUS = {
 export const PAYMENT_BILL_REFERENCE_TYPES = {
   SIPL: "sipl",
   BILL: "bill",
+  SO_INVOICE: "soInvoice",
 } as const;
 
 export const DELIVERY_TYPES = {
@@ -105,4 +106,4 @@ export const SALES_ORDER_STATUS = {
   COMPLETED: "completed",
   CANCELLED: "cancelled",
   CLOSED: "closed",
-}
+};
