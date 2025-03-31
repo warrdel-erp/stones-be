@@ -64,7 +64,7 @@ export const getLoadingOrderById = async (id: number) => {
     0
   );
 
-  // Calculate total amount added in SO.
+  // Calculate total pl amount added in SO.
   loadingOrder.totalPlAmount = loadingOrder.packagingList?.salesOrderProducts?.reduce?.(
     (total: number, salesOrderProduct: any) =>
       total +
@@ -75,7 +75,7 @@ export const getLoadingOrderById = async (id: number) => {
   loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
 
   // delete salesOrder.salesOrderProducts because it is in products;
-  delete loadingOrder.salesOrderProducts;
+  // delete loadingOrder.salesOrderProducts;
 
   return loadingOrder;
 };
@@ -129,6 +129,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
     if (loadingOrder.stage == LOADING_ORDER_STAGES.INVOICED) {
       throw new AppError("Cannot invoice Loading Order as it is already invoiced.", 400);
     }
+
+    console.log(loadingOrder);
 
     // If LO doesn't have any product.
     if (!loadingOrder?.salesOrderProducts?.length) {
