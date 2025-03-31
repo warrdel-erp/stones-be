@@ -144,7 +144,12 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
-    return { ...product, salesOrderProduct };
+    return {
+      ...product,
+      salesOrderProduct,
+      totalAmount: getTotalAmount(salesOrderProduct),
+      totalQuantity: getTotalQuantity(salesOrderProduct),
+    };
   });
 
   return newProducts;
