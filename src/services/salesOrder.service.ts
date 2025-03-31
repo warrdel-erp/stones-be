@@ -6,6 +6,7 @@ import * as notesRepository from "../repositories/notes.repository";
 import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { SALES_TAX } from "../constants";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -59,7 +60,17 @@ export const createSalesOrder = async (data: any) => {
 
 // Get all sales orders
 export const getAllSalesOrders = async (page: number, limit: number) => {
-  return await salesOrderRepository.getAllSalesOrders(page, limit);
+  const data = await salesOrderRepository.getAllSalesOrders(page, limit);
+
+  data.data = data.data.map((salesOrder: any) => {
+    salesOrder = salesOrder.get({ plain: true });
+
+    salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
+
+    return salesOrder;
+  }) as any;
+
+  return data;
 };
 
 // Get sales order by ID
@@ -70,6 +81,8 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.loadingOrders = await loadingOrderService.getAllLoadingOrdersWithoutPagination({
     salesOrderId: id,
   });
+
+  salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
 
   // Total amount and total quantity calculation.
   salesOrder.totalAmount = getTotalAmount(salesOrder);
