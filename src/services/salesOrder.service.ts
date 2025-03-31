@@ -92,14 +92,6 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
   salesOrder.totalQty = getTotalQuantity(salesOrder.salesOrderProducts);
 
-  // remaining products means -> products not yet gone in loadingOrder.
-  const totalRemainingSoProducts = salesOrder.salesOrderProducts.filter(
-    (e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.SALES_ORDER
-  );
-
-  // calculate total remaining quantity.
-  salesOrder.totalRemainingQty = getTotalQuantity(totalRemainingSoProducts);
-
   // Group Products by productId and unit price.
   salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
 
@@ -152,11 +144,17 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
+    // remaining products means -> products not yet gone in loadingOrder.
+    const totalRemainingSoProducts = salesOrderProduct.filter(
+      (e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.SALES_ORDER
+    );
+
     return {
       ...product,
       salesOrderProduct,
       totalAmount: getTotalAmount(salesOrderProduct),
       totalQuantity: getTotalQuantity(salesOrderProduct),
+      totalRemainingQty: getTotalQuantity(totalRemainingSoProducts),
     };
   });
 
