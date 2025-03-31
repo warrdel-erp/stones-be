@@ -57,12 +57,6 @@ export const getSalesOrderById = async (id: number) => {
           {
             model: models.LoadingOrder,
             as: "loadingOrder",
-            include: [
-              {
-                model: models.SalesOrderInvoice,
-                as: "salesOrderInvoice",
-              },
-            ],
           },
           { model: models.PackagingList, as: "packagingList" },
         ],
