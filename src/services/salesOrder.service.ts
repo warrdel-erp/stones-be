@@ -106,7 +106,7 @@ export const getSONumber = async (clientId: number) => {
   return await salesOrderRepository.getSoNumber(clientId);
 };
 
-function getTotalQuantity(salesOrderProducts: any[]) {
+export function getTotalQuantity(salesOrderProducts: any[]) {
   return (
     _.sumBy(
       salesOrderProducts,

@@ -6,6 +6,7 @@ import _ from "lodash";
 
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as loadingOrderService from "../services/loadingOrder.service";
+import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
@@ -78,6 +79,12 @@ function getTotalLoAmount(salesOrderProducts: any[]) {
       (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
   );
 }
+function getTotalLoQuantity(salesOrderProducts: any[]) {
+  return _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) => (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth) / 144
+  );
+}
 
 function getTotalPlAmount(salesOrderProducts: any[]) {
   return _.sumBy(
@@ -95,8 +102,6 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
     }))
   );
 
-  // console.log(loadingOrder)
-
   // Map slabs to products
   const newProducts = products.map((product) => {
     const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
@@ -105,7 +110,12 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
-    return { ...product, salesOrderProduct };
+    return {
+      ...product,
+      salesOrderProduct,
+      totalQuantity: getTotalLoQuantity(salesOrderProduct),
+      soQuantity: salesOrderService.getTotalQuantity(salesOrderProduct),
+    };
   });
 
   return newProducts;
