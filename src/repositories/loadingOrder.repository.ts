@@ -68,6 +68,12 @@ export const getLoadingOrderById = async (id: number) => {
                     model: models.Slab,
                     as: "slab",
                     attributes: ["id", "receivingLength", "receivingWidth"],
+                    include: [
+                      {
+                        model: models.Product,
+                        as: "product",
+                      },
+                    ],
                   },
                 ],
               },

@@ -162,11 +162,17 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
+    const soProductsWithProductAndUnitPrice = loadingOrder.salesOrder.salesOrderProducts.filter(
+      (salesOrderProduct: any) =>
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
+        salesOrderProduct.unitPrice === product.unitPrice
+    );
+
     return {
       ...product,
       salesOrderProduct,
       totalQuantity: getTotalLoQuantity(salesOrderProduct),
-      soQuantity: salesOrderService.getTotalQuantity(loadingOrder.salesOrder.salesOrderProducts),
+      soQuantity: salesOrderService.getTotalQuantity(soProductsWithProductAndUnitPrice),
     };
   });
 

@@ -56,3 +56,7 @@
 4. swap SO product.
 5. SO and LO conditions on PICK soProduct.
 6. flow diagram.
+
+---
+
+1. data calculation in SO process, and complete missing data in SO process.
