@@ -51,3 +51,12 @@ export const getCustomerByIdController = catchAsync(async (req: Request, res: Re
   const customer = await customerService.fetchCustomerById(Number(id));
   return SuccessResponse(res, 200, "Customer retrieved successfully", customer);
 });
+
+// Get all invoices related to a customer
+export const getInvoicesByCustomerId = catchAsync(async (req: Request, res: Response) => {
+  const customerId = parseInt(req.params.customerId);
+
+  // Call service function to fetch invoices related to the customer ID.
+  const data = await customerService.getInvoicesByCustomerId(Number(customerId));
+  return SuccessResponse(res, 200, "Invoices fetched successfully", data);
+});

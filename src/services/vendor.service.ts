@@ -103,6 +103,7 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         bill.id,
         PAYMENT_BILL_REFERENCE_TYPES.BILL
       );
+
       return {
         id: bill.id,
         type: "bill",

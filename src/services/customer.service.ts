@@ -7,6 +7,8 @@ import { LedgerAccount } from "../models/ledgerAccount.model";
 import * as customerRepository from "../repositories/customer.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as customerAddressService from "../services/customerAddress.service";
+import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+
 import { SALES_TAX } from "../constants";
 
 // Service function to create a customer.
@@ -82,4 +84,11 @@ async function createLedgerAccountForCustomer(clientId: number, newCustomer: any
 // Get customer by id
 export const fetchCustomerById = async (id: number) => {
   return await customerRepository.getCustomerById(id);
+};
+
+/**
+ * Get invoices for a customer
+ */
+export const getInvoicesByCustomerId = async (customerId: number) => {
+  return await soInvoiceRepository.getAllInvoices({ customerId });
 };

@@ -20,6 +20,9 @@ router.put("/:id", authenticateUser, customerController.updateCustomerController
 // Get all vendors.
 router.get("/", authenticateUser, customerController.getAllCustomersController);
 
+// get customer invoices.
+router.get("/:customerId/invoices", authenticateUser, customerController.getInvoicesByCustomerId);
+
 // Get vendor by id.
 router.get("/:id", authenticateUser, customerController.getCustomerByIdController);
 
