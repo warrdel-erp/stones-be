@@ -47,7 +47,7 @@ export const getLoadingOrderById = async (id: number) => {
         model: models.SalesOrder,
         as: "salesOrder",
         include: [
-          { model: models.Customer, as: "customer" },
+          { model: models.Customer, as: "customer", attributes: ["id", "name"] },
           { model: models.CustomerAddress, as: "shippingAddress" },
         ],
       },
@@ -78,6 +78,10 @@ export const getLoadingOrderById = async (id: number) => {
         model: models.PackagingList,
         as: "packagingList",
         include: [{ model: models.SalesOrderProduct, as: "salesOrderProducts" }],
+      },
+      {
+        model: models.CustomerAddress,
+        as: "shippingAddress",
       },
     ],
   });

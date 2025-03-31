@@ -1,5 +1,5 @@
 import { AppError } from "../helper/appError";
-import { SLAB_STATUS } from "../constants";
+import { PAYMENT_TERMS, SALES_TAX, SLAB_STATUS } from "../constants";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
 import _ from "lodash";
@@ -57,28 +57,35 @@ export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
   // Calculate total amount added in SO.
-  loadingOrder.totalAmount = loadingOrder.salesOrderProducts.reduce(
-    (total: number, salesOrderProduct: any) =>
-      total +
-      (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144,
-    0
-  );
+  loadingOrder.totalLoAmount = getTotalLoAmount(loadingOrder.salesOrderProducts);
 
   // Calculate total pl amount added in SO.
-  loadingOrder.totalPlAmount = loadingOrder.packagingList?.salesOrderProducts?.reduce?.(
-    (total: number, salesOrderProduct: any) =>
-      total +
-      (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144,
-    0
-  );
+  loadingOrder.totalPlAmount = getTotalPlAmount(loadingOrder.salesOrderProducts);
 
+  // so product as per product and unitPrice.
   loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
 
-  // delete salesOrder.salesOrderProducts because it is in products;
-  // delete loadingOrder.salesOrderProducts;
+  // get payment terms constant data.
+  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
 
   return loadingOrder;
 };
+
+function getTotalLoAmount(salesOrderProducts: any[]) {
+  return _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) =>
+      (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
+  );
+}
+
+function getTotalPlAmount(salesOrderProducts: any[]) {
+  return _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) =>
+      (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144
+  );
+}
 
 function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
   let products = removeDuplicatesWithUnitPrice(
@@ -210,11 +217,7 @@ function loadingOrderWithTotalAmount(loadingOrders: any) {
     loadingOrder = loadingOrder.get({ plain: true });
 
     // Calculate total amount added in LO.
-    loadingOrder.totalAmount = _.sumBy(
-      loadingOrder.salesOrderProducts,
-      (salesOrderProduct: any) =>
-        (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
-    );
+    loadingOrder.totalAmount = getTotalLoAmount(loadingOrder.salesOrderProducts);
 
     return loadingOrder;
   });
