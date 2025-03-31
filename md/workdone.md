@@ -54,3 +54,5 @@
 2. data manipulation for SO, LO, PL.
 3. Pick SO product.
 4. swap SO product.
+5. SO and LO conditions on PICK soProduct.
+6. flow diagram.

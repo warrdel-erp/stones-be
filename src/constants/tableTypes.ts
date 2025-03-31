@@ -99,3 +99,10 @@ export const SALE_ORDER_PRODUCT_STAGES = {
   PACKAGING_LIST: "packagingList",
   INVOICED: "invoiced",
 } as const;
+
+export const SALES_ORDER_STATUS = {
+  PENDING: "pending",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+  CLOSED: "closed",
+}

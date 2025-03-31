@@ -5,7 +5,7 @@ import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { SLAB_STATUS } from "../constants";
 import { Transaction } from "sequelize";
-import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
 //  Create or update multiple SalesOrderProduct entries.
 export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
@@ -87,6 +87,22 @@ export const getSalesOrderProducts = async (salesOrderId: number) => {
 };
 
 export const updatePickedStatus = async (soProductId: number, picked: boolean) => {
+  const soProduct = await salesOrderProductRepository.getSOproductWithSOAndLO(soProductId);
+
+  if (!soProduct) {
+    throw new AppError("Sales Order Product not found.", 400);
+  }
+
+  // If sales order is not in PENDING status, it can't be picked.
+  if (soProduct.salesOrder.status !== SALES_ORDER_STATUS.PENDING) {
+    throw new AppError(`Sales Order is in ${soProduct.saleOrder.status}. So product can't be picked.`, 400);
+  }
+
+  // If sales order is not in PENDING status, it can't be picked.
+  if (soProduct.stage.status === SALE_ORDER_PRODUCT_STAGES.INVOICED) {
+    throw new AppError(`Product is already invoiced. So product can't be picked`, 400);
+  }
+
   return await salesOrderProductRepository.updatePickedStatus(soProductId, picked);
 };
 

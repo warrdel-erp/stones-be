@@ -9,6 +9,7 @@ import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
+import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
@@ -35,8 +36,6 @@ export const createLoadingOrder = async (data: any) => {
 
   return { ...loadingOrder, products: updatedProducts };
 };
-
-
 
 // Get all LO
 export const getAllLoadingOrders = async (page: number, limit: number) => {
@@ -65,18 +64,13 @@ export const getLoadingOrderById = async (id: number) => {
     0
   );
 
-  // let products = removeDuplicates(
-  //   loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product)
-  // );
-
-  // // Map slabs to products
-  // loadingOrder.products = products.map((product) => {
-  //   const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
-  //     (salesOrderProduct: any) => salesOrderProduct.inventoryProduct.slab.product.id === product.id
-  //   );
-
-  //   return { ...product, salesOrderProduct };
-  // });
+  // Calculate total amount added in SO.
+  loadingOrder.totalPlAmount = loadingOrder.packagingList?.salesOrderProducts?.reduce?.(
+    (total: number, salesOrderProduct: any) =>
+      total +
+      (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144,
+    0
+  );
 
   loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
 
@@ -100,8 +94,7 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
   const newProducts = products.map((product) => {
     const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
       (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id
-        &&
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
@@ -110,7 +103,6 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
 
   return newProducts;
 }
-
 
 // Get loading order by SO id
 export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
@@ -123,7 +115,7 @@ export const updateLoadingOrder = async (id: number, data: any) => {
 };
 
 // Invoice Loading Order
-export const invoiceLoadingOrder = async (id: number) => {
+export const invoiceLoadingOrder = async (id: number, clientId: number) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -139,23 +131,23 @@ export const invoiceLoadingOrder = async (id: number) => {
     }
 
     // If LO doesn't have any product.
-    if (!loadingOrder?.loadingOrderProducts?.length) {
-      throw new AppError("Loading order with id: ${id} does not have any product added. So it can't be invoiced", 400);
-    }
-
-    // If Packaging list exists then mark sold to packaging list products. otherwise mark sold to loading order products.
-    let soldSlabProducts: any[] = [];
-    if (loadingOrder.packagingList) {
-      soldSlabProducts = loadingOrder.packagingList.packagingListProducts;
-    } else {
-      soldSlabProducts = loadingOrder.loadingOrderProducts;
+    if (!loadingOrder?.salesOrderProducts?.length) {
+      throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
     // Mark corresponding slabs as SOLD
-    for (const loadingOrderProducts of soldSlabProducts) {
+    for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
+      // Update Slab status to SOLD in Slab table.
       await slabRepository.updateSlabStatusByInventoryProduct(
-        loadingOrderProducts.inventoryProductId,
+        salesOrderProduct.inventoryProductId,
         SLAB_STATUS.SOLD,
+        transaction
+      );
+
+      // Update stage to INVOICED in Sales Order Product.
+      await salesOrderProductRepository.updateSalesOrderProduct(
+        salesOrderProduct.id,
+        { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED },
         transaction
       );
     }
@@ -169,10 +161,22 @@ export const invoiceLoadingOrder = async (id: number) => {
       );
     }
 
+    // Update stage to INVOICED in Loading Order.
     await loadingOrderRepository.updateLoadingOrder(id, { stage: LOADING_ORDER_STAGES.INVOICED }, transaction);
 
+    // create invoice
+    const invoice = await soInvoiceRepository.createInvoice(
+      {
+        clientId: clientId,
+        customerId: loadingOrder.salesOrder.customerId,
+        loadingOrderId: loadingOrder.id,
+        amount: loadingOrder.totalPlAmount || loadingOrder.totalAmount,
+      },
+      transaction
+    );
+
     transaction.commit();
-    return loadingOrder;
+    return { loadingOrder, invoice };
   } catch (error) {
     transaction.rollback();
     throw error;

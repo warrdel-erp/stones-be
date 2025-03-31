@@ -31,6 +31,7 @@ import JournalEntry from "./journalEntry.model";
 import User from "./user";
 import Vendor from "./vendor";
 import Warehouse from "./warehouse";
+import SalesOrderInvoice from "./salesOrderInvoice.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId" });
@@ -371,11 +372,25 @@ Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBill" });
 LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
 SalesOrderProduct.hasOne(LoadingOrderProduct, { foreignKey: "salesOrderProductId", as: "loadingOrderProduct" });
 
+// SalesOrderProduct belongs to one LoadingOrder (one LoadingOrder can have many SalesOrderProduct)
 SalesOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
 LoadingOrder.hasMany(SalesOrderProduct, { foreignKey: "loadingOrderId", as: "salesOrderProducts" });
 
+// SalesOrderProduct belongs to one PackagingList (one PackagingList can have many SalesOrderProduct)
 SalesOrderProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 PackagingList.hasMany(SalesOrderProduct, { foreignKey: "packagingListId", as: "salesOrderProducts" });
+
+// SalesOrderInvoice belongs to one Customer (one Customer can have many SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(SalesOrderInvoice, { foreignKey: "customerId", as: "salesOrderInvoices" });
+
+// SalesOrderInvoice belongs to one loadingOrder (one LoadingOrder can have one SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "salesOrderInvoices" });
+
+// SalesOrderInvoice belongs to one Client (one Client can have many SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(SalesOrderInvoice, { foreignKey: "clientId", as: "salesOrderInvoices" });
 
 export {
   Client,
@@ -411,4 +426,5 @@ export {
   BillItem,
   Container,
   PaymentBill,
+  SalesOrderInvoice
 };

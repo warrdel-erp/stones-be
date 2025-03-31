@@ -13,6 +13,22 @@ export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
 };
 
+// Find so product with salesOrder, loadingOrder
+export const getSOproductWithSOAndLO = async (soProductId: number) => {
+  return (await models.SalesOrderProduct.findByPk(soProductId, {
+    include: [
+      {
+        model: models.SalesOrder,
+        as: "salesOrder",
+      },
+      {
+        model: models.LoadingOrder,
+        as: "loadingOrder",
+      }
+    ],
+  }))?.get({ plain: true });
+}
+
 //  Find SalesOrderProduct by ID and salesOrderId.
 export const findByInventoryProductIdAndSalesOrderId = async (
   { inventoryProductId, salesOrderId }: { inventoryProductId: number; salesOrderId: number },

@@ -3,7 +3,7 @@ import { sequelize } from "../config/database";
 import User from "./user";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
-import { DELIVERY_TYPES } from "../constants/tableTypes";
+import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -27,9 +27,9 @@ const SalesOrder = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(SALES_ORDER_STATUS)),
       allowNull: false,
-      defaultValue: "pending", // Example: pending, confirmed, shipped, completed, canceled
+      defaultValue: SALES_ORDER_STATUS.PENDING,
     },
     deliveryType: {
       type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),

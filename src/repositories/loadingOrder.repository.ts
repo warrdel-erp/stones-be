@@ -76,7 +76,7 @@ export const getLoadingOrderById = async (id: number) => {
       {
         model: models.PackagingList,
         as: "packagingList",
-        include: [{ model: models.PackagingListProduct, as: "packagingListProducts" }],
+        include: [{ model: models.SalesOrderProduct, as: "salesOrderProduct" }],
       },
     ],
   });
