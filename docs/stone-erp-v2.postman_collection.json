@@ -2157,6 +2157,42 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get all invoices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/customer/:customerId/invoices",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								":customerId",
+								"invoices"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
