@@ -20,12 +20,16 @@ export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
   PRODUCT: "product",
   SLAB: "slab",
   BILL_ITEM: "bill_item",
+  BILL: "bill",
 } as const;
 
 export const JOURNAL_ENTRY_PROCESS_TYPE = {
   CREATE_SIPL: "create_sipl",
   ADD_FREIGHT_BILL: "add_freight_bill",
   RECEIVE_INVENTORY: "receive_inventory",
+  SIPL_PAYMENT: "sipl_payment",
+  BILL_PAYMENT: "bill_payment",
+  SO_INVOICE_PAYMENT: "so_invoice_payment",
 } as const;
 
 export const JOURNAL_ENTRY_TYPE = {

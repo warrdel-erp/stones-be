@@ -48,7 +48,7 @@ export const createBill = async (billData: any) => {
 
 // get one bill by id
 export const getOneBill = async (id: number) => {
-  const bill = await billRepository.getOneBill(id);
+  const bill = await billRepository.getBillByPk(id);
   if (!bill) {
     throw new Error("Bill not found");
   }

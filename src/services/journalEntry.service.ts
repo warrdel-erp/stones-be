@@ -4,12 +4,14 @@ import * as siplService from "./sipl.service";
 import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as siplRepository from "../repositories/sipl.repository";
+import * as billRepository from "../repositories/bill.repository";
 import * as slabService from "../services/slab.service";
 import {
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
+  PAYMENT_BILL_REFERENCE_TYPES,
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
@@ -218,3 +220,89 @@ export const createJournalEntryForReceiveInventory = async (
     })
   );
 };
+
+export async function createJournalEntriesForPaymentBills(bill: any, paymentData: any, transaction: Transaction) {
+  const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    referenceId: paymentData.payeeId,
+  });
+
+  const ledgerAccountForCashBank: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.CASH_BANK,
+    clientId: paymentData.clientId,
+  });
+
+  if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
+    const siplId = (await billRepository.getBillByPk(bill.referenceId))?.get("referenceId");
+
+    const journalEntry1 = {
+      amount: bill.amount,
+      ledgerId: ledgerAccount.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: Number(siplId),
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL,
+      subReferenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    };
+
+    const journalEntry2 = {
+      amount: bill.amount,
+      ledgerId: ledgerAccountForCashBank.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: Number(siplId),
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL,
+      subReferenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    };
+
+    await journalEntryRepository.create(journalEntry1, transaction);
+    await journalEntryRepository.create(journalEntry2, transaction);
+  } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
+    // First Journal entry.
+    const journalEntry1: JournalEntry = {
+      amount: bill.amount,
+      ledgerId: ledgerAccount.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+      referenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
+    };
+
+    // Second Journal entry.
+    const journalEntry2: JournalEntry = {
+      amount: bill.amount,
+      ledgerId: ledgerAccountForCashBank.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    };
+
+    await journalEntryRepository.create(journalEntry1, transaction);
+    await journalEntryRepository.create(journalEntry2, transaction);
+  } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE) {
+    // First Journal entry.
+    const journalEntry1: JournalEntry = {
+      amount: bill.amount,
+      ledgerId: ledgerAccount.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT,
+    };
+
+    // Second Journal entry.
+    const journalEntry2: JournalEntry = {
+      amount: bill.amount,
+      ledgerId: ledgerAccountForCashBank.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: bill.referenceId,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    };
+
+    await journalEntryRepository.create(journalEntry1, transaction);
+    await journalEntryRepository.create(journalEntry2, transaction);
+  }
+}

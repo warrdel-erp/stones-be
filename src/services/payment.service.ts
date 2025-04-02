@@ -1,10 +1,21 @@
 import { sequelize } from "../config/database";
-import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import {
+  JOURNAL_ENTRY_PROCESS_TYPE,
+  JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
+  JOURNAL_ENTRY_TYPE,
+  PAYMENT_BILL_REFERENCE_TYPES,
+} from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import * as paymentRepository from "../repositories/payment.repository";
 import * as paymentBillsRepository from "../repositories/paymentBills.repository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as billRepository from "../repositories/bill.repository";
 import * as siplRepository from "../repositories/sipl.repository";
+import { JournalEntry } from "../models/journalEntry.model";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
 
 // Create a new payment
 export const processPayment = async (paymentData: any, billsData: any[]) => {
@@ -27,13 +38,20 @@ export const processPayment = async (paymentData: any, billsData: any[]) => {
     const payment: any = await paymentRepository.createPayment(paymentData, transaction);
 
     // Step 2: Prepare Payment Bills
-    const paymentBills = billsData.map((bill) => ({
-      paymentId: payment.id,
-      referenceId: bill.referenceId,
-      referenceType: bill.referenceType,
-      amount: bill.amount,
-      description: bill.description,
-    }));
+    const paymentBills = await Promise.all(
+      billsData.map(async (bill) => {
+        // Create journal entries for payment bills
+        await createJournalEntriesForPaymentBills(bill, paymentData, transaction);
+
+        return {
+          paymentId: payment.id,
+          referenceId: bill.referenceId,
+          referenceType: bill.referenceType,
+          amount: bill.amount,
+          description: bill.description,
+        };
+      })
+    );
 
     // Step 3: Insert Payment Bills
     const paymentBillsRes = await paymentBillsRepository.createPaymentBills(paymentBills, transaction);

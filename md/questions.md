@@ -55,3 +55,7 @@
 3. is it possible there is different number of product in loadingOrder and packagingList. If yes then what will happen to slabs in LO during invoicing.
 4. if slab is swapped then where it's remeasures will be stored.
 5. if PL is been created then can we swap of pick from LO.
+
+---
+
+1. is "Cash bank" under "Cash and Cash Equivalents" is default account.

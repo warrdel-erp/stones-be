@@ -60,3 +60,7 @@
 ---
 
 1. data calculation in SO process, and complete missing data in SO process.
+
+---
+
+1. Payment journal entries for both SO and PO (little complex).

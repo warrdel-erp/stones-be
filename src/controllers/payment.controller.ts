@@ -23,7 +23,7 @@ export const createPayment = catchAsync(async (req: AuthRequest, res: Response) 
   }
 
   const newPayment = await paymentService.processPayment({ ...payment, clientId }, bills);
-  return SuccessResponse(res, 201, "Payment processed successfully", "newPayment");
+  return SuccessResponse(res, 201, "Payment processed successfully", newPayment);
 });
 
 // get all payments

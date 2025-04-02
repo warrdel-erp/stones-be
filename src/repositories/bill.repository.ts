@@ -1,11 +1,11 @@
-import { Op, Transaction, where } from "sequelize";
+import { Op, Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
   return await models.Bill.create(billData, { transaction });
 };
 
-export const getOneBill = async (id: number) => {
+export const getBillByPk = async (id: number) => {
   return await models.Bill.findByPk(id, {
     include: [
       {
@@ -13,6 +13,12 @@ export const getOneBill = async (id: number) => {
         as: "billItems",
       },
     ],
+  });
+};
+
+export const findOne = async (filter: WhereOptions) => {
+  return await models.Bill.findOne({
+    where: filter,
   });
 };
 
