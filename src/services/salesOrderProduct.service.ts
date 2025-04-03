@@ -106,7 +106,7 @@ export const updatePickedStatus = async (soProductId: number, picked: boolean) =
   return await salesOrderProductRepository.updatePickedStatus(soProductId, picked);
 };
 
-export const swapSalesOrderProduct = async (salesOrderProductId: number, newInventoryProductId: number) => {
+export const swapSalesOrderProduct = async (salesOrderProductId: number, data: any) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -127,23 +127,21 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, newInve
     // Store Swap History
     await soProductSwapHistoryRepository.createSoProductSwapHistory(
       {
-        inventoryProductId: newInventoryProductId,
+        ...salesOrderProduct,
         salesProductId: salesOrderProductId,
       },
       transaction
     );
 
     // Update Sales Order Product
-    await salesOrderProductRepository.updateSalesOrderProduct(
-      salesOrderProductId,
-      {
-        inventoryProductId: newInventoryProductId,
-      },
-      transaction
-    );
+    await salesOrderProductRepository.updateSalesOrderProduct(salesOrderProductId, data, transaction);
 
     // set new slab status as ALLOCATED
-    await slabRepository.updateSlabStatusByInventoryProduct(newInventoryProductId, SLAB_STATUS.ALLOCATED, transaction);
+    await slabRepository.updateSlabStatusByInventoryProduct(
+      data.newInventoryProductId,
+      SLAB_STATUS.ALLOCATED,
+      transaction
+    );
 
     // reset old slab status as IN_INVENTORY
     await slabRepository.updateSlabStatusByInventoryProduct(

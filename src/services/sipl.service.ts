@@ -12,6 +12,7 @@ import * as journalEntryService from "../services/journalEntry.service";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { v4 as uuidv4 } from "uuid";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
@@ -144,7 +145,7 @@ export async function handleCreateSlabs(slabData: any) {
       purchaseOrderId: sipl.purchaseOrderId,
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
-      barcode: slabData.barcode ? `${slabData.barcode}-${Math.random().toString(36).substring(7)}` : null,
+      barcode: uuidv4(),
     }));
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);

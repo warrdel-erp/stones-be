@@ -14,13 +14,21 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+
 import {
+  JOURNAL_ENTRY_PROCESS_TYPE,
+  JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_TYPE,
   LOADING_ORDER_STAGES,
   NOTES_REFERENCE_TYPES,
   NOTES_TYPE,
   SALE_ORDER_PRODUCT_STAGES,
 } from "../constants/tableTypes";
-import { removeDuplicates, removeDuplicatesWithUnitPrice } from "../helper";
+import { removeDuplicatesWithUnitPrice } from "../helper";
+import { JournalEntry } from "../models/journalEntry.model";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -131,6 +139,7 @@ function getTotalLoAmount(salesOrderProducts: any[]) {
       (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
   );
 }
+
 function getTotalLoQuantity(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
@@ -205,8 +214,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       throw new AppError("Cannot invoice Loading Order as it is already invoiced.", 400);
     }
 
-    console.log(loadingOrder);
-
     // If LO doesn't have any product.
     if (!loadingOrder?.salesOrderProducts?.length) {
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
@@ -227,6 +234,35 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED, picked: true },
         transaction
       );
+
+      // Create Journal Entry for Slabs
+      let amountOfSlab = 0;
+
+      switch (salesOrderProduct.stage) {
+        case SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER:
+          amountOfSlab = salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth;
+          break;
+        case SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST:
+          amountOfSlab = salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth;
+          break;
+      }
+
+      const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+        key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+        clientId,
+      });
+
+      await journalEntryRepository.create(
+        {
+          amount: amountOfSlab,
+          ledgerId: ledgerAccountForFinishedGoods.id,
+          type: JOURNAL_ENTRY_TYPE.DR,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+          referenceId: loadingOrder.salesOrder.id,
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        },
+        transaction
+      );
     }
 
     // if Packaging list exists then mark invoiced to packaging list.
@@ -242,7 +278,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
     await loadingOrderRepository.updateLoadingOrder(id, { stage: LOADING_ORDER_STAGES.INVOICED }, transaction);
 
     // create invoice
-    const invoice = await soInvoiceRepository.createInvoice(
+    const invoice: any = await soInvoiceRepository.createInvoice(
       {
         clientId: clientId,
         customerId: loadingOrder.salesOrder.customerId,
@@ -251,6 +287,25 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       },
       transaction
     );
+
+    // Create Journal Entry for Invoice START
+    const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      referenceId: loadingOrder.salesOrder.customerId,
+    });
+
+    await journalEntryRepository.create(
+      {
+        amount: invoice.amount,
+        ledgerId: ledgerAccount.id,
+        type: JOURNAL_ENTRY_TYPE.DR,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+        referenceId: loadingOrder.salesOrder.id,
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      },
+      transaction
+    );
+
+    // Create Journal Entry for Invoice END
 
     transaction.commit();
     return { loadingOrder, invoice };

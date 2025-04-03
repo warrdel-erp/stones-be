@@ -42,9 +42,12 @@ export const updateSoProductPickedStatus = catchAsync(async (req: Request, res: 
 
 export const swapSalesOrderProduct = catchAsync(async (req: Request, res: Response) => {
   const { soProductId } = req.params;
-  const { newInventoryProductId } = req.body;
 
-  const data = await salesOrderProductService.swapSalesOrderProduct(Number(soProductId), newInventoryProductId);
+  if (!req.body.newInventoryProductId) {
+    throw new AppError("newInventoryProductId must be provided", 400);
+  }
+
+  const data = await salesOrderProductService.swapSalesOrderProduct(Number(soProductId), req.body);
 
   return SuccessResponse(res, 200, "Sales Order Product swapped successfully", data);
 });

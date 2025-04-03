@@ -29,6 +29,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   RECEIVE_INVENTORY: "receive_inventory",
   SIPL_PAYMENT: "sipl_payment",
   BILL_PAYMENT: "bill_payment",
+  SO_INVOICING: "so_invoicing",
   SO_INVOICE_PAYMENT: "so_invoice_payment",
 } as const;
 

@@ -64,3 +64,8 @@
 ---
 
 1. Payment journal entries for both SO and PO (little complex).
+2. Bar code.
+
+---
+
+1. more data in swapHistory.
