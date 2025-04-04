@@ -2216,7 +2216,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"soDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"this is deliveryNotes\",\n    \"customerPo\": \"PO123456\",\n    \"customerPoDate\": \"2025-02-28\",\n    \"specialInstruction\": \"Handle with care\",\n    \"deliveryType\": \"delivery\",\n    \"status\": \"pending\",\n    \"customerId\": 1,\n    \"shippingAddressId\": 1,\n    \"paymerntTerms\": 1,\n    \"soLocationId\": 1,\n    \"internalNote\": \"This is internal note for SO\",\n    \"printableNote\": \"This is printable note for SO\",\n    \"products\": [\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 1,\n            \"taxApplied\": true\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 2\n        }\n    ]\n}",
+							"raw": "{\n    \"soDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"this is deliveryNotes\",\n    \"customerPo\": \"PO123456\",\n    \"customerPoDate\": \"2025-02-28\",\n    \"specialInstruction\": \"Handle with care\",\n    \"deliveryType\": \"delivery\",\n    \"status\": \"pending\",\n    \"customerId\": 1,\n    \"shippingAddressId\": 1,\n    \"paymerntTerms\": 1,\n    \"soLocationId\": 1,\n    \"internalNote\": \"This is internal note for SO\",\n    \"printableNote\": \"This is printable note for SO\",\n    \"products\": [\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 3,\n            \"taxApplied\": true\n        },\n        {\n            \"unitPrice\": 45,\n            \"inventoryProductId\": 4\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2479,7 +2479,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 4,\n    \"soProducts\": [\n        {\n            \"id\":2,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        },\n        {\n            \"id\":3,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        }\n    ]\n}\n",
+							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 5,\n    \"soProducts\": [\n        {\n            \"id\": 4,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        },\n        {\n            \"id\": 5,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3528,7 +3528,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"newInventoryProductId\":2\n}",
+							"raw": "{\n  \"newInventoryProductId\":2,\n    \"loRemeasureLength\": 12,\n  \"loRemeasureWidth\": 12\n\n}",
 							"options": {
 								"raw": {
 									"language": "json"
