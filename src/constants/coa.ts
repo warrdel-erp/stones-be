@@ -1019,7 +1019,7 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   FINISHED_GOODS: "finished_goods",
   CASH_BANK: "cash_bank",
   COGS: "cogs",
-  GOODS_SOLD: "cogs",
+  GOODS_SOLD: "goods_sold",
   STATE_TAX: "state_tax",
   COUNTY_TAX: "county_tax",
 } as const;
