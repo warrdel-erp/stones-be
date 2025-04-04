@@ -17,10 +17,12 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
 } as const;
 
 export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
+  SIPL_PRODUCT: "sipl_product",
   PRODUCT: "product",
   SLAB: "slab",
   BILL_ITEM: "bill_item",
   BILL: "bill",
+  LOADING_ORDER: "loading_order",
 } as const;
 
 export const JOURNAL_ENTRY_PROCESS_TYPE = {

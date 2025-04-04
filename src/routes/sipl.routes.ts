@@ -19,6 +19,7 @@ router.get("/newInvoiceNumber", authenticateUser, siplController.getNewInvoiceNu
 // get SIPL by ID
 router.get("/:id/getReceiveInventoryData", authenticateUser, siplController.getReceiveInventoryData);
 
+// Add container to SIPL
 router.post("/:id/addContainer", authenticateUser, siplController.addContainer);
 
 // get SIPL by ID

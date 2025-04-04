@@ -1,5 +1,6 @@
-import { sequelize } from "../config/database";
 import { Transaction } from "sequelize";
+import { v4 as uuidv4 } from "uuid";
+import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import * as containerRepository from "../repositories/container.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
@@ -9,10 +10,7 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as siplProductsRepository from "../repositories/siplProducts.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
-import * as journalEntryRepository from "../repositories/journalEntry.repository";
-import { JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE } from "../constants/tableTypes";
-import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
-import { v4 as uuidv4 } from "uuid";
+import * as siplService from "../services/sipl.service";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
@@ -23,10 +21,22 @@ export const receiveInventory = async (siplId: number, clientId: number): Promis
 
     // Update SIPL inventoryReceived status.
     await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
+    const calculations = await siplService.getSiplCalculations(siplId, transaction);
+
+    // set landed unit cost for each slab.
+    await Promise.all(
+      calculations.dataAccordingToProduct.filter(
+        async (productCalc: any) =>
+          await slabRepository.setUnitLandedCost(
+            siplId,
+            productCalc.product.id,
+            productCalc.landedUnitCost,
+            transaction
+          )
+      )
+    );
 
     // Create Journal entry for Inventory Reception START.
-
-    // Get in_inventory ledger account id for products entry.
     await journalEntryService.createJournalEntryForReceiveInventory(siplId, clientId, transaction);
 
     transaction.commit();

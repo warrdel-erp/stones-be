@@ -107,6 +107,42 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
       openingBalance: 0,
       openingDate: new Date(),
     },
+    {
+      name: "COGS",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "cost_of_goods_and_services_sold")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Goods Sold",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "goods")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "State Tax",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "tax_payables")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "County Tax",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.COUNTY_TAX,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "tax_payables")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
   ] as const;
 
   return await ledgerAccountRepository.createBulkLedgerAccount(data, transaction);

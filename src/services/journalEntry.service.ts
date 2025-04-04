@@ -1,11 +1,4 @@
 import { Transaction } from "sequelize";
-import * as journalEntryRepository from "../repositories/journalEntry.repository";
-import * as siplService from "./sipl.service";
-import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
-import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as siplRepository from "../repositories/sipl.repository";
-import * as billRepository from "../repositories/bill.repository";
-import * as slabService from "../services/slab.service";
 import {
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
@@ -15,6 +8,15 @@ import {
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import * as siplService from "./sipl.service";
+import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as siplRepository from "../repositories/sipl.repository";
+import * as billRepository from "../repositories/bill.repository";
+import * as slabService from "../services/slab.service";
+
 
 // Create journal entry for freight bill item.
 export async function createJournalEntryForFreightBillItem(
@@ -45,28 +47,46 @@ export async function createJournalEntryForFreightBillItem(
   );
 
   // Unit freight item cost (amount / total received area of all products in sipl).
-  const unitFreightItemCost = freightBillItemData.amount / calculations.totalReceivingArea;
+  const unitFreightItemCost = freightBillItemData.amount / calculations.totalQuantity;
 
-  // create data for freight item entry as per product.
-  const freightItemEntryDataAsPerProduct = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {
+  const sipl: any = (await siplRepository.findSIPLById(freightBillData.referenceId, transaction))?.get({ plain: true });
+
+  const freightItemEntryDataAsPerSiplProduct = sipl.siplProducts.map((siplProduct: any): JournalEntry => {
     return {
-      amount: unitFreightItemCost * productCalc.totalReceivedArea,
+      amount: unitFreightItemCost * siplProduct.quantity,
       ledgerId: freightBillItemData.ledgerAccountId,
       type: JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
 
       // Sub reference is the product.
-      subReferenceId: productCalc.product.id,
-      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
+      subReferenceId: siplProduct.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SIPL_PRODUCT,
 
-      // reference is the SIPL.
       referenceId: freightBillData.referenceId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-    };
-  });
+    }
+  })
+
+  // // create data for freight item entry as per product.
+  // const freightItemEntryDataAsPerProduct = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {
+  //   return {
+  //     amount: unitFreightItemCost * productCalc.totalReceivedArea,
+  //     ledgerId: freightBillItemData.ledgerAccountId,
+  //     type: JOURNAL_ENTRY_TYPE.DR,
+  //     processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
+
+  //     // Sub reference is the product.
+  //     subReferenceId: productCalc.product.id,
+  //     subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
+
+  //     // reference is the SIPL.
+  //     referenceId: freightBillData.referenceId,
+  //     referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+  //   };
+  // });
 
   // create journal entry for products.
-  const productJournalEntry = await journalEntryRepository.createBulk(freightItemEntryDataAsPerProduct, transaction);
+  const productJournalEntry = await journalEntryRepository.createBulk(freightItemEntryDataAsPerSiplProduct, transaction);
 
   return {
     siplJournalEntry,

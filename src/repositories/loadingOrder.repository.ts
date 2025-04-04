@@ -67,7 +67,7 @@ export const getLoadingOrderById = async (id: number) => {
                   {
                     model: models.Slab,
                     as: "slab",
-                    attributes: ["id", "receivingLength", "receivingWidth"],
+                    attributes: ["id", "receivingLength", "receivingWidth", "landedUnitCost"],
                     include: [
                       {
                         model: models.Product,

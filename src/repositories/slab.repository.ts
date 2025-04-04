@@ -14,6 +14,21 @@ export const updateSlabStatusBySipl = async (siplId: number, transaction: Transa
   return updatedCount;
 };
 
+// Finds all slabs by SIPL ID and updates their status.
+export const setUnitLandedCost = async (
+  siplId: number,
+  productId: number,
+  landedUnitCost: number,
+  transaction: Transaction
+): Promise<number> => {
+  const [updatedCount] = await Slab.update(
+    { status: SLAB_STATUS.IN_INVENTORY },
+    { where: { siplId, productId, receivingInventory: true, landedUnitCost }, individualHooks: true, transaction } // Only update slabs that are initiated
+  );
+
+  return updatedCount;
+};
+
 // Create slabs
 export const createSlabs = async (slabData: any, transaction?: Transaction) => {
   return await models.Slab.bulkCreate(slabData, { transaction, individualHooks: true });

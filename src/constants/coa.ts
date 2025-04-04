@@ -1018,6 +1018,10 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   INVENTORY_IN_TRANSIT: "inventory_in_transit",
   FINISHED_GOODS: "finished_goods",
   CASH_BANK: "cash_bank",
+  COGS: "cogs",
+  GOODS_SOLD: "cogs",
+  STATE_TAX: "state_tax",
+  COUNTY_TAX: "county_tax",
 } as const;
 
 export const FREIGHT_BILL_ACCOUNT_KEYS = {

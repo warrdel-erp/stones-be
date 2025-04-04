@@ -1,5 +1,5 @@
 import { AppError } from "../helper/appError";
-import { PAYMENT_TERMS, SLAB_STATUS } from "../constants";
+import { PAYMENT_TERMS, SALES_TAX, SLAB_STATUS } from "../constants";
 import * as notesRepository from "../repositories/notes.repository";
 
 import { sequelize } from "../config/database";
@@ -20,13 +20,14 @@ import * as journalEntryRepository from "../repositories/journalEntry.repository
 import {
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
   LOADING_ORDER_STAGES,
   NOTES_REFERENCE_TYPES,
   NOTES_TYPE,
   SALE_ORDER_PRODUCT_STAGES,
 } from "../constants/tableTypes";
-import { removeDuplicatesWithUnitPrice } from "../helper";
+import { addPercentage, getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
@@ -219,6 +220,120 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
+
+    // create invoice
+    const invoice: any = await soInvoiceRepository.createInvoice(
+      {
+        clientId: clientId,
+        customerId: loadingOrder.salesOrder.customerId,
+        loadingOrderId: loadingOrder.id,
+        amount: loadingOrder.totalPlAmount || loadingOrder.totalAmount,
+      },
+      transaction
+    );
+
+    // Create Journal Entry for Invoice START
+    const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      referenceId: loadingOrder.salesOrder.customerId,
+    });
+
+    const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+    // Journal Entry for with tax.
+    await journalEntryRepository.create(
+      {
+        amount: addPercentage(invoice.amount, customerTax?.value || 0),
+        ledgerId: ledgerAccount.id,
+        type: JOURNAL_ENTRY_TYPE.DR,
+
+        // reference
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+        referenceId: loadingOrder.salesOrder.id,
+
+        // sub reference 
+        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER,
+        subReferenceId: loadingOrder.id,
+
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      },
+      transaction
+    );
+
+    // Get ledger account for goods sold.
+    const ledgerAccountForGoodsSold: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
+      clientId,
+    });
+
+    // Journal Entry for Without tax.
+    await journalEntryRepository.create(
+      {
+        amount: invoice.amount,
+        ledgerId: ledgerAccountForGoodsSold.id,
+        type: JOURNAL_ENTRY_TYPE.CR,
+
+        // reference
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+        referenceId: loadingOrder.salesOrder.id,
+
+        // sub reference 
+        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER,
+        subReferenceId: loadingOrder.id,
+
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      },
+      transaction
+    );
+
+
+    // Get ledger account for State tax.
+    const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
+      clientId,
+    });
+
+    // Get ledger account for State tax.
+    const ledgerAccountForCountyTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.COUNTY_TAX,
+      clientId,
+    });
+
+    // Journal Entry for state tax.
+    await journalEntryRepository.create(
+      {
+        amount: getPercentageValue(invoice.amount, customerTax?.stateTax || 0),
+        ledgerId: ledgerAccountForStateTax.id,
+        type: JOURNAL_ENTRY_TYPE.CR,
+
+        // reference
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+        referenceId: loadingOrder.salesOrder.id,
+
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      },
+      transaction
+    );
+
+    // Calculate county tax.
+    const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0
+
+    // Journal Entry for county tax.
+    await journalEntryRepository.create(
+      {
+        amount: getPercentageValue(invoice.amount, countyTax),
+        ledgerId: ledgerAccountForCountyTax.id,
+        type: JOURNAL_ENTRY_TYPE.CR,
+
+        // reference
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+        referenceId: loadingOrder.salesOrder.id,
+
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      },
+      transaction
+    );
+    // Create Journal Entry for Invoice END
+
     // Mark corresponding slabs as SOLD
     for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
       // Update Slab status to SOLD in Slab table.
@@ -235,18 +350,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         transaction
       );
 
-      // Create Journal Entry for Slabs
-      let amountOfSlab = 0;
 
-      switch (salesOrderProduct.stage) {
-        case SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER:
-          amountOfSlab = salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth;
-          break;
-        case SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST:
-          amountOfSlab = salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth;
-          break;
-      }
-
+      // Get ledger account for finished goods.
       const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
         key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
         clientId,
@@ -254,9 +359,35 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
 
       await journalEntryRepository.create(
         {
-          amount: amountOfSlab,
+          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
           ledgerId: ledgerAccountForFinishedGoods.id,
+          type: JOURNAL_ENTRY_TYPE.CR,
+
+          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+          subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
+
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+          referenceId: loadingOrder.salesOrder.id,
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        },
+        transaction
+      );
+
+      // Get ledger account for finished cogs.
+      const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+        key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+        clientId,
+      });
+
+      await journalEntryRepository.create(
+        {
+          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+          ledgerId: ledgerAccountForCogs.id,
           type: JOURNAL_ENTRY_TYPE.DR,
+
+          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+          subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
+
           referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
           referenceId: loadingOrder.salesOrder.id,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
@@ -277,35 +408,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
     // Update stage to INVOICED in Loading Order.
     await loadingOrderRepository.updateLoadingOrder(id, { stage: LOADING_ORDER_STAGES.INVOICED }, transaction);
 
-    // create invoice
-    const invoice: any = await soInvoiceRepository.createInvoice(
-      {
-        clientId: clientId,
-        customerId: loadingOrder.salesOrder.customerId,
-        loadingOrderId: loadingOrder.id,
-        amount: loadingOrder.totalPlAmount || loadingOrder.totalAmount,
-      },
-      transaction
-    );
 
-    // Create Journal Entry for Invoice START
-    const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-      referenceId: loadingOrder.salesOrder.customerId,
-    });
 
-    await journalEntryRepository.create(
-      {
-        amount: invoice.amount,
-        ledgerId: ledgerAccount.id,
-        type: JOURNAL_ENTRY_TYPE.DR,
-        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-        referenceId: loadingOrder.salesOrder.id,
-        processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-      },
-      transaction
-    );
-
-    // Create Journal Entry for Invoice END
 
     transaction.commit();
     return { loadingOrder, invoice };

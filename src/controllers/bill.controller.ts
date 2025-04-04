@@ -3,10 +3,21 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import * as billService from "../services/bill.service";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import * as siplRepository from "../repositories/sipl.repository";
+import { AppError } from "../helper/appError";
 
 export const createBill = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   const clientId = req.user?.clientId;
+
+  // check if SIPL if received in inventory or not.
+  if (req.body.referenceType === BILL_REFERENCE_TYPES.SIPL) {
+    const sipl = await siplRepository.findSIPLByIdSimple(req.body.referenceId);
+    if (sipl?.get("inventoryReceived")) {
+      throw new AppError("Can't create a bill for a received inventory SIPL", 400);
+    }
+  }
 
   const bill = await billService.createBill({ ...req.body, createdBy: userId, clientId });
   SuccessResponse(res, 201, "Bill created Successfully", bill);

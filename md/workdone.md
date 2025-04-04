@@ -69,3 +69,7 @@
 ---
 
 1. more data in swapHistory.
+2. landed unit cost as per slab.
+3. freight journal entries changes.
+4. SO journal entries.
+5. CAO data Structure additions.
