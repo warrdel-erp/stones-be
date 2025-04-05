@@ -268,3 +268,13 @@ export const updateSlabById = async (slabId: number, updateData: any, transactio
     transaction,
   });
 };
+
+
+export const getOnlyBarcode = async (siplId: number) => {
+  return await models.Slab.findAll({
+    where: {
+      siplId
+    },
+    attributes: ["id", "barcode"],
+  });
+}

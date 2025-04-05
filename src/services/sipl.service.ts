@@ -342,3 +342,8 @@ export const getSIPLByVendor = async (vendorId: number) => {
 
   return sipls;
 };
+
+// Get all barcode of an SIPL
+export const getAllBarcode: any = async (siplId: number) => {
+  return await slabRepository.getOnlyBarcode(siplId);
+}

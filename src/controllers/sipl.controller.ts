@@ -50,6 +50,14 @@ export const addContainer = catchAsync(async (req: Request, res: Response) => {
   SuccessResponse(res, 201, "Container added successfully", container);
 });
 
+// Get all barcode
+export const getAllBarcode = catchAsync(async (req: Request, res: Response) => {
+  const { siplId } = req.params;
+
+  const container = await siplService.getAllBarcode(req.body, Number(siplId));
+  SuccessResponse(res, 201, "Barcode fetched successfully", container);
+});
+
 /**
  * create Direct SIPL meaning (first create PO)
  * 1. create PO
