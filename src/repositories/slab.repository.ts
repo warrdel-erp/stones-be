@@ -23,7 +23,7 @@ export const setUnitLandedCost = async (
 ): Promise<number> => {
   const [updatedCount] = await Slab.update(
     { status: SLAB_STATUS.IN_INVENTORY },
-    { where: { siplId, productId, receivingInventory: true, landedUnitCost }, individualHooks: true, transaction } // Only update slabs that are initiated
+    { where: { siplId, productId, landedUnitCost }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
 
   return updatedCount;

@@ -156,9 +156,6 @@ const Slab = sequelize.define(
 );
 
 Slab.beforeUpdate((slab) => {
-  if (!slab.dataValues.receivingInventory) {
-    delete slab.dataValues.landedUnitCost;
-  }
   delete slab.dataValues.id;
   delete slab.dataValues.serialNumber;
   delete slab.dataValues.siplId;
