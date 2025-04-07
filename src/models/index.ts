@@ -32,6 +32,7 @@ import User from "./user";
 import Vendor from "./vendor";
 import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
+import Truck from "./truck.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId" });
@@ -396,6 +397,14 @@ LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "sale
 SalesOrderInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SalesOrderInvoice, { foreignKey: "clientId", as: "salesOrderInvoices" });
 
+// Truck belongs to One LoadingOrder
+LoadingOrder.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
+Truck.hasMany(LoadingOrder, { foreignKey: "truckId", as: "loadingOrders" });
+
+// Truck belongs to One Client (One Client can have many Trucks)
+Truck.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(Truck, { foreignKey: "Trucks", as: "trucks" });
+
 export {
   Client,
   User,
@@ -431,4 +440,5 @@ export {
   Container,
   PaymentBill,
   SalesOrderInvoice,
+  Truck,
 };

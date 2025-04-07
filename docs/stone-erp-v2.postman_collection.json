@@ -1040,7 +1040,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 2,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 653,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 400,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}\n",
+							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 653,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 400,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1383,7 +1383,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "5"
+									"value": "1"
 								}
 							]
 						}
@@ -3130,7 +3130,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"paymentType\": \"outgoing\",\n    \"payeeId\": 2,\n    \"payeeType\": \"vendor\",\n    \"amount\": 14,\n    \"paymentMethod\": \"cash\",\n    \"referenceNo\": 23,\n    \"referenceDate\":\"3023-11-05\",\n    \"transactionId\": \"TN1245689\",\n    \"status\": \"completed\",\n    \"userId\": 1,\n    \"remark\": \"this si remark\",\n    \"bills\": [\n        {\n            \"referenceId\": 1,\n            \"referenceType\": \"BILL\",\n            \"amount\": 14,\n            \"description\": \"this is description\"\n        }\n        // {\n        //     \"referenceId\": 1,\n        //     \"referenceType\": \"SIPL\",\n        //     \"amount\": 23\n        // }\n    ]\n}",
+							"raw": "{\n    \"paymentType\": \"outgoing\",\n    \"payeeId\": 1,\n    \"payeeType\": \"vendor\",\n    \"amount\": 20,\n    \"paymentMethod\": \"cash\",\n    \"referenceNo\": 23,\n    \"referenceDate\":\"3023-11-05\",\n    \"transactionId\": \"TN1245689\",\n    \"status\": \"completed\",\n    \"remark\": \"this si remark\",\n    \"bills\": [\n        // {\n        //     \"referenceId\": 2,\n        //     \"referenceType\": \"BILL\",\n        //     \"amount\": 18,\n        //     \"description\": \"this is description\"\n        // }\n        {\n            \"referenceId\": 1,\n            \"referenceType\": \"SIPL\",\n            \"amount\": 20\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3605,7 +3605,7 @@
 			"name": "journal entry",
 			"item": [
 				{
-					"name": "New Request",
+					"name": "get journal entries",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -3635,6 +3635,223 @@
 								},
 								{
 									"key": "referenceId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "truck",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/truck",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"truck"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/truck/:truckId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"truck",
+								":truckId"
+							],
+							"variable": [
+								{
+									"key": "truckId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi 12\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/truck/:truckId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"truck",
+								":truckId"
+							],
+							"variable": [
+								{
+									"key": "truckId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/truck",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"truck"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/truck/:truckId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"truck",
+								":truckId"
+							],
+							"variable": [
+								{
+									"key": "truckId",
 									"value": "1"
 								}
 							]

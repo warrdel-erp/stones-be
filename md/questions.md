@@ -58,5 +58,9 @@
 
 ---
 
-1. is "Cash bank" under "Cash and Cash Equivalents" is default account.
+1. is "Cash bank" under "Cash and Cash Equivalents" is default account.[No]
 2. Second journal entry in SO (Total area of slab _ Landed cost of that slab) or (unit price in soProduct _ remeasurement in SO).
+
+---
+
+1. can one LO have multiple Trucks.

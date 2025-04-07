@@ -5,6 +5,7 @@ import { AppError } from "../helper/appError";
 import Client from "./client";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
+import Truck from "./truck.model";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -69,6 +70,15 @@ const LoadingOrder = sequelize.define(
         key: "id",
       },
       onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
+    truckId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Truck,
+        key: "id",
+      },
+      onDelete: "NO ACTION",
       onUpdate: "CASCADE",
     },
   },

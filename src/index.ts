@@ -33,6 +33,7 @@ import containerRoutes from "./routes/container.routes";
 import masterRoutes from "./routes/master.routes";
 import salesOrderProductRoutes from "./routes/salesOrderProduct.routes";
 import journalEntryRoutes from "./routes/journalEntry.routes";
+import truckRoutes from "./routes/truck.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -67,6 +68,7 @@ app.use("/api/container", containerRoutes);
 app.use("/api/master", masterRoutes);
 app.use("/api/salesOrderProduct", salesOrderProductRoutes);
 app.use("/api/journalEntry", journalEntryRoutes);
+app.use("/api/truck", truckRoutes);
 
 // handler error globally.
 app.use(errorHandler);
