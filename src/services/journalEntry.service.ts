@@ -17,7 +17,6 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as billRepository from "../repositories/bill.repository";
 import * as slabService from "../services/slab.service";
 
-
 // Create journal entry for freight bill item.
 export async function createJournalEntryForFreightBillItem(
   freightBillItemData: any,
@@ -64,8 +63,8 @@ export async function createJournalEntryForFreightBillItem(
 
       referenceId: freightBillData.referenceId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-    }
-  })
+    };
+  });
 
   // // create data for freight item entry as per product.
   // const freightItemEntryDataAsPerProduct = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {
@@ -86,7 +85,10 @@ export async function createJournalEntryForFreightBillItem(
   // });
 
   // create journal entry for products.
-  const productJournalEntry = await journalEntryRepository.createBulk(freightItemEntryDataAsPerSiplProduct, transaction);
+  const productJournalEntry = await journalEntryRepository.createBulk(
+    freightItemEntryDataAsPerSiplProduct,
+    transaction
+  );
 
   return {
     siplJournalEntry,
@@ -326,3 +328,8 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
     await journalEntryRepository.create(journalEntry2, transaction);
   }
 }
+
+// Get all Journal entries with filter
+export const getAllJournalEntries = async (filters: any, clientId: number) => {
+  return journalEntryRepository.findAll(filters, clientId);
+};

@@ -246,7 +246,7 @@ InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 
 // One Ledger account have multiple transaction (one transaction belongs to one Account)
 LedgerAccount.hasMany(JournalEntry, { foreignKey: "ledgerId", as: "transactions" });
-JournalEntry.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledger" });
+JournalEntry.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledgerAccount" });
 
 // User can create multiple customers (Customer can belongs to one User)
 User.hasMany(Customer, { foreignKey: "userId", as: "customers" });
