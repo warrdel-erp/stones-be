@@ -54,7 +54,7 @@ export const addContainer = catchAsync(async (req: Request, res: Response) => {
 export const getAllBarcode = catchAsync(async (req: Request, res: Response) => {
   const { siplId } = req.params;
 
-  const container = await siplService.getAllBarcode(req.body, Number(siplId));
+  const container = await siplService.getAllBarcode(Number(siplId));
   SuccessResponse(res, 201, "Barcode fetched successfully", container);
 });
 
