@@ -11,6 +11,8 @@ import * as siplProductsRepository from "../repositories/siplProducts.repository
 import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
+import * as paymentBillRepository from "../repositories/paymentBills.repository";
+import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
@@ -211,7 +213,23 @@ export const getSIPLById = async (id: number) => {
 
   const calculations = await getSiplCalculations(id);
 
-  return { ...sipl, ...calculations };
+  let totalPaidBillAmount = 0;
+
+  await Promise.all(
+    sipl.bills.map(async (bill: any) => {
+      totalPaidBillAmount += await paymentBillRepository.getTotalPaidAmountOfBill(
+        bill.id,
+        PAYMENT_BILL_REFERENCE_TYPES.BILL
+      );
+    })
+  );
+
+  const totalPaidSiplAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
+    sipl.id,
+    PAYMENT_BILL_REFERENCE_TYPES.SIPL
+  );
+
+  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiplAmount };
 };
 
 // Get all SIPLs
@@ -345,6 +363,6 @@ export const getSIPLByVendor = async (vendorId: number) => {
 
 // Get all barcode of an SIPL
 export const getAllBarcode: any = async (siplId: number) => {
-  console.log(siplId)
+  console.log(siplId);
   return await slabRepository.getOnlyBarcode(siplId);
-}
+};

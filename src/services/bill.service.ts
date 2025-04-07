@@ -29,12 +29,13 @@ export const createBill = async (billData: any) => {
         transaction
       );
 
-      /**
-       * Create entries for received products in SIPL.
-       */
-
       // Create journal entry for freight bill item.
-      await journalEntryService.createJournalEntryForFreightBillItem({ ...item, id: billItem.id }, billData, siplCalculations, transaction);
+      await journalEntryService.createJournalEntryForFreightBillItem(
+        { ...item, id: billItem.id },
+        billData,
+        siplCalculations,
+        transaction
+      );
 
       billItems.push(billItem);
     }

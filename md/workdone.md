@@ -73,3 +73,7 @@
 3. freight journal entries changes.
 4. SO journal entries.
 5. CAO data Structure additions.
+
+---
+
+1. journal entries get APIs.
