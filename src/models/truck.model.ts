@@ -1,6 +1,13 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { Client } from ".";
+import { VEHICLE_TYPE } from "../constants/tableTypes";
+
+// "name": "name",
+// "vehicleType": "light",
+// "registrationNumber": "234567890",
+// "registrationDate": "2025-04-08",
+// "capacity": "50"
 
 const Truck = sequelize.define(
   "Truck",
@@ -10,17 +17,23 @@ const Truck = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    vehicleNumber: {
+    registrationNumber: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    driverName: {
+    name: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
-    driverPhone: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    registrationDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    capacity: {
+      type: DataTypes.INTEGER,
+    },
+    vehicleType: {
+      type: DataTypes.ENUM(...Object.values(VEHICLE_TYPE)),
     },
     clientId: {
       type: DataTypes.INTEGER,

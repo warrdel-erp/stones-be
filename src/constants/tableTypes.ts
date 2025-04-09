@@ -126,4 +126,9 @@ export const NOTES_REFERENCE_TYPES = {
   SALES_ORDER: "sales_order",
   PURCHASE_ORDER: "purchase_order",
   LOADING_ORDER: "loading_order",
-};
+} as const;
+
+export const VEHICLE_TYPE = {
+  LIGHT: "light",
+  HEAVY: "heavy",
+} as const;
