@@ -33,6 +33,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   BILL_PAYMENT: "bill_payment",
   SO_INVOICING: "so_invoicing",
   SO_INVOICE_PAYMENT: "so_invoice_payment",
+  custom: "custom",
 } as const;
 
 export const JOURNAL_ENTRY_TYPE = {

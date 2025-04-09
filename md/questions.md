@@ -64,3 +64,5 @@
 ---
 
 1. can one LO have multiple Trucks.
+2. where to show truck list.
+3. what to show in general account, account payables, account receivables.[ledger accounts]

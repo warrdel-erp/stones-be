@@ -24,7 +24,7 @@ export const getLedgerAccounts = async (page: number, limit: number, filters: an
 
   const whereCondition: any = filters;
 
-  return models.LedgerAccount.findAndCountAll({
+  return await models.LedgerAccount.findAndCountAll({
     where: whereCondition,
     limit,
     offset,

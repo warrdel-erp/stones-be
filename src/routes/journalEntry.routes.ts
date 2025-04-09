@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { getJournalEntries } from "../controllers/journalEntry.controller";
+import * as journalEntriesController from "../controllers/journalEntry.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.get("/", authenticateUser, getJournalEntries);
+// get Journal entries.
+router.get("/", authenticateUser, journalEntriesController.getJournalEntries);
+
+// create customer journal entry
+router.post("/", authenticateUser, journalEntriesController.createJournalEntry);
 
 export default router;

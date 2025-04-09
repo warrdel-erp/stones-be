@@ -7,7 +7,7 @@ import {
   PAYMENT_BILL_REFERENCE_TYPES,
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
-import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as siplService from "./sipl.service";
@@ -331,5 +331,11 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
 
 // Get all Journal entries with filter
 export const getAllJournalEntries = async (filters: any, clientId: number) => {
-  return journalEntryRepository.findAll(filters, clientId);
+  let data: any = await journalEntryRepository.findAll(filters, clientId);
+  return data;
+};
+
+// Create journal entry
+export const createJournalEntry = async (data: JournalEntry) => {
+  return await journalEntryRepository.create(data);
 };

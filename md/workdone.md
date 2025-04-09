@@ -79,3 +79,14 @@
 1. journal entries get APIs.
 2. total paid amount calculation for SIPL.
 3. truck basic APIS.
+
+---
+
+### me.
+
+1. truck data changes.
+2. create custom journal entry.
+
+### overall
+
+1. ledger account creation.

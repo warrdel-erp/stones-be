@@ -7,6 +7,7 @@ import {
   JOURNAL_ENTRY_TYPE,
 } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
+import User from "./user";
 
 export type JournalEntry = {
   amount: number;
@@ -39,7 +40,16 @@ const JournalEntry = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: LedgerAccount, // Assumes LedgerAccount table exists
+        model: LedgerAccount,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+    },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: User,
         key: "id",
       },
       onDelete: "RESTRICT",

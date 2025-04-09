@@ -405,6 +405,9 @@ Truck.hasMany(LoadingOrder, { foreignKey: "truckId", as: "loadingOrders" });
 Truck.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(Truck, { foreignKey: "Trucks", as: "trucks" });
 
+JournalEntry.belongsTo(User, { foreignKey: "createdBy", as: "user" });
+User.hasMany(JournalEntry, { foreignKey: "createdBy", as: "journalEntries" });
+
 export {
   Client,
   User,
