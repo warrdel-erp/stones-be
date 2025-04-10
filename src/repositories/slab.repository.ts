@@ -144,9 +144,9 @@ export const findByIdWithLogs = async (slabId: number) => {
         [
           fn(
             "CONCAT",
-            col("SIPL.PurchaseOrder.clientPoNumber"),
+            col("sipl.purchaseOrder.clientPoNumber"),
             "-",
-            col("SIPL.poSiplNumber"),
+            col("sipl.poSiplNumber"),
             "-",
             col("slabs.serialNumber")
           ),
@@ -187,9 +187,9 @@ export const getAllSlabs = async (filters?: WhereOptions) => {
         [
           fn(
             "CONCAT",
-            col("SIPL.PurchaseOrder.clientPoNumber"),
+            col("sipl.purchaseOrder.clientPoNumber"),
             "-",
-            col("SIPL.poSiplNumber"),
+            col("sipl.poSiplNumber"),
             "-",
             col("slabs.serialNumber")
           ),
