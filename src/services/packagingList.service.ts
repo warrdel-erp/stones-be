@@ -72,9 +72,9 @@ export const getPackagingListById = async (id: number) => {
   return packagingList;
 };
 
-function getPackagingListProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
   let products = removeDuplicatesWithUnitPrice(
-    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
+    packagingList?.salesOrderProducts.map((salesOrderProduct: any) => ({
       ...salesOrderProduct.inventoryProduct.slab.product,
       unitPrice: salesOrderProduct.unitPrice,
     }))
@@ -82,10 +82,9 @@ function getPackagingListProductAccordingToIdAndUnitPrice(loadingOrder: any) {
 
   // Map slabs to products
   const newProducts = products.map((product) => {
-    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+    const salesOrderProduct = packagingList.salesOrderProducts.filter(
       (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id
-        &&
+        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
