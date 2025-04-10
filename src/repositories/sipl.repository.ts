@@ -192,7 +192,7 @@ export const findSIPLBySlabId = async (slabId: number) => {
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({
     attributes: {
-      include: [[fn("CONCAT", col("PurchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
+      include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
     },
     include: [
       {
