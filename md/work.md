@@ -130,3 +130,9 @@
 5. create flow diagram for every flow 48. put constants in tables for better data fetching
 6. Restructure sipl calculations acc
 7. Set value in getting model
+
+---
+
+copy loading order to invoice page.
+create a SO journal entries page in invoice.
+copy journal entry page from PO list.

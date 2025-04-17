@@ -33,6 +33,7 @@ import Vendor from "./vendor";
 import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
+import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId" });
@@ -248,6 +249,35 @@ InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 // One Ledger account have multiple transaction (one transaction belongs to one Account)
 LedgerAccount.hasMany(JournalEntry, { foreignKey: "ledgerId", as: "transactions" });
 JournalEntry.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledgerAccount" });
+
+SIPL.hasMany(JournalEntry, { foreignKey: "referenceId", as: "journalEntries", constraints: false });
+JournalEntry.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false });
+
+Slab.hasMany(JournalEntry, {
+  foreignKey: "subReferenceId",
+  constraints: false,
+  scope: { subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB },
+  as: "journalEntries",
+});
+
+JournalEntry.belongsTo(Slab, {
+  foreignKey: "subReferenceId",
+  constraints: false,
+  as: "slab",
+});
+
+Product.hasMany(JournalEntry, {
+  foreignKey: "subReferenceId",
+  constraints: false,
+  scope: { subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT },
+  as: "journalEntries",
+});
+
+JournalEntry.belongsTo(Product, {
+  foreignKey: "subReferenceId",
+  constraints: false,
+  as: "product",
+});
 
 // User can create multiple customers (Customer can belongs to one User)
 User.hasMany(Customer, { foreignKey: "userId", as: "customers" });

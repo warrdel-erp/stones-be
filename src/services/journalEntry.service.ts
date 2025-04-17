@@ -201,7 +201,7 @@ export const createJournalEntryForReceiveInventory = async (
           // reference is the SIPL.
           referenceId: bill.referenceId,
           referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-        });
+        }, transaction);
       }
     }
   }
@@ -214,7 +214,7 @@ export const createJournalEntryForReceiveInventory = async (
 
   await Promise.all(
     calculations.dataAccordingToProduct.map(async (productCalc: any) => {
-      const slabs = await slabService.fetchAllSlabs({ siplId, productId: productCalc.product.id });
+      const slabs = await slabService.fetchAllSlabs({ siplId, productId: productCalc.product.id }, transaction);
 
       await Promise.all(
         slabs.map(async (slab: any) => {
@@ -286,9 +286,9 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
       amount: bill.amount,
       ledgerId: ledgerAccount.id,
       type: JOURNAL_ENTRY_TYPE.DR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
       referenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT,
     };
 
     // Second Journal entry.
@@ -331,7 +331,16 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
 
 // Get all Journal entries with filter
 export const getAllJournalEntries = async (filters: any, clientId: number) => {
-  let data: any = await journalEntryRepository.findAll(filters, clientId);
+  let data: any[] = await journalEntryRepository.findAll(filters, clientId);
+
+  data = data.map((e: any) => {
+    e.subHeader = COA_SUB_HEADERS.find((k) => k.id == e.ledgerAccount.subHeaderId);
+    e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
+    e.ledgerType = COA_TYPES.find((k) => k.id == e.header.parent_id);
+
+    return e;
+  });
+
   return data;
 };
 

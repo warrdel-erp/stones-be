@@ -13,7 +13,7 @@ export const LEDGER_ACCOUNT_REFERENCE_TYPES = {
 export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SIPL: "SIPL",
   PAYMENT: "PAYMENT",
-  SALES_ORDER: "SALES_ORDER",
+  LOADING_ORDER: "LOADING_ORDER",
 } as const;
 
 export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
@@ -131,5 +131,6 @@ export const NOTES_REFERENCE_TYPES = {
 
 export const VEHICLE_TYPE = {
   LIGHT: "light",
+  MEDIUM: "medium",
   HEAVY: "heavy",
 } as const;

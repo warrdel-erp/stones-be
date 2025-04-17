@@ -4,8 +4,8 @@ export const createTruck = async (data: any) => {
   return truckRepository.create(data);
 };
 
-export const getAllTrucks = async () => {
-  return truckRepository.findAll();
+export const getAllTrucks = async (page: number, limit: number, filters?: { [key: string]: any }) => {
+  return await truckRepository.findAll(page, limit, filters);
 };
 
 export const getTruckById = async (id: number) => {

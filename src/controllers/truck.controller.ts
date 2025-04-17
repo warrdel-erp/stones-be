@@ -11,9 +11,15 @@ export const createTruckController = catchAsync(async (req: AuthRequest, res: Re
   SuccessResponse(res, 201, "Truck created successfully", truck);
 });
 
-export const getAllTrucksController = catchAsync(async (_req: Request, res: Response) => {
-  const trucks = await truckService.getAllTrucks();
-  SuccessResponse(res, 200, "Trucks fetched successfully", trucks);
+export const getAllTrucksController = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10, ...filter } = req.query;
+  const { rows, count } = await truckService.getAllTrucks(Number(page), Number(limit), filter);
+
+  SuccessResponse(res, 200, "Trucks fetched successfully", rows, {
+    limit: Number(limit),
+    page: Number(page),
+    total: count
+  });
 });
 
 export const getTruckByIdController = catchAsync(async (req: Request, res: Response) => {

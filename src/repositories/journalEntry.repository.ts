@@ -1,6 +1,7 @@
-import { Transaction } from "sequelize";
+import { col, fn, Transaction } from "sequelize";
 import * as models from "../models";
 import { type JournalEntry } from "../models/journalEntry.model";
+import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
 
 // Create ledger account.
 export const create = async (data: JournalEntry, transaction?: Transaction) => {
@@ -16,7 +17,7 @@ export const createBulk = async (data: JournalEntry[], transaction?: Transaction
 export const findAll = async (filters: any, clientId: number) => {
   const journalEntries = await models.JournalEntry.findAll({
     where: filters || {},
-    order: [["createdAt", "DESC"]],
+    // order: [["createdAt", "ASC"]],
     include: [
       {
         model: models.LedgerAccount,
@@ -27,5 +28,73 @@ export const findAll = async (filters: any, clientId: number) => {
     ],
   });
 
-  return journalEntries;
+  const subReferenceDataPromises = journalEntries.map(async (entry: any) => {
+    entry = entry.get({ plain: true });
+    switch (entry.subReferenceType) {
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB:
+        entry.subReferenceData = await models.Slab.findOne({
+          where: { id: entry.subReferenceId },
+          include: [
+            {
+              model: models.SIPL,
+              as: "sipl",
+              attributes: ["id"],
+              include: [
+                {
+                  model: models.PurchaseOrder,
+                  as: "purchaseOrder",
+                  attributes: ["id"],
+                },
+              ],
+            },
+          ],
+          attributes: [
+            [
+              fn(
+                "CONCAT",
+                col("sipl.purchaseOrder.clientPoNumber"),
+                "-",
+                col("sipl.poSiplNumber"),
+                "-",
+                col("slabs.serialNumber")
+              ),
+              "combinedSerialNumber",
+            ],
+          ],
+        });
+        break;
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT:
+        entry.subReferenceData = await models.Product.findOne({
+          where: { id: entry.subReferenceId },
+        });
+        break;
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL:
+        entry.subReferenceData = await models.Bill.findOne({
+          where: { id: entry.subReferenceId },
+        });
+        break;
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM:
+        entry.subReferenceData = await models.BillItem.findOne({
+          where: { id: entry.subReferenceId },
+        });
+        break;
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER:
+        entry.subReferenceData = await models.LoadingOrder.findOne({
+          where: { id: entry.subReferenceId },
+        });
+        break;
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SIPL_PRODUCT:
+        entry.subReferenceData = await models.SIPLProduct.findOne({
+          where: { id: entry.subReferenceId },
+        });
+
+        break;
+      default:
+        entry.subReferenceData = null;
+    }
+
+    return entry;
+  });
+
+  return await Promise.all(subReferenceDataPromises);
 };

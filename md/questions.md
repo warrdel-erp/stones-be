@@ -66,3 +66,8 @@
 1. can one LO have multiple Trucks.
 2. where to show truck list.
 3. what to show in general account, account payables, account receivables.[ledger]
+4. what if siplProduct is added but Slabs are not added in it then unit landed cost is infinite then what should we do.
+5. where to show "Journal before received Inventory" in journal entries.
+6. what is So location in create SO.
+7. while remeasuring data should be prefilled for slab in LO and PL.
+8. can on SO have multiple Journal entries then journal entry belongs to LO.

@@ -1,4 +1,4 @@
-import { WhereOptions } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import * as slabRepository from "../repositories/slab.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import { AppError } from "../helper/appError";
@@ -20,8 +20,8 @@ export async function getSlabLogsBySlabIdService(slabId: number) {
 }
 
 // Get all slabs.
-export const fetchAllSlabs = async (filters?: WhereOptions) => {
-  return await slabRepository.getAllSlabs(filters);
+export const fetchAllSlabs = async (filters?: WhereOptions, transaction?: Transaction) => {
+  return await slabRepository.getAllSlabs(filters, transaction);
 };
 
 // Update slab
@@ -36,7 +36,7 @@ export const updateSlab = async (slabId: number, updateData: any) => {
 };
 
 // Bulk update slabs
-export const bulkUpdateSlabs = async (slabsData: Array<{ id: number; [key: string]: any }>) => {
+export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string]: any }>) => {
   if (!slabsData || slabsData.length === 0) return 0;
 
   const transaction = await sequelize.transaction(); // Explicitly start transaction

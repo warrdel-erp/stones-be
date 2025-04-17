@@ -22,8 +22,8 @@ export const setUnitLandedCost = async (
   transaction: Transaction
 ): Promise<number> => {
   const [updatedCount] = await Slab.update(
-    { status: SLAB_STATUS.IN_INVENTORY },
-    { where: { siplId, productId, landedUnitCost }, individualHooks: true, transaction } // Only update slabs that are initiated
+    { status: SLAB_STATUS.IN_INVENTORY, landedUnitCost },
+    { where: { siplId, productId }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
 
   return updatedCount;
@@ -161,7 +161,7 @@ export const findByIdWithLogs = async (slabId: number) => {
 /**
  * Fetch all slabs.
  */
-export const getAllSlabs = async (filters?: WhereOptions) => {
+export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transaction) => {
   return await Slab.findAll({
     where: filters,
     include: [
@@ -197,6 +197,7 @@ export const getAllSlabs = async (filters?: WhereOptions) => {
         ],
       ],
     },
+    transaction
   });
 };
 

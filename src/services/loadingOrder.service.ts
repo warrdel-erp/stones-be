@@ -220,7 +220,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
-
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
       {
@@ -247,12 +246,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         type: JOURNAL_ENTRY_TYPE.DR,
 
         // reference
-        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-        referenceId: loadingOrder.salesOrder.id,
-
-        // sub reference 
-        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER,
-        subReferenceId: loadingOrder.id,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       },
@@ -273,18 +268,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         type: JOURNAL_ENTRY_TYPE.CR,
 
         // reference
-        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-        referenceId: loadingOrder.salesOrder.id,
-
-        // sub reference 
-        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER,
-        subReferenceId: loadingOrder.id,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       },
       transaction
     );
-
 
     // Get ledger account for State tax.
     const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
@@ -306,8 +296,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         type: JOURNAL_ENTRY_TYPE.CR,
 
         // reference
-        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-        referenceId: loadingOrder.salesOrder.id,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       },
@@ -325,8 +315,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         type: JOURNAL_ENTRY_TYPE.CR,
 
         // reference
-        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-        referenceId: loadingOrder.salesOrder.id,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       },
@@ -366,8 +356,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
           subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
           subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
 
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-          referenceId: loadingOrder.salesOrder.id,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+          referenceId: loadingOrder.id,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
         },
         transaction
@@ -388,8 +378,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
           subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
           subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
 
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
-          referenceId: loadingOrder.salesOrder.id,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+          referenceId: loadingOrder.id,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
         },
         transaction

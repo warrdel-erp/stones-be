@@ -4,8 +4,18 @@ export const create = async (data: any) => {
   return models.Truck.create(data);
 };
 
-export const findAll = async () => {
-  return models.Truck.findAll();
+export const findAll = async (page: number, limit: number, filters?: { [key: string]: any }) => {
+  const offset = (page - 1) * limit;
+
+  // Build where clause dynamically if filters are provided
+  const whereClause = filters ? { ...filters } : {};
+
+  return await models.Truck.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
 };
 
 export const findById = async (id: number) => {

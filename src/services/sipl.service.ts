@@ -2,6 +2,8 @@ import { Transaction } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
+import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+
 import * as containerRepository from "../repositories/container.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as poRepository from "../repositories/purchaseOrder.repository";
@@ -12,11 +14,11 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
-import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
+
   try {
     // Update the status of all slabs in the SIPL to IN_INVENTORY.
     const updatedSlab = await slabRepository.updateSlabStatusBySipl(siplId, transaction);
@@ -27,7 +29,7 @@ export const receiveInventory = async (siplId: number, clientId: number): Promis
 
     // set landed unit cost for each slab.
     await Promise.all(
-      calculations.dataAccordingToProduct.filter(
+      calculations.dataAccordingToProduct.map(
         async (productCalc: any) =>
           await slabRepository.setUnitLandedCost(
             siplId,
@@ -248,6 +250,7 @@ export const getAllSIPLs = async (page: number, limit: number) => {
 export const getSiplCalculations = async (siplId: number, transaction?: Transaction) => {
   const siplData = (await siplRepository.findSIPLById(siplId, transaction))?.get({ plain: true });
 
+  console.log(siplData)
   // Calculate other bills total amount.
   const totalBillsCharges = siplData.bills.reduce(
     (total: number, bill: any) =>

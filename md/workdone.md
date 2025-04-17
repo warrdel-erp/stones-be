@@ -90,3 +90,14 @@
 ### overall
 
 1. ledger account creation.
+
+---
+
+### me
+
+1. error in receive inventory.
+2. truck -> validation technique change some structure change , all CRUD.
+3. PO journal entries.
+4. invoice page for LO.
+5. LO invoice journal entries.
+6. A lot of bugs (slab).

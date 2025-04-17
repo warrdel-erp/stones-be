@@ -50,7 +50,6 @@ export const getLoadingOrderById = async (id: number) => {
           {
             model: models.Customer,
             as: "customer",
-            attributes: ["id", "name"],
             include: [{ model: models.CustomerAddress, as: "addresses" }],
           },
           { model: models.CustomerAddress, as: "shippingAddress" },
