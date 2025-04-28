@@ -36,7 +36,7 @@ const Product = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
-    group: {
+    groupId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {

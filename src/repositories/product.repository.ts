@@ -27,14 +27,17 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
         as: "slabs",
         required: onlyWithSlabs,
       },
+      {
+        model: models.ProductGroup,
+        as: "group",
+        attributes: ["id", "name"],
+      },
     ],
     limit,
     offset,
     distinct: true,
     order: [["createdAt", "DESC"]],
   });
-
-  console.log(total);
 
   return { products, total, page, limit };
 };

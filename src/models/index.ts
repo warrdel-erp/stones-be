@@ -444,6 +444,9 @@ User.hasMany(JournalEntry, { foreignKey: "createdBy", as: "journalEntries" });
 ProductGroup.belongsTo(User, { foreignKey: "createdBy", as: "createdByUser" })
 User.hasMany(ProductGroup, { foreignKey: "createdBy", as: "productGroups" })
 
+Product.belongsTo(ProductGroup, { foreignKey: "groupId", as: "group" })
+ProductGroup.hasMany(Product, { foreignKey: "groupId", as: "products" })
+
 // Product finish belongs to one User (One user can have multiple product finishes)
 ProductFinish.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
 User.hasMany(ProductFinish, { foreignKey: "createdBy", as: "productFinishes" })
