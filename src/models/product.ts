@@ -7,6 +7,8 @@ import { PRODUCT_COLORS } from "../constants";
 import { AppError } from "../helper/appError";
 import { CustomUpdateOptions } from "../types/custom";
 import Bin from "./bin";
+import ProductGroup from "./productGroup.model";
+import ProductBaseColor from "./productBaseColor.model";
 
 const Product = sequelize.define(
   "products",
@@ -25,12 +27,24 @@ const Product = sequelize.define(
       allowNull: true,
     },
     baseColor: {
-      type: DataTypes.ENUM(...Object.values(PRODUCT_COLORS)),
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: ProductBaseColor,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     group: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: ProductGroup,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     origin: {
       type: DataTypes.INTEGER,

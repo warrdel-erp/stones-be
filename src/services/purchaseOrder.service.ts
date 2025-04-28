@@ -1,4 +1,5 @@
 import * as poRepository from "../repositories/purchaseOrder.repository";
+import * as soRepository from "../repositories/salesOrder.repository";
 import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
@@ -219,3 +220,15 @@ export async function updatePurchaseOrderStatusService(purchaseOrderId: number, 
 
   return updatedPurchaseOrders[0];
 }
+
+// Get count of open purchase orders by client
+export const getOpenPOCountByClient = async (clientId: number) => {
+  const count = await poRepository.countOpenPOByClientId(clientId);
+  return { count };
+};
+
+// Get count of PO in transit
+export const getPoInTransit = async (clientId: number) => {
+  const count = await poRepository.countPoInTransit(clientId);
+  return { count };
+};

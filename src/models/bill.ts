@@ -3,7 +3,6 @@ import Vendor from "./vendor";
 import { sequelize } from "../config/database";
 import User from "./user";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
-import { PAYMENT_TERMS } from "../constants";
 
 const Bill = sequelize.define(
   "bills",
@@ -12,6 +11,10 @@ const Bill = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
     },
     invoice: {
       type: DataTypes.STRING,

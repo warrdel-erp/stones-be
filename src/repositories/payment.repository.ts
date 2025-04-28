@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { PAYEE_TYPE } from "../constants/tableTypes";
 
 export const createPayment = async (paymentData: any, transaction: Transaction) => {
   return await models.Payment.create(paymentData, { transaction });
@@ -39,3 +40,19 @@ export const getTransactionNumber = async (clientId: number) => {
 
   return { clientTransactionNo: lastPayment ? lastPayment?.clientTransactionNo + 1 : 1 };
 };
+
+export const getTotalAmountByPayeeTypeAndClientId = async (payeeType: string, clientId: number) => {
+  if (!payeeType || !clientId) {
+    throw new Error("Both payeeType and clientId are required");
+  }
+
+  const totalAmount = await models.Payment.sum('amount', {
+    where: {
+      payeeType,
+      clientId,
+    },
+  });
+
+  return totalAmount || 0; // Return 0 if no payments found
+};
+

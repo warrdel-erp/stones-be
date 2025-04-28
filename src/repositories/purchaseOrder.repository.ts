@@ -1,5 +1,6 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
+import { PO_STATUS } from "../constants/tableTypes";
 
 /**
  * Create a new Purchase Order in the database.
@@ -211,3 +212,30 @@ export async function updatePurchaseOrderStatus(purchaseOrderId: number, status:
     { where: { id: purchaseOrderId }, transaction, returning: true }
   );
 }
+
+export const countOpenPOByClientId = async (clientId: number) => {
+  return await models.PurchaseOrder.count({
+    where: {
+      clientId,
+      status: PO_STATUS.OPEN,
+    },
+  });
+};
+
+export const countPoInTransit = async (clientId: number) => {
+  return await models.PurchaseOrder.count({
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipls",
+        where: {
+          inventoryReceived: false,
+        },
+        required: true,
+      },
+    ],
+    where: {
+      clientId,
+    },
+  });
+};

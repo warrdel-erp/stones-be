@@ -29,7 +29,7 @@ const SalesOrder = sequelize.define(
     status: {
       type: DataTypes.ENUM(...Object.values(SALES_ORDER_STATUS)),
       allowNull: false,
-      defaultValue: SALES_ORDER_STATUS.PENDING,
+      defaultValue: SALES_ORDER_STATUS.OPEN,
     },
     deliveryType: {
       type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),

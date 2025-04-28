@@ -101,3 +101,21 @@
 4. invoice page for LO.
 5. LO invoice journal entries.
 6. A lot of bugs (slab).
+
+---
+
+1. group.
+2. base-color.
+3. finish
+
+---
+
+1. Chart of account 4th level as account.
+2. Code and numbers to COA
+
+---
+
+1. Pending payment calculation on dashboard for customer and vendor.
+2. PO number correction.
+3. customer list data.
+4. product detail page Inventory, allocated, InTransit tabs.

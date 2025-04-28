@@ -32,6 +32,16 @@ export const getLedgerAccounts = async (page: number, limit: number, filters: an
   });
 };
 
+// Get all ledger accounts.
+export const getLedgerAccountsWithoutPagination = async (filters: any) => {
+  const whereCondition: any = filters;
+
+  return await models.LedgerAccount.findAll({
+    where: whereCondition,
+    order: [["id", "DESC"]],
+  });
+};
+
 export const getLedgerAccountsForFreightItems = async (clientId: number) => {
   return await models.LedgerAccount.findAll({
     where: {

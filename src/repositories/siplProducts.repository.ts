@@ -1,4 +1,4 @@
-import { FindOptions, Transaction, WhereOptions } from "sequelize";
+import { FindOptions, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 
@@ -92,4 +92,55 @@ export const getTotalQuantityByProductAndPO = async (productId: number, purchase
   } as FindOptions);
 
   return totalQuantity || 0; // Return 0 if no records found
+};
+
+export const getTotalSIPLProductAmountBetweenDates = async (
+  fromDate: string,
+  toDate: string,
+  clientId: number
+) => {
+  const from = new Date(fromDate);
+  const to = new Date(toDate);
+  to.setHours(23, 59, 59, 999);
+
+  const result = await models.SIPLProduct.findOne({
+    where: {
+      createdAt: {
+        [Op.between]: [from, to],
+      },
+    },
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipl",
+        where: {
+          clientId,
+        },
+        required: true,
+      },
+    ],
+    attributes: [[fn("SUM", literal("unitPrice * quantity")), "totalAmount"]],
+    group: ["sipl.id"],
+  });
+
+  return result?.dataValues?.totalAmount ?? 0;
+};
+
+export const getTotalSIPLProductValueByClient = async (clientId: number) => {
+  const result = await models.SIPLProduct.findOne({
+    include: [
+      {
+        model: models.SIPL,
+        as: "sipl",
+        where: {
+          clientId,
+        },
+        required: true,
+      },
+    ],
+    attributes: [[fn("SUM", literal("quantity * unitPrice")), "totalValue"]],
+    group: ["sipl_products.id"],
+  });
+
+  return result?.dataValues?.totalValue ?? 0;
 };

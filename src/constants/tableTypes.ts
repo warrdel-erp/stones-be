@@ -110,7 +110,7 @@ export const SALE_ORDER_PRODUCT_STAGES = {
 } as const;
 
 export const SALES_ORDER_STATUS = {
-  PENDING: "pending",
+  OPEN: "open",
   COMPLETED: "completed",
   CANCELLED: "cancelled",
   CLOSED: "closed",
@@ -120,7 +120,8 @@ export const SALES_ORDER_STATUS = {
 export const NOTES_TYPE = {
   INTERNAL: "internal",
   PRINTABLE: "printable",
-};
+  DELIVERY: "delivery",
+} as const;
 
 // sales_order, purchase_order
 export const NOTES_REFERENCE_TYPES = {
@@ -133,4 +134,10 @@ export const VEHICLE_TYPE = {
   LIGHT: "light",
   MEDIUM: "medium",
   HEAVY: "heavy",
+} as const;
+
+export const CUSTOMER_STATUS = {
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  BLOCKED: "blocked",
 } as const;

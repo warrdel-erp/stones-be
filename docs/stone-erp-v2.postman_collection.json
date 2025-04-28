@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 1\n}",
+							"raw": "{\n    \"locationId\": 3\n} ",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1222,7 +1222,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"container\": \"SIPL-001\",\n    \"clientInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"supplierInvoiceDate\": \"2025-04-01T00:00:00.000Z\",\n    \"description\": \"Sample SIPL\",\n    \"supplierNotes\": \"Important notes\",\n    \"supplierInvoiceNumber\": 23423,\n    \"purchaseOrderId\": 1,\n    \"dueDate\": \"2025-03-01\",\n    \"shipDate\": \"2025-03-01\",\n    \"shipmentLocationId\":1,\n    \"purchaseLocationId\":1,\n    \"supplierSo\":\"1234\",\n    \"products\": [\n        {\n            \"quantity\": 70,\n            \"unitPrice\": 100.5,\n            \"description\": \"Product 1 description\",\n            \"supplierNote\": \"Supplier note for product 1\",\n            \"requestedPurchaseProductId\": 5\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"Ship ABC\",\n        \"airBill\": \"AB12345\",\n        \"plannedExFactoryDate\": \"2025-03-01T00:00:00.000Z\",\n        \"exFactoryDate\": \"2025-03-05T00:00:00.000Z\",\n        \"departurePort\": \"Shanghai\",\n        \"etdPort\": \"2025-03-06T00:00:00.000Z\",\n        \"arrivalPort\": \"Los Angeles\",\n        \"etaPort\": \"2025-03-20T00:00:00.000Z\",\n        \"dischargePort\": \"California Port\",\n        \"wiringInstruction\": \"Bank details for payment\",\n        \"freightForwarderId\": 1\n    }\n}",
+							"raw": "{\n    \"purchaseOrderId\": \"1\",\n    \"supplierId\": 1,\n    \"purchaseLocationId\": 1,\n    \"shipmentLocationId\": 1,\n    \"internalNote\": \"\",\n    \"printableNote\": \"\",\n    \"container\": \"76\",\n    \"deliveryType\": \"Pickup\",\n    \"shipmentTerms\": \"3\",\n    \"clientInvoiceNumber\": 1,\n    \"clientInvoiceDate\": \"2025-04-10\",\n    \"supplierInvoiceNumber\": \"543\",\n    \"supplierInvoiceDate\": \"2025-04-10\",\n    \"shipDate\": \"2025-04-10\",\n    \"dueDate\": \"2025-04-10\",\n    \"Paymentholdreason\": \"\",\n    \"products\": [\n        {\n            \"requestedPurchaseProductId\": 1,\n            \"description\": \"this is description\",\n            \"productId\": 1,\n            \"purchaseOrderId\": 1,\n            \"quantity\": \"200\",\n            \"supplierNote\": \"\",\n            \"unitPrice\": 12\n        }\n    ],\n    \"freightDetail\": {\n        \"vessel\": \"\",\n        \"airBill\": \"\",\n        \"plannedExFactoryDate\": null,\n        \"exFactoryDate\": null,\n        \"departurePort\": \"\",\n        \"etdPort\": \"\",\n        \"arrivalPort\": \"\",\n        \"etaPort\": \"\",\n        \"dischargePort\": \"\",\n        \"wiringInstruction\": \"\",\n        \"freightForwarderId\": 2\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3367,7 +3367,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/notes",
+							"raw": "{{baseurl}}/api/notes?page=1",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -3380,6 +3380,10 @@
 									"key": "type",
 									"value": "printable",
 									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
 								}
 							]
 						}
@@ -3620,7 +3624,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/journalEntry?referenceType=SIPL&referenceId=1",
+							"raw": "{{baseurl}}/api/journalEntry?referenceType=SIPL&referenceId=2",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -3635,8 +3639,45 @@
 								},
 								{
 									"key": "referenceId",
-									"value": "1"
+									"value": "2"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 12345.67,\n  \"type\": \"cr\",\n  \"ledgerId\": 12,\n  \"referenceId\": 1,\n  \"processType\": \"custom\",\n  \"referenceType\": \"SIPL\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journalEntry",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journalEntry"
 							]
 						}
 					},
@@ -3664,7 +3705,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"name\",\n    \"vehilceType\": \"light\",\n    \"registrationNumber\": \"234567890\",\n    \"registrationDate\": \"2025-04-08\",\n    \"capacity\": \"50\"\n}",
+							"raw": "{\n    \"name\": \"name\",\n    \"vehicleType\": \"medium\",\n    \"registrationNumber\": \"234567890\",\n    \"registrationDate\": \"2025-04-08\",\n    \"capacity\": \"50\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3803,13 +3844,23 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/truck",
+							"raw": "{{baseurl}}/api/truck?page=1&limit=2",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"truck"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -3854,6 +3905,531 @@
 									"key": "truckId",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dashboard",
+			"item": [
+				{
+					"name": "get total sales amount",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/totalSalesAmount?fromDate=2025-03-21&toDate=2025-04-21",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"totalSalesAmount"
+							],
+							"query": [
+								{
+									"key": "fromDate",
+									"value": "2025-03-21"
+								},
+								{
+									"key": "toDate",
+									"value": "2025-04-21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get total purchase amount",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/totalPurchaseAmount?fromDate=2024-04-01&toDate=2025-04-22",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"totalPurchaseAmount"
+							],
+							"query": [
+								{
+									"key": "fromDate",
+									"value": "2024-04-01"
+								},
+								{
+									"key": "toDate",
+									"value": "2025-04-22"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get total open PO",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/totalOpenPo",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"totalOpenPo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get total PO in transit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/totalPoInTransit",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"totalPoInTransit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get total open SO",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/totalOpenSo",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"totalOpenSo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "product category",
+			"item": [
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/productCategory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/productCategory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productCategory/3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productCategory",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productCategory/3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productCategory",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productCategory/3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productCategory",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "product sub category",
+			"item": [
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/productSubCategory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productSubCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"categoryId\": 7,\n    \"name\": \"jitin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productSubCategory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productSubCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productSubCategory/8",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productSubCategory",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productSubCategory/8",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productSubCategory",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cat2x\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/productSubCategory/8",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"productSubCategory",
+								"8"
 							]
 						}
 					},

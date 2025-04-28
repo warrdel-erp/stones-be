@@ -160,3 +160,9 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
 
   return newProducts;
 }
+
+// Get count of open purchase orders by client
+export const getOpenSOCountByClient = async (clientId: number) => {
+  const count = await salesOrderRepository.countOpenSOByClientId(clientId);
+  return { count };
+};

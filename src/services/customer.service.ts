@@ -10,7 +10,7 @@ import * as customerAddressService from "../services/customerAddress.service";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 
-import { SALES_TAX } from "../constants";
+import { SALES_TAX, SCOP } from "../constants";
 
 // Service function to create a customer.
 export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
@@ -63,6 +63,7 @@ export const fetchAllCustomers = async (page: number, limit: number, search?: st
   customers = customers.map((customer: any) => {
     customer.get({ plain: true });
     customer.salesTax = SALES_TAX.find((e) => e.id == customer.salesTax);
+    customer.scope = SCOP.find((e) => e.id == customer.scope)?.value;
     return customer;
   });
 

@@ -54,6 +54,10 @@ const LedgerAccount = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Null for general accounts, non-null for customer/vendor-specific accounts
     },
+    code: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // Null for general accounts, non-null for customer/vendor-specific accounts
+    },
     referenceType: {
       type: DataTypes.ENUM(...Object.values(LEDGER_ACCOUNT_REFERENCE_TYPES)),
       allowNull: true, // Null for general accounts, required if referenceId exists
@@ -80,5 +84,28 @@ const LedgerAccount = sequelize.define(
     ],
   }
 );
+
+LedgerAccount.beforeCreate(async (ledgerAccount: any) => {
+  const { subHeaderId } = ledgerAccount;
+
+  // Find the last ledger account under the given subHeaderId
+  const lastAccount = (await LedgerAccount.findOne({
+    where: { subHeaderId },
+    order: [["code", "DESC"]],
+  }))?.get({ plain: true });
+
+  if (lastAccount) {
+    // If there is a last account, increment its code by 1
+    ledgerAccount.code = lastAccount.code + 1;
+  } else {
+    // If this is the first account under the subHeader, use the subHeader's code
+    const subHeader = COA_SUB_HEADERS.find((header) => header.id === subHeaderId);
+    if (subHeader) {
+      ledgerAccount.code = subHeader.code + 1;
+    } else {
+      throw new Error(`Invalid subHeaderId: ${subHeaderId}`);
+    }
+  }
+});
 
 export default LedgerAccount;

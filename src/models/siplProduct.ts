@@ -49,7 +49,7 @@ const SIPLProduct = sequelize.define(
   },
   {
     tableName: "sipl_products",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

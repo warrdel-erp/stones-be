@@ -23,6 +23,14 @@ export const getLedgerAccounts = catchAsync(async (req, res) => {
   });
 });
 
+// Get all ledger accounts.
+export const getLedgerAccountsWithoutPagination = catchAsync(async (req, res) => {
+  const { ...filters } = req.query;
+
+  const result = await ledgerAccountService.getLedgerAccountsWithoutPagination(filters);
+  return SuccessResponse(res, 200, "Ledger Account list fetched successfully without pagination", result);
+});
+
 // Get ledger account by ID.
 export const getLedgerAccountById = catchAsync(async (req, res) => {
   const { id } = req.params;

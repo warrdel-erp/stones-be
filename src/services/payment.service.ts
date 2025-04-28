@@ -99,3 +99,14 @@ export const checkIfBillsBelongToVendor = async (vendorId: number, bills: any[])
     throw new AppError("Some SIPLs do not belong to the vendor", 400);
   }
 };
+
+
+export const getTotalAmountByPayeeTypeAndClientId = async (payeeType: string, clientId: number) => {
+  if (!payeeType || !clientId) {
+    throw new Error("Both payeeType and clientId are required");
+  }
+
+  const totalAmount = await paymentRepository.getTotalAmountByPayeeTypeAndClientId(payeeType, clientId);
+
+  return totalAmount || 0; // Return 0 if no payments found
+}

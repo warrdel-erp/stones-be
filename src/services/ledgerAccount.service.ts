@@ -21,6 +21,22 @@ export const getLedgerAccounts = async (page = 1, limit = 10, filters: any) => {
   return data;
 };
 
+export const getLedgerAccountsWithoutPagination = async (filters: any) => {
+  let data: any = await ledgerAccountRepository.getLedgerAccountsWithoutPagination(filters);
+
+  data = data.map((e: any) => {
+    e = e.get({ plain: true });
+
+    e.subHeader = COA_SUB_HEADERS.find((k) => k.id == e.subHeaderId);
+    e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
+    e.type = COA_TYPES.find((k) => k.id == e.header.parent_id);
+
+    return e;
+  });
+
+  return data;
+};
+
 export const getLedgerAccountById = async (id: number) => {
   return await ledgerAccountRepository.getLedgerAccountById(id);
 };

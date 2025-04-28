@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { sequelize } from "../config/database";
 import * as billRepository from "../repositories/bill.repository";
 import * as billItemRepository from "../repositories/billItems.repository";
@@ -14,8 +15,15 @@ export const createBill = async (billData: any) => {
 
   const billItems: any[] = [];
 
+  const totalAmount = _.sumBy(billData.items, (item: any) => {
+    if (!item.amount) {
+      throw new Error("Bill item amount is required.");
+    }
+    return Number(item.amount);
+  });
+
   try {
-    const bill: any = await billRepository.createBill(billData, transaction);
+    const bill: any = await billRepository.createBill({ billData, amount: totalAmount }, transaction);
 
     // Get SIPL calculations.
     const siplCalculations = await siplService.getSiplCalculations(billData.referenceId, transaction);
@@ -95,4 +103,8 @@ export async function billForVendor(vendorId: number) {
     };
   }) as any;
   return bills;
+}
+
+export const getTotalBillValueByClientId = async (clientId: number) => {
+  return await billRepository.getTotalBillValueByClient(clientId)
 }

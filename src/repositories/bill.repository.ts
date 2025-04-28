@@ -1,4 +1,4 @@
-import { Op, Transaction, where, WhereOptions } from "sequelize";
+import { col, fn, Op, Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
@@ -90,4 +90,23 @@ export const areBillsBelongingToVendor = async (vendorId: number, billIds: numbe
   });
 
   return count === billIds.length; // If count matches the number of IDs, all belong to vendor
+};
+
+export const getTotalBillValueByClient = async (clientId: number) => {
+  const result = await models.Bill.findOne({
+    include: [
+      {
+        model: models.User,
+        as: "creator",
+        where: {
+          clientId,
+        },
+        required: true,
+      },
+    ],
+    attributes: [[fn("SUM", col("amount")), "totalValue"]],
+    group: ["bills.id"]
+  });
+
+  return result?.dataValues?.totalValue ?? 0;
 };

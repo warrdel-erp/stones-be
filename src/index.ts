@@ -34,6 +34,12 @@ import masterRoutes from "./routes/master.routes";
 import salesOrderProductRoutes from "./routes/salesOrderProduct.routes";
 import journalEntryRoutes from "./routes/journalEntry.routes";
 import truckRoutes from "./routes/truck.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
+import productCategoryRoutes from "./routes/productCategory.routes";
+import productSubCategoryRoutes from "./routes/productSubCategory.routes";
+import productGroupRoutes from "./routes/productGroup.routes";
+import productBaseColorRoutes from "./routes/productBaseColor.routes";
+import productFinishRoutes from "./routes/productFinish.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -69,6 +75,12 @@ app.use("/api/master", masterRoutes);
 app.use("/api/salesOrderProduct", salesOrderProductRoutes);
 app.use("/api/journalEntry", journalEntryRoutes);
 app.use("/api/truck", truckRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/productCategory", productCategoryRoutes);
+app.use("/api/productSubCategory", productSubCategoryRoutes);
+app.use("/api/productGroup", productGroupRoutes);
+app.use("/api/productBaseColor", productBaseColorRoutes);
+app.use("/api/productFinish", productFinishRoutes);
 
 // handler error globally.
 app.use(errorHandler);

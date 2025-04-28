@@ -17,3 +17,15 @@ export const deleteRequestedPurchaseProduct = async (id: number) => {
 export const findSiplProductByProductId = async (siplProductId: number, productId: number, siplId: number) => {
   return await siplProductsRepository.findByProductIdAndSiplId(siplProductId, productId, siplId);
 };
+
+export const fetchTotalSIPLProductAmount = async (
+  fromDate: string,
+  toDate: string,
+  clientId: number,
+) => {
+  return await siplProductsRepository.getTotalSIPLProductAmountBetweenDates(fromDate, toDate, clientId);
+};
+
+export const getTotalSIPLProductValueByClient = async (clientId: number) => {
+  return await siplProductsRepository.getTotalSIPLProductValueByClient(clientId);
+}

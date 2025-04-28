@@ -34,6 +34,9 @@ import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
 import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
+import ProductGroup from "./productGroup.model";
+import ProductBaseColor from "./productBaseColor.model";
+import ProductFinish from "./productFinish.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId" });
@@ -231,7 +234,7 @@ ProductSubCategory.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "c
 ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "subCategories" });
 
 // User can have multiple bills
-Bill.belongsTo(User, { foreignKey: "createdBy" });
+Bill.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
 User.hasMany(Bill, { foreignKey: "createdBy", as: "bills" });
 
 // User can have multiple vendors (One vendor belongs to one User)
@@ -438,6 +441,16 @@ Client.hasMany(Truck, { foreignKey: "Trucks", as: "trucks" });
 JournalEntry.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 User.hasMany(JournalEntry, { foreignKey: "createdBy", as: "journalEntries" });
 
+ProductGroup.belongsTo(User, { foreignKey: "createdBy", as: "createdByUser" })
+User.hasMany(ProductGroup, { foreignKey: "createdBy", as: "productGroups" })
+
+// Product finish belongs to one User (One user can have multiple product finishes)
+ProductFinish.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
+User.hasMany(ProductFinish, { foreignKey: "createdBy", as: "productFinishes" })
+
+ProductBaseColor.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
+User.hasMany(ProductBaseColor, { foreignKey: "createdBy", as: "productBaseColors" })
+
 export {
   Client,
   User,
@@ -474,4 +487,7 @@ export {
   PaymentBill,
   SalesOrderInvoice,
   Truck,
+  ProductGroup,
+  ProductBaseColor,
+  ProductFinish
 };

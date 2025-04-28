@@ -10,6 +10,9 @@ router.post("/", authenticateUser, ledgerAccountController.createLedgerAccount);
 // Get all ledger accounts.
 router.get("/", authenticateUser, ledgerAccountController.getLedgerAccounts);
 
+// Get all ledger accounts.
+router.get("/withoutPagination", authenticateUser, ledgerAccountController.getLedgerAccountsWithoutPagination);
+
 // Get ledger account by ID.
 router.get("/forFreightItems", authenticateUser, ledgerAccountController.getLedgerAccountsForFreightItems);
 

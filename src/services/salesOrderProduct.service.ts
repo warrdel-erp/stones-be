@@ -94,7 +94,7 @@ export const updatePickedStatus = async (soProductId: number, picked: boolean) =
   }
 
   // If sales order is not in PENDING status, it can't be picked.
-  if (soProduct.salesOrder.status !== SALES_ORDER_STATUS.PENDING) {
+  if (soProduct.salesOrder.status !== SALES_ORDER_STATUS.OPEN) {
     throw new AppError(`Sales Order is in ${soProduct.saleOrder.status}. So product can't be picked.`, 400);
   }
 

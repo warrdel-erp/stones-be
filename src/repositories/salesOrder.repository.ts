@@ -1,6 +1,7 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
+import { SALES_ORDER_STATUS } from "../constants/tableTypes";
 
 // Create new Sales Order
 export const createSalesOrder = async (data: any, transaction?: Transaction) => {
@@ -107,4 +108,14 @@ export const getSoNumber = async (clientId: number) => {
   });
 
   return { clientSoNumber: lastSO ? lastSO?.clientSoNumber + 1 : 1 };
+};
+
+// Get all open SO by clientId
+export const countOpenSOByClientId = async (clientId: number) => {
+  return await models.SalesOrder.count({
+    where: {
+      clientId,
+      status: SALES_ORDER_STATUS.OPEN,
+    },
+  });
 };

@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
 import { SCOP } from "../constants";
+import { CUSTOMER_STATUS } from "../constants/tableTypes";
 
 const Customer = sequelize.define(
   "Customer",
@@ -49,6 +50,10 @@ const Customer = sequelize.define(
       allowNull: true,
     },
     priceLevel: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    pSalesPerson: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -109,8 +114,9 @@ const Customer = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.ENUM(...Object.values(CUSTOMER_STATUS)),
+      allowNull: false,
+      defaultValue: CUSTOMER_STATUS.ACTIVE,
     },
     scope: {
       type: DataTypes.ENUM(...SCOP.map((scope) => String(scope.id))),

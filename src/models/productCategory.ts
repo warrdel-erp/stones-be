@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import Client from "./client";
 
 const ProductCategory = sequelize.define(
   "ProductCategory",
@@ -21,6 +22,16 @@ const ProductCategory = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    }
   },
   {
     tableName: "product_category",
