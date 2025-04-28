@@ -1,14 +1,14 @@
 import { DataTypes, Model } from "sequelize";
-import User from "./user";
 import { sequelize } from "../config/database";
-import ProductCategory from "./productCategory";
-import ProductSubCategory from "./productSubCategory";
-import { PRODUCT_COLORS } from "../constants";
 import { AppError } from "../helper/appError";
 import { CustomUpdateOptions } from "../types/custom";
-import Bin from "./bin";
-import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
+import ProductCategory from "./productCategory";
+import ProductGroup from "./productGroup.model";
+import ProductSubCategory from "./productSubCategory";
+import User from "./user";
+import Bin from "./bin";
+import ProductFinish from "./productFinish.model";
 
 const Product = sequelize.define(
   "products",
@@ -26,7 +26,7 @@ const Product = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    baseColor: {
+    baseColorId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -58,9 +58,15 @@ const Product = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
-    finish: {
-      type: DataTypes.STRING,
+    finishId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: ProductFinish,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     kind: {
       type: DataTypes.STRING,

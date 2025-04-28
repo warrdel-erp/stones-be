@@ -360,8 +360,8 @@ InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", a
 Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 
-Vendor.belongsTo(Location, { foreignKey: "parentLocation", as: "location" });
-Location.hasMany(Vendor, { foreignKey: "parentLocation", as: "vendors" });
+Vendor.belongsTo(Location, { foreignKey: "parentLocationId", as: "parentLocation" });
+Location.hasMany(Vendor, { foreignKey: "parentLocationId", as: "vendors" });
 
 // Payment can belongs to many "types" of invoice. but in number it is one. (One invoice can have multiple payments.)
 Payment.belongsTo(SIPL, { foreignKey: "invoiceId", as: "sipl" });
@@ -446,6 +446,12 @@ User.hasMany(ProductGroup, { foreignKey: "createdBy", as: "productGroups" })
 
 Product.belongsTo(ProductGroup, { foreignKey: "groupId", as: "group" })
 ProductGroup.hasMany(Product, { foreignKey: "groupId", as: "products" })
+
+Product.belongsTo(ProductFinish, { foreignKey: "finishId", as: "finish" })
+ProductFinish.hasMany(Product, { foreignKey: "finishId", as: "products" })
+
+Product.belongsTo(ProductBaseColor, { foreignKey: "baseColorId", as: "baseColor" })
+ProductBaseColor.hasMany(Product, { foreignKey: "baseColorId", as: "products" })
 
 // Product finish belongs to one User (One user can have multiple product finishes)
 ProductFinish.belongsTo(User, { foreignKey: "createdBy", as: "creator" })

@@ -22,9 +22,9 @@ const Vendor = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    parentLocation: {
+    parentLocationId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: Location,
         key: "id",

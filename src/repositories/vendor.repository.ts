@@ -27,6 +27,12 @@ export const getAllVendors = async (page: number, limit: number, filter?: WhereO
 
   const { rows: vendors, count: total } = await models.Vendor.findAndCountAll({
     where: filter,
+    include: [
+      {
+        model: models.Location,
+        as: "parentLocation"
+      }
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]], // Sort by latest vendors
