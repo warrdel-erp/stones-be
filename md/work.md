@@ -92,8 +92,8 @@
 
 65. fix clientPOnumber
 
-66. Sipl serial number
-67. Slab serial number
+66. Sipl serial number structure change.
+67. Slab serial number structure change.
 68. Unit landed cost in sipl page items.
 
 69. Total in by qty in fright bill tab in SIPL page.

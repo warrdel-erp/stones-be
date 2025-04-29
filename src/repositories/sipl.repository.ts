@@ -192,7 +192,7 @@ export const findSIPLBySlabId = async (slabId: number) => {
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({
     attributes: {
-      include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "combinedSiplNumber"]],
+      include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("SIPL.poSiplNumber")), "combinedSiplNumber"]],
     },
     include: [
       {
@@ -200,6 +200,21 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
         where: { productId }, // Filter only slabs belonging to the given product
         as: "slabs",
         required: true,
+        attributes: {
+          include: [
+            [
+              fn(
+                "CONCAT",
+                col("slabs->sipl.purchaseOrder.clientPoNumber"),
+                "-",
+                col("slabs->sipl.poSiplNumber"),
+                "-",
+                col("slabs.serialNumber")
+              ),
+              "combinedSerialNumber",
+            ],
+          ],
+        },
         include: [
           {
             model: models.Product,
@@ -216,6 +231,25 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
                 as: "warehouse",
                 where: { locationId },
                 required: true,
+                include: [
+                  {
+                    model: models.Location,
+                    as: "location",
+                    attributes: ["location"],
+                  },
+                ]
+              },
+            ],
+          },
+          {
+            model: models.SIPL,
+            as: "sipl",
+            // attributes: ["id", "poSiplNumber"],
+            include: [
+              {
+                model: models.PurchaseOrder,
+                as: "purchaseOrder",
+                attributes: ["id", "clientPoNumber"],
               },
             ],
           },
