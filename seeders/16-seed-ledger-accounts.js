@@ -116,6 +116,17 @@ module.exports = {
           code: 211001,
           openingDate: new Date(),
         },
+        {
+          id: 11,
+          openingBalance: 0,
+          openingDate: new Date(),
+          subHeaderId: 3,
+          clientId: 1,
+          type: "dr",
+          referenceType: "CUSTOMER",
+          referenceId: 1,
+          code: 121001,
+        },
       ],
       {}
     );

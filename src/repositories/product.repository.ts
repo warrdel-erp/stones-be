@@ -26,35 +26,6 @@ export const getAllProducts = async (page: number, limit: number, search?: strin
         model: models.Slab,
         as: "slabs",
         required: onlyWithSlabs,
-        attributes: {
-          include: [
-            [
-              fn(
-                "CONCAT",
-                col("slabs->sipl.purchaseOrder.clientPoNumber"),
-                "-",
-                col("slabs->sipl.poSiplNumber"),
-                "-",
-                col("slabs.serialNumber")
-              ),
-              "combinedSerialNumber",
-            ],
-          ],
-        },
-        include: [
-          {
-            model: models.SIPL,
-            as: "sipl",
-            attributes: ["id", "poSiplNumber"],
-            include: [
-              {
-                model: models.PurchaseOrder,
-                as: "purchaseOrder",
-                attributes: ["id", "clientPoNumber"],
-              },
-            ],
-          },
-        ],
       },
       {
         model: models.ProductGroup,

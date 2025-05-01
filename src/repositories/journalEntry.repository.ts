@@ -34,33 +34,6 @@ export const findAll = async (filters: any, clientId: number) => {
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB:
         entry.subReferenceData = await models.Slab.findOne({
           where: { id: entry.subReferenceId },
-          include: [
-            {
-              model: models.SIPL,
-              as: "sipl",
-              attributes: ["id"],
-              include: [
-                {
-                  model: models.PurchaseOrder,
-                  as: "purchaseOrder",
-                  attributes: ["id"],
-                },
-              ],
-            },
-          ],
-          attributes: [
-            [
-              fn(
-                "CONCAT",
-                col("sipl.purchaseOrder.clientPoNumber"),
-                "-",
-                col("sipl.poSiplNumber"),
-                "-",
-                col("slabs.serialNumber")
-              ),
-              "combinedSerialNumber",
-            ],
-          ],
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT:
