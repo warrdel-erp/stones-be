@@ -22,6 +22,10 @@ const Slab = sequelize.define(
     slabNumber: {
       type: DataTypes.INTEGER,
     },
+    combinedSlabNumber: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     entryUnit: {
       type: DataTypes.ENUM(...Object.values(SLAB_ENTRY_UNIT)),
       allowNull: true,

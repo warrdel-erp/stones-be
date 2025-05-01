@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
 import PurchaseOrder from "./purchaseOrder";
@@ -31,6 +31,10 @@ const SIPL = sequelize.define(
     },
     poSiplNumber: {
       type: DataTypes.INTEGER,
+      allowNull: false, // Auto-Incremented and not null is handled in hook
+    },
+    combinedSiplNumber: {
+      type: DataTypes.STRING,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
     supplierInvoiceNumber: {
@@ -140,13 +144,9 @@ SIPL.beforeCreate(async (sipl: any) => {
     order: [["clientInvoiceNumber", "DESC"]],
   });
 
-  const lastSIPLAccordingToPO: any = await SIPL.findOne({
-    where: { purchaseOrderId: sipl.purchaseOrderId },
-    order: [["poSiplNumber", "DESC"]],
-  });
-
   sipl.clientInvoiceNumber = lastSIPLAccordingToClient ? lastSIPLAccordingToClient.clientInvoiceNumber + 1 : 1;
-  sipl.poSiplNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poSiplNumber + 1 : 1;
+
 });
 
 export default SIPL;
+

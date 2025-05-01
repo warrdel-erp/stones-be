@@ -16,8 +16,6 @@ export const createProduct = catchAsync(async (req: AuthRequest, res: Response) 
 export const getProducts = catchAsync(async (req: Request, res: Response) => {
   const { page = 1, limit = 10, search, onlyWithSlabs } = req.query;
 
-  console.log(!!Number(onlyWithSlabs), onlyWithSlabs);
-
   const result = await productService.fetchAllProducts(
     Number(page),
     Number(limit),

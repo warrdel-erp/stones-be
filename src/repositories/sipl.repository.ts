@@ -23,6 +23,7 @@ export const getInvoiceNumber = async () => {
 
 // Get SIPL by ID with less data
 export const findSIPLByIdSimple = async (id: number) => {
+
   return await models.SIPL.findByPk(id);
 };
 
@@ -309,3 +310,25 @@ export const areSIPLsBelongingToVendor = async (supplierId: number, siplIds: num
 
   return count === siplIds.length; // If count matches the number of IDs, all belong to vendor
 };
+
+
+export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction) => {
+  if (!sipl.purchaseOrderId) {
+    throw new Error("purchaseOrderId is required to generate poSiplNumber.");
+  }
+
+  const lastSIPLAccordingToPO: any = await models.SIPL.findOne({
+    where: { purchaseOrderId: sipl.purchaseOrderId },
+    order: [["poSiplNumber", "DESC"]],
+    transaction
+  });
+
+  const purchaseOrder: any = await models.PurchaseOrder.findByPk(sipl.purchaseOrderId, { transaction })
+
+  const poSiplNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poSiplNumber + 1 : 1;
+
+  return {
+    poSiplNumber,
+    combinedSiplNumber: `${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
+  }
+}

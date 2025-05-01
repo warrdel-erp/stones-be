@@ -56,8 +56,8 @@ export const processPayment = async (paymentData: any, billsData: any[]) => {
 };
 
 // Get all payments
-export const getPayments = async (filters: any) => {
-  return await paymentRepository.getAllPayments(filters);
+export const getPayments = async (filters: any, page: number, limit: number) => {
+  return await paymentRepository.getAllPayments(filters, page, limit);
 };
 
 // Get payment by id

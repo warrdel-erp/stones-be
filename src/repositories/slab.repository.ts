@@ -270,7 +270,6 @@ export const updateSlabById = async (slabId: number, updateData: any, transactio
   });
 };
 
-
 export const getOnlyBarcode = async (siplId: number) => {
   return await models.Slab.findAll({
     where: {
@@ -278,4 +277,30 @@ export const getOnlyBarcode = async (siplId: number) => {
     },
     attributes: ["id", "barcode"],
   });
-}
+};
+
+export const getNewCombinedSlabNumber = async (siplId: number) => {
+  const sipl: any = await models.SIPL.findByPk(siplId, { attributes: ["combinedSiplNumber"] });
+
+  if (!sipl) {
+    throw new Error("SIPL not found for the given ID.");
+  }
+
+  const existingSlab: any = await Slab.findOne({
+    where: { siplId },
+    order: [["combinedSlabNumber", "DESC"]],
+    attributes: ["combinedSlabNumber"],
+  });
+
+  const lastCombinedSlabNumber = existingSlab ? existingSlab.combinedSlabNumber : null;
+
+  if (!lastCombinedSlabNumber) {
+    return `${sipl.combinedSiplNumber}-1`;
+  }
+
+  const lastSection = parseInt(lastCombinedSlabNumber.split("-").pop() || "0", 10);
+  const newCombinedSlabNumber = `${lastCombinedSlabNumber.split("-").slice(0, -1).join("-")}-${lastSection + 1}`;
+
+  return newCombinedSlabNumber;
+};
+

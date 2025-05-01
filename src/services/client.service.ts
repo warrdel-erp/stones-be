@@ -145,5 +145,11 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
     },
   ] as const;
 
-  return await ledgerAccountRepository.createBulkLedgerAccount(data, transaction);
+  const createdAccounts: any[] = [];
+  for (const account of data) {
+    const createdAccount = await ledgerAccountRepository.createLedgerAccount(account, transaction);
+    createdAccounts.push(createdAccount);
+  }
+
+  return createdAccounts;
 };

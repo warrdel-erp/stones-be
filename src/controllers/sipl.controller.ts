@@ -235,3 +235,30 @@ export const getReceiveInventoryData = catchAsync(async (req: Request, res: Resp
 
   SuccessResponse(res, 200, "Inventory data fetched successfully", sipls);
 });
+
+// Get new combined slab number
+export const getNewCombinedSlabNumberController = catchAsync(async (req: Request, res: Response) => {
+  const { siplId } = req.params;
+
+  if (!siplId) {
+    throw new AppError("SIPL ID is required.", 400);
+  }
+
+  const newCombinedSlabNumber = await siplService.getNewCombinedSlabNumberService(Number(siplId));
+
+  SuccessResponse(res, 200, "New combined slab number fetched successfully.", newCombinedSlabNumber);
+});
+
+
+// Get SIPL by Slab ID
+export const getSIPLBySlabIdSimple = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new AppError("SIPL ID is required.", 400);
+  }
+
+  const sipl = await siplService.getSIPLByIdSimple(Number(id));
+
+  SuccessResponse(res, 200, "SIPL fetched successfully", sipl);
+});

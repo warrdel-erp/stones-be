@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import { CreateOptions, DataTypes, Transaction } from "sequelize";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
@@ -85,13 +85,19 @@ const LedgerAccount = sequelize.define(
   }
 );
 
-LedgerAccount.beforeCreate(async (ledgerAccount: any) => {
+LedgerAccount.beforeCreate(async (ledgerAccount: any, options: CreateOptions<any>) => {
+  await assignLedgerAccountCode(ledgerAccount, options.transaction);
+});
+
+async function assignLedgerAccountCode(ledgerAccount: any, transaction?: Transaction | null) {
   const { subHeaderId } = ledgerAccount;
 
-  // Find the last ledger account under the given subHeaderId
+  // Lock the table to prevent concurrent writes
   const lastAccount = (await LedgerAccount.findOne({
     where: { subHeaderId },
     order: [["code", "DESC"]],
+    transaction,
+    lock: transaction ? transaction.LOCK.UPDATE : undefined, // Use row-level lock within the transaction
   }))?.get({ plain: true });
 
   if (lastAccount) {
@@ -106,6 +112,6 @@ LedgerAccount.beforeCreate(async (ledgerAccount: any) => {
       throw new Error(`Invalid subHeaderId: ${subHeaderId}`);
     }
   }
-});
+}
 
 export default LedgerAccount;

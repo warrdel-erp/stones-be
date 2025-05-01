@@ -25,8 +25,14 @@ router.post("/:id/addContainer", authenticateUser, siplController.addContainer);
 // Add all barcode
 router.get("/:siplId/barcode", authenticateUser, siplController.getAllBarcode);
 
+// Get new combined slab number
+router.get('/:siplId/newCombinedSlabNumber', authenticateUser, siplController.getNewCombinedSlabNumberController);
+
 // get SIPL by ID
 router.get("/:id", authenticateUser, siplController.getSIPLById);
+
+// get SIPL by id with less data
+router.get("/:id/less", authenticateUser, siplController.getSIPLBySlabIdSimple);
 
 // add slab to SIPL.
 router.post("/:siplId/addSlab", authenticateUser, siplController.createSlabHandler);

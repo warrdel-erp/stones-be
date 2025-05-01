@@ -60,8 +60,11 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
   }
 
   try {
+
+    const combinedSiplKeys = await siplRepository.getCombinedSIPlNumber(siplData, transaction);
+
     // Create SIPL
-    let sipl: any = await siplRepository.createSIPL(siplData, transaction);
+    let sipl: any = await siplRepository.createSIPL({ ...siplData, ...combinedSiplKeys }, transaction);
 
     let container;
     if (siplData.container) {
@@ -160,6 +163,7 @@ export async function handleCreateSlabs(slabData: any) {
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
       barcode: uuidv4(),
+      combinedSlabNumber: sipl.combinedSiplNumber + "-" + (lastSerialNumber + index + 1),
     }));
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);
@@ -234,6 +238,19 @@ export const getSIPLById = async (id: number) => {
   return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiplAmount };
 };
 
+// Get SIPL by ID
+export const getSIPLByIdSimple = async (id: number) => {
+  let sipl: any = await siplRepository.findSIPLByIdSimple(id);
+  if (!sipl) {
+    throw new AppError("SIPL does not found", 400);
+  }
+  sipl = sipl?.get({ plain: true });
+  if (!sipl) {
+    throw new Error("SIPL not found");
+  }
+  return sipl;
+}
+
 // Get all SIPLs
 export const getAllSIPLs = async (page: number, limit: number) => {
   const { rows, count } = await siplRepository.getAllSIPLs(page, limit);
@@ -250,7 +267,6 @@ export const getAllSIPLs = async (page: number, limit: number) => {
 export const getSiplCalculations = async (siplId: number, transaction?: Transaction) => {
   const siplData = (await siplRepository.findSIPLById(siplId, transaction))?.get({ plain: true });
 
-  console.log(siplData)
   // Calculate other bills total amount.
   const totalBillsCharges = siplData.bills.reduce(
     (total: number, bill: any) =>
@@ -295,7 +311,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
   );
 
   // Unit bill price as per total area of all product's slab.
-  const unitBillPrice = Number((totalBillsCharges / totalReceivingArea).toFixed(2));
+  const unitBillPrice = Number((totalBillsCharges / totalReceivingArea));
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
@@ -312,7 +328,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
 
-    const unitCost = Number((totalSIPLProductPrice / totalReceivedAreaPerProduct).toFixed(2));
+    const unitCost = Number((totalSIPLProductPrice / totalReceivedAreaPerProduct));
 
     // Total unit charge is self unit charge + bill charge per unit area.
     const landedUnitCost = unitCost + unitBillPrice;
@@ -368,4 +384,9 @@ export const getSIPLByVendor = async (vendorId: number) => {
 export const getAllBarcode: any = async (siplId: number) => {
   console.log(siplId);
   return await slabRepository.getOnlyBarcode(siplId);
+};
+
+// Get new combined slab number
+export const getNewCombinedSlabNumberService = async (siplId: number) => {
+  return await slabRepository.getNewCombinedSlabNumber(siplId);
 };

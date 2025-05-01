@@ -6,8 +6,9 @@ export const createPayment = async (paymentData: any, transaction: Transaction) 
   return await models.Payment.create(paymentData, { transaction });
 };
 
-export const getAllPayments = async (filters: any = {}) => {
-  return await models.Payment.findAll({
+export const getAllPayments = async (filters: any = {}, page: number, limit: number) => {
+  const offset = (page - 1) * limit;
+  const { count, rows } = await models.Payment.findAndCountAll({
     where: filters,
     include: [
       {
@@ -16,7 +17,11 @@ export const getAllPayments = async (filters: any = {}) => {
       },
     ],
     order: [["createdAt", "DESC"]],
+    limit,
+    offset,
   });
+
+  return { total: count, payments: rows, page, limit };
 };
 
 export const getPaymentById = async (id: number) => {

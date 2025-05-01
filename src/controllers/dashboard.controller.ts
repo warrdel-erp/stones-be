@@ -100,7 +100,7 @@ export const getTotalAndPaidVendorAmount = catchAsync(async (req: AuthRequest, r
     const totalBillProductAmount = await billService.getTotalBillValueByClientId(Number(clientId))
 
     const data = {
-        totalAmount: totalSiplProductAmount + totalBillProductAmount,
+        totalAmount: (totalSiplProductAmount) + totalBillProductAmount,
         totalPaidAmount: await paymentService.getTotalAmountByPayeeTypeAndClientId("vendor", Number(clientId)),
     }
 

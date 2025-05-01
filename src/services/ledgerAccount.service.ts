@@ -13,7 +13,7 @@ export const getLedgerAccounts = async (page = 1, limit = 10, filters: any) => {
 
     e.subHeader = COA_SUB_HEADERS.find((k) => k.id == e.subHeaderId);
     e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
-    e.type = COA_TYPES.find((k) => k.id == e.header.parent_id);
+    e.parentType = COA_TYPES.find((k) => k.id == e.header.parent_id);
 
     return e;
   });

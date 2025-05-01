@@ -123,7 +123,7 @@ export const getTotalSIPLProductAmountBetweenDates = async (
     group: ["sipl.id"],
   });
 
-  return result?.dataValues?.totalAmount ?? 0;
+  return Number(result?.dataValues?.totalAmount) ?? 0;
 };
 
 export const getTotalSIPLProductValueByClient = async (clientId: number) => {
@@ -142,5 +142,5 @@ export const getTotalSIPLProductValueByClient = async (clientId: number) => {
     group: ["sipl_products.id"],
   });
 
-  return result?.dataValues?.totalValue ?? 0;
+  return Number(result?.dataValues?.totalValue) ?? 0;
 };

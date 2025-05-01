@@ -1,6 +1,7 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { PO_STATUS } from "../constants/tableTypes";
+import { get } from "lodash";
 
 /**
  * Create a new Purchase Order in the database.
@@ -48,6 +49,13 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
     dateRange.poDate = { [Op.lte]: toDate };
   }
 
+  let getInInventoryData = false;
+
+  if (otherFilters.status == 'IN_TRANSIT') {
+    delete otherFilters.status;
+    getInInventoryData = true;
+  }
+
   return await models.PurchaseOrder.findAndCountAll({
     where: {
       ...otherFilters,
@@ -86,6 +94,10 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
       {
         model: models.SIPL,
         as: "sipls",
+        where: {
+          ...(getInInventoryData ? { inventoryReceived: false } : {})
+        },
+        required: getInInventoryData,
       },
     ],
     limit,

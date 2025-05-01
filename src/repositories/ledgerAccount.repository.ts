@@ -10,7 +10,7 @@ export const createLedgerAccount = async (data: LedgerAccount, transaction?: Tra
 
 // Create ledger account.
 export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction?: Transaction) => {
-  const accounts = await models.LedgerAccount.bulkCreate(data, { transaction, returning: true });
+  const accounts = await models.LedgerAccount.bulkCreate(data, { transaction, returning: true, individualHooks: true });
   return accounts;
 };
 

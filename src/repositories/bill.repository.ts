@@ -108,5 +108,5 @@ export const getTotalBillValueByClient = async (clientId: number) => {
     group: ["bills.id"]
   });
 
-  return result?.dataValues?.totalValue ?? 0;
+  return Number(result?.dataValues?.totalValue) ?? 0;
 };

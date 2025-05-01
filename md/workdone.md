@@ -119,3 +119,15 @@
 2. PO number correction.
 3. customer list data.
 4. product detail page Inventory, allocated, InTransit tabs.
+
+---
+
+1. inventory error done.
+2. in transit filter in PO.
+3. remove invoice no. from SIPL.
+4. serial number of SIPL and slab at multiple places
+5. seeder.
+
+---
+
+1. error in bill creation.

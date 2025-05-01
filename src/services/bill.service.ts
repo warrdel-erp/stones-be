@@ -23,7 +23,7 @@ export const createBill = async (billData: any) => {
   });
 
   try {
-    const bill: any = await billRepository.createBill({ billData, amount: totalAmount }, transaction);
+    const bill: any = await billRepository.createBill({ ...billData, amount: totalAmount }, transaction);
 
     // Get SIPL calculations.
     const siplCalculations = await siplService.getSiplCalculations(billData.referenceId, transaction);

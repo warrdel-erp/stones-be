@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import * as paymentService from "../services/payment.service";
-import { SuccessResponse } from "../helper/response";
-import catchAsync from "../helper/asyncCatch";
+import { PAYEE_TYPE } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
+import catchAsync from "../helper/asyncCatch";
+import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { PAYEE_TYPE, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
-import * as billRepository from "../repositories/bill.repository";
+import * as paymentService from "../services/payment.service";
 
 // create Payment
 export const createPayment = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -28,8 +27,15 @@ export const createPayment = catchAsync(async (req: AuthRequest, res: Response) 
 
 // get all payments
 export const getAllPayments = catchAsync(async (req: Request, res: Response) => {
-  const payments = await paymentService.getPayments(req.query);
-  return SuccessResponse(res, 200, "Payments fetched successfully", payments);
+  const { page = 1, limit = 10, ...filters } = req.query;
+
+  const result = await paymentService.getPayments(filters, Number(page), Number(limit));
+
+  SuccessResponse(res, 200, "Payments fetched successfully", result.payments, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
 });
 
 // get payment by id
