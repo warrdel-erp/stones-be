@@ -3,6 +3,7 @@ import Vendor from "./vendor";
 import { sequelize } from "../config/database";
 import User from "./user";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import SIPL from "./sipl";
 
 const Bill = sequelize.define(
   "bills",
@@ -15,6 +16,12 @@ const Bill = sequelize.define(
     amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    billCode: {
+      type: DataTypes.STRING
+    },
+    siplBillNumber: {
+      type: DataTypes.INTEGER,
     },
     invoice: {
       type: DataTypes.STRING,
@@ -100,6 +107,7 @@ Bill.beforeCreate(async (bill: any) => {
     throw new Error("Client ID is required to generate clientBillNumber.");
   }
 
+  // Generate unique key for client.
   let lastBillAccordingToClientBillNumber: any = await Bill.findOne({
     where: { clientId: bill.clientId },
     order: [["clientBillNumber", "DESC"]],
@@ -110,6 +118,38 @@ Bill.beforeCreate(async (bill: any) => {
   bill.clientBillNumber = !!lastBillAccordingToClientBillNumber
     ? lastBillAccordingToClientBillNumber.clientBillNumber + 1
     : 1;
+
+  // Auto-increment siplBillNumber only if referenceType is 'sipl'
+  if (bill.referenceType === "sipl") {
+    if (!bill.referenceId) {
+      throw new Error("referenceId (SIPL ID) is required for siplBillNumber.");
+    }
+
+    let lastSiplBill: any = await Bill.findOne({
+      where: {
+        referenceType: "sipl",
+        referenceId: bill.referenceId,
+      },
+      order: [["siplBillNumber", "DESC"]],
+    });
+
+    const sipl: any = await SIPL.findByPk(bill.referenceId)
+
+    lastSiplBill = lastSiplBill?.get({ plain: true });
+
+    bill.siplBillNumber = !!lastSiplBill
+      ? lastSiplBill.siplBillNumber + 1
+      : 1;
+
+    bill.billCode = "FB " + sipl.combinedSiplNumber.split(" ")[1] + "-" + bill.siplBillNumber
+  }
+
 });
 
 export default Bill;
+
+// according to FB.
+// // under PO or not.
+
+// according to VB.
+// // under PO or not.

@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import {
+  JOURNAL_ENTRY_FOR_TYPES,
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
@@ -18,6 +19,8 @@ export type JournalEntry = {
   referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
   subReferenceId?: number;
   subReferenceType?: (typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES];
+  entryFor: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
+  entryForId: number
 };
 
 const JournalEntry = sequelize.define(
@@ -74,6 +77,12 @@ const JournalEntry = sequelize.define(
       type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_REFERENCE_TYPES)),
       allowNull: true, // Required only if referenceId is used
     },
+    entryFor: {
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_FOR_TYPES))
+    },
+    entryForId: {
+      type: DataTypes.INTEGER
+    }
   },
   {
     tableName: "journal_entry",

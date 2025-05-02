@@ -25,4 +25,7 @@ router.get("/totalCustomersAmounts", authenticateUser, dashboardController.getTo
 // Get total Vendors in transit.
 router.get("/totalVendorsAmounts", authenticateUser, dashboardController.getTotalAndPaidVendorAmount);
 
+// Get category wise quantity.
+router.get("/categoryWiseQuantity", authenticateUser, dashboardController.getTotalSlabMetricByCategory);
+
 export default router;

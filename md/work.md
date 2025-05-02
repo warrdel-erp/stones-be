@@ -121,6 +121,7 @@
 82. clear loProduct and plProduct after SOproduct creation.
 83. put pagination in truck API.
 84. create another API for product list because it has unnecessary slabs data.
+85. change referenceType in journal entry to invoiceType
 
 ---
 

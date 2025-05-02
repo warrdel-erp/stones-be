@@ -72,6 +72,7 @@ export const fetchAllCustomers = async (page: number, limit: number, search?: st
 
 async function createLedgerAccountForCustomer(clientId: number, newCustomer: any, transaction: Transaction) {
   const ledgerAccountData: LedgerAccount = {
+    name: newCustomer.name,
     subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!,
     clientId,
     type: LEDGER_ACCOUNT_TYPES.DEBIT,

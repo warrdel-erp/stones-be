@@ -114,6 +114,9 @@ export const getLoadingOrderById = async (id: number) => {
         model: models.CustomerAddress,
         as: "shippingAddress",
       },
+      {
+
+      }
     ],
   });
 

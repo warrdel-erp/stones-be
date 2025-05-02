@@ -1,5 +1,7 @@
 import { Transaction } from "sequelize";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
+  JOURNAL_ENTRY_FOR_TYPES,
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
@@ -7,15 +9,13 @@ import {
   PAYMENT_BILL_REFERENCE_TYPES,
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
-import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
-import * as siplService from "./sipl.service";
-import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as siplRepository from "../repositories/sipl.repository";
-import * as billRepository from "../repositories/bill.repository";
 import * as slabService from "../services/slab.service";
+import * as siplService from "./sipl.service";
 
 // Create journal entry for freight bill item.
 export async function createJournalEntryForFreightBillItem(
@@ -38,9 +38,12 @@ export async function createJournalEntryForFreightBillItem(
       subReferenceId: freightBillItemData.id,
       subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM,
 
-      // reference is the SIPL.
-      referenceId: freightBillData.referenceId,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      // reference is the BILL.
+      referenceId: freightBillData.id,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.BILL,
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: freightBillData.referenceId
     },
     transaction
   );
@@ -61,8 +64,11 @@ export async function createJournalEntryForFreightBillItem(
       subReferenceId: siplProduct.id,
       subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SIPL_PRODUCT,
 
-      referenceId: freightBillData.referenceId,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: freightBillData.id,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.BILL,
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: freightBillData.referenceId
     };
   });
 
@@ -108,8 +114,12 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
       ledgerId: po.supplier.ledgerAccount.id,
       type: JOURNAL_ENTRY_TYPE.CR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.CREATE_SIPL,
+
       referenceId: siplId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: siplId
     },
     transaction
   );
@@ -138,6 +148,9 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
       // reference is the SIPL.
       referenceId: siplId,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: siplId
     };
   });
 
@@ -178,6 +191,9 @@ export const createJournalEntryForReceiveInventory = async (
         // reference is the SIPL.
         referenceId: siplId,
         referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+
+        entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+        entryForId: siplId
       },
       transaction
     );
@@ -201,6 +217,9 @@ export const createJournalEntryForReceiveInventory = async (
           // reference is the SIPL.
           referenceId: bill.referenceId,
           referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+
+          entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+          entryForId: siplId
         }, transaction);
       }
     }
@@ -234,6 +253,9 @@ export const createJournalEntryForReceiveInventory = async (
               // reference is the SIPL.
               referenceId: siplId,
               referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+
+              entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+              entryForId: siplId
             },
             transaction
           );
@@ -254,78 +276,17 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
   });
 
   if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
-    const siplId = (await billRepository.getBillByPk(bill.referenceId))?.get("referenceId");
 
-    const journalEntry1 = {
-      amount: bill.amount,
-      ledgerId: ledgerAccount.id,
-      type: JOURNAL_ENTRY_TYPE.DR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: Number(siplId),
-      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL,
-      subReferenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
-    };
+    await createJournalEntryForBillForPaymentBill(bill, ledgerAccount, ledgerAccountForCashBank, transaction);
 
-    const journalEntry2 = {
-      amount: bill.amount,
-      ledgerId: ledgerAccountForCashBank.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: Number(siplId),
-      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL,
-      subReferenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
-    };
-
-    await journalEntryRepository.create(journalEntry1, transaction);
-    await journalEntryRepository.create(journalEntry2, transaction);
   } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
-    // First Journal entry.
-    const journalEntry1: JournalEntry = {
-      amount: bill.amount,
-      ledgerId: ledgerAccount.id,
-      type: JOURNAL_ENTRY_TYPE.DR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT,
-    };
 
-    // Second Journal entry.
-    const journalEntry2: JournalEntry = {
-      amount: bill.amount,
-      ledgerId: ledgerAccountForCashBank.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
-    };
+    await createJournalEntryForSiplForPaymentBill(bill, ledgerAccount, ledgerAccountForCashBank, transaction);
 
-    await journalEntryRepository.create(journalEntry1, transaction);
-    await journalEntryRepository.create(journalEntry2, transaction);
   } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE) {
-    // First Journal entry.
-    const journalEntry1: JournalEntry = {
-      amount: bill.amount,
-      ledgerId: ledgerAccount.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT,
-    };
 
-    // Second Journal entry.
-    const journalEntry2: JournalEntry = {
-      amount: bill.amount,
-      ledgerId: ledgerAccountForCashBank.id,
-      type: JOURNAL_ENTRY_TYPE.DR,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: bill.referenceId,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
-    };
+    await createJournalEntryForSoInvoiceForPaymentInvoice(bill, ledgerAccount, ledgerAccountForCashBank, transaction);
 
-    await journalEntryRepository.create(journalEntry1, transaction);
-    await journalEntryRepository.create(journalEntry2, transaction);
   }
 }
 
@@ -348,3 +309,87 @@ export const getAllJournalEntries = async (filters: any, clientId: number) => {
 export const createJournalEntry = async (data: JournalEntry) => {
   return await journalEntryRepository.create(data);
 };
+
+async function createJournalEntryForSoInvoiceForPaymentInvoice(bill: any, ledgerAccount: any, ledgerAccountForCashBank: any, transaction: Transaction) {
+  const journalEntry1: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccount.id,
+    type: JOURNAL_ENTRY_TYPE.CR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    referenceId: bill.id,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    entryForId: bill.referenceId
+  };
+
+  // Second Journal entry.
+  const journalEntry2: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccountForCashBank.id,
+    type: JOURNAL_ENTRY_TYPE.DR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    referenceId: bill.id,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    entryForId: bill.referenceId
+  };
+
+  await journalEntryRepository.create(journalEntry1, transaction);
+  await journalEntryRepository.create(journalEntry2, transaction);
+}
+
+async function createJournalEntryForSiplForPaymentBill(bill: any, ledgerAccount: any, ledgerAccountForCashBank: any, transaction: Transaction) {
+  const journalEntry1: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccount.id,
+    type: JOURNAL_ENTRY_TYPE.DR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    referenceId: bill.referenceId,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: bill.referenceId
+  };
+
+  // Second Journal entry.
+  const journalEntry2: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccountForCashBank.id,
+    type: JOURNAL_ENTRY_TYPE.CR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    referenceId: bill.referenceId,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: bill.referenceId
+  };
+
+  await journalEntryRepository.create(journalEntry1, transaction);
+  await journalEntryRepository.create(journalEntry2, transaction);
+}
+
+async function createJournalEntryForBillForPaymentBill(bill: any, ledgerAccount: any, ledgerAccountForCashBank: any, transaction: Transaction) {
+  const journalEntry1: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccount.id,
+    type: JOURNAL_ENTRY_TYPE.DR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.BILL,
+    referenceId: bill.id,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: bill.referenceId
+  };
+
+  const journalEntry2: JournalEntry = {
+    amount: bill.amount,
+    ledgerId: ledgerAccountForCashBank.id,
+    type: JOURNAL_ENTRY_TYPE.CR,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.BILL,
+    referenceId: bill.id,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: bill.referenceId
+  };
+
+  await journalEntryRepository.create(journalEntry1, transaction);
+  await journalEntryRepository.create(journalEntry2, transaction);
+}
+

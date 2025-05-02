@@ -19,3 +19,7 @@ export const update = async (id: number, data: any) => {
 export const remove = async (id: number, clientId: number) => {
     return await productCategoryRepository.deleteProductCategory(id, clientId);
 };
+
+export const getTotalSlabMetricByCategory = async (clientId: number) => {
+    return await productCategoryRepository.getTotalSlabMetricByCategory(clientId);
+};

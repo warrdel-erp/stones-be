@@ -71,3 +71,5 @@
 6. what is So location in create SO.
 7. while remeasuring data should be prefilled for slab in LO and PL.
 8. can on SO have multiple Journal entries then journal entry belongs to LO.
+
+---

@@ -360,6 +360,14 @@ InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", a
 Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 
+// One Payment belongs to one user (One user can have multiple payments)
+Payment.belongsTo(Vendor, { foreignKey: "payeeId", as: "vendor" });
+Vendor.hasMany(Payment, { foreignKey: "payeeId", as: "payments" });
+
+// One Payment belongs to one user (One user can have multiple payments)
+Payment.belongsTo(Customer, { foreignKey: "payeeId", as: "customer" });
+Customer.hasMany(Payment, { foreignKey: "payeeId", as: "payments" });
+
 Vendor.belongsTo(Location, { foreignKey: "parentLocationId", as: "parentLocation" });
 Location.hasMany(Vendor, { foreignKey: "parentLocationId", as: "vendors" });
 
@@ -404,7 +412,16 @@ Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
 
 // payment can have multiple bills and one bill can have multiple payments so this is an association table.
 PaymentBill.belongsTo(Payment, { foreignKey: "paymentId", as: "payment" });
-Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBill" });
+Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBills" });
+
+PaymentBill.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl" });
+SIPL.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
+
+PaymentBill.belongsTo(Bill, { foreignKey: "referenceId", as: "bill" });
+Bill.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
+
+PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInvoice" });
+SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
 
 // Loading order belongs to one SalesOrderProduct (one SalesOrderProduct can have one loadingOrderProduct)
 LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });

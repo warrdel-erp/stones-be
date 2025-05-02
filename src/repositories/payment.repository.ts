@@ -12,9 +12,31 @@ export const getAllPayments = async (filters: any = {}, page: number, limit: num
     where: filters,
     include: [
       {
-        model: models.SIPL,
-        as: "sipl",
+        model: models.PaymentBill,
+        as: "paymentBills",
+        include: [
+          {
+            model: models.SIPL,
+            as: "sipl",
+          },
+          {
+            model: models.Bill,
+            as: "bill",
+          },
+          {
+            model: models.SalesOrderInvoice,
+            as: "soInvoice",
+          }
+        ]
       },
+      {
+        model: models.Customer,
+        as: "customer",
+      },
+      {
+        model: models.Vendor,
+        as: "vendor",
+      }
     ],
     order: [["createdAt", "DESC"]],
     limit,

@@ -9,6 +9,7 @@ import * as purchaseOrderService from "../services/purchaseOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as paymentService from "../services/payment.service";
 import * as billService from "../services/bill.service";
+import * as productCategoryService from "../services/productCategory.service";
 
 // Get total amount of sales invoices from last N days
 export const getTotalAmountFromLastNDays = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -105,4 +106,13 @@ export const getTotalAndPaidVendorAmount = catchAsync(async (req: AuthRequest, r
     }
 
     return SuccessResponse(res, 200, "Total customer amounts fetched successfully.", data);
+});
+
+// getTotalSlabMetricByCategory
+export const getTotalSlabMetricByCategory = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    const data = await productCategoryService.getTotalSlabMetricByCategory(Number(clientId));
+
+    return SuccessResponse(res, 200, "Total slab metric by category fetched successfully.", data);
 });

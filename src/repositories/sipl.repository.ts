@@ -1,5 +1,6 @@
 import { col, fn, Op, Transaction } from "sequelize";
 import * as models from "../models";
+import { AppError } from "../helper/appError";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
@@ -311,10 +312,9 @@ export const areSIPLsBelongingToVendor = async (supplierId: number, siplIds: num
   return count === siplIds.length; // If count matches the number of IDs, all belong to vendor
 };
 
-
 export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction) => {
   if (!sipl.purchaseOrderId) {
-    throw new Error("purchaseOrderId is required to generate poSiplNumber.");
+    throw new AppError("purchaseOrderId is required to generate poSiplNumber.", 400);
   }
 
   const lastSIPLAccordingToPO: any = await models.SIPL.findOne({
@@ -329,6 +329,6 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
 
   return {
     poSiplNumber,
-    combinedSiplNumber: `${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
+    combinedSiplNumber: `SIPL ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
   }
 }
