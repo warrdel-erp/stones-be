@@ -8,7 +8,7 @@ import * as siplRepository from "../repositories/sipl.repository";
 import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
 
 // Create a new payment
-export const processPayment = async (paymentData: any, billsData: any[]) => {
+export const processPayment = async (paymentData: any, billsData: any[], locationId: number) => {
   if (!paymentData || !billsData || !Array.isArray(billsData) || billsData.length === 0) {
     throw new Error("Invalid request: Payment and bills data are required");
   }
@@ -31,7 +31,7 @@ export const processPayment = async (paymentData: any, billsData: any[]) => {
     const paymentBills = await Promise.all(
       billsData.map(async (bill) => {
         // Create journal entries for payment bills
-        await createJournalEntriesForPaymentBills(bill, paymentData, transaction);
+        await createJournalEntriesForPaymentBills(bill, paymentData, transaction, locationId);
 
         return {
           paymentId: payment.id,

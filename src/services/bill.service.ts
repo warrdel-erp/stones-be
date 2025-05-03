@@ -3,10 +3,11 @@ import { sequelize } from "../config/database";
 import * as billRepository from "../repositories/bill.repository";
 import * as billItemRepository from "../repositories/billItems.repository";
 import * as journalEntryService from "./journalEntry.service";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository"
 
 import * as siplService from "./sipl.service";
 
-export const createBill = async (billData: any) => {
+export const createBill = async (billData: any, locationId: number) => {
   if (!billData.items || !Array.isArray(billData.items)) {
     throw new Error("Bill items are required.");
   }
@@ -28,6 +29,12 @@ export const createBill = async (billData: any) => {
     // Get SIPL calculations.
     const siplCalculations = await siplService.getSiplCalculations(billData.referenceId, transaction);
 
+    const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      referenceId: billData.vendorId,
+    });
+
+    const billJournalEntry = journalEntryService.createJournalEntryForBill(bill, transaction, locationId, ledgerAccount.id,)
+
     for (const item of billData.items) {
       const billItem: any = await billItemRepository.createBillItem(
         {
@@ -40,9 +47,11 @@ export const createBill = async (billData: any) => {
       // Create journal entry for freight bill item.
       await journalEntryService.createJournalEntryForFreightBillItem(
         { ...item, id: billItem.id },
-        billData,
+        { ...billData, id: bill.id },
         siplCalculations,
-        transaction
+        transaction,
+        locationId,
+        ledgerAccount.id
       );
 
       billItems.push(billItem);

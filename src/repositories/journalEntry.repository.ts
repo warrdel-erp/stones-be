@@ -1,4 +1,4 @@
-import { col, fn, Transaction } from "sequelize";
+import { Transaction } from "sequelize";
 import * as models from "../models";
 import { type JournalEntry } from "../models/journalEntry.model";
 import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -16,15 +16,23 @@ export const createBulk = async (data: JournalEntry[], transaction?: Transaction
 
 // Fetch find journal entries with filters.
 export const findAll = async (filters: any, clientId: number) => {
+
   const journalEntries = await models.JournalEntry.findAll({
     where: filters || {},
-    // order: [["createdAt", "ASC"]],
     include: [
       {
         model: models.LedgerAccount,
         as: "ledgerAccount",
         where: { clientId },
         required: true,
+      },
+      {
+        model: models.LedgerAccount,
+        as: "partyLedgerAccount",
+      },
+      {
+        model: models.Location,
+        as: "location",
       },
     ],
   });
@@ -45,6 +53,7 @@ export const findAll = async (filters: any, clientId: number) => {
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL:
         entry.subReferenceData = await models.Bill.findOne({
           where: { id: entry.subReferenceId },
+
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM:
@@ -75,6 +84,10 @@ export const findAll = async (filters: any, clientId: number) => {
       case JOURNAL_ENTRY_REFERENCE_TYPES.BILL:
         entry.referenceData = await models.Bill.findOne({
           where: { id: entry.referenceId },
+          include: {
+            model: models.SIPL,
+            as: 'sipl'
+          }
         });
         break;
       case JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER:

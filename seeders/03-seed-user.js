@@ -14,6 +14,7 @@ module.exports = {
           phone: "+1234567890",
           email: "user@gmail.com",
           clientId: 1,
+          defaultLocationId: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

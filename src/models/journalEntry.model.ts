@@ -9,6 +9,7 @@ import {
 } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 import User from "./user";
+import Location from "./location";
 
 export type JournalEntry = {
   amount: number;
@@ -20,7 +21,9 @@ export type JournalEntry = {
   subReferenceId?: number;
   subReferenceType?: (typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES];
   entryFor: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
-  entryForId: number
+  entryForId: number,
+  locationId: number,
+  partyLedgerAccountId: number | null
 };
 
 const JournalEntry = sequelize.define(
@@ -42,6 +45,23 @@ const JournalEntry = sequelize.define(
     ledgerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: LedgerAccount,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "RESTRICT",
+    },
+    partyLedgerAccountId: {
+      type: DataTypes.INTEGER,
       references: {
         model: LedgerAccount,
         key: "id",

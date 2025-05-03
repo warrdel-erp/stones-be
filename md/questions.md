@@ -73,3 +73,5 @@
 8. can on SO have multiple Journal entries then journal entry belongs to LO.
 
 ---
+
+1. what is subheader for freight vendor

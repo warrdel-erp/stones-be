@@ -17,7 +17,7 @@ const Bill = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    billCode: {
+    invoiceCode: {
       type: DataTypes.STRING
     },
     siplBillNumber: {
@@ -141,7 +141,7 @@ Bill.beforeCreate(async (bill: any) => {
       ? lastSiplBill.siplBillNumber + 1
       : 1;
 
-    bill.billCode = "FB " + sipl.combinedSiplNumber.split(" ")[1] + "-" + bill.siplBillNumber
+    bill.invoiceCode = "FB " + sipl.invoiceCode.split(" ")[1] + "-" + bill.siplBillNumber
   }
 
 });

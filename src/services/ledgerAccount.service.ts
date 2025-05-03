@@ -38,7 +38,16 @@ export const getLedgerAccountsWithoutPagination = async (filters: any) => {
 };
 
 export const getLedgerAccountById = async (id: number) => {
-  return await ledgerAccountRepository.getLedgerAccountById(id);
+  let data: any = await ledgerAccountRepository.getLedgerAccountById(id);
+
+  data = data.get({ plain: true });
+
+  // populate parent data.
+  data.subHeader = COA_SUB_HEADERS.find((k) => k.id == data.subHeaderId);
+  data.header = COA_HEADERS.find((k) => k.id == data.subHeader.parent_id);
+  data.parentType = COA_TYPES.find((k) => k.id == data.header.parent_id);
+
+  return data
 };
 
 export const getLedgerAccountsForFreightItems = async (clientId: number) => {

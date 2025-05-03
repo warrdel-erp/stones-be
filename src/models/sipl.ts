@@ -33,7 +33,7 @@ const SIPL = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false, // Auto-Incremented and not null is handled in hook
     },
-    combinedSiplNumber: {
+    invoiceCode: {
       type: DataTypes.STRING,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },

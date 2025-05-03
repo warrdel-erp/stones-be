@@ -13,12 +13,13 @@ export const receiveInventoryController = catchAsync(async (req: AuthRequest, re
   const { id } = req.params; // Get SIPL ID from request parameters
 
   const clientId = req.user?.clientId; // Get client ID from request
+  const locationId = req.user?.defaultLocationId;
 
   if (!id) {
     throw new AppError("SIPL ID is required.", 400);
   }
 
-  const updatedCount = await siplService.receiveInventory(Number(id), clientId!);
+  const updatedCount = await siplService.receiveInventory(Number(id), clientId!, Number(locationId));
 
   if (updatedCount === 0) {
     throw new AppError("No slabs found or already in inventory.", 404);
@@ -31,6 +32,7 @@ export const receiveInventoryController = catchAsync(async (req: AuthRequest, re
 export const createSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
 
   const data = {
     ...req.body,
@@ -39,7 +41,7 @@ export const createSIPLController = catchAsync(async (req: AuthRequest, res: Res
     updatedBy: userId,
   };
 
-  const sipl = await siplService.createSIPLService(data);
+  const sipl = await siplService.createSIPLService(data, Number(locationId));
   res.status(201).json({ success: true, data: sipl });
 });
 
@@ -88,6 +90,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 
   const createdBy = req.user?.id; // Get user ID from request
   const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
 
   // There is problem in adding transaction that sipl product needs id of requestedProductId but it is not been created
 
@@ -163,7 +166,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       shipDate,
     };
 
-    const sipl = await siplService.createSIPLService(siplData, transaction);
+    const sipl = await siplService.createSIPLService(siplData, Number(locationId), transaction);
 
     transaction.commit();
     SuccessResponse(res, 201, "SIPL with PO is been created successfully", { sipl, newPO });

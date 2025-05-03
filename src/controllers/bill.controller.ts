@@ -10,6 +10,7 @@ import { AppError } from "../helper/appError";
 export const createBill = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
 
   // check if SIPL if received in inventory or not.
   if (req.body.referenceType === BILL_REFERENCE_TYPES.SIPL) {
@@ -19,7 +20,7 @@ export const createBill = catchAsync(async (req: AuthRequest, res: Response) => 
     }
   }
 
-  const bill = await billService.createBill({ ...req.body, createdBy: userId, clientId });
+  const bill = await billService.createBill({ ...req.body, createdBy: userId, clientId, }, Number(locationId));
   SuccessResponse(res, 201, "Bill created Successfully", bill);
 });
 

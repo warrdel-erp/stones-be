@@ -201,7 +201,7 @@ export const updateLoadingOrder = async (id: number, data: any) => {
 };
 
 // Invoice Loading Order
-export const invoiceLoadingOrder = async (id: number, clientId: number) => {
+export const invoiceLoadingOrder = async (id: number, clientId: number, locationId: number) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -237,6 +237,12 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
       referenceId: loadingOrder.salesOrder.customerId,
     });
 
+    // Get ledger account for goods sold.
+    const ledgerAccountForGoodsSold: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
+      clientId,
+    });
+
     const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
 
     // Journal Entry for with tax.
@@ -254,15 +260,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         entryForId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        locationId,
+        partyLedgerAccountId: ledgerAccountForGoodsSold.id
       },
       transaction
     );
 
-    // Get ledger account for goods sold.
-    const ledgerAccountForGoodsSold: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-      key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
-      clientId,
-    });
+
 
     // Journal Entry for Without tax.
     await journalEntryRepository.create(
@@ -279,6 +283,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         entryForId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        locationId,
+        partyLedgerAccountId: ledgerAccount.id
       },
       transaction
     );
@@ -310,6 +316,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         entryForId: loadingOrder.id,
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        locationId,
+        partyLedgerAccountId: ledgerAccount.id
       },
       transaction
     );
@@ -331,7 +339,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
         entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-        entryForId: loadingOrder.id
+        entryForId: loadingOrder.id,
+        locationId,
+        partyLedgerAccountId: ledgerAccount.id
       },
       transaction
     );
@@ -360,6 +370,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
         clientId,
       });
 
+      // Get ledger account for finished cogs.
+      const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+        key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+        clientId,
+      });
+
+
       await journalEntryRepository.create(
         {
           amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
@@ -375,16 +392,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
           entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id
+          entryForId: loadingOrder.id,
+          locationId,
+          partyLedgerAccountId: ledgerAccountForCogs.id
         },
         transaction
       );
 
-      // Get ledger account for finished cogs.
-      const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-        key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
-        clientId,
-      });
 
       await journalEntryRepository.create(
         {
@@ -401,7 +415,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
           entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id
+          entryForId: loadingOrder.getSIPLByIdSimple,
+          locationId,
+          partyLedgerAccountId: ledgerAccountForFinishedGoods.id
         },
         transaction
       );
@@ -418,9 +434,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number) => {
 
     // Update stage to INVOICED in Loading Order.
     await loadingOrderRepository.updateLoadingOrder(id, { stage: LOADING_ORDER_STAGES.INVOICED }, transaction);
-
-
-
 
     transaction.commit();
     return { loadingOrder, invoice };

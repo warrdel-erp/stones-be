@@ -280,7 +280,7 @@ export const getOnlyBarcode = async (siplId: number) => {
 };
 
 export const getNewCombinedSlabNumber = async (siplId: number) => {
-  const sipl: any = await models.SIPL.findByPk(siplId, { attributes: ["combinedSiplNumber"] });
+  const sipl: any = await models.SIPL.findByPk(siplId, { attributes: ["invoiceCode"] });
 
   if (!sipl) {
     throw new Error("SIPL not found for the given ID.");
@@ -295,7 +295,7 @@ export const getNewCombinedSlabNumber = async (siplId: number) => {
   const lastCombinedSlabNumber = existingSlab ? existingSlab.combinedSlabNumber : null;
 
   if (!lastCombinedSlabNumber) {
-    return `${sipl.combinedSiplNumber}-1`;
+    return `${sipl.invoiceCode}-1`;
   }
 
   const lastSection = parseInt(lastCombinedSlabNumber.split("-").pop() || "0", 10);

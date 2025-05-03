@@ -5,6 +5,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as paymentService from "../services/payment.service";
+import * as userRepository from "../repositories/user.repository";
 
 // create Payment
 export const createPayment = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -21,7 +22,7 @@ export const createPayment = catchAsync(async (req: AuthRequest, res: Response) 
     await paymentService.checkIfBillsBelongToVendor(payment.payeeId, bills);
   }
 
-  const newPayment = await paymentService.processPayment({ ...payment, clientId }, bills);
+  const newPayment = await paymentService.processPayment({ ...payment, clientId }, bills, Number(req.user?.defaultLocationId));
   return SuccessResponse(res, 201, "Payment processed successfully", newPayment);
 });
 

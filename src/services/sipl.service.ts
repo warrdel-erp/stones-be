@@ -16,7 +16,7 @@ import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 
 // Processes the inventory reception by updating slab statuses.
-export const receiveInventory = async (siplId: number, clientId: number): Promise<number> => {
+export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -41,7 +41,7 @@ export const receiveInventory = async (siplId: number, clientId: number): Promis
     );
 
     // Create Journal entry for Inventory Reception START.
-    await journalEntryService.createJournalEntryForReceiveInventory(siplId, clientId, transaction);
+    await journalEntryService.createJournalEntryForReceiveInventory(siplId, clientId, transaction, locationId);
 
     transaction.commit();
     return updatedSlab;
@@ -52,7 +52,7 @@ export const receiveInventory = async (siplId: number, clientId: number): Promis
 };
 
 // Create SIPL
-export async function createSIPLService(siplData: any, transaction?: Transaction) {
+export async function createSIPLService(siplData: any, locationId: number, transaction?: Transaction,) {
   const shouldCommitTransaction = !transaction;
 
   if (!transaction) {
@@ -97,7 +97,7 @@ export async function createSIPLService(siplData: any, transaction?: Transaction
     await siplProductsRepository.createBulkSIPLProducts(productsWithSIPLId, transaction);
 
     // Create Journal entry for SIPL START.
-    const siplJournalEntry = await journalEntryService.createJournalEntryForSIPL(sipl.id, siplData, transaction);
+    const siplJournalEntry = await journalEntryService.createJournalEntryForSIPL(sipl.id, siplData, transaction, locationId);
     // Create Journal entry for SIPL END.
 
     // Create Freight Detail (if provided)
@@ -163,7 +163,7 @@ export async function handleCreateSlabs(slabData: any) {
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
       barcode: uuidv4(),
-      combinedSlabNumber: sipl.combinedSiplNumber + "-" + (lastSerialNumber + index + 1),
+      combinedSlabNumber: sipl.invoiceCode + "-" + (lastSerialNumber + index + 1),
     }));
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);

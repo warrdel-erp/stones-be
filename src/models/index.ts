@@ -477,6 +477,11 @@ User.hasMany(ProductFinish, { foreignKey: "createdBy", as: "productFinishes" })
 ProductBaseColor.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
 User.hasMany(ProductBaseColor, { foreignKey: "createdBy", as: "productBaseColors" })
 
+JournalEntry.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(JournalEntry, { foreignKey: "locationId", as: "journalEntries" });
+
+JournalEntry.belongsTo(LedgerAccount, { foreignKey: "partyLedgerAccountId", as: "partyLedgerAccount" })
+
 export {
   Client,
   User,
