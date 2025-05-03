@@ -13,6 +13,49 @@ export const createInvoice = async (data: SoInvoice, transaction: Transaction) =
 /**
  * Fetch all invoices
  */
+export const getAllInvoicesList = async (clientId: number, filter: WhereOptions, page: number, limit: number, transaction?: Transaction) => {
+  const offset = (page - 1) * limit;
+
+  return await models.SalesOrderInvoice.findAndCountAll({
+    where: {
+      ...filter,
+      clientId
+    },
+    include: [
+      {
+        model: models.Customer,
+        as: "customer",
+        attributes: ["id", "name", "primaryPhoneNumber", "secondaryPhoneNumber"],
+      },
+      {
+        model: models.LoadingOrder,
+        as: "loadingOrder",
+        include: [
+          {
+            model: models.SalesOrder,
+            as: "salesOrder"
+          },
+          {
+            model: models.PackagingList,
+            as: "packagingList"
+          },
+          {
+            model: models.SalesOrderProduct,
+            as: "salesOrderProducts"
+          },
+        ]
+      },
+    ],
+    transaction,
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+};
+
+/**
+ * Fetch all invoices
+ */
 export const getAllInvoices = async (filter: WhereOptions, transaction?: Transaction) => {
   return await models.SalesOrderInvoice.findAll({
     where: filter,

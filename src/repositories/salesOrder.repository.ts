@@ -26,7 +26,7 @@ export const getAllSalesOrders = async (page: number, limit: number) => {
       ],
     },
     include: [
-      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope", "daysForHold"] },
+      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope", "daysForHold", "name"] },
       { model: models.User, as: "createdBy", attributes: ["id", "username"] },
       { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
       { model: models.Notes, as: "notes" },

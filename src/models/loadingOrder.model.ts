@@ -15,6 +15,9 @@ const LoadingOrder = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    code: {
+      type: DataTypes.STRING
+    },
     clientLoNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
@@ -23,6 +26,9 @@ const LoadingOrder = sequelize.define(
       type: DataTypes.DATEONLY,
       defaultValue: DataTypes.NOW,
       allowNull: false,
+    },
+    soLoadingOrderNumber: {
+      type: DataTypes.INTEGER,
     },
     expDeliveryDate: {
       type: DataTypes.DATEONLY,
@@ -90,12 +96,16 @@ const LoadingOrder = sequelize.define(
         unique: true,
         fields: ["clientId", "clientLoNumber"],
       },
+      {
+        unique: true,
+        fields: ["salesOrderId", "soLoadingOrderNumber"],
+      },
     ],
   }
 );
 
 // Hook to prevent updates if invoiced = true
-LoadingOrder.beforeUpdate(async (loadingOrder, options) => {
+LoadingOrder.beforeUpdate(async (loadingOrder) => {
   const loadingOrderExisting = await LoadingOrder.findByPk(loadingOrder.dataValues.id);
 
   if (loadingOrderExisting?.dataValues.invoiced) {
@@ -105,6 +115,8 @@ LoadingOrder.beforeUpdate(async (loadingOrder, options) => {
 
 // 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
 LoadingOrder.beforeCreate(async (loadingOrder: any) => {
+
+  //  Generate clientLoNumber
   if (!loadingOrder.clientId) {
     throw new Error("Client ID is required to generate clientLoNumber.");
   }
@@ -117,6 +129,23 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
   lastLOAccordingToClient = lastLOAccordingToClient?.get({ plain: true });
 
   loadingOrder.clientLoNumber = !!lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
+
+  //  Generate soLoadingOrderNumber
+
+  if (!loadingOrder.salesOrderId) {
+    throw new AppError("salesOrderId is required to generate soLoadingOrderNumber.", 400);
+  }
+
+  const lastLoAccordingToSo: any = await LoadingOrder.findOne({
+    where: { salesOrderId: loadingOrder.salesOrderId },
+    order: [["soLoadingOrderNumber", "DESC"]],
+  });
+
+  const salesOrder: any = await SalesOrder.findByPk(loadingOrder.salesOrderId)
+
+  loadingOrder.soLoadingOrderNumber = lastLoAccordingToSo ? lastLoAccordingToSo.soLoadingOrderNumber + 1 : 1;
+  loadingOrder.code = `LO ${salesOrder.clientSoNumber}-${loadingOrder.soLoadingOrderNumber}`;
+
 });
 
 export default LoadingOrder;

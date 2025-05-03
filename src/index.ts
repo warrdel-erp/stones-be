@@ -40,6 +40,7 @@ import productSubCategoryRoutes from "./routes/productSubCategory.routes";
 import productGroupRoutes from "./routes/productGroup.routes";
 import productBaseColorRoutes from "./routes/productBaseColor.routes";
 import productFinishRoutes from "./routes/productFinish.routes";
+import soInvoiceRoutes from "./routes/soInvoice.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -81,6 +82,7 @@ app.use("/api/productSubCategory", productSubCategoryRoutes);
 app.use("/api/productGroup", productGroupRoutes);
 app.use("/api/productBaseColor", productBaseColorRoutes);
 app.use("/api/productFinish", productFinishRoutes);
+app.use("/api/soInvoice", soInvoiceRoutes);
 
 // handler error globally.
 app.use(errorHandler);

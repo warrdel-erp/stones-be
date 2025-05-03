@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import LoadingOrder from "./loadingOrder.model";
 import Client from "./client";
+import SalesOrder from "./salesOrder.model";
+import { AppError } from "../helper/appError";
 
 const PackagingList = sequelize.define(
   "PackagingList",
@@ -10,6 +12,12 @@ const PackagingList = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    code: {
+      type: DataTypes.STRING
+    },
+    soPackagingListNumber: {
+      type: DataTypes.INTEGER,
     },
     clientPlNumber: {
       type: DataTypes.INTEGER,
@@ -25,6 +33,16 @@ const PackagingList = sequelize.define(
       allowNull: false,
       references: {
         model: LoadingOrder,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    salesOrderId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: SalesOrder,
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -52,6 +70,10 @@ const PackagingList = sequelize.define(
         unique: true,
         fields: ["clientId", "clientPlNumber"],
       },
+      {
+        unique: true,
+        fields: ["salesOrderId", "soPackagingListNumber"],
+      },
     ],
   }
 );
@@ -70,6 +92,23 @@ PackagingList.beforeCreate(async (packagingList: any) => {
   lastPLAccordingToClient = lastPLAccordingToClient?.get({ plain: true });
 
   packagingList.clientPlNumber = !!lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
+
+  //  Generate soPackagingListNumber
+
+  if (!packagingList.salesOrderId) {
+    throw new AppError("salesOrderId is required to generate soPackagingListNumber.", 400);
+  }
+
+  const lastPLAccordingToSo: any = await PackagingList.findOne({
+    where: { salesOrderId: packagingList.salesOrderId },
+    order: [["soPackagingListNumber", "DESC"]],
+  });
+
+  const salesOrder: any = await SalesOrder.findByPk(packagingList.salesOrderId)
+
+  packagingList.soPackagingListNumber = lastPLAccordingToSo ? lastPLAccordingToSo.soPackagingListNumber + 1 : 1;
+  packagingList.code = `PL ${salesOrder.clientSoNumber}-${packagingList.soPackagingListNumber}`;
+
 });
 
 

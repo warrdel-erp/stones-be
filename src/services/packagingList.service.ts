@@ -11,7 +11,12 @@ export const createPackagingList = async (data: any) => {
   const transaction = await sequelize.transaction();
 
   try {
-    let packagingList: any = await packagingListRepository.createPackagingList(data, transaction);
+
+    const loadingOrder = (await loadingOrderRepository.getLoadingOrderByIdSimple(data.loadingOrderId))?.get({
+      plain: true,
+    });
+
+    let packagingList: any = await packagingListRepository.createPackagingList({ ...data, salesOrderId: loadingOrder.salesOrderId }, transaction);
     packagingList = packagingList.get({ plain: true });
 
     let updatedProducts = [];
@@ -24,9 +29,6 @@ export const createPackagingList = async (data: any) => {
         stage: SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
       }));
 
-      const loadingOrder = (await loadingOrderRepository.getLoadingOrderByIdSimple(data.loadingOrderId))?.get({
-        plain: true,
-      });
 
       // update sales order products with packaging list id and stage -> packagingList.
       updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(
