@@ -1,4 +1,4 @@
-import { Transaction, WhereOptions } from "sequelize";
+import { Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { SoInvoice } from "../models/salesOrderInvoice.model";
 import { Op, fn, col } from "sequelize";
@@ -22,6 +22,10 @@ export const getAllInvoicesList = async (clientId: number, filter: WhereOptions,
       clientId
     },
     include: [
+      {
+        model: models.Truck,
+        as: "truck",
+      },
       {
         model: models.Customer,
         as: "customer",
@@ -106,3 +110,12 @@ export const getTotalAmountForClient = async (clientId: number) => {
   return result?.totalAmount ?? 0;
 };
 
+export const assignTruck = async (id: number, truckId: number) => {
+  await models.SalesOrderInvoice.update({ truckId, truckAssignedOn: new Date() }, { where: { id } })
+}
+
+export const getInvoiceById = async (id: number, transaction?: Transaction) => {
+  return await models.SalesOrderInvoice.findByPk(id, {
+    transaction,
+  });
+};

@@ -4,7 +4,10 @@ import * as soInvoiceController from '../controllers/soInvoice.controller'
 
 const router = Router();
 
-// hold-unHold slab
+// get all so invoice.
 router.get("/", authenticateUser, soInvoiceController.getAllSoInvoiceList);
 
-export default router
+// assign truck to SO invoice.
+router.put("/:id/assignTruck", authenticateUser, soInvoiceController.assignTruck);
+
+export default router; 

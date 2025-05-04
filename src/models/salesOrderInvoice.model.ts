@@ -32,6 +32,12 @@ const SalesOrderInvoice = sequelize.define(
     soInvoiceNumber: {
       type: DataTypes.INTEGER
     },
+    truckId: {
+      type: DataTypes.INTEGER
+    },
+    truckAssignedOn: {
+      type: DataTypes.DATE
+    },
     clientSoInvoiceNumber: {
       type: DataTypes.STRING,
       allowNull: true,

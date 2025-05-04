@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as salesOrderInvoiceService from "../services/salesOrderInvoice.service"
+import { AppError } from "../helper/appError";
 
 // Get all po with pagination.
 export const getAllSoInvoiceList = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -17,4 +18,19 @@ export const getAllSoInvoiceList = catchAsync(async (req: AuthRequest, res: Resp
         page,
         total: result.count
     });
+});
+
+// Assign Truck to SO invoice.
+export const assignTruck = catchAsync(async (req: AuthRequest, res: Response) => {
+
+    const { id } = req.params;
+    const truckId = req.body.truckId;
+
+    if (!truckId) {
+        throw new AppError("truckId is required.", 400);
+    }
+
+    const result = await salesOrderInvoiceService.assignTruck(Number(id), truckId);
+
+    SuccessResponse(res, 200, "Truck assigned successfully", result);
 });

@@ -482,6 +482,9 @@ Location.hasMany(JournalEntry, { foreignKey: "locationId", as: "journalEntries" 
 
 JournalEntry.belongsTo(LedgerAccount, { foreignKey: "partyLedgerAccountId", as: "partyLedgerAccount" })
 
+SalesOrderInvoice.belongsTo(Truck, { foreignKey: "truckId", as: "truck" })
+Truck.hasMany(SalesOrderInvoice, { foreignKey: "truckId", as: "salesOrderInvoices" })
+
 export {
   Client,
   User,

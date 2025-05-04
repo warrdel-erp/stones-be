@@ -1,6 +1,6 @@
 import _ from "lodash";
 import * as salesOrderInvoiceRepository from "../repositories/soInvoice.repository";
-
+import { AppError } from "../helper/appError";
 
 export const fetchTotalAmountFromLastNDays = async (fromDate: string, toDate: string, clientId: number) => {
     return await salesOrderInvoiceRepository.getTotalAmountFromLastNDays(fromDate, toDate, clientId);
@@ -8,6 +8,16 @@ export const fetchTotalAmountFromLastNDays = async (fromDate: string, toDate: st
 
 export const getTotalAmountForClient = async (clientId: number) => {
     return await salesOrderInvoiceRepository.getTotalAmountForClient(clientId);
+}
+
+export const assignTruck = async (id: number, truckId: number) => {
+    const soInvoice = (await salesOrderInvoiceRepository.getInvoiceById(id))?.get({ plain: true });
+
+    if (!soInvoice) {
+        throw new AppError("Invoice does not exists.", 400)
+    }
+
+    return await salesOrderInvoiceRepository.assignTruck(id, truckId);
 }
 
 export const getAllSoInvoiceList = async (clientId: number, filter: any, page: number, limit: number) => {
@@ -29,4 +39,3 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
 
     return data
 }
-
