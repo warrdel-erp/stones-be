@@ -30,6 +30,12 @@ export const getAllInvoicesList = async (clientId: number, filter: WhereOptions,
         model: models.Customer,
         as: "customer",
         attributes: ["id", "name", "primaryPhoneNumber", "secondaryPhoneNumber"],
+        include: [
+          {
+            model: models.CustomerAddress,
+            as: "addresses",
+          },
+        ]
       },
       {
         model: models.LoadingOrder,

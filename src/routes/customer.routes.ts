@@ -17,7 +17,7 @@ router.get("/:customerId/addresses", customerAddressController.getAddressesByCus
 // Update vendor.
 router.put("/:id", authenticateUser, customerController.updateCustomerController);
 
-// Get all vendors.
+// Get all customers.
 router.get("/", authenticateUser, customerController.getAllCustomersController);
 
 // get customer invoices.

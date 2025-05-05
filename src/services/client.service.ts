@@ -1,7 +1,5 @@
 import bcrypt from "bcryptjs";
 import { AppError } from "../helper/appError";
-import * as clientRepository from "../repositories/client.repository";
-import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import { LedgerAccount } from "../models/ledgerAccount.model";
 import {
   COA_SUB_HEADERS,
@@ -11,6 +9,10 @@ import {
 } from "../constants/coa";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
+
+import * as clientRepository from "../repositories/client.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as userRepository from '../repositories/user.repository'
 
 /**
  * Register Client
@@ -153,3 +155,11 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
 
   return createdAccounts;
 };
+
+export const checkEmailAvailability = async (email: string) => {
+  const clientExists = await clientRepository.findClientByEmail(email);
+  const userExists = await userRepository.getUserByEmail(email);
+
+  return !!userExists || !!clientExists
+
+}

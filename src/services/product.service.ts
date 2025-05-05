@@ -11,8 +11,8 @@ export const addProduct = async (productData: any, userId: number) => {
 };
 
 // Fetch all products
-export const fetchAllProducts = async (page: number, limit: number, search?: string, onlyWithSlabs?: boolean) => {
-  let products = await productRepository.getAllProducts(page, limit, search, onlyWithSlabs);
+export const fetchAllProducts = async (page: number, limit: number, search?: string, filter?: any, onlyWithSlabs?: boolean) => {
+  let products = await productRepository.getAllProducts(page, limit, search, filter, onlyWithSlabs);
 
   products.products = products.products.map((product: any) => {
     product = product.get({ plain: true });

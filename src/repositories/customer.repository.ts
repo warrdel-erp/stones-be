@@ -20,10 +20,11 @@ export const updateCustomerById = async (id: number, data: any) => {
 };
 
 // Get all customers.
-export const getAllCustomers = async (page: number, limit: number, search?: string) => {
+export const getAllCustomers = async (page: number, limit: number, search?: string, filter?: any) => {
   const offset = (page - 1) * limit;
 
   const { rows: customers, count: total } = await models.Customer.findAndCountAll({
+    where: { ...filter },
     include: [
       {
         model: models.CustomerAddress,

@@ -57,8 +57,8 @@ export const updateCustomer = async (id: number, data: any) => {
 };
 
 // Get all customers with pagination.
-export const fetchAllCustomers = async (page: number, limit: number, search?: string) => {
-  let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, search);
+export const fetchAllCustomers = async (page: number, limit: number, search?: string, filter?: any) => {
+  let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, search, filter);
 
   customers = customers.map((customer: any) => {
     customer.get({ plain: true });

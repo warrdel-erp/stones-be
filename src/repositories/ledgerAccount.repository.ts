@@ -19,13 +19,13 @@ export const getLedgerAccountByFilter = async (filter: WhereOptions, transaction
 };
 
 // Get all ledger accounts.
-export const getLedgerAccounts = async (page: number, limit: number, filters: any) => {
+export const getLedgerAccounts = async (page: number, limit: number, clientId: number, filters: any) => {
   const offset = (page - 1) * limit;
 
   const whereCondition: any = filters;
 
   return await models.LedgerAccount.findAndCountAll({
-    where: whereCondition,
+    where: { ...whereCondition, clientId },
     limit,
     offset,
     order: [["id", "DESC"]],

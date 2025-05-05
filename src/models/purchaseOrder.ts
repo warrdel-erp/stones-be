@@ -3,7 +3,7 @@ import { sequelize } from "../config/database";
 import Location from "./location";
 import User from "./user";
 import Vendor from "./vendor";
-import Client from "./client";
+import Client from "./client.model";
 import { PO_STATUS } from "../constants/tableTypes";
 
 const PurchaseOrder = sequelize.define(

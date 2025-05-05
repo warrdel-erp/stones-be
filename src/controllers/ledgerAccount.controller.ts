@@ -11,10 +11,12 @@ export const createLedgerAccount = catchAsync(async (req, res) => {
 });
 
 // Get all ledger accounts.
-export const getLedgerAccounts = catchAsync(async (req, res) => {
+export const getLedgerAccounts = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, ...filters } = req.query;
 
-  const result = await ledgerAccountService.getLedgerAccounts(Number(page), Number(limit), filters);
+  const clientId = req.user?.clientId
+
+  const result = await ledgerAccountService.getLedgerAccounts(Number(page), Number(limit), Number(clientId), filters);
 
   return SuccessResponse(res, 200, "Ledger Account list fetched successfully", result.rows, {
     total: result.count,

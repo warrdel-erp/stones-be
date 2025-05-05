@@ -7,12 +7,12 @@ export const createProduct = async (productData: any) => {
 };
 
 // Get all products
-export const getAllProducts = async (page: number, limit: number, search?: string, onlyWithSlabs?: boolean) => {
+export const getAllProducts = async (page: number, limit: number, search?: string, filter?: any, onlyWithSlabs?: boolean) => {
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
   const { rows: products, count: total } = await models.Product.findAndCountAll({
-    where: whereClause,
+    where: { ...whereClause, ...filter },
     include: [
       {
         model: models.ProductCategory,

@@ -5,8 +5,8 @@ export const createLedgerAccount = async (data: any) => {
   return await ledgerAccountRepository.createLedgerAccount(data);
 };
 
-export const getLedgerAccounts = async (page = 1, limit = 10, filters: any) => {
-  let data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, filters);
+export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, filters: any) => {
+  let data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, clientId, filters);
 
   data.rows = data.rows.map((e: any) => {
     e = e.get({ plain: true });

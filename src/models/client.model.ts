@@ -9,7 +9,11 @@ const Client = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    firstName: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    lastName: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
@@ -28,49 +32,53 @@ const Client = sequelize.define(
         isEmail: true,
       },
     },
-    locationShortName: {
-      type: DataTypes.STRING(100),
+    phoneNumber: {
+      type: DataTypes.STRING(255),
       allowNull: false,
+      unique: {
+        name: "unique_phone_number_constraint",
+        msg: "unique phone_number",
+      },
     },
     clientType: {
       type: DataTypes.STRING(100),
-      allowNull: false,
+      allowNull: true,
     },
     address: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     country: {
       type: DataTypes.STRING(100),
-      allowNull: false,
+      allowNull: true,
     },
     city: {
       type: DataTypes.STRING(100),
-      allowNull: false,
+      allowNull: true,
     },
     pincode: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
     },
     tax: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: true,
     },
     priceLevel: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: true,
     },
     paymentTerms: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     licenseNumber: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     userCount: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

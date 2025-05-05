@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Customer from "./customer.model";
 import LoadingOrder from "./loadingOrder.model";
-import Client from "./client";
+import Client from "./client.model";
 import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
 

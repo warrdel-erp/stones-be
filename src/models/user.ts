@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Client from "./client";
+import Client from "./client.model";
 import Location from "./location";
 
 // Define User Model

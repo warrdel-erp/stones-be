@@ -2,7 +2,7 @@ import { DataTypes, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user";
 import PurchaseOrder from "./purchaseOrder";
-import Client from "./client";
+import Client from "./client.model";
 import Location from "./location";
 
 const SIPL = sequelize.define(

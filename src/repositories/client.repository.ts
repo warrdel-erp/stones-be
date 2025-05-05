@@ -22,8 +22,8 @@ export const getAllClients = async (page: number, limit: number, search?: string
   // Define search condition if search query is provided
   const whereClause = search
     ? {
-        [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }],
-      }
+      [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }],
+    }
     : {};
 
   // Fetch clients along with the total count

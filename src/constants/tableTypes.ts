@@ -49,7 +49,7 @@ export const JOURNAL_ENTRY_TYPE = {
 
 export const CUSTOMER_ADDRESS_TYPES = {
   SHIPPING: "SHIPPING",
-  BILLING: "REMIT",
+  REMIT: "REMIT",
 } as const;
 
 export const PAYMENT_METHOD = {
@@ -145,5 +145,4 @@ export const VEHICLE_TYPE = {
 export const CUSTOMER_STATUS = {
   ACTIVE: "active",
   INACTIVE: "inactive",
-  BLOCKED: "blocked",
 } as const;

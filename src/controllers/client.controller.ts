@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import catchAsync from "../helper/asyncCatch";
 import * as clientService from "../services/client.service";
 import { SuccessResponse } from "../helper/response";
@@ -44,4 +44,15 @@ export const updateClient = catchAsync(async (req, res) => {
   }
 
   return SuccessResponse(res, 200, "Vendor updated successfully", updatedClient);
+});
+
+// check is given email already exists in client or user data.
+export const checkEmailExists = catchAsync(async (req, res) => {
+  const email = req.query;
+
+  console.log(email)
+  // Attempt to update the client
+  const emailExists = await clientService.checkEmailAvailability(String(email.email));
+
+  return SuccessResponse(res, 200, "Email exists data fetched successfully", emailExists);
 });

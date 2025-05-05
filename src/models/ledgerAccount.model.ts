@@ -2,7 +2,7 @@ import { CreateOptions, DataTypes, Transaction } from "sequelize";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
-import Client from "./client";
+import Client from "./client.model";
 
 export type LedgerAccount = {
   name?: string;
