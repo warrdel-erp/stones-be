@@ -163,7 +163,7 @@ export async function handleCreateSlabs(slabData: any) {
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
       barcode: uuidv4(),
-      combinedSlabNumber: sipl.invoiceCode + "-" + (lastSerialNumber + index + 1),
+      combinedSlabNumber: sipl.invoiceCode.split(' ')[1] + "-" + (lastSerialNumber + index + 1),
     }));
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);

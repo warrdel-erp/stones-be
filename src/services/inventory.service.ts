@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import * as productRepository from "../repositories/product.repository";
@@ -30,7 +31,21 @@ export const fetchProductsWithSlabsByLocation = async (page: number, limit: numb
         })
       );
 
-      return product;
+      const totalQuantity = (_.sumBy(
+        _.flatMap(product.sipls, 'slabs'),
+        item => item.receivingWidth * item.receivingWidth
+      ) / 144).toFixed(2);
+
+      const totalSlabsCount = _.flatMap(product.sipls, 'slabs').length;
+
+      const totalHoldQuantity = (_.sumBy(
+        _.flatMap(product.sipls, 'slabs').filter(e => e.isHold),
+        item => item.receivingWidth * item.receivingWidth
+      ) / 144).toFixed(2);
+
+      const totalHoldSlabsCount = _.flatMap(product.sipls, 'slabs')?.filter(e => e.isHold)?.length;
+
+      return { ...product, totalQuantity, totalSlabsCount, totalHoldQuantity, totalHoldSlabsCount };
     })
   );
 

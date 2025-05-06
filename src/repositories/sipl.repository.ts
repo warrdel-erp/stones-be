@@ -202,21 +202,6 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
         where: { productId }, // Filter only slabs belonging to the given product
         as: "slabs",
         required: true,
-        attributes: {
-          include: [
-            [
-              fn(
-                "CONCAT",
-                col("slabs->sipl.purchaseOrder.clientPoNumber"),
-                "-",
-                col("slabs->sipl.poSiplNumber"),
-                "-",
-                col("slabs.serialNumber")
-              ),
-              "combinedSerialNumber",
-            ],
-          ],
-        },
         include: [
           {
             model: models.Product,
