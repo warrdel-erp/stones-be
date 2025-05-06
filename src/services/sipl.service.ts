@@ -152,7 +152,7 @@ export async function handleCreateSlabs(slabData: any) {
     let lastSlabNumber = await slabRepository.getLastSlabNumber(slabData.productId, slabData.siplId);
 
     if (slabData.slabNumber > lastSlabNumber) {
-      lastSlabNumber = slabData.slabNumber;
+      lastSlabNumber = Number(slabData.slabNumber) - 1;
     }
 
     // Pair each slab with its own inventory product

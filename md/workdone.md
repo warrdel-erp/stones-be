@@ -131,3 +131,14 @@
 ---
 
 1. error in bill creation.
+
+---
+
+1. serial number in SIPL journal entries.
+2. SO journal entries.
+3. cash & cash equivalent in make payment.
+
+---
+
+1. Payment pending tab in PO.
+2. slab number creation as required.

@@ -7,6 +7,9 @@ import * as siplProductRepository from "../repositories/siplProducts.repository"
 import * as containerService from "../services/container.service";
 import { Transaction } from "sequelize";
 import { SCOP } from "../constants";
+import * as paymentBillsRepository from '../repositories/paymentBills.repository'
+import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import _ from "lodash";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -92,14 +95,34 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
-  let { rows, count }: { rows: any[]; count: number } = await poRepository.getAllPurchaseOrders(
-    page,
-    limit,
-    filter || {}
-  );
+  let { rows, count }: { rows: any[]; count: any } = { rows: [], count: 0 }
 
-  rows = rows.map((e) => {
-    const purchaseOrder = e.get({ plain: true }); // Convert Sequelize instance to plain object
+  if (filter?.status == "PAYMENT_PENDING") {
+    let result = await poRepository.getPaymentPendingPurchaseOrders(
+      page,
+      limit,
+      filter || {}
+    );
+
+    rows = result.rows;
+    count = result.count;
+
+  } else {
+
+    let result = await poRepository.getAllPurchaseOrders(
+      page,
+      limit,
+      filter || {}
+    );
+    rows = result.rows;
+    count = result.count;
+  }
+
+  rows = await Promise.all(rows.map(async (purchaseOrder) => {
+
+    if (purchaseOrder?.get) {
+      purchaseOrder = purchaseOrder.get({ plain: true }); // Convert Sequelize instance to plain object
+    }
 
     // Get vendor scope for purchaseOrder
     purchaseOrder.supplier.vendorScope = SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;
@@ -136,10 +159,14 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
       0
     );
 
+    purchaseOrder.totalPaidAmount = _.sum(await Promise.all(purchaseOrder.sipls.map((sipl: any) => {
+      return paymentBillsRepository.getTotalPaidAmountOfBill(sipl.id, PAYMENT_BILL_REFERENCE_TYPES.SIPL);
+    })))
+
     return {
       ...purchaseOrder,
     };
-  });
+  }));
 
   return {
     data: rows,

@@ -1,4 +1,4 @@
-import { Op, Transaction, WhereOptions } from "sequelize";
+import { col, fn, literal, Op, Sequelize, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { PO_STATUS } from "../constants/tableTypes";
 import { get } from "lodash";
@@ -104,6 +104,86 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
     offset,
     order: [["createdAt", "DESC"]],
   });
+};
+
+// Get po with pagination
+export const getPaymentPendingPurchaseOrders = async (page: number, limit: number, filter: { [k: string]: string }) => {
+  const offset = (page - 1) * limit;
+
+  const { fromDate, toDate, ...otherFilters } = filter;
+
+  const dateRange: any = {};
+
+  if (fromDate && toDate) {
+    dateRange.poDate = { [Op.between]: [fromDate, toDate] };
+  } else if (fromDate) {
+    dateRange.poDate = { [Op.gte]: fromDate };
+  } else if (toDate) {
+    dateRange.poDate = { [Op.lte]: toDate };
+  }
+
+  const pos: any = await models.PurchaseOrder.findAndCountAll({
+    attributes: [
+      "id",
+      [
+        Sequelize.fn(
+          "COALESCE",
+          Sequelize.fn(
+            "SUM",
+            Sequelize.literal("`sipls->siplProducts`.`quantity` * `sipls->siplProducts`.`unitPrice`")
+          ),
+          0
+        ),
+        "totalSIPLProductQuantity"
+      ],
+      [
+        Sequelize.fn(
+          "COALESCE",
+          Sequelize.fn(
+            "SUM",
+            Sequelize.literal("`sipls->paymentBills`.`amount`")
+          ),
+          0
+        ),
+        "totalPayedBillsAmount"
+      ]
+    ],
+    include: [
+      {
+        model: models.SIPL,
+        as: 'sipls', // Adjust alias if necessary
+        attributes: [],
+        include: [
+          {
+            model: models.SIPLProduct,
+            as: 'siplProducts', // Adjust alias if necessary
+            attributes: [] // We don't need to select fields from siplProducts, just to aggregate the quantities
+          },
+          {
+            model: models.PaymentBill,
+            as: 'paymentBills', // Adjust alias if necessary
+            attributes: [] // We don't need to select fields from siplProducts, just to aggregate the quantities
+          },
+        ]
+      }
+    ],
+    limit,
+    offset,
+    subQuery: false,
+    order: [["createdAt", "DESC"]],
+    group: ['PurchaseOrder.id'], // Ensure we group by purchase_order's ID,
+    having: Sequelize.literal(
+      "COALESCE(SUM(`sipls->siplProducts`.`quantity` * `sipls->siplProducts`.`unitPrice`), 0) > COALESCE(SUM(`sipls->paymentBills`.`amount`), 0)"
+    )
+  });
+
+  pos.rows = await Promise.all(pos.rows.map(async (po: any) => {
+    const poData = (await getPurchaseOrderById(po.id))
+
+    return { ...structuredClone(poData), ...po.get({ plain: true }) }
+  }))
+
+  return pos
 };
 
 // Get PO detail by ID
