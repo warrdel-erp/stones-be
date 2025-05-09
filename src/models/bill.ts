@@ -120,14 +120,14 @@ Bill.beforeCreate(async (bill: any) => {
     : 1;
 
   // Auto-increment siplBillNumber only if referenceType is 'sipl'
-  if (bill.referenceType === "sipl") {
+  if (bill.referenceType === BILL_REFERENCE_TYPES.SIPL) {
     if (!bill.referenceId) {
       throw new Error("referenceId (SIPL ID) is required for siplBillNumber.");
     }
 
     let lastSiplBill: any = await Bill.findOne({
       where: {
-        referenceType: "sipl",
+        referenceType: BILL_REFERENCE_TYPES.SIPL,
         referenceId: bill.referenceId,
       },
       order: [["siplBillNumber", "DESC"]],

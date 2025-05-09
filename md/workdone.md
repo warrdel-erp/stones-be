@@ -142,3 +142,12 @@
 
 1. Payment pending tab in PO.
 2. slab number creation as required.
+
+---
+
+1. freight bill code.
+
+---
+
+1. total of ledger accounts.
+2. calculations of create LO & PL.

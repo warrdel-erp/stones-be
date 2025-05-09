@@ -12,6 +12,9 @@ router.get("/", authenticateUser, billController.getAllBills);
 // Get new PO number
 router.get("/newBillNumber", authenticateUser, billController.getNewBillNumber);
 
+// Route to get last bill as per SIPL
+router.get("/lastBillAsPerSipl/:siplId", authenticateUser, billController.getLastBillAsPerSIPL);
+
 // Route to get a single client
 router.get("/:id", authenticateUser, billController.getBillById);
 

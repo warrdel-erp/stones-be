@@ -117,3 +117,7 @@ export async function billForVendor(vendorId: number) {
 export const getTotalBillValueByClientId = async (clientId: number) => {
   return await billRepository.getTotalBillValueByClient(clientId)
 }
+
+export const getLastBillAsPerSIPL = (siplId: number) => {
+  return billRepository.getLastBillAsPerSIPL(siplId);
+}

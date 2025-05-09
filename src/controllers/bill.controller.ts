@@ -43,3 +43,11 @@ export const getNewBillNumber = catchAsync(async (req: AuthRequest, res: Respons
   const data = await billService.getBillNumber(clientId!);
   SuccessResponse(res, 200, "New Bill number fetched successfully.", data);
 });
+
+// Get new Bill number
+export const getLastBillAsPerSIPL = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { siplId } = req.params;
+
+  const data = await billService.getLastBillAsPerSIPL(Number(siplId));
+  SuccessResponse(res, 200, "Last bill as per SIPL fetched successfully.", data);
+});

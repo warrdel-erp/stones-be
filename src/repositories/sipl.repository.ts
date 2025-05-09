@@ -158,9 +158,6 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
         attributes: ["location"],
       },
     ],
-    attributes: {
-      include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("poSiplNumber")), "invoiceCode"]],
-    },
     transaction,
   });
 };

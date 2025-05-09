@@ -1,5 +1,6 @@
 import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES } from "../constants/coa";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as journalEntriesRepository from "../repositories/journalEntry.repository";
 
 export const createLedgerAccount = async (data: any) => {
   return await ledgerAccountRepository.createLedgerAccount(data);
@@ -8,15 +9,17 @@ export const createLedgerAccount = async (data: any) => {
 export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, filters: any) => {
   let data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, clientId, filters);
 
-  data.rows = data.rows.map((e: any) => {
+  data.rows = await Promise.all(data.rows.map(async (e: any) => {
     e = e.get({ plain: true });
 
     e.subHeader = COA_SUB_HEADERS.find((k) => k.id == e.subHeaderId);
     e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
     e.parentType = COA_TYPES.find((k) => k.id == e.header.parent_id);
 
-    return e;
-  });
+    const finalJournalAmount = await journalEntriesRepository.getFinalAmountForLedger(e.id);
+
+    return { ...e, finalAmount: Number(e.openingBalance) + finalJournalAmount };
+  }));
 
   return data;
 };

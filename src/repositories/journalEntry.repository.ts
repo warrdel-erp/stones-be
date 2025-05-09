@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { fn, literal, Transaction } from "sequelize";
 import * as models from "../models";
 import { type JournalEntry } from "../models/journalEntry.model";
 import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -109,3 +109,24 @@ export const findAll = async (filters: any, clientId: number) => {
 
   return await Promise.all(subReferenceDataPromises);
 };
+
+export const getFinalAmountForLedger = async (ledgerId: number) => {
+
+  const result: any = await models.JournalEntry.findOne({
+    attributes: [
+      [
+        fn(
+          "SUM",
+          literal(`CASE WHEN type = 'dr' THEN amount ELSE -amount END`)
+        ),
+        "netAmount"
+      ]
+    ],
+    where: {
+      ledgerId
+    },
+    raw: true,
+  });
+
+  return Number(result.netAmount) || 0;
+}

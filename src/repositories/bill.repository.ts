@@ -1,5 +1,6 @@
 import { col, fn, Op, Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
+import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
   return await models.Bill.create(billData, { transaction });
@@ -110,3 +111,13 @@ export const getTotalBillValueByClient = async (clientId: number) => {
 
   return Number(result?.dataValues?.totalValue) ?? 0;
 };
+
+export const getLastBillAsPerSIPL = async (siplId: number) => {
+  return await models.Bill.findOne({
+    where: {
+      referenceType: BILL_REFERENCE_TYPES.SIPL,
+      referenceId: siplId,
+    },
+    order: [["siplBillNumber", "DESC"]],
+  });
+}

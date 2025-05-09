@@ -140,3 +140,131 @@
 copy loading order to invoice page.
 create a SO journal entries page in invoice.
 copy journal entry page from PO list.
+
+---
+
+Cross check.
+
+Dashboard
+
+1. Sales in 30 days amount.
+2. Purchase amount
+3. Total pending amount customer and vendor
+
+Product accounts
+1st -> marchecdise accounts.
+2nd -> goods account -> Goods sold
+3rd -> header of -> cogs
+
+—————————
+
+Customer -> 1. User list 2. Remove price level. In list. ✅
+
+PO->
+only can be cancelled which does not contain SIPL.
+
+SIPL creation -> SIPL number, invoice number remove.✅
+
+SIPL list -> , Transaction (correct SIPL number), remove invoice number. ✅
+
+Dashboard -> SIPL In transit
+
+Inventory -> not working. ✅
+
+Make payment is not correct.
+Payments on SIPL page.
+
+SIPL Journal entries error. ✅
+SIPL journal entry id.
+
+Create SO -> add slab quantity, data according to sipl
+
+Don’t show picked in SO invoice
+
+So product select total quantity. ✅
+
+SO journal entry order
+
+Header have cr or dr types
+
+———
+Make payment account dropdown => cash and cash equivalents (subheader)
+
+Freight item expense (type) .
+
+Bills invoiceCode.
+
+Add a vendor bill option.
+
+————
+
+Dashboard =>
+welcome message ✅
+loading … with blank data
+
+product=>
+Single slab price in product list. ✅  
+ Edit in all.
+active inactive ✅
+Customer =>
+payment pending for customer.
+active, inactive, payment pending ✅
+Supplier =>
+active inactive ✅
+
+Vendor =>
+Freight type ✅
+
+General ledger =>
+balance is not visible in list.
+
+#######
+Journal entry =>
+opening balance ✅
+
+Account payable, ✅
+Account receivable. ✅
+Sales invoice ✅.
+
+In COA put type in header
+
+Po =>
+location contact detail.
+SIPL SIPL two times ✅
+
+Slab =>
+barcode pattern
+slab number should start with given number ✅
+Freight bill =>
+Freight bill number.
+
+Inventory =>
+first view data is not complete.
+landed cost
+selling price
+
+Inventory received date in sipl detail page
+
+Accounts in payment.
+Serial number and location in journal entry.
+
+So => tax
+Add loading order => calculations.
+Add packaging list => calculations
+
+SO journal entry
+So list => Sub transaction
+
+Return , sales invoice => same data as deliveries.
+
+Journal entry balance calculation =>
+dr type account => dr -cr
+cr type account => cr - dr
+
+Location list.
+Transaction list.
+
+Icons
+Location wise.
+
+---
