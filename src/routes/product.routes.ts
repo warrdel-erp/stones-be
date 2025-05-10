@@ -11,6 +11,9 @@ router.post("/", authenticateUser, productController.createProduct);
 router.get("/", authenticateUser, productController.getProducts);
 
 // Get all products.
+router.get("/landedCost/:productId", authenticateUser, productController.getLandedCost);
+
+// Get all products.
 router.get("/:productId/tabs/:tab", authenticateUser, productController.getProductsTabsData);
 
 // Update product

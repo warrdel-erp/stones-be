@@ -24,7 +24,6 @@ router.get("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProdu
 // Get new SO number
 router.get("/newSoNumber", authenticateUser, salesOrderController.getNewSoNumber);
 
-
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);
 

@@ -79,3 +79,9 @@ export const getInventoryBalance = async (productId: number) => {
     available,
   };
 };
+
+export const productLandedCosts = async (productId: number) => {
+  const averageLandedCost = await slabRepository.getAverageLandedCost(productId);
+  const lastLandedCost = await slabRepository.getLastLandedCost(productId);
+  return { ...averageLandedCost, lastLandedCost: lastLandedCost?.dataValues.landedUnitCost }
+}

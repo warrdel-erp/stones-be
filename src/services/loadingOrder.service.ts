@@ -400,7 +400,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         transaction
       );
 
-
       await journalEntryRepository.create(
         {
           amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
@@ -416,7 +415,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
           processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
           entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.getSIPLByIdSimple,
+          entryForId: loadingOrder.id,
+
           locationId,
           partyLedgerAccountId: ledgerAccountForFinishedGoods.id
         },

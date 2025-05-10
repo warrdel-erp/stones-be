@@ -24,7 +24,7 @@ const Slab = sequelize.define(
     },
     combinedSlabNumber: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     entryUnit: {
       type: DataTypes.ENUM(...Object.values(SLAB_ENTRY_UNIT)),
@@ -142,10 +142,18 @@ const Slab = sequelize.define(
       onDelete: "NO ACTION",
       onUpdate: "CASCADE",
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "slabs",
-    timestamps: false,
+    timestamps: true,
     indexes: [
       {
         unique: true,

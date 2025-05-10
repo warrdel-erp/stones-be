@@ -58,3 +58,12 @@ export const getProductById = catchAsync(async (req: Request, res: Response) => 
 
   return SuccessResponse(res, 200, "Product fetched successfully", product);
 });
+
+// Get product by id
+export const getLandedCost = catchAsync(async (req: Request, res: Response) => {
+  const { productId } = req.params;
+
+  const product: any = await productService.productLandedCosts(Number(productId));
+
+  return SuccessResponse(res, 200, "Product landed costs fetched successfully", product);
+});

@@ -306,7 +306,7 @@ export const getNewCombinedSlabNumber = async (siplId: number) => {
 
 // get average landed cost.
 export const getAverageLandedCost = async (productId: number) => {
-  return await Slab.findOne({
+  const data = await Slab.findOne({
     where: {
       productId
     },
@@ -314,6 +314,7 @@ export const getAverageLandedCost = async (productId: number) => {
       [fn('AVG', col("landedUnitCost")), "avgLandedCost"]
     ]
   })
+  return data?.dataValues
 }
 
 // get last landed cost.
@@ -326,3 +327,4 @@ export const getLastLandedCost = async (productId: number) => {
     order: [['createdAt', 'desc']]
   })
 }
+
