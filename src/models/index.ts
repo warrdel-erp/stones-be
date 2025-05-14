@@ -1,4 +1,4 @@
-import Bill from "./bill";
+import Bill from "./bill.model";
 import BillItem from "./billItem";
 import Bin from "./bin";
 import Client from "./client.model";
@@ -16,7 +16,7 @@ import PackagingList from "./packagingList.model";
 import PackagingListProduct from "./packagingListProduct.model";
 import Payment from "./payment.model";
 import PaymentBill from "./paymentBills.model";
-import Product from "./product";
+import Product from "./product.model";
 import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
 import PurchaseOrder from "./purchaseOrder";
@@ -458,32 +458,41 @@ Client.hasMany(Truck, { foreignKey: "Trucks", as: "trucks" });
 JournalEntry.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 User.hasMany(JournalEntry, { foreignKey: "createdBy", as: "journalEntries" });
 
-ProductGroup.belongsTo(User, { foreignKey: "createdBy", as: "createdByUser" })
-User.hasMany(ProductGroup, { foreignKey: "createdBy", as: "productGroups" })
+ProductGroup.belongsTo(User, { foreignKey: "createdBy", as: "createdByUser" });
+User.hasMany(ProductGroup, { foreignKey: "createdBy", as: "productGroups" });
 
-Product.belongsTo(ProductGroup, { foreignKey: "groupId", as: "group" })
-ProductGroup.hasMany(Product, { foreignKey: "groupId", as: "products" })
+Product.belongsTo(ProductGroup, { foreignKey: "groupId", as: "group" });
+ProductGroup.hasMany(Product, { foreignKey: "groupId", as: "products" });
 
-Product.belongsTo(ProductFinish, { foreignKey: "finishId", as: "finish" })
-ProductFinish.hasMany(Product, { foreignKey: "finishId", as: "products" })
+Product.belongsTo(ProductFinish, { foreignKey: "finishId", as: "finish" });
+ProductFinish.hasMany(Product, { foreignKey: "finishId", as: "products" });
 
-Product.belongsTo(ProductBaseColor, { foreignKey: "baseColorId", as: "baseColor" })
-ProductBaseColor.hasMany(Product, { foreignKey: "baseColorId", as: "products" })
+Product.belongsTo(ProductBaseColor, { foreignKey: "baseColorId", as: "baseColor" });
+ProductBaseColor.hasMany(Product, { foreignKey: "baseColorId", as: "products" });
 
 // Product finish belongs to one User (One user can have multiple product finishes)
-ProductFinish.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
-User.hasMany(ProductFinish, { foreignKey: "createdBy", as: "productFinishes" })
+ProductFinish.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
+User.hasMany(ProductFinish, { foreignKey: "createdBy", as: "productFinishes" });
 
-ProductBaseColor.belongsTo(User, { foreignKey: "createdBy", as: "creator" })
-User.hasMany(ProductBaseColor, { foreignKey: "createdBy", as: "productBaseColors" })
+ProductBaseColor.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
+User.hasMany(ProductBaseColor, { foreignKey: "createdBy", as: "productBaseColors" });
 
 JournalEntry.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 Location.hasMany(JournalEntry, { foreignKey: "locationId", as: "journalEntries" });
 
-JournalEntry.belongsTo(LedgerAccount, { foreignKey: "partyLedgerAccountId", as: "partyLedgerAccount" })
+JournalEntry.belongsTo(LedgerAccount, { foreignKey: "partyLedgerAccountId", as: "partyLedgerAccount" });
 
-SalesOrderInvoice.belongsTo(Truck, { foreignKey: "truckId", as: "truck" })
-Truck.hasMany(SalesOrderInvoice, { foreignKey: "truckId", as: "salesOrderInvoices" })
+SalesOrderInvoice.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
+Truck.hasMany(SalesOrderInvoice, { foreignKey: "truckId", as: "salesOrderInvoices" });
+
+// Product belongs to one LedgerAccount (one LedgerAccount can have multiple products)
+Product.belongsTo(LedgerAccount, { foreignKey: "inventoryLinkAccountId", as: "inventoryLinkAccount" });
+
+// Product belongs to one LedgerAccount (one LedgerAccount can have multiple products)
+Product.belongsTo(LedgerAccount, { foreignKey: "incomeAccountId", as: "incomeAccount" });
+
+// Product belongs to one LedgerAccount (one LedgerAccount can have multiple products)
+Product.belongsTo(LedgerAccount, { foreignKey: "costOfGoodsAccountId", as: "costOfGoodsAccount" });
 
 export {
   Client,
@@ -523,5 +532,5 @@ export {
   Truck,
   ProductGroup,
   ProductBaseColor,
-  ProductFinish
+  ProductFinish,
 };

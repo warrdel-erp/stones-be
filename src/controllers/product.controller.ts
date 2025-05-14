@@ -7,8 +7,9 @@ import * as productService from "../services/product.service";
 // Create a new product
 export const createProduct = catchAsync(async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
+  const clientId = req.user?.clientId;
 
-  const product = await productService.addProduct(req.body, userId!);
+  const product = await productService.addProduct(req.body, userId!, clientId!);
   SuccessResponse(res, 201, "Product created successfully", product);
 });
 

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Product from "./product";
+import Product from "./product.model";
 import SIPL from "./sipl";
 import InventoryProduct from "./inventoryProduct";
 import PurchaseOrder from "./purchaseOrder";
@@ -132,6 +132,7 @@ const Slab = sequelize.define(
       onDelete: "NO ACTION",
       onUpdate: "CASCADE",
     },
+
     siplProductId: {
       type: DataTypes.INTEGER,
       allowNull: false,

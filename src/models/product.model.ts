@@ -9,6 +9,7 @@ import ProductSubCategory from "./productSubCategory";
 import User from "./user";
 import Bin from "./bin";
 import ProductFinish from "./productFinish.model";
+import LedgerAccount from "./ledgerAccount.model";
 
 const Product = sequelize.define(
   "products",
@@ -25,6 +26,30 @@ const Product = sequelize.define(
     alternativeName: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    inventoryLinkAccountId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: LedgerAccount,
+        key: "id",
+      },
+    },
+    incomeAccountId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: LedgerAccount,
+        key: "id",
+      },
+    },
+    costOfGoodsAccountId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: LedgerAccount,
+        key: "id",
+      },
     },
     baseColorId: {
       type: DataTypes.INTEGER,

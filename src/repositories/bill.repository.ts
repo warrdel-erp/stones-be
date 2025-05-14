@@ -36,6 +36,10 @@ export const getAllBills = async (page: number, limit: number, filters?: { [key:
         model: models.BillItem,
         as: "billItems",
       },
+      {
+        model: models.Vendor,
+        as: 'vendor'
+      }
     ],
     limit,
     offset,

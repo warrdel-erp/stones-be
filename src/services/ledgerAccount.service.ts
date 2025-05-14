@@ -1,4 +1,4 @@
-import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES } from "../constants/coa";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as journalEntriesRepository from "../repositories/journalEntry.repository";
 
@@ -55,6 +55,29 @@ export const getLedgerAccountById = async (id: number) => {
 
 export const getLedgerAccountsForFreightItems = async (clientId: number) => {
   return await ledgerAccountRepository.getLedgerAccountsForFreightItems(clientId);
+};
+
+export const getDefaultLedgerAccountsForProduct = async (clientId: number) => {
+  const finishedGoodsAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+    clientId,
+  });
+
+  const cogsAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+    clientId,
+  });
+
+  const goodsSoldAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
+    clientId,
+  });
+
+  return {
+    finishedGoodsAccount,
+    cogsAccount,
+    goodsSoldAccount
+  };
 };
 
 // export const updateLedgerAccount = async (id: number, data: any) => {

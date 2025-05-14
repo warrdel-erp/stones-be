@@ -3,15 +3,46 @@ import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 // Create a new product.
-export const addProduct = async (productData: any, userId: number) => {
+export const addProduct = async (productData: any, userId: number, clientId: number) => {
+  // Get ledger account for finished goods.
+  const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+    clientId,
+  });
+
+  const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+    clientId,
+  });
+
+  const incomeAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
+    clientId,
+  });
+
   // Append created by and updated by as userId
-  return await productRepository.createProduct({ ...productData, createdBy: userId, updatedBy: userId });
+  return await productRepository.createProduct({
+    ...productData,
+    createdBy: userId,
+    updatedBy: userId,
+    inventoryLinkAccountId: ledgerAccountForFinishedGoods.id,
+    incomeAccountId: incomeAccount.id,
+    costOfGoodsAccountId: ledgerAccountForCogs.id,
+  });
 };
 
 // Fetch all products
-export const fetchAllProducts = async (page: number, limit: number, search?: string, filter?: any, onlyWithSlabs?: boolean) => {
+export const fetchAllProducts = async (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: any,
+  onlyWithSlabs?: boolean
+) => {
   let products = await productRepository.getAllProducts(page, limit, search, filter, onlyWithSlabs);
 
   products.products = products.products.map((product: any) => {
@@ -83,5 +114,5 @@ export const getInventoryBalance = async (productId: number) => {
 export const productLandedCosts = async (productId: number) => {
   const averageLandedCost = await slabRepository.getAverageLandedCost(productId);
   const lastLandedCost = await slabRepository.getLastLandedCost(productId);
-  return { ...averageLandedCost, lastLandedCost: lastLandedCost?.dataValues.landedUnitCost }
-}
+  return { ...averageLandedCost, lastLandedCost: lastLandedCost?.dataValues.landedUnitCost };
+};

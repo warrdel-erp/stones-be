@@ -225,11 +225,19 @@ export const getSIPLById = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get all SIPLs
-export const getAllSIPLs = catchAsync(async (req: Request, res: Response) => {
+export const getAllSIPLs = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10 } = req.query;
-  const sipls = await siplService.getAllSIPLs(Number(page), Number(limit));
-  SuccessResponse(res, 200, "SIPLs fetched successfully", sipls);
+
+  const clientId = req.user?.clientId
+
+  const sipls = await siplService.getAllSIPLs(Number(page), Number(limit), Number(clientId));
+  SuccessResponse(res, 200, "SIPLs fetched successfully", sipls.data, {
+    page: sipls.page,
+    limit: sipls.limit,
+    total: sipls.total
+  });
 });
+
 // Get all SIPLs
 export const getReceiveInventoryData = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;

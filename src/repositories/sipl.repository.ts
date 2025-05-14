@@ -163,10 +163,46 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
 };
 
 // Get all SIPLs
-export const getAllSIPLs = async (page: number, limit: number) => {
+export const getAllSIPLs = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
 
   return await models.SIPL.findAndCountAll({
+    where: {
+      clientId
+    },
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        include: [
+          {
+            model: models.Vendor,
+            as: "supplier"
+          }
+        ]
+      },
+      {
+        model: models.Container,
+        as: "containers",
+        where: {
+          referenceType: 'sipl'
+        }
+      },
+      {
+        model: models.Location,
+        as: 'shipmentLocation'
+      },
+      {
+        model: models.FreightDetail,
+        as: "freightDetail",
+        include: [
+          {
+            model: models.Vendor,
+            as: 'freightForwarder'
+          }
+        ]
+      }
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]],

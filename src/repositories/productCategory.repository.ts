@@ -1,7 +1,7 @@
 import * as models from "../models";
 import { col, fn, literal, Op } from "sequelize";
 import Slab from "../models/slab";
-import Product from "../models/product";
+import Product from "../models/product.model";
 import ProductCategory from "../models/productCategory";
 import _ from "lodash";
 
@@ -71,7 +71,10 @@ export const getTotalSlabMetricByCategory = async (clientId: number) => {
     metricsMap.set(Number(row.subCategoryId), Number(row.totalMetric));
   }
 
-  const categories = _.uniqBy(subCategories.map((subcategory: any) => subcategory.category), 'id')
+  const categories = _.uniqBy(
+    subCategories.map((subcategory: any) => subcategory.category),
+    "id"
+  );
 
   subCategories.forEach((subCategory: any) => {
     const belongsToCategory = categories.findIndex((cat: any) => cat.id === subCategory.category.id);
@@ -84,12 +87,10 @@ export const getTotalSlabMetricByCategory = async (clientId: number) => {
     delete subCategoryWithMetric.category;
 
     if (Array.isArray(categories[belongsToCategory]?.subCategories)) {
-      categories[belongsToCategory].subCategories.push({ ...subCategoryWithMetric })
+      categories[belongsToCategory].subCategories.push({ ...subCategoryWithMetric });
     } else {
       categories[belongsToCategory].subCategories = [subCategoryWithMetric];
-
     }
-
   });
 
   return categories;

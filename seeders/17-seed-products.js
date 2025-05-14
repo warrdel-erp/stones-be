@@ -31,6 +31,9 @@ module.exports = {
           updatedBy: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
+          inventoryLinkAccountId: 4,
+          incomeAccountId: 7,
+          costOfGoodsAccountId: 6,
         },
         {
           id: 2,
@@ -58,6 +61,9 @@ module.exports = {
           updatedBy: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
+          inventoryLinkAccountId: 4,
+          incomeAccountId: 7,
+          costOfGoodsAccountId: 6,
         },
       ],
       {}

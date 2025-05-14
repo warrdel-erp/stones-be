@@ -14,6 +14,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
+import { PAYMENT_TERMS } from "../constants";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
@@ -252,8 +253,18 @@ export const getSIPLByIdSimple = async (id: number) => {
 }
 
 // Get all SIPLs
-export const getAllSIPLs = async (page: number, limit: number) => {
-  const { rows, count } = await siplRepository.getAllSIPLs(page, limit);
+export const getAllSIPLs = async (page: number, limit: number, clientId: number) => {
+  let { rows, count }: any = await siplRepository.getAllSIPLs(page, limit, clientId);
+
+  rows = await Promise.all(rows.map(async (sipl: any) => {
+    sipl = sipl.get({ plain: true });
+
+    sipl.purchaseOrder.supplier.paymentTerms = PAYMENT_TERMS.find((e) => e.id == sipl.purchaseOrder.supplier.paymentTerms);
+
+    sipl.calculations = await getSiplCalculations(sipl.id);
+
+    return sipl;
+  }))
 
   return {
     total: count,

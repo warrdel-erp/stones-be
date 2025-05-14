@@ -151,3 +151,15 @@
 
 1. total of ledger accounts.
 2. calculations of create LO & PL.
+
+---
+
+Product =>
+
+1. inventory link account “finished. Goods" ✅
+2. income account => Good sold ✅
+3. COGS ✅
+
+Create so => 1. tax calcs. ✅
+
+Purchase invoices ✅

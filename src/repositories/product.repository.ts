@@ -7,7 +7,13 @@ export const createProduct = async (productData: any) => {
 };
 
 // Get all products
-export const getAllProducts = async (page: number, limit: number, search?: string, filter?: any, onlyWithSlabs?: boolean) => {
+export const getAllProducts = async (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: any,
+  onlyWithSlabs?: boolean
+) => {
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
@@ -57,6 +63,22 @@ export const getProductById = async (id: number) => {
       {
         model: models.ProductSubCategory,
         as: "subCategory",
+      },
+      {
+        model: models.LedgerAccount,
+        as: "inventoryLinkAccount",
+      },
+      {
+        model: models.LedgerAccount,
+        as: "incomeAccount",
+      },
+      {
+        model: models.LedgerAccount,
+        as: "costOfGoodsAccount",
+      },
+      {
+        model: models.ProductBaseColor,
+        as: "baseColor",
       },
     ],
   });

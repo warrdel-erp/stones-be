@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Bill from "./bill";
+import Bill from "./bill.model";
 import LedgerAccount from "./ledgerAccount.model";
 
 const BillItem = sequelize.define(

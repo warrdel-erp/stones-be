@@ -47,6 +47,13 @@ export const getLedgerAccountsForFreightItems = catchAsync(async (req: AuthReque
   return SuccessResponse(res, 200, "Ledger Accounts for freightItems", ledgerAccount);
 });
 
+export const getDefaultLedgerAccountsForProduct = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  const ledgerAccounts = await ledgerAccountService.getDefaultLedgerAccountsForProduct(Number(clientId));
+  return SuccessResponse(res, 200, "Default ledger accounts for product fetched successfully", ledgerAccounts);
+});
+
 // export const updateLedgerAccount = catchAsync(async (req, res) => {
 //   const { id } = req.params;
 //   const updatedLedgerAccount = await ledgerAccountService.updateLedgerAccount(Number(id), req.body);

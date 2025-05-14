@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database";
 import SIPL from "./sipl";
-import Product from "./product";
+import Product from "./product.model";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 
 const SIPLProduct = sequelize.define(
