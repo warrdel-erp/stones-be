@@ -71,8 +71,22 @@ export const createLoadingOrder = async (data: any) => {
 };
 
 // Get all LO
-export const getAllLoadingOrders = async (page: number, limit: number) => {
-  return await loadingOrderRepository.getAllLoadingOrders(page, limit);
+export const getAllLoadingOrders = async (page: number, limit: number, clientId: number, filters?: any) => {
+  const data = await loadingOrderRepository.getAllLoadingOrders(page, limit, clientId, filters);
+
+  data.data = data.data.map((loadingOrder: any) => {
+    loadingOrder = loadingOrder.get({ plain: true });
+
+    if (loadingOrder.packagingList) {
+      loadingOrder.totalAmount = getTotalPlAmount(loadingOrder.salesOrderProducts)
+    } else {
+      loadingOrder.totalAmount = getTotalLoAmount(loadingOrder.salesOrderProducts)
+    }
+
+    return loadingOrder
+  }) as any
+
+  return data
 };
 
 // Get all LO without pagination.
@@ -134,7 +148,7 @@ async function createLONotes(data: any, loadingOrder: any, transaction: Transact
   return { internalNote, printableNote };
 }
 
-function getTotalLoAmount(salesOrderProducts: any[]) {
+export function getTotalLoAmount(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) =>

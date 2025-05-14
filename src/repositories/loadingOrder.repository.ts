@@ -1,6 +1,6 @@
-import { Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
-import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 // Create new LO
 export const createLoadingOrder = async (data: any, transaction?: Transaction) => {
@@ -8,13 +8,38 @@ export const createLoadingOrder = async (data: any, transaction?: Transaction) =
 };
 
 // Get all LO
-export const getAllLoadingOrders = async (page: number, limit: number) => {
+export const getAllLoadingOrders = async (page: number, limit: number, clientId: number, filters?: any) => {
   const offset = (page - 1) * limit;
 
+  const whereClause: any = { ...filters };
+
+  // Add clientId filter if provided
+  if (clientId) {
+    whereClause.clientId = clientId;
+  }
+
+  if (filters.notInvoicedOnly === "true") {
+    whereClause.stage = {
+      [Op.ne]: [LOADING_ORDER_STAGES.INVOICED]
+    }
+
+    delete whereClause.notInvoicedOnly;
+  }
+
   const { rows: data, count: total } = await models.LoadingOrder.findAndCountAll({
+    where: {
+      ...whereClause
+    },
     include: [
-      { model: models.SalesOrder, as: "salesOrder" },
-      { model: models.LoadingOrderProduct, as: "loadingOrderProducts" },
+      {
+        model: models.SalesOrder, as: "salesOrder",
+        include: [
+          { model: models.Customer, as: "customer" },
+          { model: models.Location, as: "soLocation" }
+        ]
+      },
+      { model: models.PackagingList, as: "packagingList" },
+      { model: models.SalesOrderProduct, as: "salesOrderProducts" },
     ],
     limit,
     offset,
