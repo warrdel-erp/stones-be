@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Location from "./location";
-import User from "./user";
+import User from "./user.model";
 import Vendor from "./vendor";
 import Client from "./client.model";
 import { PO_STATUS } from "../constants/tableTypes";

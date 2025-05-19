@@ -1,6 +1,6 @@
 import { DataTypes, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user";
+import User from "./user.model";
 import PurchaseOrder from "./purchaseOrder";
 import Client from "./client.model";
 import Location from "./location";

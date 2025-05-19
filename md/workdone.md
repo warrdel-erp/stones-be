@@ -163,3 +163,17 @@ Product =>
 Create so => 1. tax calcs. ✅
 
 Purchase invoices ✅
+
+---
+
+Batch sales invoice. => LO or PL of not invoiced. ✅
+
+Freight bills. ✅
+
+Location List ✅
+
+-----
+
+client login
+
+user profile.

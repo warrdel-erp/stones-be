@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { PAYEE_TYPE, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_TYPE } from "../constants/tableTypes";
-import User from "./user";
+import User from "./user.model";
 import Client from "./client.model";
 
 const Payment = sequelize.define(

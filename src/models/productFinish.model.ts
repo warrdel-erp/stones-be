@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user"; // adjust the path if needed
+import User from "./user.model"; // adjust the path if needed
 
 const ProductFinish = sequelize.define(
     "ProductFinish",

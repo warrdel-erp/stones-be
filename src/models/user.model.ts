@@ -31,6 +31,10 @@ const User = sequelize.define(
     phone: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: {
+        name: "unique_phone_number_constraint",
+        msg: "unique phone_number",
+      },
     },
     email: {
       type: DataTypes.STRING,

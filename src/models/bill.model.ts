@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import Vendor from "./vendor";
 import { sequelize } from "../config/database";
-import User from "./user";
+import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import SIPL from "./sipl";
 

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user"; // Adjust the path if needed
+import User from "./user.model"; // Adjust the path if needed
 
 const ProductBaseColor = sequelize.define(
     "ProductBaseColor",

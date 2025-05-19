@@ -163,3 +163,12 @@ export const checkEmailAvailability = async (email: string) => {
   return !!userExists || !!clientExists
 
 }
+
+/**
+ * Service to fetch a client's profile by ID.
+ */
+export const getClientProfile = async (clientId: number) => {
+  const client = (await clientRepository.getClientById(clientId))?.get({ plain: true });
+  if (!client) throw new AppError("Client not found", 404);
+  return { ...client, userType: 'client' };
+};

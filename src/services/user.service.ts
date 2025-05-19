@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import * as userRepository from "../repositories/user.repository";
-import { checkClientExists } from "../repositories/client.repository";
+import { checkClientExists, findClientByEmail } from "../repositories/client.repository";
 import { AppError } from "../helper/appError";
 import jwt from "jsonwebtoken";
 
@@ -54,24 +54,93 @@ export const assignLocationToUser = async (userId: number, locationId: number) =
   return result;
 };
 
-// Login User
-export const loginUser = async (email: string, password: string) => {
+// Authenticate user
+const authenticateUser = async (email: string, password: string) => {
   const user: any = await userRepository.getUserByEmail(email);
-  if (!user) throw new AppError("Invalid credentials", 401);
+  if (!user) return null;
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new AppError("Invalid credentials", 401);
+  if (!isMatch) return null;
 
   if (!process.env.JWT_SECRET) {
     throw new Error("env does not exists.");
   }
 
   const token = jwt.sign(
-    { id: user.id, userid: user.userid, email: user.email, clientId: user.client.id },
+    {
+      id: user.id,
+      userid: user.userid,
+      email: user.email,
+      clientId: user.client?.id,
+      accountType: "user"
+    },
     process.env.JWT_SECRET
   );
 
-  return { token, user: { id: user.id, username: user.username, email: user.email, clientId: user.client.id } };
+  return {
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      clientId: user.client?.id,
+      accountType: "user"
+    }
+  };
+};
+
+// Authenticate client
+const authenticateClient = async (email: string, password: string) => {
+  const client: any = await findClientByEmail(email);
+  if (!client) return null;
+
+  const isMatch = await bcrypt.compare(password, client.password);
+  if (!isMatch) return null;
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error("env does not exists.");
+  }
+
+  const token = jwt.sign(
+    {
+      id: client.id,
+      email: client.email,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      clientId: client.id,
+      accountType: "client"
+    },
+    process.env.JWT_SECRET
+  );
+
+  return {
+    token,
+    user: {
+      id: client.id,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      email: client.email,
+      accountType: "client"
+    }
+  };
+};
+
+// Login User or Client
+export const loginUser = async (email: string, password: string) => {
+  // Try to authenticate as user first
+  const userResult = await authenticateUser(email, password);
+  if (userResult) {
+    return userResult;
+  }
+
+  // If not a user, try to authenticate as client
+  const clientResult = await authenticateClient(email, password);
+  if (clientResult) {
+    return clientResult;
+  }
+
+  // If neither authentication succeeded
+  throw new AppError("Invalid credentials", 401);
 };
 
 // Get all Users.
@@ -100,7 +169,7 @@ export const assignDefaultLocation = async (userId: number, locationId: number) 
     throw new AppError("User not found", 400);
   }
 
-  const userHaveLocation = await userRepository.doesUserHaveLocation(userId, locationId);
+  const userHaveLocation = await userRepository.doesUserHaveLocation(locationId, userId);
 
   if (!userHaveLocation) {
     throw new AppError("User does not have access to this location", 400);
@@ -128,4 +197,13 @@ export const fetchUserById = async (userId: number) => {
 export const checkUserLocationAccess = async (locationId: number, userId: number) => {
   const userHasLocation = await userRepository.doesUserHaveLocation(Number(locationId), userId!);
   if (!userHasLocation) throw new AppError("User does not have access to given location", 400);
+};
+
+// Get user profile
+export const getUserProfile = async (userId: number) => {
+  const user = (await userRepository.findUserById(userId))?.get({ plain: true });
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  return { ...user, userType: 'user' };
 };

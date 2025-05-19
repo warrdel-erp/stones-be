@@ -6,7 +6,7 @@ import ProductBaseColor from "./productBaseColor.model";
 import ProductCategory from "./productCategory";
 import ProductGroup from "./productGroup.model";
 import ProductSubCategory from "./productSubCategory";
-import User from "./user";
+import User from "./user.model";
 import Bin from "./bin";
 import ProductFinish from "./productFinish.model";
 import LedgerAccount from "./ledgerAccount.model";

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user";
+import User from "./user.model";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";

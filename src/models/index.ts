@@ -28,7 +28,7 @@ import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
 import SlabRemeasurement from "./slabRemeasurement.model";
 import JournalEntry from "./journalEntry.model";
-import User from "./user";
+import User from "./user.model";
 import Vendor from "./vendor";
 import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";

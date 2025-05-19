@@ -2,13 +2,60 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "../helper/appError";
 import * as userRepository from "../repositories/user.repository";
+import * as clientRepository from "../repositories/client.repository";
 import catchAsync from "../helper/asyncCatch";
 
 export interface AuthRequest extends Request {
-  user?: { id: number; userid: string; email: string; defaultLocationId: number; clientId: number };
+  user?: {
+    id: number;
+    userid?: string;
+    email: string;
+    defaultLocationId?: number;
+    clientId?: number;
+    firstName?: string;
+    lastName?: string;
+    accountType: "user" | "client";
+  };
 }
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Authenticate a user
+const authenticateUserFromToken = async (decoded: any, req: AuthRequest) => {
+  if (decoded.accountType !== "user") return false;
+
+  const user: any = await userRepository.findUserById(decoded.id);
+  if (!user) return false;
+
+  req.user = {
+    id: user.id,
+    userid: user.userid,
+    email: user.email,
+    defaultLocationId: user.defaultLocationId,
+    clientId: user.clientId,
+    accountType: "user"
+  };
+
+  return true;
+};
+
+// Authenticate a client
+const authenticateClientFromToken = async (decoded: any, req: AuthRequest) => {
+  if (decoded.accountType !== "client") return false;
+
+  const client: any = await clientRepository.checkClientExists(decoded.id);
+  if (!client) return false;
+
+  req.user = {
+    id: client.id,
+    email: client.email,
+    firstName: client.firstName,
+    lastName: client.lastName,
+    accountType: "client"
+  };
+
+  return true;
+};
 
 export const authenticateUser = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.header("Authorization")?.split(" ")[1]; // Extract token from Bearer <token>
@@ -21,13 +68,24 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
     throw new Error("env does not exists.");
   }
 
-  const decoded = jwt.verify(token, JWT_SECRET) as AuthRequest["user"];
+  const decoded = jwt.verify(token, JWT_SECRET) as any;
 
-  const user: any = await userRepository.findUserById(decoded?.id!);
+  if (!decoded) {
+    throw new AppError("Invalid token", 401);
+  }
 
-  if (!user) throw new AppError("Something wrong with token", 400);
+  // Try to authenticate as a user
+  const userAuthenticated = await authenticateUserFromToken(decoded, req);
+  if (userAuthenticated) {
+    return next();
+  }
 
-  req.user = user;
+  // If not a user, try as a client
+  const clientAuthenticated = await authenticateClientFromToken(decoded, req);
+  if (clientAuthenticated) {
+    return next();
+  }
 
-  next();
+  // If neither authentication succeeded
+  throw new AppError("Invalid account type or user not found", 401);
 });

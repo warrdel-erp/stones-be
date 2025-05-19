@@ -41,6 +41,7 @@ import productGroupRoutes from "./routes/productGroup.routes";
 import productBaseColorRoutes from "./routes/productBaseColor.routes";
 import productFinishRoutes from "./routes/productFinish.routes";
 import soInvoiceRoutes from "./routes/soInvoice.routes";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +51,7 @@ app.use(express.json());
 app.use(urlencoded({ extended: true }));
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/client", clientRoute);
 app.use("/api/user", userRoute);
 app.use("/api/vendor", vendorRoute);

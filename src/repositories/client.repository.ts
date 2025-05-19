@@ -46,3 +46,12 @@ export const updateClient = async (id: number, updateData: any) => {
   // If update was successful, return the updated client
   return updatedRows ? await Client.findByPk(id) : null;
 };
+
+/**
+ * Get a client by ID
+ */
+export const getClientById = async (clientId: number) => {
+  return await Client.findByPk(clientId, {
+    attributes: { exclude: ['password'] }
+  });
+};

@@ -8,7 +8,7 @@ import {
   JOURNAL_ENTRY_TYPE,
 } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
-import User from "./user";
+import User from "./user.model";
 import Location from "./location";
 
 export type JournalEntry = {

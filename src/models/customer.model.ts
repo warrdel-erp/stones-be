@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user";
+import User from "./user.model";
 import { SCOP } from "../constants";
 import { CUSTOMER_STATUS } from "../constants/tableTypes";
 
