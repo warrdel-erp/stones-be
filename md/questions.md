@@ -77,3 +77,7 @@
 1. what is subheader for freight vendor
 
 2. Is there also multiple roles that user can contain under on client.
+
+3. will slab deleted from cart if it is been added in so.
+
+4. how to decide unit price of slab in cart to SO.

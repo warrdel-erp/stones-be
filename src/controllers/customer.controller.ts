@@ -30,10 +30,12 @@ export const updateCustomerController = catchAsync(async (req: Request, res: Res
 });
 
 // Get all customers
-export const getAllCustomersController = catchAsync(async (req: Request, res: Response) => {
+export const getAllCustomersController = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, search, ...filter } = req.query;
 
-  const result = await customerService.fetchAllCustomers(Number(page), Number(limit), String(search), filter);
+  const clientId = Number(req.user?.clientId)
+
+  const result = await customerService.fetchAllCustomers(Number(page), Number(limit), clientId, String(search), filter);
 
   return SuccessResponse(res, 200, "Customers retrieved successfully", result.customers, {
     total: result.total,

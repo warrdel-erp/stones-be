@@ -132,7 +132,6 @@ const Slab = sequelize.define(
       onDelete: "NO ACTION",
       onUpdate: "CASCADE",
     },
-
     siplProductId: {
       type: DataTypes.INTEGER,
       allowNull: false,

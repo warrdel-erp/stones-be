@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import User from "./user.model";
 import { SCOP } from "../constants";
 import { CUSTOMER_STATUS } from "../constants/tableTypes";
+import Client from "./client.model";
 
 const Customer = sequelize.define(
   "Customer",
@@ -131,6 +132,15 @@ const Customer = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Client, // Table name should match the one in DB
+        key: "id",
+      },
+      onUpdate: "CASCADE", // Update clientId when Client.id changes
+      onDelete: "RESTRICT", // Prevent deleting Client if Users exist
     },
     updatedBy: {
       type: DataTypes.INTEGER,

@@ -73,7 +73,8 @@ export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) =>
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
   status: (typeof SLAB_STATUS)[keyof typeof SLAB_STATUS],
-  transaction?: Transaction
+  transaction?: Transaction,
+  additionalObj?: any
 ) => {
   // Find the related slab
   const slab = await Slab.findOne({
@@ -86,7 +87,7 @@ export const updateSlabStatusByInventoryProduct = async (
   }
 
   // Update the status
-  await Slab.update({ status }, { where: { inventoryProductId }, individualHooks: true, transaction });
+  await Slab.update({ status, ...additionalObj }, { where: { inventoryProductId }, individualHooks: true, transaction });
 
   return slab;
 };
@@ -139,21 +140,6 @@ export const findByIdWithLogs = async (slabId: number) => {
         ],
       },
     ],
-    attributes: {
-      include: [
-        [
-          fn(
-            "CONCAT",
-            col("sipl.purchaseOrder.clientPoNumber"),
-            "-",
-            col("sipl.poSiplNumber"),
-            "-",
-            col("slabs.serialNumber")
-          ),
-          "combinedSerialNumber",
-        ],
-      ],
-    },
   });
   return slab?.get({ plain: true });
 };
@@ -165,6 +151,10 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
   return await Slab.findAll({
     where: filters,
     include: [
+      {
+        model: models.Product,
+        as: 'product',
+      },
       {
         model: models.SIPL,
         as: "sipl",
@@ -180,23 +170,20 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
       {
         model: models.Bin,
         as: "bin",
+        include: [
+          {
+            model: models.Warehouse,
+            as: "warehouse",
+            include: [
+              {
+                model: models.Location,
+                as: "location"
+              }
+            ]
+          }
+        ]
       },
     ],
-    attributes: {
-      include: [
-        [
-          fn(
-            "CONCAT",
-            col("sipl.purchaseOrder.clientPoNumber"),
-            "-",
-            col("sipl.poSiplNumber"),
-            "-",
-            col("slabs.serialNumber")
-          ),
-          "combinedSerialNumber",
-        ],
-      ],
-    },
     transaction
   });
 };

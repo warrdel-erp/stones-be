@@ -11,6 +11,7 @@ import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 
 import { SALES_TAX, SCOP } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 
 // Service function to create a customer.
 export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
@@ -57,13 +58,21 @@ export const updateCustomer = async (id: number, data: any) => {
 };
 
 // Get all customers with pagination.
-export const fetchAllCustomers = async (page: number, limit: number, search?: string, filter?: any) => {
-  let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, search, filter);
+export const fetchAllCustomers = async (page: number, limit: number, clientId: number, search?: string, filter?: any) => {
+  let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, clientId, search, filter);
 
   customers = customers.map((customer: any) => {
     customer.get({ plain: true });
     customer.salesTax = SALES_TAX.find((e) => e.id == customer.salesTax);
     customer.scope = SCOP.find((e) => e.id == customer.scope)?.value;
+
+    customer.addresses = customer.addresses.map((address: any) => {
+      address = address.get({ plain: true });
+      address.country = COUNTRIES.find((e) => e.id == address.countryId);
+
+      return address
+    })
+
     return customer;
   });
 

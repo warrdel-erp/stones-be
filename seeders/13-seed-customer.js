@@ -35,6 +35,7 @@ module.exports = {
           pSalesPerson: null,
           createdBy: 1,
           updatedBy: 1,
+          clientId: 1,
           updatedAt: new Date(),
           createdAt: new Date(),
         },
@@ -45,7 +46,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete("customers", {
-      id: { [Sequelize.Op.in]: [1, 2, 3, 4, 5, 6] },
+      id: { [Sequelize.Op.in]: [1] },
     });
   },
 };

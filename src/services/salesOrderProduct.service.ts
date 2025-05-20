@@ -62,7 +62,8 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
         await slabRepository.updateSlabStatusByInventoryProduct(
           product.inventoryProductId,
           SLAB_STATUS.ALLOCATED,
-          transaction
+          transaction,
+          { isInCart: false }
         );
 
         upsertedProducts.push(newProduct);
