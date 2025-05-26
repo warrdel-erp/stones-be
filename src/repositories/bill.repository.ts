@@ -113,7 +113,7 @@ export const getTotalBillValueByClient = async (clientId: number) => {
     group: ["bills.id"]
   });
 
-  return Number(result?.dataValues?.totalValue) ?? 0;
+  return Number(result?.dataValues?.totalValue) || 0;
 };
 
 export const getLastBillAsPerSIPL = async (siplId: number) => {

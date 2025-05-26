@@ -3,18 +3,21 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
-      "users",
+      "accounts",
       [
         {
           id: 1,
-          username: "Chris Evans",
-          userid: "user",
+          // Password: "SecurePass123",
+          password: "$2b$10$fwn9yJLoj7CJ9WkKVUMYkeXKRbe1/P/Vhs3yjzXVdhr/CwQJ1IdCC",
+          email: "contact1@techsolutions.com",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 2,
           // password: "user",
           password: "$2b$10$IwAT2GAFsLLg9cVN8mK/4OoouEl/Wdz0VsLCsrhvkXaNFmfE8AoV2",
-          phone: "+1234567890",
           email: "user@gmail.com",
-          clientId: 1,
-          defaultLocationId: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -24,8 +27,8 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("users", {
-      id: { [Sequelize.Op.in]: [1, 2, 3, 4, 5, 6] },
+    await queryInterface.bulkDelete("accounts", {
+      id: { [Sequelize.Op.in]: [1, 2] },
     });
   },
 };

@@ -100,6 +100,7 @@ export const getTotalAndPaidVendorAmount = catchAsync(async (req: AuthRequest, r
     const totalSiplProductAmount = await siplProductService.getTotalSIPLProductValueByClient(Number(clientId))
     const totalBillProductAmount = await billService.getTotalBillValueByClientId(Number(clientId))
 
+
     const data = {
         totalAmount: (totalSiplProductAmount) + totalBillProductAmount,
         totalPaidAmount: await paymentService.getTotalAmountByPayeeTypeAndClientId("vendor", Number(clientId)),
