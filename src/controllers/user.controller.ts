@@ -101,3 +101,13 @@ export const getUser = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.fetchUserById(userId);
   return res.json(user);
 });
+
+// Get all users for the client of the requesting user
+export const getClientUsers = catchAsync(async (req: AuthRequest, res: Response) => {
+  if (!req.user) {
+    throw new AppError("User not authenticated", 401);
+  }
+
+  const users = await userService.getUsersByClientId(req.user.clientId);
+  return SuccessResponse(res, 200, "Users retrieved successfully", users);
+});

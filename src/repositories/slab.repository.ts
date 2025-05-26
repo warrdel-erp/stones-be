@@ -282,7 +282,7 @@ export const getNewCombinedSlabNumber = async (siplId: number) => {
   const lastCombinedSlabNumber = existingSlab ? existingSlab.combinedSlabNumber : null;
 
   if (!lastCombinedSlabNumber) {
-    return `${sipl.invoiceCode}-1`;
+    return `${sipl.invoiceCode.split(" ")[1]}-1`;
   }
 
   const lastSection = parseInt(lastCombinedSlabNumber.split("-").pop() || "0", 10);

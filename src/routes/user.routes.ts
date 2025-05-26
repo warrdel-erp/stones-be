@@ -19,10 +19,14 @@ router.get("/getLocations", authenticateUser, userController.getUserLocations);
 // Set default location.
 router.put("/setDefaultLocation", authenticateUser, userController.setDefaultLocation);
 
+// Get All Users for the client of requesting user
+router.get("/clientUsers", authenticateUser, userController.getClientUsers);
+
 // Get user by ID
 router.get("/:id", userController.getUser);
 
 // Update User.
 router.put("/:id", userController.updateUserController);
+
 
 export default router;

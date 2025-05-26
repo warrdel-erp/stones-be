@@ -260,7 +260,6 @@ export const getNewCombinedSlabNumberController = catchAsync(async (req: Request
   SuccessResponse(res, 200, "New combined slab number fetched successfully.", newCombinedSlabNumber);
 });
 
-
 // Get SIPL by Slab ID
 export const getSIPLBySlabIdSimple = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;

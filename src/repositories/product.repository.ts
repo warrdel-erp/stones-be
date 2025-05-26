@@ -38,6 +38,11 @@ export const getAllProducts = async (
         as: "group",
         attributes: ["id", "name"],
       },
+      {
+        model: models.ProductBaseColor,
+        as: "baseColor",
+        attributes: ["id", "name"],
+      },
     ],
     limit,
     offset,

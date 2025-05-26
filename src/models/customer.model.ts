@@ -54,10 +54,6 @@ const Customer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    pSalesPerson: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     taxExempt: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -149,6 +145,16 @@ const Customer = sequelize.define(
     deletedAt: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    primarySalesPersonId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: User,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
   },
   {

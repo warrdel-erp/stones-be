@@ -62,7 +62,7 @@ export const fetchAllVendors = async (page: number, limit: number, filter?: Wher
   vendors.vendors = vendors.vendors.map((vendor: any) => {
     vendor = vendor.get({ plain: true });
     vendor.vendorScope = SCOP.find((k) => k.id == vendor.vendorScope)?.value;
-    vendor.paymentTerms = PAYMENT_TERMS.find((k) => k.id == vendor.paymentTerms)?.value;
+    vendor.paymentTerms = PAYMENT_TERMS.find((k) => k.id == vendor.paymentTerms);
 
     return vendor;
   }) as any;

@@ -22,6 +22,10 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
+    paymentTerm: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM(...Object.values(PO_STATUS)),
       defaultValue: PO_STATUS.OPEN,

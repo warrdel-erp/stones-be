@@ -223,3 +223,12 @@ export const getUserProfile = async (userId: number) => {
   }
   return { ...user, userType: 'user' };
 };
+
+// Get Users by Client ID
+export const getUsersByClientId = async (clientId: number) => {
+  const users = await userRepository.getUsersByClientId(clientId);
+  if (!users) {
+    throw new AppError("No users found for this client", 404);
+  }
+  return users;
+};

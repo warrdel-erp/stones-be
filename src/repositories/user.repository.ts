@@ -107,3 +107,14 @@ export const doesUserHaveLocation = async (locationId: number, userId: number) =
 
   return !!user; // Returns true if user is found, otherwise false
 };
+
+// Get Users by Client ID
+export const getUsersByClientId = async (clientId: number) => {
+  return await models.User.findAll({
+    where: { clientId },
+    attributes: { exclude: ['password'] },
+    include: [
+      { model: models.Account, attributes: ['email'], as: "account" },
+    ]
+  });
+};

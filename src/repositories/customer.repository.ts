@@ -30,6 +30,10 @@ export const getAllCustomers = async (page: number, limit: number, clientId: num
         model: models.CustomerAddress,
         as: "addresses",
       },
+      {
+        model: models.User,
+        as: "primarySalesPerson",
+      },
     ],
     limit,
     offset,

@@ -508,6 +508,17 @@ Product.belongsTo(LedgerAccount, { foreignKey: "incomeAccountId", as: "incomeAcc
 // Product belongs to one LedgerAccount (one LedgerAccount can have multiple products)
 Product.belongsTo(LedgerAccount, { foreignKey: "costOfGoodsAccountId", as: "costOfGoodsAccount" });
 
+// Define the association
+Customer.belongsTo(User, {
+  foreignKey: "primarySalesPersonId",
+  as: "primarySalesPerson",
+});
+
+User.hasMany(Customer, {
+  foreignKey: "primarySalesPersonId",
+  as: "primarySalesCustomers",
+});
+
 export {
   Client,
   User,
