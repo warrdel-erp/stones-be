@@ -91,7 +91,7 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
   }
 };
 
-export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, filter?: { [k: string]: string }) => {
+export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, clientId: number, filter?: { [k: string]: string }) => {
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
 
@@ -101,6 +101,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
     let result = await poRepository.getPaymentPendingPurchaseOrders(
       page,
       limit,
+      clientId,
       filter || {}
     );
 
@@ -112,6 +113,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
     let result = await poRepository.getAllPurchaseOrders(
       page,
       limit,
+      clientId,
       filter || {}
     );
     rows = result.rows;

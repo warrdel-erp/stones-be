@@ -1,41 +1,57 @@
 import bcrypt from "bcryptjs";
 import * as userRepository from "../repositories/user.repository";
-import { checkClientExists, findClientByEmail } from "../repositories/client.repository";
+import { findClientByEmail } from "../repositories/client.repository";
 import { AppError } from "../helper/appError";
 import jwt from "jsonwebtoken";
+import * as accountService from "./account.service";
+import { sequelize } from "../config/database";
+import * as clientRepository from "../repositories/client.repository";
 
-// Register User
-export const registerUser = async (userData: {
+type UserRegistrationData = {
   username: string;
   userid: string;
   password: string;
   phone: string;
   email: string;
   clientId: number;
-}) => {
-  // Check if email already exists
-  const existingEmail = await userRepository.getUserByEmail(userData.email);
-  if (existingEmail) {
-    throw new Error("Email already in use.");
+};
+
+// Register User
+export const registerUser = async (userData: UserRegistrationData) => {
+  // Start a transaction
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Validate client exists
+    const client = await clientRepository.checkClientExists(userData.clientId);
+    if (!client) {
+      throw new AppError("Client not found", 404);
+    }
+
+    // Extract account data
+    const { email, password } = userData;
+
+    // Create account (account service handles its own transaction)
+    const account = await accountService.createAccount({ email, password }, transaction);
+
+    // Create user with account reference within transaction
+    const user = await userRepository.createUser({
+      username: userData.username,
+      userid: userData.userid,
+      phone: userData.phone,
+      clientId: userData.clientId,
+      accountId: account.getDataValue('id')
+    }, transaction);
+
+    // If everything is successful, commit the transaction
+    await transaction.commit();
+
+    return user;
+  } catch (error) {
+    // If any error occurs, rollback the transaction
+    await transaction.rollback();
+    throw error;
   }
-
-  // Check if userid is already taken
-  const existingUserId = await userRepository.getUserByUserId(userData.userid);
-  if (existingUserId) {
-    throw new Error("User ID already taken.");
-  }
-
-  // Check if client exists
-  const clientExists = await checkClientExists(userData.clientId);
-  if (!clientExists) {
-    throw new AppError("Client not found.", 401);
-  }
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-  // Create user
-  return await userRepository.createUser({ ...userData, password: hashedPassword });
 };
 
 /**

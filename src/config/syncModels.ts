@@ -3,7 +3,7 @@ import * as models from "../models";
 import { sequelize } from "./database";
 
 export const syncModels = async () => {
-  await models.Client.sync({ alter: true });
+  await models.Account.sync({ alter: true });
   await models.Client.sync({ alter: true });
   await models.Location.sync({ alter: true });
   await models.ProductCategory.sync({ alter: true });

@@ -24,9 +24,12 @@ export const createBill = catchAsync(async (req: AuthRequest, res: Response) => 
   SuccessResponse(res, 201, "Bill created Successfully", bill);
 });
 
-export const getAllBills = catchAsync(async (req: Request, res: Response) => {
+export const getAllBills = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, ...filter } = req.query;
-  const bills = await billService.getAllBills(Number(page), Number(limit), filter);
+  const clientId = req.user?.clientId;
+
+
+  const bills = await billService.getAllBills(Number(page), Number(limit), Number(clientId), filter);
   SuccessResponse(res, 200, "Bills fetched successfully", bills.data, {
     total: bills.total,
     page: bills.page,

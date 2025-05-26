@@ -1,7 +1,6 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
-import { run } from "node:test";
 
 // Create a new vendor in the database.
 export const createVendor = async (vendorData: any, transaction?: Transaction) => {
@@ -48,12 +47,15 @@ export const findVendorById = async (id: number) => {
     include: [
       {
         model: models.Location,
-        as: "location",
+        as: "parentLocation",
       },
       {
         model: models.Notes,
         as: "notes",
       },
+      {
+        association: "ledgerAccount"
+      }
     ],
   });
 };

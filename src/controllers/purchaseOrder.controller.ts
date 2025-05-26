@@ -4,6 +4,7 @@ import { AppError } from "../helper/appError";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { NUMBER } from "sequelize";
 
 /**
  * Controller to handle PO creation.
@@ -32,7 +33,9 @@ export const createPurchaseOrderController = catchAsync(async (req: AuthRequest,
 export const getAllPurchaseOrders = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, ...filter }: any = req.query;
 
-  const result = await poService.getAllPurchaseOrders(Number(page), Number(limit), filter);
+  const clientId = req.user?.clientId;
+
+  const result = await poService.getAllPurchaseOrders(Number(page), Number(limit), Number(clientId), filter);
   SuccessResponse(res, 200, "Purchase Orders fetched successfully", result.data, {
     limit: result.pagination.limit,
     page: result.pagination.page,

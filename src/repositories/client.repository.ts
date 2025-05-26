@@ -1,12 +1,28 @@
-import { Op, Transaction } from "sequelize";
+import { Op, Transaction, Model } from "sequelize";
 import { Client } from "../models";
+import ClientModel from "../models/client.model";
+import { Location } from "../models";
+
+interface ClientCreateData {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  accountId: number;
+}
+
+type ClientAttributes = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  accountId: number;
+};
 
 export async function findClientByEmail(email: string) {
   return await Client.findOne({ where: { email } });
 }
 
-export async function createClient(clientData: Partial<typeof Client>, transaction?: Transaction) {
-  return await Client.create(clientData, { transaction });
+export async function createClient(clientData: ClientAttributes, transaction?: Transaction) {
+  return await Client.create(clientData as any, { transaction });
 }
 
 export const checkClientExists = async (clientId: number) => {
@@ -50,8 +66,41 @@ export const updateClient = async (id: number, updateData: any) => {
 /**
  * Get a client by ID
  */
-export const getClientById = async (clientId: number) => {
+export const getClientById = async (clientId: number, options?: any) => {
   return await Client.findByPk(clientId, {
-    attributes: { exclude: ['password'] }
+    attributes: { exclude: ['password'] },
+    include: [
+      {
+        association: 'users',
+        include: ['account']
+      },
+      {
+        association: 'company'
+      },
+      {
+        association: 'account'
+      }
+    ],
+    ...options
   });
+};
+
+/**
+ * Get all locations associated with a client
+ */
+export const getClientLocations = async (clientId: number) => {
+  let client: any = await Client.findByPk(clientId, {
+    include: [{
+      model: Location,
+      as: "locations"
+    }]
+  });
+
+  if (!client) {
+    return null;
+  }
+
+  client = client.get({ plain: true })
+
+  return client.locations;
 };

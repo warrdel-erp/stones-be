@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import catchAsync from "../helper/asyncCatch";
+import * as accountService from "../services/account.service";
 import * as userService from "../services/user.service";
 import * as clientService from "../services/client.service";
 import { SuccessResponse } from "../helper/response";
@@ -12,7 +13,10 @@ export const login = catchAsync(async (req: Request, res: Response) => {
         throw new AppError("Email and password are required", 400);
     }
 
-    const result = await userService.loginUser(email, password);
+    const result = await accountService.authenticateAccount(email, password);
+    if (!result) {
+        throw new AppError("Invalid credentials", 401);
+    }
 
     SuccessResponse(res, 200, "Login successful", result);
 });

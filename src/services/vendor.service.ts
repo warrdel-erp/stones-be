@@ -4,7 +4,7 @@ import * as ledgerAccountRepository from "../repositories/ledgerAccount.reposito
 import * as billService from "../services/bill.service";
 import * as siplService from "../services/sipl.service";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
-import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import {
   BILL_REFERENCE_TYPES,
   LEDGER_ACCOUNT_REFERENCE_TYPES,
@@ -72,11 +72,20 @@ export const fetchAllVendors = async (page: number, limit: number, filter?: Wher
 
 // Get vendor by id
 export const getVendorById = async (id: number) => {
-  const vendor = await vendorRepository.findVendorById(id);
+  let vendor: any = await vendorRepository.findVendorById(id);
+
+  vendor = vendor.get({ plain: true })
 
   if (!vendor) {
     throw new Error("Vendor not found");
   }
+
+  // get payment terms constant data.
+  vendor.paymentTerms = PAYMENT_TERMS.find((e) => e.id == vendor.paymentTerms);
+
+  vendor.ledgerAccount.subHeader = COA_SUB_HEADERS.find((k) => k.id == vendor.ledgerAccount.subHeaderId);
+  vendor.ledgerAccount.header = COA_HEADERS.find((k) => k.id == vendor.ledgerAccount.subHeader.parent_id);
+  vendor.ledgerAccount.ledgerType = COA_TYPES.find((k) => k.id == vendor.ledgerAccount.header.parent_id);
 
   return vendor;
 };

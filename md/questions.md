@@ -81,3 +81,5 @@
 3. will slab deleted from cart if it is been added in so.
 
 4. how to decide unit price of slab in cart to SO.
+
+5. we've array of addresses of customer how to CRUD on UI.

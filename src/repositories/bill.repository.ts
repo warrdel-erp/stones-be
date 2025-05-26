@@ -23,11 +23,11 @@ export const findOne = async (filter: WhereOptions) => {
   });
 };
 
-export const getAllBills = async (page: number, limit: number, filters?: { [key: string]: any }) => {
+export const getAllBills = async (page: number, limit: number, clientId: number, filters?: { [key: string]: any }) => {
   const offset = (page - 1) * limit;
 
   // Build where clause dynamically if filters are provided
-  const whereClause = filters ? { ...filters } : {};
+  const whereClause = filters ? { ...filters, clientId } : {};
 
   return await models.Bill.findAndCountAll({
     where: whereClause,

@@ -1,17 +1,19 @@
-import { Op } from "sequelize";
+import { Op, Transaction, Model } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
+import User from "../models/user.model";
 
-// Create a new user
-export const createUser = async (userData: {
+type UserAttributes = {
   username: string;
   userid: string;
-  password: string;
   phone: string;
-  email: string;
   clientId: number;
-}) => {
-  return await models.User.create(userData);
+  accountId: number;
+};
+
+// Create a new user
+export const createUser = async (userData: UserAttributes, transaction?: Transaction) => {
+  return await models.User.create(userData as any, { transaction });
 };
 
 // Get User by Email
@@ -48,12 +50,12 @@ export const getAllUsers = async (page: number, limit: number, search?: string) 
 
   const whereClause = search
     ? {
-        [Op.or]: [
-          { username: { [Op.like]: `%${search}%` } },
-          { email: { [Op.like]: `%${search}%` } },
-          { phone: { [Op.like]: `%${search}%` } },
-        ],
-      }
+      [Op.or]: [
+        { username: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+        { phone: { [Op.like]: `%${search}%` } },
+      ],
+    }
     : {};
 
   const { rows: users, count: total } = await models.User.findAndCountAll({

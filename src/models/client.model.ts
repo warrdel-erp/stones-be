@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import Account from "./Account.model";
 
 const Client = sequelize.define(
   "Client",
@@ -17,21 +18,6 @@ const Client = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-    password: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: {
-        name: "unique_email_constraint",
-        msg: "unique email",
-      },
-      validate: {
-        isEmail: true,
-      },
-    },
     phone: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -40,9 +26,19 @@ const Client = sequelize.define(
         msg: "unique phone_number",
       },
     },
-    userCount: {
+    accountId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: Account,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    userCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
   },
   {
@@ -50,5 +46,6 @@ const Client = sequelize.define(
     timestamps: true,
   }
 );
+
 
 export default Client;

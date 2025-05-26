@@ -11,40 +11,80 @@ import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 
 import * as clientRepository from "../repositories/client.repository";
+import * as companyRepository from "../repositories/company.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as userRepository from '../repositories/user.repository'
+import * as accountService from "./account.service";
+
+type ClientRegistrationData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone: string;
+  company?: {
+    companyName: string;
+    companyAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    contactPersonName: string;
+    contactMobile: string;
+    email: string;
+  };
+};
 
 /**
  * Register Client
  */
-export async function registerClient(clientData: any) {
-  const { email, password } = clientData;
-
+export const registerClient = async (clientData: ClientRegistrationData) => {
+  // Start a transaction
   const transaction = await sequelize.transaction();
+
   try {
-    // Check if client exists
-    const existingClient = await clientRepository.findClientByEmail(email);
-    if (existingClient) {
-      throw new AppError("Client already exists", 400);
+    // Extract account data and company data
+    const { email, password, company, ...clientDetails } = clientData;
+
+    if (!(email && password)) {
+      throw new AppError("Email and password are required", 400);
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Create account (account service handles its own transaction)
+    const account = await accountService.createAccount({ email, password }, transaction);
 
-    // Create client
-    const client = await clientRepository.createClient({ ...clientData, password: hashedPassword }, transaction);
+    // Create client with account reference within transaction
+    const client = await clientRepository.createClient({
+      ...clientDetails,
+      accountId: account.getDataValue('id')
+    }, transaction);
 
-    const id = client.getDataValue("id");
-    // Create default ledger accounts for client.
-    const defaultLedgerAccount = await createDefaultLedgerAccountsForClient(id, transaction);
+    // Create company if company data is provided
+    if (company) {
+      await companyRepository.createCompany({
+        ...company,
+        clientId: client.getDataValue('id')
+      }, transaction);
+    }
 
-    transaction.commit();
-    return { client, defaultLedgerAccount };
+    // Create default ledger accounts for the client within transaction
+    await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+
+    // If everything is successful, commit the transaction
+    await transaction.commit();
+
+    // Fetch the complete client data with company
+    const completeClient = await clientRepository.getClientById(client.getDataValue('id'), {
+      include: ['company']
+    });
+
+    return completeClient;
   } catch (error) {
-    transaction.rollback();
+    // If any error occurs, rollback the transaction
+    await transaction.rollback();
     throw error;
   }
-}
+};
 
 /**
  * Service to fetch all clients with pagination and optional search.
@@ -156,14 +196,6 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
   return createdAccounts;
 };
 
-export const checkEmailAvailability = async (email: string) => {
-  const clientExists = await clientRepository.findClientByEmail(email);
-  const userExists = await userRepository.getUserByEmail(email);
-
-  return !!userExists || !!clientExists
-
-}
-
 /**
  * Service to fetch a client's profile by ID.
  */
@@ -171,4 +203,16 @@ export const getClientProfile = async (clientId: number) => {
   const client = (await clientRepository.getClientById(clientId))?.get({ plain: true });
   if (!client) throw new AppError("Client not found", 404);
   return { ...client, userType: 'client' };
+};
+
+// Get client locations
+export const getClientLocations = async (clientId: number) => {
+  const client = await clientRepository.getClientById(clientId);
+  if (!client) {
+    throw new AppError("Client not found", 404);
+  }
+
+  // Get all locations associated with the client
+  const locations = await clientRepository.getClientLocations(clientId);
+  return locations;
 };

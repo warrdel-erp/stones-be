@@ -75,8 +75,8 @@ export const getOneBill = async (id: number) => {
 };
 
 // get all bills with pagination and filters
-export const getAllBills = async (page: number, limit: number, filters?: { [key: string]: any }) => {
-  let { count, rows } = await billRepository.getAllBills(page, limit, filters);
+export const getAllBills = async (page: number, limit: number, clientId: number, filters?: { [key: string]: any }) => {
+  let { count, rows } = await billRepository.getAllBills(page, limit, clientId, filters);
 
   rows = rows.map((bill: any) => {
     bill = bill.get({ plain: true });

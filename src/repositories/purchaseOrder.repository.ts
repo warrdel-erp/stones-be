@@ -34,7 +34,7 @@ export async function createFreightDetail(
 }
 
 // Get po with pagination
-export const getAllPurchaseOrders = async (page: number, limit: number, filter: { [k: string]: string }) => {
+export const getAllPurchaseOrders = async (page: number, limit: number, clientId: number, filter: { [k: string]: string }) => {
   const offset = (page - 1) * limit;
 
   const { fromDate, toDate, ...otherFilters } = filter;
@@ -60,6 +60,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
     where: {
       ...otherFilters,
       ...dateRange,
+      clientId
     },
     include: [
       {
@@ -99,6 +100,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
         },
         required: getInInventoryData,
       },
+
     ],
     limit,
     offset,
@@ -107,7 +109,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, filter: 
 };
 
 // Get po with pagination
-export const getPaymentPendingPurchaseOrders = async (page: number, limit: number, filter: { [k: string]: string }) => {
+export const getPaymentPendingPurchaseOrders = async (page: number, limit: number, clientId: number, filter: { [k: string]: string }) => {
   const offset = (page - 1) * limit;
 
   const { fromDate, toDate, ...otherFilters } = filter;
@@ -123,6 +125,9 @@ export const getPaymentPendingPurchaseOrders = async (page: number, limit: numbe
   }
 
   const pos: any = await models.PurchaseOrder.findAndCountAll({
+    where: {
+      clientId
+    },
     attributes: [
       "id",
       [

@@ -7,7 +7,8 @@ module.exports = {
       [
         {
           id: 1,
-          name: "Tech Solutions Ltd 1",
+          firstName: "Ethan",
+          lastName: "Sterling",
           // Password: "SecurePass123",
           password: "$2b$10$fwn9yJLoj7CJ9WkKVUMYkeXKRbe1/P/Vhs3yjzXVdhr/CwQJ1IdCC",
           email: "contact1@techsolutions.com",

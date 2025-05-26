@@ -9,9 +9,12 @@ export const createSalesOrder = async (data: any, transaction?: Transaction) => 
 };
 
 // Get all sales order
-export const getAllSalesOrders = async (page: number, limit: number) => {
+export const getAllSalesOrders = async (page: number, limit: number, clientId: number,) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+    where: {
+      clientId,
+    },
     attributes: {
       include: [
         [

@@ -2,6 +2,7 @@ import Bill from "./bill.model";
 import BillItem from "./billItem";
 import Bin from "./bin";
 import Client from "./client.model";
+import Company from "./company.model";
 import Container from "./container";
 import Customer from "./customer.model";
 import CustomerAddress from "./customerAddress.model";
@@ -33,18 +34,31 @@ import Vendor from "./vendor";
 import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
+import Account from "./Account.model";
 import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
 import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
-Client.hasMany(User, { foreignKey: "clientId" });
+Client.hasMany(User, { foreignKey: "clientId", as: "users" });
 User.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
+// Define associations
+User.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
+Account.hasOne(User, { foreignKey: 'accountId', as: 'user' });
+
+// Define associations
+Client.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
+Account.hasOne(Client, { foreignKey: 'accountId', as: 'client' });
+
+// Client-Company relation (one-to-one)
+Client.hasOne(Company, { foreignKey: "clientId", as: "company" });
+Company.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
 // Client-Location relation (one 'Client' have multiple 'Location') (one 'Location' have one 'Client')
-Client.hasMany(Location, { foreignKey: "clientId" });
-Location.belongsTo(Client, { foreignKey: "clientId" });
+Client.hasMany(Location, { foreignKey: "clientId", as: 'locations' });
+Location.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // User-Location relation (one 'User' have multiple 'Location') (one 'Location' have multiple 'User')
 User.belongsToMany(Location, {
@@ -533,4 +547,6 @@ export {
   ProductGroup,
   ProductBaseColor,
   ProductFinish,
+  Account,
+  Company
 };

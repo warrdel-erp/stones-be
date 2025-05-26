@@ -42,6 +42,7 @@ import productBaseColorRoutes from "./routes/productBaseColor.routes";
 import productFinishRoutes from "./routes/productFinish.routes";
 import soInvoiceRoutes from "./routes/soInvoice.routes";
 import authRoutes from "./routes/auth.routes";
+import accountRoutes from "./routes/account.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,6 +53,7 @@ app.use(urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/account", accountRoutes);
 app.use("/api/client", clientRoute);
 app.use("/api/user", userRoute);
 app.use("/api/vendor", vendorRoute);

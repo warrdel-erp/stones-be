@@ -11,7 +11,7 @@ export interface AuthRequest extends Request {
     userid?: string;
     email: string;
     defaultLocationId?: number;
-    clientId?: number;
+    clientId: number;
     firstName?: string;
     lastName?: string;
     accountType: "user" | "client";
@@ -48,6 +48,7 @@ const authenticateClientFromToken = async (decoded: any, req: AuthRequest) => {
 
   req.user = {
     id: client.id,
+    clientId: client.id,
     email: client.email,
     firstName: client.firstName,
     lastName: client.lastName,
@@ -73,6 +74,9 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
   if (!decoded) {
     throw new AppError("Invalid token", 401);
   }
+
+
+  console.log(decoded);
 
   // Try to authenticate as a user
   const userAuthenticated = await authenticateUserFromToken(decoded, req);

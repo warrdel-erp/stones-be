@@ -16,10 +16,12 @@ export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Respons
 });
 
 // Get all SO
-export const getAllSalesOrders = catchAsync(async (req: Request, res: Response) => {
+export const getAllSalesOrders = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10 } = req.query;
 
-  const result = await salesOrderService.getAllSalesOrders(Number(page), Number(limit));
+  const clientId = req.user?.clientId
+
+  const result = await salesOrderService.getAllSalesOrders(Number(page), Number(limit), Number(clientId));
 
   SuccessResponse(res, 200, "Sales Orders retrieved successfully", result.data, {
     total: result.total,

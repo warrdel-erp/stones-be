@@ -172,8 +172,26 @@ Freight bills. ✅
 
 Location List ✅
 
------
+---
 
 client login
 
 user profile.
+
+---
+
+new account structure of client user login. ✅
+some data bifurcation for new structure ✅
+4th step in client registration. ✅
+client registration in BE. ✅
+
+integration of FE and BE is pending ✅
+
+---
+
+client profile is done,
+create new user under a client is done and all of them can login.
+
+---
+
+1. SO invoice direct from LO.

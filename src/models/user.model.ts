@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Client from "./client.model";
 import Location from "./location";
+import Account from "./Account.model";
 
 // Define User Model
 const User = sequelize.define(
@@ -24,10 +25,6 @@ const User = sequelize.define(
       },
       allowNull: false,
     },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     phone: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -36,23 +33,24 @@ const User = sequelize.define(
         msg: "unique phone_number",
       },
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        name: "unique_email_constraint",
-        msg: "unique email",
+    accountId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Account,
+        key: "id",
       },
-      validate: { isEmail: true },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     clientId: {
       type: DataTypes.INTEGER,
       references: {
-        model: Client, // Table name should match the one in DB
+        model: Client,
         key: "id",
       },
-      onUpdate: "CASCADE", // Update clientId when Client.id changes
-      onDelete: "RESTRICT", // Prevent deleting Client if Users exist
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     defaultLocationId: {
       type: DataTypes.INTEGER,
@@ -67,5 +65,6 @@ const User = sequelize.define(
     timestamps: true,
   }
 );
+
 
 export default User;

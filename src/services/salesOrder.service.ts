@@ -59,17 +59,15 @@ export const createSalesOrder = async (data: any) => {
 };
 
 // Get all sales orders
-export const getAllSalesOrders = async (page: number, limit: number) => {
-  const data = await salesOrderRepository.getAllSalesOrders(page, limit);
+export const getAllSalesOrders = async (page: number, limit: number, clientId: number) => {
+  const data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId);
 
   data.data = data.data.map((salesOrder: any) => {
     salesOrder = salesOrder.get({ plain: true });
 
-
     salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
     salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scope)?.value;
 
-    console.log(salesOrder.customer)
     salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
 
     return salesOrder;
