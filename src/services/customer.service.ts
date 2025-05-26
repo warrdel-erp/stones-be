@@ -22,7 +22,7 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
     }
 
     // Create customer
-    const newCustomer: any = await customerRepository.createCustomer(customerData, transaction);
+    const newCustomer: any = await customerRepository.createCustomer({ ...customerData, clientId }, transaction);
 
     let newAddresses: any[] = [];
     // Associate customer id to address.
