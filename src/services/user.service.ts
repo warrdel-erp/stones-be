@@ -206,7 +206,18 @@ export const fetchUserById = async (userId: number) => {
   if (!user) {
     throw new AppError("User not found", 400);
   }
-  return user;
+
+  // Convert to plain object and format the response
+  const userData = user.get({ plain: true });
+
+  // Ensure we have a clean response structure
+  return {
+    ...userData,
+    client: userData.client ? {
+      ...userData.client,
+      company: userData.client.company || null
+    } : null
+  };
 };
 
 // Check if user has access to given location.

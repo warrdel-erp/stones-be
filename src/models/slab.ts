@@ -7,6 +7,7 @@ import PurchaseOrder from "./purchaseOrder";
 import { SLAB_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
 import SIPLProduct from "./siplProduct";
+import Client from "./client.model";
 
 const Slab = sequelize.define(
   "slabs",
@@ -141,6 +142,16 @@ const Slab = sequelize.define(
       },
       onDelete: "NO ACTION",
       onUpdate: "CASCADE",
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     createdAt: {
       type: DataTypes.DATE,

@@ -4,6 +4,7 @@ import * as slabService from "../services/slab.service";
 import * as slabRemeasurementService from "../services/slabRemeasurement.service";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 export const updateSlabHoldStatus = catchAsync(async (req: Request, res: Response) => {
   const { slabId } = req.params;
@@ -89,4 +90,15 @@ export const bulkUpdateSlabs = catchAsync(async (req: Request, res: Response) =>
   }
 
   return SuccessResponse(res, 200, `${affectedRows} slabs updated successfully.`, affectedRows);
+});
+
+export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+
+  if (!clientId) {
+    throw new AppError("Missing client information", 401);
+  }
+
+  const result = await slabService.getCartCount(clientId);
+  return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
 });

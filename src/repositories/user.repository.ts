@@ -78,7 +78,26 @@ export const updateUser = async (id: number, updateData: any) => {
 
 // get User By userID
 export const findUserById = async (userId: number) => {
-  return await models.User.findByPk(userId, { attributes: { exclude: ["password"] } });
+  return await models.User.findByPk(userId, {
+    attributes: { exclude: ["password"] },
+    include: [
+      {
+        model: models.Client,
+        as: "client",
+        include: [
+          {
+            model: models.Company,
+            as: "company"
+          }
+        ]
+      },
+      {
+        model: models.Account,
+        as: "account",
+        attributes: ['email']
+      }
+    ]
+  });
 };
 
 // Get all locations that are assigned to user.

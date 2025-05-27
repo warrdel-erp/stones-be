@@ -62,3 +62,8 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
     throw error; // Ensure the error is propagated
   }
 };
+
+export const getCartCount = async (clientId: number) => {
+  const count = await slabRepository.getCartCount(clientId);
+  return { count };
+};

@@ -315,3 +315,12 @@ export const getLastLandedCost = async (productId: number) => {
   })
 }
 
+export const getCartCount = async (clientId: number) => {
+  return await Slab.count({
+    where: {
+      isInCart: true,
+      clientId: clientId
+    }
+  });
+};
+

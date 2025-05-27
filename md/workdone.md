@@ -196,3 +196,8 @@ create new user under a client is done and all of them can login.
 
 1. SO invoice direct from LO.
 2. Dashboard loading errors.
+
+---
+
+1. kuldeep error.
+2. structure change of Side bar (dynamic),

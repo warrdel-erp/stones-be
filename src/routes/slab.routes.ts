@@ -26,4 +26,7 @@ router.get("/", authenticateUser, slabController.getAllSlabs);
 // // Get all remeasurement by Slab id.
 router.get("/:slabId", authenticateUser, slabController.getSlabWithLogs);
 
+// get cart count
+router.get("/cart/count", authenticateUser, slabController.getCartCount);
+
 export default router;
