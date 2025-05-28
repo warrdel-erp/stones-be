@@ -23,6 +23,7 @@ import {
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
+  LEDGER_ACCOUNT_REFERENCE_TYPES,
   LOADING_ORDER_STAGES,
   NOTES_REFERENCE_TYPES,
   NOTES_TYPE,
@@ -250,6 +251,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Create Journal Entry for Invoice START
     const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
       referenceId: loadingOrder.salesOrder.customerId,
+      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
     });
 
     // Get ledger account for goods sold.

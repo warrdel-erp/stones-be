@@ -268,3 +268,79 @@ Icons
 Location wise.
 
 ---
+
+```
+Remove date range from
+ => product ✅, customer. ✅
+
+Create product =>
+Subcategory should work according to category ✅
+
+Create supplier =>
+	address and suite should not be in different input it should be one.
+
+Create customer =>
+	sales person list  ✅
+
+Create PO =>
+	1. contact info for supplier, both locations. ✅
+	2. Payment terms dropdown in create PO. ✅
+
+PO detail page =>
+	1. If SIPL is been created then PO can’t be changed. And before it should be.
+
+SIPL details page =>
+	1. Add slab => slab number should not show “SIPL” text ✅
+	2.  In freight bill label should be on “billed quantity” ✅
+	3. Heading should	 not have two times “SIPL” ✅
+	4. Slab No default value. ✅
+
+Inventory =>
+	1. color ✅
+	2. Status icons.
+	3. Available label ✅
+	4. Allocated should be present in list but unable to add in cart ✅
+
+Navbar =>
+	1. cart items count ✅
+	2. UI changes to add and remove cart item. ✅
+
+In SO detail page
+	1. Selling price should be editable 🤨 [when can we change price in SO.]
+	2. Tax bifurcation according 🤨 [is tax product wise or slab wise in SO?]
+	3. Print should be a hamburger and it should show “print LO”, “print PL”, “print invoice” ✅
+
+Create LO
+	1. Tax calc.
+
+SO journal entry
+	1. It should be customer instead of Freight vendor. ✅
+	2. Heading is wrong. ✅
+
+COA =>
+	Create account =>
+		1. Account type should be fetched from header type.
+
+Customer Payment  =>
+	1. account should come from same as supplier accounts. ✅
+
+SIPL detail =>
+	1. Inventory received date.
+	2. Payment receipt number list.
+
+SIPL journal entry =>
+	1. payment account is not as selected. ✅
+
+Some details should be shown in all list as in return list.
+
+SO list =>
+	1. address
+
+Dashboard =>
+	1. “PO in transit” UI.
+
+SO from cart form => all mediation message should visible.
+
+Bar code
+
+```

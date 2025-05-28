@@ -82,6 +82,8 @@
 
 4. how to decide unit price of slab in cart to SO.
 
-5. we've array of addresses of customer how to CRUD on UI.
+5. we've array of addresses of customer how to CRUD on UI. [in-customer-tab]
 
-6. can two different user put same slab in cart.
+6. can two different user put same slab in cart. ✅
+
+---

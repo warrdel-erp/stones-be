@@ -201,3 +201,13 @@ create new user under a client is done and all of them can login.
 
 1. kuldeep error.
 2. structure change of Side bar (dynamic),
+3. (UI) categorization in sidebar
+4. Navbar changes.
+
+---
+
+1. Print should be a hamburger and it should show “print LO”, “print PL”, “print invoice” ✅
+2. account should come from same as supplier accounts. ✅
+3. payment account is not as selected. ✅
+4. SO journal entry should be customer instead of Freight vendor. ✅
+5. SO journal entry heading. ✅
