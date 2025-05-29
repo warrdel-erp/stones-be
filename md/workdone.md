@@ -211,3 +211,4 @@ create new user under a client is done and all of them can login.
 3. payment account is not as selected. ✅
 4. SO journal entry should be customer instead of Freight vendor. ✅
 5. SO journal entry heading. ✅
+6. sidebar bug resolved. ✅

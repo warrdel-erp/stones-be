@@ -32,7 +32,6 @@ module.exports = {
           einNumber: null,
           reason: null,
           scope: 1,
-          pSalesPerson: null,
           createdBy: 1,
           updatedBy: 1,
           clientId: 1,
