@@ -212,3 +212,11 @@ create new user under a client is done and all of them can login.
 4. SO journal entry should be customer instead of Freight vendor. ✅
 5. SO journal entry heading. ✅
 6. sidebar bug resolved. ✅
+
+---
+
+1. add slab bug
+2. add slab UI changes.
+3. sidebar icons.
+4. PO UI changes.
+5. Supplier invoice opening error.

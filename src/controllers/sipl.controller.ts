@@ -180,6 +180,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Response) => {
   const { siplId } = req.params;
   const userId = req.user?.id;
+  const clientId = req.user?.clientId
 
   const { siplProductId, productId } = req.body;
 
@@ -205,6 +206,7 @@ export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Respon
     siplId: Number(siplId),
     createdBy: userId,
     updatedBy: userId,
+    clientId
   });
   res.status(201).json({ message: "Slabs created successfully", slabs });
 });

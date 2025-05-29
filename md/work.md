@@ -343,4 +343,6 @@ SO from cart form => all mediation message should visible.
 
 Bar code
 
+PO Detail
+
 ```
