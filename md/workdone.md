@@ -220,3 +220,40 @@ create new user under a client is done and all of them can login.
 3. sidebar icons.
 4. PO UI changes.
 5. Supplier invoice opening error.
+
+---
+
+1. Keep only “Supplier name” blue (In journal entries.). ✅
+
+2. Direct SIPL =>
+
+   1. payment terms error. ✅
+   2. all list is now showing. ✅
+
+3. Inventory slab detail =>
+
+   1. Last landed cost. ✅
+
+4. Sidebar =>
+
+   1. sales should before invoices ✅
+
+5. SO create =>
+
+   1. second heading should be customer invoice/PL/LO ✅
+
+6. COA account creation default account type according to subHeader. ✅
+
+---
+
+1. SO journal entry =>
+
+   1. slab amount is wrong (10x) ✅
+
+2. LO detail page =>
+
+   1. Order quantity is for whole SO it should be only for LO. ✅
+
+3. smaller barcode ✅
+
+4. cart SO creation validations, remove SO Location. ✅

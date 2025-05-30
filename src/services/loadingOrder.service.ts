@@ -164,6 +164,13 @@ function getTotalLoQuantity(salesOrderProducts: any[]) {
   );
 }
 
+function getTotalLoOrderQuantity(salesOrderProducts: any[]) {
+  return _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) => (salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth) / 144
+  );
+}
+
 function getTotalPlAmount(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
@@ -198,6 +205,7 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
       ...product,
       salesOrderProduct,
       totalQuantity: getTotalLoQuantity(salesOrderProduct),
+      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),
       soQuantity: salesOrderService.getTotalQuantity(soProductsWithProductAndUnitPrice),
     };
   });
@@ -282,8 +290,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       },
       transaction
     );
-
-
 
     // Journal Entry for Without tax.
     await journalEntryRepository.create(
@@ -418,7 +424,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
       await journalEntryRepository.create(
         {
-          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
           ledgerId: ledgerAccountForCogs.id,
           type: JOURNAL_ENTRY_TYPE.DR,
 

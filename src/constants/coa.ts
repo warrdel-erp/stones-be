@@ -4,49 +4,49 @@ export const COA_TYPES = [
     number: "1",
     name: "Assets",
     key: "assets",
-    code: 100000
+    code: 100000,
   },
   {
     id: 2,
     number: "2",
     name: "Liabilities",
     key: "liabilities",
-    code: 200000
+    code: 200000,
   },
   {
     id: 3,
     number: "3",
     name: "Equity, Including Portion Attributable to Non controlling Interest",
     key: "equity_including_non_controlling_interest",
-    code: 300000
+    code: 300000,
   },
   {
     id: 4,
     number: "4",
     name: "Revenue",
     key: "revenue",
-    code: 400000
+    code: 400000,
   },
   {
     id: 5,
     number: "5",
     name: "Expenses",
     key: "expenses",
-    code: 500000
+    code: 500000,
   },
   {
     id: 6,
     number: "6",
     name: "Other (Non-Operating) Income and Expenses",
     key: "other_non_operating_income_expenses",
-    code: 600000
+    code: 600000,
   },
   {
     id: 7,
     number: "7",
     name: "Intercompany and Related Party Accounts",
     key: "intercompany_related_party_accounts",
-    code: 700000
+    code: 700000,
   },
 ] as const;
 
@@ -57,7 +57,7 @@ export const COA_HEADERS = [
     name: "Cash and Financial Assets",
     key: "cash_and_financial_assets",
     parent_id: 1,
-    code: 110000
+    code: 110000,
   },
   {
     id: 2,
@@ -65,7 +65,7 @@ export const COA_HEADERS = [
     name: "Receivables and Contracts",
     key: "receivables_and_contracts",
     parent_id: 1,
-    code: 120000
+    code: 120000,
   },
   {
     id: 3,
@@ -73,7 +73,7 @@ export const COA_HEADERS = [
     name: "Inventory",
     key: "inventory",
     parent_id: 1,
-    code: 130000
+    code: 130000,
   },
   {
     id: 4,
@@ -81,7 +81,7 @@ export const COA_HEADERS = [
     name: "Accruals and Additional Assets",
     key: "accruals_and_additional_assets",
     parent_id: 1,
-    code: 140000
+    code: 140000,
   },
   {
     id: 5,
@@ -89,7 +89,7 @@ export const COA_HEADERS = [
     name: "Property, Plant and Equipment, Net",
     key: "property_plant_and_equipment_net",
     parent_id: 1,
-    code: 150000
+    code: 150000,
   },
   {
     id: 6,
@@ -97,7 +97,7 @@ export const COA_HEADERS = [
     name: "Intangible Assets (Excluding Goodwill)",
     key: "intangible_assets_excluding_goodwill",
     parent_id: 1,
-    code: 160000
+    code: 160000,
   },
   {
     id: 7,
@@ -105,7 +105,7 @@ export const COA_HEADERS = [
     name: "Goodwill",
     key: "goodwill",
     parent_id: 1,
-    code: 170000
+    code: 170000,
   },
 
   {
@@ -114,7 +114,7 @@ export const COA_HEADERS = [
     name: "Payables",
     key: "payables",
     parent_id: 2,
-    code: 210000
+    code: 210000,
   },
   {
     id: 9,
@@ -122,7 +122,7 @@ export const COA_HEADERS = [
     name: "Accruals, Deferrals and Additional Liabilities",
     key: "accruals_deferrals_and_additional_liabilities",
     parent_id: 2,
-    code: 220000
+    code: 220000,
   },
   {
     id: 10,
@@ -130,7 +130,7 @@ export const COA_HEADERS = [
     name: "Financial Liabilities",
     key: "financial_liabilities",
     parent_id: 2,
-    code: 230000
+    code: 230000,
   },
   {
     id: 11,
@@ -138,7 +138,7 @@ export const COA_HEADERS = [
     name: "Commitments and Contingencies",
     key: "commitments_and_contingencies",
     parent_id: 2,
-    code: 240000
+    code: 240000,
   },
 
   {
@@ -147,7 +147,7 @@ export const COA_HEADERS = [
     name: "Equity, Attributable to Parent",
     key: "equity_attributable_to_parent",
     parent_id: 3,
-    code: 310000
+    code: 310000,
   },
   {
     id: 13,
@@ -155,7 +155,7 @@ export const COA_HEADERS = [
     name: "Retained Earnings (Accumulated Deficit)",
     key: "retained_earnings_accumulated_deficit",
     parent_id: 3,
-    code: 320000
+    code: 320000,
   },
   {
     id: 14,
@@ -163,7 +163,7 @@ export const COA_HEADERS = [
     name: "Accumulated Other Comprehensive Income (Loss)",
     key: "accumulated_other_comprehensive_income_loss",
     parent_id: 3,
-    code: 330000
+    code: 330000,
   },
   {
     id: 15,
@@ -171,7 +171,7 @@ export const COA_HEADERS = [
     name: "Other Equity Items",
     key: "other_equity_items",
     parent_id: 3,
-    code: 340000
+    code: 340000,
   },
   {
     id: 16,
@@ -179,7 +179,7 @@ export const COA_HEADERS = [
     name: "Equity, Attributable to Non controlling Interest",
     key: "equity_attributable_to_non_controlling_interest",
     parent_id: 3,
-    code: 350000
+    code: 350000,
   },
 
   {
@@ -188,7 +188,7 @@ export const COA_HEADERS = [
     name: "Recognized Point of Time",
     key: "recognized_point_of_time",
     parent_id: 4,
-    code: 410000
+    code: 410000,
   },
   {
     id: 18,
@@ -196,7 +196,7 @@ export const COA_HEADERS = [
     name: "Recognized Over Time",
     key: "recognized_over_time",
     parent_id: 4,
-    code: 420000
+    code: 420000,
   },
   {
     id: 19,
@@ -204,7 +204,7 @@ export const COA_HEADERS = [
     name: "Adjustments",
     key: "adjustments",
     parent_id: 4,
-    code: 430000
+    code: 430000,
   },
 
   {
@@ -213,7 +213,7 @@ export const COA_HEADERS = [
     name: "Expenses (Classified by Nature)",
     key: "expenses_classified_by_nature",
     parent_id: 5,
-    code: 510000
+    code: 510000,
   },
   {
     id: 21,
@@ -221,7 +221,7 @@ export const COA_HEADERS = [
     name: "Expenses (Classified by Function)",
     key: "expenses_classified_by_function",
     parent_id: 5,
-    code: 520000
+    code: 520000,
   },
   {
     id: 22,
@@ -229,7 +229,7 @@ export const COA_HEADERS = [
     name: "Operational Expense",
     key: "operational_expense",
     parent_id: 5,
-    code: 530000
+    code: 530000,
   },
 
   {
@@ -238,7 +238,7 @@ export const COA_HEADERS = [
     name: "Other Revenue and Expenses",
     key: "other_revenue_and_expenses",
     parent_id: 6,
-    code: 610000
+    code: 610000,
   },
   {
     id: 24,
@@ -246,7 +246,7 @@ export const COA_HEADERS = [
     name: "Gains and Losses",
     key: "gains_and_losses",
     parent_id: 6,
-    code: 620000
+    code: 620000,
   },
   {
     id: 25,
@@ -254,7 +254,7 @@ export const COA_HEADERS = [
     name: "Taxes (Other than Income and Payroll) and Fees",
     key: "taxes_other_than_income_and_payroll_fees",
     parent_id: 6,
-    code: 630000
+    code: 630000,
   },
   {
     id: 26,
@@ -262,7 +262,7 @@ export const COA_HEADERS = [
     name: "Income Tax Expense (Benefit)",
     key: "income_tax_expense_benefit",
     parent_id: 6,
-    code: 640000
+    code: 640000,
   },
 
   {
@@ -271,7 +271,7 @@ export const COA_HEADERS = [
     name: "Intercompany and Related Party Assets",
     key: "intercompany_related_party_assets",
     parent_id: 7,
-    code: 710000
+    code: 710000,
   },
   {
     id: 28,
@@ -279,7 +279,7 @@ export const COA_HEADERS = [
     name: "Intercompany and Related Party Liabilities",
     key: "intercompany_related_party_liabilities",
     parent_id: 7,
-    code: 720000
+    code: 720000,
   },
   {
     id: 29,
@@ -287,7 +287,7 @@ export const COA_HEADERS = [
     name: "Intercompany and Related Party Income and Expense",
     key: "intercompany_related_party_income_expense",
     parent_id: 7,
-    code: 730000
+    code: 730000,
   },
 ] as const;
 
@@ -298,7 +298,8 @@ export const COA_SUB_HEADERS = [
     name: "Cash and Cash Equivalents",
     key: "cash_and_cash_equivalents",
     parent_id: 1,
-    code: 111000
+    code: 111000,
+    type: "Dr"
   },
   {
     id: 2,
@@ -306,7 +307,8 @@ export const COA_SUB_HEADERS = [
     name: "Investments",
     key: "investments",
     parent_id: 1,
-    code: 112000
+    code: 112000,
+    type: "Dr"
   },
   {
     id: 3,
@@ -314,7 +316,8 @@ export const COA_SUB_HEADERS = [
     name: "Accounts, Notes and Loans Receivable",
     key: "accounts_notes_loans_receivable",
     parent_id: 2,
-    code: 121000
+    code: 121000,
+    type: "Dr"
   },
   {
     id: 4,
@@ -322,7 +325,8 @@ export const COA_SUB_HEADERS = [
     name: "Contracts with Customers",
     key: "contracts_with_customers",
     parent_id: 2,
-    code: 122000
+    code: 122000,
+    type: "Dr"
   },
   {
     id: 5,
@@ -330,7 +334,8 @@ export const COA_SUB_HEADERS = [
     name: "Nontrade and Other Receivables",
     key: "nontrade_and_other_receivables",
     parent_id: 2,
-    code: 123000
+    code: 123000,
+    type: "Dr"
   },
   {
     id: 6,
@@ -338,7 +343,8 @@ export const COA_SUB_HEADERS = [
     name: "In Transit",
     key: "in_transit",
     parent_id: 3,
-    code: 131000
+    code: 131000,
+    type: "Dr"
   },
   {
     id: 7,
@@ -346,7 +352,8 @@ export const COA_SUB_HEADERS = [
     name: "Merchandise",
     key: "merchandise",
     parent_id: 3,
-    code: 132000
+    code: 132000,
+    type: "Dr"
   },
   {
     id: 8,
@@ -354,7 +361,8 @@ export const COA_SUB_HEADERS = [
     name: "Raw Material, Parts and Supplies",
     key: "raw_material_parts_and_supplies",
     parent_id: 3,
-    code: 133000
+    code: 133000,
+    type: "Dr"
   },
   {
     id: 9,
@@ -362,7 +370,8 @@ export const COA_SUB_HEADERS = [
     name: "Work in Process",
     key: "work_in_process",
     parent_id: 3,
-    code: 134000
+    code: 134000,
+    type: "Dr"
   },
   {
     id: 10,
@@ -370,7 +379,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Inventory, Gross",
     key: "other_inventory_gross",
     parent_id: 3,
-    code: 135000
+    code: 135000,
+    type: "Dr"
   },
   {
     id: 11,
@@ -378,7 +388,8 @@ export const COA_SUB_HEADERS = [
     name: "Prepaid Expense",
     key: "prepaid_expense",
     parent_id: 4,
-    code: 141000
+    code: 141000,
+    type: "Dr"
   },
   {
     id: 12,
@@ -386,7 +397,8 @@ export const COA_SUB_HEADERS = [
     name: "Accrued Income",
     key: "accrued_income",
     parent_id: 4,
-    code: 142000
+    code: 142000,
+    type: "Dr"
   },
   {
     id: 13,
@@ -394,7 +406,8 @@ export const COA_SUB_HEADERS = [
     name: "Service Provider Work in Process",
     key: "service_provider_work_in_process",
     parent_id: 4,
-    code: 143000
+    code: 143000,
+    type: "Dr"
   },
   {
     id: 14,
@@ -402,7 +415,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Assets",
     key: "additional_assets",
     parent_id: 4,
-    code: 144000
+    code: 144000,
+    type: "Dr"
   },
   {
     id: 15,
@@ -410,7 +424,8 @@ export const COA_SUB_HEADERS = [
     name: "Land and Land Improvements",
     key: "land_and_land_improvements",
     parent_id: 5,
-    code: 151000
+    code: 151000,
+    type: "Dr"
   },
   {
     id: 16,
@@ -418,7 +433,8 @@ export const COA_SUB_HEADERS = [
     name: "Buildings, Structures and Improvements",
     key: "buildings_structures_and_improvements",
     parent_id: 5,
-    code: 152000
+    code: 152000,
+    type: "Dr"
   },
   {
     id: 17,
@@ -426,7 +442,8 @@ export const COA_SUB_HEADERS = [
     name: "Machinery and Equipment",
     key: "machinery_and_equipment",
     parent_id: 5,
-    code: 153000
+    code: 153000,
+    type: "Dr"
   },
   {
     id: 18,
@@ -434,7 +451,8 @@ export const COA_SUB_HEADERS = [
     name: "Furniture and Fixtures",
     key: "furniture_and_fixtures",
     parent_id: 5,
-    code: 154000
+    code: 154000,
+    type: "Dr"
   },
   {
     id: 19,
@@ -442,7 +460,8 @@ export const COA_SUB_HEADERS = [
     name: "Right of Use Assets (Classified as PP&E)",
     key: "right_of_use_assets_ppe",
     parent_id: 5,
-    code: 155000
+    code: 155000,
+    type: "Dr"
   },
   {
     id: 20,
@@ -450,7 +469,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Property, Plant and Equipment",
     key: "additional_property_plant_equipment",
     parent_id: 5,
-    code: 156000
+    code: 156000,
+    type: "Dr"
   },
   {
     id: 21,
@@ -458,7 +478,8 @@ export const COA_SUB_HEADERS = [
     name: "Construction in Progress",
     key: "construction_in_progress",
     parent_id: 5,
-    code: 157000
+    code: 157000,
+    type: "Dr"
   },
   {
     id: 22,
@@ -466,7 +487,8 @@ export const COA_SUB_HEADERS = [
     name: "Intellectual Property",
     key: "intellectual_property",
     parent_id: 6,
-    code: 161000
+    code: 161000,
+    type: "Dr"
   },
   {
     id: 23,
@@ -474,7 +496,8 @@ export const COA_SUB_HEADERS = [
     name: "Computer Software",
     key: "computer_software",
     parent_id: 6,
-    code: 162000
+    code: 162000,
+    type: "Dr"
   },
   {
     id: 24,
@@ -482,7 +505,8 @@ export const COA_SUB_HEADERS = [
     name: "Trade and Distribution Assets",
     key: "trade_and_distribution_assets",
     parent_id: 6,
-    code: 163000
+    code: 163000,
+    type: "Dr"
   },
   {
     id: 25,
@@ -490,7 +514,8 @@ export const COA_SUB_HEADERS = [
     name: "Contracts and Rights",
     key: "contracts_and_rights",
     parent_id: 6,
-    code: 164000
+    code: 164000,
+    type: "Dr"
   },
   {
     id: 26,
@@ -498,7 +523,8 @@ export const COA_SUB_HEADERS = [
     name: "Right of Use Assets (Classified as Intangible)",
     key: "right_of_use_assets_intangible",
     parent_id: 6,
-    code: 165000
+    code: 165000,
+    type: "Dr"
   },
   {
     id: 27,
@@ -506,7 +532,8 @@ export const COA_SUB_HEADERS = [
     name: "Crypto Assets (Classified as Intangible)",
     key: "crypto_assets_intangible",
     parent_id: 6,
-    code: 166000
+    code: 166000,
+    type: "Dr"
   },
   {
     id: 28,
@@ -514,7 +541,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Intangible Assets",
     key: "additional_intangible_assets",
     parent_id: 6,
-    code: 167000
+    code: 167000,
+    type: "Dr"
   },
   {
     id: 29,
@@ -522,7 +550,8 @@ export const COA_SUB_HEADERS = [
     name: "Acquisition in Progress",
     key: "acquisition_in_progress",
     parent_id: 6,
-    code: 168000
+    code: 168000,
+    type: "Dr"
   },
   {
     id: 30,
@@ -530,7 +559,8 @@ export const COA_SUB_HEADERS = [
     name: "Trade Payables",
     key: "trade_payables",
     parent_id: 8,
-    code: 211000
+    code: 211000,
+    type: "Cr"
   },
   {
     id: 31,
@@ -538,7 +568,8 @@ export const COA_SUB_HEADERS = [
     name: "Freight Payables",
     key: "freight_payables",
     parent_id: 8,
-    code: 212000
+    code: 212000,
+    type: "Cr"
   },
   {
     id: 32,
@@ -546,7 +577,8 @@ export const COA_SUB_HEADERS = [
     name: "Tax Payables",
     key: "tax_payables",
     parent_id: 8,
-    code: 213000
+    code: 213000,
+    type: "Cr"
   },
   {
     id: 33,
@@ -554,7 +586,8 @@ export const COA_SUB_HEADERS = [
     name: "Dividends Payable",
     key: "dividends_payable",
     parent_id: 8,
-    code: 214000
+    code: 214000,
+    type: "Cr"
   },
   {
     id: 34,
@@ -562,7 +595,8 @@ export const COA_SUB_HEADERS = [
     name: "Interest Payable",
     key: "interest_payable",
     parent_id: 8,
-    code: 215000
+    code: 215000,
+    type: "Cr"
   },
   {
     id: 35,
@@ -570,7 +604,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Accounts Payable and Accrued Liabilities",
     key: "other_accounts_payable_accrued_liabilities",
     parent_id: 8,
-    code: 216000
+    code: 216000,
+    type: "Cr"
   },
   {
     id: 36,
@@ -578,7 +613,8 @@ export const COA_SUB_HEADERS = [
     name: "Accrued Expenses",
     key: "accrued_expenses",
     parent_id: 9,
-    code: 221000
+    code: 221000,
+    type: "Cr"
   },
   {
     id: 37,
@@ -586,7 +622,8 @@ export const COA_SUB_HEADERS = [
     name: "Accrued Taxes (Other than Payroll)",
     key: "accrued_taxes_other_than_payroll",
     parent_id: 9,
-    code: 222000
+    code: 222000,
+    type: "Cr"
   },
   {
     id: 38,
@@ -594,7 +631,8 @@ export const COA_SUB_HEADERS = [
     name: "Deferred Income and Refund Liabilities",
     key: "deferred_income_refund_liabilities",
     parent_id: 9,
-    code: 223000
+    code: 223000,
+    type: "Cr"
   },
   {
     id: 39,
@@ -602,7 +640,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Liabilities",
     key: "additional_liabilities",
     parent_id: 9,
-    code: 224000
+    code: 224000,
+    type: "Cr"
   },
   {
     id: 40,
@@ -610,7 +649,8 @@ export const COA_SUB_HEADERS = [
     name: "Notes Payable",
     key: "notes_payable",
     parent_id: 10,
-    code: 231000
+    code: 231000,
+    type: "Cr"
   },
   {
     id: 41,
@@ -618,7 +658,8 @@ export const COA_SUB_HEADERS = [
     name: "Loans Payable",
     key: "loans_payable",
     parent_id: 10,
-    code: 232000
+    code: 232000,
+    type: "Cr"
   },
   {
     id: 42,
@@ -626,7 +667,8 @@ export const COA_SUB_HEADERS = [
     name: "Bonds (Debentures)",
     key: "bonds_debentures",
     parent_id: 10,
-    code: 233000
+    code: 233000,
+    type: "Cr"
   },
   {
     id: 43,
@@ -634,7 +676,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Debts and Borrowings",
     key: "other_debts_borrowings",
     parent_id: 10,
-    code: 234000
+    code: 234000,
+    type: "Cr"
   },
   {
     id: 44,
@@ -642,7 +685,8 @@ export const COA_SUB_HEADERS = [
     name: "Lease Obligations",
     key: "lease_obligations",
     parent_id: 10,
-    code: 235000
+    code: 235000,
+    type: "Cr"
   },
   {
     id: 45,
@@ -650,7 +694,8 @@ export const COA_SUB_HEADERS = [
     name: "Derivative Liability",
     key: "derivative_liability",
     parent_id: 10,
-    code: 236000
+    code: 236000,
+    type: "Cr"
   },
   {
     id: 46,
@@ -658,7 +703,8 @@ export const COA_SUB_HEADERS = [
     name: "Customer Related Contingencies",
     key: "customer_related_contingencies",
     parent_id: 11,
-    code: 241000
+    code: 241000,
+    type: "Cr"
   },
   {
     id: 47,
@@ -666,7 +712,8 @@ export const COA_SUB_HEADERS = [
     name: "Litigation and Regulatory",
     key: "litigation_regulatory",
     parent_id: 11,
-    code: 242000
+    code: 242000,
+    type: "Cr"
   },
   {
     id: 48,
@@ -674,7 +721,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Provisions",
     key: "additional_provisions",
     parent_id: 11,
-    code: 243000
+    code: 243000,
+    type: "Cr"
   },
   {
     id: 49,
@@ -682,7 +730,8 @@ export const COA_SUB_HEADERS = [
     name: "Equity at Par",
     key: "equity_at_par",
     parent_id: 12,
-    code: 311000
+    code: 311000,
+    type: "Cr"
   },
   {
     id: 50,
@@ -690,7 +739,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Paid in Capital",
     key: "additional_paid_in_capital",
     parent_id: 12,
-    code: 312000
+    code: 312000,
+    type: "Cr"
   },
   {
     id: 51,
@@ -698,7 +748,8 @@ export const COA_SUB_HEADERS = [
     name: "Retained Earnings, Appropriated",
     key: "retained_earnings_appropriated",
     parent_id: 13,
-    code: 321000
+    code: 321000,
+    type: "Cr"
   },
   {
     id: 52,
@@ -706,7 +757,8 @@ export const COA_SUB_HEADERS = [
     name: "Retained Earnings, Unappropriated",
     key: "retained_earnings_unappropriated",
     parent_id: 13,
-    code: 322000
+    code: 322000,
+    type: "Cr"
   },
   {
     id: 53,
@@ -714,7 +766,8 @@ export const COA_SUB_HEADERS = [
     name: "Deficit",
     key: "deficit",
     parent_id: 13,
-    code: 323000
+    code: 323000,
+    type: "Dr"
   },
   {
     id: 54,
@@ -722,7 +775,8 @@ export const COA_SUB_HEADERS = [
     name: "In Suspense",
     key: "in_suspense",
     parent_id: 13,
-    code: 324000
+    code: 324000,
+    type: "Cr"
   },
   {
     id: 55,
@@ -730,7 +784,8 @@ export const COA_SUB_HEADERS = [
     name: "Foreign Currency Translation Adjustment",
     key: "foreign_currency_translation_adjustment",
     parent_id: 14,
-    code: 331000
+    code: 331000,
+    type: null
   },
   {
     id: 56,
@@ -738,7 +793,8 @@ export const COA_SUB_HEADERS = [
     name: "AOCI, Cash Flow Hedge, Cumulative Gain (Loss)",
     key: "aoci_cash_flow_hedge_cumulative_gain_loss",
     parent_id: 14,
-    code: 332000
+    code: 332000,
+    type: null
   },
   {
     id: 57,
@@ -746,7 +802,8 @@ export const COA_SUB_HEADERS = [
     name: "Remeasurements Available-For-Sale Financial Assets",
     key: "remeasurements_available_for_sale_financial_assets",
     parent_id: 14,
-    code: 333000
+    code: 333000,
+    type: null
   },
   {
     id: 58,
@@ -754,7 +811,8 @@ export const COA_SUB_HEADERS = [
     name: "Remeasurement of Defined Benefit Plans",
     key: "remeasurement_of_defined_benefit_plans",
     parent_id: 14,
-    code: 334000
+    code: 334000,
+    type: null
   },
   {
     id: 59,
@@ -762,7 +820,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional AOCI Items",
     key: "additional_aoci_items",
     parent_id: 14,
-    code: 335000
+    code: 335000,
+    type: null
   },
   {
     id: 60,
@@ -770,7 +829,8 @@ export const COA_SUB_HEADERS = [
     name: "ESOP Related Items",
     key: "esop_related_items",
     parent_id: 15,
-    code: 341000
+    code: 341000,
+    type: "Cr"
   },
   {
     id: 61,
@@ -778,7 +838,8 @@ export const COA_SUB_HEADERS = [
     name: "Stock Receivables",
     key: "stock_receivables",
     parent_id: 15,
-    code: 342000
+    code: 342000,
+    type: "Dr"
   },
   {
     id: 62,
@@ -786,7 +847,8 @@ export const COA_SUB_HEADERS = [
     name: "Treasury Stock",
     key: "treasury_stock",
     parent_id: 15,
-    code: 343000
+    code: 343000,
+    type: "Dr"
   },
   {
     id: 63,
@@ -794,7 +856,8 @@ export const COA_SUB_HEADERS = [
     name: "Additional Equity",
     key: "additional_equity",
     parent_id: 15,
-    code: 344000
+    code: 344000,
+    type: "Cr"
   },
   {
     id: 64,
@@ -802,7 +865,8 @@ export const COA_SUB_HEADERS = [
     name: "Goods",
     key: "goods",
     parent_id: 17,
-    code: 411000
+    code: 411000,
+    type: "Cr"
   },
   {
     id: 65,
@@ -810,7 +874,8 @@ export const COA_SUB_HEADERS = [
     name: "Services",
     key: "services_4_1",
     parent_id: 17,
-    code: 412000
+    code: 412000,
+    type: "Cr"
   },
   {
     id: 66,
@@ -818,7 +883,8 @@ export const COA_SUB_HEADERS = [
     name: "Products",
     key: "products",
     parent_id: 18,
-    code: 421000
+    code: 421000,
+    type: "Cr"
   },
   {
     id: 67,
@@ -826,7 +892,8 @@ export const COA_SUB_HEADERS = [
     name: "Services",
     key: "services_4_2",
     parent_id: 18,
-    code: 422000
+    code: 422000,
+    type: "Cr"
   },
   {
     id: 68,
@@ -834,7 +901,8 @@ export const COA_SUB_HEADERS = [
     name: "Variable Consideration",
     key: "variable_consideration",
     parent_id: 19,
-    code: 431000
+    code: 431000,
+    type: "Dr"
   },
   {
     id: 69,
@@ -842,7 +910,8 @@ export const COA_SUB_HEADERS = [
     name: "Consideration Paid (Payable) to Customers",
     key: "consideration_paid_payable_to_customers",
     parent_id: 19,
-    code: 432000
+    code: 432000,
+    type: "Dr"
   },
   {
     id: 70,
@@ -850,7 +919,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Adjustments",
     key: "other_adjustments",
     parent_id: 19,
-    code: 433000
+    code: 433000,
+    type: "Dr"
   },
   {
     id: 71,
@@ -858,7 +928,8 @@ export const COA_SUB_HEADERS = [
     name: "Material and Merchandise",
     key: "material_and_merchandise",
     parent_id: 20,
-    code: 511000
+    code: 511000,
+    type: "Dr"
   },
   {
     id: 72,
@@ -866,7 +937,8 @@ export const COA_SUB_HEADERS = [
     name: "Employee Benefits",
     key: "employee_benefits",
     parent_id: 20,
-    code: 512000
+    code: 512000,
+    type: "Dr"
   },
   {
     id: 73,
@@ -874,7 +946,8 @@ export const COA_SUB_HEADERS = [
     name: "Services",
     key: "services_5_1",
     parent_id: 20,
-    code: 513000
+    code: 513000,
+    type: "Dr"
   },
   {
     id: 74,
@@ -882,7 +955,8 @@ export const COA_SUB_HEADERS = [
     name: "Rent, Depreciation, Amortization and Depletion",
     key: "rent_depreciation_amortization_depletion",
     parent_id: 20,
-    code: 514000
+    code: 514000,
+    type: "Dr"
   },
   {
     id: 75,
@@ -890,7 +964,8 @@ export const COA_SUB_HEADERS = [
     name: "Cost of Goods and Services Sold",
     key: "cost_of_goods_and_services_sold",
     parent_id: 21,
-    code: 521000
+    code: 521000,
+    type: "Dr"
   },
   {
     id: 76,
@@ -898,7 +973,8 @@ export const COA_SUB_HEADERS = [
     name: "Selling, General and Administrative Expense",
     key: "selling_general_administrative_expense",
     parent_id: 21,
-    code: 522000
+    code: 522000,
+    type: "Dr"
   },
   {
     id: 77,
@@ -906,7 +982,8 @@ export const COA_SUB_HEADERS = [
     name: "Uncollectible Accounts Expense (Reversal)",
     key: "uncollectible_accounts_expense_reversal",
     parent_id: 21,
-    code: 523000
+    code: 523000,
+    type: null
   },
   {
     id: 78,
@@ -914,7 +991,8 @@ export const COA_SUB_HEADERS = [
     name: "Freight Expense",
     key: "freight_expense",
     parent_id: 22,
-    code: 531000
+    code: 531000,
+    type: "Dr"
   },
   {
     id: 79,
@@ -922,7 +1000,8 @@ export const COA_SUB_HEADERS = [
     name: "Customs Fees and Duty",
     key: "customs_fees_and_duty",
     parent_id: 22,
-    code: 532000
+    code: 532000,
+    type: "Dr"
   },
   {
     id: 80,
@@ -930,7 +1009,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Revenue",
     key: "other_revenue",
     parent_id: 23,
-    code: 611000
+    code: 611000,
+    type: "Cr"
   },
   {
     id: 81,
@@ -938,7 +1018,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Expenses",
     key: "other_expenses",
     parent_id: 23,
-    code: 612000
+    code: 612000,
+    type: null
   },
   {
     id: 82,
@@ -946,7 +1027,8 @@ export const COA_SUB_HEADERS = [
     name: "Inventory Gain and Loss",
     key: "inventory_gain_and_loss",
     parent_id: 24,
-    code: 621000
+    code: 621000,
+    type: null
   },
   {
     id: 83,
@@ -954,7 +1036,8 @@ export const COA_SUB_HEADERS = [
     name: "Gain (Loss), Foreign Currency Transaction",
     key: "gain_loss_foreign_currency_transaction",
     parent_id: 24,
-    code: 622000
+    code: 622000,
+    type: null
   },
   {
     id: 84,
@@ -962,7 +1045,8 @@ export const COA_SUB_HEADERS = [
     name: "Gain (Loss) on Investments",
     key: "gain_loss_on_investments",
     parent_id: 24,
-    code: 623000
+    code: 623000,
+    type: null
   },
   {
     id: 85,
@@ -970,7 +1054,8 @@ export const COA_SUB_HEADERS = [
     name: "Gain (Loss) on Derivatives",
     key: "gain_loss_on_derivatives",
     parent_id: 24,
-    code: 624000
+    code: 624000,
+    type: null
   },
   {
     id: 86,
@@ -978,7 +1063,8 @@ export const COA_SUB_HEADERS = [
     name: "Crypto Asset Gain (Loss)",
     key: "crypto_asset_gain_loss",
     parent_id: 24,
-    code: 625000
+    code: 625000,
+    type: null
   },
   {
     id: 87,
@@ -986,7 +1072,8 @@ export const COA_SUB_HEADERS = [
     name: "Gain (Loss) on Disposal of Assets",
     key: "gain_loss_on_disposal_of_assets",
     parent_id: 24,
-    code: 626000
+    code: 626000,
+    type: null
   },
   {
     id: 88,
@@ -994,7 +1081,8 @@ export const COA_SUB_HEADERS = [
     name: "Debt Related Gain (Loss)",
     key: "debt_related_gain_loss",
     parent_id: 24,
-    code: 627000
+    code: 627000,
+    type: null
   },
   {
     id: 89,
@@ -1002,7 +1090,8 @@ export const COA_SUB_HEADERS = [
     name: "Impairment Loss",
     key: "impairment_loss",
     parent_id: 24,
-    code: 628000
+    code: 628000,
+    type: null
   },
   {
     id: 90,
@@ -1010,7 +1099,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Gains and (Losses)",
     key: "other_gains_and_losses",
     parent_id: 24,
-    code: 629000
+    code: 629000,
+    type: null
   },
   {
     id: 91,
@@ -1018,7 +1108,8 @@ export const COA_SUB_HEADERS = [
     name: "Real Estate Taxes and Insurance",
     key: "real_estate_taxes_and_insurance",
     parent_id: 25,
-    code: 631000
+    code: 631000,
+    type: "Dr"
   },
   {
     id: 92,
@@ -1026,7 +1117,8 @@ export const COA_SUB_HEADERS = [
     name: "Highway (Road) Taxes and Tolls",
     key: "highway_road_taxes_and_tolls",
     parent_id: 25,
-    code: 632000
+    code: 632000,
+    type: "Dr"
   },
   {
     id: 93,
@@ -1034,7 +1126,8 @@ export const COA_SUB_HEADERS = [
     name: "Direct Tax and License Fees",
     key: "direct_tax_and_license_fees",
     parent_id: 25,
-    code: 633000
+    code: 633000,
+    type: "Dr"
   },
   {
     id: 94,
@@ -1042,7 +1135,8 @@ export const COA_SUB_HEADERS = [
     name: "Excise and Sales Taxes",
     key: "excise_and_sales_taxes",
     parent_id: 25,
-    code: 634000
+    code: 634000,
+    type: "Dr"
   },
   {
     id: 95,
@@ -1050,7 +1144,8 @@ export const COA_SUB_HEADERS = [
     name: "Customs Fees and Duties (Not Classified as Sales or Excise)",
     key: "customs_fees_and_duties_not_sales_or_excise",
     parent_id: 25,
-    code: 635000
+    code: 635000,
+    type: "Dr"
   },
   {
     id: 96,
@@ -1058,7 +1153,8 @@ export const COA_SUB_HEADERS = [
     name: "General Insurance Expense",
     key: "general_insurance_expense",
     parent_id: 25,
-    code: 636000
+    code: 636000,
+    type: "Dr"
   },
   {
     id: 97,
@@ -1066,7 +1162,8 @@ export const COA_SUB_HEADERS = [
     name: "Administrative Fees",
     key: "administrative_fees",
     parent_id: 25,
-    code: 637000
+    code: 637000,
+    type: "Dr"
   },
   {
     id: 98,
@@ -1074,7 +1171,8 @@ export const COA_SUB_HEADERS = [
     name: "Fines and Penalties",
     key: "fines_and_penalties",
     parent_id: 25,
-    code: 638000
+    code: 638000,
+    type: "Dr"
   },
   {
     id: 99,
@@ -1082,7 +1180,8 @@ export const COA_SUB_HEADERS = [
     name: "Taxes, Miscellaneous",
     key: "taxes_miscellaneous",
     parent_id: 25,
-    code: 639000
+    code: 639000,
+    type: "Dr"
   },
   {
     id: 100,
@@ -1090,7 +1189,8 @@ export const COA_SUB_HEADERS = [
     name: "Other Taxes and Fees",
     key: "other_taxes_and_fees",
     parent_id: 25,
-    code: 640000
+    code: 640000,
+    type: "Dr"
   },
   {
     id: 101,
@@ -1098,7 +1198,8 @@ export const COA_SUB_HEADERS = [
     name: "Intercompany Balances (Eliminated in Consolidation)",
     key: "intercompany_balances_eliminated",
     parent_id: 26,
-    code: 711000
+    code: 711000,
+    type: 'Dr'
   },
   {
     id: 102,
@@ -1106,7 +1207,8 @@ export const COA_SUB_HEADERS = [
     name: "Related Party Balances (Reported or Disclosed)",
     key: "related_party_balances_reported",
     parent_id: 26,
-    code: 712000
+    code: 712000,
+    type: 'Dr'
   },
   {
     id: 103,
@@ -1114,7 +1216,8 @@ export const COA_SUB_HEADERS = [
     name: "Investments in and Advance to Affiliates, Subsidiaries, Associates, and Joint Ventures",
     key: "investments_in_affiliates_subsidiaries",
     parent_id: 26,
-    code: 713000
+    code: 713000,
+    type: 'Dr'
   },
   {
     id: 104,
@@ -1122,7 +1225,8 @@ export const COA_SUB_HEADERS = [
     name: "Intercompany Balances (Eliminated in Consolidation)",
     key: "intercompany_balances_eliminated_consolidation",
     parent_id: 27,
-    code: 721000
+    code: 721000,
+    type: "Cr"
   },
   {
     id: 105,
@@ -1130,7 +1234,8 @@ export const COA_SUB_HEADERS = [
     name: "Related Party Balances (Reported or Disclosed)",
     key: "related_party_balances_disclosed",
     parent_id: 27,
-    code: 722000
+    code: 722000,
+    type: "Cr"
   },
   {
     id: 106,
@@ -1138,7 +1243,8 @@ export const COA_SUB_HEADERS = [
     name: "Intercompany and Related Party Income",
     key: "intercompany_related_party_income",
     parent_id: 28,
-    code: 731000
+    code: 731000,
+    type: "Cr"
   },
   {
     id: 107,
@@ -1146,7 +1252,8 @@ export const COA_SUB_HEADERS = [
     name: "Intercompany and Related Party Expenses",
     key: "intercompany_related_party_expenses",
     parent_id: 28,
-    code: 732000
+    code: 732000,
+    type: "Dr"
   },
   {
     id: 108,
@@ -1154,7 +1261,8 @@ export const COA_SUB_HEADERS = [
     name: "Income (Loss) from Equity Method Investments",
     key: "income_loss_equity_method_investments",
     parent_id: 28,
-    code: 733000
+    code: 733000,
+    type: null
   },
 ] as const;
 

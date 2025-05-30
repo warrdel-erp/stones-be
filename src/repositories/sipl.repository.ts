@@ -184,6 +184,7 @@ export const getAllSIPLs = async (page: number, limit: number, clientId: number)
       {
         model: models.Container,
         as: "containers",
+        required: false,
         where: {
           referenceType: 'sipl'
         }

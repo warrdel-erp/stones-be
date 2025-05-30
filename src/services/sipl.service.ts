@@ -15,6 +15,7 @@ import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS } from "../constants";
+import { randomId } from "../helper";
 
 // Processes the inventory reception by updating slab statuses.
 export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
@@ -163,7 +164,7 @@ export async function handleCreateSlabs(slabData: any) {
       purchaseOrderId: sipl.purchaseOrderId,
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
-      barcode: uuidv4(),
+      barcode: randomId().toUpperCase(),
       combinedSlabNumber: sipl.invoiceCode.split(' ')[1] + "-" + (lastSerialNumber + index + 1),
     }));
 
