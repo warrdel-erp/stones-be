@@ -39,6 +39,15 @@ const CustomerAddress = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    contactName: {
+      type: DataTypes.STRING(255),
+    },
+    contactEmail: {
+      type: DataTypes.STRING(255),
+    },
+    contactNumber: {
+      type: DataTypes.STRING(15),
+    },
     addressType: {
       type: DataTypes.ENUM(...Object.values(CUSTOMER_ADDRESS_TYPES)),
       allowNull: false,

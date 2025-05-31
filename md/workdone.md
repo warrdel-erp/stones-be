@@ -257,3 +257,8 @@ create new user under a client is done and all of them can login.
 3. smaller barcode ✅
 
 4. cart SO creation validations, remove SO Location. ✅
+
+---
+
+1. Inventory Design ✅
+2. So contact details.

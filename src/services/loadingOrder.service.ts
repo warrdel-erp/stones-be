@@ -116,6 +116,8 @@ export const getLoadingOrderById = async (id: number) => {
   // get payment terms constant data.
   loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
 
+  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
+
   return loadingOrder;
 };
 
