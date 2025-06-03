@@ -125,3 +125,56 @@ export const getInvoiceById = async (id: number, transaction?: Transaction) => {
     transaction,
   });
 };
+
+export const getInvoiceDetailsById = async (id: number, transaction?: Transaction) => {
+  return await models.SalesOrderInvoice.findByPk(id, {
+    include: [
+      {
+        association: 'client',
+        include: [
+          {
+            association: 'company'
+          }
+        ]
+      },
+      {
+        association: 'loadingOrder',
+        include: [
+          {
+            association: 'salesOrderProducts',
+            include: [
+              {
+                association: 'inventoryProduct',
+                include: [
+                  {
+                    association: 'slab',
+                    include: [
+                      {
+                        association: 'product'
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            association: 'shippingAddress'
+          },
+        ]
+      },
+      {
+        association: 'customer',
+        include: [
+          {
+            association: 'billingAddress',
+          },
+          {
+            association: 'primarySalesPerson'
+          }
+        ]
+      }
+    ],
+    transaction,
+  });
+};

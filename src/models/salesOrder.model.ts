@@ -86,7 +86,7 @@ const SalesOrder = sequelize.define(
     },
     soLocationId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: models.Location,
         key: "id",

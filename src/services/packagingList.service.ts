@@ -5,18 +5,23 @@ import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/ta
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import { removeDuplicatesWithUnitPrice } from "../helper";
+import { PAYMENT_TERMS, SALES_TAX } from "../constants";
+import { getTotalLoOrderQuantity, getTotalPlAmount } from "./loadingOrder.service";
+import _ from "lodash";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
   const transaction = await sequelize.transaction();
 
   try {
-
     const loadingOrder = (await loadingOrderRepository.getLoadingOrderByIdSimple(data.loadingOrderId))?.get({
       plain: true,
     });
 
-    let packagingList: any = await packagingListRepository.createPackagingList({ ...data, salesOrderId: loadingOrder.salesOrderId }, transaction);
+    let packagingList: any = await packagingListRepository.createPackagingList(
+      { ...data, salesOrderId: loadingOrder.salesOrderId },
+      transaction
+    );
     packagingList = packagingList.get({ plain: true });
 
     let updatedProducts = [];
@@ -28,7 +33,6 @@ export const createPackagingList = async (data: any) => {
         packagingListId: packagingList.id,
         stage: SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
       }));
-
 
       // update sales order products with packaging list id and stage -> packagingList.
       updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(
@@ -67,12 +71,30 @@ export const getPackagingListById = async (id: number) => {
   if (!packagingList) {
     throw new AppError("Invalid Id", 400);
   }
+
   packagingList.products = getPackagingListProductAccordingToIdAndUnitPrice(packagingList);
+
+  // Calculate total pl amount added in SO.
+  packagingList.totalAmount = getTotalPlAmount(packagingList.salesOrderProducts);
+
+  // get payment terms constant data.
+  packagingList.loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == packagingList.loadingOrder.paymentTerms);
+
+  packagingList.loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find(
+    (e) => e.id == packagingList.loadingOrder.salesOrder.customer.salesTax
+  );
 
   delete packagingList.salesOrderProducts;
 
   return packagingList;
 };
+
+function getTotalPLQuantity(salesOrderProducts: any[]) {
+  return _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) => (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth) / 144
+  );
+}
 
 function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
   let products = removeDuplicatesWithUnitPrice(
@@ -90,7 +112,13 @@ function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
-    return { ...product, salesOrderProduct };
+    return {
+      ...product,
+      taxApplied: !!salesOrderProduct[0].taxApplied,
+      totalQuantity: getTotalPLQuantity(salesOrderProduct),
+      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),
+      salesOrderProduct,
+    };
   });
 
   return newProducts;

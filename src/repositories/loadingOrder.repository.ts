@@ -20,23 +20,24 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
 
   if (filters.notInvoicedOnly === "true") {
     whereClause.stage = {
-      [Op.ne]: [LOADING_ORDER_STAGES.INVOICED]
-    }
+      [Op.ne]: [LOADING_ORDER_STAGES.INVOICED],
+    };
 
     delete whereClause.notInvoicedOnly;
   }
 
   const { rows: data, count: total } = await models.LoadingOrder.findAndCountAll({
     where: {
-      ...whereClause
+      ...whereClause,
     },
     include: [
       {
-        model: models.SalesOrder, as: "salesOrder",
+        model: models.SalesOrder,
+        as: "salesOrder",
         include: [
           { model: models.Customer, as: "customer" },
-          { model: models.Location, as: "soLocation" }
-        ]
+          { model: models.Location, as: "soLocation" },
+        ],
       },
       { model: models.PackagingList, as: "packagingList" },
       { model: models.SalesOrderProduct, as: "salesOrderProducts" },
@@ -69,33 +70,33 @@ export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await models.LoadingOrder.findByPk(id, {
     include: [
       {
-        model: models.SalesOrder,
-        as: "salesOrder",
+        association: "salesOrder",
         include: [
           {
-            model: models.Customer,
-            as: "customer",
-            include: [{ model: models.CustomerAddress, as: "addresses" }],
+            association: "customer",
+            include: [
+              {
+                association: "addresses"
+              }
+            ],
           },
-          { model: models.CustomerAddress, as: "shippingAddress" },
           {
-            model: models.SalesOrderProduct,
-            as: "salesOrderProducts",
+            association: "shippingAddress",
+          },
+          {
+            association: "salesOrderProducts",
             attributes: ["id", "unitPrice"],
             include: [
               {
-                model: models.InventoryProduct,
-                as: "inventoryProduct",
+                association: "inventoryProduct",
                 attributes: ["id"],
                 include: [
                   {
-                    model: models.Slab,
-                    as: "slab",
+                    association: "slab",
                     attributes: ["id", "receivingLength", "receivingWidth", "landedUnitCost"],
                     include: [
                       {
-                        model: models.Product,
-                        as: "product",
+                        association: "product",
                         attributes: ["id"],
                       },
                     ],
@@ -104,25 +105,28 @@ export const getLoadingOrderById = async (id: number) => {
               },
             ],
           },
-          { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
+          {
+            association: "soLocation",
+            attributes: ["id", "location"],
+          },
         ],
       },
       {
-        model: models.SalesOrderProduct,
-        as: "salesOrderProducts",
+        association: "salesOrderProducts",
         required: false,
         include: [
           {
-            model: models.InventoryProduct,
-            as: "inventoryProduct",
+            association: "inventoryProduct",
             include: [
               {
-                model: models.Slab,
-                as: "slab",
+                association: "bin",
+                attributes: ["id", "name"],
+              },
+              {
+                association: "slab",
                 include: [
                   {
-                    model: models.Product,
-                    as: "product",
+                    association: "product",
                   },
                 ],
               },
@@ -131,17 +135,19 @@ export const getLoadingOrderById = async (id: number) => {
         ],
       },
       {
-        model: models.PackagingList,
-        as: "packagingList",
-        include: [{ model: models.SalesOrderProduct, as: "salesOrderProducts" }],
+        association: "packagingList",
+        include: [
+          {
+            association: "salesOrderProducts"
+          }
+        ],
       },
       {
-        model: models.CustomerAddress,
-        as: "shippingAddress",
+        association: "shippingAddress",
       },
       {
-        association: "salesOrderInvoice"
-      }
+        association: "salesOrderInvoice",
+      },
     ],
   });
 

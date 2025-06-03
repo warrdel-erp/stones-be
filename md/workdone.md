@@ -262,3 +262,16 @@ create new user under a client is done and all of them can login.
 
 1. Inventory Design ✅
 2. So contact details.
+3. SO tax.
+4. SO cancellation redirecting to PO list page. ✅
+5. PL cancel page => not working correctly. ✅
+
+---
+
+1. Hold in inventory. ✅
+2. Landed cost in Slab drawer. ✅
+3. Total amount in add product in SO. ✅
+4. Tax checkbox in SO. ✅
+5. Payment terms in LO auto complete. ✅
+6. Receive payment in invoice. ✅
+7. Address info in SO Invoice. ✅

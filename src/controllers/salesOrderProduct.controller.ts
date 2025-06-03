@@ -27,6 +27,15 @@ export const getSalesOrderProducts = catchAsync(async (req, res) => {
   return SuccessResponse(res, 200, "Sales Order Products fetched successfully", salesOrderProducts);
 });
 
+// API to get all SalesOrderProducts by SalesOrderId
+export const addSalesOrderProduct = catchAsync(async (req, res) => {
+  const { salesOrderId } = req.params;
+
+  const salesOrderProducts = await salesOrderProductService.upsertSalesOrderProducts(req.body, Number(salesOrderId));
+
+  return SuccessResponse(res, 200, "Sales Order Products added successfully", salesOrderProducts);
+});
+
 export const updateSoProductPickedStatus = catchAsync(async (req: Request, res: Response) => {
   const { soProductId } = req.params;
   const { picked } = req.body;

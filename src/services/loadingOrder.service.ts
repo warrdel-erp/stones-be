@@ -79,15 +79,15 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
     loadingOrder = loadingOrder.get({ plain: true });
 
     if (loadingOrder.packagingList) {
-      loadingOrder.totalAmount = getTotalPlAmount(loadingOrder.salesOrderProducts)
+      loadingOrder.totalAmount = getTotalPlAmount(loadingOrder.salesOrderProducts);
     } else {
-      loadingOrder.totalAmount = getTotalLoAmount(loadingOrder.salesOrderProducts)
+      loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
     }
 
-    return loadingOrder
-  }) as any
+    return loadingOrder;
+  }) as any;
 
-  return data
+  return data;
 };
 
 // Get all LO without pagination.
@@ -105,7 +105,7 @@ export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
   // Calculate total amount added in SO.
-  loadingOrder.totalLoAmount = getTotalLoAmount(loadingOrder.salesOrderProducts);
+  loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
 
   // Calculate total pl amount added in SO.
   loadingOrder.totalPlAmount = getTotalPlAmount(loadingOrder.salesOrderProducts);
@@ -151,7 +151,7 @@ async function createLONotes(data: any, loadingOrder: any, transaction: Transact
   return { internalNote, printableNote };
 }
 
-export function getTotalLoAmount(salesOrderProducts: any[]) {
+export function getTotalSalesOrderProductsAmount(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) =>
@@ -159,21 +159,24 @@ export function getTotalLoAmount(salesOrderProducts: any[]) {
   );
 }
 
-function getTotalLoQuantity(salesOrderProducts: any[]) {
+export function getTotalLOQuantity(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) => (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth) / 144
   );
 }
 
-function getTotalLoOrderQuantity(salesOrderProducts: any[]) {
+export function getTotalLoOrderQuantity(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
-    (salesOrderProduct: any) => (salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth) / 144
+    (salesOrderProduct: any) =>
+      (salesOrderProduct.inventoryProduct.slab.receivingLength *
+        salesOrderProduct.inventoryProduct.slab.receivingWidth) /
+      144
   );
 }
 
-function getTotalPlAmount(salesOrderProducts: any[]) {
+export function getTotalPlAmount(salesOrderProducts: any[]) {
   return _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) =>
@@ -181,7 +184,7 @@ function getTotalPlAmount(salesOrderProducts: any[]) {
   );
 }
 
-function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
   let products = removeDuplicatesWithUnitPrice(
     loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
       ...salesOrderProduct.inventoryProduct.slab.product,
@@ -205,8 +208,9 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
 
     return {
       ...product,
+      taxApplied: !!salesOrderProduct[0].taxApplied,
       salesOrderProduct,
-      totalQuantity: getTotalLoQuantity(salesOrderProduct),
+      totalQuantity: getTotalLOQuantity(salesOrderProduct),
       totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),
       soQuantity: salesOrderService.getTotalQuantity(soProductsWithProductAndUnitPrice),
     };
@@ -253,7 +257,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         customerId: loadingOrder.salesOrder.customerId,
         loadingOrderId: loadingOrder.id,
         amount: loadingOrder.totalPlAmount || loadingOrder.totalLoAmount,
-        salesOrderId: loadingOrder.id
+        salesOrderId: loadingOrder.id,
       },
       transaction
     );
@@ -261,7 +265,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Create Journal Entry for Invoice START
     const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
       referenceId: loadingOrder.salesOrder.customerId,
-      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
+      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
     });
 
     // Get ledger account for goods sold.
@@ -288,7 +292,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
         locationId,
-        partyLedgerAccountId: ledgerAccountForGoodsSold.id
+        partyLedgerAccountId: ledgerAccountForGoodsSold.id,
       },
       transaction
     );
@@ -309,7 +313,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
         locationId,
-        partyLedgerAccountId: ledgerAccount.id
+        partyLedgerAccountId: ledgerAccount.id,
       },
       transaction
     );
@@ -342,13 +346,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
         processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
         locationId,
-        partyLedgerAccountId: ledgerAccount.id
+        partyLedgerAccountId: ledgerAccount.id,
       },
       transaction
     );
 
     // Calculate county tax.
-    const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0
+    const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0;
 
     // Journal Entry for county tax.
     await journalEntryRepository.create(
@@ -366,7 +370,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
         entryForId: loadingOrder.id,
         locationId,
-        partyLedgerAccountId: ledgerAccount.id
+        partyLedgerAccountId: ledgerAccount.id,
       },
       transaction
     );
@@ -388,7 +392,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         transaction
       );
 
-
       // Get ledger account for finished goods.
       const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
         key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
@@ -401,10 +404,12 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         clientId,
       });
 
-
       await journalEntryRepository.create(
         {
-          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+          amount:
+            salesOrderProduct.inventoryProduct.slab.receivingLength *
+            salesOrderProduct.inventoryProduct.slab.receivingLength *
+            salesOrderProduct.inventoryProduct.slab.landedUnitCost,
           ledgerId: ledgerAccountForFinishedGoods.id,
           type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -419,14 +424,17 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
           entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
           entryForId: loadingOrder.id,
           locationId,
-          partyLedgerAccountId: ledgerAccountForCogs.id
+          partyLedgerAccountId: ledgerAccountForCogs.id,
         },
         transaction
       );
 
       await journalEntryRepository.create(
         {
-          amount: salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth * salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+          amount:
+            salesOrderProduct.inventoryProduct.slab.receivingLength *
+            salesOrderProduct.inventoryProduct.slab.receivingWidth *
+            salesOrderProduct.inventoryProduct.slab.landedUnitCost,
           ledgerId: ledgerAccountForCogs.id,
           type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -442,7 +450,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
           entryForId: loadingOrder.id,
 
           locationId,
-          partyLedgerAccountId: ledgerAccountForFinishedGoods.id
+          partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
         },
         transaction
       );
@@ -493,7 +501,7 @@ function loadingOrderWithTotalAmount(loadingOrders: any) {
     loadingOrder = loadingOrder.get({ plain: true });
 
     // Calculate total amount added in LO.
-    loadingOrder.totalAmount = getTotalLoAmount(loadingOrder.salesOrderProducts);
+    loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
 
     return loadingOrder;
   });

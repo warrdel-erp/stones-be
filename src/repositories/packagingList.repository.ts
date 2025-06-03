@@ -19,42 +19,53 @@ export const getPackagingListById = async (id: number) => {
     await models.PackagingList.findByPk(id, {
       include: [
         {
-          model: models.LoadingOrder,
-          as: "loadingOrder",
+          association: "loadingOrder",
           include: [
             {
-              model: models.SalesOrder,
-              as: "salesOrder",
+              association: "shippingAddress",
+            },
+            {
+              association: "salesOrder",
               include: [
                 {
-                  model: models.Customer,
-                  as: "customer",
-                  attributes: ["id", "name"],
-                  include: [{ model: models.CustomerAddress, as: "addresses" }],
+                  association: "customer",
+                  attributes: ["id", "name", "salesTax"],
+                  include: [
+                    {
+                      association: "addresses",
+                    },
+                  ],
                 },
-                { model: models.CustomerAddress, as: "shippingAddress" },
-                { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
+                {
+                  association: "shippingAddress",
+                },
+                {
+                  association: "soLocation",
+                  attributes: ["id", "location"],
+                },
               ],
             },
           ],
         },
-        { model: models.PackagingListProduct, as: "packagingListProducts" },
         {
-          model: models.SalesOrderProduct,
-          as: "salesOrderProducts",
+          association: "packagingListProducts",
+        },
+        {
+          association: "salesOrderProducts",
           required: false,
           include: [
             {
-              model: models.InventoryProduct,
-              as: "inventoryProduct",
+              association: "inventoryProduct",
               include: [
                 {
-                  model: models.Slab,
-                  as: "slab",
+                  association: "bin",
+                  attributes: ["id", "name"],
+                },
+                {
+                  association: "slab",
                   include: [
                     {
-                      model: models.Product,
-                      as: "product",
+                      association: "product",
                     },
                   ],
                 },

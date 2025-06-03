@@ -35,7 +35,7 @@ import Warehouse from "./warehouse";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
 import Account from "./Account.model";
-import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
+import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
 import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
@@ -518,6 +518,8 @@ User.hasMany(Customer, {
   foreignKey: "primarySalesPersonId",
   as: "primarySalesCustomers",
 });
+
+Customer.hasOne(CustomerAddress, { foreignKey: 'customerId', as: 'billingAddress', scope: { addressType: CUSTOMER_ADDRESS_TYPES.REMIT } })
 
 export {
   Client,

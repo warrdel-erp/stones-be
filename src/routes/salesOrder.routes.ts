@@ -18,9 +18,6 @@ router.get("/:salesOrderId/loadingOrder", authenticateUser, loadingOrderControll
 // Update requested sales order product
 router.put("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProductController.upsertSalesOrderProducts);
 
-// Update requested sales order product
-router.get("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProductController.getSalesOrderProducts);
-
 // Get new SO number
 router.get("/newSoNumber", authenticateUser, salesOrderController.getNewSoNumber);
 

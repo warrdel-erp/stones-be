@@ -66,34 +66,33 @@ export const getSalesOrderById = async (id: number) => {
   return await models.SalesOrder.findOne({
     where: { id },
     include: [
-      { model: models.Customer, as: "customer" },
-      { model: models.User, as: "createdBy" },
-      { model: models.CustomerAddress, as: "shippingAddress" },
-      { model: models.Notes, as: "notes" },
-      { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
+      { association: "customer" },
+      { association: "createdBy" },
+      { association: "shippingAddress" },
+      { association: "notes" },
+      { association: "soLocation", attributes: ["id", "location"] },
       {
-        model: models.SalesOrderProduct,
-        as: "salesOrderProducts",
+        association: "salesOrderProducts",
         include: [
           {
-            model: models.InventoryProduct,
-            as: "inventoryProduct",
+            association: "inventoryProduct",
             include: [
               {
-                model: models.Slab,
-                as: "slab",
+                association: "bin",
+                attributes: ['id', 'name'],
+              },
+              {
+                association: "slab",
                 include: [
                   {
-                    model: models.Product,
-                    as: "product",
+                    association: "product",
                   },
                 ],
               },
             ],
           },
           {
-            model: models.LoadingOrder,
-            as: "loadingOrder",
+            association: "loadingOrder",
           },
           { model: models.PackagingList, as: "packagingList" },
         ],

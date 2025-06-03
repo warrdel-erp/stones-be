@@ -151,6 +151,7 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
 
     return {
       ...product,
+      taxApplied: !!salesOrderProduct[0].taxApplied,
       salesOrderProduct,
       totalAmount: getTotalAmount(salesOrderProduct),
       totalQuantity: getTotalQuantity(salesOrderProduct),

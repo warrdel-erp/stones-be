@@ -34,3 +34,13 @@ export const assignTruck = catchAsync(async (req: AuthRequest, res: Response) =>
 
     SuccessResponse(res, 200, "Truck assigned successfully", result);
 });
+
+// Assign Truck to SO invoice.
+export const getInvoiceById = catchAsync(async (req: AuthRequest, res: Response) => {
+
+    const { id } = req.params;
+
+    const result = await salesOrderInvoiceService.getInvoiceById(Number(id));
+
+    SuccessResponse(res, 200, "SO invoice details fetched successfully.", result);
+});

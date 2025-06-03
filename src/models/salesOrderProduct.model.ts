@@ -46,6 +46,7 @@ const SalesOrderProduct = sequelize.define(
     stage: {
       type: DataTypes.ENUM(...Object.values(SALE_ORDER_PRODUCT_STAGES)), // Sales Order, Loading Order, Packaging List
       allowNull: false,
+      defaultValue: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER,
     },
     inventoryProductId: {
       type: DataTypes.INTEGER,
