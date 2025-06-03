@@ -256,8 +256,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         clientId: clientId,
         customerId: loadingOrder.salesOrder.customerId,
         loadingOrderId: loadingOrder.id,
-        amount: loadingOrder.totalPlAmount || loadingOrder.totalLoAmount,
-        salesOrderId: loadingOrder.id,
+        amount: loadingOrder.totalPlAmount || loadingOrder.totalAmount,
+        salesOrderId: loadingOrder.salesOrder.id,
       },
       transaction
     );

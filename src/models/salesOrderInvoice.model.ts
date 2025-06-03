@@ -11,7 +11,7 @@ export type SoInvoice = {
   loadingOrderId: number;
   clientId: number;
   amount: number;
-  salesOrderId: number
+  salesOrderId: number;
 };
 
 const SalesOrderInvoice = sequelize.define(
@@ -23,20 +23,20 @@ const SalesOrderInvoice = sequelize.define(
       primaryKey: true,
     },
     invoiceCode: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     amount: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
     soInvoiceNumber: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     truckId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     truckAssignedOn: {
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
     },
     clientSoInvoiceNumber: {
       type: DataTypes.STRING,
@@ -121,11 +121,14 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
     order: [["soInvoiceNumber", "DESC"]],
   });
 
-  const salesOrder: any = await SalesOrder.findByPk(soInvoice.salesOrderId)
+  const salesOrder: any = await SalesOrder.findByPk(soInvoice.salesOrderId);
+
+  if (!salesOrder) {
+    throw new AppError("sales Order not found", 400);
+  }
 
   soInvoice.soInvoiceNumber = lastInvAccordingToSo ? lastInvAccordingToSo.soInvoiceNumber + 1 : 1;
   soInvoice.invoiceCode = `INV ${salesOrder.clientSoNumber}-${soInvoice.soInvoiceNumber}`;
-
 });
 
 export default SalesOrderInvoice;

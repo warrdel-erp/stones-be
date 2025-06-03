@@ -1,4 +1,4 @@
-import { Transaction, where, WhereOptions } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { SoInvoice } from "../models/salesOrderInvoice.model";
 import { Op, fn, col } from "sequelize";
@@ -13,13 +13,19 @@ export const createInvoice = async (data: SoInvoice, transaction: Transaction) =
 /**
  * Fetch all invoices
  */
-export const getAllInvoicesList = async (clientId: number, filter: WhereOptions, page: number, limit: number, transaction?: Transaction) => {
+export const getAllInvoicesList = async (
+  clientId: number,
+  filter: WhereOptions,
+  page: number,
+  limit: number,
+  transaction?: Transaction
+) => {
   const offset = (page - 1) * limit;
 
   return await models.SalesOrderInvoice.findAndCountAll({
     where: {
       ...filter,
-      clientId
+      clientId,
     },
     include: [
       {
@@ -35,7 +41,7 @@ export const getAllInvoicesList = async (clientId: number, filter: WhereOptions,
             model: models.CustomerAddress,
             as: "addresses",
           },
-        ]
+        ],
       },
       {
         model: models.LoadingOrder,
@@ -43,17 +49,17 @@ export const getAllInvoicesList = async (clientId: number, filter: WhereOptions,
         include: [
           {
             model: models.SalesOrder,
-            as: "salesOrder"
+            as: "salesOrder",
           },
           {
             model: models.PackagingList,
-            as: "packagingList"
+            as: "packagingList",
           },
           {
             model: models.SalesOrderProduct,
-            as: "salesOrderProducts"
+            as: "salesOrderProducts",
           },
-        ]
+        ],
       },
     ],
     transaction,
@@ -85,7 +91,6 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
 };
 
 export const getTotalAmountFromLastNDays = async (fromDate: string, toDate: string, clientId: number) => {
-
   const from = new Date(fromDate);
   const to = new Date(toDate);
   to.setHours(23, 59, 59, 999);
@@ -117,8 +122,8 @@ export const getTotalAmountForClient = async (clientId: number) => {
 };
 
 export const assignTruck = async (id: number, truckId: number) => {
-  await models.SalesOrderInvoice.update({ truckId, truckAssignedOn: new Date() }, { where: { id } })
-}
+  await models.SalesOrderInvoice.update({ truckId, truckAssignedOn: new Date() }, { where: { id } });
+};
 
 export const getInvoiceById = async (id: number, transaction?: Transaction) => {
   return await models.SalesOrderInvoice.findByPk(id, {
@@ -130,50 +135,50 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
   return await models.SalesOrderInvoice.findByPk(id, {
     include: [
       {
-        association: 'client',
+        association: "client",
         include: [
           {
-            association: 'company'
-          }
-        ]
+            association: "company",
+          },
+        ],
       },
       {
-        association: 'loadingOrder',
+        association: "loadingOrder",
         include: [
           {
-            association: 'salesOrderProducts',
+            association: "salesOrderProducts",
             include: [
               {
-                association: 'inventoryProduct',
+                association: "inventoryProduct",
                 include: [
                   {
-                    association: 'slab',
+                    association: "slab",
                     include: [
                       {
-                        association: 'product'
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+                        association: "product",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
           {
-            association: 'shippingAddress'
+            association: "shippingAddress",
           },
-        ]
+        ],
       },
       {
-        association: 'customer',
+        association: "customer",
         include: [
           {
-            association: 'billingAddress',
+            association: "billingAddress",
           },
           {
-            association: 'primarySalesPerson'
-          }
-        ]
-      }
+            association: "primarySalesPerson",
+          },
+        ],
+      },
     ],
     transaction,
   });
