@@ -164,8 +164,15 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
             ],
           },
           {
+            association: "packagingList"
+          },
+          {
             association: "shippingAddress",
           },
+          {
+            association: "salesOrder",
+            include: ['customer']
+          }
         ],
       },
       {

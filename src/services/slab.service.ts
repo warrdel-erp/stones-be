@@ -20,8 +20,8 @@ export async function getSlabLogsBySlabIdService(slabId: number) {
 }
 
 // Get all slabs.
-export const fetchAllSlabs = async (filters?: WhereOptions, transaction?: Transaction) => {
-  return await slabRepository.getAllSlabs(filters, transaction);
+export const fetchAllSlabs = async (filters?: any, transaction?: Transaction, locationId?: number) => {
+  return await slabRepository.getAllSlabs(filters, transaction, locationId);
 };
 
 // Update slab

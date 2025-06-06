@@ -12,6 +12,8 @@ export type SoInvoice = {
   clientId: number;
   amount: number;
   salesOrderId: number;
+  taxableAmount: number;
+  taxValue: number
 };
 
 const SalesOrderInvoice = sequelize.define(
@@ -25,7 +27,15 @@ const SalesOrderInvoice = sequelize.define(
     invoiceCode: {
       type: DataTypes.STRING,
     },
-    amount: {
+    amount: { // total amount without tax.
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    taxableAmount: { // only amount that has to applied tax.
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    taxValue: { // total tax value as per taxable amount.
       type: DataTypes.FLOAT,
       allowNull: false,
     },

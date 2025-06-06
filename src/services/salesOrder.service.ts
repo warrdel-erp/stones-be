@@ -5,7 +5,7 @@ import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
 import { removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
-import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { SALES_TAX, SCOP } from "../constants";
 
 export const createSalesOrder = async (data: any) => {
@@ -59,8 +59,24 @@ export const createSalesOrder = async (data: any) => {
 };
 
 // Get all sales orders
-export const getAllSalesOrders = async (page: number, limit: number, clientId: number) => {
-  const data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId);
+export const getAllSalesOrders = async (
+  page: number,
+  limit: number,
+  clientId: number,
+  filter: { [key: string]: string }
+) => {
+  let data: any;
+  if (filter.tab == "LOADING_ORDER") {
+    data = await salesOrderRepository.getAllSalesOrdersOnlyWithLoadingOrder(page, limit, clientId);
+  } else if (filter.tab == "PACKAGING_LIST") {
+    data = await salesOrderRepository.getAllSalesOrdersOnlyWithPackagingList(page, limit, clientId);
+  } else if (filter.tab == "OPEN") {
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { status: SALES_ORDER_STATUS.OPEN });
+  } else if (filter.tab == "CLOSED") {
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { status: SALES_ORDER_STATUS.CLOSED });
+  } else {
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId);
+  }
 
   data.data = data.data.map((salesOrder: any) => {
     salesOrder = salesOrder.get({ plain: true });

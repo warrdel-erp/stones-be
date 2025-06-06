@@ -49,10 +49,12 @@ export const createSlabLog = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get all slabs with filter
-export const getAllSlabs = catchAsync(async (req: Request, res: Response) => {
+export const getAllSlabs = catchAsync(async (req: AuthRequest, res: Response) => {
   const filters = req.query;
 
-  const slabs = await slabService.fetchAllSlabs(filters);
+  const locationId = req.user?.defaultLocationId
+
+  const slabs = await slabService.fetchAllSlabs(filters, undefined, Number(locationId));
   return SuccessResponse(res, 200, "Slabs fetched successfully", slabs);
 });
 

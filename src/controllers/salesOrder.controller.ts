@@ -17,11 +17,11 @@ export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Respons
 
 // Get all SO
 export const getAllSalesOrders = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, ...filter }: any = req.query;
 
-  const clientId = req.user?.clientId
+  const clientId = req.user?.clientId;
 
-  const result = await salesOrderService.getAllSalesOrders(Number(page), Number(limit), Number(clientId));
+  const result = await salesOrderService.getAllSalesOrders(Number(page), Number(limit), Number(clientId), filter);
 
   SuccessResponse(res, 200, "Sales Orders retrieved successfully", result.data, {
     total: result.total,
@@ -50,4 +50,3 @@ export const getNewSoNumber = catchAsync(async (req: AuthRequest, res: Response)
   const data = await salesOrderService.getSONumber(clientId!);
   SuccessResponse(res, 200, "New SO number fetched successfully.", data);
 });
-

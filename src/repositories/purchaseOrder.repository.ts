@@ -112,7 +112,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
 export const getPaymentPendingPurchaseOrders = async (page: number, limit: number, clientId: number, filter: { [k: string]: string }) => {
   const offset = (page - 1) * limit;
 
-  const { fromDate, toDate, ...otherFilters } = filter;
+  const { fromDate, toDate } = filter;
 
   const dateRange: any = {};
 

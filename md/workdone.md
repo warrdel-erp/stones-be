@@ -275,3 +275,17 @@ create new user under a client is done and all of them can login.
 5. Payment terms in LO auto complete. ✅
 6. Receive payment in invoice. ✅
 7. Address info in SO Invoice. ✅
+
+---
+
+1. dashboard card design fix.
+2. sales list orange data.
+
+---
+
+1. SO tabs. (except Payment Pending).
+2. SO products according to location.
+3. Sub transaction in SO list.
+4. Create LO/PL page prefilled data.
+5. tax calculation in BE.
+6. invoice UI.

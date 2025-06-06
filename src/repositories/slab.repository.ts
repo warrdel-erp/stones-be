@@ -147,7 +147,7 @@ export const findByIdWithLogs = async (slabId: number) => {
 /**
  * Fetch all slabs.
  */
-export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transaction) => {
+export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transaction, locationId?: number) => {
   return await Slab.findAll({
     where: filters,
     include: [
@@ -170,14 +170,17 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
       {
         model: models.Bin,
         as: "bin",
+        required: true,
         include: [
           {
             model: models.Warehouse,
             as: "warehouse",
+            where: { ...(locationId ? { locationId } : {}) },
+            required: true,
             include: [
               {
                 model: models.Location,
-                as: "location"
+                as: "location",
               }
             ]
           }

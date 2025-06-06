@@ -55,10 +55,23 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
   const loadingOrders = await models.LoadingOrder.findAll({
     where: filters,
     include: [
-      { model: models.SalesOrder, as: "salesOrder" },
-      { model: models.SalesOrderProduct, as: "salesOrderProducts" },
-      { model: models.PackagingList, as: "packagingList" },
-      { model: models.SalesOrderInvoice, as: "salesOrderInvoice" },
+      {
+        association: "salesOrder",
+        include: [
+          {
+            association: 'customer'
+          }
+        ]
+      },
+      {
+        association: "salesOrderProducts"
+      },
+      {
+        association: "packagingList"
+      },
+      {
+        association: "salesOrderInvoice"
+      },
     ],
   });
 

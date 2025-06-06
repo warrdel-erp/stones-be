@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, Op, Sequelize } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 import { SALES_ORDER_STATUS } from "../constants/tableTypes";
@@ -9,7 +9,85 @@ export const createSalesOrder = async (data: any, transaction?: Transaction) => 
 };
 
 // Get all sales order
-export const getAllSalesOrders = async (page: number, limit: number, clientId: number,) => {
+export const getAllSalesOrders = async (
+  page: number,
+  limit: number,
+  clientId: number,
+  filter?: { [k: string]: string }
+) => {
+  const offset = (page - 1) * limit;
+  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+    where: {
+      clientId,
+      ...filter,
+    },
+    attributes: {
+      include: [
+        [
+          // Count the number of associated Loading Orders
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM loading_orders AS lo
+            WHERE lo.salesOrderId = SalesOrder.id
+          )`),
+          "loadingOrderCount",
+        ],
+      ],
+    },
+    include: [
+      {
+        association: "customer",
+        attributes: ["id", "salesTax", "scope", "daysForHold", "name", "primaryPhoneNumber"],
+      },
+      {
+        association: "loadingOrders",
+        attributes: ["id", "code"],
+        include: [
+          {
+            association: "packagingList",
+            attributes: ["id", "code"],
+          }
+        ]
+      },
+      {
+        association: "createdBy",
+        attributes: ["id", "username", "phone"],
+      },
+      {
+        association: "soLocation",
+        attributes: ["id", "location"],
+      },
+      {
+        association: "notes",
+      },
+      {
+        association: "salesOrderProducts",
+        attributes: ["id", "unitPrice"],
+        include: [
+          {
+            association: "inventoryProduct",
+            attributes: ["id"],
+            include: [
+              {
+                association: "slab",
+                attributes: ["id", "receivingLength", "receivingWidth"],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [["createdAt", "DESC"]],
+  });
+
+  return { data, total, page, limit };
+};
+
+// Get all sales order
+export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
     where: {
@@ -29,23 +107,35 @@ export const getAllSalesOrders = async (page: number, limit: number, clientId: n
       ],
     },
     include: [
-      { model: models.Customer, as: "customer", attributes: ["id", "salesTax", "scope", "daysForHold", "name"] },
-      { model: models.User, as: "createdBy", attributes: ["id", "username"] },
-      { model: models.Location, as: "soLocation", attributes: ["id", "location"] },
-      { model: models.Notes, as: "notes" },
       {
-        model: models.SalesOrderProduct,
-        as: "salesOrderProducts",
+        association: "customer",
+        attributes: ["id", "salesTax", "scope", "daysForHold", "name", "primaryPhoneNumber"],
+      },
+      {
+        association: "loadingOrders",
+        required: true,
+      },
+      {
+        association: "createdBy",
+        attributes: ["id", "username", "phone"],
+      },
+      {
+        association: "soLocation",
+        attributes: ["id", "location"],
+      },
+      {
+        association: "notes",
+      },
+      {
+        association: "salesOrderProducts",
         attributes: ["id", "unitPrice"],
         include: [
           {
-            model: models.InventoryProduct,
-            as: "inventoryProduct",
+            association: "inventoryProduct",
             attributes: ["id"],
             include: [
               {
-                model: models.Slab,
-                as: "slab",
+                association: "slab",
                 attributes: ["id", "receivingLength", "receivingWidth"],
               },
             ],
@@ -55,11 +145,157 @@ export const getAllSalesOrders = async (page: number, limit: number, clientId: n
     ],
     limit,
     offset,
+    distinct: true,
     order: [["createdAt", "DESC"]],
   });
 
   return { data, total, page, limit };
 };
+
+// Get all sales order
+export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number) => {
+  const offset = (page - 1) * limit;
+  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+    where: {
+      clientId,
+      id: {
+        [Op.in]: sequelize.literal(`(
+          SELECT DISTINCT so.id 
+          FROM sales_orders so
+          INNER JOIN loading_orders lo ON lo.salesOrderId = so.id
+          INNER JOIN packaging_lists pl ON pl.loadingOrderId = lo.id
+          WHERE so.clientId = ${clientId}
+        )`),
+      },
+    },
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM loading_orders AS lo
+            WHERE lo.salesOrderId = SalesOrder.id
+          )`),
+          "loadingOrderCount",
+        ],
+      ],
+    },
+    include: [
+      {
+        association: "customer",
+        attributes: ["id", "salesTax", "scope", "daysForHold", "name", "primaryPhoneNumber"],
+      },
+      {
+        association: "loadingOrders",
+        include: [
+          {
+            association: "packagingList",
+          },
+        ],
+      },
+      {
+        association: "createdBy",
+        attributes: ["id", "username", "phone"],
+      },
+      {
+        association: "soLocation",
+        attributes: ["id", "location"],
+      },
+      {
+        association: "notes",
+      },
+      {
+        association: "salesOrderProducts",
+        attributes: ["id", "unitPrice"],
+        include: [
+          {
+            association: "inventoryProduct",
+            attributes: ["id"],
+            include: [
+              {
+                association: "slab",
+                attributes: ["id", "receivingLength", "receivingWidth"],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [["createdAt", "DESC"]],
+  });
+
+  return { data, total, page, limit };
+};
+
+// Get SO with pagination
+// const getPaymentPendingSalesOrders = async (page: number, limit: number, clientId: number, filter: { [k: string]: string }) => {
+//   const offset = (page - 1) * limit;
+
+//   const { fromDate, toDate } = filter;
+
+//   const dateRange: any = {};
+
+//   if (fromDate && toDate) {
+//     dateRange.poDate = { [Op.between]: [fromDate, toDate] };
+//   } else if (fromDate) {
+//     dateRange.poDate = { [Op.gte]: fromDate };
+//   } else if (toDate) {
+//     dateRange.poDate = { [Op.lte]: toDate };
+//   }
+
+//   const pos: any = await models.SalesOrder.findAndCountAll({
+//     where: {
+//       clientId
+//     },
+//     attributes: [
+//       "id",
+//       [
+//         Sequelize.fn(
+//           "COALESCE",
+//           Sequelize.fn(
+//             "SUM",
+//             Sequelize.literal("`sipls->paymentBills`.`amount`")
+//           ),
+//           0
+//         ),
+//         "totalPayedBillsAmount"
+//       ]
+//     ],
+//     include: [
+//       {
+//         as: 'loadingOrders', // Adjust alias if necessary
+//         attributes: [],
+//         include: [
+//           {
+//             model: models.PaymentBill,
+//             as: 'paymentBills', // Adjust alias if necessary
+//             attributes: [] // We don't need to select fields from siplProducts, just to aggregate the quantities
+//           },
+//         ]
+//       }
+//     ],
+//     limit,
+//     offset,
+//     subQuery: false,
+//     order: [["createdAt", "DESC"]],
+//     group: ['PurchaseOrder.id'], // Ensure we group by purchase_order's ID,
+//     having: Sequelize.literal(
+//       "COALESCE(SUM(`sipls->siplProducts`.`quantity` * `sipls->siplProducts`.`unitPrice`), 0) > COALESCE(SUM(`sipls->paymentBills`.`amount`), 0)"
+//     )
+//   });
+
+//   pos.rows = await Promise.all(pos.rows.map(async (po: any) => {
+//     const poData = (await getPurchaseOrderById(po.id))
+
+//     return { ...structuredClone(poData), ...po.get({ plain: true }) }
+//   }))
+
+//   return pos
+// };
+
 
 // Get One SO
 export const getSalesOrderById = async (id: number) => {
@@ -79,7 +315,7 @@ export const getSalesOrderById = async (id: number) => {
             include: [
               {
                 association: "bin",
-                attributes: ['id', 'name'],
+                attributes: ["id", "name"],
               },
               {
                 association: "slab",

@@ -78,10 +78,17 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
   data.data = data.data.map((loadingOrder: any) => {
     loadingOrder = loadingOrder.get({ plain: true });
 
+    const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+    if (!salesTax) {
+      throw new AppError('Error in getting tax value', 400);
+    }
+
     if (loadingOrder.packagingList) {
-      loadingOrder.totalAmount = getTotalPlAmount(loadingOrder.salesOrderProducts);
+      loadingOrder.plAmounts = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
     } else {
-      loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
+
+      loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
     }
 
     return loadingOrder;
@@ -104,11 +111,17 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
+  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+  if (!salesTax) {
+    throw new AppError('Error in getting tax value', 400);
+  }
+
   // Calculate total amount added in SO.
-  loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
+  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
 
   // Calculate total pl amount added in SO.
-  loadingOrder.totalPlAmount = getTotalPlAmount(loadingOrder.salesOrderProducts);
+  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
 
   // so product as per product and unitPrice.
   loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
@@ -151,12 +164,29 @@ async function createLONotes(data: any, loadingOrder: any, transaction: Transact
   return { internalNote, printableNote };
 }
 
-export function getTotalSalesOrderProductsAmount(salesOrderProducts: any[]) {
-  return _.sumBy(
+export function getTotalLoadingOrderAmount(salesOrderProducts: any[], tax: number) {
+
+  const totalAmount = _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) =>
       (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
   );
+
+  const taxableAmount = _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) => {
+      if (!salesOrderProduct.taxApplied) return 0;
+      return (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+    }
+  );
+
+  const taxAmount = getPercentageValue(taxableAmount, tax)
+
+  return {
+    totalAmount,
+    taxableAmount,
+    taxAmount,
+  }
 }
 
 export function getTotalLOQuantity(salesOrderProducts: any[]) {
@@ -176,12 +206,28 @@ export function getTotalLoOrderQuantity(salesOrderProducts: any[]) {
   );
 }
 
-export function getTotalPlAmount(salesOrderProducts: any[]) {
-  return _.sumBy(
+export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
+  const totalAmount = _.sumBy(
     salesOrderProducts,
     (salesOrderProduct: any) =>
       (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144
   );
+
+  const taxableAmount = _.sumBy(
+    salesOrderProducts,
+    (salesOrderProduct: any) => {
+      if (!salesOrderProduct.taxApplied) return 0;
+      return (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+    }
+  );
+
+  const taxAmount = getPercentageValue(taxableAmount, tax)
+
+  return {
+    totalAmount,
+    taxableAmount,
+    taxAmount,
+  }
 }
 
 export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
@@ -250,13 +296,17 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
+    const invoiceAmount = loadingOrder.packagingList ? loadingOrder.amounts : loadingOrder.plAmount
+
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
       {
         clientId: clientId,
         customerId: loadingOrder.salesOrder.customerId,
         loadingOrderId: loadingOrder.id,
-        amount: loadingOrder.totalPlAmount || loadingOrder.totalAmount,
+        amount: invoiceAmount.totalAmount,
+        taxableAmount: invoiceAmount.taxableAmount,
+        taxValue: invoiceAmount.taxAmount,
         salesOrderId: loadingOrder.salesOrder.id,
       },
       transaction
@@ -500,8 +550,14 @@ function loadingOrderWithTotalAmount(loadingOrders: any) {
   return loadingOrders.map((loadingOrder: any) => {
     loadingOrder = loadingOrder.get({ plain: true });
 
+    const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+    if (!salesTax) {
+      throw new AppError('Error in getting tax value', 400);
+    }
+
     // Calculate total amount added in LO.
-    loadingOrder.totalAmount = getTotalSalesOrderProductsAmount(loadingOrder.salesOrderProducts);
+    loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax?.value);
 
     return loadingOrder;
   });

@@ -87,3 +87,5 @@
 6. can two different user put same slab in cart. ✅
 
 ---
+
+1. Sales Order amount and tax can be LO and PL data.

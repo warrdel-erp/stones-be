@@ -72,10 +72,17 @@ export const getPackagingListById = async (id: number) => {
     throw new AppError("Invalid Id", 400);
   }
 
+  const salesTax = SALES_TAX.find(e => e.id == packagingList.loadingOrder.salesOrder.customer.salesTax);
+
+  if (!salesTax) {
+    throw new AppError('Error in getting tax value', 400);
+  }
+
+
   packagingList.products = getPackagingListProductAccordingToIdAndUnitPrice(packagingList);
 
   // Calculate total pl amount added in SO.
-  packagingList.totalAmount = getTotalPlAmount(packagingList.salesOrderProducts);
+  packagingList.amounts = getTotalPlAmount(packagingList.salesOrderProducts, salesTax.value);
 
   // get payment terms constant data.
   packagingList.loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == packagingList.loadingOrder.paymentTerms);

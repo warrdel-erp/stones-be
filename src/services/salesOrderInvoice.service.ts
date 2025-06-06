@@ -1,7 +1,8 @@
 import _ from "lodash";
 import * as salesOrderInvoiceRepository from "../repositories/soInvoice.repository";
+import * as loadingOrderService from '../services/loadingOrder.service'
 import { AppError } from "../helper/appError";
-import { PAYMENT_TERMS } from "../constants";
+import { PAYMENT_TERMS, SALES_TAX } from "../constants";
 import { removeDuplicatesWithUnitPrice } from "../helper";
 import { getTotalLOQuantity } from "./loadingOrder.service";
 
@@ -31,6 +32,7 @@ export const getInvoiceById = async (id: number) => {
   }
 
   soInvoice.customer.paymentTerms = PAYMENT_TERMS.find((e) => e.id == soInvoice.customer.paymentTerms);
+  soInvoice.customer.salesTax = SALES_TAX.find((e) => e.id == soInvoice.customer.salesTax);
 
   soInvoice.products = getLoadingOrderProductAccordingToIdAndUnitPrice(soInvoice.loadingOrder);
 
@@ -53,9 +55,24 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
         salesOrderProduct.unitPrice === product.unitPrice
     );
 
+    const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+    if (!salesTax) {
+      throw new AppError('Error in getting tax value', 400);
+    }
+
+    let amounts = {};
+
+    if (loadingOrder.packagingList) {
+      amounts = loadingOrderService.getTotalPlAmount(salesOrderProduct, salesTax.value)
+    } else {
+      amounts = loadingOrderService.getTotalLoadingOrderAmount(salesOrderProduct, salesTax.value)
+    }
+
     return {
       ...product,
       salesOrderProduct,
+      amounts,
       totalQuantity: getTotalLOQuantity(salesOrderProduct),
     };
   });

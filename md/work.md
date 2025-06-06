@@ -346,3 +346,60 @@ Bar code
 PO Detail
 
 ```
+
+---
+
+```
+Direct SIPL =>
+	 payment terms error. ✅
+	all list is now showing. ✅
+
+
+Change all ALERT error messages.
+
+Freight bill =>
+	 based on received quantity
+
+Inventory slab detail =>
+	 Last landed cost. ✅
+
+Sidebar =>
+	sales should  before invoices ✅
+
+SO create =>
+	second heading should be customer invoice/PL/LO ✅
+	add more product is not working.
+
+SO detail page =>
+	delete button in front of slab.
+	print dropdown should be only available invoices
+
+SO journal entry =>
+		slab amount is wrong (10x) ✅
+
+LO detail page =>
+ 	Order quantity is for whole SO it should be only for LO. ✅
+	SO list =>	SO tabs. ✅
+
+Cart SO creation =>	remove soLocation ✅
+
+SO cancelation =>
+	redirecting to PO list page. ✅
+
+PL cancel page => not working correctly.  ✅
+
+
+——
+
+1. Hold in inventory. ✅
+2. Landed cost in Slab drawer. ✅
+3. Total amount in add product in SO. ✅
+4. Tax checkbox in SO. ✅
+5. Add more product in SO. ✅
+6. Payment terms in LO auto complete. ✅
+7. Tax info in LO/PL. ✅
+8. Receive payment in invoice. ✅
+9. SO location is freezed to current location. ✅
+10. Add product in SO should be as Location. ✅
+11. Address info in SO Invoice. ✅
+```
