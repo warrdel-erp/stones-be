@@ -43,6 +43,7 @@ import productFinishRoutes from "./routes/productFinish.routes";
 import soInvoiceRoutes from "./routes/soInvoice.routes";
 import authRoutes from "./routes/auth.routes";
 import accountRoutes from "./routes/account.routes";
+import advancedDepositRoutes from "./routes/advancedDeposit.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,6 +88,7 @@ app.use("/api/productGroup", productGroupRoutes);
 app.use("/api/productBaseColor", productBaseColorRoutes);
 app.use("/api/productFinish", productFinishRoutes);
 app.use("/api/soInvoice", soInvoiceRoutes);
+app.use("/api/advancedDeposit", advancedDepositRoutes);
 
 // handler error globally.
 app.use(errorHandler);

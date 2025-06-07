@@ -303,6 +303,7 @@ export const getSalesOrderById = async (id: number) => {
     where: { id },
     include: [
       { association: "customer" },
+      { association: 'advancedDeposits' },
       { association: "createdBy" },
       { association: "shippingAddress" },
       { association: "notes" },

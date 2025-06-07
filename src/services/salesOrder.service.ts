@@ -101,6 +101,8 @@ export const getSalesOrderById = async (id: number) => {
     salesOrderId: id,
   });
 
+  salesOrder.totalAdvancedDeposit = _.sumBy(salesOrder.advancedDeposits, (e: any) => Number(e.amount));
+
   salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
   salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
 

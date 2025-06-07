@@ -39,6 +39,7 @@ import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../co
 import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
+import AdvancedDeposit from "./advancedDeposit.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -375,8 +376,8 @@ Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 
 // One Payment belongs to one user (One user can have multiple payments)
-Payment.belongsTo(Vendor, { foreignKey: "payeeId", as: "vendor" });
-Vendor.hasMany(Payment, { foreignKey: "payeeId", as: "payments" });
+Payment.belongsTo(Vendor, { foreignKey: "payeeId", as: "vendor", constraints: false });
+Vendor.hasMany(Payment, { foreignKey: "payeeId", as: "payments", constraints: false });
 
 // One Payment belongs to one user (One user can have multiple payments)
 Payment.belongsTo(Customer, { foreignKey: "payeeId", as: "customer" });
@@ -428,14 +429,17 @@ Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
 PaymentBill.belongsTo(Payment, { foreignKey: "paymentId", as: "payment" });
 Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBills" });
 
-PaymentBill.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl" });
-SIPL.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
+PaymentBill.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false });
+SIPL.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
 
-PaymentBill.belongsTo(Bill, { foreignKey: "referenceId", as: "bill" });
-Bill.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
+PaymentBill.belongsTo(Bill, { foreignKey: "referenceId", as: "bill", constraints: false });
+Bill.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
 
-PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInvoice" });
-SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills" });
+PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInvoice", constraints: false });
+SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
+
+PaymentBill.belongsTo(AdvancedDeposit, { foreignKey: "referenceId", as: "advancedDeposit", constraints: false });
+AdvancedDeposit.hasOne(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
 
 // Loading order belongs to one SalesOrderProduct (one SalesOrderProduct can have one loadingOrderProduct)
 LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
@@ -521,6 +525,11 @@ User.hasMany(Customer, {
 
 Customer.hasOne(CustomerAddress, { foreignKey: 'customerId', as: 'billingAddress', scope: { addressType: CUSTOMER_ADDRESS_TYPES.REMIT } })
 
+// Associations
+AdvancedDeposit.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: 'salesOrder' });
+SalesOrder.hasMany(AdvancedDeposit, { foreignKey: "salesOrderId", as: 'advancedDeposits' });
+
+
 export {
   Client,
   User,
@@ -561,5 +570,6 @@ export {
   ProductBaseColor,
   ProductFinish,
   Account,
-  Company
+  Company,
+  AdvancedDeposit
 };

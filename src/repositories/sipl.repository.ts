@@ -348,6 +348,6 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
 
   return {
     poSiplNumber,
-    invoiceCode: `SIPL ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
+    invoiceCode: `VI ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
   }
 }

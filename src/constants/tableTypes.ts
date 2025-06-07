@@ -95,6 +95,7 @@ export const PAYMENT_BILL_REFERENCE_TYPES = {
   SIPL: "sipl",
   BILL: "bill",
   SO_INVOICE: "soInvoice",
+  ADVANCED_DEPOSIT: "advancedDeposit",
 } as const;
 
 export const DELIVERY_TYPES = {
