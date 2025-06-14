@@ -10,6 +10,7 @@ import {
   UNITS_OF_MEASUREMENT
 } from "../constants";
 import { COUNTRIES } from "../constants/countries";
+import { PAYMENT_METHOD } from "../constants/tableTypes";
 
 import * as productBaseColorRepository from "../repositories/productBaseColor.repository";
 import * as productCategoryRepository from "../repositories/productCategory.repository";
@@ -40,5 +41,6 @@ export const getGeneralData = async (clientId: number) => {
     group: productGroup,
     kind: PRODUCT_KIND,
     salesTax: SALES_TAX,
+    paymentMethods: PAYMENT_METHOD
   };
 };

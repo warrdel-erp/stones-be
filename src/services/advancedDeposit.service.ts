@@ -3,18 +3,20 @@ import AdvancedDeposit from "../models/advancedDeposit.model";
 import SalesOrder from "../models/salesOrder.model";
 import Payment from "../models/payment.model";
 import PaymentBill from "../models/paymentBills.model";
-import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE } from "../constants/tableTypes";
+import * as journalEntryRepository from '../repositories/journalEntry.repository'
+import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES } from "../constants/tableTypes";
 
 interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
     paymentMethod: string;
+    accountId: number
 }
 
 /**
  * Creates a new advanced deposit with associated payment and payment bill records
  */
-export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO) => {
+export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, locationId: number) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -22,8 +24,13 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO) => {
         const salesOrder: any = await SalesOrder.findByPk(data.salesOrderId, {
             transaction,
             attributes: ['id', 'clientId'],
-            include: ['customer']
+            include: [{
+                association: 'customer',
+                include: ['ledgerAccount']
+            }]
         });
+
+        console.log(salesOrder.customer.ledgerAccount, "salesOrder")
 
         if (!salesOrder) {
             throw new Error("Sales order not found");
@@ -68,9 +75,39 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO) => {
             { transaction }
         );
 
+        const customerJournalEntry = await journalEntryRepository.create(
+            {
+                amount: data.amount,
+                ledgerId: data.accountId,
+                type: JOURNAL_ENTRY_TYPE.CR,
+                // reference is the BILL.
+                referenceId: data.salesOrderId,
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+
+                locationId,
+                partyLedgerAccountId: salesOrder.customer.ledgerAccount.id
+            },
+            transaction
+        );
+
+        const accountJournalEntry = await journalEntryRepository.create(
+            {
+                amount: data.amount,
+                ledgerId: salesOrder.customer.ledgerAccount.id,
+                type: JOURNAL_ENTRY_TYPE.DR,
+                // reference is the BILL.
+                referenceId: data.salesOrderId,
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+
+                locationId,
+                partyLedgerAccountId: data.accountId
+            },
+            transaction
+        );
+
         await transaction.commit();
 
-        return advancedDeposit;
+        return { advancedDeposit, customerJournalEntry, accountJournalEntry };
     } catch (error) {
         await transaction.rollback();
         throw error;

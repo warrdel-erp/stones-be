@@ -289,3 +289,14 @@ create new user under a client is done and all of them can login.
 4. Create LO/PL page prefilled data.
 5. tax calculation in BE.
 6. invoice UI.
+
+---
+
+3. SO tax.
+4. SO cancellation redirecting to PO list page. ✅
+5. PL cancel page => not working correctly. ✅
+
+---
+
+1. journal entries for advanced deposit.
+2. payment method correction.

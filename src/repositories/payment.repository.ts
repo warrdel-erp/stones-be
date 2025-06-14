@@ -1,6 +1,5 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
-import { PAYEE_TYPE } from "../constants/tableTypes";
 
 export const createPayment = async (paymentData: any, transaction: Transaction) => {
   return await models.Payment.create(paymentData, { transaction });

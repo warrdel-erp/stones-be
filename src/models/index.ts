@@ -105,6 +105,9 @@ Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId", as: "purchaseOrder" })
 LedgerAccount.belongsTo(Vendor, { foreignKey: "referenceId", as: "vendor", constraints: false });
 Vendor.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false });
 
+// Ledger account belongs to one Vendor and one vendor has one ledger account.
+Customer.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false });
+
 // PurchaseOrder-User (one 'User' have multiple 'PurchaseOrder') (one 'PurchaseOrder' have one 'User')
 User.hasMany(PurchaseOrder, { foreignKey: "userId" });
 PurchaseOrder.belongsTo(User, { foreignKey: "userId" });

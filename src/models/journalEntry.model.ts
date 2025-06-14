@@ -15,13 +15,13 @@ export type JournalEntry = {
   amount: number;
   type: (typeof JOURNAL_ENTRY_TYPE)[keyof typeof JOURNAL_ENTRY_TYPE];
   ledgerId: number;
-  processType: (typeof JOURNAL_ENTRY_PROCESS_TYPE)[keyof typeof JOURNAL_ENTRY_PROCESS_TYPE];
+  processType?: (typeof JOURNAL_ENTRY_PROCESS_TYPE)[keyof typeof JOURNAL_ENTRY_PROCESS_TYPE];
   referenceId?: number;
   referenceType?: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
   subReferenceId?: number;
   subReferenceType?: (typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_SUB_REFERENCE_TYPES];
-  entryFor: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
-  entryForId: number,
+  entryFor?: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
+  entryForId?: number,
   locationId: number,
   partyLedgerAccountId: number | null
 };
@@ -79,7 +79,7 @@ const JournalEntry = sequelize.define(
     },
     processType: {
       type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_PROCESS_TYPE)),
-      allowNull: false,
+      allowNull: true,
     },
     subReferenceId: {
       type: DataTypes.INTEGER,
@@ -98,10 +98,13 @@ const JournalEntry = sequelize.define(
       allowNull: true, // Required only if referenceId is used
     },
     entryFor: {
-      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_FOR_TYPES))
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_FOR_TYPES)),
+      allowNull: true
     },
     entryForId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: true
+
     }
   },
   {

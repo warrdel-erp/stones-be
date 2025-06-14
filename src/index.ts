@@ -90,7 +90,7 @@ app.use("/api/productFinish", productFinishRoutes);
 app.use("/api/soInvoice", soInvoiceRoutes);
 app.use("/api/advancedDeposit", advancedDepositRoutes);
 
-// handler error globally.
+// Global error handler - must be placed after all routes
 app.use(errorHandler);
 
 // Start server

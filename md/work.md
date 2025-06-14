@@ -368,7 +368,7 @@ Sidebar =>
 
 SO create =>
 	second heading should be customer invoice/PL/LO ✅
-	add more product is not working.
+	add more product is not working. ✅
 
 SO detail page =>
 	delete button in front of slab.
@@ -388,7 +388,6 @@ SO cancelation =>
 
 PL cancel page => not working correctly.  ✅
 
-
 ——
 
 1. Hold in inventory. ✅
@@ -403,3 +402,39 @@ PL cancel page => not working correctly.  ✅
 10. Add product in SO should be as Location. ✅
 11. Address info in SO Invoice. ✅
 ```
+
+---
+
+1. change SIPL - Vendor Invoice (#VI) ✅
+
+- Lot to bundle ✅
+
+2. Integrate capturing images with slabs; missing images to be available
+
+3. block wise, bundle number wise data hierarchy in inventory
+
+4. Show Avg size in sipl
+
+5. Block specific pricing update option
+
+6. Direct SO creation Hold from inventory
+
+7. Defaults address and todays date ✅
+
+8. Redirect ✅
+
+9. Remeasure to be autofilled default with an option to edit
+
+10. Swap option within the same block
+
+11. Advance deposit option in SO ✅
+
+12. QR code activate
+
+13. Payment gateway
+
+14. Invoice missing - ship date - Weight not required - customer PO required - lead# not required
+
+15. Packing List - Delivery charge option present - discount
+
+---
