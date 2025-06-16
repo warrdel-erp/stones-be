@@ -48,6 +48,10 @@ export const getAllProducts = async (
                 ]
               }
             ]
+          },
+          {
+            association: 'sipl',
+            attributes: ['id', 'invoiceCode']
           }
         ]
       },

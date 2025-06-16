@@ -64,6 +64,10 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
     product = product.get({ plain: true })
     const blockGroups = new Map<number, any>();
 
+    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+
     for (const slab of product.slabs) {
       if (!blockGroups.has(slab.block)) {
         blockGroups.set(slab.block, []);
@@ -85,19 +89,17 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
       }
     });
 
-    const totalQuantity = (_.sumBy(
-      _.flatMap(product.sipls, 'slabs'),
-      item => item.receivingWidth * item.receivingWidth
+    const totalQuantity = (_.sumBy(product.slabs,
+      (item: any) => item.receivingLength * item.receivingWidth
     ) / 144).toFixed(2);
 
-    const totalSlabsCount = _.flatMap(product.sipls, 'slabs').length;
+    const totalSlabsCount = product.slabs.length;
 
-    const totalHoldQuantity = (_.sumBy(
-      _.flatMap(product.sipls, 'slabs').filter(e => e.isHold),
-      item => item.receivingWidth * item.receivingWidth
+    const totalHoldQuantity = (_.sumBy(product.slabs.filter((e: any) => e.isHold),
+      (item: any) => item.receivingWidth * item.receivingWidth
     ) / 144).toFixed(2);
 
-    const totalHoldSlabsCount = _.flatMap(product.sipls, 'slabs')?.filter(e => e.isHold)?.length;
+    const totalHoldSlabsCount = product.slabs?.filter((e: any) => e.isHold)?.length;
 
     delete product.slabs;
 
@@ -119,17 +121,21 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
   const finalData = data.products.map((product: any) => {
     product = product.get({ plain: true })
-    const blockGroups = new Map<number, any>();
+    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+
+    const bundleGroups = new Map<number, any>();
 
     for (const slab of product.slabs) {
-      if (!blockGroups.has(slab.lot)) {
-        blockGroups.set(slab.lot, []);
+      if (!bundleGroups.has(slab.lot)) {
+        bundleGroups.set(slab.lot, []);
       }
-      blockGroups.get(slab.lot)?.push(slab);
+      bundleGroups.get(slab.lot)?.push(slab);
     }
 
     // name changed lot => bundle
-    const bundles = Array.from(blockGroups.entries()).map(([bundle, slabs]: any) => {
+    const bundles = Array.from(bundleGroups.entries()).map(([bundle, slabs]: any) => {
 
       const totalQuantity = (_.sumBy(slabs,
         (item: any) => (item.status == SLAB_STATUS.IN_INVENTORY && !item.isHold) ? item.receivingLength * item.receivingWidth : 0
