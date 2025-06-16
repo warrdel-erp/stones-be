@@ -225,6 +225,10 @@ Bin.belongsTo(Warehouse, { foreignKey: "warehouseId" });
 Slab.belongsTo(Bin, { foreignKey: "binId" });
 Bin.hasMany(Slab, { foreignKey: "binId" });
 
+// one Bin has many slabs.
+Slab.belongsTo(Location, { foreignKey: "locationId" });
+Location.hasMany(Slab, { foreignKey: "locationId" });
+
 // (one Vendor has many Bills) (One Bill belongs to one Ven)
 Vendor.hasMany(Bill, { foreignKey: "vendorId", as: "bills" });
 Bill.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });

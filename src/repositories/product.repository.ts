@@ -21,26 +21,42 @@ export const getAllProducts = async (
     where: { ...whereClause, ...filter },
     include: [
       {
-        model: models.ProductCategory,
-        as: "category",
+        association: "category",
       },
       {
-        model: models.ProductSubCategory,
-        as: "subCategory",
+        association: "subCategory",
       },
       {
-        model: models.Slab,
-        as: "slabs",
+        association: "slabs",
         required: onlyWithSlabs,
+        include: [
+          {
+            association: "inventoryProduct",
+            include: [
+              {
+                association: "bin",
+                attributes: ['name'],
+                include: [
+                  {
+                    association: "warehouse",
+                    include: [
+                      {
+                        association: "location", attributes: ["location"]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
-        model: models.ProductGroup,
-        as: "group",
+        association: "group",
         attributes: ["id", "name"],
       },
       {
-        model: models.ProductBaseColor,
-        as: "baseColor",
+        association: "baseColor",
         attributes: ["id", "name"],
       },
     ],

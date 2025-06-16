@@ -298,5 +298,10 @@ create new user under a client is done and all of them can login.
 
 ---
 
-1. journal entries for advanced deposit.
-2. payment method correction.
+1. journal entries for advanced deposit. ✅
+2. payment method correction. ✅
+
+---
+
+1. University deployment. ✅
+2. Inventory categorization in BE. ✅
