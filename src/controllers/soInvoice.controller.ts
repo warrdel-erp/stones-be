@@ -44,3 +44,14 @@ export const getInvoiceById = catchAsync(async (req: AuthRequest, res: Response)
 
     SuccessResponse(res, 200, "SO invoice details fetched successfully.", result);
 });
+
+/**
+ * Get sales order products without returns for a specific invoice
+ */
+export const getSalesOrderProductsWithoutReturns = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    const products = await salesOrderInvoiceService.getSalesOrderProductsWithoutReturns(Number(id));
+
+    SuccessResponse(res, 200, "Sales order products without returns fetched successfully", products);
+});

@@ -40,6 +40,8 @@ import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
 import AdvancedDeposit from "./advancedDeposit.model";
+import Return from "./return.model";
+import ReturnProduct from "./returnProduct.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -536,6 +538,38 @@ Customer.hasOne(CustomerAddress, { foreignKey: 'customerId', as: 'billingAddress
 AdvancedDeposit.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: 'salesOrder' });
 SalesOrder.hasMany(AdvancedDeposit, { foreignKey: "salesOrderId", as: 'advancedDeposits' });
 
+// Return associations
+Return.hasMany(ReturnProduct, {
+  foreignKey: "returnId",
+  as: "returnProducts",
+});
+
+ReturnProduct.belongsTo(Return, {
+  foreignKey: "returnId",
+  as: "return",
+});
+
+ReturnProduct.belongsTo(SalesOrderProduct, {
+  foreignKey: "salesOrderProductId",
+  as: "salesOrderProduct",
+});
+
+SalesOrderProduct.hasMany(ReturnProduct, {
+  foreignKey: "salesOrderProductId",
+  as: "returnProducts",
+});
+
+// Return associations
+SalesOrderInvoice.hasMany(Return, {
+  foreignKey: "invoiceId",
+  as: "returns",
+});
+
+// Return associations
+Return.belongsTo(SalesOrderInvoice, {
+  foreignKey: "invoiceId",
+  as: "soInvoice",
+});
 
 export {
   Client,
@@ -578,5 +612,7 @@ export {
   ProductFinish,
   Account,
   Company,
-  AdvancedDeposit
+  AdvancedDeposit,
+  Return,
+  ReturnProduct
 };

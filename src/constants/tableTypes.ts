@@ -16,11 +16,13 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   LOADING_ORDER: "LOADING_ORDER",
   LOADING_ORDER_INVOICE: "LOADING_ORDER_INVOICE",
   SALES_ORDER: "SALES_ORDER",
+  RETURN: "RETURN"
 } as const;
 
 export const JOURNAL_ENTRY_FOR_TYPES = {
   SIPL: "SIPL",
-  LOADING_ORDER: "LOADING_ORDER"
+  LOADING_ORDER: "LOADING_ORDER",
+  RETURN: "RETURN"
 } as const;
 
 export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
@@ -40,6 +42,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   BILL_PAYMENT: "bill_payment",
   SO_INVOICING: "so_invoicing",
   SO_INVOICE_PAYMENT: "so_invoice_payment",
+  CONFIRM_RETURN: "confirm_return",
   custom: "custom",
 } as const;
 

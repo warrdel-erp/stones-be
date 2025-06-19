@@ -296,7 +296,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
-    const invoiceAmount = loadingOrder.packagingList ? loadingOrder.amounts : loadingOrder.plAmount
+    const invoiceAmount = loadingOrder.packagingList ? loadingOrder.plAmount : loadingOrder.amounts
 
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
@@ -329,7 +329,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for with tax.
     await journalEntryRepository.create(
       {
-        amount: addPercentage(invoice.amount, customerTax?.value || 0),
+        amount: invoiceAmount.totalAmount + invoiceAmount.taxAmount,
         ledgerId: ledgerAccount.id,
         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -383,7 +383,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for state tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoice.amount, customerTax?.stateTax || 0),
+        amount: getPercentageValue(invoiceAmount.taxableAmount, customerTax?.stateTax || 0),
         ledgerId: ledgerAccountForStateTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -407,7 +407,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for county tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoice.amount, countyTax),
+        amount: getPercentageValue(invoiceAmount.taxableAmount, countyTax),
         ledgerId: ledgerAccountForCountyTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -426,6 +426,19 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     );
     // Create Journal Entry for Invoice END
 
+    // Get ledger account for finished goods.
+    const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+      clientId,
+    });
+
+    // Get ledger account for finished cogs.
+    const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+      clientId,
+    });
+
+
     // Mark corresponding slabs as SOLD
     for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
       // Update Slab status to SOLD in Slab table.
@@ -442,17 +455,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         transaction
       );
 
-      // Get ledger account for finished goods.
-      const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-        key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
-        clientId,
-      });
 
-      // Get ledger account for finished cogs.
-      const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-        key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
-        clientId,
-      });
 
       await journalEntryRepository.create(
         {

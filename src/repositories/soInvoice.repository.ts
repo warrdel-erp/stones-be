@@ -2,6 +2,11 @@ import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { SoInvoice } from "../models/salesOrderInvoice.model";
 import { Op, fn, col } from "sequelize";
+import { Sequelize } from "sequelize";
+import { RETURN_STATUS } from "../models/return.model";
+import SalesOrderProduct from "../models/salesOrderProduct.model";
+import ReturnProduct from "../models/returnProduct.model";
+import Return from "../models/return.model";
 
 /**
  * Create a new invoice
@@ -42,6 +47,31 @@ export const getAllInvoicesList = async (
             as: "addresses",
           },
         ],
+      },
+      {
+        association: 'returns',
+        include: [
+          {
+            association: 'returnProducts',
+            include: [
+              {
+                association: 'salesOrderProduct',
+                include: [
+
+                  {
+                    association: "inventoryProduct",
+                    include: [
+                      {
+                        association: 'slab',
+                        attributes: ['combinedSlabNumber']
+                      }
+                    ]
+                  }
+
+                ]
+              },]
+          }
+        ]
       },
       {
         model: models.LoadingOrder,
@@ -188,5 +218,84 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
       },
     ],
     transaction,
+  });
+};
+
+/**
+ * Get list of sales order products that don't have initiated or completed returns for a specific invoice
+ */
+export const getSalesOrderProductsWithoutReturns = async (
+  soInvoiceId: number,
+  filter: WhereOptions = {},
+  transaction?: Transaction
+) => {
+  // First get all sales order products for the invoice
+  const allProducts = await models.SalesOrderProduct.findAll({
+    where: {
+      ...filter,
+      '$loadingOrder.salesOrderInvoice.id$': soInvoiceId
+    },
+    include: [
+      {
+        model: models.LoadingOrder,
+        as: 'loadingOrder',
+        include: [
+          {
+            model: models.SalesOrderInvoice,
+            as: 'salesOrderInvoice',
+            attributes: ['id']
+          },
+          {
+            association: "packagingList"
+          }
+        ]
+      },
+      {
+        model: models.ReturnProduct,
+        as: 'returnProducts',
+        include: [
+          {
+            model: models.Return,
+            as: 'return',
+            attributes: ['id', 'status']
+          }
+        ]
+      },
+      {
+        model: models.InventoryProduct,
+        as: 'inventoryProduct',
+        include: [
+          {
+            model: models.Slab,
+            as: 'slab',
+            include: [
+              {
+                model: models.Product,
+                as: 'product'
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    transaction
+  });
+
+  // Filter out products that have returns with status other than COMPLETE or INITIATED
+  return allProducts.filter(product => {
+
+    const returnProducts = product.get('returnProducts') as any[];
+
+    // keep product if return product does not exists.
+    if (!returnProducts?.length) {
+      return true;
+    }
+
+    // keep product if every return product is canceled previously
+    return returnProducts.every(rp => {
+      const returnData = rp.get('return');
+      return returnData.status === RETURN_STATUS.CANCELLED
+    })
+
   });
 };

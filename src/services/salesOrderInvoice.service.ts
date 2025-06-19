@@ -105,3 +105,17 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
 
   return data;
 };
+
+/**
+ * Get sales order products without returns for a specific invoice
+ */
+export const getSalesOrderProductsWithoutReturns = async (soInvoiceId: number) => {
+  const soInvoice = await salesOrderInvoiceRepository.getInvoiceById(soInvoiceId);
+
+  if (!soInvoice) {
+    throw new AppError("Invoice does not exist.", 404);
+  }
+
+  const products = await salesOrderInvoiceRepository.getSalesOrderProductsWithoutReturns(soInvoiceId);
+  return products;
+};

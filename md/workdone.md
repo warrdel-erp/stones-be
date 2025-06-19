@@ -306,3 +306,14 @@ create new user under a client is done and all of them can login.
 1. University deployment. ✅
 2. Inventory categorization in BE. ✅
 3. Inventory categorization in FE. ✅
+
+---
+
+1. initialize return
+2. confirm return
+3. product list that are not returned
+
+---
+
+1. journal entries for confirm Return.
+2. map in product inventory.
