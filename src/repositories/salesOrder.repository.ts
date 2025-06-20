@@ -330,8 +330,12 @@ export const getSalesOrderById = async (id: number) => {
           },
           {
             association: "loadingOrder",
+            include: [
+              {
+                association: "packagingList"
+              }
+            ]
           },
-          { model: models.PackagingList, as: "packagingList" },
         ],
       },
     ],

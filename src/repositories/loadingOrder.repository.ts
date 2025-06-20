@@ -161,6 +161,9 @@ export const getLoadingOrderById = async (id: number) => {
       {
         association: "salesOrderInvoice",
       },
+      {
+        association: "salesOrderInvoice"
+      }
     ],
   });
 
