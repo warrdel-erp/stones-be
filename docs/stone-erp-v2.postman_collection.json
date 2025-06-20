@@ -7,6 +7,162 @@
 	},
 	"item": [
 		{
+			"name": "account",
+			"item": [
+				{
+					"name": "get locations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/account/locations",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								"locations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extract the token from the response",
+									"const response = pm.response.json();",
+									"",
+									"if (response.success && response.data && response.data.token) {",
+									"    pm.environment.set(\"token\", response.data.token);",
+									"    console.log(\"Token has been set in environment variable: token\");",
+									"} else {",
+									"    console.warn(\"Token not found in response or login was unsuccessful.\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"email\": \"clinet1@gmail.com\",\n//     \"password\": \"client\"\n// }\n\n\n// {\n//     \"email\": \"user@gmail.com\",\n//     \"password\": \"user\"\n// }\n\n\n{\n    \"email\": \"contact1@techsolutions.com\",\n    \"password\": \"client\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/auth/login",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userProfile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/auth/userProfile",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"userProfile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check email exists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/auth/checkEmailExists?email=user@gmail.com",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"checkEmailExists"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "user@gmail.com"
+								},
+								{
+									"key": "email",
+									"value": "user1@gmail.com",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "client",
 			"item": [
 				{
@@ -16,7 +172,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Tech Solutions Ltd 1\",\n  \"password\": \"SecurePass123\",\n  \"email\": \"contact1@techsolutions.com\",\n  \"locationShortName\": \"TSL\",\n  \"clientType\": \"Enterprise\",\n  \"address\": \"456 Innovation Drive, Suite 800\",\n  \"country\": \"USA\",\n  \"city\": \"San Francisco\",\n  \"pincode\": \"94107\",\n  \"tax\": \"GST987654\",\n  \"priceLevel\": \"Gold\",\n  \"paymentTerms\": \"Net 45\",\n  \"licenseNumber\": \"LIC-567890\",\n  \"userCount\": 10\n}\n",
+							"raw": "\n{\n  \"firstName\": \"Client-1\",\n  \"lastName\": \"Super\",\n  \"phone\": \"+1234567890\",\n  \"email\" : \"clinet3@gmail.com\",\n  \"userCount\": 10,\n  \"password\": \"client\",\n  \"company\": {\n    \"companyName\": \"SUBHASH CHANDER\",\n    \"companyAddress\": \"WARD NO. 22\",\n    \"country\": \"India\",\n    \"zipCode\": \"335701\",\n    \"state\": \"Rajasthan\",\n    \"city\": \"Sri Ganganagar\",\n    \"contactPersonName\": \"JITIN KUMAR\",\n    \"contactMobile\": \"09119136857\",\n    \"email\": \"jkgoyal85@gmail.com\"\n}\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -101,7 +257,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"John Doe\",\n  \"userid\": \"user\",\n  \"password\": \"user\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"user@gmail.com\",\n  \"clientId\": 1\n}\n",
+							"raw": "{\n  \"username\": \"Chris Evans\",\n  \"userid\": \"user1\",\n  \"password\": \"user\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"user1@gmail.com\",\n  \"clientId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -139,7 +295,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 3\n} ",
+							"raw": "{\n    \"locationId\": 1\n} ",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -155,34 +311,6 @@
 								"api",
 								"user",
 								"assignLocation"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"user\"\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseurl}}/api/user/login",
-							"host": [
-								"{{baseurl}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"login"
 							]
 						}
 					},
@@ -350,6 +478,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get client user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/user/clientUsers",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"clientUsers"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -373,7 +530,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Morgan\",\n    \"printName\":\"Vendor 2\",\n    \"parentLocation\": 1,\n    \"type\": \"freight\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}\n",
+							"raw": "{\n    \"name\": \"Supplier 1\",\n    \"printName\":\"supplier-1\",\n    \"parentLocation\": 1,\n    \"type\": \"supplier\",\n    \"contactName\": \"John Doe\",\n    \"vendorSince\": \"2022-01-01\",\n    \"primaryPhoneNo\": \"1234567890\",\n    \"email\": \"abc@example.com\",\n    \"remitAddress\": \"123 Street\",\n    \"remitCity\": \"New York\",\n    \"remitState\": \"NY\",\n    \"remitZip\": \"10001\",\n    \"remitCountry\": \"USA\",\n    \"shippingAddress\": \"456 Avenue\",\n    \"shippingCity\": \"New York\",\n    \"shippingState\": \"NY\",\n    \"shippingZip\": \"10002\",\n    \"shippingCountry\": \"USA\",\n    \"paymentTerms\":1,\n    \"currency\": \"USD\",\n    \"vendorScope\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -466,6 +623,16 @@
 				{
 					"name": "Get vendor by ID",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -639,7 +806,7 @@
 								},
 								{
 									"key": "status",
-									"value": "closed",
+									"value": "PAYMENT_PENDING",
 									"disabled": true
 								}
 							]
@@ -829,7 +996,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Kota Stone 2\",\n    \"subCategory\": \"Marble\",\n    \"baseColor\": \"Gray\",\n    \"group\": \"Natural Stones\",\n    \"origin\": 1,\n    \"uom\": 1,\n    \"kind\": \"1\",\n    \"weight\": 10.5,\n    \"finish\": \"Polished\",\n    \"thickness\": 2.5,\n    \"paymentTerms\": 1,\n    \"notes\": \"High quality granite slab\",\n    \"specialInstruction\": \"Handle with care\",\n    \"disclaimer\": \"Color may vary slightly\",\n    \"categoryId\": 1,\n    \"singleSlabPrice\": 12,\n    \"bundlePrice\": 10,\n    \"reorderQuantity\": 43,\n    \"safetyQuantity\": 43\n}",
+							"raw": "{\n    \"name\": \"Kota Stone 2\",\n    \"alternativeName\":\"kota-stone-2\",\n    \"subCategoryId\": 1,\n    \"baseColorId\": 1,\n    \"groupId\": 1,\n    \"finishId\": 1,\n    \"origin\": 1,\n    \"uom\": 1,\n    \"kind\": \"1\",\n    \"weight\": 10.5,\n    \"thickness\": 2.5,\n    \"paymentTerms\": 1,\n    \"notes\": \"High quality granite slab\",\n    \"specialInstruction\": \"Handle with care\",\n    \"disclaimer\": \"Color may vary slightly\",\n    \"categoryId\": 1,\n    \"singleSlabPrice\": 12,\n    \"bundlePrice\": 10,\n    \"reorderQuantity\": 43,\n    \"safetyQuantity\": 43\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -916,7 +1083,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"alternativeName\":\"Kota stone12\"\n}",
+							"raw": "{\n    \"status\":\"inactive\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -971,7 +1138,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "3"
 								}
 							]
 						}
@@ -1013,6 +1180,42 @@
 								{
 									"key": "tab",
 									"value": "inventory"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get landed cost for product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/product/landedCost/:productId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"product",
+								"landedCost",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "1"
 								}
 							]
 						}
@@ -1077,7 +1280,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/bill",
+							"raw": "{{baseurl}}/api/bill?type=freight",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1093,8 +1296,12 @@
 								},
 								{
 									"key": "vendorId",
-									"value": null,
+									"value": "",
 									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "freight"
 								}
 							]
 						}
@@ -1162,6 +1369,14 @@
 								"newBillNumber"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "get last bill as per SIPL",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
@@ -1384,6 +1599,42 @@
 							"variable": [
 								{
 									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get SIPL by Id less",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/sipl/:id/less",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"sipl",
+								":id",
+								"less"
+							],
+							"variable": [
+								{
+									"key": "id",
 									"value": "1"
 								}
 							]
@@ -1547,6 +1798,42 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get new Combined Slab Number",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/sipl/:siplId/newCombinedSlabNumber",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"sipl",
+								":siplId",
+								"newCombinedSlabNumber"
+							],
+							"variable": [
+								{
+									"key": "siplId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1556,6 +1843,16 @@
 				{
 					"name": "Get general Data",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -1634,7 +1931,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/inventory/location/:locationId?page=1&limit=100",
+							"raw": "{{baseurl}}/api/inventory/location/:locationId?page=1&limit=100&categorization=BLOCK",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1652,6 +1949,10 @@
 								{
 									"key": "limit",
 									"value": "100"
+								},
+								{
+									"key": "categorization",
+									"value": "BLOCK"
 								}
 							],
 							"variable": [
@@ -1855,7 +2156,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/slab?status=IN_INVENTORY",
+							"raw": "{{baseurl}}/api/slab",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -1876,7 +2177,13 @@
 								},
 								{
 									"key": "status",
-									"value": "IN_INVENTORY"
+									"value": "IN_INVENTORY",
+									"disabled": true
+								},
+								{
+									"key": "isInCart",
+									"value": "1",
+									"disabled": true
 								}
 							]
 						}
@@ -1963,6 +2270,36 @@
 								"api",
 								"slab",
 								"bulkUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cart item count",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/slab/cart/count",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								"cart",
+								"count"
 							]
 						}
 					},
@@ -2296,13 +2633,32 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/salesOrder",
+							"raw": "{{baseurl}}/api/salesOrder?limit=100&page=1&tab=PACKAGING_LIST",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"salesOrder"
+							],
+							"query": [
+								{
+									"key": "tab",
+									"value": "LOADING_ORDERS",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "tab",
+									"value": "PACKAGING_LIST"
+								}
 							]
 						}
 					},
@@ -2336,7 +2692,7 @@
 							"variable": [
 								{
 									"key": "SOId",
-									"value": "5"
+									"value": "16"
 								}
 							]
 						}
@@ -2396,7 +2752,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 11\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 12\n    }\n]\n",
+							"raw": "[\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 18\n    },\n    {\n        \"unitPrice\": 45,\n        \"inventoryProductId\": 19\n    }\n]\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2417,7 +2773,7 @@
 							"variable": [
 								{
 									"key": "salesOrderId",
-									"value": "3"
+									"value": "9"
 								}
 							]
 						}
@@ -2559,13 +2915,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/loadingOrder",
+							"raw": "{{baseurl}}/api/loadingOrder?notInvoicedOnly=true",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"loadingOrder"
+							],
+							"query": [
+								{
+									"key": "notInvoicedOnly",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -2599,7 +2961,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "5"
 								}
 							]
 						}
@@ -3154,6 +3516,16 @@
 				{
 					"name": "get all",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -3319,7 +3691,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "14"
 								}
 							]
 						}
@@ -3387,6 +3759,42 @@
 							"path": [
 								"api",
 								"ledgerAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "default Ledger Accounts For Product",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cash Account\",\n  \"clientId\": 1,\n  \"key\": \"CASH001\",\n  \"type\": \"dr\", \n  \"openingBalance\": 10000.50,\n  \"openingDate\": \"2025-03-11T00:00:00.000Z\",\n  \"subHeaderId\": 80\n}\n"
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/ledgerAccount/defaultLedgerAccountsForProduct",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"ledgerAccount",
+								"defaultLedgerAccountsForProduct"
 							]
 						}
 					},
@@ -3660,7 +4068,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/journalEntry?referenceType=SIPL&referenceId=2",
+							"raw": "{{baseurl}}/api/journalEntry?entryFor=LOADING_ORDER&entryForId=1",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -3670,12 +4078,17 @@
 							],
 							"query": [
 								{
-									"key": "referenceType",
-									"value": "SIPL"
+									"key": "entryFor",
+									"value": "LOADING_ORDER"
 								},
 								{
-									"key": "referenceId",
-									"value": "2"
+									"key": "entryForId",
+									"value": "1"
+								},
+								{
+									"key": "ledgerId",
+									"value": "1",
+									"disabled": true
 								}
 							]
 						}
@@ -3872,7 +4285,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"vehicleNumber\": \"GJ05AB1234\",\n  \"driverName\": \"Ravi\",\n  \"driverPhone\": \"9876543210\"\n}\n",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4169,6 +4582,35 @@
 								"api",
 								"dashboard",
 								"totalVendorsAmounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get category wise quantity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/dashboard/categoryWiseQuantity",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"categoryWiseQuantity"
 							]
 						}
 					},
@@ -4933,6 +5375,325 @@
 								{
 									"key": "id",
 									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "sales order invoice",
+			"item": [
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/soInvoice",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"soInvoice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "assign truck",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"truckId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/soInvoice/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"soInvoice",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"truckId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/soInvoice/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"soInvoice",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "product without return",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/soInvoice/:id/productsWithoutReturns",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"soInvoice",
+								":id",
+								"productsWithoutReturns"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "advanced deposit to SO",
+			"item": [
+				{
+					"name": "create advanced deposit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 200,\n    \"salesOrderId\": 16,\n    \"paymentMethod\": \"cash\",\n    \"accountId\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/advancedDeposit",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"advancedDeposit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "return",
+			"item": [
+				{
+					"name": "Create return",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"invoiceId\": 4, \"productIds\": [47, 48]}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/return",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"return"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm return",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceId\": 5,\n    \"productIds\": [55]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/return/:returnId/confirm",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"return",
+								":returnId",
+								"confirm"
+							],
+							"variable": [
+								{
+									"key": "returnId",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel return",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceId\": 5,\n    \"productIds\": [55]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/return/:returnId/cancel",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"return",
+								":returnId",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "returnId",
+									"value": "4"
 								}
 							]
 						}
