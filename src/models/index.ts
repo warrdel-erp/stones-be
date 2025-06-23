@@ -556,6 +556,11 @@ ReturnProduct.belongsTo(SalesOrderProduct, {
 
 SalesOrderProduct.hasMany(ReturnProduct, {
   foreignKey: "salesOrderProductId",
+  as: "returnProduct",
+});
+
+SalesOrderProduct.hasMany(ReturnProduct, {
+  foreignKey: "salesOrderProductId",
   as: "returnProducts",
 });
 

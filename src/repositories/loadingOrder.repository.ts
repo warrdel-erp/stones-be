@@ -1,6 +1,7 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { RETURN_STATUS } from "../models/return.model";
 
 // Create new LO
 export const createLoadingOrder = async (data: any, transaction?: Transaction) => {
@@ -145,6 +146,22 @@ export const getLoadingOrderById = async (id: number) => {
               },
             ],
           },
+          {
+            association: 'returnProducts',
+            attributes: ['id'],
+            include: [
+              {
+                association: 'return',
+                attributes: ['id', 'status'],
+                required: true,
+                where: {
+                  status: {
+                    [Op.in]: [RETURN_STATUS.COMPLETE, RETURN_STATUS.INITIATED]
+                  }
+                }
+              }
+            ]
+          }
         ],
       },
       {

@@ -29,4 +29,19 @@ export const cancelReturn = catchAsync(async (req: AuthRequest, res: Response) =
     const { returnId } = req.params;
     const returnRecord = await returnService.cancelReturn(Number(returnId));
     SuccessResponse(res, 200, "Return canceled successfully", returnRecord);
+});
+
+export const getAllReturnsPaginated = catchAsync(async (req: AuthRequest, res: Response) => {
+    // const page = parseInt(req.query.page as string) || 1;
+    // const limit = parseInt(req.query.limit as string) || 10;
+
+    const { page = 1, limit = 10, status } = req.query
+
+    const clientId = req.user?.clientId
+    const result = await returnService.getAllReturnsPaginated(Number(page), Number(limit), Number(clientId), { status });
+    SuccessResponse(res, 200, "Returns fetched successfully", result.rows, {
+        limit: Number(limit),
+        page: Number(page),
+        total: result.count
+    });
 }); 

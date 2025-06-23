@@ -25,4 +25,7 @@ router.post("/:returnId/cancel",
     returnController.cancelReturn
 );
 
+// Get all returns with pagination
+router.get('/', authenticateUser, returnController.getAllReturnsPaginated);
+
 export default router; 

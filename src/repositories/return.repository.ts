@@ -1,7 +1,8 @@
-import { Transaction } from "sequelize";
+import { Transaction, where } from "sequelize";
 import { Return, ReturnProduct, SalesOrderProduct, Slab, SalesOrderInvoice, LoadingOrder, InventoryProduct } from "../models";
 import { Op } from "sequelize";
 import { RETURN_STATUS } from "../models/return.model";
+import * as models from '../models'
 
 export const createReturn = async (data: any, transaction: Transaction) => {
     return await Return.create(data, { transaction });
@@ -105,4 +106,57 @@ export const checkExistingActiveReturns = async (salesOrderProductId: number) =>
 
 export const getReturnById = async (returnId: number) => {
     return await Return.findByPk(returnId);
+};
+
+export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter?: any) => {
+    const offset = (page - 1) * limit;
+    return await Return.findAndCountAll({
+        where: filter,
+        include: [
+            {
+                association: 'soInvoice',
+                where: { clientId },
+                include: [
+                    {
+                        association: 'loadingOrder'
+                    },
+                    {
+                        association: "customer",
+                        attributes: ["id", "name", "primaryPhoneNumber", "secondaryPhoneNumber"],
+                        include: [
+                            {
+                                association: "addresses",
+                                attributes: ['address', 'city', 'state', 'addressType'],
+                            },
+                        ],
+                    },
+                ]
+            },
+            {
+                association: 'returnProducts',
+                include: [
+                    {
+                        association: 'salesOrderProduct',
+                        attributes: ['id'],
+                        include: [
+                            {
+                                association: "inventoryProduct",
+                                attributes: ['id'],
+                                include: [
+                                    {
+                                        association: 'slab',
+                                        attributes: ['id', 'combinedSlabNumber']
+                                    }
+                                ]
+                            }
+
+                        ]
+                    },
+                ]
+            }
+        ],
+        offset,
+        limit,
+        order: [['createdAt', 'DESC']],
+    });
 }; 

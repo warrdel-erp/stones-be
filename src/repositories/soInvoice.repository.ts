@@ -67,9 +67,9 @@ export const getAllInvoicesList = async (
                       }
                     ]
                   }
-
                 ]
-              },]
+              },
+            ]
           }
         ]
       },

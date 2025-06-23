@@ -6,6 +6,8 @@ import * as paymentRepository from "../repositories/payment.repository";
 import * as paymentBillsRepository from "../repositories/paymentBills.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
+import * as customerRepository from "../repositories/customer.repository";
+import * as vendorRepository from "../repositories/vendor.repository";
 
 // Create a new payment
 export const processPayment = async (paymentData: any, billsData: any[], locationId: number) => {
@@ -57,7 +59,37 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
 
 // Get all payments
 export const getPayments = async (filters: any, page: number, limit: number) => {
-  return await paymentRepository.getAllPayments(filters, page, limit);
+  const payments: any = await paymentRepository.getAllPayments(filters, page, limit);
+
+  const paymentsWithPayee = await Promise.all(
+    payments.payments.map(async (payment: any) => {
+      let payee = null;
+      if (payment.payeeType === "customer") {
+        payee = await customerRepository.getCustomerById(payment.payeeId);
+      } else if (payment.payeeType === "vendor") {
+        payee = await vendorRepository.findVendorById(payment.payeeId);
+      }
+      const plainPayment = payment.get({ plain: true });
+
+      const processedPaymentBills = plainPayment.paymentBills.map((bill: any) => {
+        let reference = null;
+        if (bill.referenceType === "sipl") {
+          reference = bill.sipl;
+        } else if (bill.referenceType === "bill") {
+          reference = bill.bill;
+        } else if (bill.referenceType === "soInvoice") {
+          reference = bill.soInvoice;
+        }
+        delete bill.sipl;
+        delete bill.bill;
+        delete bill.soInvoice;
+        return { ...bill, reference };
+      });
+      return { ...plainPayment, paymentBills: processedPaymentBills, payee };
+    })
+  );
+
+  return { ...payments, payments: paymentsWithPayee };
 };
 
 // Get payment by id

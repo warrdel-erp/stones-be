@@ -371,4 +371,8 @@ export const cancelReturn = async (returnId: number) => {
         await transaction.rollback();
         throw error;
     }
+};
+
+export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter: any) => {
+    return await returnRepository.getAllReturnsPaginated(page, limit, clientId, filter);
 }; 

@@ -28,14 +28,6 @@ export const getAllPayments = async (filters: any = {}, page: number, limit: num
           }
         ]
       },
-      {
-        model: models.Customer,
-        as: "customer",
-      },
-      {
-        model: models.Vendor,
-        as: "vendor",
-      }
     ],
     order: [["createdAt", "DESC"]],
     limit,

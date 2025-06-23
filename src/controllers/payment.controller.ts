@@ -27,10 +27,12 @@ export const createPayment = catchAsync(async (req: AuthRequest, res: Response) 
 });
 
 // get all payments
-export const getAllPayments = catchAsync(async (req: Request, res: Response) => {
+export const getAllPayments = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, ...filters } = req.query;
 
-  const result = await paymentService.getPayments(filters, Number(page), Number(limit));
+  const clientId = req.user?.clientId;
+
+  const result = await paymentService.getPayments({ ...filters, clientId }, Number(page), Number(limit));
 
   SuccessResponse(res, 200, "Payments fetched successfully", result.payments, {
     total: result.total,

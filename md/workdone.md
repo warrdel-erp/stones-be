@@ -317,3 +317,13 @@ create new user under a client is done and all of them can login.
 
 1. journal entries for confirm Return.
 2. map in product inventory.
+
+---
+
+1. new UI for initiate return.
+2. return tab.
+3. partially initiated conditions in initiate return.
+4. meeting with ram.
+5. complete and canceled tab in return.
+6. transactions listing.
+7. map show in locations page.
