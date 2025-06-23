@@ -1,8 +1,6 @@
-import { Transaction, where } from "sequelize";
-import { Return, ReturnProduct, SalesOrderProduct, Slab, SalesOrderInvoice, LoadingOrder, InventoryProduct } from "../models";
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
+import { LoadingOrder, Return, ReturnProduct, SalesOrderInvoice, SalesOrderProduct } from "../models";
 import { RETURN_STATUS } from "../models/return.model";
-import * as models from '../models'
 
 export const createReturn = async (data: any, transaction: Transaction) => {
     return await Return.create(data, { transaction });
