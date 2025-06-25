@@ -90,8 +90,8 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
     }
 };
 
-export const getReturnById = async (returnId: number) => {
-    const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId))?.get({ plain: true });
+export const getReturnById = async (returnId: number, transaction?: Transaction) => {
+    const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId, transaction))?.get({ plain: true });
 
     const salesTax = SALES_TAX.find(e => e.id == returnRecord.soInvoice.loadingOrder.salesOrder.customer.salesTax);
 
@@ -113,12 +113,13 @@ export const getReturnById = async (returnId: number) => {
     return returnRecord;
 }
 
-export const confirmReturn = async (returnId: number, clientId: number) => {
-    const transaction = await sequelize.transaction();
+export const confirmReturn = async (returnId: number, clientId: number, pTransaction?: Transaction) => {
+    const transaction = pTransaction || await sequelize.transaction();
+    const shouldCommit = !pTransaction;
 
     try {
         // Get return with its products
-        const returnRecord: any = await getReturnById(returnId);
+        const returnRecord: any = await getReturnById(returnId, transaction);
 
         const returnAmounts = returnRecord.amounts;
 
@@ -334,10 +335,14 @@ export const confirmReturn = async (returnId: number, clientId: number) => {
             transaction
         );
 
-        await transaction.commit();
+        if (shouldCommit) {
+            await transaction.commit();
+        }
         return returnRecord;
     } catch (error) {
-        await transaction.rollback();
+        if (shouldCommit) {
+            await transaction.rollback();
+        }
         throw error;
     }
 };
@@ -375,4 +380,80 @@ export const cancelReturn = async (returnId: number) => {
 
 export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter: any) => {
     return await returnRepository.getAllReturnsPaginated(page, limit, clientId, filter);
-}; 
+};
+
+export const updateReturnProductsAndConfirm = async (returnId: number, productIds: number[], clientId: number) => {
+    const transaction = await sequelize.transaction();
+    try {
+
+        // 1. Get the return record and check status
+        const returnRecord: any = await returnRepository.getReturnById(returnId);
+        if (!returnRecord) {
+            throw new AppError("Return not found", 404);
+        }
+        if (returnRecord.status !== RETURN_STATUS.INITIATED) {
+            throw new AppError("Only initiated returns can be updated and confirmed", 400);
+        }
+
+        // Get invoice with its products
+        // await validateProductsBelongsToGivenInvoice(returnRecord, transaction, productIds);
+
+        // 2. Delete all previous ReturnProduct for this return
+        await returnRepository.deleteReturnProductsByReturnId(returnId, transaction);
+
+        // 3. Create new ReturnProducts for the given productIds
+        const newReturnProducts = productIds.map((salesOrderProductId) => ({
+            returnId,
+            salesOrderProductId,
+        }));
+
+        await returnRepository.createReturnProducts(newReturnProducts, transaction);
+
+        // 4. Call confirmReturn with the transaction
+        const confirmedReturn = await confirmReturn(returnId, clientId, transaction);
+
+        await transaction.commit();
+
+        return confirmedReturn;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
+async function validateProductsBelongsToGivenInvoice(returnRecord: any, transaction: Transaction, productIds: number[]) {
+    const invoice = await returnRepository.getInvoiceWithProducts(returnRecord.invoiceId, transaction);
+    const invoiceData = invoice?.get({ plain: true }) as InvoiceWithProducts;
+
+    if (!invoiceData) {
+        throw new AppError("Invoice not found", 404);
+    }
+
+    // Check if given product ids not already exists in another return that is not canceled
+    for (const salesOrderProductId of productIds) {
+        const existingProduct: any = await returnRepository.checkExistingActiveReturns(salesOrderProductId);
+        if (existingProduct) {
+            throw new AppError(
+                `Sales order product with id ${salesOrderProductId} already returned or initiated for return in return Id ${existingProduct.return.id}`,
+                400
+            );
+        }
+    }
+
+    // Get all sales order product IDs from the invoice's loading order
+    const validSalesOrderProductIds = invoiceData.loadingOrder.salesOrderProducts.map(
+        (sop) => sop.id
+    );
+
+    // Check if all provided product IDs belong to this invoice
+    const invalidProductIds = productIds.filter(
+        (id) => !validSalesOrderProductIds.includes(id)
+    );
+
+    if (invalidProductIds.length > 0) {
+        throw new AppError(
+            `The following product IDs do not belong to this invoice: ${invalidProductIds.join(", ")}`,
+            400
+        );
+    }
+}

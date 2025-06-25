@@ -178,9 +178,101 @@ export const getLoadingOrderById = async (id: number) => {
       {
         association: "salesOrderInvoice",
       },
+    ],
+  });
+
+  return loadingOrder?.get({ plain: true });
+};
+
+// Get loading order by Id
+export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) => {
+  const loadingOrder = await models.LoadingOrder.findByPk(id, {
+    include: [
       {
-        association: "salesOrderInvoice"
-      }
+        association: "salesOrder",
+        include: [
+          {
+            association: "customer",
+            include: [
+              {
+                association: "addresses"
+              }
+            ],
+          },
+          {
+            association: "shippingAddress",
+          },
+          {
+            association: "salesOrderProducts",
+            attributes: ["id", "unitPrice"],
+            include: [
+              {
+                association: "inventoryProduct",
+                attributes: ["id"],
+                include: [
+                  {
+                    association: "slab",
+                    attributes: ["id", "receivingLength", "receivingWidth", "landedUnitCost"],
+                    include: [
+                      {
+                        association: "product",
+                        attributes: ["id"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: "soLocation",
+            attributes: ["id", "location"],
+          },
+        ],
+      },
+      {
+        association: "salesOrderProducts",
+        required: false,
+        include: [
+          {
+            association: "inventoryProduct",
+            include: [
+              {
+                association: "bin",
+                attributes: ["id", "name"],
+              },
+              {
+                association: "slab",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: 'returnProducts',
+            attributes: ['id', 'returnId'],
+            where: { returnId },
+            required: true
+          }
+        ],
+      },
+      {
+        association: "packagingList",
+        include: [
+          {
+            association: "salesOrderProducts"
+          }
+        ],
+      },
+      {
+        association: "shippingAddress",
+      },
+      {
+        association: "salesOrderInvoice",
+      },
     ],
   });
 

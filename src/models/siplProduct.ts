@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database";
-import SIPL from "./sipl";
+import SIPL from "./sipl.model";
 import Product from "./product.model";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 

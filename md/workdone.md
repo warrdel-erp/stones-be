@@ -327,3 +327,7 @@ create new user under a client is done and all of them can login.
 5. complete and canceled tab in return.
 6. transactions listing.
 7. map show in locations page.
+
+---
+
+1. details page for initiate, confirmed, canceled returns.

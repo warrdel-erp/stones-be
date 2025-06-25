@@ -28,9 +28,35 @@ export const getAllLoadingOrders = catchAsync(async (req: AuthRequest, res: Resp
 
 // Get loading order by Id
 export const getLoadingOrderById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id, } = req.params;
 
   const loadingOrder = await loadingOrderService.getLoadingOrderById(Number(id));
+
+  if (!loadingOrder) {
+    return SuccessResponse(res, 404, "Loading Order not found", null);
+  }
+
+  SuccessResponse(res, 200, "Loading Order retrieved successfully", loadingOrder);
+});
+
+// Get loading order by Id
+export const getLoadingOrderAsPerReturn = catchAsync(async (req: Request, res: Response) => {
+  const { returnId } = req.params;
+
+  const loadingOrder = await loadingOrderService.getLoadingOrderAsPerReturn(Number(returnId));
+
+  if (!loadingOrder) {
+    return SuccessResponse(res, 404, "Loading Order not found", null);
+  }
+
+  SuccessResponse(res, 200, "Loading Order retrieved successfully", loadingOrder);
+});
+
+// Get loading order by Id
+export const getLoadingOrderOnlyAsPerReturn = catchAsync(async (req: Request, res: Response) => {
+  const { returnId } = req.params;
+
+  const loadingOrder = await loadingOrderService.getLoadingOrderAsPerReturn(Number(returnId));
 
   if (!loadingOrder) {
     return SuccessResponse(res, 404, "Loading Order not found", null);

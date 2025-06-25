@@ -24,7 +24,7 @@ import PurchaseOrder from "./purchaseOrder";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
 import SalesOrder from "./salesOrder.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
-import SIPL from "./sipl";
+import SIPL from "./sipl.model";
 import SIPLProduct from "./siplProduct";
 import Slab from "./slab";
 import SlabRemeasurement from "./slabRemeasurement.model";

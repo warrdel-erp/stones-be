@@ -25,6 +25,12 @@ router.post("/:returnId/cancel",
     returnController.cancelReturn
 );
 
+// Update return products and confirm
+router.post("/:returnId/updateAndConfirm",
+    authenticateUser,
+    returnController.updateReturnProductsAndConfirm
+);
+
 // Get all returns with pagination
 router.get('/', authenticateUser, returnController.getAllReturnsPaginated);
 

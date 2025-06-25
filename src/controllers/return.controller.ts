@@ -44,4 +44,12 @@ export const getAllReturnsPaginated = catchAsync(async (req: AuthRequest, res: R
         page: Number(page),
         total: result.count
     });
+});
+
+export const updateReturnProductsAndConfirm = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { productIds } = req.body;
+    const { returnId } = req.params;
+    const clientId = req.user?.clientId;
+    const returnRecord = await returnService.updateReturnProductsAndConfirm(Number(returnId), productIds, Number(clientId));
+    SuccessResponse(res, 200, "Return products updated and confirmed successfully", returnRecord);
 }); 

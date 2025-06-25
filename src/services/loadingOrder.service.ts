@@ -32,6 +32,8 @@ import {
 import { addPercentage, getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import * as  salesOrderInvoiceService from "./salesOrderInvoice.service";
+import { Return } from "../models";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -110,6 +112,103 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 // Get loading order by Id
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
+
+  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+  if (!salesTax) {
+    throw new AppError('Error in getting tax value', 400);
+  }
+
+  // Calculate total amount added in SO.
+  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
+
+  // Calculate total pl amount added in SO.
+  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
+
+  // so product as per product and unitPrice.
+  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
+
+  // get payment terms constant data.
+  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
+
+  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+  return loadingOrder;
+};
+
+// Get loading order by Id
+export const getLoadingOrderAsPerReturn = async (returnId: number) => {
+  const returnData = (await Return.findByPk(returnId, {
+    include: [
+      {
+        association: 'soInvoice'
+      }
+    ]
+  }))?.get({ plain: true })
+
+  if (!returnData) {
+    throw new AppError('Return does not exists.', 400);
+  }
+
+  // this loading order does have only return products that belongs to given returnId
+  // If you are getting a TypeScript error with returnData.get('loadingOrderId'), you can use type assertion to inform TypeScript that returnData is a Sequelize Model and .get is available.
+  // This avoids the "Property 'loadingOrderId' does not exist on type 'Model<any, any>'" error.
+  const loadingOrder = await loadingOrderRepository.getLoadingOrderAsPerReturn(Number(returnData.soInvoice.loadingOrderId), returnId);
+
+  if (!loadingOrder) {
+    throw new AppError('Loading Order does not exists.', 400);
+  }
+
+  // these are product for an invoice that are available for invoicing
+  const soProductsAvailableToReturnAsPerInvoice = await salesOrderInvoiceService.getSalesOrderProductsWithoutReturns(loadingOrder.salesOrderInvoice.id)
+
+  loadingOrder.salesOrderProducts.push(...(soProductsAvailableToReturnAsPerInvoice.map(e => e.get({ plain: true }))))
+
+  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+  if (!salesTax) {
+    throw new AppError('Error in getting tax value', 400);
+  }
+
+  // Calculate total amount added in SO.
+  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
+
+  // Calculate total pl amount added in SO.
+  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
+
+  // so product as per product and unitPrice.
+  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
+
+  // get payment terms constant data.
+  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
+
+  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
+
+  return loadingOrder;
+};
+
+// Get loading order by Id
+export const getLoadingOrderOnlyAsPerReturn = async (returnId: number) => {
+  const returnData = (await Return.findByPk(returnId, {
+    include: [
+      {
+        association: 'soInvoice'
+      }
+    ]
+  }))?.get({ plain: true })
+
+  if (!returnData) {
+    throw new AppError('Return does not exists.', 400);
+  }
+
+  // this loading order does have only return products that belongs to given returnId
+  // If you are getting a TypeScript error with returnData.get('loadingOrderId'), you can use type assertion to inform TypeScript that returnData is a Sequelize Model and .get is available.
+  // This avoids the "Property 'loadingOrderId' does not exist on type 'Model<any, any>'" error.
+  const loadingOrder = await loadingOrderRepository.getLoadingOrderAsPerReturn(Number(returnData.soInvoice.loadingOrderId), returnId);
+
+  if (!loadingOrder) {
+    throw new AppError('Loading Order does not exists.', 400);
+  }
 
   const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
 
@@ -254,7 +353,7 @@ export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: an
 
     return {
       ...product,
-      taxApplied: !!salesOrderProduct[0].taxApplied,
+      taxApplied: !!salesOrderProduct[0]?.taxApplied,
       salesOrderProduct,
       totalQuantity: getTotalLOQuantity(salesOrderProduct),
       totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),

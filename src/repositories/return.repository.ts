@@ -36,9 +36,10 @@ export const updateReturn = async (id: number, data: any, transaction: Transacti
     });
 };
 
-export const getReturnWithProducts = async (returnId: number) => {
+export const getReturnWithProducts = async (returnId: number, transaction?: Transaction) => {
     return await Return.findOne({
         where: { id: returnId },
+        transaction,
         include: [
             {
                 association: 'returnProducts',
@@ -116,7 +117,14 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
                 where: { clientId },
                 include: [
                     {
-                        association: 'loadingOrder'
+                        association: 'loadingOrder',
+                        attributes: ['id', 'code'],
+                        include: [
+                            {
+                                association: 'packagingList',
+                                attributes: ['id', 'code'],
+                            }
+                        ]
                     },
                     {
                         association: "customer",
@@ -157,4 +165,8 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
         limit,
         order: [['createdAt', 'DESC']],
     });
+};
+
+export const deleteReturnProductsByReturnId = async (returnId: number, transaction: Transaction) => {
+    return await ReturnProduct.destroy({ where: { returnId }, transaction });
 }; 

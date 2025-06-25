@@ -3,7 +3,7 @@ import Vendor from "./vendor";
 import { sequelize } from "../config/database";
 import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
-import SIPL from "./sipl";
+import SIPL from "./sipl.model";
 
 const Bill = sequelize.define(
   "bills",

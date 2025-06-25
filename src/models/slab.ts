@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Product from "./product.model";
-import SIPL from "./sipl";
+import SIPL from "./sipl.model";
 import InventoryProduct from "./inventoryProduct";
 import PurchaseOrder from "./purchaseOrder";
 import { SLAB_STATUS } from "../constants";

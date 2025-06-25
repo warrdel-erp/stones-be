@@ -37,4 +37,10 @@ router.put("/:id/createInvoice", authenticateUser, loadingOrderController.invoic
 // Get loading order by Id
 router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById);
 
+// This API gives data of loading order with soProduct that are only in given return or 
+router.get("/accordingToReturnConfirmation/:returnId", authenticateUser, loadingOrderController.getLoadingOrderAsPerReturn);
+
+// This API gives data of loading order with soProduct that are only in given return or 
+router.get("/withSoProductAsPerReturn/:returnId", authenticateUser, loadingOrderController.getLoadingOrderAsPerReturn);
+
 export default router;
