@@ -30,8 +30,6 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
             }]
         });
 
-        console.log(salesOrder.customer.ledgerAccount, "salesOrder")
-
         if (!salesOrder) {
             throw new Error("Sales order not found");
         }

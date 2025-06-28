@@ -27,7 +27,7 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
 
   try {
     // Step 1: Create Payment
-    const payment: any = await paymentRepository.createPayment(paymentData, transaction);
+    const payment: any = await paymentRepository.createPayment({ ...paymentData, accountId: paymentData.account }, transaction);
 
     // Step 2: Prepare Payment Bills
     const paymentBills = await Promise.all(

@@ -18,7 +18,6 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
   await checkUserLocationAccess(Number(locationId), userId!);
 
   let data: any = {};
-  console.log(categorization, "categorization")
 
   if (categorization === "BLOCK") {
     // Get inventory data

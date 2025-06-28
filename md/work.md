@@ -438,3 +438,21 @@ PL cancel page => not working correctly.  ✅
 15. Packing List - Delivery charge option present - discount
 
 ---
+
+1. Icons in inventory for status ✅
+2. Product name bold in inventory ✅
+3. So create tax. ✅
+4. Slab dimension in invoice.
+5. Print invoice button on SO page. ✅
+6. Journal entry for so invoice.
+7. Customer make payment. ✅
+8. Cancel button in RO. ✅
+9. Transaction No. ✅
+10. missing data in create LO ✅
+
+---
+
+•⁠ ⁠balance sheet and profit and loss sheet [BE ✅]
+•⁠ ⁠⁠transaction list with Receipt prints
+•⁠ ⁠⁠geolocations in customer and locations
+•⁠ ⁠⁠delivery assigning via geolocation

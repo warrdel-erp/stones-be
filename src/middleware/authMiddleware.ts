@@ -75,9 +75,6 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
     throw new AppError("Invalid token", 401);
   }
 
-
-  console.log(decoded);
-
   // Try to authenticate as a user
   const userAuthenticated = await authenticateUserFromToken(decoded, req);
   if (userAuthenticated) {

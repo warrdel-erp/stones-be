@@ -537,7 +537,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
-
     // Mark corresponding slabs as SOLD
     for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
       // Update Slab status to SOLD in Slab table.

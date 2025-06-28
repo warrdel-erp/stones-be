@@ -20,17 +20,27 @@ export const createInvoice = async (data: SoInvoice, transaction: Transaction) =
  */
 export const getAllInvoicesList = async (
   clientId: number,
-  filter: WhereOptions,
+  filter: any,
   page: number,
   limit: number,
+  truckOnly?: boolean,
   transaction?: Transaction
 ) => {
   const offset = (page - 1) * limit;
+
+  console.log(truckOnly)
+
+  if (truckOnly) {
+    filter.truckId = {
+      [Op.ne]: null
+    }
+  }
 
   return await models.SalesOrderInvoice.findAndCountAll({
     where: {
       ...filter,
       clientId,
+
     },
     include: [
       {
@@ -96,6 +106,7 @@ export const getAllInvoicesList = async (
     limit,
     offset,
     order: [["createdAt", "DESC"]],
+    distinct: true
   });
 };
 

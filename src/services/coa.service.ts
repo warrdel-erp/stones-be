@@ -1,5 +1,6 @@
 import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES } from "../constants/coa";
 import { getLedgerAccountsWithoutPagination } from "../repositories/ledgerAccount.repository";
+import JournalEntry from "../models/journalEntry.model";
 
 export const getCoaData = () => {
   return {
@@ -34,32 +35,56 @@ export const buildNestedCOA = () => {
 export const getBalanceSheetData = async (clientId: number) => {
   const nestedData = buildNestedCOA().filter(e => [1, 2].includes(e.id));
 
-  // Create a new structure with ledger accounts
+  // Helper to get last journal entry balance for a ledger
+  const getLedgerLastBalance = async (ledgerId: number) => {
+    const lastEntry = await JournalEntry.findOne({
+      where: { ledgerId },
+      order: [["createdAt", "DESC"]],
+    });
+    return lastEntry ? Number(lastEntry.get("balance")) : 0;
+  };
+
+  // Create a new structure with ledger accounts and balances
   const data = await Promise.all(nestedData.map(async (type) => {
+    let typeBalance = 0;
     const headersWithLedgerAccounts = await Promise.all(type.headers.map(async (header) => {
+      let headerBalance = 0;
+
       const subHeadersWithLedgerAccounts = await Promise.all(header.subHeaders.map(async (subHeader) => {
         // Fetch ledger accounts for this subheader and client
         const ledgerAccounts = await getLedgerAccountsWithoutPagination({
           subHeaderId: subHeader.id,
           clientId: clientId
         });
+        // For each ledger, get last journal entry balance
+        const ledgerAccountsWithBalance = await Promise.all(ledgerAccounts.map(async (ledger: any) => {
+          const ledgerPlain = ledger.get ? ledger.get({ plain: true }) : ledger;
+          const balance = await getLedgerLastBalance(ledger.id);
+          return { ...ledgerPlain, balance };
+        }));
 
-        // Return subheader with ledger accounts
+        // Sum all ledger balances for this subHeader
+        const subHeaderBalance = ledgerAccountsWithBalance.reduce((sum, l) => sum + (Number(l.balance) || 0), 0);
+        headerBalance += subHeaderBalance;
         return {
           ...subHeader,
-          ledgerAccounts: ledgerAccounts
+          balance: subHeaderBalance,
+          ledgerAccounts: ledgerAccountsWithBalance,
         };
       }));
 
+      typeBalance += headerBalance;
+
       return {
         ...header,
-        subHeaders: subHeadersWithLedgerAccounts
+        balance: headerBalance,
+        subHeaders: subHeadersWithLedgerAccounts,
       };
     }));
-
     return {
       ...type,
-      headers: headersWithLedgerAccounts
+      balance: typeBalance,
+      headers: headersWithLedgerAccounts,
     };
   }));
 

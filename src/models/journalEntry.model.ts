@@ -104,7 +104,11 @@ const JournalEntry = sequelize.define(
     entryForId: {
       type: DataTypes.INTEGER,
       allowNull: true
-
+    },
+    balance: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.0,
     }
   },
   {
@@ -112,5 +116,34 @@ const JournalEntry = sequelize.define(
     timestamps: true,
   }
 );
+
+// Hook to calculate balance before creating a new JournalEntry
+JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
+  // Get the last entry for this ledgerId, ordered by createdAt DESC
+  const lastEntry = await JournalEntry.findOne({
+    where: { ledgerId: entry.ledgerId },
+    transaction,
+    order: [["createdAt", "DESC"]],
+  });
+
+  let lastBalance: number;
+  if (lastEntry) {
+    const lastEntryPlain = lastEntry.get({ plain: true });
+    lastBalance = lastEntryPlain.balance;
+  } else {
+    // If no previous entry, get openingBalance from LedgerAccount
+    const ledger = await LedgerAccount.findByPk(entry.ledgerId, { transaction });
+    const ledgerPlain = ledger ? ledger.get({ plain: true }) : null;
+    lastBalance = ledgerPlain ? parseFloat(ledgerPlain.openingBalance) : 0;
+  }
+
+  // Add or subtract based on type
+  const amount = parseFloat(entry.amount);
+  if (entry.type === JOURNAL_ENTRY_TYPE.DR) {
+    entry.balance = lastBalance + amount;
+  } else if (entry.type === JOURNAL_ENTRY_TYPE.CR) {
+    entry.balance = lastBalance - amount;
+  }
+});
 
 export default JournalEntry;

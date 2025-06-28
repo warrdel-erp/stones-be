@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import { Client } from ".";
+import { Client, SalesOrderInvoice } from ".";
 import { VEHICLE_TYPE } from "../constants/tableTypes";
 
 const Truck = sequelize.define(

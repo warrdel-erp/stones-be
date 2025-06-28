@@ -45,7 +45,6 @@ export const getSalesOrderById = catchAsync(async (req: Request, res: Response) 
 // Get new SO number
 export const getNewSoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
-  console.log("clientId", clientId);
 
   const data = await salesOrderService.getSONumber(clientId!);
   SuccessResponse(res, 200, "New SO number fetched successfully.", data);

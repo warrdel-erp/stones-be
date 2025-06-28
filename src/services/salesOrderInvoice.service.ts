@@ -106,6 +106,32 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
   return data;
 };
 
+export const getAllSoInvoiceListWithTruckOnly = async (clientId: number, filter: any, page: number, limit: number) => {
+  const data: any = await salesOrderInvoiceRepository.getAllInvoicesList(clientId, filter, page, limit, true);
+
+  data.rows = data.rows.map((invoice: any) => {
+    invoice = invoice.get({ plain: true });
+
+    if (invoice.loadingOrder.packagingList) {
+      invoice.totalQuantity = _.sumBy(
+        invoice.loadingOrder.salesOrderProducts,
+        (item: any) => item.plRemeasureLength * item.plRemeasureWidth
+      );
+    } else {
+      invoice.totalQuantity = _.sumBy(
+        invoice.loadingOrder.salesOrderProducts,
+        (item: any) => item.loRemeasureLength * item.loRemeasureWidth
+      );
+    }
+
+    invoice.totalSlabs = invoice.loadingOrder.salesOrderProducts.length;
+
+    return { ...invoice };
+  });
+
+  return data;
+};
+
 /**
  * Get sales order products without returns for a specific invoice
  */

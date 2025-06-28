@@ -333,3 +333,16 @@ create new user under a client is done and all of them can login.
 1. details page for initiate, confirmed, canceled returns.
 2. RO number.
 3. Balance sheet API
+
+---
+
+1. calculating balance for each journal entry.
+2. total for each level of balance sheet.
+3. Print invoice button on SO page.
+
+---
+
+1. Transaction No.
+2. missing data in create LO
+3. deliveries tabs.
+4. show delivery UI and direction on Map.

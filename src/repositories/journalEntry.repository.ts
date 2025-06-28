@@ -11,7 +11,7 @@ export const create = async (data: JournalEntry, transaction?: Transaction) => {
 
 // Create ledger account.
 export const createBulk = async (data: JournalEntry[], transaction?: Transaction) => {
-  return await models.JournalEntry.bulkCreate(data, { transaction });
+  return await models.JournalEntry.bulkCreate(data, { transaction, individualHooks: true });
 };
 
 // Fetch find journal entries with filters.

@@ -12,7 +12,6 @@ export const findOne = async (filter: WhereOptions) => {
 };
 
 export const findByProductIdAndSiplId = async (siplProductId: number, productId: number, siplId: number) => {
-  console.log(productId, siplId);
   const result = await models.SIPLProduct.findOne({
     where: {
       id: siplProductId,

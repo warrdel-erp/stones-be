@@ -78,15 +78,6 @@ const LoadingOrder = sequelize.define(
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
-    truckId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: Truck,
-        key: "id",
-      },
-      onDelete: "NO ACTION",
-      onUpdate: "CASCADE",
-    },
   },
   {
     tableName: "loading_orders",

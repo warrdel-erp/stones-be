@@ -20,6 +20,21 @@ export const getAllSoInvoiceList = catchAsync(async (req: AuthRequest, res: Resp
     });
 });
 
+// Get all po with pagination.
+export const getAllSoInvoiceListWithTruckOnly = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { page = 1, limit = 10, ...filter }: any = req.query;
+
+    const clientId = req.user?.clientId;
+
+    const result = await salesOrderInvoiceService.getAllSoInvoiceListWithTruckOnly(Number(clientId), filter, page, limit);
+
+    SuccessResponse(res, 200, "All So Invoice List fetched successfully", result.rows, {
+        limit,
+        page,
+        total: result.count
+    });
+});
+
 // Assign Truck to SO invoice.
 export const assignTruck = catchAsync(async (req: AuthRequest, res: Response) => {
 
