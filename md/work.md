@@ -452,7 +452,17 @@ PL cancel page => not working correctly.  ✅
 
 ---
 
-•⁠ ⁠balance sheet and profit and loss sheet [BE ✅]
+•⁠ ⁠balance sheet and profit and loss sheet ✅
 •⁠ ⁠⁠transaction list with Receipt prints
-•⁠ ⁠⁠geolocations in customer and locations
+•⁠ ⁠⁠geolocations in customer ✅
 •⁠ ⁠⁠delivery assigning via geolocation
+•⁠ geoLocation in location ✅
+
+---
+
+1. customer address change according to new payload. ✅
+2. system location according to map. ✅
+3. delivery locations on map. ✅
+4. transaction detail page API.
+
+---

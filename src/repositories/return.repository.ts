@@ -132,7 +132,7 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
                         include: [
                             {
                                 association: "addresses",
-                                attributes: ['address', 'city', 'state', 'addressType'],
+                                attributes: ['address', 'addressType'],
                             },
                         ],
                     },

@@ -88,8 +88,8 @@ export const getAllInvoicesList = async (
         as: "loadingOrder",
         include: [
           {
-            model: models.SalesOrder,
-            as: "salesOrder",
+            association: "salesOrder",
+            include: ['soLocation', 'shippingAddress']
           },
           {
             model: models.PackagingList,

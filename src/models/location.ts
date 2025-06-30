@@ -34,25 +34,13 @@ const Location = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    suite: {
-      type: DataTypes.STRING(100),
+    lat: {
+      type: DataTypes.DECIMAL(10, 8),
       allowNull: true,
     },
-    city: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    state: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    zip: {
-      type: DataTypes.STRING(20),
-      allowNull: false,
-    },
-    country: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
+    long: {
+      type: DataTypes.DECIMAL(11, 8),
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM("active", "inactive"),

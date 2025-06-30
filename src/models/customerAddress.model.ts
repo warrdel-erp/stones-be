@@ -15,29 +15,9 @@ const CustomerAddress = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    suit: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     unit: {
       type: DataTypes.STRING,
       allowNull: true,
-    },
-    city: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    state: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    zip: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    countryId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
     },
     contactName: {
       type: DataTypes.STRING(255),
@@ -47,6 +27,14 @@ const CustomerAddress = sequelize.define(
     },
     contactNumber: {
       type: DataTypes.STRING(15),
+    },
+    lat: {
+      type: DataTypes.DECIMAL(10, 8),
+      allowNull: true,
+    },
+    long: {
+      type: DataTypes.DECIMAL(11, 8),
+      allowNull: true,
     },
     addressType: {
       type: DataTypes.ENUM(...Object.values(CUSTOMER_ADDRESS_TYPES)),

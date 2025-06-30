@@ -346,3 +346,18 @@ create new user under a client is done and all of them can login.
 2. missing data in create LO
 3. deliveries tabs.
 4. show delivery UI and direction on Map.
+
+---
+
+1. customer location from MAP.
+2. total balance in balance sheet.
+3. geoLocation in location.
+4. change in customer address structure throughout the project.
+5. incorrect slab list data in complete return.
+6. delivery path according to actual data.
+
+---
+
+1. payment API.
+2. location data show according to new structure.
+3. delivery truck assign bug.

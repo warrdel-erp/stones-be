@@ -56,7 +56,7 @@ export const getLoadingOrderAsPerReturn = catchAsync(async (req: Request, res: R
 export const getLoadingOrderOnlyAsPerReturn = catchAsync(async (req: Request, res: Response) => {
   const { returnId } = req.params;
 
-  const loadingOrder = await loadingOrderService.getLoadingOrderAsPerReturn(Number(returnId));
+  const loadingOrder = await loadingOrderService.getLoadingOrderOnlyAsPerReturn(Number(returnId));
 
   if (!loadingOrder) {
     return SuccessResponse(res, 404, "Loading Order not found", null);

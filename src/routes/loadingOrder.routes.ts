@@ -41,6 +41,6 @@ router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById)
 router.get("/accordingToReturnConfirmation/:returnId", authenticateUser, loadingOrderController.getLoadingOrderAsPerReturn);
 
 // This API gives data of loading order with soProduct that are only in given return or 
-router.get("/withSoProductAsPerReturn/:returnId", authenticateUser, loadingOrderController.getLoadingOrderAsPerReturn);
+router.get("/withSoProductAsPerReturn/:returnId", authenticateUser, loadingOrderController.getLoadingOrderOnlyAsPerReturn);
 
 export default router;
