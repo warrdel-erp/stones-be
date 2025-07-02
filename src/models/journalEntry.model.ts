@@ -10,6 +10,7 @@ import {
 import LedgerAccount from "./ledgerAccount.model";
 import User from "./user.model";
 import Location from "./location";
+import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 
 export type JournalEntry = {
   amount: number;
@@ -123,22 +124,30 @@ JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
   const lastEntry = await JournalEntry.findOne({
     where: { ledgerId: entry.ledgerId },
     transaction,
-    order: [["createdAt", "DESC"]],
+    order: [["id", "DESC"]],
   });
 
+  const lastEntryPlain = lastEntry?.get({ plain: true });
+
+  const ledgerAccount = (await LedgerAccount.findByPk(entry.ledgerId, { transaction }))?.get({ plain: true });
+
   let lastBalance: number;
-  if (lastEntry) {
-    const lastEntryPlain = lastEntry.get({ plain: true });
+  if (lastEntryPlain) {
     lastBalance = lastEntryPlain.balance;
   } else {
     // If no previous entry, get openingBalance from LedgerAccount
-    const ledger = await LedgerAccount.findByPk(entry.ledgerId, { transaction });
-    const ledgerPlain = ledger ? ledger.get({ plain: true }) : null;
-    lastBalance = ledgerPlain ? parseFloat(ledgerPlain.openingBalance) : 0;
+    lastBalance = ledgerAccount ? parseFloat(ledgerAccount.openingBalance) : 0;
   }
 
+  let amount = parseFloat(entry.amount);
+
+  if (ledgerAccount.type === LEDGER_ACCOUNT_TYPES.CREDIT) {
+    amount = -amount;
+  }
+
+  console.log("aaaaaa", entry.type, amount, lastBalance, lastEntryPlain);
+
   // Add or subtract based on type
-  const amount = parseFloat(entry.amount);
   if (entry.type === JOURNAL_ENTRY_TYPE.DR) {
     entry.balance = lastBalance + amount;
   } else if (entry.type === JOURNAL_ENTRY_TYPE.CR) {
@@ -146,4 +155,4 @@ JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
   }
 });
 
-export default JournalEntry;
+export default JournalEntry; 

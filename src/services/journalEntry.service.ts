@@ -61,32 +61,6 @@ export async function createJournalEntryForFreightBillItem(
   locationId: number,
   partyLedgerAccountId: number
 ) {
-
-  /**
-   * Create journal entry for freight bill item.
-   */
-  // const siplJournalEntry = await journalEntryRepository.create(
-  //   {
-  //     amount: freightBillItemData.amount,
-  //     ledgerId: freightBillItemData.ledgerAccountId,
-  //     type: JOURNAL_ENTRY_TYPE.CR,
-  //     processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
-
-  //     // Sub reference is the bill item.
-  //     subReferenceId: freightBillItemData.id,
-  //     subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM,
-
-  //     // reference is the BILL.
-  //     referenceId: freightBillData.id,
-  //     referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.BILL,
-
-  //     entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-  //     entryForId: freightBillData.referenceId,
-  //     locationId,
-  //   },
-  //   transaction
-  // );
-
   // Unit freight item cost (amount / total received area of all products in sipl).
   const unitFreightItemCost = freightBillItemData.amount / calculations.totalQuantity;
 
@@ -113,40 +87,19 @@ export async function createJournalEntryForFreightBillItem(
     };
   });
 
-  // // create data for freight item entry as per product.
-  // const freightItemEntryDataAsPerProduct = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {
-  //   return {
-  //     amount: unitFreightItemCost * productCalc.totalReceivedArea,
-  //     ledgerId: freightBillItemData.ledgerAccountId,
-  //     type: JOURNAL_ENTRY_TYPE.DR,
-  //     processType: JOURNAL_ENTRY_PROCESS_TYPE.ADD_FREIGHT_BILL,
-
-  //     // Sub reference is the product.
-  //     subReferenceId: productCalc.product.id,
-  //     subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT,
-
-  //     // reference is the SIPL.
-  //     referenceId: freightBillData.referenceId,
-  //     referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-  //   };
-  // });
-
-  // create journal entry for products.
-  const productJournalEntry = await journalEntryRepository.createBulk(
-    freightItemEntryDataAsPerSiplProduct,
-    transaction
-  );
+  // Sequentially create journal entries for products
+  for (const entry of freightItemEntryDataAsPerSiplProduct) {
+    await journalEntryRepository.create(entry, transaction);
+  }
 
   return {
-    // siplJournalEntry,
-    productJournalEntry,
+    productJournalEntry: true,
   };
 }
 
 // Create journal entry for SIPL.
 export async function createJournalEntryForSIPL(siplId: number, siplData: any, transaction: Transaction, locationId: number) {
   const calculations = await siplService.getSiplCalculations(siplId, transaction);
-
   const po = await purchaseOrderRepository.getPOWithVendorLedgerAccount(siplData.purchaseOrderId, transaction);
 
   // Get in_inventory ledger account id for products entry.
@@ -176,8 +129,6 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
     transaction
   );
 
-
-
   // Create Journal entry data.
   const arr: JournalEntry[] = calculations.dataAccordingToProduct.map((productCalc: any): JournalEntry => {
     return {
@@ -201,10 +152,12 @@ export async function createJournalEntryForSIPL(siplId: number, siplData: any, t
     };
   });
 
-  // create journal entry for products.
-  const productJournalEntry = await journalEntryRepository.createBulk(arr, transaction);
+  // Sequentially create journal entries for products
+  for (const entry of arr) {
+    await journalEntryRepository.create(entry, transaction);
+  }
 
-  return { siplJournalEntry, productJournalEntry };
+  return { siplJournalEntry, productJournalEntry: true };
 }
 
 // create journal entry for receive inventory.
@@ -283,40 +236,30 @@ export const createJournalEntryForReceiveInventory = async (
     }
   }
 
-  await Promise.all(
-    calculations.dataAccordingToProduct.map(async (productCalc: any) => {
-      const slabs = await slabService.fetchAllSlabs({ siplId, productId: productCalc.product.id }, transaction);
+  for (const productCalc of calculations.dataAccordingToProduct) {
+    const slabs = await slabService.fetchAllSlabs({ siplId, productId: productCalc.product.id }, transaction);
 
-      await Promise.all(
-        slabs.map(async (slab: any) => {
-          slab = slab.get({ plain: true });
+    for (let slab of slabs) {
+      slab = slab.get ? (slab.get({ plain: true }) as any) : (slab as any);
+      const slabAny: any = slab;
+      const amount = slabAny.receivingLength * slabAny.receivingWidth * productCalc.landedUnitCost;
 
-          await journalEntryRepository.create(
-            {
-              amount: slab.receivingLength * slab.receivingWidth * productCalc.landedUnitCost,
-              ledgerId: ledgerAccountForSlabs.id,
-              type: JOURNAL_ENTRY_TYPE.DR,
-              processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
-
-              // Sub reference is the slab.
-              subReferenceId: slab.id,
-              subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-
-              // reference is the SIPL.
-              referenceId: siplId,
-              referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-
-              entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-              entryForId: siplId,
-              locationId,
-              partyLedgerAccountId: ledgerAccountForProducts.id
-            },
-            transaction
-          );
-        })
-      );
-    })
-  );
+      await journalEntryRepository.create({
+        amount,
+        ledgerId: ledgerAccountForSlabs.id,
+        type: JOURNAL_ENTRY_TYPE.DR,
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+        subReferenceId: slabAny.id,
+        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+        referenceId: siplId,
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+        entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+        entryForId: siplId,
+        locationId,
+        partyLedgerAccountId: ledgerAccountForProducts.id,
+      }, transaction);
+    }
+  }
 };
 
 export async function createJournalEntriesForPaymentBills(bill: any, paymentData: any, transaction: Transaction, locationId: number) {

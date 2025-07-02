@@ -361,3 +361,7 @@ create new user under a client is done and all of them can login.
 1. payment API.
 2. location data show according to new structure.
 3. delivery truck assign bug.
+
+---
+
+1. incorrect total balance for journal entries.

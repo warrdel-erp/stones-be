@@ -466,3 +466,5 @@ PL cancel page => not working correctly.  ✅
 4. transaction detail page API.
 
 ---
+
+1. Journal entry total calculation according to cr and dr.

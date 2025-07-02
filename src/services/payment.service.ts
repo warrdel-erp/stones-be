@@ -94,7 +94,32 @@ export const getPayments = async (filters: any, page: number, limit: number) => 
 
 // Get payment by id
 export const getPayment = async (id: number) => {
-  return await paymentRepository.getPaymentById(id);
+  const payment: any = await paymentRepository.getPaymentById(id);
+
+  let payee = null;
+  if (payment.payeeType === "customer") {
+    payee = await customerRepository.getCustomerById(payment.payeeId);
+  } else if (payment.payeeType === "vendor") {
+    payee = await vendorRepository.findVendorById(payment.payeeId);
+  }
+  const plainPayment = payment.get({ plain: true });
+
+  const processedPaymentBills = plainPayment.paymentBills.map((bill: any) => {
+    let reference = null;
+    if (bill.referenceType === "sipl") {
+      reference = bill.sipl;
+    } else if (bill.referenceType === "bill") {
+      reference = bill.bill;
+    } else if (bill.referenceType === "soInvoice") {
+      reference = bill.soInvoice;
+    }
+    delete bill.sipl;
+    delete bill.bill;
+    delete bill.soInvoice;
+    return { ...bill, reference };
+  });
+
+  return { ...plainPayment, paymentBills: processedPaymentBills, payee };
 };
 
 // de
