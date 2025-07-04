@@ -145,8 +145,6 @@ JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
     amount = -amount;
   }
 
-  console.log("aaaaaa", entry.type, amount, lastBalance, lastEntryPlain);
-
   // Add or subtract based on type
   if (entry.type === JOURNAL_ENTRY_TYPE.DR) {
     entry.balance = lastBalance + amount;

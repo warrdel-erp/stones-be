@@ -12,8 +12,14 @@ export const createTruckController = catchAsync(async (req: AuthRequest, res: Re
 });
 
 export const getAllTrucksController = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, ...filter } = req.query;
-  const { rows, count } = await truckService.getAllTrucks(Number(page), Number(limit), filter);
+  // Support notAssignedOnly query param to filter trucks with no pending deliveries
+  const { page = 1, limit = 10, notAssignedOnly, ...filter } = req.query;
+  const filters = { ...filter };
+  if (notAssignedOnly !== undefined) {
+    // Always store as string to avoid type errors
+    filters.notAssignedOnly = String(notAssignedOnly);
+  }
+  const { rows, count } = await truckService.getAllTrucks(Number(page), Number(limit), filters);
 
   SuccessResponse(res, 200, "Trucks fetched successfully", rows, {
     limit: Number(limit),

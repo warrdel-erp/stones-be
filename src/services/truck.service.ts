@@ -5,6 +5,7 @@ export const createTruck = async (data: any) => {
 };
 
 export const getAllTrucks = async (page: number, limit: number, filters?: { [key: string]: any }) => {
+  // Pass notAssignedOnly through to repository for special filtering
   return await truckRepository.findAll(page, limit, filters);
 };
 
