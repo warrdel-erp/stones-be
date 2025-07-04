@@ -42,6 +42,8 @@ import ProductFinish from "./productFinish.model";
 import AdvancedDeposit from "./advancedDeposit.model";
 import Return from "./return.model";
 import ReturnProduct from "./returnProduct.model";
+import Delivery from "./Delivery.model";
+import InvoiceDelivery from "./InvoiceDelivery.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -576,6 +578,18 @@ Return.belongsTo(SalesOrderInvoice, {
   as: "soInvoice",
 });
 
+// one truck can have multiple deliveries, one delivery can one truck.
+Delivery.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
+Truck.hasMany(Delivery, { foreignKey: "truckId", as: "deliveries" });
+
+// one invoice can have multiple invoice deliveries, one invoice delivery belongs to one invoice
+InvoiceDelivery.belongsTo(SalesOrderInvoice, { foreignKey: "soInvoiceId", as: "soInvoice" });
+SalesOrderInvoice.hasOne(InvoiceDelivery, { foreignKey: "soInvoiceId", as: "invoiceDeliveries" });
+
+// one delivery can have multiple invoice deliveries, one invoice delivery belongs to one delivery
+InvoiceDelivery.belongsTo(Delivery, { foreignKey: "deliveryId", as: "delivery" });
+Delivery.hasMany(InvoiceDelivery, { foreignKey: "deliveryId", as: "invoiceDeliveries" });
+
 export {
   Client,
   User,
@@ -619,5 +633,7 @@ export {
   Company,
   AdvancedDeposit,
   Return,
-  ReturnProduct
+  ReturnProduct,
+  Delivery,
+  InvoiceDelivery
 };

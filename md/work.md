@@ -468,3 +468,11 @@ PL cancel page => not working correctly.  ✅
 ---
 
 1. Journal entry total calculation according to cr and dr.
+2. multiple deliveries system design.
+
+---
+
+major delivery handled ->
+
+1. keeping separate location data in invoice-delivery so in future if customer's address changed it should remain same.
+2.

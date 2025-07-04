@@ -151,3 +151,8 @@ export const CUSTOMER_STATUS = {
   ACTIVE: "active",
   INACTIVE: "inactive",
 } as const;
+
+export const DELIVERY_STATUS = {
+  PENDING: "pending",
+  COMPLETED: "completed",
+} as const;

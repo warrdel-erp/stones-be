@@ -45,6 +45,7 @@ import authRoutes from "./routes/auth.routes";
 import accountRoutes from "./routes/account.routes";
 import advancedDepositRoutes from "./routes/advancedDeposit.routes";
 import returnRoutes from "./routes/return.routes";
+import deliveryRoutes from "./routes/delivery.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -91,6 +92,7 @@ app.use("/api/productFinish", productFinishRoutes);
 app.use("/api/soInvoice", soInvoiceRoutes);
 app.use("/api/advancedDeposit", advancedDepositRoutes);
 app.use("/api/return", returnRoutes);
+app.use("/api/delivery", deliveryRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

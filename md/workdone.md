@@ -365,3 +365,4 @@ create new user under a client is done and all of them can login.
 ---
 
 1. incorrect total balance for journal entries.
+2. multiple deliveries in BE.

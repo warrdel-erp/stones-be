@@ -7,6 +7,10 @@ import { RETURN_STATUS } from "../models/return.model";
 import SalesOrderProduct from "../models/salesOrderProduct.model";
 import ReturnProduct from "../models/returnProduct.model";
 import Return from "../models/return.model";
+import LoadingOrder from "../models/loadingOrder.model";
+import SalesOrder from "../models/salesOrder.model";
+import Location from "../models/location";
+import CustomerAddress from "../models/customerAddress.model";
 
 /**
  * Create a new invoice
@@ -308,5 +312,23 @@ export const getSalesOrderProductsWithoutReturns = async (
       return returnData.status === RETURN_STATUS.CANCELLED
     })
 
+  });
+};
+
+export const findSoInvoiceWithAssociations = async (soInvoiceId: number, transaction?: any) => {
+  return await models.SalesOrderInvoice.findByPk(soInvoiceId, {
+    include: [{
+      model: LoadingOrder,
+      as: "loadingOrder",
+      include: [{
+        model: SalesOrder,
+        as: "salesOrder",
+        include: [
+          { model: Location, as: "soLocation" },
+          { model: CustomerAddress, as: "shippingAddress" }
+        ]
+      }]
+    }],
+    transaction
   });
 };

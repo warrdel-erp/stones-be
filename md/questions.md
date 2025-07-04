@@ -89,3 +89,7 @@
 ---
 
 1. Sales Order amount and tax can be LO and PL data.
+
+---
+
+1. we are taking shipping address in SO. what if customer changes it in future it will be changed in SO also.
