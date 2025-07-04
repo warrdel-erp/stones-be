@@ -2334,6 +2334,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "balance sheet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/coa/balanceSheetData",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"coa",
+								"balanceSheetData"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2961,7 +2990,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "5"
+									"value": "1"
 								}
 							]
 						}
@@ -3147,6 +3176,42 @@
 								"api",
 								"loadingOrder",
 								"newLoNumber"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get LO data with given return id's product and initiable products",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/loadingOrder/accordingToReturnConfirmation/:returnId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"loadingOrder",
+								"accordingToReturnConfirmation",
+								":returnId"
+							],
+							"variable": [
+								{
+									"key": "returnId",
+									"value": "7"
+								}
 							]
 						}
 					},
@@ -5415,6 +5480,34 @@
 					"response": []
 				},
 				{
+					"name": "get all with truck only",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/soInvoice",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"soInvoice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "assign truck",
 					"request": {
 						"method": "PUT",
@@ -5590,7 +5683,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"invoiceId\": 4, \"productIds\": [47, 48]}",
+							"raw": "{\n    \"invoiceId\": 4,\n    \"productIds\": [\n        47,\n        48\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5627,7 +5720,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"invoiceId\": 5,\n    \"productIds\": [55]\n}",
+							"raw": "{\n    \"productIds\": [55, 54, 65]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5695,6 +5788,131 @@
 									"key": "returnId",
 									"value": "4"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/return",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"return"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "confirm with given new Ids",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productIds\": [23,45]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/return/:returnId/update-and-confirm",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"return",
+								":returnId",
+								"update-and-confirm"
+							],
+							"variable": [
+								{
+									"key": "returnId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "delivery",
+			"item": [
+				{
+					"name": "initialte",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"truckId\": 2,\n    \"invocieIds\": [5,3,7]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery"
 							]
 						}
 					},
