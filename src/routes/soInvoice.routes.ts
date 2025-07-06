@@ -8,7 +8,7 @@ const router = Router();
 router.get("/", authenticateUser, soInvoiceController.getAllSoInvoiceList);
 
 // get all so invoice.
-router.get("/withTruckOnly", authenticateUser, soInvoiceController.getAllSoInvoiceListWithTruckOnly);
+// router.get("/withTruckOnly", authenticateUser, soInvoiceController.getAllSoInvoiceListWithTruckOnly);
 
 // assign truck to SO invoice.
 router.put("/:id/assignTruck", authenticateUser, soInvoiceController.assignTruck);

@@ -25,8 +25,10 @@ export const createInvoiceDelivery = async (
     data: {
         fromLat: number,
         fromLng: number,
+        fromAddress: string,
         toLat: number,
         toLng: number,
+        toAddress: string,
         soInvoiceId: number,
         deliveryId: number
     },
@@ -48,6 +50,9 @@ export const getAllDeliveriesByClientId = async (clientId: number) => {
                     }
                 ]
             },
+            {
+                association: 'truck'
+            }
         ],
     });
 }; 

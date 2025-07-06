@@ -19,12 +19,20 @@ const InvoiceDelivery = sequelize.define(
             type: DataTypes.FLOAT,
             allowNull: false,
         },
+        fromAddress: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+        },
         toLat: {
             type: DataTypes.FLOAT,
             allowNull: false,
         },
         toLng: {
             type: DataTypes.FLOAT,
+            allowNull: false,
+        },
+        toAddress: {
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         soInvoiceId: {

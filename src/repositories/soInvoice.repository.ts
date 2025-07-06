@@ -105,6 +105,9 @@ export const getAllInvoicesList = async (
           },
         ],
       },
+      {
+        association: 'invoiceDelivery'
+      }
     ],
     transaction,
     limit,

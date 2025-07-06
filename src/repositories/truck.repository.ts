@@ -15,34 +15,31 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
   const notAssignedOnly = whereClause.notAssignedOnly;
   delete whereClause.notAssignedOnly;
 
-  // Build include for deliveries if notAssignedOnly is set to 'true' (string)
-  const include = [];
+  // If notAssignedOnly is true, find trucks that don't have pending deliveries
   if (notAssignedOnly === 'true') {
-    include.push({
-      association: "deliveries",
-      required: false,
-      where: { status: "pending" },
-      attributes: ["id"],
+    const trucksWithPendingDeliveries = await models.Truck.findAll({
+      include: [{
+        association: "deliveries",
+        where: { status: "pending" },
+        attributes: [],
+      }],
+      attributes: ['id'],
+      raw: true,
     });
-  }
 
-  // If notAssignedOnly, only return trucks with zero pending deliveries
-  const having = notAssignedOnly === 'true'
-    ? {
-      [Op.or]: [
-        { '$deliveries.id$': null }, // No deliveries at all
-      ],
-    }
-    : undefined;
+    const truckIdsWithPendingDeliveries = trucksWithPendingDeliveries.map((truck: any) => truck.id);
+
+    // Add condition to exclude trucks with pending deliveries
+    whereClause.id = {
+      [Op.notIn]: truckIdsWithPendingDeliveries
+    };
+  }
 
   return await models.Truck.findAndCountAll({
     where: whereClause,
-    include: include.length ? include : undefined,
     limit,
     offset,
     order: [["createdAt", "DESC"]],
-    distinct: true,
-    having,
   });
 };
 

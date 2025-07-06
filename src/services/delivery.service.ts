@@ -30,10 +30,12 @@ export const initiateDelivery = async (truckId: number, soInvoiceIds: number[], 
             if (!shippingAddress || !soLocation) throw new Error(`shippingAddress or soLocation missing for soInvoice ${soInvoiceId}`);
 
             const invoiceDelivery = await deliveryRepository.createInvoiceDelivery({
-                fromLat: shippingAddress.lat,
-                fromLng: shippingAddress.long,
-                toLat: soLocation.lat,
-                toLng: soLocation.long,
+                toLat: shippingAddress.lat,
+                toLng: shippingAddress.long,
+                fromAddress: shippingAddress.address,
+                fromLat: soLocation.lat,
+                fromLng: soLocation.long,
+                toAddress: soLocation.address,
                 soInvoiceId,
                 deliveryId: delivery.get('id') as number
             }, transaction);

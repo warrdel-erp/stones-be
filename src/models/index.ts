@@ -584,7 +584,7 @@ Truck.hasMany(Delivery, { foreignKey: "truckId", as: "deliveries" });
 
 // one invoice can have multiple invoice deliveries, one invoice delivery belongs to one invoice
 InvoiceDelivery.belongsTo(SalesOrderInvoice, { foreignKey: "soInvoiceId", as: "soInvoice" });
-SalesOrderInvoice.hasOne(InvoiceDelivery, { foreignKey: "soInvoiceId", as: "invoiceDeliveries" });
+SalesOrderInvoice.hasOne(InvoiceDelivery, { foreignKey: "soInvoiceId", as: "invoiceDelivery" });
 
 // one delivery can have multiple invoice deliveries, one invoice delivery belongs to one delivery
 InvoiceDelivery.belongsTo(Delivery, { foreignKey: "deliveryId", as: "delivery" });
