@@ -38,7 +38,21 @@ export const getAllPayments = async (filters: any = {}, page: number, limit: num
 };
 
 export const getPaymentById = async (id: number) => {
-  return await models.Payment.findByPk(id);
+  return await models.Payment.findByPk(id, {
+    include: [
+      {
+        association: 'client',
+        include: [
+          {
+            association: 'company'
+          }
+        ]
+      },
+      {
+        association: 'paymentBills'
+      }
+    ]
+  });
 };
 
 export const updatePaymentStatus = async (id: number, status: string) => {

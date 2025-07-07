@@ -387,6 +387,10 @@ Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 
 // One Payment belongs to one user (One user can have multiple payments)
+Payment.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(Payment, { foreignKey: "clientId", as: "payments" });
+
+// One Payment belongs to one user (One user can have multiple payments)
 Payment.belongsTo(Vendor, { foreignKey: "payeeId", as: "vendor", constraints: false });
 Vendor.hasMany(Payment, { foreignKey: "payeeId", as: "payments", constraints: false });
 

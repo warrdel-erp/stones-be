@@ -1,16 +1,11 @@
-import { Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions, col, fn } from "sequelize";
 import * as models from "../models";
-import { SoInvoice } from "../models/salesOrderInvoice.model";
-import { Op, fn, col } from "sequelize";
-import { Sequelize } from "sequelize";
-import { RETURN_STATUS } from "../models/return.model";
-import SalesOrderProduct from "../models/salesOrderProduct.model";
-import ReturnProduct from "../models/returnProduct.model";
-import Return from "../models/return.model";
-import LoadingOrder from "../models/loadingOrder.model";
-import SalesOrder from "../models/salesOrder.model";
-import Location from "../models/location";
 import CustomerAddress from "../models/customerAddress.model";
+import LoadingOrder from "../models/loadingOrder.model";
+import Location from "../models/location";
+import { RETURN_STATUS } from "../models/return.model";
+import SalesOrder from "../models/salesOrder.model";
+import { SoInvoice } from "../models/salesOrderInvoice.model";
 
 /**
  * Create a new invoice
@@ -31,8 +26,6 @@ export const getAllInvoicesList = async (
   transaction?: Transaction
 ) => {
   const offset = (page - 1) * limit;
-
-  console.log(truckOnly)
 
   if (truckOnly) {
     filter.truckId = {
