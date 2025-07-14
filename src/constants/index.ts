@@ -40,6 +40,7 @@ export const UNITS_OF_MEASUREMENT = [
   { id: 11, name: "Metric Ton" },
   { id: 12, name: "Pound" },
   { id: 13, name: "Ounce" },
+  { id: 14, name: "EA" },
 ] as const;
 
 export const DELIVERY_TYPE = {

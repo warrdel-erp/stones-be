@@ -1,0 +1,1 @@
+export { default as tradeServiceRoutes } from './tradeService.routes'; 

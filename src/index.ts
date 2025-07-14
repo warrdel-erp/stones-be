@@ -46,6 +46,9 @@ import accountRoutes from "./routes/account.routes";
 import advancedDepositRoutes from "./routes/advancedDeposit.routes";
 import returnRoutes from "./routes/return.routes";
 import deliveryRoutes from "./routes/delivery.routes";
+import serviceRoutes from "./routes/service.routes";
+import serviceCategoryRoutes from "./routes/serviceCategory.routes";
+import tradeServiceRoutes from "./routes/tradeService.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -93,6 +96,9 @@ app.use("/api/soInvoice", soInvoiceRoutes);
 app.use("/api/advancedDeposit", advancedDepositRoutes);
 app.use("/api/return", returnRoutes);
 app.use("/api/delivery", deliveryRoutes);
+app.use("/api/service", serviceRoutes);
+app.use("/api/serviceCategory", serviceCategoryRoutes);
+app.use("/api/tradeService", tradeServiceRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

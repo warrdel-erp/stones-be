@@ -93,3 +93,7 @@
 ---
 
 1. we are taking shipping address in SO. what if customer changes it in future it will be changed in SO also.
+2. when can we add services to SO.
+3. condition for deletion.
+
+---

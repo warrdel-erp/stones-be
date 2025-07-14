@@ -44,6 +44,9 @@ import Return from "./return.model";
 import ReturnProduct from "./returnProduct.model";
 import Delivery from "./Delivery.model";
 import InvoiceDelivery from "./InvoiceDelivery.model";
+import ServiceCategory from "./serviceCategory.model";
+import Service from "./service.model";
+import TradeService from "./tradeService.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -594,6 +597,20 @@ SalesOrderInvoice.hasOne(InvoiceDelivery, { foreignKey: "soInvoiceId", as: "invo
 InvoiceDelivery.belongsTo(Delivery, { foreignKey: "deliveryId", as: "delivery" });
 Delivery.hasMany(InvoiceDelivery, { foreignKey: "deliveryId", as: "invoiceDeliveries" });
 
+// ServiceCategory-Client relation (many ServiceCategory to one Client)
+ServiceCategory.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(ServiceCategory, { foreignKey: "clientId", as: "serviceCategories" });
+
+// Service-ServiceCategory relation (many Service to one ServiceCategory)
+Service.belongsTo(ServiceCategory, { foreignKey: "serviceCategoryId", as: "serviceCategory" });
+ServiceCategory.hasMany(Service, { foreignKey: "serviceCategoryId", as: "services" });
+
+// Service-LedgerAccount relation (many Service to one LedgerAccount)
+Service.belongsTo(LedgerAccount, { foreignKey: "ledgerAccountId", as: "ledgerAccount" });
+LedgerAccount.hasMany(Service, { foreignKey: "ledgerAccountId", as: "services" });
+
+TradeService.belongsTo(Service, { foreignKey: "serviceId", as: 'service' })
+
 export {
   Client,
   User,
@@ -639,5 +656,8 @@ export {
   Return,
   ReturnProduct,
   Delivery,
-  InvoiceDelivery
+  InvoiceDelivery,
+  ServiceCategory,
+  Service,
+  TradeService
 };

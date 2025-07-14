@@ -366,3 +366,29 @@ create new user under a client is done and all of them can login.
 
 1. incorrect total balance for journal entries.
 2. multiple deliveries in BE.
+
+---
+
+1. Single start point.
+2. Checkpoint DND.
+3. Transaction API change and details to ram.
+
+---
+
+1. buttons, search bar.
+2. spacing in many places.
+
+---
+
+1. Customer selection of addresses.
+2. Service, Service Category UI,
+3. Bifurcation of data based on client.
+4. Connection of SO and PO BE design.
+5. attach services with SO.
+
+---
+
+1. EA in uom.
+2. University deployment.
+3. base price in services.
+4. Services in LO instead of SO
