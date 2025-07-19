@@ -392,3 +392,10 @@ create new user under a client is done and all of them can login.
 2. University deployment.
 3. base price in services.
 4. Services in LO instead of SO
+
+---
+
+1. Services could only be added, deleted before invoicing [BE, FE] ✅
+2. Journal entry of services. ✅
+3. SIPL services. ✅
+4. Journal entry for services in SIPL. ✅

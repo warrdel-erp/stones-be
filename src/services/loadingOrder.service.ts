@@ -34,6 +34,7 @@ import { JournalEntry } from "../models/journalEntry.model";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import * as  salesOrderInvoiceService from "./salesOrderInvoice.service";
 import { Return } from "../models";
+import { createJournalEntriesForTradeServicesOfLoadingOrder } from "./journalEntry.service";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -618,6 +619,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     // Update stage to INVOICED in Loading Order.
     await loadingOrderRepository.updateLoadingOrder(id, { stage: LOADING_ORDER_STAGES.INVOICED }, transaction);
+
+    // Create journal entries for trade services
+    await createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder, locationId, transaction);
 
     transaction.commit();
     return { loadingOrder, invoice };

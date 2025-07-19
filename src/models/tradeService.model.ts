@@ -5,7 +5,7 @@ import Client from "./client.model";
 
 export const TRADE_SERVICE_REFERENCE_TYPES = {
     LOADING_ORDER: "loadingOrder",
-    PURCHASE_ORDER: "purchaseOrder",
+    SIPL: "sipl",
 } as const;
 
 const TradeService = sequelize.define(
@@ -26,7 +26,7 @@ const TradeService = sequelize.define(
         referenceType: {
             type: DataTypes.ENUM(
                 TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
-                TRADE_SERVICE_REFERENCE_TYPES.PURCHASE_ORDER
+                TRADE_SERVICE_REFERENCE_TYPES.SIPL
             ),
             allowNull: false,
         },

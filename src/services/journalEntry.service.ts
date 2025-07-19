@@ -17,6 +17,10 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as slabService from "../services/slab.service";
 import * as siplService from "./sipl.service";
 import { AppError } from "../helper/appError";
+import * as tradeServiceRepository from "../repositories/tradeService.repository";
+import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 export const createJournalEntryForBill = async (
   freightBillData: any,
@@ -260,6 +264,10 @@ export const createJournalEntryForReceiveInventory = async (
       }, transaction);
     }
   }
+
+  // Journal entry for Services.
+  await createJournalEntriesForTradeServicesOfSIPL(siplData, locationId, transaction)
+
 };
 
 export async function createJournalEntriesForPaymentBills(bill: any, paymentData: any, transaction: Transaction, locationId: number) {
@@ -407,3 +415,118 @@ async function createJournalEntryForBillForPaymentBill(bill: any, ledgerAccount:
   await journalEntryRepository.create(journalEntry2, transaction);
 }
 
+export async function createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder: any, locationId: number, transaction: Transaction) {
+  // Find all trade services for this loading order
+  const tradeServices = await tradeServiceRepository.findTradeServices({
+    referenceType: "loadingOrder",
+    referenceId: loadingOrder.id
+  });
+
+  if (!tradeServices.length) return;
+
+  // Get loading order for customerId and locationId
+  if (!loadingOrder) throw new AppError("Loading Order not found", 404);
+
+  // Get customer ledger account
+  const customerLedgerAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    referenceId: loadingOrder.salesOrder?.customerId,
+    referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
+  }, transaction);
+
+  if (!customerLedgerAccount) throw new AppError("Customer ledger account not found", 404);
+
+  const customerLedgerAccountObj = customerLedgerAccount?.get({ plain: true });
+  if (!customerLedgerAccountObj) throw new AppError("Customer ledger account not found", 404);
+
+  for (const tradeServiceInstance of tradeServices) {
+    const tradeService = tradeServiceInstance.get ? tradeServiceInstance.get({ plain: true }) : tradeServiceInstance;
+    const service = tradeService.service;
+    if (!service || !service.ledgerAccountId) {
+      throw new AppError("TradeService's service or ledgerAccountId not found", 400);
+    }
+
+    await journalEntryRepository.create({
+      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      ledgerId: service.ledgerAccountId,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+      referenceId: loadingOrder.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+      entryForId: loadingOrder.id,
+      locationId: locationId,
+      partyLedgerAccountId: customerLedgerAccountObj.id
+    }, transaction);
+
+    await journalEntryRepository.create({
+      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      ledgerId: customerLedgerAccountObj.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+      referenceId: loadingOrder.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+      entryForId: loadingOrder.id,
+      locationId: locationId,
+      partyLedgerAccountId: service.ledgerAccountId
+    }, transaction);
+
+  }
+}
+
+export async function createJournalEntriesForTradeServicesOfSIPL(sipl: any, locationId: number, transaction: Transaction) {
+  // Find all trade services for this loading order
+  const tradeServices = await tradeServiceRepository.findTradeServices({
+    referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL,
+    referenceId: sipl.id
+  });
+
+  if (!tradeServices.length) return;
+
+  // Get customer ledger account
+  const vendorLedgerAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    referenceId: sipl.purchaseOrder.supplierId,
+    referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR
+  }, transaction);
+
+  if (!vendorLedgerAccount) throw new AppError("Vendor ledger account not found", 404);
+
+  const customerLedgerAccountObj = vendorLedgerAccount?.get({ plain: true });
+  if (!customerLedgerAccountObj) throw new AppError("Vendor ledger account not found", 404);
+
+  for (const tradeServiceInstance of tradeServices) {
+    const tradeService = tradeServiceInstance.get({ plain: true });
+
+    const service = tradeService.service;
+    if (!service || !service.ledgerAccountId) {
+      throw new AppError("TradeService's service or ledgerAccountId not found", 400);
+    }
+
+    await journalEntryRepository.create({
+      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      ledgerId: service.ledgerAccountId,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: sipl.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: sipl.id,
+      locationId: locationId,
+      partyLedgerAccountId: customerLedgerAccountObj.id
+    }, transaction);
+
+    await journalEntryRepository.create({
+      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      ledgerId: customerLedgerAccountObj.id,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      referenceId: sipl.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: sipl.id,
+      locationId: locationId,
+      partyLedgerAccountId: service.ledgerAccountId
+    }, transaction);
+
+  }
+} 

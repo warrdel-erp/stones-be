@@ -102,7 +102,6 @@ export const GROUPS = [
 export const PRODUCT_KIND = [
   { id: 1, value: "Stock" },
   { id: 2, value: "No-Stock" },
-  { id: 3, value: "Service" },
 ] as const;
 
 export const SALES_TAX = [
