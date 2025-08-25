@@ -68,3 +68,15 @@ export const updateInventoryProductsSellingPrice = catchAsync(async (req: AuthRe
         newSellingPrice: sellingPrice
     });
 });
+
+export const getAllocatedInventoryProductsAccordingToCustomer = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { customerId } = req.query;
+
+    if (!customerId) {
+        return res.status(400).json({ error: "customerId is required" });
+    }
+
+    const data = await inventoryProductService.getAllocatedInventoryProductsAccordingToCustomer(Number(customerId));
+
+    return SuccessResponse(res, 200, "Allocated inventory products fetched successfully", data);
+});

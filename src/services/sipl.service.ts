@@ -13,7 +13,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
-import { PAYMENT_TERMS } from "../constants";
+import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
 import * as genericProductRepository from "../repositories/genericProductRepository";
 import * as productRepository from "../repositories/product.repository";
@@ -60,6 +60,13 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
           }
         }
       )
+    );
+
+    // Update all related inventory products to IN_INVENTORY
+    await inventoryProductRepository.updateInventoryProductStatusBySipl(
+      siplId,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      transaction
     );
 
     // Create Journal entry for Inventory Reception START.

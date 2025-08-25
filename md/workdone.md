@@ -430,7 +430,7 @@ create new user under a client is done and all of them can login.
 
 ---
 
-1. Packaging List creation.
+1. Packaging List creation with Generic product.
 2. Packaging List Table According to Generic products.
 3. Create Invoice.
 4. LO, PL, INV detail page data with tax.
@@ -439,6 +439,8 @@ create new user under a client is done and all of them can login.
 7. Update pricing as per SIPL id.
 8. Update pricing as Bundle and block.
 9. Test Software with both type of product.
+10. Delivery approval with given order of invoice addresses.
+11. Customer Allocated inventory Products, Open SOs
 
 ---
 
@@ -448,4 +450,11 @@ Pending
 
 ---
 
-1. Delivery approval with given order of invoice addresses.
+1. Local docker setup for production deployment.[DONE]
+2. Create Docker file. [DONE]
+3. Setup local database for docker. [DONE]
+4. Write Pipeline for docker. [FE, BE]
+5. Setup docker in server. [Done]
+6. Setup Database in server. [DONE]
+7. Expose PORTS in server. [FE, BE]
+8. Push branch to git.[FE, BE]

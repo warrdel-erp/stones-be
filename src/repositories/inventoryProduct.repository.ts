@@ -1,6 +1,7 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { Op } from "sequelize";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 
 export const createInventoryProducts = async (binId: number, quantity: number, transaction: Transaction) => {
   const inventoryProductsData = Array.from({ length: quantity }, () => ({
@@ -183,4 +184,61 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
   });
 
   return inventoryProducts;
+};
+
+export const getAllocatedInventoryProductsAccordingToCustomer = (customerId: number) => {
+  const data = models.InventoryProduct.findAll({
+    where: {
+      status: INVENTORY_ITEM_STATUS.ALLOCATED
+    },
+    include: [
+      {
+        association: 'salesOrderProducts',
+        required: true,
+        include: [
+          {
+            association: 'salesOrder',
+            required: true,
+            where: { customerId }
+          }
+        ]
+      }
+    ]
+  });
+
+  return data;
+}
+
+// Update status of all InventoryProducts for a given SIPL
+export const updateInventoryProductStatusBySipl = async (
+  siplId: number,
+  status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
+  transaction?: Transaction
+) => {
+  const [updatedCount] = await models.InventoryProduct.update(
+    { status },
+    {
+      where: { siplId },
+      individualHooks: true,
+      transaction,
+    }
+  );
+
+  return updatedCount;
+};
+
+// Update status of a single InventoryProduct by its ID
+export const updateInventoryProductStatusById = async (
+  inventoryProductId: number,
+  status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
+  transaction?: Transaction
+) => {
+  await models.InventoryProduct.update(
+    { status },
+    {
+      where: { id: inventoryProductId },
+      individualHooks: true,
+      transaction,
+    }
+  );
 };

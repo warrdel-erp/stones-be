@@ -483,3 +483,4 @@ major delivery handled ->
 2.
 
 3. lot pricing
+4. remove Status from slab

@@ -10,6 +10,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as genericProductRepository from "../repositories/genericProductRepository";
 import { Transaction } from "sequelize";
 import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { getTotalLoadingOrderAmount, getTotalPlAmount } from "./loadingOrder.service";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
 import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
@@ -298,6 +299,13 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
                     transaction
                 );
             }
+
+            // Update inventory product status to IN_INVENTORY
+            await inventoryProductRepository.updateInventoryProductStatusById(
+                returnProduct.salesOrderProduct.inventoryProductId,
+                INVENTORY_ITEM_STATUS.IN_INVENTORY,
+                transaction
+            );
 
             // Create journal entries (only for slabs as they have landed unit cost)
             if (slab) {

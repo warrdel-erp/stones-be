@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Bin from "./bin";
 import SIPL from "./sipl.model";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 
 const InventoryProduct = sequelize.define(
   "InventoryProduct",
@@ -34,6 +35,11 @@ const InventoryProduct = sequelize.define(
     sellingPrice: {
       type: DataTypes.FLOAT,
       allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM(...Object.values(INVENTORY_ITEM_STATUS)),
+      allowNull: true,
+      defaultValue: INVENTORY_ITEM_STATUS.INITIATE,
     },
     combinedNumber: {
       type: DataTypes.STRING,

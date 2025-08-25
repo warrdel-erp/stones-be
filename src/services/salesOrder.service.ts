@@ -92,6 +92,8 @@ export const getAllSalesOrders = async (
   return data;
 };
 
+
+
 // Get sales order by ID
 export const getSalesOrderById = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });

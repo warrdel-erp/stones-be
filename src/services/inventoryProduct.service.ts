@@ -20,3 +20,7 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
 
     return inventoryProducts;
 };
+
+export const getAllocatedInventoryProductsAccordingToCustomer = async (customerId: number) => {
+    return await inventoryProductRepository.getAllocatedInventoryProductsAccordingToCustomer(customerId);
+};

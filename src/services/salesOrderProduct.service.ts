@@ -5,6 +5,7 @@ import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHi
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
@@ -92,6 +93,13 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
           );
         }
 
+        // Update inventory product status to ALLOCATED
+        await inventoryProductRepository.updateInventoryProductStatusById(
+          product.inventoryProductId,
+          INVENTORY_ITEM_STATUS.ALLOCATED,
+          transaction
+        );
+
         upsertedProducts.push(newProduct);
       }
     }
@@ -169,9 +177,19 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, data: a
       INVENTORY_ITEM_STATUS.ALLOCATED,
       transaction
     );
+    await inventoryProductRepository.updateInventoryProductStatusById(
+      data.newInventoryProductId,
+      INVENTORY_ITEM_STATUS.ALLOCATED,
+      transaction
+    );
 
     // reset old slab status as IN_INVENTORY
     await slabRepository.updateSlabStatusByInventoryProduct(
+      salesOrderProduct.inventoryProductId,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      transaction
+    );
+    await inventoryProductRepository.updateInventoryProductStatusById(
       salesOrderProduct.inventoryProductId,
       INVENTORY_ITEM_STATUS.IN_INVENTORY,
       transaction

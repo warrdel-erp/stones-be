@@ -14,6 +14,7 @@ import * as packagingListRepository from "../repositories/packagingList.reposito
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
@@ -612,6 +613,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
           transaction
         );
       }
+
+      // Update inventory product status to SOLD
+      await inventoryProductRepository.updateInventoryProductStatusById(
+        salesOrderProduct.inventoryProductId,
+        INVENTORY_ITEM_STATUS.SOLD,
+        transaction
+      );
 
       // Update stage to INVOICED in Sales Order Product.
       await salesOrderProductRepository.updateSalesOrderProduct(

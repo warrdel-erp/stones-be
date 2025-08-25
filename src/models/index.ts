@@ -379,7 +379,7 @@ SalesOrder.hasMany(SalesOrderProduct, { foreignKey: "salesOrderId", as: "salesOr
 
 // One sales Order belongs to inventory product.
 SalesOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
-InventoryProduct.hasOne(SalesOrderProduct, { foreignKey: "inventoryProductId", as: "salesOrderProduct" });
+InventoryProduct.hasMany(SalesOrderProduct, { foreignKey: "inventoryProductId", as: "salesOrderProducts" });
 
 // One Payment belongs to one user (One user can have multiple payments)
 Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
