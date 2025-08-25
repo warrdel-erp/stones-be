@@ -5,7 +5,7 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { siplId, lot: bundle, block } = req.query;
+    const { siplId, bundle, block } = req.query;
 
     // Count how many filters are provided
     const filtersProvided = [siplId, bundle, block].filter(Boolean).length;
