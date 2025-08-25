@@ -35,7 +35,6 @@ import salesOrderProductRoutes from "./routes/salesOrderProduct.routes";
 import journalEntryRoutes from "./routes/journalEntry.routes";
 import truckRoutes from "./routes/truck.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
-import productCategoryRoutes from "./routes/productCategory.routes";
 import productSubCategoryRoutes from "./routes/productSubCategory.routes";
 import productGroupRoutes from "./routes/productGroup.routes";
 import productBaseColorRoutes from "./routes/productBaseColor.routes";
@@ -49,6 +48,8 @@ import deliveryRoutes from "./routes/delivery.routes";
 import serviceRoutes from "./routes/service.routes";
 import serviceCategoryRoutes from "./routes/serviceCategory.routes";
 import tradeServiceRoutes from "./routes/tradeService.routes";
+import genericProductRoutes from "./routes/genericProduct.routes";
+import inventoryProductRoutes from "./routes/inventoryProduct.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,7 +88,6 @@ app.use("/api/salesOrderProduct", salesOrderProductRoutes);
 app.use("/api/journalEntry", journalEntryRoutes);
 app.use("/api/truck", truckRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/productCategory", productCategoryRoutes);
 app.use("/api/productSubCategory", productSubCategoryRoutes);
 app.use("/api/productGroup", productGroupRoutes);
 app.use("/api/productBaseColor", productBaseColorRoutes);
@@ -99,6 +99,8 @@ app.use("/api/delivery", deliveryRoutes);
 app.use("/api/service", serviceRoutes);
 app.use("/api/serviceCategory", serviceCategoryRoutes);
 app.use("/api/tradeService", tradeServiceRoutes);
+app.use("/api/genericProduct", genericProductRoutes);
+app.use("/api/inventoryProduct", inventoryProductRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

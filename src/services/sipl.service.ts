@@ -1,5 +1,4 @@
 import { Transaction } from "sequelize";
-import { v4 as uuidv4 } from "uuid";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -16,8 +15,10 @@ import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS } from "../constants";
 import { randomId } from "../helper";
+import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as productRepository from "../repositories/product.repository";
 
-// Processes the inventory reception by updating slab statuses.
+// Processes the inventory reception by updating slab and generic product statuses.
 export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
 
@@ -25,20 +26,39 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
     // Update the status of all slabs in the SIPL to IN_INVENTORY.
     const updatedSlab = await slabRepository.updateSlabStatusBySipl(siplId, transaction);
 
+    // Update the status of all generic products in the SIPL to IN_INVENTORY.
+    const updatedGenericProduct = await genericProductRepository.updateGenericProductStatusBySipl(siplId, transaction);
+
+    if (!(updatedSlab + updatedGenericProduct)) {
+      throw new AppError("No slab and generic product exists.", 400);
+    }
+
     // Update SIPL inventoryReceived status.
     await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
     const calculations = await siplService.getSiplCalculations(siplId, transaction);
 
-    // set landed unit cost for each slab.
+    // set landed unit cost for each product (slabs and generic products)
     await Promise.all(
       calculations.dataAccordingToProduct.map(
-        async (productCalc: any) =>
-          await slabRepository.setUnitLandedCost(
-            siplId,
-            productCalc.product.id,
-            productCalc.landedUnitCost,
-            transaction
-          )
+        async (productCalc: any) => {
+          if (productCalc.product.isSlabType) {
+            // For slab products, set landed unit cost
+            return await slabRepository.setUnitLandedCost(
+              siplId,
+              productCalc.product.id,
+              productCalc.landedUnitCost,
+              transaction
+            );
+          } else {
+            // For generic products, update status to IN_INVENTORY
+            return await genericProductRepository.setUnitLandedCost(
+              siplId,
+              productCalc.product.id,
+              productCalc.landedUnitCost,
+              transaction
+            );
+          }
+        }
       )
     );
 
@@ -46,7 +66,7 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
     await journalEntryService.createJournalEntryForReceiveInventory(siplId, clientId, transaction, locationId);
 
     transaction.commit();
-    return updatedSlab;
+    return updatedSlab + updatedGenericProduct; // Return total count of updated items
   } catch (error) {
     transaction.rollback();
     throw error;
@@ -143,10 +163,15 @@ export async function handleCreateSlabs(slabData: any) {
       throw new Error("SIPL not found.");
     }
 
-    // Create a new InventoryProduct for each Slab
-    const inventoryProducts: any = await inventoryProductRepository.createInventoryProducts(
+    const sellingPrice = (await productRepository.getProductByIdSimple(slabData.productId))?.singleUnitPrice;
+
+    // Create a new InventoryProduct for each Slab with combined numbers
+    const inventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
       slabData.binId,
       slabData.quantity,
+      slabData.siplId,
+      true, // isSlabType = true for slabs
+      sellingPrice,
       transaction
     );
 
@@ -165,13 +190,64 @@ export async function handleCreateSlabs(slabData: any) {
       serialNumber: lastSerialNumber + index + 1,
       slabNumber: lastSlabNumber + index + 1,
       barcode: randomId().toUpperCase(),
-      combinedSlabNumber: sipl.invoiceCode.split(' ')[1] + "-" + (lastSerialNumber + index + 1),
     }));
 
     const createdSlabs = await slabRepository.createSlabs(slabs, transaction);
 
     await transaction.commit();
     return createdSlabs;
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
+}
+
+// Create generic Products for SIPL
+export async function handleCreateGenericProduct(data: any) {
+  const transaction = await sequelize.transaction();
+
+  try {
+    if (!data.quantity || data.quantity < 1) {
+      throw new Error("Quantity must be at least 1.");
+    }
+
+    const sipl: any = await siplRepository.findSIPLByIdSimple(data.siplId);
+
+    if (!sipl) {
+      throw new Error("SIPL not found.");
+    }
+
+    console.log('data', data)
+
+    const product = (await productRepository.getProductByIdSimple(data.productId));
+
+    console.log(product, 'product')
+
+    const sellingPrice = product.singleUnitPrice
+    // console.log(sellingPrice, 'sellingPrice')
+
+    // Create a new InventoryProduct for each generic Product with combined numbers
+    const inventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
+      data.binId,
+      data.quantity,
+      data.siplId,
+      false, // isSlabType = false for generic products
+      sellingPrice,
+      transaction
+    );
+
+    // Pair each generic Product with its own inventory product
+    const genericProduct = inventoryProducts.map((inventoryProduct: any, index: number) => ({
+      ...data, // Ensure each generic Product has unique data
+      inventoryProductId: inventoryProduct.id,
+      purchaseOrderId: sipl.purchaseOrderId,
+      barcode: randomId().toUpperCase(),
+    }));
+
+    const createdGenericProduct = await genericProductRepository.createGenericProduct(genericProduct, transaction);
+
+    await transaction.commit();
+    return createdGenericProduct;
   } catch (error) {
     transaction.rollback();
     throw error;
@@ -311,7 +387,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
   );
 
   // Calculate total area of slabs that received.
-  const totalReceivingArea = Number(
+  let totalReceivingQuantity = Number(
     siplData.siplProducts
       .reduce(
         (sum: number, siplProduct: any) =>
@@ -322,15 +398,25 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
       .toFixed(2)
   );
 
+  // Total quantity of generic product.
+  totalReceivingQuantity = siplData.siplProducts.reduce(
+    (total: number, siplProduct: any) => total + siplProduct.genericProducts.length,
+    0
+  );
+
   // Unit bill price as per total area of all product's slab.
-  const unitBillPrice = Number((totalBillsCharges / totalReceivingArea));
+  const unitBillPrice = Number((totalBillsCharges / totalReceivingQuantity)) || 0;
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
     // total received area as per product.
-    const totalReceivedAreaPerProduct = Number(
+    let totalReceivedQuantity = Number(
       siplProduct.slabs.reduce((a: number, b: any) => a + Number(b.receivingWidth * b.receivingLength), 0).toFixed(2)
     );
+
+    if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
+      totalReceivedQuantity = siplProduct.genericProducts.length;
+    }
 
     // total packaging area as per product.
     const totalPackagingAreaPerProduct = Number(
@@ -340,36 +426,63 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
 
-    const unitCost = Number((totalSIPLProductPrice / totalReceivedAreaPerProduct));
+    const unitCost = Number((totalSIPLProductPrice / totalReceivedQuantity));
 
     // Total unit charge is self unit charge + bill charge per unit area.
     const landedUnitCost = unitCost + unitBillPrice;
 
-    return {
-      siplProductId: siplProduct.id,
-      product: {
-        id: siplProduct.requestedPurchaseProduct.product.id,
-        name: siplProduct.requestedPurchaseProduct.product.name,
-      },
+    console.log('landedUnitCost', landedUnitCost, unitCost, unitBillPrice)
 
-      siplProductQuantity: siplProduct.quantity,
+    let data: object = {}
 
-      totalSlabs: siplProduct.slabs.length,
-      totalPrice: totalSIPLProductPrice,
+    if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
+      data = {
+        siplProductId: siplProduct.id,
+        product: {
+          id: siplProduct.requestedPurchaseProduct.product.id,
+          name: siplProduct.requestedPurchaseProduct.product.name,
+          isSlabType: siplProduct.requestedPurchaseProduct.product.isSlabType,
+        },
 
-      totalReceivedArea: totalReceivedAreaPerProduct,
-      totalPackagingArea: totalPackagingAreaPerProduct,
+        totalGenericQuantity: siplProduct.genericProducts.length,
 
-      unitCost,
-      landedUnitCost,
-    };
+        siplProductQuantity: siplProduct.quantity,
+
+        totalPrice: totalSIPLProductPrice,
+
+        unitCost,
+        landedUnitCost,
+      };
+    } else {
+      data = {
+        siplProductId: siplProduct.id,
+        product: {
+          id: siplProduct.requestedPurchaseProduct.product.id,
+          name: siplProduct.requestedPurchaseProduct.product.name,
+          isSlabType: siplProduct.requestedPurchaseProduct.product.isSlabType,
+        },
+
+        siplProductQuantity: siplProduct.quantity,
+
+        totalSlabs: siplProduct.slabs.length,
+        totalPrice: totalSIPLProductPrice,
+
+        totalReceivedArea: totalReceivedQuantity,
+        totalPackagingArea: totalPackagingAreaPerProduct,
+
+        unitCost,
+        landedUnitCost,
+      };
+    }
+
+    return data;
   });
 
   return {
     dataAccordingToProduct,
     totalBillsCharges,
     totalPackagingArea,
-    totalReceivingArea,
+    totalReceivingQuantity,
     totalQuantity,
     totalAmount,
     unitBillCharge: unitBillPrice,
@@ -399,5 +512,5 @@ export const getAllBarcode: any = async (siplId: number) => {
 
 // Get new combined slab number
 export const getNewCombinedSlabNumberService = async (siplId: number) => {
-  return await slabRepository.getNewCombinedSlabNumber(siplId);
+  return await inventoryProductRepository.getNewCombinedNumber(siplId);
 };

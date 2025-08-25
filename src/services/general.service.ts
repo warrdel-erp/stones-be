@@ -13,20 +13,17 @@ import { COUNTRIES } from "../constants/countries";
 import { PAYMENT_METHOD } from "../constants/tableTypes";
 
 import * as productBaseColorRepository from "../repositories/productBaseColor.repository";
-import * as productCategoryRepository from "../repositories/productCategory.repository";
 import * as productFinishRepository from "../repositories/productFinish.repository";
 import * as productGroupRepository from "../repositories/productGroup.repository";
 import * as productSubCategoryRepository from "../repositories/productSubCategory.repository";
 
 export const getGeneralData = async (clientId: number) => {
-  const productCategories = await productCategoryRepository.getAllProductCategories(clientId);
   const productSubCategories = await productSubCategoryRepository.getAllProductSubCategories(clientId);
   const productGroup = await productGroupRepository.findAll(clientId);
   const productBaseColors = await productBaseColorRepository.findAll(clientId);
   const productFinish = await productFinishRepository.findAll(clientId);
 
   return {
-    productCategories,
     productSubCategories,
     productColors: productBaseColors,
     countries: COUNTRIES,

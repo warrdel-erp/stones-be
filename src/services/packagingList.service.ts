@@ -106,7 +106,7 @@ function getTotalPLQuantity(salesOrderProducts: any[]) {
 function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
   let products = removeDuplicatesWithUnitPrice(
     packagingList?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct.inventoryProduct.slab.product,
+      ...(salesOrderProduct.inventoryProduct.slab?.product || salesOrderProduct.inventoryProduct.genericProduct?.product),
       unitPrice: salesOrderProduct.unitPrice,
     }))
   );
@@ -114,16 +114,25 @@ function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
   // Map slabs to products
   const newProducts = products.map((product) => {
     const salesOrderProduct = packagingList.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
-    );
+      (salesOrderProduct: any) => {
+        let productId = null;
+        if (salesOrderProduct.inventoryProduct.slab) {
+          productId = salesOrderProduct.inventoryProduct.slab.product.id;
+        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
+          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
+        }
+
+        return (productId === product.id)
+          &&
+          (salesOrderProduct.unitPrice == product.unitPrice)
+
+      });
 
     return {
       ...product,
-      taxApplied: !!salesOrderProduct[0].taxApplied,
+      taxApplied: !!salesOrderProduct[0]?.taxApplied,
       totalQuantity: getTotalPLQuantity(salesOrderProduct),
-      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),
+      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct, product.isSlabType),
       salesOrderProduct,
     };
   });

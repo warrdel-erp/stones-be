@@ -67,10 +67,11 @@ export const getAllInvoicesList = async (
 
                   {
                     association: "inventoryProduct",
+                    attributes: ['combinedNumber'],
                     include: [
                       {
                         association: 'slab',
-                        attributes: ['combinedSlabNumber']
+                        attributes: ['id']
                       }
                     ]
                   }

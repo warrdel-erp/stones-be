@@ -17,60 +17,202 @@ export const getAllProducts = async (
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
-  const { rows: products, count: total } = await models.Product.findAndCountAll({
-    where: { ...whereClause, ...filter },
-    include: [
-      {
-        association: "category",
-      },
-      {
-        association: "subCategory",
-      },
-      {
-        association: "slabs",
-        required: onlyWithSlabs,
-        include: [
-          {
-            association: "inventoryProduct",
-            include: [
-              {
-                association: "bin",
-                attributes: ['name'],
-                include: [
-                  {
-                    association: "warehouse",
-                    include: [
-                      {
-                        association: "location", attributes: ["location"]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            association: 'sipl',
-            attributes: ['id', 'invoiceCode']
-          }
+  // If onlyWithSlabs is true, we need to handle it differently
+  if (onlyWithSlabs) {
+    // First get product IDs that have either slabs or generic products
+    const productsWithInventory = await models.Product.findAll({
+      attributes: ['id'],
+      include: [
+        {
+          association: "slabs",
+          required: false,
+          attributes: []
+        },
+        {
+          association: "genericProducts",
+          required: false,
+          attributes: []
+        }
+      ],
+      where: {
+        [Op.or]: [
+          { '$slabs.id$': { [Op.ne]: null } },
+          { '$genericProducts.id$': { [Op.ne]: null } }
         ]
       },
-      {
-        association: "group",
-        attributes: ["id", "name"],
-      },
-      {
-        association: "baseColor",
-        attributes: ["id", "name"],
-      },
-    ],
-    limit,
-    offset,
-    distinct: true,
-    order: [["createdAt", "DESC"]],
-  });
+      raw: true
+    });
 
-  return { products, total, page, limit };
+    const productIds = productsWithInventory.map((p: any) => p.id);
+
+    // Now get the full product details with these IDs
+    const { rows: products, count: total } = await models.Product.findAndCountAll({
+      where: {
+        ...whereClause,
+        ...filter,
+        id: { [Op.in]: productIds }
+      },
+      include: [
+        {
+          association: "subCategory",
+        },
+        {
+          association: "slabs",
+          required: false,
+          include: [
+            {
+              association: "inventoryProduct",
+              include: [
+                {
+                  association: "bin",
+                  attributes: ['name'],
+                  include: [
+                    {
+                      association: "warehouse",
+                      include: [
+                        {
+                          association: "location", attributes: ["location"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              association: 'sipl',
+              attributes: ['id', 'invoiceCode']
+            }
+          ]
+        },
+        {
+          association: "genericProducts",
+          required: false,
+          include: [
+            {
+              association: "inventoryProduct",
+              include: [
+                {
+                  association: "bin",
+                  attributes: ['name'],
+                  include: [
+                    {
+                      association: "warehouse",
+                      include: [
+                        {
+                          association: "location", attributes: ["location"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              association: 'sipl',
+              attributes: ['id', 'invoiceCode']
+            }
+          ]
+        },
+        {
+          association: "group",
+          attributes: ["id", "name"],
+        },
+        {
+          association: "baseColor",
+          attributes: ["id", "name"],
+        },
+      ],
+      limit,
+      offset,
+      distinct: true,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return { products, total, page, limit };
+  } else {
+    // Original query for when onlyWithSlabs is false
+    const { rows: products, count: total } = await models.Product.findAndCountAll({
+      where: { ...whereClause, ...filter },
+      include: [
+        {
+          association: "subCategory",
+        },
+        {
+          association: "slabs",
+          required: false,
+          include: [
+            {
+              association: "inventoryProduct",
+              include: [
+                {
+                  association: "bin",
+                  attributes: ['name'],
+                  include: [
+                    {
+                      association: "warehouse",
+                      include: [
+                        {
+                          association: "location", attributes: ["location"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              association: 'sipl',
+              attributes: ['id', 'invoiceCode']
+            }
+          ]
+        },
+        {
+          association: "genericProducts",
+          required: false,
+          include: [
+            {
+              association: "inventoryProduct",
+              include: [
+                {
+                  association: "bin",
+                  attributes: ['name'],
+                  include: [
+                    {
+                      association: "warehouse",
+                      include: [
+                        {
+                          association: "location", attributes: ["location"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              association: 'sipl',
+              attributes: ['id', 'invoiceCode']
+            }
+          ]
+        },
+        {
+          association: "group",
+          attributes: ["id", "name"],
+        },
+        {
+          association: "baseColor",
+          attributes: ["id", "name"],
+        },
+      ],
+      limit,
+      offset,
+      distinct: true,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return { products, total, page, limit };
+  }
 };
 
 // get product by id
@@ -84,7 +226,6 @@ export const getProductById = async (id: number) => {
     where: { id },
     include: [
       { model: models.Slab, as: "slabs" },
-      { model: models.ProductCategory, as: "category" },
       {
         model: models.ProductSubCategory,
         as: "subCategory",

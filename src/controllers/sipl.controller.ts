@@ -203,6 +203,17 @@ export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Respon
     );
   }
 
+  if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
+    const genericProduct = await siplService.handleCreateGenericProduct({
+      ...req.body,
+      siplId: Number(siplId),
+      createdById: userId,
+      updatedById: userId,
+      clientId
+    });
+    return SuccessResponse(res, 201, "Generic product created successfully", genericProduct);
+  }
+
   const slabs = await siplService.handleCreateSlabs({
     ...req.body,
     siplId: Number(siplId),
@@ -210,7 +221,8 @@ export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Respon
     updatedBy: userId,
     clientId
   });
-  res.status(201).json({ message: "Slabs created successfully", slabs });
+
+  SuccessResponse(res, 201, "Slabs created successfully", slabs);
 });
 
 // Get new PO number

@@ -1,4 +1,4 @@
-export const SLAB_STATUS = {
+export const INVENTORY_ITEM_STATUS = {
   INITIATE: "INITIATE",
   IN_INVENTORY: "IN_INVENTORY",
   ALLOCATED: "ALLOCATED",
@@ -27,20 +27,20 @@ export const PRODUCT_COLORS = {
 } as const;
 
 export const UNITS_OF_MEASUREMENT = [
-  { id: 1, name: "Square Foot" },
-  { id: 2, name: "Square Meter" },
-  { id: 3, name: "Square Inch" },
-  { id: 4, name: "Square Yard" },
-  { id: 5, name: "Square Centimeter" },
-  { id: 6, name: "Cubic Foot" },
-  { id: 7, name: "Cubic Meter" },
-  { id: 8, name: "Cubic Inch" },
-  { id: 9, name: "Cubic Centimeter" },
-  { id: 10, name: "Kilogram" },
-  { id: 11, name: "Metric Ton" },
-  { id: 12, name: "Pound" },
-  { id: 13, name: "Ounce" },
-  { id: 14, name: "EA" },
+  { id: 1, name: "Square Foot", code: 'SF' },
+  // { id: 2, name: "Square Meter" },
+  // { id: 3, name: "Square Inch" },
+  // { id: 4, name: "Square Yard" },
+  // { id: 5, name: "Square Centimeter" },
+  // { id: 6, name: "Cubic Foot" },
+  // { id: 7, name: "Cubic Meter" },
+  // { id: 8, name: "Cubic Inch" },
+  // { id: 9, name: "Cubic Centimeter" },
+  // { id: 10, name: "Kilogram" },
+  // { id: 11, name: "Metric Ton" },
+  // { id: 12, name: "Pound" },
+  // { id: 13, name: "Ounce" },
+  { id: 14, name: "EA", code: "EA" },
 ] as const;
 
 export const DELIVERY_TYPE = {

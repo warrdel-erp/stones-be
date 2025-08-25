@@ -97,3 +97,13 @@
 3. condition for deletion.
 
 ---
+
+1. can there be more categories then "slab" and "non slab".
+
+---
+
+1. if generic product how would show `Packaging Oty, Received Oty` in SIPL page.
+2. there can be multiple type of product in one SIPL.
+3. can generic product swapable with Slab. Or another generic product. [can be swaped only with its own product]
+4. what if SO has both types of product in SO then how to get total quantity.
+   5, In PL how would we show different type of product in single table.

@@ -1,9 +1,10 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as genericProductRepository from "../repositories/genericProductRepository";
 import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
-import { SLAB_STATUS } from "../constants";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 import { Transaction } from "sequelize";
 import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
@@ -35,20 +36,37 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
           throw new AppError(`Invalid Id '${product.id}' or product does not belongs to given SO`, 400);
         }
       } else {
+        // Check if it's a slab or generic product
         let slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
+        let genericProduct: any = null;
 
-        slab = slab?.get({ plain: true });
+        if (slab) {
+          slab = slab?.get({ plain: true });
+        } else {
+          // If not a slab, check if it's a generic product
+          genericProduct = await genericProductRepository.getGenericProductByInventoryProductId(
+            product.inventoryProductId,
+            transaction
+          );
+        }
 
         // can't add to SO if it is not in inventory
-        if (slab?.status !== SLAB_STATUS.IN_INVENTORY) {
+        if (slab && slab.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
           throw new AppError(
             `Slab is not in inventory. Slab is ${slab.status} with id: ${slab.id}, and inventoryProductId: ${product.inventoryProductId}`,
             400
           );
         }
 
-        // can't add to SO if it is in hold.
-        if (slab?.isHold) {
+        if (genericProduct && genericProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+          throw new AppError(
+            `Generic product is not in inventory. Generic product is ${genericProduct.status} with id: ${genericProduct.id}, and inventoryProductId: ${product.inventoryProductId}`,
+            400
+          );
+        }
+
+        // can't add to SO if it is in hold (only for slabs)
+        if (slab && slab.isHold) {
           throw new AppError(`Slab is in hold with id: ${slab.id}`, 400);
         }
 
@@ -58,13 +76,21 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
           transaction
         );
 
-        // If a product is added in SO then status is changed to ALLOCATED for that slab.
-        await slabRepository.updateSlabStatusByInventoryProduct(
-          product.inventoryProductId,
-          SLAB_STATUS.ALLOCATED,
-          transaction,
-          { isInCart: false }
-        );
+        // If a product is added in SO then status is changed to ALLOCATED
+        if (slab) {
+          await slabRepository.updateSlabStatusByInventoryProduct(
+            product.inventoryProductId,
+            INVENTORY_ITEM_STATUS.ALLOCATED,
+            transaction,
+            { isInCart: false }
+          );
+        } else if (genericProduct) {
+          await genericProductRepository.updateGenericProductStatusByInventoryProduct(
+            product.inventoryProductId,
+            INVENTORY_ITEM_STATUS.ALLOCATED,
+            transaction
+          );
+        }
 
         upsertedProducts.push(newProduct);
       }
@@ -140,14 +166,14 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, data: a
     // set new slab status as ALLOCATED
     await slabRepository.updateSlabStatusByInventoryProduct(
       data.newInventoryProductId,
-      SLAB_STATUS.ALLOCATED,
+      INVENTORY_ITEM_STATUS.ALLOCATED,
       transaction
     );
 
     // reset old slab status as IN_INVENTORY
     await slabRepository.updateSlabStatusByInventoryProduct(
       salesOrderProduct.inventoryProductId,
-      SLAB_STATUS.IN_INVENTORY,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
       transaction
     );
 

@@ -5,12 +5,14 @@ module.exports = {
     await queryInterface.bulkInsert(
       "product_sub_category",
       [
-        { id: 1, name: "GRANITE", categoryId: 1 },
-        { id: 2, name: "LIMESTONE", categoryId: 1 },
-        { id: 3, name: "MARBLE", categoryId: 1 },
-        { id: 4, name: "QUARTZ", categoryId: 1 },
-        { id: 5, name: "QUARTZITE", categoryId: 1 },
-        { id: 6, name: "SOAPSTONE", categoryId: 1 },
+        { id: 1, name: "GRANITE", isSlabType: true, clientId: 1 },
+        { id: 2, name: "LIMESTONE", isSlabType: true, clientId: 1 },
+        { id: 3, name: "MARBLE", isSlabType: true, clientId: 1 },
+        { id: 4, name: "QUARTZ", isSlabType: true, clientId: 1 },
+        { id: 5, name: "QUARTZITE", isSlabType: true, clientId: 1 },
+        { id: 6, name: "SOAPSTONE", isSlabType: true, clientId: 1 },
+        { id: 7, name: "Table", isSlabType: false, clientId: 1 },
+        { id: 8, name: "Cup", isSlabType: false, clientId: 1 },
       ],
       {}
     );

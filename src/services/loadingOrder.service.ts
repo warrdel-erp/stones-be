@@ -1,22 +1,24 @@
+import { INVENTORY_ITEM_STATUS, PAYMENT_TERMS, SALES_TAX } from "../constants";
 import { AppError } from "../helper/appError";
-import { PAYMENT_TERMS, SALES_TAX, SLAB_STATUS } from "../constants";
 import * as notesRepository from "../repositories/notes.repository";
 
-import { sequelize } from "../config/database";
-import { Transaction, WhereOptions } from "sequelize";
 import _ from "lodash";
+import { Transaction, WhereOptions } from "sequelize";
+import { sequelize } from "../config/database";
 
+import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as slabRepository from "../repositories/slab.repository";
+import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
-import * as slabRepository from "../repositories/slab.repository";
-import * as packagingListRepository from "../repositories/packagingList.repository";
-import * as soInvoiceRepository from "../repositories/soInvoice.repository";
-import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as journalEntryRepository from "../repositories/journalEntry.repository";
 
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
   JOURNAL_ENTRY_FOR_TYPES,
   JOURNAL_ENTRY_PROCESS_TYPE,
@@ -29,12 +31,10 @@ import {
   NOTES_TYPE,
   SALE_ORDER_PRODUCT_STAGES,
 } from "../constants/tableTypes";
-import { addPercentage, getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
-import { JournalEntry } from "../models/journalEntry.model";
-import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
-import * as  salesOrderInvoiceService from "./salesOrderInvoice.service";
+import { getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { Return } from "../models";
 import { createJournalEntriesForTradeServicesOfLoadingOrder } from "./journalEntry.service";
+import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
@@ -265,20 +265,26 @@ async function createLONotes(data: any, loadingOrder: any, transaction: Transact
 }
 
 export function getTotalLoadingOrderAmount(salesOrderProducts: any[], tax: number) {
+  let totalAmount = 0;
 
-  const totalAmount = _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) =>
-      (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144
-  );
-
-  const taxableAmount = _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) => {
-      if (!salesOrderProduct.taxApplied) return 0;
-      return (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+  for (const salesOrderProduct of salesOrderProducts) {
+    if (salesOrderProduct?.inventoryProduct?.slab) {
+      totalAmount += (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+    } else {
+      totalAmount += Number(salesOrderProduct.unitPrice);
     }
-  );
+  }
+
+  let taxableAmount = 0;
+  for (const salesOrderProduct of salesOrderProducts) {
+    if (salesOrderProduct.taxApplied) {
+      if (salesOrderProduct?.inventoryProduct?.slab) {
+        taxableAmount += (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+      } else {
+        taxableAmount += Number(salesOrderProduct.unitPrice);
+      }
+    }
+  }
 
   const taxAmount = getPercentageValue(taxableAmount, tax)
 
@@ -289,38 +295,57 @@ export function getTotalLoadingOrderAmount(salesOrderProducts: any[], tax: numbe
   }
 }
 
-export function getTotalLOQuantity(salesOrderProducts: any[]) {
-  return _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) => (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth) / 144
-  );
+export function getTotalLOQuantity(salesOrderProducts: any[], isSlabType: boolean) {
+  if (isSlabType) {
+    return _.sumBy(
+      salesOrderProducts,
+      (salesOrderProduct: any) => (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth) / 144
+    );
+  }
+
+  return salesOrderProducts.length;
 }
 
-export function getTotalLoOrderQuantity(salesOrderProducts: any[]) {
-  return _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) =>
-      (salesOrderProduct.inventoryProduct.slab.receivingLength *
-        salesOrderProduct.inventoryProduct.slab.receivingWidth) /
-      144
-  );
+export function getTotalLoOrderQuantity(salesOrderProducts: any[], isSlabType: boolean) {
+  if (!isSlabType) {
+    return salesOrderProducts.length;
+  } else {
+    return _.sumBy(
+      salesOrderProducts,
+      (salesOrderProduct: any) => {
+        if (salesOrderProduct?.inventoryProduct?.slab) {
+          return (salesOrderProduct.inventoryProduct.slab.receivingLength *
+            salesOrderProduct.inventoryProduct.slab.receivingWidth) /
+            144
+        } else {
+          return salesOrderProduct.unitPrice;
+        }
+      }
+    );
+  }
 }
 
 export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
-  const totalAmount = _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) =>
-      (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144
-  );
+  let totalAmount = 0;
 
-  const taxableAmount = _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) => {
-      if (!salesOrderProduct.taxApplied) return 0;
-      return (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+  for (const salesOrderProduct of salesOrderProducts) {
+    if (salesOrderProduct.inventoryProduct.slab) {
+      totalAmount += (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+    } else {
+      totalAmount += Number(salesOrderProduct.unitPrice);
     }
-  );
+  }
 
+  let taxableAmount = 0;
+  for (const salesOrderProduct of salesOrderProducts) {
+    if (salesOrderProduct.taxApplied) {
+      if (salesOrderProduct.inventoryProduct.slab) {
+        taxableAmount += (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144;
+      } else {
+        taxableAmount += Number(salesOrderProduct.unitPrice);
+      }
+    }
+  }
   const taxAmount = getPercentageValue(taxableAmount, tax)
 
   return {
@@ -331,9 +356,10 @@ export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
 }
 
 export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+
   let products = removeDuplicatesWithUnitPrice(
     loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct.inventoryProduct.slab.product,
+      ...(salesOrderProduct?.inventoryProduct?.slab?.product || salesOrderProduct?.inventoryProduct?.genericProduct?.product),
       unitPrice: salesOrderProduct.unitPrice,
     }))
   );
@@ -341,23 +367,43 @@ export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: an
   // Map slabs to products
   const newProducts = products.map((product) => {
     const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
+      (salesOrderProduct: any) => {
+        let productId = null;
+        if (salesOrderProduct.inventoryProduct.slab) {
+          productId = salesOrderProduct.inventoryProduct.slab.product.id;
+        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
+          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
+        }
+
+        return (productId === product.id)
+          &&
+          (salesOrderProduct.unitPrice == product.unitPrice)
+
+      }
     );
 
     const soProductsWithProductAndUnitPrice = loadingOrder.salesOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
+      (salesOrderProduct: any) => {
+        let productId = null;
+        if (salesOrderProduct.inventoryProduct.slab) {
+          productId = salesOrderProduct.inventoryProduct.slab.product.id;
+        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
+          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
+        }
+
+        return (productId === product.id)
+          &&
+          (salesOrderProduct.unitPrice === product.unitPrice)
+
+      }
     );
 
     return {
       ...product,
       taxApplied: !!salesOrderProduct[0]?.taxApplied,
       salesOrderProduct,
-      totalQuantity: getTotalLOQuantity(salesOrderProduct),
-      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct),
+      totalQuantity: getTotalLOQuantity(salesOrderProduct, product.isSlabType),
+      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct, product.isSlabType),
       soQuantity: salesOrderService.getTotalQuantity(soProductsWithProductAndUnitPrice),
     };
   });
@@ -538,14 +584,34 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
-    // Mark corresponding slabs as SOLD
+    // Mark corresponding products as SOLD
     for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
-      // Update Slab status to SOLD in Slab table.
-      await slabRepository.updateSlabStatusByInventoryProduct(
-        salesOrderProduct.inventoryProductId,
-        SLAB_STATUS.SOLD,
-        transaction
-      );
+      // Check if it's a slab or generic product
+      let slab = await slabRepository.getSlabByInventoryProductId(salesOrderProduct.inventoryProductId);
+      let genericProduct = null;
+
+      if (!slab) {
+        genericProduct = await genericProductRepository.updateGenericProductStatusByInventoryProduct(
+          salesOrderProduct.inventoryProductId,
+          INVENTORY_ITEM_STATUS.IN_INVENTORY, // Just to check if it exists
+          transaction
+        );
+      }
+
+      // Update product status to SOLD
+      if (slab) {
+        await slabRepository.updateSlabStatusByInventoryProduct(
+          salesOrderProduct.inventoryProductId,
+          INVENTORY_ITEM_STATUS.SOLD,
+          transaction
+        );
+      } else if (genericProduct) {
+        await genericProductRepository.updateGenericProductStatusByInventoryProduct(
+          salesOrderProduct.inventoryProductId,
+          INVENTORY_ITEM_STATUS.SOLD,
+          transaction
+        );
+      }
 
       // Update stage to INVOICED in Sales Order Product.
       await salesOrderProductRepository.updateSalesOrderProduct(
@@ -554,58 +620,59 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         transaction
       );
 
+      // Create journal entries (only for slabs as they have landed unit cost)
+      if (slab) {
+        await journalEntryRepository.create(
+          {
+            amount:
+              salesOrderProduct.inventoryProduct.slab.receivingLength *
+              salesOrderProduct.inventoryProduct.slab.receivingLength *
+              salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+            ledgerId: ledgerAccountForFinishedGoods.id,
+            type: JOURNAL_ENTRY_TYPE.CR,
 
+            subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+            subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
 
-      await journalEntryRepository.create(
-        {
-          amount:
-            salesOrderProduct.inventoryProduct.slab.receivingLength *
-            salesOrderProduct.inventoryProduct.slab.receivingLength *
-            salesOrderProduct.inventoryProduct.slab.landedUnitCost,
-          ledgerId: ledgerAccountForFinishedGoods.id,
-          type: JOURNAL_ENTRY_TYPE.CR,
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+            referenceId: invoice.id,
 
-          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-          subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
+            processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
-          referenceId: invoice.id,
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+            entryForId: loadingOrder.id,
+            locationId,
+            partyLedgerAccountId: ledgerAccountForCogs.id,
+          },
+          transaction
+        );
 
-          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+        await journalEntryRepository.create(
+          {
+            amount:
+              salesOrderProduct.inventoryProduct.slab.receivingLength *
+              salesOrderProduct.inventoryProduct.slab.receivingWidth *
+              salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+            ledgerId: ledgerAccountForCogs.id,
+            type: JOURNAL_ENTRY_TYPE.DR,
 
-          entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id,
-          locationId,
-          partyLedgerAccountId: ledgerAccountForCogs.id,
-        },
-        transaction
-      );
+            subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+            subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
 
-      await journalEntryRepository.create(
-        {
-          amount:
-            salesOrderProduct.inventoryProduct.slab.receivingLength *
-            salesOrderProduct.inventoryProduct.slab.receivingWidth *
-            salesOrderProduct.inventoryProduct.slab.landedUnitCost,
-          ledgerId: ledgerAccountForCogs.id,
-          type: JOURNAL_ENTRY_TYPE.DR,
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+            referenceId: invoice.id,
 
-          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-          subReferenceId: salesOrderProduct.inventoryProduct.slab.id,
+            processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
 
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
-          referenceId: invoice.id,
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+            entryForId: loadingOrder.id,
 
-          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-
-          entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id,
-
-          locationId,
-          partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
-        },
-        transaction
-      );
+            locationId,
+            partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
+          },
+          transaction
+        );
+      }
     }
 
     // if Packaging list exists then mark invoiced to packaging list.

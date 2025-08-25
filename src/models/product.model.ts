@@ -3,7 +3,6 @@ import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import { CustomUpdateOptions } from "../types/custom";
 import ProductBaseColor from "./productBaseColor.model";
-import ProductCategory from "./productCategory";
 import ProductGroup from "./productGroup.model";
 import ProductSubCategory from "./productSubCategory";
 import User from "./user.model";
@@ -113,7 +112,10 @@ const Product = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    singleSlabPrice: {
+    isSlabType: {
+      type: DataTypes.BOOLEAN,
+    },
+    singleUnitPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
     },
@@ -163,16 +165,6 @@ const Product = sequelize.define(
       type: DataTypes.ENUM("active", "inactive"),
       allowNull: false,
       defaultValue: "active",
-    },
-    categoryId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: ProductCategory,
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
     },
     subCategoryId: {
       type: DataTypes.INTEGER,

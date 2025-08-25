@@ -18,7 +18,6 @@ import PackagingListProduct from "./packagingListProduct.model";
 import Payment from "./payment.model";
 import PaymentBill from "./paymentBills.model";
 import Product from "./product.model";
-import ProductCategory from "./productCategory";
 import ProductSubCategory from "./productSubCategory";
 import PurchaseOrder from "./purchaseOrder";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
@@ -47,6 +46,7 @@ import InvoiceDelivery from "./InvoiceDelivery.model";
 import ServiceCategory from "./serviceCategory.model";
 import Service from "./service.model";
 import TradeService from "./tradeService.model";
+import GenericProduct from "./genericProduct.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -190,10 +190,6 @@ RequestedPurchaseProduct.belongsTo(PurchaseOrder, {
 Product.hasMany(RequestedPurchaseProduct, { foreignKey: "productId" });
 RequestedPurchaseProduct.belongsTo(Product, { foreignKey: "productId" });
 
-// Product-ProductCategory (one 'Product' have one 'Category') (one 'Category' have multiple 'Product')
-Product.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
-ProductCategory.hasMany(Product, { foreignKey: "categoryId" });
-
 // Product-ProductSubCategory (one 'Product' have one 'SubCategory') (one 'SubCategory' have multiple 'Product')
 Product.belongsTo(ProductSubCategory, { foreignKey: "subCategoryId", as: "subCategory" });
 ProductSubCategory.hasMany(Product, { foreignKey: "subCategoryId" });
@@ -233,6 +229,10 @@ Slab.belongsTo(Bin, { foreignKey: "binId" });
 Bin.hasMany(Slab, { foreignKey: "binId" });
 
 // one Bin has many slabs.
+GenericProduct.belongsTo(Bin, { foreignKey: "binId" });
+Bin.hasMany(GenericProduct, { foreignKey: "binId" });
+
+// one Bin has many slabs.
 Slab.belongsTo(Location, { foreignKey: "locationId" });
 Location.hasMany(Slab, { foreignKey: "locationId" });
 
@@ -257,10 +257,6 @@ Bill.belongsTo(SIPL, {
 // user have one default location ,One location could be default for many users.
 User.belongsTo(Location, { foreignKey: "defaultLocationId" });
 Location.hasMany(User, { foreignKey: "defaultLocationId" });
-
-// (ProductCategory have multiple sub categories), (One subCategory has one category)
-ProductSubCategory.belongsTo(ProductCategory, { foreignKey: "categoryId", as: "category" });
-ProductCategory.hasMany(ProductSubCategory, { foreignKey: "categoryId", as: "subCategories" });
 
 // User can have multiple bills
 Bill.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
@@ -611,6 +607,22 @@ LedgerAccount.hasMany(Service, { foreignKey: "ledgerAccountId", as: "services" }
 
 TradeService.belongsTo(Service, { foreignKey: "serviceId", as: 'service' })
 
+// Register associations for GenericProduct
+GenericProduct.belongsTo(User, { foreignKey: "createdById", as: "createdBy" });
+GenericProduct.belongsTo(User, { foreignKey: "updatedById", as: "updatedBy" });
+GenericProduct.belongsTo(Product, { foreignKey: "productId", as: "product" });
+GenericProduct.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
+GenericProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+GenericProduct.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
+
+SIPLProduct.hasMany(GenericProduct, { foreignKey: "siplProductId", as: "genericProducts" });
+
+SIPL.hasMany(GenericProduct, { foreignKey: "siplId", as: "genericProducts" });
+
+InventoryProduct.hasOne(GenericProduct, { foreignKey: "inventoryProductId", as: "genericProduct" });
+
+Product.hasMany(GenericProduct, { foreignKey: "productId", as: "genericProducts" });
+
 export {
   Client,
   User,
@@ -627,7 +639,6 @@ export {
   Slab,
   Warehouse,
   Bill,
-  ProductCategory,
   ProductSubCategory,
   InventoryProduct,
   LedgerAccount,
@@ -659,5 +670,6 @@ export {
   InvoiceDelivery,
   ServiceCategory,
   Service,
-  TradeService
+  TradeService,
+  GenericProduct
 };

@@ -147,11 +147,11 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
                         include: [
                             {
                                 association: "inventoryProduct",
-                                attributes: ['id'],
+                                attributes: ['id', 'combinedNumber'],
                                 include: [
                                     {
                                         association: 'slab',
-                                        attributes: ['id', 'combinedSlabNumber']
+                                        attributes: ['id']
                                     }
                                 ]
                             }

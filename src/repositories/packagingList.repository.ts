@@ -69,6 +69,14 @@ export const getPackagingListById = async (id: number) => {
                     },
                   ],
                 },
+                {
+                  association: "genericProduct",
+                  include: [
+                    {
+                      association: "product",
+                    },
+                  ],
+                },
               ],
             },
           ],

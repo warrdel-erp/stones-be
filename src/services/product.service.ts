@@ -50,7 +50,7 @@ export const fetchAllProducts = async (
 
     product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
     product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
+    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom);
 
     return product;
   });

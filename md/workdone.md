@@ -399,3 +399,53 @@ create new user under a client is done and all of them can login.
 2. Journal entry of services. ✅
 3. SIPL services. ✅
 4. Journal entry for services in SIPL. ✅
+
+---
+
+1. only two categories, remove all other category thing for product.
+2. product inputs according to slab category.
+3. restrict UOM to only two.
+4. reorder units according to selected UOM
+
+---
+
+1. create generic product.
+2. create PO with generic product, with unit accordingly.
+3. create SIPL as per generic product.
+4. form distunguation for slab and generic product.
+
+---
+
+1. Create generic product for submission FE, BE.
+2. receive inventory calculations in FE, BE.
+3. Pending : receive inventory.
+
+---
+
+1. Common serial number for Slab and Generic Product [BE, FE].
+2. Some design changes like (receive inventory table and button removal)
+3. Inventory page data.
+4. product filtration in SO add product.
+5. calculations of SO page.
+
+---
+
+1. Packaging List creation.
+2. Packaging List Table According to Generic products.
+3. Create Invoice.
+4. LO, PL, INV detail page data with tax.
+5. Put selling data for each inventory product.
+6. SO tax correction.
+7. Update pricing as per SIPL id.
+8. Update pricing as Bundle and block.
+9. Test Software with both type of product.
+
+---
+
+Pending
+
+1. Show invoice data.
+
+---
+
+1. Delivery approval with given order of invoice addresses.

@@ -326,6 +326,14 @@ export const getSalesOrderById = async (id: number) => {
                   },
                 ],
               },
+              {
+                association: "genericProduct",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
             ],
           },
           {

@@ -1,5 +1,5 @@
 import Slab from "../models/slab";
-import { SLAB_STATUS } from "../constants";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 import { col, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
@@ -7,8 +7,8 @@ import { sequelize } from "../config/database";
 // Finds all slabs by SIPL ID and updates their status.
 export const updateSlabStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
   const [updatedCount] = await Slab.update(
-    { status: SLAB_STATUS.IN_INVENTORY },
-    { where: { siplId, status: SLAB_STATUS.INITIATE }, individualHooks: true, transaction } // Only update slabs that are initiated
+    { status: INVENTORY_ITEM_STATUS.IN_INVENTORY },
+    { where: { siplId, status: INVENTORY_ITEM_STATUS.INITIATE }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
 
   return updatedCount;
@@ -22,7 +22,7 @@ export const setUnitLandedCost = async (
   transaction: Transaction
 ): Promise<number> => {
   const [updatedCount] = await Slab.update(
-    { status: SLAB_STATUS.IN_INVENTORY, landedUnitCost },
+    { status: INVENTORY_ITEM_STATUS.IN_INVENTORY, landedUnitCost },
     { where: { siplId, productId }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
 
@@ -72,7 +72,7 @@ export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) =>
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
-  status: (typeof SLAB_STATUS)[keyof typeof SLAB_STATUS],
+  status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
   transaction?: Transaction,
   additionalObj?: any
 ) => {
@@ -129,10 +129,6 @@ export const findByIdWithLogs = async (slabId: number) => {
         model: models.Product,
         as: "product",
         include: [
-          {
-            model: models.ProductCategory,
-            as: "category",
-          },
           {
             model: models.ProductSubCategory,
             as: "subCategory",
@@ -207,7 +203,7 @@ export const getInStockSlabsData = async (productId: number) => {
     where: {
       productId,
       status: {
-        [Op.or]: [SLAB_STATUS.IN_INVENTORY, SLAB_STATUS.ALLOCATED],
+        [Op.or]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.ALLOCATED],
       },
     },
     attributes: [
@@ -224,7 +220,7 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
   const data = await models.Slab.findAll({
     where: {
       productId,
-      [Op.or]: [{ status: SLAB_STATUS.ALLOCATED }, { isHold: true }],
+      [Op.or]: [{ status: INVENTORY_ITEM_STATUS.ALLOCATED }, { isHold: true }],
     },
     attributes: [
       [fn("COUNT", col("id")), "count"],
@@ -240,7 +236,7 @@ export const getAvailableSlabsData = async (productId: number) => {
   const data = await models.Slab.findAll({
     where: {
       productId,
-      [Op.and]: [{ status: SLAB_STATUS.IN_INVENTORY }, { isHold: false }],
+      [Op.and]: [{ status: INVENTORY_ITEM_STATUS.IN_INVENTORY }, { isHold: false }],
     },
     attributes: [
       [fn("COUNT", col("id")), "count"],
@@ -267,31 +263,6 @@ export const getOnlyBarcode = async (siplId: number) => {
     },
     attributes: ["id", "barcode"],
   });
-};
-
-export const getNewCombinedSlabNumber = async (siplId: number) => {
-  const sipl: any = await models.SIPL.findByPk(siplId, { attributes: ["invoiceCode"] });
-
-  if (!sipl) {
-    throw new Error("SIPL not found for the given ID.");
-  }
-
-  const existingSlab: any = await Slab.findOne({
-    where: { siplId },
-    order: [["combinedSlabNumber", "DESC"]],
-    attributes: ["combinedSlabNumber"],
-  });
-
-  const lastCombinedSlabNumber = existingSlab ? existingSlab.combinedSlabNumber : null;
-
-  if (!lastCombinedSlabNumber) {
-    return `${sipl.invoiceCode.split(" ")[1]}-1`;
-  }
-
-  const lastSection = parseInt(lastCombinedSlabNumber.split("-").pop() || "0", 10);
-  const newCombinedSlabNumber = `${lastCombinedSlabNumber.split("-").slice(0, -1).join("-")}-${lastSection + 1}`;
-
-  return newCombinedSlabNumber;
 };
 
 // get average landed cost.

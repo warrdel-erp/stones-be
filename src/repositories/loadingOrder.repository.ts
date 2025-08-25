@@ -111,7 +111,16 @@ export const getLoadingOrderById = async (id: number) => {
                     include: [
                       {
                         association: "product",
-                        attributes: ["id"],
+                        attributes: ["id", "isSlabType"],
+                      },
+                    ],
+                  },
+                  {
+                    association: "genericProduct",
+                    include: [
+                      {
+                        association: "product",
+                        attributes: ["id", "isSlabType"],
                       },
                     ],
                   },
@@ -138,6 +147,14 @@ export const getLoadingOrderById = async (id: number) => {
               },
               {
                 association: "slab",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
+              {
+                association: "genericProduct",
                 include: [
                   {
                     association: "product",

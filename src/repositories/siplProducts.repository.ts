@@ -21,6 +21,11 @@ export const findByProductIdAndSiplId = async (siplProductId: number, productId:
       {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProduct",
+        include: [
+          {
+            association: "product",
+          }
+        ],
         where: {
           productId,
         },
@@ -29,7 +34,7 @@ export const findByProductIdAndSiplId = async (siplProductId: number, productId:
     ],
   });
 
-  return result;
+  return result?.get({ plain: true });
 };
 
 // Delete product by id

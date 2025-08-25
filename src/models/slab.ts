@@ -4,7 +4,7 @@ import Product from "./product.model";
 import SIPL from "./sipl.model";
 import InventoryProduct from "./inventoryProduct";
 import PurchaseOrder from "./purchaseOrder";
-import { SLAB_STATUS } from "../constants";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
 import SIPLProduct from "./siplProduct";
 import Client from "./client.model";
@@ -22,10 +22,6 @@ const Slab = sequelize.define(
     },
     slabNumber: {
       type: DataTypes.INTEGER,
-    },
-    combinedSlabNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     entryUnit: {
       type: DataTypes.ENUM(...Object.values(SLAB_ENTRY_UNIT)),
@@ -68,9 +64,9 @@ const Slab = sequelize.define(
       },
     },
     status: {
-      type: DataTypes.ENUM(...Object.values(SLAB_STATUS)),
+      type: DataTypes.ENUM(...Object.values(INVENTORY_ITEM_STATUS)),
       allowNull: true,
-      defaultValue: SLAB_STATUS.INITIATE,
+      defaultValue: INVENTORY_ITEM_STATUS.INITIATE,
     },
     isHold: {
       type: DataTypes.BOOLEAN,

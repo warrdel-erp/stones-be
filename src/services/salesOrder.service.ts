@@ -129,38 +129,56 @@ export function getTotalQuantity(salesOrderProducts: any[]) {
     _.sumBy(
       salesOrderProducts,
       (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.receivingLength * salesOrderProduct.inventoryProduct.slab.receivingWidth
+        salesOrderProduct?.inventoryProduct?.slab?.receivingLength * salesOrderProduct?.inventoryProduct?.slab?.receivingWidth
     ) / 144
   );
 }
 
 function getTotalAmount(salesOrderProducts: any) {
+
+  // if salesOrderProduct.inventoryProduct.isSlabType is false then just add unit Price
+
   return (
     _.sumBy(
       salesOrderProducts,
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.receivingLength *
-        salesOrderProduct.inventoryProduct.slab.receivingWidth *
-        salesOrderProduct.unitPrice
-    ) / 144
+      (salesOrderProduct: any) => {
+
+        if (salesOrderProduct.inventoryProduct.isSlabType) {
+          return Number(salesOrderProduct?.inventoryProduct?.slab?.receivingLength *
+            salesOrderProduct?.inventoryProduct?.slab?.receivingWidth *
+            salesOrderProduct?.unitPrice / 144)
+        }
+
+        return Number(salesOrderProduct?.unitPrice)
+      }
+    )
   );
 }
 
 function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
   let products = removeDuplicatesWithUnitPrice(
     salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct.inventoryProduct.slab.product,
-      unitPrice: salesOrderProduct.unitPrice,
+      ...salesOrderProduct?.inventoryProduct?.slab?.product || salesOrderProduct?.inventoryProduct?.genericProduct?.product,
+      unitPrice: salesOrderProduct?.unitPrice,
     }))
   );
 
   // Map slabs to products
   const newProducts = products.map((product) => {
     const salesOrderProduct = salesOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
-    );
+      (salesOrderProduct: any) => {
+        let productId = null;
+        if (salesOrderProduct.inventoryProduct.slab) {
+          productId = salesOrderProduct.inventoryProduct.slab.product.id;
+        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
+          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
+        }
+
+        return (productId === product.id)
+          &&
+          (salesOrderProduct.unitPrice === product.unitPrice)
+
+      });
 
     // remaining products means -> products not yet gone in loadingOrder.
     const totalRemainingSoProducts = salesOrderProduct.filter(
@@ -169,11 +187,11 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
 
     return {
       ...product,
-      taxApplied: !!salesOrderProduct[0].taxApplied,
+      taxApplied: !!salesOrderProduct[0]?.taxApplied,
       salesOrderProduct,
-      totalAmount: getTotalAmount(salesOrderProduct),
-      totalQuantity: getTotalQuantity(salesOrderProduct),
-      totalRemainingQty: getTotalQuantity(totalRemainingSoProducts),
+      totalAmount: product.isSlabType ? getTotalAmount(salesOrderProduct) : _.sumBy(salesOrderProduct, (e: any) => Number(e.unitPrice)),
+      totalQuantity: product.isSlabType ? getTotalQuantity(salesOrderProduct) : salesOrderProduct.length,
+      totalRemainingQty: product.isSlabType ? getTotalQuantity(totalRemainingSoProducts) : totalRemainingSoProducts.length,
     };
   });
 

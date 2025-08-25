@@ -42,7 +42,7 @@ export const getInvoiceById = async (id: number) => {
 function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
   let products = removeDuplicatesWithUnitPrice(
     loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct.inventoryProduct.slab.product,
+      ...(salesOrderProduct.inventoryProduct.slab?.product || salesOrderProduct.inventoryProduct.genericProduct?.product),
       unitPrice: salesOrderProduct.unitPrice,
     }))
   );
@@ -50,10 +50,19 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
   // Map slabs to products
   const newProducts = products.map((product) => {
     const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) =>
-        salesOrderProduct.inventoryProduct.slab.product.id === product.id &&
-        salesOrderProduct.unitPrice === product.unitPrice
-    );
+      (salesOrderProduct: any) => {
+        let productId = null;
+        if (salesOrderProduct.inventoryProduct.slab) {
+          productId = salesOrderProduct.inventoryProduct.slab.product.id;
+        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
+          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
+        }
+
+        return (productId === product.id)
+          &&
+          (salesOrderProduct.unitPrice == product.unitPrice)
+
+      });
 
     const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
 
@@ -73,7 +82,7 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
       ...product,
       salesOrderProduct,
       amounts,
-      totalQuantity: getTotalLOQuantity(salesOrderProduct),
+      totalQuantity: getTotalLOQuantity(salesOrderProduct, product?.isSlabType),
     };
   });
 

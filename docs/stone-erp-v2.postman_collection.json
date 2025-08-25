@@ -5917,6 +5917,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "approve orders",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"id\": 1,\n        \"order\": 1\n    },\n    {\n        \"id\": 2,\n        \"order\": 2\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery/approve-orders",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"approve-orders"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}

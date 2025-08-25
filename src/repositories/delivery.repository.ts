@@ -55,4 +55,32 @@ export const getAllDeliveriesByClientId = async (clientId: number) => {
             }
         ],
     });
+};
+
+export const updateInvoiceDeliveryOrders = async (orders: Array<{ id: number, order: number }>, transaction?: Transaction) => {
+    const updates = orders.map(({ id, order }) =>
+        InvoiceDelivery.update({ order }, {
+            where: { id },
+            transaction
+        })
+    );
+
+    return Promise.all(updates);
+};
+
+export const findInvoiceDeliveriesByIds = async (ids: number[]) => {
+    return InvoiceDelivery.findAll({
+        where: { id: { [Op.in]: ids } },
+        attributes: ['id', 'deliveryId']
+    });
+};
+
+export const updateDeliveryStatus = async (deliveryIds: number[], status: string, transaction?: Transaction) => {
+    return Delivery.update(
+        { status },
+        {
+            where: { id: { [Op.in]: deliveryIds } },
+            transaction
+        }
+    );
 }; 

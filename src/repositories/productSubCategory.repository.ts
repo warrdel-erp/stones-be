@@ -6,29 +6,13 @@ export const createProductSubCategory = async (payload: any) => {
 
 export const getAllProductSubCategories = async (clientId: number) => {
   return await models.ProductSubCategory.findAll({
-    include: [
-      {
-        model: models.ProductCategory,
-        as: "category",
-        where: { clientId },
-        required: true,
-      },
-    ],
+    where: { clientId }
   });
 };
 
 export const getProductSubCategoryById = async (id: number, clientId: number) => {
   return await models.ProductSubCategory.findOne({
-    where: { id },
-    include: [
-      {
-        model: models.ProductCategory,
-        as: "category",
-        attributes: [],
-        where: { clientId },
-        required: true,
-      },
-    ],
+    where: { id, clientId },
   });
 };
 
@@ -39,16 +23,7 @@ export const updateProductSubCategory = async (id: number, data: any) => {
 // This function deletes a product subcategory by its ID and checks if it belongs to the specified client
 export const deleteProductSubCategory = async (id: number, clientId: number) => {
   const subCategory = await models.ProductSubCategory.findOne({
-    where: { id },
-    include: [
-      {
-        model: models.ProductCategory,
-        as: "category",
-        attributes: [],
-        where: { clientId },
-        required: true,
-      },
-    ],
+    where: { id, clientId },
   });
 
   if (subCategory) {

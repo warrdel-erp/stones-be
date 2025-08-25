@@ -145,6 +145,35 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
               },
             ],
           },
+          {
+            model: models.GenericProduct,
+            as: "genericProducts",
+            include: [
+              {
+                model: models.InventoryProduct,
+                as: "inventoryProduct",
+                include: [
+                  {
+                    model: models.Bin,
+                    as: "bin",
+                    include: [
+                      {
+                        model: models.Warehouse,
+                        as: "warehouse",
+                        include: [
+                          {
+                            model: models.Location,
+                            as: "location",
+                            attributes: ["location"],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
@@ -227,59 +256,81 @@ export const findSIPLBySlabId = async (slabId: number) => {
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({
-    attributes: {
-      include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("SIPL.poSiplNumber")), "invoiceCode"]],
-    },
+    // attributes: {
+    //   include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("SIPL.poSiplNumber")), "invoiceCode"]],
+    // },
     include: [
       {
-        model: models.Slab,
         where: { productId }, // Filter only slabs belonging to the given product
-        as: "slabs",
-        required: true,
+        association: "slabs",
+        required: false, // Make this optional so SIPLs with only generic products are also returned
         include: [
           {
-            model: models.Product,
-            as: "product",
+            association: "product",
             attributes: ["id", "name"],
           },
           {
-            model: models.Bin,
-            as: "bin",
+            association: "inventoryProduct",
             required: true,
             include: [
               {
-                model: models.Warehouse,
-                as: "warehouse",
-                where: { locationId },
+                association: "bin",
                 required: true,
                 include: [
                   {
-                    model: models.Location,
-                    as: "location",
-                    attributes: ["location"],
+                    association: "warehouse",
+                    where: { locationId },
+                    required: true,
+                    include: [
+                      {
+                        association: "location",
+                        attributes: ["location"],
+                      },
+                    ]
                   },
-                ]
-              },
-            ],
-          },
-          {
-            model: models.SIPL,
-            as: "sipl",
-            // attributes: ["id", "poSiplNumber"],
-            include: [
-              {
-                model: models.PurchaseOrder,
-                as: "purchaseOrder",
-                attributes: ["id", "clientPoNumber"],
+                ],
               },
             ],
           },
         ],
       },
       {
-        model: models.PurchaseOrder,
-        as: "purchaseOrder",
-        attributes: [],
+        where: { productId }, // Filter only generic products belonging to the given product
+        association: "genericProducts",
+        required: false, // Make this optional so SIPLs with only slabs are also returned
+        include: [
+          {
+            association: "product",
+            attributes: ["id", "name"],
+          },
+          {
+            association: "inventoryProduct",
+            required: true,
+            include: [
+              {
+                association: "bin",
+                required: true,
+                include: [
+                  {
+                    association: "warehouse",
+                    where: { locationId },
+                    required: true,
+                    include: [
+                      {
+                        association: "location",
+                        attributes: ["location"],
+                      },
+                    ]
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        association: "purchaseOrder",
+        attributes: ["id", "clientPoNumber"],
       },
     ],
     order: [["createdAt", "DESC"]],

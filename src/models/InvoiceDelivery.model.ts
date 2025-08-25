@@ -35,6 +35,11 @@ const InvoiceDelivery = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: false,
         },
+        order: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+        },
         soInvoiceId: {
             type: DataTypes.INTEGER,
             allowNull: false,

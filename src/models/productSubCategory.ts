@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import ProductCategory from "./productCategory";
+import Client from "./client.model";
 
 const ProductSubCategory = sequelize.define(
   "ProductCategory",
@@ -18,13 +18,18 @@ const ProductSubCategory = sequelize.define(
         msg: "unique name_no",
       },
     },
-    categoryId: {
+    clientId: {
       type: DataTypes.INTEGER,
       references: {
-        model: ProductCategory,
+        model: Client,
         key: "id",
       },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
     },
+    isSlabType: {
+      type: DataTypes.BOOLEAN
+    }
   },
   {
     tableName: "product_sub_category",

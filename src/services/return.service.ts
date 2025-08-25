@@ -7,8 +7,9 @@ import Return from "../models/return.model";
 import { ReturnProduct, SalesOrderProduct, Slab } from "../models";
 import { Op } from "sequelize";
 import * as slabRepository from "../repositories/slab.repository";
+import * as genericProductRepository from "../repositories/genericProductRepository";
 import { Transaction } from "sequelize";
-import { SALES_TAX, SLAB_STATUS } from "../constants";
+import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
 import { getTotalLoadingOrderAmount, getTotalPlAmount } from "./loadingOrder.service";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
 import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
@@ -269,63 +270,87 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
         });
 
 
-        // Update status of all slabs to IN_INVENTORY
+        // Update status of all products to IN_INVENTORY
         for (const returnProduct of returnRecord.returnProducts) {
-            await slabRepository.updateSlabStatusByInventoryProduct(
-                returnProduct.salesOrderProduct.inventoryProductId,
-                SLAB_STATUS.IN_INVENTORY,
-                transaction
-            );
+            // Check if it's a slab or generic product
+            let slab = await slabRepository.getSlabByInventoryProductId(returnProduct.salesOrderProduct.inventoryProductId);
+            let genericProduct = null;
 
-            const slab = returnProduct.salesOrderProduct.inventoryProduct.slab
+            if (!slab) {
+                genericProduct = await genericProductRepository.updateGenericProductStatusByInventoryProduct(
+                    returnProduct.salesOrderProduct.inventoryProductId,
+                    INVENTORY_ITEM_STATUS.IN_INVENTORY, // Just to check if it exists
+                    transaction
+                );
+            }
 
-            // #5
-            await journalEntryRepository.create(
-                {
-                    amount: slab.receivingLength * slab.receivingLength * slab.landedUnitCost,
-                    ledgerId: ledgerAccountForFinishedGoods.id,
-                    type: JOURNAL_ENTRY_TYPE.DR,
+            // Update product status to IN_INVENTORY
+            if (slab) {
+                await slabRepository.updateSlabStatusByInventoryProduct(
+                    returnProduct.salesOrderProduct.inventoryProductId,
+                    INVENTORY_ITEM_STATUS.IN_INVENTORY,
+                    transaction
+                );
+            } else if (genericProduct) {
+                await genericProductRepository.updateGenericProductStatusByInventoryProduct(
+                    returnProduct.salesOrderProduct.inventoryProductId,
+                    INVENTORY_ITEM_STATUS.IN_INVENTORY,
+                    transaction
+                );
+            }
 
-                    subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-                    subReferenceId: slab.id,
+            // Create journal entries (only for slabs as they have landed unit cost)
+            if (slab) {
+                const slabData = returnProduct.salesOrderProduct.inventoryProduct.slab;
 
-                    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                    referenceId: returnRecord.id,
+                // #5
+                await journalEntryRepository.create(
+                    {
+                        amount: slabData.receivingLength * slabData.receivingLength * slabData.landedUnitCost,
+                        ledgerId: ledgerAccountForFinishedGoods.id,
+                        type: JOURNAL_ENTRY_TYPE.DR,
 
-                    processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+                        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+                        subReferenceId: slabData.id,
 
-                    entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                    entryForId: returnRecord.id,
+                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+                        referenceId: returnRecord.id,
 
-                    locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
-                    partyLedgerAccountId: ledgerAccountForCogs.id,
-                },
-                transaction
-            );
+                        processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
 
-            // #6
-            await journalEntryRepository.create(
-                {
-                    amount: slab.receivingLength * slab.receivingLength * slab.landedUnitCost,
-                    ledgerId: ledgerAccountForCogs.id,
-                    type: JOURNAL_ENTRY_TYPE.CR,
+                        entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+                        entryForId: returnRecord.id,
 
-                    subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-                    subReferenceId: slab.id,
+                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                        partyLedgerAccountId: ledgerAccountForCogs.id,
+                    },
+                    transaction
+                );
 
-                    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                    referenceId: returnRecord.id,
+                // #6
+                await journalEntryRepository.create(
+                    {
+                        amount: slabData.receivingLength * slabData.receivingLength * slabData.landedUnitCost,
+                        ledgerId: ledgerAccountForCogs.id,
+                        type: JOURNAL_ENTRY_TYPE.CR,
 
-                    processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+                        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+                        subReferenceId: slabData.id,
 
-                    entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                    entryForId: returnRecord.id,
+                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+                        referenceId: returnRecord.id,
 
-                    locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
-                    partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
-                },
-                transaction
-            );
+                        processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+
+                        entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+                        entryForId: returnRecord.id,
+
+                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                        partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
+                    },
+                    transaction
+                );
+            }
         }
 
         // Update return status to COMPLETE

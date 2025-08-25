@@ -154,5 +154,7 @@ export const CUSTOMER_STATUS = {
 
 export const DELIVERY_STATUS = {
   PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
   COMPLETED: "completed",
 } as const;

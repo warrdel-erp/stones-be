@@ -46,7 +46,7 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
   }
 
   if (!data.products.length) {
-    SuccessResponse(res, 200, "Inventory data fetched successfully", []);
+    return SuccessResponse(res, 200, "Inventory data fetched successfully", []);
   }
 
   SuccessResponse(res, 200, "Inventory data fetched successfully", data.products, {
@@ -55,3 +55,5 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     limit: Number(limit),
   });
 });
+
+

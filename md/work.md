@@ -476,3 +476,10 @@ major delivery handled ->
 
 1. keeping separate location data in invoice-delivery so in future if customer's address changed it should remain same.
 2.
+
+---
+
+1. journal entry for generic product on loading Order, Return.
+2.
+
+3. lot pricing

@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { Op } from "sequelize";
 
 export const createInventoryProducts = async (binId: number, quantity: number, transaction: Transaction) => {
   const inventoryProductsData = Array.from({ length: quantity }, () => ({
@@ -7,4 +8,179 @@ export const createInventoryProducts = async (binId: number, quantity: number, t
   }));
 
   return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
+};
+
+export const createInventoryProductsWithCombinedNumbers = async (
+  binId: number,
+  quantity: number,
+  siplId: number,
+  isSlabType: boolean,
+  sellingPrice: number,
+  transaction: Transaction
+) => {
+  const sipl: any = await models.SIPL.findByPk(siplId, {
+    attributes: ["invoiceCode"],
+    transaction
+  });
+
+  if (!sipl) {
+    throw new Error("SIPL not found for the given ID.");
+  }
+
+  // Get the last combined number for this SIPL by checking inventory products
+  const lastInventoryProduct: any = await models.InventoryProduct.findOne({
+    include: [
+      {
+        model: models.Slab,
+        as: "slab",
+        where: { siplId },
+        required: false,
+      },
+      {
+        model: models.GenericProduct,
+        as: "genericProduct",
+        where: { siplId },
+        required: false,
+      }
+    ],
+    order: [["combinedNumber", "DESC"]],
+    attributes: ["combinedNumber"],
+    transaction,
+  });
+
+  const lastCombinedNumber = lastInventoryProduct?.combinedNumber || null;
+  let lastSection = 0;
+
+  if (lastCombinedNumber) {
+    const parts = lastCombinedNumber.split("-");
+    lastSection = parseInt(parts[parts.length - 1] || "0", 10);
+  }
+
+  const baseNumber = sipl.invoiceCode.split(" ")[1];
+  const inventoryProductsData = Array.from({ length: quantity }, (_, index) => ({
+    binId,
+    combinedNumber: `${baseNumber}-${lastSection + index + 1}`,
+    isSlabType,
+    sellingPrice,
+    siplId
+  }));
+
+  return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
+};
+
+export const getNewCombinedNumber = async (siplId: number, transaction?: Transaction) => {
+  const sipl: any = await models.SIPL.findByPk(siplId, {
+    attributes: ["invoiceCode"],
+    transaction
+  });
+
+  if (!sipl) {
+    throw new Error("SIPL not found for the given ID.");
+  }
+
+  // Get the last combined number for this SIPL by checking inventory products
+  const lastInventoryProduct: any = await models.InventoryProduct.findOne({
+    include: [
+      {
+        model: models.Slab,
+        as: "slab",
+        where: { siplId },
+        required: false,
+      },
+      {
+        model: models.GenericProduct,
+        as: "genericProduct",
+        where: { siplId },
+        required: false,
+      }
+    ],
+    order: [["combinedNumber", "DESC"]],
+    attributes: ["combinedNumber"],
+    transaction,
+  });
+
+  const lastCombinedNumber = lastInventoryProduct?.combinedNumber || null;
+
+  if (!lastCombinedNumber) {
+    return `${sipl.invoiceCode.split(" ")[1]}-1`;
+  }
+
+  const parts = lastCombinedNumber.split("-");
+  const lastSection = parseInt(parts[parts.length - 1] || "0", 10);
+  const newCombinedNumber = `${parts.slice(0, -1).join("-")}-${lastSection + 1}`;
+
+  return newCombinedNumber;
+};
+
+export const getInventoryProductsBySIPL = async (siplId: number) => {
+  // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
+  const inventoryProducts = await models.InventoryProduct.findAll({
+    where: {
+      siplId
+    },
+    include: [
+      {
+        association: "bin",
+        include: [
+          {
+            association: "warehouse",
+            include: [
+              {
+                association: "location",
+                attributes: ["location"],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  return inventoryProducts;
+};
+
+export const updateInventoryProductsSellingPrice = async (ids: number[], sellingPrice: number, transaction?: Transaction) => {
+  // Update multiple inventory products by IDs with new selling price
+  const result = await models.InventoryProduct.update(
+    { sellingPrice },
+    {
+      where: {
+        id: {
+          [Op.in]: ids
+        }
+      },
+      transaction
+    }
+  );
+
+  return result;
+};
+
+export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string) => {
+  // Find all inventory products where the specified slab field matches
+  const inventoryProducts = await models.InventoryProduct.findAll({
+    include: [
+      {
+        association: "bin",
+        include: [
+          {
+            association: "warehouse",
+            include: [
+              {
+                association: "location",
+                attributes: ["location"],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        association: "slab",
+        where: { [fieldName]: fieldValue },
+        required: true,
+      },
+    ],
+  });
+
+  return inventoryProducts;
 };

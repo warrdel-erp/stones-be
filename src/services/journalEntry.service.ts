@@ -215,7 +215,7 @@ export const createJournalEntryForReceiveInventory = async (
     for (const bill of siplData.bills) {
       for (const billItem of bill.billItems) {
         // Unit freight item cost (amount / total received area of all products in sipl).
-        const unitFreightItemCost = billItem.amount / calculations.totalReceivingArea;
+        const unitFreightItemCost = billItem.amount / calculations.totalReceivingQuantity;
 
         await journalEntryRepository.create({
           amount: unitFreightItemCost * productCalc.totalReceivedArea,

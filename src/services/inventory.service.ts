@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { PRODUCT_KIND, SLAB_STATUS, UNITS_OF_MEASUREMENT } from "../constants";
+import { PRODUCT_KIND, INVENTORY_ITEM_STATUS, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import * as productRepository from "../repositories/product.repository";
 import * as siplRepository from "../repositories/sipl.repository";
@@ -31,17 +31,25 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
         })
       );
 
-      const totalQuantity = (_.sumBy(
+      let totalQuantity = (_.sumBy(
         _.flatMap(product.sipls, 'slabs'),
         item => item.receivingWidth * item.receivingWidth
       ) / 144).toFixed(2);
 
+      if (!product.isSlabType) {
+        totalQuantity = _.flatMap(product.sipls, 'genericProducts').length?.toString();
+      }
+
       const totalSlabsCount = _.flatMap(product.sipls, 'slabs').length;
 
-      const totalHoldQuantity = (_.sumBy(
+      let totalHoldQuantity = (_.sumBy(
         _.flatMap(product.sipls, 'slabs').filter(e => e.isHold),
         item => item.receivingWidth * item.receivingWidth
       ) / 144).toFixed(2);
+
+      if (!product.isSlabType) {
+        totalHoldQuantity = _.flatMap(product.sipls, 'genericProducts')?.filter(e => e.isHold)?.length?.toString();
+      }
 
       const totalHoldSlabsCount = _.flatMap(product.sipls, 'slabs')?.filter(e => e.isHold)?.length;
 
@@ -79,7 +87,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
     const blocks = Array.from(blockGroups.entries()).map(([block, slabs]: any) => {
 
       const totalQuantity = (_.sumBy(slabs,
-        (item: any) => (item.status == SLAB_STATUS.IN_INVENTORY && !item.isHold) ? item.receivingLength * item.receivingWidth : 0
+        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.isHold) ? item.receivingLength * item.receivingWidth : 0
       ) / 144).toFixed(2);
 
       return {
@@ -138,7 +146,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
     const bundles = Array.from(bundleGroups.entries()).map(([bundle, slabs]: any) => {
 
       const totalQuantity = (_.sumBy(slabs,
-        (item: any) => (item.status == SLAB_STATUS.IN_INVENTORY && !item.isHold) ? item.receivingLength * item.receivingWidth : 0
+        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.isHold) ? item.receivingLength * item.receivingWidth : 0
       ) / 144).toFixed(2);
 
       return {
@@ -175,3 +183,5 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
   return { products: finalData, total: data.total };
 };
+
+
