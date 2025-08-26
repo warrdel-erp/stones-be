@@ -81,25 +81,13 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
 
   // Get the last combined number for this SIPL by checking inventory products
   const lastInventoryProduct: any = await models.InventoryProduct.findOne({
-    include: [
-      {
-        model: models.Slab,
-        as: "slab",
-        where: { siplId },
-        required: false,
-      },
-      {
-        model: models.GenericProduct,
-        as: "genericProduct",
-        where: { siplId },
-        required: false,
-      }
-    ],
+    where: { siplId },
     order: [["combinedNumber", "DESC"]],
     attributes: ["combinedNumber"],
     transaction,
   });
 
+  console.log(lastInventoryProduct, lastInventoryProduct)
   const lastCombinedNumber = lastInventoryProduct?.combinedNumber || null;
 
   if (!lastCombinedNumber) {
