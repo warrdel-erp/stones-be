@@ -1,4 +1,5 @@
 import { Transaction } from "sequelize";
+import { sequelize } from "../config/database";
 import * as models from "../models";
 import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
@@ -29,12 +30,7 @@ export const createInventoryProductsWithCombinedNumbers = async (
   }
 
   // Get the last combined number for this SIPL by checking inventory products
-  const lastInventoryProduct: any = await models.InventoryProduct.findOne({
-    where: { siplId },
-    order: [["combinedNumber", "DESC"]],
-    attributes: ["combinedNumber"],
-    transaction,
-  });
+  const lastInventoryProduct: any = await getLastInventoryProductAsPerSipl(siplId, transaction)
 
   const lastCombinedNumber = lastInventoryProduct?.combinedNumber || null;
   let lastSection = 0;
@@ -56,6 +52,22 @@ export const createInventoryProductsWithCombinedNumbers = async (
   return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
 };
 
+const getLastInventoryProductAsPerSipl = (siplId: number, transaction?: Transaction) => {
+  return models.InventoryProduct.findOne({
+    where: { siplId },
+    order: [
+      [
+        sequelize.literal(
+          "CAST(SUBSTRING_INDEX(`combinedNumber`, '-', -1) AS UNSIGNED)"
+        ),
+        "DESC",
+      ],
+    ],
+    attributes: ["combinedNumber"],
+    transaction,
+  });
+}
+
 export const getNewCombinedNumber = async (siplId: number, transaction?: Transaction) => {
   const sipl: any = await models.SIPL.findByPk(siplId, {
     attributes: ["invoiceCode"],
@@ -67,14 +79,8 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
   }
 
   // Get the last combined number for this SIPL by checking inventory products
-  const lastInventoryProduct: any = await models.InventoryProduct.findOne({
-    where: { siplId },
-    order: [["combinedNumber", "DESC"]],
-    attributes: ["combinedNumber"],
-    transaction,
-  });
+  const lastInventoryProduct: any = await getLastInventoryProductAsPerSipl(siplId, transaction)
 
-  console.log(lastInventoryProduct, lastInventoryProduct)
   const lastCombinedNumber = lastInventoryProduct?.combinedNumber || null;
 
   if (!lastCombinedNumber) {
