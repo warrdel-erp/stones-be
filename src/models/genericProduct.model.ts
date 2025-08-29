@@ -3,8 +3,8 @@ import { sequelize } from "../config/database";
 import User from "./user.model";
 import Product from "./product.model";
 import SIPL from "./sipl.model";
-import InventoryProduct from "./inventoryProduct";
-import SIPLProduct from "./siplProduct";
+import InventoryProduct from "./inventoryProduct.model";
+import SIPLProduct from "./siplProduct.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 
 const GenericProduct = sequelize.define(

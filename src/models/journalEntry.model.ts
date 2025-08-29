@@ -9,7 +9,7 @@ import {
 } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 import User from "./user.model";
-import Location from "./location";
+import Location from "./location.model";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 
 export type JournalEntry = {

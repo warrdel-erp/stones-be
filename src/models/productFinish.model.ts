@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user.model"; // adjust the path if needed
+import User from "./user.model";
+import Client from "./client.model";
 
 const ProductFinish = sequelize.define(
     "ProductFinish",
@@ -10,7 +11,6 @@ const ProductFinish = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -19,7 +19,6 @@ const ProductFinish = sequelize.define(
                 msg: "Group name must be unique",
             },
         },
-
         createdBy: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -30,7 +29,6 @@ const ProductFinish = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "RESTRICT",
         },
-
         updatedBy: {
             type: DataTypes.INTEGER,
             allowNull: true,

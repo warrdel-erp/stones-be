@@ -106,10 +106,6 @@ const Customer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    reason: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     status: {
       type: DataTypes.ENUM(...Object.values(CUSTOMER_STATUS)),
       allowNull: false,

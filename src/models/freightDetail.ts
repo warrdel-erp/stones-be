@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SIPL from "./sipl.model";
-import Vendor from "./vendor";
-import PurchaseOrder from "./purchaseOrder";
+import Vendor from "./vendor.model";
+import PurchaseOrder from "./purchaseOrder.model";
 
 const FreightDetail = sequelize.define(
   "FreightDetail",

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Bin from "./bin";
+import Bin from "./bin.model";
 import SIPL from "./sipl.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 
@@ -44,10 +44,7 @@ const InventoryProduct = sequelize.define(
     combinedNumber: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: {
-        name: "unique_combinedNumber_constraint",
-        msg: "unique combined number",
-      },
+      unique: true
     },
     isSlabType: {
       type: DataTypes.BOOLEAN,

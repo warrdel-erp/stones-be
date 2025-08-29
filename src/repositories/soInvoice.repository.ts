@@ -2,7 +2,7 @@ import { Op, Transaction, WhereOptions, col, fn } from "sequelize";
 import * as models from "../models";
 import CustomerAddress from "../models/customerAddress.model";
 import LoadingOrder from "../models/loadingOrder.model";
-import Location from "../models/location";
+import Location from "../models/location.model";
 import { RETURN_STATUS } from "../models/return.model";
 import SalesOrder from "../models/salesOrder.model";
 import { SoInvoice } from "../models/salesOrderInvoice.model";

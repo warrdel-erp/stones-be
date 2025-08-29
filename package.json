@@ -6,6 +6,7 @@
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed:all": "npx sequelize-cli db:seed:all",
+    "migrate:all": "npx sequelize-cli db:migrate",
     "build": "tsc",
     "start": "pm2 start dist/index.js"
   },

@@ -224,11 +224,7 @@ export async function handleCreateGenericProduct(data: any) {
       throw new Error("SIPL not found.");
     }
 
-    console.log('data', data)
-
     const product = (await productRepository.getProductByIdSimple(data.productId));
-
-    console.log(product, 'product')
 
     const sellingPrice = product.singleUnitPrice
     // console.log(sellingPrice, 'sellingPrice')

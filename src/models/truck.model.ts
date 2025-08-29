@@ -14,10 +14,7 @@ const Truck = sequelize.define(
     registrationNumber: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: {
-        name: "unique_registration_number",
-        msg: "unique_registration_number"
-      }
+      unique: true
     },
     name: {
       type: DataTypes.STRING,
@@ -47,12 +44,6 @@ const Truck = sequelize.define(
   {
     tableName: "trucks",
     timestamps: true,
-    indexes: [
-      {
-        fields: ["registrationNumber"],
-        unique: true
-      }
-    ]
   }
 );
 

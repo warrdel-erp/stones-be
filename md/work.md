@@ -482,5 +482,7 @@ major delivery handled ->
 1. journal entry for generic product on loading Order, Return.
 2.
 
-3. lot pricing
+3. lot pricing ✅
 4. remove Status from slab
+5. bifurcate address from vendor.
+6. remove unnecessary fields from customer.

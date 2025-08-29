@@ -1,10 +1,11 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Notes from "./note";
+import Notes from "./note.model";
 import { VENDOR_TYPES } from "../constants/tableTypes";
 import User from "./user.model";
 import { SCOP } from "../constants";
-import Location from "./location";
+import Location from "./location.model";
+import Client from "./client.model";
 
 const Vendor = sequelize.define(
   "Vendor",
@@ -153,9 +154,19 @@ const Vendor = sequelize.define(
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
-    tableName: "vendor",
+    tableName: "vendors",
     timestamps: true,
     paranoid: true, // Enables soft delete
   }

@@ -125,7 +125,7 @@ export const SALES_ORDER_STATUS = {
   COMPLETED: "completed",
   CANCELLED: "cancelled",
   CLOSED: "closed",
-};
+} as const;
 
 // "internal", "printable"
 export const NOTES_TYPE = {

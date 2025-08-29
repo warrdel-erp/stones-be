@@ -1,24 +1,20 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Warehouse from "./warehouse";
+import Location from "./location.model";
 
-const Bin = sequelize.define(
-  "bins",
+const Warehouse = sequelize.define(
+  "warehouses",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    warehouseId: {
+    locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Warehouse,
+        model: Location,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -26,9 +22,9 @@ const Bin = sequelize.define(
     },
   },
   {
-    tableName: "bins",
+    tableName: "warehouses",
     timestamps: false,
   }
 );
 
-export default Bin;
+export default Warehouse;

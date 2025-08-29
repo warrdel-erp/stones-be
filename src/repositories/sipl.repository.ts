@@ -9,16 +9,16 @@ export async function createSIPL(siplData: any, transaction?: Transaction) {
 
 // Get latest invoice number
 export const getInvoiceNumber = async () => {
-  let lastPO: any = await models.SIPL.findOne({
+  let lastSIPL: any = await models.SIPL.findOne({
     order: [["id", "DESC"]],
     attributes: ["clientInvoiceNumber", "poSiplNumber"],
   });
 
-  lastPO = lastPO?.get({ plain: true });
+  lastSIPL = lastSIPL?.get({ plain: true });
 
   return {
-    clientInvoiceNumber: lastPO ? lastPO?.clientInvoiceNumber + 1 : 1,
-    poSiplNumber: lastPO ? lastPO?.poSiplNumber + 1 : 1,
+    clientInvoiceNumber: lastSIPL ? lastSIPL?.clientInvoiceNumber + 1 : 1,
+    poSiplNumber: lastSIPL ? lastSIPL?.poSiplNumber + 1 : 1,
   };
 };
 

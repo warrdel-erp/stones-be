@@ -24,10 +24,7 @@ const TradeService = sequelize.define(
             allowNull: false,
         },
         referenceType: {
-            type: DataTypes.ENUM(
-                TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
-                TRADE_SERVICE_REFERENCE_TYPES.SIPL
-            ),
+            type: DataTypes.ENUM(...Object.values(TRADE_SERVICE_REFERENCE_TYPES)),
             allowNull: false,
         },
 

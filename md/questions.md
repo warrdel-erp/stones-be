@@ -107,3 +107,8 @@
 3. can generic product swapable with Slab. Or another generic product. [can be swaped only with its own product]
 4. what if SO has both types of product in SO then how to get total quantity.
    5, In PL how would we show different type of product in single table.
+
+---
+
+1. what if there are too much products.
+2. what was logic behind Picked in SalesOrderProduct, because I think all LO products are mandatory in PL so Picked is not required.

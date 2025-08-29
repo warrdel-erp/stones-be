@@ -1,9 +1,9 @@
-import { DataTypes, Transaction } from "sequelize";
+import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user.model";
-import PurchaseOrder from "./purchaseOrder";
+import PurchaseOrder from "./purchaseOrder.model";
 import Client from "./client.model";
-import Location from "./location";
+import Location from "./location.model";
 
 const SIPL = sequelize.define(
   "SIPL",

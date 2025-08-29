@@ -1,4 +1,4 @@
-import Slab from "../models/slab";
+import Slab from "../models/slab.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { col, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";

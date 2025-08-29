@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import Notes from "../models/note";
+import Notes from "../models/note.model";
 
 /**
  * Create a note entry in the database.

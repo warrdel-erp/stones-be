@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import InventoryProduct from "./inventoryProduct";
+import InventoryProduct from "./inventoryProduct.model";
 import PackagingList from "./packagingList.model";
 import LoadingOrder from "./loadingOrder.model";
 import SalesOrder from "./salesOrder.model";

@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import Vendor from "./vendor";
+import Vendor from "./vendor.model";
 import { sequelize } from "../config/database";
 import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";

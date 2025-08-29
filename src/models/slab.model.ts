@@ -2,11 +2,11 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Product from "./product.model";
 import SIPL from "./sipl.model";
-import InventoryProduct from "./inventoryProduct";
-import PurchaseOrder from "./purchaseOrder";
+import InventoryProduct from "./inventoryProduct.model";
+import PurchaseOrder from "./purchaseOrder.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
-import SIPLProduct from "./siplProduct";
+import SIPLProduct from "./siplProduct.model";
 import Client from "./client.model";
 
 const Slab = sequelize.define(
@@ -148,14 +148,6 @@ const Slab = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
     },
   },
   {

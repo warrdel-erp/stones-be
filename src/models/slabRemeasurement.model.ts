@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import Slab from "./slab"; // Assuming you have a Slab model
+import Slab from "./slab.model"; // Assuming you have a Slab model
 
 const SlabRemeasurement = sequelize.define(
   "SlabRemeasurement",
