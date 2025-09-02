@@ -59,6 +59,28 @@ export const fetchAllProducts = async (
 };
 
 // Fetch all products
+export const fetchAllProductsWithCompactData = async (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: any,
+  onlyWithSlabs?: boolean
+) => {
+  let products = await productRepository.getAllProductsWithCompactData(page, limit, search, filter, onlyWithSlabs);
+
+  products.products = products.products.map((product: any) => {
+
+    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
+    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
+    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom);
+
+    return product;
+  });
+
+  return products;
+};
+
+// Fetch all products
 export const fetchProductsDataByTabs = async (tab: string, productId: number) => {
   let data: any[] = [];
 

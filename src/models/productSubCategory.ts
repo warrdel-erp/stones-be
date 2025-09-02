@@ -3,7 +3,7 @@ import { sequelize } from "../config/database";
 import Client from "./client.model";
 
 const ProductSubCategory = sequelize.define(
-  "ProductCategory",
+  "ProductSubCategory",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -32,8 +32,8 @@ const ProductSubCategory = sequelize.define(
     }
   },
   {
-    tableName: "product_sub_category",
-    timestamps: false,
+    tableName: "product_sub_categories",
+    timestamps: true,
   }
 );
 

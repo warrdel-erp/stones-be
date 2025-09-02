@@ -23,7 +23,7 @@ const Warehouse = sequelize.define(
   },
   {
     tableName: "warehouses",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

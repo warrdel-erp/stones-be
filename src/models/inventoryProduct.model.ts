@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Bin from "./bin.model";
 import SIPL from "./sipl.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import Product from "./product.model";
 
 const InventoryProduct = sequelize.define(
   "InventoryProduct",
@@ -44,7 +45,17 @@ const InventoryProduct = sequelize.define(
     combinedNumber: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true
+      // unique: true
+    },
+    productId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Product,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     isSlabType: {
       type: DataTypes.BOOLEAN,
@@ -64,4 +75,5 @@ InventoryProduct.beforeUpdate((inventoryProduct) => {
   delete inventoryProduct.dataValues.id;
   delete inventoryProduct.dataValues.combinedNumber;
   delete inventoryProduct.dataValues.siplId;
-});
+  delete inventoryProduct.dataValues.productId;
+}); 

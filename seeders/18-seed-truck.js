@@ -15,7 +15,6 @@ module.exports = {
           clientId: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
-          Trucks: null,
         },
         {
           id: 1,
@@ -27,7 +26,6 @@ module.exports = {
           clientId: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
-          Trucks: null,
         },
       ],
       {}

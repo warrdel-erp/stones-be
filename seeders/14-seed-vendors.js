@@ -3,10 +3,11 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
-      "vendor",
+      "vendors",
       [
         {
           id: 1,
+          clientId: 1,
           name: "Supplier 1",
           printName: "supplier-1",
           type: "supplier",
@@ -35,6 +36,7 @@ module.exports = {
         },
         {
           id: 2,
+          clientId: 1,
           name: "Supplier 2",
           printName: "supplier-2",
           type: "supplier",
@@ -63,6 +65,7 @@ module.exports = {
         },
         {
           id: 3,
+          clientId: 1,
           name: "Freight 1",
           printName: "freight-1",
           type: "freight",
@@ -91,6 +94,7 @@ module.exports = {
         },
         {
           id: 4,
+          clientId: 1,
           name: "Freight 2",
           printName: "freight-2",
           type: "freight",
@@ -123,6 +127,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("vendor", null, {});
+    await queryInterface.bulkDelete("vendors", null, {});
   },
 };

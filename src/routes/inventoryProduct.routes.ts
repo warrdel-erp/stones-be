@@ -5,7 +5,10 @@ import { authenticateUser } from "../middleware/authMiddleware";
 const router = express.Router();
 
 // Get inventory products according to siplId
-router.get("/", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
+router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
+
+// Get inventory products according to siplId
+router.get("/", authenticateUser, inventoryProductController.getInventoryProducts);
 
 // Update selling price of inventory products
 router.put("/sellingPrice", authenticateUser, inventoryProductController.updateInventoryProductsSellingPrice);

@@ -163,25 +163,25 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
           },
         ],
       },
-      {
-        model: models.Bin,
-        as: "bin",
-        required: true,
-        include: [
-          {
-            model: models.Warehouse,
-            as: "warehouse",
-            where: { ...(locationId ? { locationId } : {}) },
-            required: true,
-            include: [
-              {
-                model: models.Location,
-                as: "location",
-              }
-            ]
-          }
-        ]
-      },
+      // {
+      //   model: models.Bin,
+      //   as: "bin",
+      //   required: true,
+      //   include: [
+      //     {
+      //       model: models.Warehouse,
+      //       as: "warehouse",
+      //       where: { ...(locationId ? { locationId } : {}) },
+      //       required: true,
+      //       include: [
+      //         {
+      //           model: models.Location,
+      //           as: "location",
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // },
     ],
     transaction
   });

@@ -5,7 +5,7 @@ import Payment from "../models/payment.model";
 import PaymentBill from "../models/paymentBills.model";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
 import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES } from "../constants/tableTypes";
-
+import * as advancedDepositRepository from '../repositories/advancedDeposit.repository'
 interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
@@ -43,6 +43,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
             {
                 amount: data.amount,
                 salesOrderId: data.salesOrderId,
+                accountId: data.accountId
             },
             { transaction }
         );
@@ -57,6 +58,8 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
                 paymentMethod: data.paymentMethod,
                 status: "completed",
                 clientId: salesOrder.clientId,
+                paymentFor: 'ADVANCED_DEPOSIT',
+                paymentForId: advancedDeposit.id
             },
             { transaction }
         );
@@ -139,4 +142,9 @@ export const getAdvancedDepositsBySalesOrderId = async (salesOrderId: number) =>
             }
         ]
     });
-}; 
+};
+
+
+export const getAdvancedDepositWithoutPagination = (filters: Record<string, string>) => {
+    return advancedDepositRepository.getAdvancedDepositWithoutPagination(filters);
+}

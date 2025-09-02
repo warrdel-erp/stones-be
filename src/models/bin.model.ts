@@ -27,7 +27,7 @@ const Bin = sequelize.define(
   },
   {
     tableName: "bins",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

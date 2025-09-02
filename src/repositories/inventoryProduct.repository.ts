@@ -3,14 +3,7 @@ import { sequelize } from "../config/database";
 import * as models from "../models";
 import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
-
-export const createInventoryProducts = async (binId: number, quantity: number, transaction: Transaction) => {
-  const inventoryProductsData = Array.from({ length: quantity }, () => ({
-    binId,
-  }));
-
-  return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
-};
+import { Where } from "sequelize/types/utils";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -18,6 +11,7 @@ export const createInventoryProductsWithCombinedNumbers = async (
   siplId: number,
   isSlabType: boolean,
   sellingPrice: number,
+  productId: number,
   transaction: Transaction
 ) => {
   const sipl: any = await models.SIPL.findByPk(siplId, {
@@ -46,7 +40,8 @@ export const createInventoryProductsWithCombinedNumbers = async (
     combinedNumber: `${baseNumber}-${lastSection + index + 1}`,
     isSlabType,
     sellingPrice,
-    siplId
+    siplId,
+    productId
   }));
 
   return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
@@ -223,3 +218,34 @@ export const updateInventoryProductStatusById = async (
     }
   );
 };
+
+export const getInventoryProducts = (filter: Record<string, string>) => {
+  return models.InventoryProduct.findAll({
+    where: filter,
+    include: [
+      {
+        association: 'slab'
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'bin',
+        attributes: ['id', 'name'],
+        include: [
+          {
+            association: "warehouse",
+            attributes: ['id'],
+            include: [
+              {
+                association: 'location',
+                attributes: ['location']
+              }
+            ]
+
+          }
+        ]
+      }
+    ]
+  })
+}

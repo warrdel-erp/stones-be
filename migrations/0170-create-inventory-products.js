@@ -47,6 +47,16 @@ module.exports = {
         allowNull: true,
         defaultValue: false,
       },
+      productId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "products",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

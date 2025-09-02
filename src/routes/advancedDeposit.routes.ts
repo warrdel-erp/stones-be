@@ -9,4 +9,6 @@ const router = Router();
 // Create a new advanced deposit
 router.post("/", authenticateUser, validateRequest(createAdvancedDepositSchema), advancedDepositController.createAdvancedDepositHandler);
 
+router.get('/withoutPagination', authenticateUser, advancedDepositController.getAdvancedDepositWithoutPagination)
+
 export default router; 

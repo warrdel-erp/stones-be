@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
+import { Where } from "sequelize/types/utils";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
@@ -80,3 +81,13 @@ export const getAllocatedInventoryProductsAccordingToCustomer = catchAsync(async
 
     return SuccessResponse(res, 200, "Allocated inventory products fetched successfully", data);
 });
+
+
+export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
+    const filter = req.query;
+
+    const data = await inventoryProductService.getInventoryProducts(filter as Record<string, string>);
+
+    return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
+});
+

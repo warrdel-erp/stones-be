@@ -225,16 +225,16 @@ Warehouse.hasMany(Bin, { foreignKey: "warehouseId" });
 Bin.belongsTo(Warehouse, { foreignKey: "warehouseId" });
 
 // one Bin has many slabs.
-Slab.belongsTo(Bin, { foreignKey: "binId" });
-Bin.hasMany(Slab, { foreignKey: "binId" });
+// Slab.belongsTo(Bin, { foreignKey: "binId" });
+// Bin.hasMany(Slab, { foreignKey: "binId" });
 
 // one Bin has many slabs.
-GenericProduct.belongsTo(Bin, { foreignKey: "binId" });
-Bin.hasMany(GenericProduct, { foreignKey: "binId" });
+// GenericProduct.belongsTo(Bin, { foreignKey: "binId" });
+// Bin.hasMany(GenericProduct, { foreignKey: "binId" });
 
 // one Bin has many slabs.
-Slab.belongsTo(Location, { foreignKey: "locationId" });
-Location.hasMany(Slab, { foreignKey: "locationId" });
+// Slab.belongsTo(Location, { foreignKey: "locationId" });
+// Location.hasMany(Slab, { foreignKey: "locationId" });
 
 // (one Vendor has many Bills) (One Bill belongs to one Ven)
 Vendor.hasMany(Bill, { foreignKey: "vendorId", as: "bills" });
@@ -471,6 +471,10 @@ PackagingList.hasMany(SalesOrderProduct, { foreignKey: "packagingListId", as: "s
 SalesOrderInvoice.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
 Customer.hasMany(SalesOrderInvoice, { foreignKey: "customerId", as: "salesOrderInvoices" });
 
+// SalesOrderInvoice belongs to one SsalesOrder (one SalesOrder can have many SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+SalesOrder.hasMany(SalesOrderInvoice, { foreignKey: "salesOrderId", as: "salesOrderInvoices" });
+
 // SalesOrderInvoice belongs to one loadingOrder (one LoadingOrder can have one SalesOrderInvoice)
 SalesOrderInvoice.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
 LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "salesOrderInvoice" });
@@ -622,6 +626,11 @@ SIPL.hasMany(GenericProduct, { foreignKey: "siplId", as: "genericProducts" });
 InventoryProduct.hasOne(GenericProduct, { foreignKey: "inventoryProductId", as: "genericProduct" });
 
 Product.hasMany(GenericProduct, { foreignKey: "productId", as: "genericProducts" });
+
+AdvancedDeposit.belongsTo(LedgerAccount, { foreignKey: 'accountId', as: 'ledgerAccount' })
+LedgerAccount.hasMany(AdvancedDeposit, { foreignKey: 'accountId', as: 'advancedDeposits' })
+
+AdvancedDeposit.hasOne(Payment, { foreignKey: 'paymentForId', as: 'payment' })
 
 export {
   Client,

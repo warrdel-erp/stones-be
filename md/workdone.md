@@ -459,4 +459,6 @@ Pending
 7. Expose PORTS in server. [FE, BE]
 8. Push branch to git.[FE, BE]
 
-table no: 19
+---
+
+1. Migrations are done.

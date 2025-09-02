@@ -205,3 +205,8 @@ export const getOpenSOCountByClient = async (clientId: number) => {
   const count = await salesOrderRepository.countOpenSOByClientId(clientId);
   return { count };
 };
+
+
+export const getPaidAmountForSO = (id: number) => {
+  return salesOrderRepository.getTotalPaidAmountForSO(id);
+}

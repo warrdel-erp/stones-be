@@ -41,7 +41,7 @@ const ProductBaseColor = sequelize.define(
         },
     },
     {
-        tableName: "product_base_color",
+        tableName: "product_base_colors",
         timestamps: true,
     }
 );

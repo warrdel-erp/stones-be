@@ -43,7 +43,7 @@ const ProductGroup = sequelize.define(
         },
     },
     {
-        tableName: "product_group",
+        tableName: "product_groups",
         timestamps: true,
     }
 );

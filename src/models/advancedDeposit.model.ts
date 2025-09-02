@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
+import { getAccountById } from "../repositories/account.repository";
+import LedgerAccount from "./ledgerAccount.model";
 
 const AdvancedDeposit = sequelize.define(
     "AdvancedDeposit",
@@ -22,6 +24,16 @@ const AdvancedDeposit = sequelize.define(
             allowNull: false,
             references: {
                 model: SalesOrder,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
+        accountId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: LedgerAccount,
                 key: "id",
             },
             onUpdate: "CASCADE",

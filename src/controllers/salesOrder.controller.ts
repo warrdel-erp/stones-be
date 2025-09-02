@@ -49,3 +49,13 @@ export const getNewSoNumber = catchAsync(async (req: AuthRequest, res: Response)
   const data = await salesOrderService.getSONumber(clientId!);
   SuccessResponse(res, 200, "New SO number fetched successfully.", data);
 });
+
+// Get total paid amount for an SO.
+export const getPaidAmountForSO = catchAsync(async (req: AuthRequest, res: Response) => {
+
+  const { id } = req.params
+
+  const data = await salesOrderService.getPaidAmountForSO(Number(id));
+
+  return SuccessResponse(res, 200, 'Total paid amount fetched successfully for given SO.', data)
+})

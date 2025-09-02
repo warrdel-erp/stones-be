@@ -1,4 +1,4 @@
-import { Transaction, Op, Sequelize } from "sequelize";
+import { Transaction, Op, Sequelize, fn, cast, col } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 import { SALES_ORDER_STATUS } from "../constants/tableTypes";
@@ -370,3 +370,28 @@ export const countOpenSOByClientId = async (clientId: number) => {
     },
   });
 };
+
+// Get total paid amount for a SO.
+export const getTotalPaidAmountForSO = (id: number) => {
+  return models.SalesOrder.findByPk(id, {
+    attributes: [
+      'id',
+      [
+        fn('COALESCE', fn("SUM", cast(col('salesOrderInvoices->paymentBills.amount'), 'double')), 0), 'totalPaidAmount'
+      ]
+    ],
+    include: [
+      {
+        association: "salesOrderInvoices",
+        attributes: [],
+        include: [
+          {
+            association: 'paymentBills',
+            attributes: []
+          }
+        ]
+      }
+    ],
+    group: ['id']
+  })
+}

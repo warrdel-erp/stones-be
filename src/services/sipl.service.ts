@@ -179,6 +179,7 @@ export async function handleCreateSlabs(slabData: any) {
       slabData.siplId,
       true, // isSlabType = true for slabs
       sellingPrice,
+      slabData.productId,
       transaction
     );
 
@@ -236,6 +237,7 @@ export async function handleCreateGenericProduct(data: any) {
       data.siplId,
       false, // isSlabType = false for generic products
       sellingPrice,
+      data.productId,
       transaction
     );
 

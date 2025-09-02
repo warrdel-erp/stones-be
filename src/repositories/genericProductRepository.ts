@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { col, fn, literal, Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 
@@ -102,4 +102,20 @@ export const getAllGenericProducts = async (filters?: any, transaction?: Transac
         ],
         transaction
     });
+};
+
+
+// Get data
+export const getAvailableGenericProductData = async (productId: number) => {
+    const data = await models.GenericProduct.findAll({
+        where: {
+            productId,
+            [Op.and]: [{ status: INVENTORY_ITEM_STATUS.IN_INVENTORY }, { isHold: false }],
+        },
+        attributes: [
+            [fn("COUNT", col("id")), "count"],
+        ],
+    });
+
+    return data;
 };

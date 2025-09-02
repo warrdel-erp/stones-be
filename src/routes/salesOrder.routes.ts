@@ -21,7 +21,11 @@ router.put("/:salesOrderId/salesOrderProduct", authenticateUser, salesOrderProdu
 // Get new SO number
 router.get("/newSoNumber", authenticateUser, salesOrderController.getNewSoNumber);
 
+// Get Paid Amount for a SO
+router.get("/paidAmount/:id", authenticateUser, salesOrderController.getPaidAmountForSO)
+
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);
+
 
 export default router;

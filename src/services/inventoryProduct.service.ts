@@ -1,3 +1,4 @@
+import { Where } from "sequelize/types/utils";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 
 export const getInventoryProductsBySIPLCombinedNumber = async (siplId: number) => {
@@ -24,3 +25,8 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
 export const getAllocatedInventoryProductsAccordingToCustomer = async (customerId: number) => {
     return await inventoryProductRepository.getAllocatedInventoryProductsAccordingToCustomer(customerId);
 };
+
+
+export const getInventoryProducts = (filter: Record<string, string>) => {
+    return inventoryProductRepository.getInventoryProducts(filter)
+}

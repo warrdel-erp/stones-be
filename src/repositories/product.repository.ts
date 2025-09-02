@@ -1,6 +1,9 @@
-import { col, fn, Op } from "sequelize";
+import { col, fn, literal, Op, Sequelize } from "sequelize";
 import * as models from "../models";
 import { CustomUpdateOptions } from "../types/custom";
+import { INVENTORY_ITEM_STATUS } from "../constants";
+import * as slabRepository from '../repositories/slab.repository'
+import * as genericProductRepository from '../repositories/genericProductRepository'
 
 export const createProduct = async (productData: any) => {
   return await models.Product.create(productData);
@@ -131,6 +134,7 @@ export const getAllProducts = async (
 
     return { products, total, page, limit };
   } else {
+
     // Original query for when onlyWithSlabs is false
     const { rows: products, count: total } = await models.Product.findAndCountAll({
       where: { ...whereClause, ...filter },
@@ -214,6 +218,127 @@ export const getAllProducts = async (
     return { products, total, page, limit };
   }
 };
+
+// Get all products
+export const getAllProductsWithCompactData = async (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: any,
+  onlyWithSlabs?: boolean
+) => {
+  const offset = (page - 1) * limit;
+  const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
+
+  // If onlyWithSlabs is true, we need to handle it differently
+  if (onlyWithSlabs) {
+    // First get product IDs that have either slabs or generic products
+    const productsWithInventory = await models.Product.findAll({
+      attributes: ['id'],
+      include: [
+        {
+          association: "slabs",
+          required: false,
+          attributes: []
+        },
+        {
+          association: "genericProducts",
+          required: false,
+          attributes: []
+        }
+      ],
+      where: {
+        [Op.or]: [
+          { '$slabs.status$': INVENTORY_ITEM_STATUS.IN_INVENTORY },
+          { '$genericProducts.status$': INVENTORY_ITEM_STATUS.IN_INVENTORY }
+        ]
+      },
+      raw: true
+    });
+
+    const productIds = productsWithInventory.map((p: any) => p.id);
+
+    // Now get the full product details with these IDs
+    let { rows: products, count: total }: any = await models.Product.findAndCountAll({
+      where: {
+        ...whereClause,
+        ...filter,
+        id: { [Op.in]: productIds }
+      },
+      include: [
+        {
+          association: "subCategory",
+        },
+        {
+          association: "group",
+          attributes: ["id", "name"],
+        },
+        {
+          association: "baseColor",
+          attributes: ["id", "name"],
+        },
+      ],
+      limit,
+      offset,
+      distinct: true,
+      order: [["createdAt", "DESC"]],
+    });
+
+    products = await getCountDataForProducts(products)
+
+    // console.log(products)
+
+    return { products, total, page, limit };
+  } else {
+    // Original query for when onlyWithSlabs is false
+    let { rows: products, count: total }: any = await models.Product.findAndCountAll({
+      where: { ...whereClause, ...filter },
+      include: [
+        {
+          association: "subCategory",
+        },
+        {
+          association: "group",
+          attributes: ["id", "name"],
+        },
+        {
+          association: "baseColor",
+          attributes: ["id", "name"],
+        },
+      ],
+      limit,
+      offset,
+      distinct: true,
+      order: [["createdAt", "DESC"]],
+    });
+
+
+    products = await getCountDataForProducts(products)
+
+    return { products, total, page, limit };
+  }
+};
+
+
+const getCountDataForProducts = async (products: any[]) => {
+  return await Promise.all(products.map(async (product: any) => {
+
+    console.log(product)
+    const plainProduct = product.get({ plain: true });
+    let countData: object[] = [];
+    if (plainProduct.isSlabType) {
+      countData = await slabRepository.getAvailableSlabsData(plainProduct.id);
+
+    } else {
+      countData = await genericProductRepository.getAvailableGenericProductData(plainProduct.id);
+    }
+
+    plainProduct.countData = countData[0];
+
+    return plainProduct
+  }))
+
+}
 
 // get product by id
 export const getProductByIdSimple = async (id: number) => {

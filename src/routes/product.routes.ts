@@ -10,6 +10,9 @@ router.post("/", authenticateUser, productController.createProduct);
 // Get all products.
 router.get("/", authenticateUser, productController.getProducts);
 
+// Get all products with less data..
+router.get("/compact", authenticateUser, productController.getProductsWithCompactData);
+
 // Get all products.
 router.get("/landedCost/:productId", authenticateUser, productController.getLandedCost);
 

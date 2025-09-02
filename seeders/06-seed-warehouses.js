@@ -3,9 +3,9 @@ module.exports = {
     await queryInterface.bulkInsert(
       "warehouses",
       [
-        { id: 1, locationId: 1 },
-        { id: 2, locationId: 2 },
-        { id: 3, locationId: 3 },
+        { id: 1, locationId: 1, createdAt: new Date(), updatedAt: new Date() },
+        { id: 2, locationId: 2, createdAt: new Date(), updatedAt: new Date() },
+        { id: 3, locationId: 3, createdAt: new Date(), updatedAt: new Date() },
       ],
       {}
     );

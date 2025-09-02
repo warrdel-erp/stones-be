@@ -19,6 +19,16 @@ const ProductFinish = sequelize.define(
                 msg: "Group name must be unique",
             },
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
         createdBy: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -41,7 +51,7 @@ const ProductFinish = sequelize.define(
         },
     },
     {
-        tableName: "product_finish",
+        tableName: "product_finishes",
         timestamps: true,
     }
 );

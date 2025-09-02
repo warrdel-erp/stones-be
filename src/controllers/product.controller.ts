@@ -33,6 +33,25 @@ export const getProducts = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get all products
+export const getProductsWithCompactData = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10, search, onlyWithSlabs, ...filter } = req.query;
+
+  const result = await productService.fetchAllProductsWithCompactData(
+    Number(page),
+    Number(limit),
+    search as string,
+    filter,
+    !!Number(onlyWithSlabs)
+  );
+
+  SuccessResponse(res, 200, "Users retrieved successfully", result.products, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});
+
+// Get all products
 export const getProductsTabsData = catchAsync(async (req: Request, res: Response) => {
   const { tab, productId } = req.params;
 

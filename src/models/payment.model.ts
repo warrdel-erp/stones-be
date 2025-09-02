@@ -57,6 +57,14 @@ const Payment = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
+    paymentFor: {
+      type: DataTypes.ENUM('ADVANCED_DEPOSIT'),
+      allowNull: true
+    },
+    paymentForId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     userId: {
       type: DataTypes.INTEGER,
       references: {

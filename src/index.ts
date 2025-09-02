@@ -108,7 +108,7 @@ app.use(errorHandler);
 // Start server
 // connectDB().then(() => {
 app.listen(PORT, () => {
-  // syncModels();
+  syncModels();
   console.log(`Server running on http://localhost:${PORT}`);
 });
 // });

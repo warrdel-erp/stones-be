@@ -7,7 +7,9 @@ import * as productFinishService from "../services/productFinish.service";
 
 export const createFinish = catchAsync(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
-    const finish = await productFinishService.create({ ...req.body, createdBy: userId, updatedBy: userId });
+    const clientId = req.user?.clientId;
+
+    const finish = await productFinishService.create({ ...req.body, createdBy: userId, updatedBy: userId, clientId });
     SuccessResponse(res, 201, "Finish created successfully", finish);
 });
 

@@ -30,7 +30,6 @@ module.exports = {
           daysForHold: null,
           customerSince: new Date(),
           einNumber: null,
-          reason: null,
           scope: 1,
           createdBy: 1,
           updatedBy: 1,
