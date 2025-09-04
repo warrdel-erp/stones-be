@@ -18,6 +18,7 @@ import * as inventoryProductRepository from "../repositories/inventoryProduct.re
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
+import * as tradeServiceService from '../services/tradeService.service';
 
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
@@ -36,14 +37,32 @@ import { getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { Return } from "../models";
 import { createJournalEntriesForTradeServicesOfLoadingOrder } from "./journalEntry.service";
 import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
 
   try {
+
     let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data, transaction);
     loadingOrder = loadingOrder.get({ plain: true });
+
+    // Create trade services for loading order if it exists
+    // --------------------
+    if (Array.isArray(data.services)) {
+      const servicePayload = data.services.map((e: any) => (
+        {
+          ...e,
+          referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+          referenceId: loadingOrder.id,
+          clientId: data.clientId
+        }))
+
+      await tradeServiceService.createMultipleTradeServices(servicePayload, transaction);
+    }
+    // --------------------
+
 
     let updatedProducts = [];
 
@@ -234,6 +253,7 @@ export const getLoadingOrderOnlyAsPerReturn = async (returnId: number) => {
 
   return loadingOrder;
 };
+
 
 async function createLONotes(data: any, loadingOrder: any, transaction: Transaction) {
   let internalNote: any = null;
@@ -471,7 +491,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
-    const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
+    const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax.value);
+
+    console.log('customerTax', customerTax)
 
     // Journal Entry for with tax.
     await journalEntryRepository.create(

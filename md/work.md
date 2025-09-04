@@ -486,3 +486,27 @@ major delivery handled ->
 4. remove Status from slab
 5. bifurcate address from vendor.
 6. remove unnecessary fields from customer.
+
+```
+1. Unit price in add product in SO. ✅
+2. Product data optimisation. ✅
+3. Product details in SO add product. ✅
+4. Due data  in SO. ✅
+5. Tax must be selected by default. ✅
+6. Tax can not be edited after SO creation ✅
+7. Advanced deposit more data show. ✅
+8. Picked is removed. ✅
+9. Swap check (Data Show). ✅
+10. Taxable is wrong for multiple products in SO.
+11. Tax check box should freeze after creation.
+12. Services must be created during create LO, PL.
+13. Check all Totals.
+14. State tax and County tax in SO.
+15. Print invoice
+16. Fulfill in SO list.
+17. Initiate Return is not working.
+18. Approval tab in Deliveries.
+19. Credit/Debit note.
+20. Pending amount must be calculated with advanced deposit and tax.
+21. All transactions
+```

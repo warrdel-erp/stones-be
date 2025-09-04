@@ -18,7 +18,12 @@ export const getAll = async (clientId: number) => {
 };
 
 export const getOne = async (id: number, clientId: number) => {
-    return await serviceRepository.getServiceById(id, clientId);
+    let data: any = await serviceRepository.getServiceById(id, clientId);
+    data = data?.get({ plain: true });
+
+    data.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == data.uom);
+
+    return data
 };
 
 export const update = async (id: number, data: any) => {

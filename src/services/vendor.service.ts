@@ -25,7 +25,7 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
     }
 
     // Create vendor
-    const newVendor: any = await vendorRepository.createVendor(vendorData, transaction);
+    const newVendor: any = await vendorRepository.createVendor({ ...vendorData, clientId }, transaction);
 
     // Create Ledger Account data
     const ledgerAccountData: LedgerAccount = {

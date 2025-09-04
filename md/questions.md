@@ -110,5 +110,5 @@
 
 ---
 
-1. what if there are too much products.
-2. what was logic behind Picked in SalesOrderProduct, because I think all LO products are mandatory in PL so Picked is not required.
+1. What if there are too much products.
+2. Should we give CRUD at create PO.

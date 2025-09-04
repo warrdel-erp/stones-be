@@ -297,8 +297,8 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
 };
 
 // Get loading order by Id
-export const getLoadingOrderByIdSimple = async (id: number) => {
-  return await models.LoadingOrder.findByPk(id);
+export const getLoadingOrderByIdSimple = async (id: number, transaction?: Transaction) => {
+  return await models.LoadingOrder.findByPk(id, { transaction });
 };
 
 // Get loading order by SO id

@@ -462,3 +462,12 @@ Pending
 ---
 
 1. Migrations are done.
+
+---
+
+1. Removed ₹. ✅
+2. Taxable is wrong for multiple products in SO. ✅
+3. Tax check box should freeze after creation. ✅
+4. Services must be created during create LO. ✅
+5. Calculations in LO create/details, PL create/details. ✅
+6. State tax and County tax in SO journal entry. ✅

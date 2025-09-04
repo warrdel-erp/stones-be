@@ -4,10 +4,11 @@ import { AppError } from "../helper/appError";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import { Transaction } from "sequelize";
 
-export async function createTradeService(data: any) {
+export async function createTradeService(data: any, transaction?: Transaction) {
     if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
-        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(data.referenceId);
+        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(data.referenceId, transaction);
 
         const loadingOrder = loadingOrderInstance?.get({ plain: true });
 
@@ -18,7 +19,7 @@ export async function createTradeService(data: any) {
             throw new AppError("Cannot create Trade Service for an invoiced Loading Order", 400);
         }
     }
-    return tradeServiceRepository.createTradeService(data);
+    return tradeServiceRepository.createTradeService(data, transaction);
 }
 
 export async function listTradeServices(filters: any = {}) {
@@ -35,4 +36,14 @@ export async function listTradeServices(filters: any = {}) {
 
 export async function deleteTradeService(id: number) {
     return tradeServiceRepository.deleteTradeServiceById(id);
-} 
+}
+
+export async function createMultipleTradeServices(services: any, transaction?: Transaction) {
+    if (Array.isArray(services)) {
+        const promises: Promise<any>[] = [];
+        for (const servicePayload of services) {
+            promises.push(createTradeService(servicePayload, transaction));
+        }
+        return await Promise.all(promises);
+    }
+}
