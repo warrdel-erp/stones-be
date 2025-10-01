@@ -7,7 +7,7 @@ import Return from "../models/return.model";
 import { ReturnProduct, SalesOrderProduct, Slab } from "../models";
 import { Op } from "sequelize";
 import * as slabRepository from "../repositories/slab.repository";
-import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as genericProductRepository from "../repositories/genericProduct.repository";
 import { Transaction } from "sequelize";
 import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";

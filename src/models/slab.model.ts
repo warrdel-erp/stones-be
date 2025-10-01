@@ -91,10 +91,6 @@ const Slab = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    isInCart: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
     landedUnitCost: {
       type: DataTypes.FLOAT,
       allowNull: true,

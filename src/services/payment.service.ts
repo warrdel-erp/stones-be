@@ -1,13 +1,33 @@
 import { sequelize } from "../config/database";
-import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, CREDIT_DEBIT_NOTE_TYPES, CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES, CREDIT_NOTE_REFERENCE_TYPES, PAYEE_TYPE } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import * as billRepository from "../repositories/bill.repository";
 import * as paymentRepository from "../repositories/payment.repository";
 import * as paymentBillsRepository from "../repositories/paymentBills.repository";
 import * as siplRepository from "../repositories/sipl.repository";
+import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repository";
 import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
 import * as customerRepository from "../repositories/customer.repository";
 import * as vendorRepository from "../repositories/vendor.repository";
+
+// Create credit debit note for payment
+const createCreditNoteForPayment = async (paymentData: any, paymentId: number, transaction: any) => {
+  if (!paymentData.creditNote?.amount || paymentData.payeeType !== PAYEE_TYPE.CUSTOMER) {
+    return null;
+  }
+
+  const creditNoteData = {
+    amount: paymentData.creditNote.amount,
+    type: CREDIT_DEBIT_NOTE_TYPES.CREDIT,
+    entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.CUSTOMER,
+    entryIdFor: paymentData.payeeId,
+    referenceType: CREDIT_NOTE_REFERENCE_TYPES.PAYMENT,
+    referenceId: paymentId,
+    clientId: paymentData.clientId,
+  };
+
+  return await creditDebitNoteRepository.createCreditDebitNote(creditNoteData, transaction);
+};
 
 // Create a new payment
 export const processPayment = async (paymentData: any, billsData: any[], locationId: number) => {
@@ -16,11 +36,11 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
   }
 
   // Validate total amount
-  const totalBillAmount = billsData.reduce((sum, bill) => sum + bill.amount, 0);
+  // const totalBillAmount = billsData.reduce((sum, bill) => sum + bill.amount, 0);
 
-  if (totalBillAmount !== paymentData.amount) {
-    throw new AppError("Total bill amount does not match payment amount", 400);
-  }
+  // if (totalBillAmount !== paymentData.amount) {
+  //   throw new AppError("Total bill amount does not match payment amount", 400);
+  // }
 
   // Begin transaction
   const transaction = await sequelize.transaction();
@@ -29,7 +49,10 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
     // Step 1: Create Payment
     const payment: any = await paymentRepository.createPayment({ ...paymentData, accountId: paymentData.account }, transaction);
 
-    // Step 2: Prepare Payment Bills
+    // Step 2: Handle Credit Note Creation (if creditNote exists in paymentData)
+    const creditDebitNote = await createCreditNoteForPayment(paymentData, payment.id, transaction);
+
+    // Step 3: Prepare Payment Bills
     const paymentBills = await Promise.all(
       billsData.map(async (bill) => {
         // Create journal entries for payment bills
@@ -45,12 +68,12 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
       })
     );
 
-    // Step 3: Insert Payment Bills
+    // Step 4: Insert Payment Bills
     const paymentBillsRes = await paymentBillsRepository.createPaymentBills(paymentBills, transaction);
 
     // Commit transaction
     await transaction.commit();
-    return { payment, bills: paymentBillsRes };
+    return { payment, bills: paymentBillsRes, creditDebitNote };
   } catch (error) {
     await transaction.rollback();
     throw error;

@@ -3,7 +3,7 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
-import { removeDuplicatesWithUnitPrice } from "../helper";
+import { getPercentageValue, getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { SALES_TAX, SCOP } from "../constants";
@@ -85,6 +85,8 @@ export const getAllSalesOrders = async (
     salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scope)?.value;
 
     salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
+
+    salesOrder.fulFilled = getPercentageValueFromValue(salesOrder.salesOrderProducts.length, salesOrder.salesOrderProducts.filter((e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED).length)
 
     return salesOrder;
   }) as any;

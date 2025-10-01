@@ -4,6 +4,7 @@ import Bin from "./bin.model";
 import SIPL from "./sipl.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import Product from "./product.model";
+import Client from "./client.model";
 
 const InventoryProduct = sequelize.define(
   "InventoryProduct",
@@ -37,6 +38,10 @@ const InventoryProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
+    isInCart: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     status: {
       type: DataTypes.ENUM(...Object.values(INVENTORY_ITEM_STATUS)),
       allowNull: true,
@@ -61,6 +66,16 @@ const InventoryProduct = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: false,
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
   },
   {

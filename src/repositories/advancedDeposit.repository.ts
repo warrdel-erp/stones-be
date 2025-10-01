@@ -11,6 +11,10 @@ export const getAdvancedDepositWithoutPagination = (filters: Record<string, stri
             {
                 association: 'payment',
                 attributes: ['id', 'paymentMethod']
+            },
+            {
+                association: 'salesOrder',
+                attributes: ['id', "clientSoNumber", 'customerId']
             }
         ]
     })

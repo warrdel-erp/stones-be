@@ -1,6 +1,6 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
-import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";

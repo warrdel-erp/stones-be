@@ -3,7 +3,7 @@ import * as models from "../models";
 import { CustomUpdateOptions } from "../types/custom";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as slabRepository from '../repositories/slab.repository'
-import * as genericProductRepository from '../repositories/genericProductRepository'
+import * as genericProductRepository from './genericProduct.repository'
 
 export const createProduct = async (productData: any) => {
   return await models.Product.create(productData);

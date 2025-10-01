@@ -471,3 +471,48 @@ Pending
 4. Services must be created during create LO. ✅
 5. Calculations in LO create/details, PL create/details. ✅
 6. State tax and County tax in SO journal entry. ✅
+
+---
+
+1. Taxable is wrong for multiple products in SO. ✅
+2. Tax check box should freeze after creation. ✅
+3. Services must be created during create LO, PL. ✅
+4. Calculations in LO create/details, PL create/details. ✅
+5. State tax and County tax in SO journal entry. ✅
+
+---
+
+1. Customer payment new structure with credit note. ✅
+
+---
+
+1. Advanced deposit integration in customer payment. ✅
+2. Add, Remove cart products.
+3. Cart count.
+4. Seeder more data.
+5. Services journal entries, default accounts.
+
+---
+
+1. Routes Restructure.
+2. Sidebar refactoring.
+3. sidebar Design.
+4. Table design
+
+---
+
+Design changed for
+
+1. Sidebar.
+2. Navbar.
+3. Sales list.
+4. Purchase Order List.
+5. Sales Invoices.
+
+---
+
+1. General Ledger.
+2. Account Payables.
+3. Account Receivable.
+4. Transactions.
+5. Credit Debit Note.

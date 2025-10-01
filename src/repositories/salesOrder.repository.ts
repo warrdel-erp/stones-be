@@ -62,7 +62,7 @@ export const getAllSalesOrders = async (
       },
       {
         association: "salesOrderProducts",
-        attributes: ["id", "unitPrice"],
+        attributes: ["id", "unitPrice", "stage"],
         include: [
           {
             association: "inventoryProduct",
@@ -128,7 +128,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
       },
       {
         association: "salesOrderProducts",
-        attributes: ["id", "unitPrice"],
+        attributes: ["id", "unitPrice", "stage"],
         include: [
           {
             association: "inventoryProduct",
@@ -206,7 +206,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
       },
       {
         association: "salesOrderProducts",
-        attributes: ["id", "unitPrice"],
+        attributes: ["id", "unitPrice", "stage"],
         include: [
           {
             association: "inventoryProduct",

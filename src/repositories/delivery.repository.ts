@@ -37,9 +37,9 @@ export const createInvoiceDelivery = async (
     return InvoiceDelivery.create(data, { transaction });
 };
 
-export const getAllDeliveriesByClientId = async (clientId: number) => {
+export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {
     return Delivery.findAll({
-        where: { clientId },
+        where: { clientId, ...filter },
         order: [["createdAt", "DESC"]],
         include: [
             {

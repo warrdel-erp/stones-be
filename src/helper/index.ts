@@ -12,4 +12,7 @@ export const addPercentage = (value: number, percentage: number) =>
 export const getPercentageValue = (value: number, percentage: number) =>
   (value * percentage) / 100;
 
+export const getPercentageValueFromValue = (total: number, value: number) =>
+  (value / total) * 100;
+
 export const randomId = () => Math.random().toString(36).substring(2, 10);

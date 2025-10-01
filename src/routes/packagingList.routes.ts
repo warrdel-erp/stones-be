@@ -1,7 +1,6 @@
 import { Router } from "express";
 import * as packagingListController from "../controllers/packagingList.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
-import * as packagingListProductController from "../controllers/packagingListProduct.controller";
 
 const router = Router();
 
@@ -16,20 +15,6 @@ router.get("/newPlNumber", authenticateUser, packagingListController.getNewPlNum
 
 // Update Packaging List
 router.put("/:id", authenticateUser, packagingListController.updatePackagingList);
-
-// Update requested Packaging List product
-router.put(
-  "/:packagingListId/packagingListProduct",
-  authenticateUser,
-  packagingListProductController.upsertPackagingListProducts
-);
-
-// Update requested Packaging List product
-router.get(
-  "/:packagingListId/packagingListProduct",
-  authenticateUser,
-  packagingListProductController.getPackagingListProducts
-);
 
 // Get Packaging List by Id
 router.get("/:id", authenticateUser, packagingListController.getPackagingListById);

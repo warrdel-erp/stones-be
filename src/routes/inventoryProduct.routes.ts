@@ -16,4 +16,10 @@ router.put("/sellingPrice", authenticateUser, inventoryProductController.updateI
 // Get allocated inventory products according to customer
 router.get("/allocated", authenticateUser, inventoryProductController.getAllocatedInventoryProductsAccordingToCustomer);
 
+// put and remove slab to cart
+router.put("/:inventoryProductId/cart", authenticateUser, inventoryProductController.updateInventoryProductCartStatus);
+
+// get cart count
+router.get("/cartCount", authenticateUser, inventoryProductController.getCartCount);
+
 export default router;

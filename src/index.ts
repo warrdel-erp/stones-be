@@ -50,6 +50,7 @@ import serviceCategoryRoutes from "./routes/serviceCategory.routes";
 import tradeServiceRoutes from "./routes/tradeService.routes";
 import genericProductRoutes from "./routes/genericProduct.routes";
 import inventoryProductRoutes from "./routes/inventoryProduct.routes";
+import creditDebitNoteRoutes from "./routes/creditDebitNote.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -101,6 +102,7 @@ app.use("/api/serviceCategory", serviceCategoryRoutes);
 app.use("/api/tradeService", tradeServiceRoutes);
 app.use("/api/genericProduct", genericProductRoutes);
 app.use("/api/inventoryProduct", inventoryProductRoutes);
+app.use("/api/creditDebitNote", creditDebitNoteRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);
@@ -108,7 +110,7 @@ app.use(errorHandler);
 // Start server
 // connectDB().then(() => {
 app.listen(PORT, () => {
-  syncModels();
+  // syncModels();
   console.log(`Server running on http://localhost:${PORT}`);
 });
 // });

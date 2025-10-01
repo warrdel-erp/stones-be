@@ -118,7 +118,7 @@ const SIPL = sequelize.define(
     },
   },
   {
-    tableName: "sipl",
+    tableName: "sipls",
     timestamps: true,
     indexes: [
       {

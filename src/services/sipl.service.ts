@@ -15,7 +15,7 @@ import * as siplService from "../services/sipl.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
-import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as productRepository from "../repositories/product.repository";
 
 // Processes the inventory reception by updating slab and generic product statuses.
@@ -180,6 +180,7 @@ export async function handleCreateSlabs(slabData: any) {
       true, // isSlabType = true for slabs
       sellingPrice,
       slabData.productId,
+      slabData.clientId,
       transaction
     );
 
@@ -238,6 +239,7 @@ export async function handleCreateGenericProduct(data: any) {
       false, // isSlabType = false for generic products
       sellingPrice,
       data.productId,
+      data.clientId,
       transaction
     );
 
@@ -403,11 +405,11 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
       .toFixed(2)
   );
 
-  // Total quantity of generic product.
-  totalReceivingQuantity = siplData.siplProducts.reduce(
-    (total: number, siplProduct: any) => total + siplProduct.genericProducts.length,
-    0
-  );
+  // // Total quantity of generic product.
+  // totalReceivingQuantity = siplData.siplProducts.reduce(
+  //   (total: number, siplProduct: any) => total + siplProduct.genericProducts.length,
+  //   0
+  // );
 
   // Unit bill price as per total area of all product's slab.
   const unitBillPrice = Number((totalBillsCharges / totalReceivingQuantity)) || 0;

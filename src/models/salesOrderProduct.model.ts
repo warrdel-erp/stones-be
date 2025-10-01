@@ -91,7 +91,7 @@ const SalesOrderProduct = sequelize.define(
   },
   {
     tableName: "sales_order_products",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

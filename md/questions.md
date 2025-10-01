@@ -106,9 +106,12 @@
 2. there can be multiple type of product in one SIPL.
 3. can generic product swapable with Slab. Or another generic product. [can be swaped only with its own product]
 4. what if SO has both types of product in SO then how to get total quantity.
-   5, In PL how would we show different type of product in single table.
+5. In PL how would we show different type of product in single table.
 
 ---
 
 1. What if there are too much products.
 2. Should we give CRUD at create PO.
+3. Fulfill in SO list. [DOUBT]
+4. What is connection of Credit note with LedgerAccount
+5. how to calculate unit bill price if an SIPL contains both generic and slabType products.

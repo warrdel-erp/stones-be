@@ -266,6 +266,14 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
                   },
                 ],
               },
+              {
+                association: "genericProduct",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
             ],
           },
           {

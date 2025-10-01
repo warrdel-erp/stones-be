@@ -60,3 +60,12 @@ export const getInvoicesByCustomerId = catchAsync(async (req: Request, res: Resp
   const data = await customerService.getInvoicesByCustomerId(Number(customerId));
   return SuccessResponse(res, 200, "Invoices fetched successfully", data);
 });
+
+// Get all advanced deposits related to a customer
+export const getAdvancedDepositsByCustomerId = catchAsync(async (req: Request, res: Response) => {
+  const customerId = parseInt(req.params.customerId);
+
+  // Call service function to fetch advanced deposits related to the customer ID.
+  const data = await customerService.getAdvancedDepositsByCustomerId(Number(customerId));
+  return SuccessResponse(res, 200, "Advanced deposits fetched successfully", data);
+}); 

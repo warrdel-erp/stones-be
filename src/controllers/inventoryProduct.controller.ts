@@ -3,7 +3,6 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
-import { Where } from "sequelize/types/utils";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
@@ -86,8 +85,33 @@ export const getAllocatedInventoryProductsAccordingToCustomer = catchAsync(async
 export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
     const filter = req.query;
 
-    const data = await inventoryProductService.getInventoryProducts(filter as Record<string, string>);
+    const locationId = req.user?.defaultLocationId
+
+    const data = await inventoryProductService.getInventoryProducts(filter as Record<string, string>, Number(locationId));
 
     return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
 });
 
+export const updateInventoryProductCartStatus = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { inventoryProductId } = req.params;
+    const { isInCart } = req.body;
+
+    if (typeof isInCart !== "boolean") {
+        return res.status(400).json({ error: "`isInCart` must be true or false" });
+    }
+
+    const result = await inventoryProductService.updateInventoryProductCartStatus(Number(inventoryProductId), isInCart);
+
+    return SuccessResponse(res, 200, "Inventory Product Cart status Updated successfully", result);
+});
+
+export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        return res.status(401).json({ error: "Missing client information" });
+    }
+
+    const result = await inventoryProductService.getCartCount(clientId);
+    return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
+});

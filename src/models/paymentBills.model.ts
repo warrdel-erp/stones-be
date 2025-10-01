@@ -35,7 +35,7 @@ const PaymentBill = sequelize.define(
   },
   {
     tableName: "payment_bills",
-    timestamps: false,
+    timestamps: true,
     indexes: [
       {
         unique: true,

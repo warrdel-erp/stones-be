@@ -10,11 +10,6 @@ export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
   return { message: `Slab ID ${slabId} hold status updated to ${isHold}` };
 };
 
-export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) => {
-  await slabRepository.updateSlabCartStatus(slabId, isInCart);
-  return { message: `Slab ID ${slabId} cart status updated to ${isInCart}` };
-};
-
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
 }
@@ -61,9 +56,4 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
     await transaction.rollback(); // Rollback transaction on error
     throw error; // Ensure the error is propagated
   }
-};
-
-export const getCartCount = async (clientId: number) => {
-  const count = await slabRepository.getCartCount(clientId);
-  return { count };
 };

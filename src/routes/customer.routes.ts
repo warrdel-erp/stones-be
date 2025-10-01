@@ -23,6 +23,9 @@ router.get("/", authenticateUser, customerController.getAllCustomersController);
 // get customer invoices.
 router.get("/:customerId/invoices", authenticateUser, customerController.getInvoicesByCustomerId);
 
+// get customer advanced deposits.
+router.get("/:customerId/advancedDeposits", authenticateUser, customerController.getAdvancedDepositsByCustomerId);
+
 // Get vendor by id.
 router.get("/:id", authenticateUser, customerController.getCustomerByIdController);
 

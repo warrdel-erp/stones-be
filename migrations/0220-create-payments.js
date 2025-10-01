@@ -75,6 +75,14 @@ module.exports = {
         type: Sequelize.DATEONLY,
         allowNull: true,
       },
+      paymentFor: {
+        type: Sequelize.ENUM("ADVANCED_DEPOSIT"),
+        allowNull: true,
+      },
+      paymentForId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       userId: {
         type: Sequelize.INTEGER,
         references: {

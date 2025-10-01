@@ -6,7 +6,7 @@ import _ from "lodash";
 import { Transaction, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 
-import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
@@ -492,8 +492,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     });
 
     const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax.value);
-
-    console.log('customerTax', customerTax)
 
     // Journal Entry for with tax.
     await journalEntryRepository.create(

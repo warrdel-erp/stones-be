@@ -9,6 +9,7 @@ import * as ledgerAccountRepository from "../repositories/ledgerAccount.reposito
 import * as customerAddressService from "../services/customerAddress.service";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
+import * as advancedDepositRepository from "../repositories/advancedDeposit.repository";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -128,10 +129,40 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
         dueDate: soInvoice.loadingOrder.expDeliveryDate,
         amount: soInvoice.amount,
         paidAmount,
-        invoiceDate: soInvoice.createdAt,
-        invoice: soInvoice.clientSoInvoiceNumber,
+        creationDate: soInvoice.createdAt,
+        code: soInvoice.invoiceCode,
         loNumber: soInvoice.loadingOrder.clientLoNumber,
         loDate: soInvoice.loadingOrder.loDate,
+        type: "invoice"
+      };
+    })
+  );
+
+  return finalData;
+};
+
+// Get advanced deposits for a customer
+export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
+  let advancedDeposits: any = await advancedDepositRepository.getAdvancedDepositWithoutPagination({});
+
+  // Filter advanced deposits by customer through sales order relationship
+  const customerAdvancedDeposits = advancedDeposits.filter((deposit: any) =>
+    deposit.salesOrder && deposit.salesOrder.customerId === customerId
+  );
+
+  const finalData = await Promise.all(
+    customerAdvancedDeposits.map(async (advancedDeposit: any) => {
+      advancedDeposit = advancedDeposit.get({ plain: true });
+
+      return {
+        id: advancedDeposit.id,
+        amount: advancedDeposit.amount,
+        creationDate: advancedDeposit.createdAt,
+        soId: advancedDeposit.salesOrderId,
+        code: advancedDeposit.salesOrder.clientSoNumber,
+        accountName: advancedDeposit.ledgerAccount?.name,
+        paymentMethod: advancedDeposit.payment?.paymentMethod,
+        type: "advancedDeposit"
       };
     })
   );

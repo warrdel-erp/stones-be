@@ -7,7 +7,7 @@ import { checkUserLocationAccess } from "../services/user.service";
 
 export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, categorization } = req.query;
-  const { locationId, } = req.params;
+  const { locationId } = req.params;
   const userId = req.user?.id;
 
   if (!locationId) {

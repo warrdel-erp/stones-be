@@ -185,6 +185,15 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
       openingBalance: 0,
       openingDate: new Date(),
     },
+    {
+      name: "Default Service Account",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.DEFAULT_SERVICE_ACCOUNT,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "services_5_1")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
   ] as const;
 
   const createdAccounts: any[] = [];

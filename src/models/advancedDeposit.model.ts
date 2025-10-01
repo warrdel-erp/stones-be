@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
-import { getAccountById } from "../repositories/account.repository";
 import LedgerAccount from "./ledgerAccount.model";
 
 const AdvancedDeposit = sequelize.define(

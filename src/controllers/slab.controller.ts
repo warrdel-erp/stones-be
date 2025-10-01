@@ -19,23 +19,8 @@ export const updateSlabHoldStatus = catchAsync(async (req: Request, res: Respons
   SuccessResponse(res, 200, "Slab Hold status Updated successfully", result);
 });
 
-export const updateSlabCartStatus = catchAsync(async (req: Request, res: Response) => {
-  const { slabId } = req.params;
-  const { isInCart } = req.body;
-
-  if (typeof isInCart !== "boolean") {
-    return res.status(400).json({ error: "`isInCart` must be true or false" });
-  }
-
-  const result = await slabService.updateSlabCartStatus(Number(slabId), isInCart);
-
-  SuccessResponse(res, 200, "Slab Cart status Updated successfully", result);
-
-  return res.json(result);
-});
-
 // 🔹 Get SlabLogs by SlabId
-export const getSlabWithLogs = catchAsync(async (req: Request, res: Response) => {
+export const getSlabWithLogs = catchAsync(async (req: AuthRequest, res: Response) => {
   const slabId = parseInt(req.params.slabId);
   const slabLogs = await slabService.getSlabLogsBySlabIdService(slabId);
   SuccessResponse(res, 200, "Slab logs for given Slab ID fetched", slabLogs);
@@ -92,15 +77,4 @@ export const bulkUpdateSlabs = catchAsync(async (req: Request, res: Response) =>
   }
 
   return SuccessResponse(res, 200, `${affectedRows} slabs updated successfully.`, affectedRows);
-});
-
-export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) => {
-  const clientId = req.user?.clientId;
-
-  if (!clientId) {
-    throw new AppError("Missing client information", 401);
-  }
-
-  const result = await slabService.getCartCount(clientId);
-  return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
 });

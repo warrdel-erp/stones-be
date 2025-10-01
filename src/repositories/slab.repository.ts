@@ -64,11 +64,6 @@ export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
   return await Slab.update({ isHold }, { where: { id: slabId }, individualHooks: true });
 };
 
-// update hold status of slab
-export const updateSlabCartStatus = async (slabId: number, isInCart: boolean) => {
-  return await Slab.update({ isInCart }, { where: { id: slabId }, individualHooks: true });
-};
-
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
@@ -163,25 +158,28 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
           },
         ],
       },
-      // {
-      //   model: models.Bin,
-      //   as: "bin",
-      //   required: true,
-      //   include: [
-      //     {
-      //       model: models.Warehouse,
-      //       as: "warehouse",
-      //       where: { ...(locationId ? { locationId } : {}) },
-      //       required: true,
-      //       include: [
-      //         {
-      //           model: models.Location,
-      //           as: "location",
-      //         }
-      //       ]
-      //     }
-      //   ]
-      // },
+      {
+        association: "inventoryProduct",
+        include: [
+          {
+            association: "bin",
+            required: true,
+            include: [
+              {
+                association: "warehouse",
+                where: { ...(locationId ? { locationId } : {}) },
+                required: true,
+                include: [
+                  {
+                    association: "location",
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+
     ],
     transaction
   });
@@ -289,12 +287,4 @@ export const getLastLandedCost = async (productId: number) => {
   })
 }
 
-export const getCartCount = async (clientId: number) => {
-  return await Slab.count({
-    where: {
-      isInCart: true,
-      clientId: clientId
-    }
-  });
-};
 

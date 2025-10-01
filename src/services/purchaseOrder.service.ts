@@ -6,7 +6,7 @@ import * as requestedPurchaseProductRepository from "../repositories/requestedPu
 import * as siplProductRepository from "../repositories/siplProducts.repository";
 import * as containerService from "../services/container.service";
 import { Transaction } from "sequelize";
-import { SCOP } from "../constants";
+import { PAYMENT_TERMS, SCOP } from "../constants";
 import * as paymentBillsRepository from '../repositories/paymentBills.repository'
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import _ from "lodash";
@@ -188,6 +188,8 @@ export const getPurchaseOrderById = async (id: number) => {
   if (!purchaseOrder) {
     return null; // Handle case where PO does not exist
   }
+
+  purchaseOrder.paymentTerm = PAYMENT_TERMS.find((k) => k.id == purchaseOrder.paymentTerm)?.value;
 
   // Get vendor scope for purchaseOrder
   purchaseOrder.supplier.vendorScope = SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;

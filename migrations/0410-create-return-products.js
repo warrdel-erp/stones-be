@@ -1,36 +1,32 @@
 "use strict";
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("advanced_deposits", {
+  up: async (sequelizeInterface, Sequelize) => {
+    await sequelizeInterface.createTable("return_products", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      amount: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: false,
-      },
-      salesOrderId: {
+      salesOrderProductId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "sales_orders",
+          model: "sales_order_products",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "RESTRICT",
       },
-      accountId: {
+      returnId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "ledger_accounts",
+          model: "returns",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
+        onDelete: "CASCADE",
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -42,8 +38,7 @@ module.exports = {
       },
     });
   },
-
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("advanced_deposits");
+  down: async (sequelizeInterface, Sequelize) => {
+    await sequelizeInterface.dropTable("return_products");
   },
 };

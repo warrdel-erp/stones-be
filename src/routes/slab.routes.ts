@@ -8,9 +8,6 @@ const router = Router();
 // hold-unHold slab
 router.put("/:slabId/hold", authenticateUser, slabController.updateSlabHoldStatus);
 
-// put and remove slab to cart
-router.put("/:slabId/cart", authenticateUser, slabController.updateSlabCartStatus);
-
 // Bulk update slabs
 router.put("/bulkUpdate", authenticateUser, slabController.bulkUpdateSlabs);
 
@@ -25,8 +22,5 @@ router.get("/", authenticateUser, slabController.getAllSlabs);
 
 // // Get all remeasurement by Slab id.
 router.get("/:slabId", authenticateUser, slabController.getSlabWithLogs);
-
-// get cart count
-router.get("/cart/count", authenticateUser, slabController.getCartCount);
 
 export default router;

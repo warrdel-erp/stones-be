@@ -158,3 +158,18 @@ export const DELIVERY_STATUS = {
   REJECTED: "rejected",
   COMPLETED: "completed",
 } as const;
+
+export const CREDIT_NOTE_REFERENCE_TYPES = {
+  PAYMENT: "payment",
+} as const;
+
+export const CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES = {
+  CUSTOMER: "customer",
+  VENDOR: "vendor",
+} as const;
+
+
+export const CREDIT_DEBIT_NOTE_TYPES = {
+  CREDIT: "credit",
+  DEBIT: "debit",
+} as const;

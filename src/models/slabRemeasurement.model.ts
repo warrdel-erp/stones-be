@@ -30,7 +30,7 @@ const SlabRemeasurement = sequelize.define(
     },
   },
   {
-    tableName: "slab_remeasurement",
+    tableName: "slab_remeasurements",
     timestamps: true,
   }
 );

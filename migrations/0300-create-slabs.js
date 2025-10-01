@@ -97,10 +97,6 @@ module.exports = {
           onUpdate: "CASCADE",
           onDelete: "CASCADE",
         },
-        isInCart: {
-          type: Sequelize.BOOLEAN,
-          defaultValue: false,
-        },
         landedUnitCost: {
           type: Sequelize.FLOAT,
           allowNull: true,

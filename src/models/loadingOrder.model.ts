@@ -5,7 +5,6 @@ import { AppError } from "../helper/appError";
 import Client from "./client.model";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
-import Truck from "./truck.model";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",

@@ -37,7 +37,7 @@ export async function createFreightDetail(
 export const getAllPurchaseOrders = async (page: number, limit: number, clientId: number, filter: { [k: string]: string }) => {
   const offset = (page - 1) * limit;
 
-  const { fromDate, toDate, ...otherFilters } = filter;
+  const { fromDate, toDate, search, ...otherFilters } = filter;
 
   const dateRange: any = {};
 
@@ -50,6 +50,8 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
   }
 
   let getInInventoryData = false;
+
+
 
   if (otherFilters.status == 'IN_TRANSIT') {
     delete otherFilters.status;

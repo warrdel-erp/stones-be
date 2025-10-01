@@ -27,6 +27,16 @@ export const getAllocatedInventoryProductsAccordingToCustomer = async (customerI
 };
 
 
-export const getInventoryProducts = (filter: Record<string, string>) => {
-    return inventoryProductRepository.getInventoryProducts(filter)
+export const getInventoryProducts = (filter: Record<string, string>, locationId: number) => {
+    return inventoryProductRepository.getInventoryProducts(filter, locationId)
 }
+
+export const updateInventoryProductCartStatus = async (id: number, isInCart: boolean) => {
+    await inventoryProductRepository.updateInventoryProductCartStatus(id, isInCart);
+    return { message: `Inventory Product ID ${id} cart status updated to ${isInCart}` };
+};
+
+export const getCartCount = async (clientId: number) => {
+    const count = await inventoryProductRepository.getCartCount(clientId);
+    return { count };
+};

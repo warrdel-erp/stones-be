@@ -510,3 +510,29 @@ major delivery handled ->
 20. Pending amount must be calculated with advanced deposit and tax.
 21. All transactions
 ```
+
+```
+1. Print invoice
+2. Fulfill in SO list.
+3. Initiate Return is not working.
+4. Approval tab in Deliveries.
+5. Credit/Debit note.
+6. Pending amount must be calculated with advanced deposit and tax.
+7. All transactions
+8. Services journal entries, default accounts.
+9. Cart.
+10. Returns
+11. Create new customer directly from SO, PO.
+12. Packing and receiving forms will be separate for SIPL.
+13. Deliveries will show non invoiced LO.
+14. More details on Delivery page like time and km.
+
+```
+
+```
+
+Multiple LO bug
+Login with OTP.
+Email notification.
+
+```

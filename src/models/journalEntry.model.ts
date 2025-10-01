@@ -113,7 +113,7 @@ const JournalEntry = sequelize.define(
     }
   },
   {
-    tableName: "journal_entry",
+    tableName: "journal_entries",
     timestamps: true,
   }
 );

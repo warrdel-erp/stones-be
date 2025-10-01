@@ -3,7 +3,6 @@ import { sequelize } from "../config/database";
 import * as models from "../models";
 import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
-import { Where } from "sequelize/types/utils";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -12,6 +11,7 @@ export const createInventoryProductsWithCombinedNumbers = async (
   isSlabType: boolean,
   sellingPrice: number,
   productId: number,
+  clientId: number,
   transaction: Transaction
 ) => {
   const sipl: any = await models.SIPL.findByPk(siplId, {
@@ -41,7 +41,8 @@ export const createInventoryProductsWithCombinedNumbers = async (
     isSlabType,
     sellingPrice,
     siplId,
-    productId
+    productId,
+    clientId
   }));
 
   return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
@@ -219,7 +220,7 @@ export const updateInventoryProductStatusById = async (
   );
 };
 
-export const getInventoryProducts = (filter: Record<string, string>) => {
+export const getInventoryProducts = (filter: Record<string, string>, locationId?: number) => {
   return models.InventoryProduct.findAll({
     where: filter,
     include: [
@@ -230,16 +231,22 @@ export const getInventoryProducts = (filter: Record<string, string>) => {
         association: 'genericProduct'
       },
       {
+        association: 'product',
+        attributes: ['id', 'name']
+      },
+      {
         association: 'bin',
         attributes: ['id', 'name'],
         include: [
           {
             association: "warehouse",
-            attributes: ['id'],
+            attributes: ['id', 'locationId'],
+            where: { ...(locationId ? { locationId } : {}) },
+            required: true,
             include: [
               {
                 association: 'location',
-                attributes: ['location']
+                attributes: ['location', 'id'],
               }
             ]
 
@@ -249,3 +256,19 @@ export const getInventoryProducts = (filter: Record<string, string>) => {
     ]
   })
 }
+
+// update hold status of slab
+export const updateInventoryProductCartStatus = async (id: number, isInCart: boolean) => {
+  return await models.InventoryProduct.update({ isInCart }, { where: { id }, individualHooks: true });
+};
+
+export const getCartCount = async (clientId: number) => {
+
+  console.log('clientId', clientId)
+  return await models.InventoryProduct.count({
+    where: {
+      isInCart: true,
+      clientId: clientId
+    }
+  });
+}; 

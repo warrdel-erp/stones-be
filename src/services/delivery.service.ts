@@ -60,8 +60,8 @@ export const initiateDelivery = async (truckId: number, soInvoiceIds: number[], 
     });
 };
 
-export const getAllDeliveriesByClientId = async (clientId: number) => {
-    return await deliveryRepository.getAllDeliveriesByClientId(clientId);
+export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {
+    return await deliveryRepository.getAllDeliveriesByClientId(filter, clientId);
 };
 
 export const approveDeliveryOrders = async (orders: Array<{ id: number, order: number }>) => {

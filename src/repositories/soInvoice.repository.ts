@@ -41,10 +41,6 @@ export const getAllInvoicesList = async (
     },
     include: [
       {
-        model: models.Truck,
-        as: "truck",
-      },
-      {
         model: models.Customer,
         as: "customer",
         attributes: ["id", "name", "primaryPhoneNumber", "secondaryPhoneNumber"],
@@ -195,6 +191,14 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
                 include: [
                   {
                     association: "slab",
+                    include: [
+                      {
+                        association: "product",
+                      },
+                    ],
+                  },
+                  {
+                    association: "genericProduct",
                     include: [
                       {
                         association: "product",

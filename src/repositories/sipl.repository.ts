@@ -256,9 +256,6 @@ export const findSIPLBySlabId = async (slabId: number) => {
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
   const SIPLs = await models.SIPL.findAll({
-    // attributes: {
-    //   include: [[fn("CONCAT", col("purchaseOrder.clientPoNumber"), "-", col("SIPL.poSiplNumber")), "invoiceCode"]],
-    // },
     include: [
       {
         where: { productId }, // Filter only slabs belonging to the given product

@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import * as genericProductRepository from "../repositories/genericProductRepository";
+import * as genericProductRepository from "../repositories/genericProduct.repository";
 
 // Get all generic products
 export const fetchAllGenericProducts = async (filters?: any, transaction?: Transaction, locationId?: number) => {

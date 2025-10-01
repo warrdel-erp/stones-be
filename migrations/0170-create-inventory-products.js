@@ -44,7 +44,10 @@ module.exports = {
       },
       isSlabType: {
         type: Sequelize.BOOLEAN,
-        allowNull: true,
+        defaultValue: false,
+      },
+      isInCart: {
+        type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
       productId: {
@@ -52,6 +55,16 @@ module.exports = {
         allowNull: false,
         references: {
           model: "products",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
+      },
+      clientId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "clients",
           key: "id",
         },
         onUpdate: "CASCADE",

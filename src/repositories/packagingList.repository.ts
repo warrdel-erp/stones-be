@@ -48,9 +48,6 @@ export const getPackagingListById = async (id: number) => {
           ],
         },
         {
-          association: "packagingListProducts",
-        },
-        {
           association: "salesOrderProducts",
           required: false,
           include: [
@@ -97,7 +94,6 @@ export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) =>
     where: { loadingOrderId },
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
-      { model: models.PackagingListProduct, as: "packagingListProducts" },
     ],
   });
 };

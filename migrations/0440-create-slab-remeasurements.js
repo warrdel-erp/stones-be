@@ -2,35 +2,29 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("advanced_deposits", {
+    await queryInterface.createTable("slab_remeasurements", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      amount: {
-        type: Sequelize.DECIMAL(15, 2),
+      length: {
+        type: Sequelize.FLOAT,
         allowNull: false,
       },
-      salesOrderId: {
+      width: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
+      slabId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "sales_orders",
+          model: "slabs",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
-      },
-      accountId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "ledger_accounts",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
+        onDelete: "CASCADE",
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -44,6 +38,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("advanced_deposits");
+    await queryInterface.dropTable("slab_remeasurements");
   },
 };
