@@ -287,17 +287,17 @@ async function createLONotes(data: any, loadingOrder: any, transaction: Transact
 
 export function getTotalLoadingOrderAmount(salesOrderProducts: any[], tax: number) {
   let totalAmount = 0;
+  let taxableAmount = 0;
 
   for (const salesOrderProduct of salesOrderProducts) {
+    // Calculate total amount.
     if (salesOrderProduct?.inventoryProduct?.slab) {
       totalAmount += (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;
     } else {
       totalAmount += Number(salesOrderProduct.unitPrice);
     }
-  }
 
-  let taxableAmount = 0;
-  for (const salesOrderProduct of salesOrderProducts) {
+    // Calculate Total Amount
     if (salesOrderProduct.taxApplied) {
       if (salesOrderProduct?.inventoryProduct?.slab) {
         taxableAmount += (salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth * salesOrderProduct.unitPrice) / 144;

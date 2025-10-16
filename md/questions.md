@@ -115,3 +115,7 @@
 3. Fulfill in SO list. [DOUBT]
 4. What is connection of Credit note with LedgerAccount
 5. how to calculate unit bill price if an SIPL contains both generic and slabType products.
+
+---
+
+1. can we add, delete products after so created.

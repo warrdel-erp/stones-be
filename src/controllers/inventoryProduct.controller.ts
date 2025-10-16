@@ -115,3 +115,16 @@ export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) =
     const result = await inventoryProductService.getCartCount(clientId);
     return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
 });
+
+export const updateInventoryProductHoldStatus = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const { isHold } = req.body;
+
+    if (typeof isHold !== "boolean") {
+        return res.status(400).json({ error: "`isHold` must be true or false" });
+    }
+
+    const result = await inventoryProductService.updateInventoryProductHoldStatus(Number(id), isHold);
+
+    SuccessResponse(res, 200, "Slab Hold status Updated successfully", result);
+});

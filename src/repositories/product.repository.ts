@@ -232,38 +232,12 @@ export const getAllProductsWithCompactData = async (
 
   // If onlyWithSlabs is true, we need to handle it differently
   if (onlyWithSlabs) {
-    // First get product IDs that have either slabs or generic products
-    const productsWithInventory = await models.Product.findAll({
-      attributes: ['id'],
-      include: [
-        {
-          association: "slabs",
-          required: false,
-          attributes: []
-        },
-        {
-          association: "genericProducts",
-          required: false,
-          attributes: []
-        }
-      ],
-      where: {
-        [Op.or]: [
-          { '$slabs.status$': INVENTORY_ITEM_STATUS.IN_INVENTORY },
-          { '$genericProducts.status$': INVENTORY_ITEM_STATUS.IN_INVENTORY }
-        ]
-      },
-      raw: true
-    });
-
-    const productIds = productsWithInventory.map((p: any) => p.id);
 
     // Now get the full product details with these IDs
     let { rows: products, count: total }: any = await models.Product.findAndCountAll({
       where: {
         ...whereClause,
         ...filter,
-        id: { [Op.in]: productIds }
       },
       include: [
         {
@@ -277,6 +251,11 @@ export const getAllProductsWithCompactData = async (
           association: "baseColor",
           attributes: ["id", "name"],
         },
+        {
+          association: 'inventoryProducts',
+          where: { status: INVENTORY_ITEM_STATUS.IN_INVENTORY },
+          attributes: []
+        }
       ],
       limit,
       offset,
@@ -284,7 +263,7 @@ export const getAllProductsWithCompactData = async (
       order: [["createdAt", "DESC"]],
     });
 
-    products = await getCountDataForProducts(products)
+    // products = await getCountDataForProducts(products)
 
     // console.log(products)
 
@@ -313,7 +292,7 @@ export const getAllProductsWithCompactData = async (
     });
 
 
-    products = await getCountDataForProducts(products)
+    // products = await getCountDataForProducts(products)
 
     return { products, total, page, limit };
   }
@@ -322,8 +301,6 @@ export const getAllProductsWithCompactData = async (
 
 const getCountDataForProducts = async (products: any[]) => {
   return await Promise.all(products.map(async (product: any) => {
-
-    console.log(product)
     const plainProduct = product.get({ plain: true });
     let countData: object[] = [];
     if (plainProduct.isSlabType) {

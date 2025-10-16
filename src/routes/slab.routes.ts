@@ -5,8 +5,6 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
-// hold-unHold slab
-router.put("/:slabId/hold", authenticateUser, slabController.updateSlabHoldStatus);
 
 // Bulk update slabs
 router.put("/bulkUpdate", authenticateUser, slabController.bulkUpdateSlabs);

@@ -47,6 +47,11 @@ const InventoryProduct = sequelize.define(
       allowNull: true,
       defaultValue: INVENTORY_ITEM_STATUS.INITIATE,
     },
+    isHold: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     combinedNumber: {
       type: DataTypes.STRING,
       allowNull: true,

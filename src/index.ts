@@ -58,7 +58,6 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/account", accountRoutes);
@@ -110,7 +109,7 @@ app.use(errorHandler);
 // Start server
 // connectDB().then(() => {
 app.listen(PORT, () => {
-  // syncModels();
+  syncModels();
   console.log(`Server running on http://localhost:${PORT}`);
 });
 // });

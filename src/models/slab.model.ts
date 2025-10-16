@@ -68,11 +68,6 @@ const Slab = sequelize.define(
       allowNull: true,
       defaultValue: INVENTORY_ITEM_STATUS.INITIATE,
     },
-    isHold: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: true,

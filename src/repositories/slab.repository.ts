@@ -59,11 +59,6 @@ export const getSlabByInventoryProductId = async (inventoryProductId: number, tr
   return await models.Slab.findOne({ where: { inventoryProductId }, transaction });
 };
 
-// update hold status of slab
-export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
-  return await Slab.update({ isHold }, { where: { id: slabId }, individualHooks: true });
-};
-
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
@@ -218,10 +213,22 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
   const data = await models.Slab.findAll({
     where: {
       productId,
-      [Op.or]: [{ status: INVENTORY_ITEM_STATUS.ALLOCATED }, { isHold: true }],
+      [Op.or]: [
+        { status: INVENTORY_ITEM_STATUS.ALLOCATED },
+        // inventory product isHold true
+        // Use literal to OR against included association column
+        literal("`inventoryProduct`.`isHold` = true"),
+      ],
     },
+    include: [
+      {
+        association: "inventoryProduct",
+        required: false,
+        attributes: [],
+      },
+    ],
     attributes: [
-      [fn("COUNT", col("id")), "count"],
+      [fn("COUNT", col("slabs.id")), "count"],
       [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
     ],
   });
@@ -234,10 +241,18 @@ export const getAvailableSlabsData = async (productId: number) => {
   const data = await models.Slab.findAll({
     where: {
       productId,
-      [Op.and]: [{ status: INVENTORY_ITEM_STATUS.IN_INVENTORY }, { isHold: false }],
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
     },
+    include: [
+      {
+        association: "inventoryProduct",
+        required: true,
+        where: { isHold: false },
+        attributes: [],
+      },
+    ],
     attributes: [
-      [fn("COUNT", col("id")), "count"],
+      [fn("COUNT", col("slabs.id")), "count"],
       [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
     ],
   });

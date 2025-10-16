@@ -1,14 +1,10 @@
-import { Transaction, WhereOptions } from "sequelize";
-import * as slabRepository from "../repositories/slab.repository";
-import * as siplRepository from "../repositories/sipl.repository";
-import { AppError } from "../helper/appError";
+import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
-import { update } from "lodash";
+import { AppError } from "../helper/appError";
+import * as siplRepository from "../repositories/sipl.repository";
+import * as slabRepository from "../repositories/slab.repository";
 
-export const updateSlabHoldStatus = async (slabId: number, isHold: boolean) => {
-  await slabRepository.updateSlabHoldStatus(slabId, isHold);
-  return { message: `Slab ID ${slabId} hold status updated to ${isHold}` };
-};
+
 
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);

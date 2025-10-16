@@ -516,3 +516,10 @@ Design changed for
 3. Account Receivable.
 4. Transactions.
 5. Credit Debit Note.
+
+---
+
+loader.
+background color.
+logo.
+sticky navbar.

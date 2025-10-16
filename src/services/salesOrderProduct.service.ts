@@ -66,9 +66,10 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
           );
         }
 
-        // can't add to SO if it is in hold (only for slabs)
-        if (slab && slab.isHold) {
-          throw new AppError(`Slab is in hold with id: ${slab.id}`, 400);
+        // can't add to SO if it is in hold (check inventoryProduct hold)
+        const inv = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
+        if (inv && (inv as any).isHold) {
+          throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
         }
 
         // Create new product entry.

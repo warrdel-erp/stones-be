@@ -4,6 +4,9 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
+// hold-unHold slab
+router.put("/:id/hold", authenticateUser, inventoryProductController.updateInventoryProductHoldStatus);
+
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
 

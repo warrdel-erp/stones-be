@@ -40,3 +40,9 @@ export const getCartCount = async (clientId: number) => {
     const count = await inventoryProductRepository.getCartCount(clientId);
     return { count };
 };
+
+
+export const updateInventoryProductHoldStatus = async (id: number, isHold: boolean) => {
+    await inventoryProductRepository.updateInventoryProductHoldStatus(id, isHold);
+    return { message: `Inventory product ID ${id} hold status updated to ${isHold}` };
+};
