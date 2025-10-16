@@ -56,3 +56,10 @@ export const getCustomerById = async (id: number) => {
 
   return data?.get({ plain: true });
 };
+
+// Get customer by id simple.
+export const getCustomerByIdSimple = async (id: number) => {
+  const data = await models.Customer.findByPk(id);
+
+  return data?.get({ plain: true });
+};

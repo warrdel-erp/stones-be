@@ -3,6 +3,7 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
+import * as customerRepository from "../repositories/customer.repository";
 import { getPercentageValue, getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
@@ -11,13 +12,22 @@ import { SALES_TAX, SCOP } from "../constants";
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
   try {
+    // Fetch customer to get taxId
+    if (data.customerId) {
+      const customer = await customerRepository.getCustomerByIdSimple(data.customerId);
+      data.taxId = customer?.salesTax;
+    }
+
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
 
-    // Set stage to salesOrder for each product.
-    data.products = data.products.map((product: any) => ({ ...product, stage: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER }));
+    // Add Tax percentage to salesOrderProduct
+    const productsWithTaxPercentage = data.products.map((product: any) => ({
+      ...product,
+      taxPercentage: SALES_TAX.find((e) => e.id == data.taxId)?.value || 0
+    }));
 
-    const salesOrderProducts = await salesOrderProductService.upsertSalesOrderProducts(
-      data.products,
+    const salesOrderProducts = await salesOrderProductService.createSalesOrderProducts(
+      productsWithTaxPercentage,
       salesOrder.id,
       transaction
     );

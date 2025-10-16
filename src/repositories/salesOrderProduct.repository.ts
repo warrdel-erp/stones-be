@@ -1,13 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 
-//  Find SalesOrderProduct by ID and salesOrderId.
-export const findByIdAndSalesOrderId = async (
-  { id, salesOrderId }: { id: number; salesOrderId: number },
-  transaction?: Transaction
-) => {
-  return models.SalesOrderProduct.findOne({ where: { id, salesOrderId }, transaction });
-};
 
 export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });

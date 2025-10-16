@@ -4,6 +4,7 @@ import User from "./user.model";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { SALES_TAX } from "../constants";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -92,6 +93,16 @@ const SalesOrder = sequelize.define(
         key: "id",
       },
     },
+    taxId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    tax: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return SALES_TAX.find((e: any) => e.id === this.get("taxId"));
+      },
+    }
   },
   {
     tableName: "sales_orders",

@@ -18,6 +18,11 @@ const SalesOrderProduct = sequelize.define(
       type: DataTypes.DECIMAL(10, 3),
       allowNull: false,
     },
+    taxPercentage: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    },
     taxApplied: {
       type: DataTypes.FLOAT,
       allowNull: false,
@@ -92,7 +97,20 @@ const SalesOrderProduct = sequelize.define(
   {
     tableName: "sales_order_products",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["salesOrderId", "inventoryProductId"],
+      },
+    ],
   }
 );
 
 export default SalesOrderProduct;
+
+
+// hook to prevent update salesOrderd and inventoryProductId
+SalesOrderProduct.beforeUpdate((product: any) => {
+  delete product.dataValues.salesOrderId;
+  delete product.dataValues.inventoryProductId;
+});

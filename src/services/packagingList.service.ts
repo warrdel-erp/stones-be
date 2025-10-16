@@ -27,17 +27,16 @@ export const createPackagingList = async (data: any) => {
     let updatedProducts = [];
 
     if (data?.soProducts) {
-      // Set loadingOrderId and stage to loadingOrder for each product.
-      data.soProducts = data.soProducts.map((e: any) => ({
+      // Set packagingListId, salesOrderId and stage for each product
+      const productsToUpdate = data.soProducts.map((e: any) => ({
         ...e,
         packagingListId: packagingList.id,
         stage: SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
       }));
 
-      // update sales order products with packaging list id and stage -> packagingList.
-      updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(
-        data.soProducts,
-        loadingOrder.salesOrderId,
+      // update sales order products with packaging list id and stage -> packagingList
+      updatedProducts = await salesOrderProductService.updateSalesOrderProducts(
+        productsToUpdate,
         transaction
       );
     } else {

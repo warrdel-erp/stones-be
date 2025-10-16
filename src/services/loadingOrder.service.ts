@@ -45,7 +45,10 @@ export const createLoadingOrder = async (data: any) => {
 
   try {
 
-    let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(data, transaction);
+    const { salesOrderId } = await salesOrderProductService.validateSalesOrderProducts(data.soProducts);
+
+    let loadingOrder: any = await loadingOrderRepository.createLoadingOrder({ ...data, salesOrderId }, transaction);
+
     loadingOrder = loadingOrder.get({ plain: true });
 
     // Create trade services for loading order if it exists
@@ -61,22 +64,22 @@ export const createLoadingOrder = async (data: any) => {
 
       await tradeServiceService.createMultipleTradeServices(servicePayload, transaction);
     }
+
     // --------------------
 
 
     let updatedProducts = [];
 
     if (data?.soProducts) {
-      // Set loadingOrderId and stage to loadingOrder for each product.
-      data.soProducts = data.soProducts.map((e: any) => ({
+      // Set loadingOrderId, salesOrderId and stage to loadingOrder for each product
+      const productsToUpdate = data.soProducts.map((e: any) => ({
         ...e,
         loadingOrderId: loadingOrder.id,
         stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
       }));
 
-      updatedProducts = await salesOrderProductService.upsertSalesOrderProducts(
-        data.soProducts,
-        data.salesOrderId,
+      updatedProducts = await salesOrderProductService.updateSalesOrderProducts(
+        productsToUpdate,
         transaction
       );
     } else {
@@ -607,32 +610,6 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     // Mark corresponding products as SOLD
     for (const salesOrderProduct of loadingOrder.salesOrderProducts) {
-      // Check if it's a slab or generic product
-      let slab = await slabRepository.getSlabByInventoryProductId(salesOrderProduct.inventoryProductId);
-      let genericProduct = null;
-
-      if (!slab) {
-        genericProduct = await genericProductRepository.updateGenericProductStatusByInventoryProduct(
-          salesOrderProduct.inventoryProductId,
-          INVENTORY_ITEM_STATUS.IN_INVENTORY, // Just to check if it exists
-          transaction
-        );
-      }
-
-      // Update product status to SOLD
-      if (slab) {
-        await slabRepository.updateSlabStatusByInventoryProduct(
-          salesOrderProduct.inventoryProductId,
-          INVENTORY_ITEM_STATUS.SOLD,
-          transaction
-        );
-      } else if (genericProduct) {
-        await genericProductRepository.updateGenericProductStatusByInventoryProduct(
-          salesOrderProduct.inventoryProductId,
-          INVENTORY_ITEM_STATUS.SOLD,
-          transaction
-        );
-      }
 
       // Update inventory product status to SOLD
       await inventoryProductRepository.updateInventoryProductStatusById(
@@ -649,7 +626,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       );
 
       // Create journal entries (only for slabs as they have landed unit cost)
-      if (slab) {
+      if (salesOrderProduct?.inventoryProduct?.isSlabType) {
         await journalEntryRepository.create(
           {
             amount:

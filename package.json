@@ -9,7 +9,9 @@
     "migrate:all": "npx sequelize-cli db:migrate",
     "initialize:db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "build": "tsc",
-    "start": "pm2 start dist/index.js"
+    "start": "pm2 start dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,9 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.5",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "eslint": "^9.18.0",
     "nodemon": "^3.1.9",
     "sequelize-typescript": "^2.1.6",
     "ts-node": "^10.9.2",

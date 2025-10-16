@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+*.js
+migrations
+seeders
+config/config.js
+ecosystem.config.js
+
+

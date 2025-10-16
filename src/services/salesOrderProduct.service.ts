@@ -7,11 +7,11 @@ import { sequelize } from "../config/database";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
-import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
-//  Create or update multiple SalesOrderProduct entries.
-export const upsertSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
-  const upsertedProducts = [];
+// Create multiple SalesOrderProduct entries
+export const createSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
+  const createdProducts = [];
 
   const shouldCommitTransaction = !transaction;
 
@@ -21,97 +21,84 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
 
   try {
     for (const product of products) {
-      if (product.id) {
-        // Fetch existing product with SOid because update should be happen when product belongs to given SO.
-        const existingProduct = await salesOrderProductRepository.findByIdAndSalesOrderId(
-          { id: product.id, salesOrderId },
-          transaction
-        );
+      // can't add to SO if it is in hold (check inventoryProduct hold)
+      const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
 
-        if (existingProduct) {
-          // Prevent updating `inventoryProductId` & `salesOrderId`.
-          await salesOrderProductRepository.updateSalesOrderProduct(product.id, product, transaction);
-
-          upsertedProducts.push({ id: product.id, ...product });
-        } else {
-          throw new AppError(`Invalid Id '${product.id}' or product does not belongs to given SO`, 400);
-        }
-      } else {
-        // Check if it's a slab or generic product
-        let slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
-        let genericProduct: any = null;
-
-        if (slab) {
-          slab = slab?.get({ plain: true });
-        } else {
-          // If not a slab, check if it's a generic product
-          genericProduct = await genericProductRepository.getGenericProductByInventoryProductId(
-            product.inventoryProductId,
-            transaction
-          );
-        }
-
-        // can't add to SO if it is not in inventory
-        if (slab && slab.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
-          throw new AppError(
-            `Slab is not in inventory. Slab is ${slab.status} with id: ${slab.id}, and inventoryProductId: ${product.inventoryProductId}`,
-            400
-          );
-        }
-
-        if (genericProduct && genericProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
-          throw new AppError(
-            `Generic product is not in inventory. Generic product is ${genericProduct.status} with id: ${genericProduct.id}, and inventoryProductId: ${product.inventoryProductId}`,
-            400
-          );
-        }
-
-        // can't add to SO if it is in hold (check inventoryProduct hold)
-        const inv = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
-        if (inv && (inv as any).isHold) {
-          throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
-        }
-
-        // Create new product entry.
-        const newProduct = await salesOrderProductRepository.createSalesOrderProduct(
-          { ...product, salesOrderId },
-          transaction
-        );
-
-        // If a product is added in SO then status is changed to ALLOCATED
-        if (slab) {
-          await slabRepository.updateSlabStatusByInventoryProduct(
-            product.inventoryProductId,
-            INVENTORY_ITEM_STATUS.ALLOCATED,
-            transaction,
-            { isInCart: false }
-          );
-        } else if (genericProduct) {
-          await genericProductRepository.updateGenericProductStatusByInventoryProduct(
-            product.inventoryProductId,
-            INVENTORY_ITEM_STATUS.ALLOCATED,
-            transaction
-          );
-        }
-
-        // Update inventory product status to ALLOCATED
-        await inventoryProductRepository.updateInventoryProductStatusById(
-          product.inventoryProductId,
-          INVENTORY_ITEM_STATUS.ALLOCATED,
-          transaction
-        );
-
-        upsertedProducts.push(newProduct);
+      if (inventoryProduct?.isHold) {
+        throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
       }
+
+      if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+        throw new AppError(`Inventory product is not in inventory. Inventory product is ${inventoryProduct.status} with id: ${inventoryProduct.id}, and inventoryProductId: ${product.inventoryProductId}`, 400);
+      }
+
+      // Create new sales order product entry
+      const newProduct = await salesOrderProductRepository.createSalesOrderProduct(
+        { ...product, salesOrderId },
+        transaction
+      );
+
+      // Update inventory product status to ALLOCATED
+      await inventoryProductRepository.updateInventoryProductStatusById(
+        product.inventoryProductId,
+        INVENTORY_ITEM_STATUS.ALLOCATED,
+        transaction
+      );
+
+      createdProducts.push(newProduct);
     }
 
     if (shouldCommitTransaction) {
-      transaction.commit();
+      await transaction.commit();
     }
-    return upsertedProducts;
+    return createdProducts;
   } catch (error) {
     if (shouldCommitTransaction) {
-      transaction.rollback();
+      await transaction.rollback();
+    }
+    throw error;
+  }
+};
+
+// Update multiple SalesOrderProduct entries
+export const updateSalesOrderProducts = async (products: any[], transaction?: Transaction) => {
+  const updatedProducts = [];
+
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
+
+  try {
+    for (const product of products) {
+      if (!product.id) {
+        throw new AppError("Product id is required for update", 400);
+      }
+
+      // Fetch existing product with SOid because update should happen when product belongs to given SO
+      const existingProduct = await salesOrderProductRepository.findByIdSimple(
+        product.id,
+        transaction
+      );
+
+      if (!existingProduct) {
+        throw new AppError(`Invalid Id '${product.id}' or so product does not exists`, 400);
+      }
+
+      // Prevent updating `inventoryProductId` & `salesOrderId`
+      await salesOrderProductRepository.updateSalesOrderProduct(product.id, product, transaction);
+
+      updatedProducts.push({ id: product.id, ...product });
+    }
+
+    if (shouldCommitTransaction) {
+      await transaction.commit();
+    }
+    return updatedProducts;
+  } catch (error) {
+    if (shouldCommitTransaction) {
+      await transaction.rollback();
     }
     throw error;
   }
@@ -120,6 +107,51 @@ export const upsertSalesOrderProducts = async (products: any[], salesOrderId: nu
 // Fetch all SalesOrderProducts linked to a SalesOrder
 export const getSalesOrderProducts = async (salesOrderId: number) => {
   return await salesOrderProductRepository.getSalesOrderProductsBySalesOrderId(salesOrderId);
+};
+
+// Validate that all sales order product IDs exist and belong to the same sales order
+export const validateSalesOrderProducts = async (soProducts: any[]) => {
+  if (!soProducts || soProducts.length === 0) {
+    throw new AppError("Sales order products are required", 400);
+  }
+
+  // Extract IDs from the objects
+  const soProductIds = soProducts.map(product => product.id).filter(id => id);
+
+  // Check if all products have IDs
+  const productsWithoutId = soProducts.filter(product => !product.id);
+  if (productsWithoutId.length > 0) {
+    throw new AppError("All sales order products must have an id", 400);
+  }
+
+  // Fetch all products by IDs
+  const fetchedProducts = await Promise.all(
+    soProductIds.map(id => salesOrderProductRepository.findByIdSimple(id))
+  );
+
+  // Check if all products exist
+  const notFoundIds = soProductIds.filter((_, index) => !fetchedProducts[index]);
+  if (notFoundIds.length > 0) {
+    throw new AppError(`Sales order products not found: ${notFoundIds.join(", ")}`, 404);
+  }
+
+  // Extract salesOrderIds from all products
+  const salesOrderIds = fetchedProducts.map((product: any) => product.salesOrderId);
+  const uniqueSalesOrderIds = [...new Set(salesOrderIds)];
+
+  // Check if all products belong to the same sales order
+  if (uniqueSalesOrderIds.length > 1) {
+    throw new AppError(
+      `Sales order products belong to different sales orders: ${uniqueSalesOrderIds.join(", ")}`,
+      400
+    );
+  }
+
+  const salesOrderId = uniqueSalesOrderIds[0];
+
+  return {
+    salesOrderId
+  };
 };
 
 export const updatePickedStatus = async (soProductId: number, picked: boolean) => {
