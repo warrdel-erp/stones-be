@@ -523,3 +523,12 @@ loader.
 background color.
 logo.
 sticky navbar.
+
+---
+
+1. So detail page redesign.
+2. So details code restructure.
+3. Change in implementation of calculation in so calcs,
+4. Snapshot of tax in SO.
+5. removed calculations from FE.
+6. Create Loading Order API Changes.

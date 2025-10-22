@@ -5,6 +5,7 @@ import { AppError } from "../helper/appError";
 import Client from "./client.model";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
+import { PAYMENT_TERMS } from "../constants";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -33,8 +34,8 @@ const LoadingOrder = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    paymentTerms: {
-      type: DataTypes.STRING,
+    paymentTermId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     deliveryNotes: {
@@ -77,6 +78,12 @@ const LoadingOrder = sequelize.define(
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
+    }
   },
   {
     tableName: "loading_orders",

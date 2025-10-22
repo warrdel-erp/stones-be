@@ -32,9 +32,23 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
         throw new AppError(`Inventory product is not in inventory. Inventory product is ${inventoryProduct.status} with id: ${inventoryProduct.id}, and inventoryProductId: ${product.inventoryProductId}`, 400);
       }
 
+      // Calculate receivingAreaSqIn if it's a slab type
+      let receivingAreaSqIn = null;
+      if (inventoryProduct.isSlabType) {
+        const slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
+        if (slab) {
+          receivingAreaSqIn = slab.receivingLength * slab.receivingWidth;
+        }
+      }
+
       // Create new sales order product entry
       const newProduct = await salesOrderProductRepository.createSalesOrderProduct(
-        { ...product, salesOrderId },
+        {
+          ...product,
+          salesOrderId,
+          isSlabType: inventoryProduct.isSlabType,
+          receivingAreaSqIn
+        },
         transaction
       );
 

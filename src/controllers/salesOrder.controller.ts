@@ -42,6 +42,18 @@ export const getSalesOrderById = catchAsync(async (req: Request, res: Response) 
   SuccessResponse(res, 200, "Sales Order retrieved successfully", salesOrder);
 });
 
+// Get SO by ID
+export const getSalesOrderByIdForCreateLO = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const salesOrder = await salesOrderService.getSalesOrderByIdForCreateLO(Number(id));
+
+  if (!salesOrder) {
+    return SuccessResponse(res, 404, "Sales Order not found", null);
+  }
+
+  SuccessResponse(res, 200, "Sales Order retrieved successfully", salesOrder);
+});
+
 // Get new SO number
 export const getNewSoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;

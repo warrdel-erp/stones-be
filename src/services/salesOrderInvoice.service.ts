@@ -5,6 +5,7 @@ import { AppError } from "../helper/appError";
 import { PAYMENT_TERMS, SALES_TAX } from "../constants";
 import { removeDuplicatesWithUnitPrice } from "../helper";
 import { getTotalLOQuantity } from "./loadingOrder.service";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 
 export const fetchTotalAmountFromLastNDays = async (fromDate: string, toDate: string, clientId: number) => {
   return await salesOrderInvoiceRepository.getTotalAmountFromLastNDays(fromDate, toDate, clientId);
@@ -31,12 +32,14 @@ export const getInvoiceById = async (id: number) => {
     throw new AppError("Invoice does not exists.", 400);
   }
 
-  soInvoice.customer.paymentTerms = PAYMENT_TERMS.find((e) => e.id == soInvoice.customer.paymentTerms);
-  soInvoice.customer.salesTax = SALES_TAX.find((e) => e.id == soInvoice.customer.salesTax);
-
   soInvoice.products = getLoadingOrderProductAccordingToIdAndUnitPrice(soInvoice.loadingOrder);
 
-  return soInvoice;
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(soInvoice.loadingOrder.salesOrderProducts)
+
+  return {
+    ...soInvoice,
+    calculations,
+  };
 };
 
 function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
@@ -49,8 +52,9 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
 
   // Map slabs to products
   const newProducts = products.map((product) => {
-    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+    const salesOrderProducts = loadingOrder.salesOrderProducts.filter(
       (salesOrderProduct: any) => {
+
         let productId = null;
         if (salesOrderProduct.inventoryProduct.slab) {
           productId = salesOrderProduct.inventoryProduct.slab.product.id;
@@ -64,25 +68,13 @@ function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
 
       });
 
-    const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
-
-    if (!salesTax) {
-      throw new AppError('Error in getting tax value', 400);
-    }
-
-    let amounts = {};
-
-    if (loadingOrder.packagingList) {
-      amounts = loadingOrderService.getTotalPlAmount(salesOrderProduct, salesTax.value)
-    } else {
-      amounts = loadingOrderService.getTotalLoadingOrderAmount(salesOrderProduct, salesTax.value)
-    }
+    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProducts)
 
     return {
       ...product,
-      salesOrderProduct,
-      amounts,
-      totalQuantity: getTotalLOQuantity(salesOrderProduct, product?.isSlabType),
+      salesOrderProduct: salesOrderProducts,
+      calculations,
+      totalQuantity: getTotalLOQuantity(salesOrderProducts, product?.isSlabType),
     };
   });
 

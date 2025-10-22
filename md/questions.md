@@ -118,4 +118,8 @@
 
 ---
 
-1. can we add, delete products after so created.
+1. can we add, delete products after so created.[Yes-if-not-added-in-LO]
+
+---
+
+1. In SO Details page totals and date could be different for LO, PL, Invoice.

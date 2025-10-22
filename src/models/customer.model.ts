@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user.model";
-import { SCOP } from "../constants";
+import { SALES_TAX, SCOP, PAYMENT_TERMS } from "../constants";
 import { CUSTOMER_STATUS } from "../constants/tableTypes";
 import Client from "./client.model";
 
@@ -58,13 +58,25 @@ const Customer = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    salesTax: {
+    salesTaxId: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    paymentTerms: {
-      type: DataTypes.STRING,
+    salesTax: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return SALES_TAX.find((e: any) => e.id === this.get("salesTaxId"));
+      },
+    },
+    paymentTermId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
     },
     exemptCerti: {
       type: DataTypes.STRING,
@@ -111,9 +123,15 @@ const Customer = sequelize.define(
       allowNull: false,
       defaultValue: CUSTOMER_STATUS.ACTIVE,
     },
-    scope: {
-      type: DataTypes.ENUM(...SCOP.map((scope) => String(scope.id))),
+    scopeId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    scope: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return SCOP.find((e) => e.id === this.get("scopeId"));
+      },
     },
     createdBy: {
       type: DataTypes.INTEGER,

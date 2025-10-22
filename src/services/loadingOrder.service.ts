@@ -137,25 +137,10 @@ export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions
 export const getLoadingOrderById = async (id: number) => {
   const loadingOrder = await loadingOrderRepository.getLoadingOrderById(id);
 
-  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
-
-  if (!salesTax) {
-    throw new AppError('Error in getting tax value', 400);
-  }
-
-  // Calculate total amount added in SO.
-  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
-
-  // Calculate total pl amount added in SO.
-  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
+  loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
 
   // so product as per product and unitPrice.
   loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
-
-  // get payment terms constant data.
-  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
-
-  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
 
   return loadingOrder;
 };
@@ -466,7 +451,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
-    const invoiceAmount = loadingOrder.packagingList ? loadingOrder.plAmount : loadingOrder.amounts
+    const invoiceAmountObj = loadingOrder.packagingList ? loadingOrder.calculations.packagingList : loadingOrder.calculations.loadingOrder
 
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
@@ -474,9 +459,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         clientId: clientId,
         customerId: loadingOrder.salesOrder.customerId,
         loadingOrderId: loadingOrder.id,
-        amount: invoiceAmount.totalAmount,
-        taxableAmount: invoiceAmount.taxableAmount,
-        taxValue: invoiceAmount.taxAmount,
+        amount: invoiceAmountObj.subTotal,
+        taxableAmount: invoiceAmountObj.taxable,
+        taxValue: invoiceAmountObj.tax,
         salesOrderId: loadingOrder.salesOrder.id,
       },
       transaction
@@ -499,7 +484,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for with tax.
     await journalEntryRepository.create(
       {
-        amount: invoiceAmount.totalAmount + invoiceAmount.taxAmount,
+        amount: invoiceAmountObj.total,
         ledgerId: ledgerAccount.id,
         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -553,7 +538,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for state tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmount.taxableAmount, customerTax?.stateTax || 0),
+        amount: getPercentageValue(invoiceAmountObj.taxable, customerTax?.stateTax || 0),
         ledgerId: ledgerAccountForStateTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -577,7 +562,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // Journal Entry for county tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmount.taxableAmount, countyTax),
+        amount: getPercentageValue(invoiceAmountObj.taxable, countyTax),
         ledgerId: ledgerAccountForCountyTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 

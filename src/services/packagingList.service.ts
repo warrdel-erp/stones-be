@@ -8,6 +8,7 @@ import { removeDuplicatesWithUnitPrice } from "../helper";
 import { PAYMENT_TERMS, SALES_TAX } from "../constants";
 import { getTotalLoOrderQuantity, getTotalPlAmount } from "./loadingOrder.service";
 import _ from "lodash";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
@@ -71,17 +72,10 @@ export const getPackagingListById = async (id: number) => {
     throw new AppError("Invalid Id", 400);
   }
 
-  const salesTax = SALES_TAX.find(e => e.id == packagingList.loadingOrder.salesOrder.customer.salesTax);
-
-  if (!salesTax) {
-    throw new AppError('Error in getting tax value', 400);
-  }
-
-
   packagingList.products = getPackagingListProductAccordingToIdAndUnitPrice(packagingList);
 
-  // Calculate total pl amount added in SO.
-  packagingList.amounts = getTotalPlAmount(packagingList.salesOrderProducts, salesTax.value);
+  // Calculations for packaging list.
+  packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
 
   // get payment terms constant data.
   packagingList.loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == packagingList.loadingOrder.paymentTerms);

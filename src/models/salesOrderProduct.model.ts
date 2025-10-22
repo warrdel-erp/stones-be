@@ -5,6 +5,7 @@ import PackagingList from "./packagingList.model";
 import LoadingOrder from "./loadingOrder.model";
 import SalesOrder from "./salesOrder.model";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { getPercentageValue } from "../helper";
 
 const SalesOrderProduct = sequelize.define(
   "sales_order_products",
@@ -16,6 +17,10 @@ const SalesOrderProduct = sequelize.define(
     },
     unitPrice: {
       type: DataTypes.DECIMAL(10, 3),
+      allowNull: false,
+    },
+    isSlabType: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
     },
     taxPercentage: {
@@ -45,6 +50,10 @@ const SalesOrderProduct = sequelize.define(
       allowNull: true,
     },
     plRemeasureWidth: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    receivingAreaSqIn: {
       type: DataTypes.FLOAT,
       allowNull: true,
     },
@@ -92,6 +101,48 @@ const SalesOrderProduct = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    amount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.get("isSlabType") ? (Number(this.get("receivingAreaSqIn")) * Number(this.get("unitPrice")) / 144) : Number(this.get("unitPrice"));
+      },
+    },
+    loAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (this.get("isSlabType")) {
+          return Number(this.get("loRemeasureLength")) * Number(this.get("loRemeasureWidth")) * Number(this.get("unitPrice")) / 144;
+        }
+        return Number(this.get("unitPrice"));
+      },
+    },
+    plAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (this.get("isSlabType")) {
+          return Number(this.get("plRemeasureLength")) * Number(this.get("plRemeasureWidth")) * Number(this.get("unitPrice")) / 144;
+        }
+        return Number(this.get("unitPrice"));
+      },
+    },
+    plTaxAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return getPercentageValue(Number(this.get("plAmount")), Number(this.get("taxPercentage")));
+      },
+    },
+    loTaxAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return getPercentageValue(Number(this.get("loAmount")), Number(this.get("taxPercentage")));
+      },
+    },
+    taxAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return getPercentageValue(Number(this.get("amount")), Number(this.get("taxPercentage")));
+      },
     },
   },
   {

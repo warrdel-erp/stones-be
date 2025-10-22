@@ -1,7 +1,7 @@
 import { Transaction, Op, Sequelize, fn, cast, col } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
-import { SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
 // Create new Sales Order
 export const createSalesOrder = async (data: any, transaction?: Transaction) => {
@@ -37,7 +37,7 @@ export const getAllSalesOrders = async (
     include: [
       {
         association: "customer",
-        attributes: ["id", "salesTax", "scope", "daysForHold", "name", "primaryPhoneNumber"],
+        attributes: ["id", "scopeId", 'scope', "daysForHold", "name", "primaryPhoneNumber"],
       },
       {
         association: "loadingOrders",
@@ -303,6 +303,7 @@ export const getSalesOrderById = async (id: number) => {
     where: { id },
     include: [
       { association: "customer" },
+
       { association: 'advancedDeposits' },
       { association: "createdBy" },
       { association: "shippingAddress" },
@@ -348,6 +349,92 @@ export const getSalesOrderById = async (id: number) => {
           },
         ],
       },
+      {
+        association: 'loadingOrders',
+        attributes: ['id', 'code', 'loDate', 'stage'],
+        include: [
+          {
+            association: 'packagingList',
+            attributes: ['id', 'code'],
+          },
+          {
+            association: 'salesOrderProducts'
+          },
+          {
+            association: "salesOrderInvoice"
+          },
+        ]
+      }
+    ],
+  });
+};
+
+// Get One SO
+export const getSalesOrderByIdForCreateLO = async (id: number) => {
+  return await models.SalesOrder.findOne({
+    where: { id },
+    include: [
+      { association: "customer" },
+      { association: "shippingAddress" },
+      { association: "notes" },
+      { association: "soLocation" },
+      {
+        association: "salesOrderProducts",
+        where: { stage: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER },
+        include: [
+          {
+            association: "inventoryProduct",
+            include: [
+              {
+                association: "bin",
+                attributes: ["id", "name"],
+              },
+              {
+                association: "slab",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
+              {
+                association: "genericProduct",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: "loadingOrder",
+            attributes: ["id", "code"],
+            include: [
+              {
+                association: "packagingList",
+                attributes: ["id", "code"],
+              }
+            ]
+          },
+        ],
+      },
+      {
+        association: 'loadingOrders',
+        attributes: ['id', 'code', 'loDate', 'stage'],
+        include: [
+          {
+            association: 'packagingList',
+            attributes: ['id', 'code'],
+          },
+          {
+            association: 'salesOrderProducts'
+          },
+          {
+            association: "salesOrderInvoice"
+          },
+        ]
+      }
     ],
   });
 };

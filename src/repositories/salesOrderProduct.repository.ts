@@ -75,3 +75,57 @@ export const areSOProductsBelongingToSO = async (SOProductIds: number[], salesOr
 export const updatePickedStatus = async (id: number, picked: boolean) => {
   return await models.SalesOrderProduct.update({ picked }, { where: { id } });
 };
+
+export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
+  const calcs = {
+    receiving: {
+      subTotal: 0, // total of each "amount"
+      taxable: 0, // total of each "amount" with taxApplied = true
+      tax: 0, // taxAmount
+      total: 0, // subTotal + tax
+    },
+    loadingOrder: {
+      subTotal: 0, // total of each "loAmount"
+      taxable: 0, // total of each "loAmount" with taxApplied = true
+      tax: 0, // loTaxAmount
+      total: 0, // subTotal + tax
+    },
+    packagingList: {
+      subTotal: 0, // total of each "plAmount"
+      taxable: 0, // total of each "plAmount" with taxApplied = true
+      tax: 0, // plTaxAmount
+      total: 0, // subTotal + tax
+    }
+  }
+
+  for (const salesOrderProduct of salesOrderProducts) {
+    // Calculate for receiving
+    calcs.receiving.subTotal += salesOrderProduct.amount;
+    if (salesOrderProduct.taxApplied) {
+      calcs.receiving.taxable += salesOrderProduct.amount;
+    }
+    calcs.receiving.tax += salesOrderProduct.taxAmount;
+
+    // Calculate for loading order
+    calcs.loadingOrder.subTotal += salesOrderProduct.loAmount;
+    if (salesOrderProduct.taxApplied) {
+      calcs.loadingOrder.taxable += salesOrderProduct.loAmount;
+    }
+
+    calcs.loadingOrder.tax += salesOrderProduct.loTaxAmount;
+
+    // Calculate for packaging list
+    calcs.packagingList.subTotal += salesOrderProduct.plAmount;
+    if (salesOrderProduct.taxApplied) {
+      calcs.packagingList.taxable += salesOrderProduct.plAmount;
+    }
+
+    calcs.packagingList.tax += salesOrderProduct.plTaxAmount;
+  }
+
+  calcs.receiving.total = calcs.receiving.subTotal + calcs.receiving.tax;
+  calcs.loadingOrder.total = calcs.loadingOrder.subTotal + calcs.loadingOrder.tax;
+  calcs.packagingList.total = calcs.packagingList.subTotal + calcs.packagingList.tax;
+
+  return calcs;
+}

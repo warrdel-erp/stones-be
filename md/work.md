@@ -538,7 +538,3 @@ Email notification.
 ```
 
 ---
-
-1. So detail page redesign.
-2. So details code restructure.
-3. Create Loading Order API Changes.

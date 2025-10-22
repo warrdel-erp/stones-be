@@ -4,7 +4,7 @@ import User from "./user.model";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
-import { SALES_TAX } from "../constants";
+import { PAYMENT_TERMS, SALES_TAX } from "../constants";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -40,8 +40,8 @@ const SalesOrder = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    paymentTerms: {
-      type: DataTypes.STRING,
+    paymentTermId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     customerPoDate: {
@@ -101,6 +101,12 @@ const SalesOrder = sequelize.define(
       type: DataTypes.VIRTUAL,
       get() {
         return SALES_TAX.find((e: any) => e.id === this.get("taxId"));
+      },
+    },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
       },
     }
   },

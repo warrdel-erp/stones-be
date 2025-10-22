@@ -1,13 +1,13 @@
 import { sequelize } from "../config/database";
 import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
-import * as loadingOrderService from "../services/loadingOrder.service";
 import * as notesRepository from "../repositories/notes.repository";
 import * as customerRepository from "../repositories/customer.repository";
-import { getPercentageValue, getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
+import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { SALES_TAX, SCOP } from "../constants";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -91,9 +91,6 @@ export const getAllSalesOrders = async (
   data.data = data.data.map((salesOrder: any) => {
     salesOrder = salesOrder.get({ plain: true });
 
-    salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
-    salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scope)?.value;
-
     salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
 
     salesOrder.fulFilled = getPercentageValueFromValue(salesOrder.salesOrderProducts.length, salesOrder.salesOrderProducts.filter((e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED).length)
@@ -108,19 +105,30 @@ export const getAllSalesOrders = async (
 export const getSalesOrderById = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
 
-  // add total to loadingOrders.
-  salesOrder.loadingOrders = await loadingOrderService.getAllLoadingOrdersWithoutPagination({
-    salesOrderId: id,
-  });
-
   salesOrder.totalAdvancedDeposit = _.sumBy(salesOrder.advancedDeposits, (e: any) => Number(e.amount));
 
-  salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == salesOrder.customer.salesTax);
-  salesOrder.customer.scope = SCOP.find((e) => e.id == salesOrder.customer.scop)?.value;
+  // Calculations for sales order products.
+  salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
 
-  // Total amount and total quantity calculation.
-  salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
-  salesOrder.totalQty = getTotalQuantity(salesOrder.salesOrderProducts);
+  // Calculations for LoadingOrder
+  salesOrder.loadingOrders = salesOrder.loadingOrders.map((loadingOrder: any) => {
+    loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
+    delete loadingOrder.salesOrderProducts;
+    return loadingOrder;
+  });
+
+  // Group Products by productId and unit price.
+  salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
+
+  // delete salesOrder.salesOrderProducts because it is in products;
+  delete salesOrder.salesOrderProducts;
+
+  return salesOrder;
+};
+
+// Get sales order by ID
+export const getSalesOrderByIdForCreateLO = async (id: number) => {
+  const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateLO(id))?.get({ plain: true });
 
   // Group Products by productId and unit price.
   salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
