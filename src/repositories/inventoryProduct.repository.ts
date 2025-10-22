@@ -273,7 +273,7 @@ export const getCartCount = async (clientId: number) => {
 };
 
 export const findInventoryProductById = async (id: number) => {
-  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "isHold", "status"] });
+  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "isHold", "status", 'isSlabType'] });
 };
 
 

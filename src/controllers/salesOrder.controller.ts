@@ -3,8 +3,6 @@ import * as salesOrderService from "../services/salesOrder.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
-import * as salesOrderInvoiceService from "../services/salesOrderInvoice.service";
-import { AppError } from "../helper/appError";
 
 // Create new SO
 export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {

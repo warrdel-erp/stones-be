@@ -15,7 +15,7 @@ export const createSalesOrder = async (data: any) => {
     // Fetch customer to get taxId
     if (data.customerId) {
       const customer = await customerRepository.getCustomerByIdSimple(data.customerId);
-      data.taxId = customer?.salesTax;
+      data.taxId = customer?.taxId;
     }
 
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);

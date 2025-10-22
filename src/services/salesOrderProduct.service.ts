@@ -21,9 +21,9 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
 
   try {
     for (const product of products) {
-      // can't add to SO if it is in hold (check inventoryProduct hold)
       const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
 
+      // can't add to SO if it is in hold (check inventoryProduct hold)
       if (inventoryProduct?.isHold) {
         throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
       }
