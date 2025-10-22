@@ -263,7 +263,6 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
 
 export const getCartCount = async (clientId: number) => {
 
-  console.log('clientId', clientId)
   return await models.InventoryProduct.count({
     where: {
       isInCart: true,
