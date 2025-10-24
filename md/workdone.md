@@ -532,3 +532,8 @@ sticky navbar.
 4. Snapshot of tax in SO.
 5. removed calculations from FE.
 6. Create Loading Order API Changes.
+
+---
+
+1. Navbar, settings menu design.
+2. Cart Page design.

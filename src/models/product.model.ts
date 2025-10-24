@@ -9,6 +9,7 @@ import User from "./user.model";
 import Bin from "./bin.model";
 import ProductFinish from "./productFinish.model";
 import LedgerAccount from "./ledgerAccount.model";
+import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 
 const Product = sequelize.define(
   "products",
@@ -70,13 +71,26 @@ const Product = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    originId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     origin: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        // Assuming origin refers to country or location - you may need to adjust this
+        return null; // Add appropriate logic based on your origin data structure
+      },
+    },
+    uomId: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
     uom: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      type: DataTypes.VIRTUAL,
+      get() {
+        return UNITS_OF_MEASUREMENT.find((e) => e.id === this.get("uomId"));
+      },
     },
     weight: {
       type: DataTypes.FLOAT,
@@ -92,9 +106,15 @@ const Product = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
-    kind: {
-      type: DataTypes.STRING,
+    kindId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    kind: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PRODUCT_KIND.find((e) => e.id === this.get("kindId"));
+      },
     },
     thickness: {
       type: DataTypes.FLOAT,

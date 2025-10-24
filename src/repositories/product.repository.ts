@@ -9,6 +9,56 @@ export const createProduct = async (productData: any) => {
   return await models.Product.create(productData);
 };
 
+// Get all products with minimal data (only subcategory and group)
+export const getAllProductsMinimal = async (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: any
+) => {
+  const offset = (page - 1) * limit;
+  const whereClause: any = { ...filter };
+
+  if (search) {
+    whereClause.name = { [Op.like]: `%${search}%` };
+  }
+
+  const { count, rows } = await models.Product.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    include: [
+      {
+        association: "subCategory",
+        attributes: ["id", "name", "isSlabType"]
+      },
+      {
+        association: "group",
+        attributes: ["id", "name"]
+      }
+    ],
+    attributes: [
+      "id",
+      "name",
+      "alternativeName",
+      "isSlabType",
+      "status",
+      "singleUnitPrice",
+      "bundlePrice",
+      "createdAt"
+    ],
+    order: [["createdAt", "DESC"]]
+  });
+
+  return {
+    products: rows,
+    total: count,
+    page,
+    limit,
+    totalPages: Math.ceil(count / limit)
+  };
+};
+
 // Get all products
 export const getAllProducts = async (
   page: number,

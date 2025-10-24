@@ -35,27 +35,14 @@ export const addProduct = async (productData: any, userId: number, clientId: num
   });
 };
 
-// Fetch all products
+// Fetch all products with minimal data
 export const fetchAllProducts = async (
   page: number,
   limit: number,
   search?: string,
-  filter?: any,
-  onlyWithSlabs?: boolean
+  filter?: any
 ) => {
-  let products = await productRepository.getAllProducts(page, limit, search, filter, onlyWithSlabs);
-
-  products.products = products.products.map((product: any) => {
-    product = product.get({ plain: true });
-
-    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
-    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom);
-
-    return product;
-  });
-
-  return products;
+  return await productRepository.getAllProductsMinimal(page, limit, search, filter);
 };
 
 // Fetch all products

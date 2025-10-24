@@ -15,14 +15,13 @@ export const createProduct = catchAsync(async (req: AuthRequest, res: Response) 
 
 // Get all products
 export const getProducts = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, search, onlyWithSlabs, ...filter } = req.query;
+  const { page = 1, limit = 10, search, ...filter } = req.query;
 
   const result = await productService.fetchAllProducts(
     Number(page),
     Number(limit),
     search as string,
-    filter,
-    !!Number(onlyWithSlabs)
+    filter
   );
 
   SuccessResponse(res, 200, "Users retrieved successfully", result.products, {
