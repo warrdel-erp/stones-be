@@ -538,3 +538,11 @@ Email notification.
 ```
 
 ---
+
+1. Loading Orders section should take less space while empty. ✅
+2. Tax is not visible on multiple pages. ✅
+3. Cart selection.
+4. Payment Pages.
+5. Inventory Data -> average landed, selling price, stock, remove kind, remove category.
+6. Dashboard.
+7. some loader ✅
