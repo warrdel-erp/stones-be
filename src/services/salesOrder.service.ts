@@ -185,7 +185,7 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
 
   // Map slabs to products
   const newProducts = products.map((product) => {
-    const salesOrderProduct = salesOrder.salesOrderProducts.filter(
+    const salesOrderProduct = salesOrder?.salesOrderProducts?.filter(
       (salesOrderProduct: any) => {
         let productId = null;
         if (salesOrderProduct.inventoryProduct.slab) {
@@ -201,17 +201,17 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
       });
 
     // remaining products means -> products not yet gone in loadingOrder.
-    const totalRemainingSoProducts = salesOrderProduct.filter(
+    const totalRemainingSoProducts = salesOrderProduct?.filter(
       (e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.SALES_ORDER
     );
 
     return {
       ...product,
-      taxApplied: !!salesOrderProduct[0]?.taxApplied,
+      taxApplied: !!salesOrderProduct?.[0]?.taxApplied,
       salesOrderProduct,
-      totalAmount: product.isSlabType ? getTotalAmount(salesOrderProduct) : _.sumBy(salesOrderProduct, (e: any) => Number(e.unitPrice)),
-      totalQuantity: product.isSlabType ? getTotalQuantity(salesOrderProduct) : salesOrderProduct.length,
-      totalRemainingQty: product.isSlabType ? getTotalQuantity(totalRemainingSoProducts) : totalRemainingSoProducts.length,
+      totalAmount: product?.isSlabType ? getTotalAmount(salesOrderProduct) : _.sumBy(salesOrderProduct, (e: any) => Number(e.unitPrice)),
+      totalQuantity: product?.isSlabType ? getTotalQuantity(salesOrderProduct) : salesOrderProduct.length,
+      totalRemainingQty: product?.isSlabType ? getTotalQuantity(totalRemainingSoProducts) : totalRemainingSoProducts.length,
     };
   });
 

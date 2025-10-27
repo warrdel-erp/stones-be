@@ -30,5 +30,4 @@ router.get("/:id/forCreateLO", authenticateUser, salesOrderController.getSalesOr
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);
 
-
 export default router;
