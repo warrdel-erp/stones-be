@@ -381,6 +381,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
       {
         association: "salesOrderProducts",
         where: { stage: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER },
+        required: false,
         include: [
           {
             association: "inventoryProduct",

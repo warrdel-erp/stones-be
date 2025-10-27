@@ -130,11 +130,13 @@ export const getSalesOrderById = async (id: number) => {
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateLO(id))?.get({ plain: true });
 
-  // Group Products by productId and unit price.
-  salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
+  if (!!salesOrder?.salesOrderProducts) {
+    // Group Products by productId and unit price.
+    salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
 
-  // delete salesOrder.salesOrderProducts because it is in products;
-  delete salesOrder.salesOrderProducts;
+    // delete salesOrder.salesOrderProducts because it is in products;
+    delete salesOrder.salesOrderProducts;
+  }
 
   return salesOrder;
 };
@@ -180,7 +182,7 @@ function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
     salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
       ...salesOrderProduct?.inventoryProduct?.slab?.product || salesOrderProduct?.inventoryProduct?.genericProduct?.product,
       unitPrice: salesOrderProduct?.unitPrice,
-    }))
+    })) || []
   );
 
   // Map slabs to products
