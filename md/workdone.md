@@ -537,3 +537,8 @@ sticky navbar.
 
 1. Navbar, settings menu design.
 2. Cart Page design.
+
+---
+
+1. inventory page data restructure and calculations.
+2. Cart bugs

@@ -38,6 +38,10 @@ const InventoryProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
+    landedUnitCost: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
     isInCart: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

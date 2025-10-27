@@ -19,10 +19,6 @@ const GenericProduct = sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
         },
-        landedUnitCost: {
-            type: DataTypes.FLOAT,
-            allowNull: true,
-        },
         isHold: {
             type: DataTypes.BOOLEAN,
             allowNull: true,

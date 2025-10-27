@@ -539,10 +539,43 @@ Email notification.
 
 ---
 
+1. Print invoice ✅
+2. Fulfill in SO list.✅ [DOUBT]
+3. Initiate Return is not working, Generic products data in returns. ✅
+4. Approval tab in Deliveries. ✅
+5. Credit/Debit note. ✅
+6. Pending amount must be calculated with advanced deposit and tax in payment page. [If ]
+7. All transactions
+8. Services journal entries, default accounts. ✅
+9. Cart.✅
+10. Create new customer directly from SO, PO.
+11. Packing and receiving forms will be separate for SIPL.
+12. Deliveries will show non invoiced LO.
+13. More details on Delivery page like time and km.
+    14.Serial number of slabs in create SO. ✅
+14. Cancel RO.
+15. Customer shipping address in deliveries. ✅
+16. Errors due to migrations. ✅
+17. Returned Products are not showing in Inventory in SIPL filter.
+18. Add customer Addresses in seeder.
+19. Seed services
+20.
+
+---
+
+---
+
 1. Loading Orders section should take less space while empty. ✅
 2. Tax is not visible on multiple pages. ✅
-3. Cart selection.
-4. Payment Pages.
-5. Inventory Data -> average landed, selling price, stock, remove kind, remove category.
-6. Dashboard.
-7. some loader ✅
+3. Some loader ✅
+4. Some sidebar labels changed. ✅
+5. Some design changes on login page. ✅
+6. Enter and Escape shortcuts on Confirm dialog. ✅
+
+---
+
+1. Cart selection. ✅
+2. Hold Slab is not selectable now in Cart. ✅
+3. Payment Pages.
+4. Inventory Data -> average landed, selling price, stock, remove kind, remove category.
+5. Dashboard.

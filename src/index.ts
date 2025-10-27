@@ -107,9 +107,9 @@ app.use("/api/creditDebitNote", creditDebitNoteRoutes);
 app.use(errorHandler);
 
 // Start server
-// connectDB().then(() => {
-app.listen(PORT, () => {
-  // syncModels();
-  console.log(`Server running on http://localhost:${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    // syncModels();
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 });
-// });

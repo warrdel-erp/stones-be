@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { col, fn, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 import { Op } from "sequelize";
@@ -285,3 +285,30 @@ export const updateInventoryProductHoldStatus = async (id: number, isHold: boole
     { where: { id: id }, individualHooks: true }
   );
 };
+
+
+// get last landed cost.
+export const getLastLandedCost = async (productId: number) => {
+  return await models.InventoryProduct.findOne({
+    where: {
+      productId
+    },
+    attributes: ['landedUnitCost'],
+    order: [['createdAt', 'desc']]
+  })
+}
+
+// get average landed cost.
+export const getAverageLandedCost = async (productId: number) => {
+  const data = await models.InventoryProduct.findOne({
+    where: {
+      productId
+    },
+    attributes: [
+      [fn('AVG', col("landedUnitCost")), "avgLandedCost"]
+    ]
+  })
+  return data?.dataValues
+}
+
+

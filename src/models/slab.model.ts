@@ -86,10 +86,6 @@ const Slab = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    landedUnitCost: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
     siplId: {
       type: DataTypes.INTEGER,
       allowNull: false,

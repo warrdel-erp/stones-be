@@ -258,68 +258,30 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
   const SIPLs = await models.SIPL.findAll({
     include: [
       {
-        where: { productId }, // Filter only slabs belonging to the given product
-        association: "slabs",
-        required: false, // Make this optional so SIPLs with only generic products are also returned
+        association: "inventoryProducts",
+        where: { productId },
+        required: true,
         include: [
           {
-            association: "product",
-            attributes: ["id", "name"],
+            association: "genericProduct",
           },
           {
-            association: "inventoryProduct",
+            association: "slab",
+          },
+          {
+            association: "bin",
             required: true,
             include: [
               {
-                association: "bin",
+                association: "warehouse",
+                where: { locationId },
                 required: true,
                 include: [
                   {
-                    association: "warehouse",
-                    where: { locationId },
-                    required: true,
-                    include: [
-                      {
-                        association: "location",
-                        attributes: ["location"],
-                      },
-                    ]
+                    association: "location",
+                    attributes: ["location"],
                   },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        where: { productId }, // Filter only generic products belonging to the given product
-        association: "genericProducts",
-        required: false, // Make this optional so SIPLs with only slabs are also returned
-        include: [
-          {
-            association: "product",
-            attributes: ["id", "name"],
-          },
-          {
-            association: "inventoryProduct",
-            required: true,
-            include: [
-              {
-                association: "bin",
-                required: true,
-                include: [
-                  {
-                    association: "warehouse",
-                    where: { locationId },
-                    required: true,
-                    include: [
-                      {
-                        association: "location",
-                        attributes: ["location"],
-                      },
-                    ]
-                  },
-                ],
+                ]
               },
             ],
           },

@@ -3,6 +3,7 @@ import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
@@ -121,7 +122,7 @@ export const getInventoryBalance = async (productId: number) => {
 };
 
 export const productLandedCosts = async (productId: number) => {
-  const averageLandedCost = await slabRepository.getAverageLandedCost(productId);
-  const lastLandedCost = await slabRepository.getLastLandedCost(productId);
+  const averageLandedCost = await inventoryProductRepository.getAverageLandedCost(productId);
+  const lastLandedCost = await inventoryProductRepository.getLastLandedCost(productId);
   return { ...averageLandedCost, lastLandedCost: lastLandedCost?.dataValues.landedUnitCost };
-};
+}; 

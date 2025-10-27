@@ -4,6 +4,7 @@ import { CustomUpdateOptions } from "../types/custom";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as slabRepository from '../repositories/slab.repository'
 import * as genericProductRepository from './genericProduct.repository'
+import * as inventoryProductRepository from './inventoryProduct.repository'
 
 export const createProduct = async (productData: any) => {
   return await models.Product.create(productData);
@@ -47,7 +48,7 @@ export const getAllProductsMinimal = async (
       "bundlePrice",
       "createdAt"
     ],
-    order: [["createdAt", "DESC"]]
+    order: [["name", "ASC"]]
   });
 
   return {
@@ -77,29 +78,18 @@ export const getAllProducts = async (
       attributes: ['id'],
       include: [
         {
-          association: "slabs",
-          required: false,
-          attributes: []
-        },
-        {
-          association: "genericProducts",
-          required: false,
-          attributes: []
+          association: 'inventoryProducts',
+          attributes: [],
+          required: true,
         }
       ],
-      where: {
-        [Op.or]: [
-          { '$slabs.id$': { [Op.ne]: null } },
-          { '$genericProducts.id$': { [Op.ne]: null } }
-        ]
-      },
       raw: true
     });
 
     const productIds = productsWithInventory.map((p: any) => p.id);
 
     // Now get the full product details with these IDs
-    const { rows: products, count: total } = await models.Product.findAndCountAll({
+    let { rows: products, count: total } = await models.Product.findAndCountAll({
       where: {
         ...whereClause,
         ...filter,
@@ -110,77 +100,35 @@ export const getAllProducts = async (
           association: "subCategory",
         },
         {
-          association: "slabs",
-          required: false,
+          association: "inventoryProducts",
           include: [
             {
-              association: "inventoryProduct",
-              include: [
-                {
-                  association: "bin",
-                  attributes: ['name'],
-                  include: [
-                    {
-                      association: "warehouse",
-                      include: [
-                        {
-                          association: "location", attributes: ["location"]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              association: "genericProduct",
             },
             {
-              association: 'sipl',
-              attributes: ['id', 'invoiceCode']
-            }
-          ]
-        },
-        {
-          association: "genericProducts",
-          required: false,
-          include: [
-            {
-              association: "inventoryProduct",
-              include: [
-                {
-                  association: "bin",
-                  attributes: ['name'],
-                  include: [
-                    {
-                      association: "warehouse",
-                      include: [
-                        {
-                          association: "location", attributes: ["location"]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              association: "slab",
             },
-            {
-              association: 'sipl',
-              attributes: ['id', 'invoiceCode']
-            }
           ]
         },
         {
           association: "group",
           attributes: ["id", "name"],
         },
-        {
-          association: "baseColor",
-          attributes: ["id", "name"],
-        },
       ],
       limit,
       offset,
       distinct: true,
-      order: [["createdAt", "DESC"]],
+      order: [["name", "ASC"]],
     });
+
+    products = await Promise.all(products.map(async e => {
+      const plainProduct: any = e.get({ plain: true });
+
+      plainProduct.averageLandedCost = await inventoryProductRepository.getAverageLandedCost(plainProduct.id);
+      plainProduct.lastLandedCost = await inventoryProductRepository.getLastLandedCost(plainProduct.id);
+
+      return plainProduct
+    }))
 
     return { products, total, page, limit };
   } else {
@@ -262,7 +210,7 @@ export const getAllProducts = async (
       limit,
       offset,
       distinct: true,
-      order: [["createdAt", "DESC"]],
+      order: [["name", "ASC"]],
     });
 
     return { products, total, page, limit };
@@ -310,12 +258,10 @@ export const getAllProductsWithCompactData = async (
       limit,
       offset,
       distinct: true,
-      order: [["createdAt", "DESC"]],
+      order: [["name", "ASC"]],
     });
 
     // products = await getCountDataForProducts(products)
-
-    // console.log(products)
 
     return { products, total, page, limit };
   } else {
@@ -338,9 +284,8 @@ export const getAllProductsWithCompactData = async (
       limit,
       offset,
       distinct: true,
-      order: [["createdAt", "DESC"]],
+      order: [["name", "ASC"]],
     });
-
 
     // products = await getCountDataForProducts(products)
 

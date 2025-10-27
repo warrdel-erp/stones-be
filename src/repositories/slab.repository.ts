@@ -278,28 +278,4 @@ export const getOnlyBarcode = async (siplId: number) => {
   });
 };
 
-// get average landed cost.
-export const getAverageLandedCost = async (productId: number) => {
-  const data = await Slab.findOne({
-    where: {
-      productId
-    },
-    attributes: [
-      [fn('AVG', col("landedUnitCost")), "avgLandedCost"]
-    ]
-  })
-  return data?.dataValues
-}
-
-// get last landed cost.
-export const getLastLandedCost = async (productId: number) => {
-  return await models.Slab.findOne({
-    where: {
-      productId
-    },
-    attributes: ['landedUnitCost'],
-    order: [['createdAt', 'desc']]
-  })
-}
-
 

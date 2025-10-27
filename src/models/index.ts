@@ -270,9 +270,13 @@ User.hasMany(Vendor, { foreignKey: "createdBy", as: "vendors" });
 Bin.hasMany(InventoryProduct, { foreignKey: "binId" });
 InventoryProduct.belongsTo(Bin, { foreignKey: "binId" });
 
-// One Bin can have multiple products.
+// One product can have multiple inventory products.
 Product.hasMany(InventoryProduct, { foreignKey: "productId", as: "inventoryProducts" });
 InventoryProduct.belongsTo(Product, { foreignKey: "productId", as: 'product' });
+
+// One sipl can have multiple inventory products.
+SIPL.hasMany(InventoryProduct, { foreignKey: "siplId", as: "inventoryProducts" });
+InventoryProduct.belongsTo(SIPL, { foreignKey: "siplId", as: 'sipl' });
 
 // One to One relation.
 Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });

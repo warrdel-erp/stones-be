@@ -6,16 +6,11 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
 
 export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number, limit: number, locationId: number) => {
-  const data: any = await productRepository.getAllProducts(page, limit, undefined, true);
+  const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
 
   // Map data accordingly product -> sipl -> slab
   let finalData = await Promise.all(
     data.products.map(async (product: any) => {
-      product = product.get({ plain: true });
-
-      product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
-      product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-      product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
 
       product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
 
@@ -31,31 +26,24 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
         })
       );
 
-      let totalQuantity = (_.sumBy(
-        _.flatMap(product.sipls, 'slabs'),
-        item => item.receivingWidth * item.receivingWidth
+      // Calculate totalQuantity by summing area of all inventoryProducts (per slab), using product.inventoryProducts
+      let totalAvailableQuantity = (
+        _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
+        / 144
+      ).toFixed(2);
+
+      const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
+
+      let totalHoldQuantity = (_.sumBy(product?.inventoryProducts?.filter((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.isHold),
+        (item: any) => item.slab?.receivingLength * item.slab?.receivingWidth
       ) / 144).toFixed(2);
 
-      if (!product.isSlabType) {
-        totalQuantity = _.flatMap(product.sipls, 'genericProducts').length?.toString();
-      }
+      // Total units
+      product.totalUnits = product?.inventoryProducts?.find((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY)?.length;
 
-      const totalSlabsCount = _.flatMap(product.sipls, 'slabs').length;
+      delete product.inventoryProducts;
 
-      let totalHoldQuantity = (_.sumBy(
-        _.flatMap(product.sipls, 'slabs').filter((e: any) => e.inventoryProduct?.isHold),
-        (item: any) => item.receivingWidth * item.receivingWidth
-      ) / 144).toFixed(2);
-
-      if (!product.isSlabType) {
-        totalHoldQuantity = _.flatMap(product.sipls, 'genericProducts')?.filter(e => e.isHold)?.length?.toString();
-      }
-
-      const totalHoldSlabsCount = _.flatMap(product.sipls, 'slabs')?.filter((e: any) => e.inventoryProduct?.isHold)?.length;
-
-      delete product.slabs
-
-      return { ...product, totalQuantity, totalSlabsCount, totalHoldQuantity, totalHoldSlabsCount };
+      return { ...product, totalAvailableQuantity, totalSlabsCount, totalHoldQuantity, };
     })
   );
 
@@ -129,10 +117,6 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
   const finalData = data.products.map((product: any) => {
     product = product.get({ plain: true })
-    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
-    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
-
     const bundleGroups = new Map<number, any>();
 
     for (const slab of product.slabs) {
