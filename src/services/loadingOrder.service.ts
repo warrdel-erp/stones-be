@@ -6,15 +6,13 @@ import _ from "lodash";
 import { Transaction, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 
-import * as genericProductRepository from "../repositories/genericProduct.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import * as slabRepository from "../repositories/slab.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
-import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
@@ -35,9 +33,9 @@ import {
 } from "../constants/tableTypes";
 import { getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { Return } from "../models";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import { createJournalEntriesForTradeServicesOfLoadingOrder } from "./journalEntry.service";
 import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
-import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 // Create new LO
 export const createLoadingOrder = async (data: any) => {

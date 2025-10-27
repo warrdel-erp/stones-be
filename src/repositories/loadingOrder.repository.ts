@@ -103,11 +103,11 @@ export const getLoadingOrderById = async (id: number) => {
             include: [
               {
                 association: "inventoryProduct",
-                attributes: ["id"],
+                attributes: ["id", "landedUnitCost"],
                 include: [
                   {
                     association: "slab",
-                    attributes: ["id", "receivingLength", "receivingWidth", "landedUnitCost"],
+                    attributes: ["id", "receivingLength", "receivingWidth",],
                     include: [
                       {
                         association: "product",

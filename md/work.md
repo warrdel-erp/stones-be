@@ -577,5 +577,5 @@ Email notification.
 1. Cart selection. ✅
 2. Hold Slab is not selectable now in Cart. ✅
 3. Payment Pages.
-4. Inventory Data -> average landed, selling price, stock, remove kind, remove category.
+4. Inventory Data -> average landed, selling price, stock, remove kind, remove category. ✅
 5. Dashboard.
