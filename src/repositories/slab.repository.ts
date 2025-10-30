@@ -203,6 +203,7 @@ export const getInStockSlabsData = async (productId: number) => {
       [fn("COUNT", col("id")), "count"],
       [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
     ],
+    group: ['slabs.id']
   });
 
   return data;
@@ -231,6 +232,7 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
       [fn("COUNT", col("slabs.id")), "count"],
       [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
     ],
+    group: ['slabs.id']
   });
 
   return data;
@@ -255,6 +257,7 @@ export const getAvailableSlabsData = async (productId: number) => {
       [fn("COUNT", col("slabs.id")), "count"],
       [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
     ],
+    group: ['slabs.id']
   });
 
   return data;

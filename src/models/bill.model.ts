@@ -4,6 +4,7 @@ import { sequelize } from "../config/database";
 import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import SIPL from "./sipl.model";
+import Client from "./client.model";
 
 const Bill = sequelize.define(
   "bills",
@@ -83,7 +84,7 @@ const Bill = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Vendor,
+        model: Client,
         key: "id",
       },
       onUpdate: "CASCADE",

@@ -10,6 +10,7 @@ import Bin from "./bin.model";
 import ProductFinish from "./productFinish.model";
 import LedgerAccount from "./ledgerAccount.model";
 import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { COUNTRIES } from "../constants/countries";
 
 const Product = sequelize.define(
   "products",
@@ -78,8 +79,7 @@ const Product = sequelize.define(
     origin: {
       type: DataTypes.VIRTUAL,
       get() {
-        // Assuming origin refers to country or location - you may need to adjust this
-        return null; // Add appropriate logic based on your origin data structure
+        return COUNTRIES.find((e) => e.id === this.get("originId"));
       },
     },
     uomId: {

@@ -6,7 +6,6 @@ import {
   SALES_TAX,
   SCOP,
   SHIPMENT_TERMS,
-  THICKNESS,
   UNITS_OF_MEASUREMENT
 } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -33,7 +32,6 @@ export const getGeneralData = async (clientId: number) => {
     shipmentTerms: SHIPMENT_TERMS,
     scope: SCOP,
     languages: LANGUAGES,
-    thickness: THICKNESS,
     finish: productFinish,
     group: productGroup,
     kind: PRODUCT_KIND,

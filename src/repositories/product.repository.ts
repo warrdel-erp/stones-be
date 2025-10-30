@@ -46,7 +46,11 @@ export const getAllProductsMinimal = async (
       "status",
       "singleUnitPrice",
       "bundlePrice",
-      "createdAt"
+      "createdAt",
+      "originId",
+      "origin",
+      "kindId",
+      "kind"
     ],
     order: [["name", "ASC"]]
   });
@@ -322,6 +326,8 @@ export const getProductById = async (id: number) => {
   return await models.Product.findOne({
     where: { id },
     include: [
+      { model: models.ProductGroup, as: "group" },
+      { model: models.ProductFinish, as: "finish" },
       { model: models.Slab, as: "slabs" },
       {
         model: models.ProductSubCategory,

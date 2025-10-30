@@ -542,3 +542,20 @@ sticky navbar.
 
 1. inventory page data restructure and calculations.
 2. Cart bugs
+
+---
+
+1. customer payment page.
+2. vendor payment page.
+3. create form for following
+   1. Product
+   2. Supplier.
+   3. Customer.
+   4. Vendor.
+   5. Services.
+   6. Trucks.
+4. Details Pages for following.
+   1. Product.
+   2. Supplier
+   3. Customer.
+   4. Vendor.
