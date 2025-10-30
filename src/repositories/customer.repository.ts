@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 
 // Create a new customer in the database.
 export const createCustomer = async (customerData: any, transaction?: Transaction) => {
@@ -48,9 +49,13 @@ export const getCustomerById = async (id: number) => {
   const data = await models.Customer.findByPk(id, {
     include: [
       {
-        model: models.CustomerAddress,
-        as: "addresses",
+        association: "addresses",
       },
+      {
+        association: "ledgerAccount",
+        where: { referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER }
+
+      }
     ],
   });
 

@@ -1,5 +1,5 @@
 import { CreateOptions, DataTypes, Transaction } from "sequelize";
-import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import Client from "./client.model";
@@ -72,6 +72,27 @@ const LedgerAccount = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    subHeader: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return COA_SUB_HEADERS.find((subHeader) => subHeader.id === Number(this.get("subHeaderId")));
+      }
+    },
+    header: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const subHeader: any = this.get("subHeader");
+        return COA_HEADERS.find((header) => header.id === Number(subHeader?.parent_id));
+      }
+    },
+    parentType: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const header: any = this.get("header");
+        return COA_TYPES.find((type) => type.id === Number(header?.parent_id));
+      }
+    }
+
   },
   {
     tableName: "ledger_accounts",

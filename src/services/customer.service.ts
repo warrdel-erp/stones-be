@@ -97,17 +97,6 @@ async function createLedgerAccountForCustomer(clientId: number, newCustomer: any
 // Get customer by id
 export const fetchCustomerById = async (id: number) => {
   const customer = await customerRepository.getCustomerById(id);
-
-  // get payment terms constant data.
-  customer.paymentTerms = PAYMENT_TERMS.find((e) => e.id == customer.paymentTerms);
-  customer.scope = SCOP.find((e) => e.id == customer.scope);
-  customer.salesTax = SALES_TAX.find((e) => e.id == customer.salesTax);
-
-  customer.addresses = customer.addresses.map((address: any) => {
-    address.country = COUNTRIES.find((e) => e.id == address.countryId);
-    return address
-  })
-
   return customer
 };
 
