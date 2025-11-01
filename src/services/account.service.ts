@@ -49,7 +49,8 @@ export const authenticateAccount = async (email: string, password: string) => {
 
     // Prepare user data based on account type
     let userData: any = {
-        email: account.getDataValue('email')
+        email: account.getDataValue('email'),
+        accountId: account.getDataValue('id')
     };
 
     // Get the associated user or client

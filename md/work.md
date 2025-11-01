@@ -579,3 +579,27 @@ Email notification.
 3. Payment Pages.
 4. Inventory Data -> average landed, selling price, stock, remove kind, remove category. ✅
 5. Dashboard.
+
+---
+
+1. If product is inactive it can’t be sold.
+2. In create Customer first three section in one row.
+3. Customer details first 3 in single
+4. Pick ticket -> loading order.
+5. Journal entry page. ✅
+6. Deliveries UI.
+7. Returns UI.
+8. SIPL two step process.
+9. Vendor payment -> debit note to supplier if extra payment.
+10. Vendor payment.
+11. Advanced deposit design. -> due must be affected. ✅
+12. Totals in customer payment.
+13. Customer payment submit popup.
+14. Journal entry for credit note [Pending(what-is-account-for-credit-note-journal-entry)] and advanced deposit [is-this-one-is-correct]. ✅
+15. Customer Payment journal entry.
+16. Last closing entries in journal entries.
+17. Cart to SO.
+18. Direct SIPL.
+19. Hold-Unhold
+
+11, 14, 17, 18

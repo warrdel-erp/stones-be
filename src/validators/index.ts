@@ -4,4 +4,5 @@ export * from './service.validator';
 export * from './serviceCategory.validator';
 export * from './tradeService.validator';
 export * from './delivery.validator';
-export * from './creditDebitNote.validator'; 
+export * from './creditDebitNote.validator';
+export * from './cartItem.validator'; 

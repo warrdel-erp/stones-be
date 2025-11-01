@@ -4,7 +4,7 @@ import SalesOrder from "../models/salesOrder.model";
 import Payment from "../models/payment.model";
 import PaymentBill from "../models/paymentBills.model";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
-import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import * as advancedDepositRepository from '../repositories/advancedDeposit.repository'
 interface CreateAdvancedDepositDTO {
     amount: number;
@@ -24,10 +24,16 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         const salesOrder: any = await SalesOrder.findByPk(data.salesOrderId, {
             transaction,
             attributes: ['id', 'clientId'],
-            include: [{
-                association: 'customer',
-                include: ['ledgerAccount']
-            }]
+            include: [
+                {
+                    association: 'customer',
+                    include: [
+                        {
+                            association: 'ledgerAccount',
+                        }
+                    ]
+                }
+            ]
         });
 
         if (!salesOrder) {
@@ -82,11 +88,13 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
                 ledgerId: data.accountId,
                 type: JOURNAL_ENTRY_TYPE.CR,
                 // reference is the BILL.
-                referenceId: data.salesOrderId,
-                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+                referenceId: advancedDeposit.id,
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
 
                 locationId,
-                partyLedgerAccountId: salesOrder.customer.ledgerAccount.id
+                partyLedgerAccountId: salesOrder.customer.ledgerAccount.id,
+
+                processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
             },
             transaction
         );
@@ -96,12 +104,14 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
                 amount: data.amount,
                 ledgerId: salesOrder.customer.ledgerAccount.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
-                // reference is the BILL.
-                referenceId: data.salesOrderId,
-                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SALES_ORDER,
+
+                referenceId: advancedDeposit.id,
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
 
                 locationId,
-                partyLedgerAccountId: data.accountId
+                partyLedgerAccountId: data.accountId,
+
+                processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
             },
             transaction
         );

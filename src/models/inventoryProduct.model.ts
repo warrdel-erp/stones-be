@@ -42,10 +42,6 @@ const InventoryProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
-    isInCart: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
     status: {
       type: DataTypes.ENUM(...Object.values(INVENTORY_ITEM_STATUS)),
       allowNull: true,

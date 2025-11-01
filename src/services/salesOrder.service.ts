@@ -3,11 +3,13 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as notesRepository from "../repositories/notes.repository";
 import * as customerRepository from "../repositories/customer.repository";
+import * as cartItemService from "../services/cartItem.service";
 import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { SALES_TAX, SCOP } from "../constants";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import { Transaction } from "sequelize";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -18,6 +20,10 @@ export const createSalesOrder = async (data: any) => {
       data.taxId = customer?.salesTaxId;
     }
 
+    // If cart item exists for any inventory product then first delete it before creating new sales order with account validation
+    await validateAndDeleteCartItemForInventoryProductId(data, transaction);
+
+    // Create sales order
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
 
     // Add Tax percentage to salesOrderProduct
@@ -145,6 +151,31 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
 export const getSONumber = async (clientId: number) => {
   return await salesOrderRepository.getSoNumber(clientId);
 };
+
+async function validateAndDeleteCartItemForInventoryProductId(data: any, transaction: Transaction) {
+  if (data.products && Array.isArray(data.products) && data.accountId) {
+
+    const inventoryProductIds = data.products
+      .map((product: any) => product.inventoryProductId)
+      .filter((id: any) => id !== undefined && id !== null);
+
+    if (inventoryProductIds.length > 0) {
+      // Validate cart items exist and belong to the accountId
+      await cartItemService.validateCartItemsByInventoryProductIds(
+        inventoryProductIds,
+        data.accountId,
+        transaction
+      );
+
+      // Delete cart items after validation
+      await cartItemService.deleteCartItemsByInventoryProductIds(
+        inventoryProductIds,
+        data.accountId,
+        transaction
+      );
+    }
+  }
+}
 
 export function getTotalQuantity(salesOrderProducts: any[]) {
   return (

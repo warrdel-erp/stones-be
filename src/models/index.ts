@@ -33,7 +33,8 @@ import Warehouse from "./warehouse.model";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
 import Account from "./Account.model";
-import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
+import CartItem from "./cartItem.model";
+import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
@@ -59,6 +60,11 @@ Account.hasOne(User, { foreignKey: 'accountId', as: 'user' });
 // Define associations
 Client.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
 Account.hasOne(Client, { foreignKey: 'accountId', as: 'client' });
+
+// CartItem reverse associations (hasMany/hasOne defined here for Account, InventoryProduct, and Client)
+Account.hasMany(CartItem, { foreignKey: "accountId", as: "cartItems" });
+InventoryProduct.hasOne(CartItem, { foreignKey: "inventoryProductId", as: "cartItem" });
+Client.hasMany(CartItem, { foreignKey: "clientId", as: "cartItems" });
 
 // Client-Company relation (one-to-one)
 Client.hasOne(Company, { foreignKey: "clientId", as: "company" });
@@ -110,10 +116,10 @@ Vendor.hasMany(PurchaseOrder, { foreignKey: "supplierId", as: "purchaseOrder" })
 
 // Ledger account belongs to one Vendor and one vendor has one ledger account.
 LedgerAccount.belongsTo(Vendor, { foreignKey: "referenceId", as: "vendor", constraints: false });
-Vendor.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false });
+Vendor.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false, scope: { referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR } });
 
 // Ledger account belongs to one Vendor and one vendor has one ledger account.
-Customer.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false });
+Customer.hasOne(LedgerAccount, { foreignKey: "referenceId", as: "ledgerAccount", constraints: false, scope: { referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER } });
 
 // PurchaseOrder-User (one 'User' have multiple 'PurchaseOrder') (one 'PurchaseOrder' have one 'User')
 User.hasMany(PurchaseOrder, { foreignKey: "userId" });
@@ -676,5 +682,6 @@ export {
   Service,
   TradeService,
   GenericProduct,
-  CreditDebitNote
+  CreditDebitNote,
+  CartItem
 };

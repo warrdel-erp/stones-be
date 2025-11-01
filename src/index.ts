@@ -51,6 +51,7 @@ import tradeServiceRoutes from "./routes/tradeService.routes";
 import genericProductRoutes from "./routes/genericProduct.routes";
 import inventoryProductRoutes from "./routes/inventoryProduct.routes";
 import creditDebitNoteRoutes from "./routes/creditDebitNote.routes";
+import cartItemRoutes from "./routes/cartItem.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -102,6 +103,7 @@ app.use("/api/tradeService", tradeServiceRoutes);
 app.use("/api/genericProduct", genericProductRoutes);
 app.use("/api/inventoryProduct", inventoryProductRoutes);
 app.use("/api/creditDebitNote", creditDebitNoteRoutes);
+app.use("/api/cartItem", cartItemRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

@@ -559,3 +559,9 @@ sticky navbar.
    2. Supplier
    3. Customer.
    4. Vendor.
+
+---
+
+1. cart item as per account.
+2. So creation from Cart.
+3. Inventory Icons design.

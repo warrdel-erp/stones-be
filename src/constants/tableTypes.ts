@@ -16,7 +16,8 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   LOADING_ORDER: "LOADING_ORDER",
   LOADING_ORDER_INVOICE: "LOADING_ORDER_INVOICE",
   SALES_ORDER: "SALES_ORDER",
-  RETURN: "RETURN"
+  RETURN: "RETURN",
+  ADVANCE_DEPOSIT: "ADVANCE_DEPOSIT",
 } as const;
 
 export const JOURNAL_ENTRY_FOR_TYPES = {
@@ -43,7 +44,8 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   SO_INVOICING: "so_invoicing",
   SO_INVOICE_PAYMENT: "so_invoice_payment",
   CONFIRM_RETURN: "confirm_return",
-  custom: "custom",
+  ADVANCE_DEPOSIT: "advance_deposit",
+  CUSTOM: "custom",
 } as const;
 
 export const JOURNAL_ENTRY_TYPE = {

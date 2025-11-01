@@ -484,4 +484,4 @@ export const getTotalPaidAmountForSO = (id: number) => {
     ],
     group: ['id']
   })
-}
+} 
