@@ -281,4 +281,22 @@ export const getOnlyBarcode = async (siplId: number) => {
   });
 };
 
+/**
+ * Get all slabs for a SIPL with their inventory products
+ * Used to check if slabs are fully filled
+ */
+export const getSlabsWithInventoryProductBySiplId = async (siplId: number) => {
+  return await models.Slab.findAll({
+    where: { siplId },
+    attributes: ['id', 'block', 'lot', 'receivingLength', 'receivingWidth', 'inventoryProductId'],
+    include: [
+      {
+        association: 'inventoryProduct',
+        attributes: ['id', 'binId'],
+        required: true
+      }
+    ]
+  });
+};
+
 

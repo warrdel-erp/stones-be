@@ -17,6 +17,7 @@ import * as ledgerAccountRepository from '../repositories/ledgerAccount.reposito
 import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import { getPercentageValue } from "../helper";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 
 interface InvoiceWithProducts {
     loadingOrder: {
@@ -95,7 +96,7 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
 export const getReturnById = async (returnId: number, transaction?: Transaction) => {
     const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId, transaction))?.get({ plain: true });
 
-    const salesTax = SALES_TAX.find(e => e.id == returnRecord.soInvoice.loadingOrder.salesOrder.customer.salesTax);
+    const salesTax = returnRecord.soInvoice.loadingOrder.salesOrder.tax;
 
     if (!salesTax) {
         throw new AppError('Error in getting tax value', 400);
@@ -103,14 +104,8 @@ export const getReturnById = async (returnId: number, transaction?: Transaction)
 
     const salesOrderProducts = returnRecord.returnProducts.map((e: any) => e.salesOrderProduct);
 
-    if (returnRecord.soInvoice.loadingOrder.packagingList) {
-
-        // Calculate total pl amount added in return.
-        returnRecord.amounts = getTotalPlAmount(salesOrderProducts, salesTax.value);
-    } else {
-        // Calculate total amount lo added in return.
-        returnRecord.amounts = getTotalLoadingOrderAmount(salesOrderProducts, salesTax.value);
-    }
+    // Calculate total pl amount added in return.
+    returnRecord.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProducts);
 
     return returnRecord;
 }
@@ -149,12 +144,11 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
             clientId,
         });
 
-
         // #1
         // Journal Entry for with tax.
         await journalEntryRepository.create(
             {
-                amount: returnAmounts.totalAmount + returnAmounts.taxAmount,
+                amount: returnAmounts.final.total,
                 ledgerId: ledgerAccount.id,
                 type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -176,7 +170,7 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
         // Journal Entry for without tax.
         await journalEntryRepository.create(
             {
-                amount: returnAmounts.totalAmount + returnAmounts.taxAmount,
+                amount: returnAmounts.final.total,
                 ledgerId: ledgerAccountForGoodsSold.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -206,14 +200,13 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
             clientId,
         });
 
-        const customerTax = SALES_TAX.find((e) => e.id == returnRecord.soInvoice.loadingOrder.salesOrder.customer.salesTax);
-
+        const customerTax = returnRecord.soInvoice.loadingOrder.salesOrder.tax;
 
         // #3
         // Journal Entry for state tax.
         await journalEntryRepository.create(
             {
-                amount: getPercentageValue(returnAmounts.taxableAmount, customerTax?.stateTax || 0),
+                amount: getPercentageValue(returnAmounts.final.taxable, customerTax?.stateTax || 0),
                 ledgerId: ledgerAccountForStateTax.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -234,12 +227,11 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
         // Calculate county tax.
         const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0;
 
-
         // #4
         // Journal Entry for state tax.
         await journalEntryRepository.create(
             {
-                amount: getPercentageValue(returnAmounts.taxableAmount, countyTax),
+                amount: getPercentageValue(returnAmounts.final.taxable, countyTax),
                 ledgerId: ledgerAccountForCountyTax.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -274,31 +266,7 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
         // Update status of all products to IN_INVENTORY
         for (const returnProduct of returnRecord.returnProducts) {
             // Check if it's a slab or generic product
-            let slab = await slabRepository.getSlabByInventoryProductId(returnProduct.salesOrderProduct.inventoryProductId);
-            let genericProduct = null;
-
-            if (!slab) {
-                genericProduct = await genericProductRepository.updateGenericProductStatusByInventoryProduct(
-                    returnProduct.salesOrderProduct.inventoryProductId,
-                    INVENTORY_ITEM_STATUS.IN_INVENTORY, // Just to check if it exists
-                    transaction
-                );
-            }
-
-            // Update product status to IN_INVENTORY
-            if (slab) {
-                await slabRepository.updateSlabStatusByInventoryProduct(
-                    returnProduct.salesOrderProduct.inventoryProductId,
-                    INVENTORY_ITEM_STATUS.IN_INVENTORY,
-                    transaction
-                );
-            } else if (genericProduct) {
-                await genericProductRepository.updateGenericProductStatusByInventoryProduct(
-                    returnProduct.salesOrderProduct.inventoryProductId,
-                    INVENTORY_ITEM_STATUS.IN_INVENTORY,
-                    transaction
-                );
-            }
+            let isSlabType = returnProduct.salesOrderProduct.inventoryProduct.isSlabType;
 
             // Update inventory product status to IN_INVENTORY
             await inventoryProductRepository.updateInventoryProductStatusById(
@@ -308,13 +276,14 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
             );
 
             // Create journal entries (only for slabs as they have landed unit cost)
-            if (slab) {
+            if (isSlabType) {
                 const slabData = returnProduct.salesOrderProduct.inventoryProduct.slab;
+                const inventoryProduct = returnProduct.salesOrderProduct.inventoryProduct;
 
                 // #5
                 await journalEntryRepository.create(
                     {
-                        amount: slabData.receivingLength * slabData.receivingLength * slabData.landedUnitCost,
+                        amount: slabData.receivingLength * slabData.receivingLength * inventoryProduct.landedUnitCost,
                         ledgerId: ledgerAccountForFinishedGoods.id,
                         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -338,7 +307,7 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
                 // #6
                 await journalEntryRepository.create(
                     {
-                        amount: slabData.receivingLength * slabData.receivingLength * slabData.landedUnitCost,
+                        amount: slabData.receivingLength * slabData.receivingLength * inventoryProduct.landedUnitCost,
                         ledgerId: ledgerAccountForCogs.id,
                         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -431,7 +400,7 @@ export const updateReturnProductsAndConfirm = async (returnId: number, productId
         // Get invoice with its products
         // await validateProductsBelongsToGivenInvoice(returnRecord, transaction, productIds);
 
-        // 2. Delete all previous ReturnProduct for this return
+        // 2. Delete all previous ReturnProduct for this return (Because if less slabs are confirmed then initiated then remaining are not more in return)
         await returnRepository.deleteReturnProductsByReturnId(returnId, transaction);
 
         // 3. Create new ReturnProducts for the given productIds

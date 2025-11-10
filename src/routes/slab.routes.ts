@@ -5,6 +5,8 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
+// Check if all slabs in a SIPL are fully filled
+router.get("/sipl/:siplId/checkFullyFilled", authenticateUser, slabController.checkSiplSlabsFullyFilled);
 
 // Bulk update slabs
 router.put("/bulkUpdate", authenticateUser, slabController.bulkUpdateSlabs);

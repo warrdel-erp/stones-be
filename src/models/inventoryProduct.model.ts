@@ -16,7 +16,7 @@ const InventoryProduct = sequelize.define(
     },
     binId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: Bin,
         key: "id",

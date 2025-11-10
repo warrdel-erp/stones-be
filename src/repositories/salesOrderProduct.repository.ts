@@ -95,6 +95,18 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
       taxable: 0, // total of each "plAmount" with taxApplied = true
       tax: 0, // plTaxAmount
       total: 0, // subTotal + tax
+    },
+    final: {
+      subTotal: 0, // total of each "plAmount"
+      taxable: 0, // total of each "plAmount" with taxApplied = true
+      tax: 0, // plTaxAmount
+      total: 0, // subTotal + tax
+    },
+    quantities: {
+      receiving: 0,
+      loadingOrder: 0,
+      packagingList: 0,
+      final: 0,
     }
   }
 
@@ -120,12 +132,42 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
       calcs.packagingList.taxable += salesOrderProduct.plAmount;
     }
 
+    if (salesOrderProduct.isSlabType) {
+      calcs.quantities.receiving += salesOrderProduct.receivingAreaSqIn
+      calcs.quantities.loadingOrder += salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth;
+      calcs.quantities.packagingList += salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth;
+    } else {
+      calcs.quantities.receiving += 1;
+
+      // if plAmount exists that means it is in packaging list
+      if (salesOrderProduct.plAmount) {
+        calcs.quantities.packagingList += 1;
+      }
+
+      // if loAmount exists that means it is in loading order
+      if (salesOrderProduct.loAmount) {
+        calcs.quantities.loadingOrder += 1;
+      }
+
+    }
+
     calcs.packagingList.tax += salesOrderProduct.plTaxAmount;
   }
 
   calcs.receiving.total = calcs.receiving.subTotal + calcs.receiving.tax;
   calcs.loadingOrder.total = calcs.loadingOrder.subTotal + calcs.loadingOrder.tax;
   calcs.packagingList.total = calcs.packagingList.subTotal + calcs.packagingList.tax;
+
+  if (calcs.packagingList.total) {
+    calcs.final = calcs.packagingList;
+    calcs.quantities.final = calcs.quantities.packagingList
+  } else if (calcs.loadingOrder.total) {
+    calcs.final = calcs.loadingOrder;
+    calcs.quantities.final = calcs.quantities.loadingOrder
+  } else {
+    calcs.final = calcs.receiving;
+    calcs.quantities.final = calcs.quantities.receiving
+  }
 
   return calcs;
 }

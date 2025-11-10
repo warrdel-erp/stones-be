@@ -9,6 +9,7 @@ import { PAYMENT_TERMS, SALES_TAX } from "../constants";
 import { getTotalLoOrderQuantity, getTotalPlAmount } from "./loadingOrder.service";
 import _ from "lodash";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as loadingOrderService from "../services/loadingOrder.service";
 
 // Create new PL
 export const createPackagingList = async (data: any) => {
@@ -72,7 +73,7 @@ export const getPackagingListById = async (id: number) => {
     throw new AppError("Invalid Id", 400);
   }
 
-  packagingList.products = getPackagingListProductAccordingToIdAndUnitPrice(packagingList);
+  packagingList.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts);
 
   // Calculations for packaging list.
   packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
@@ -89,49 +90,6 @@ export const getPackagingListById = async (id: number) => {
   return packagingList;
 };
 
-function getTotalPLQuantity(salesOrderProducts: any[]) {
-  return _.sumBy(
-    salesOrderProducts,
-    (salesOrderProduct: any) => (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth) / 144
-  );
-}
-
-function getPackagingListProductAccordingToIdAndUnitPrice(packagingList: any) {
-  let products = removeDuplicatesWithUnitPrice(
-    packagingList?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...(salesOrderProduct.inventoryProduct.slab?.product || salesOrderProduct.inventoryProduct.genericProduct?.product),
-      unitPrice: salesOrderProduct.unitPrice,
-    }))
-  );
-
-  // Map slabs to products
-  const newProducts = products.map((product) => {
-    const salesOrderProduct = packagingList.salesOrderProducts.filter(
-      (salesOrderProduct: any) => {
-        let productId = null;
-        if (salesOrderProduct.inventoryProduct.slab) {
-          productId = salesOrderProduct.inventoryProduct.slab.product.id;
-        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
-          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
-        }
-
-        return (productId === product.id)
-          &&
-          (salesOrderProduct.unitPrice == product.unitPrice)
-
-      });
-
-    return {
-      ...product,
-      taxApplied: !!salesOrderProduct[0]?.taxApplied,
-      totalQuantity: getTotalPLQuantity(salesOrderProduct),
-      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct, product.isSlabType),
-      salesOrderProduct,
-    };
-  });
-
-  return newProducts;
-}
 
 // Get packaging list by LO id
 export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) => {

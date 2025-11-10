@@ -583,23 +583,39 @@ Email notification.
 ---
 
 1. If product is inactive it can’t be sold.
-2. In create Customer first three section in one row.
-3. Customer details first 3 in single
-4. Pick ticket -> loading order.
+2. In create Customer first 3 section in one row. ✅
+3. Customer details first 3 in single. ✅
+4. Pick ticket -> loading order (in customer tab). ✅
 5. Journal entry page. ✅
-6. Deliveries UI.
-7. Returns UI.
+6. Deliveries UI (Initiate Deliveries and Create new Vehicle). ✅
+7. Returns UI, Calculation and both type product feature. ✅
 8. SIPL two step process.
-9. Vendor payment -> debit note to supplier if extra payment.
-10. Vendor payment.
+9. Vendor payment -> debit note to supplier if extra payment. ✅
+10. Vendor payment. ✅
 11. Advanced deposit design. -> due must be affected. ✅
 12. Totals in customer payment.
-13. Customer payment submit popup.
+13. Customer payment submit popup. ✅
 14. Journal entry for credit note [Pending(what-is-account-for-credit-note-journal-entry)] and advanced deposit [is-this-one-is-correct]. ✅
 15. Customer Payment journal entry.
 16. Last closing entries in journal entries.
-17. Cart to SO.
-18. Direct SIPL.
-19. Hold-Unhold
+17. Cart to SO. ✅
+18. Direct SIPL. ✅
+19. Hold-Unhold. ✅
+20. Customer details page tab scroll. ✅
+21. cart item as per account. ✅
+22. So creation from Cart. ✅
+23. Inventory Icons design. ✅
+
+24. Refactor SO process for Return.
+
+---
 
 11, 14, 17, 18
+
+---
+
+1. PO Page tabs design.
+2. Create SIPL delete confirm modal.
+3. Refactor payment pages, and test end to end.
+4. remove old cart fns.
+5. view RO confirmed RO data API change as per return.

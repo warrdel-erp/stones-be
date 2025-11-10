@@ -286,7 +286,6 @@ export const updateInventoryProductHoldStatus = async (id: number, isHold: boole
   );
 };
 
-
 // get last landed cost.
 export const getLastLandedCost = async (productId: number) => {
   return await models.InventoryProduct.findOne({

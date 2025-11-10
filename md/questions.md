@@ -123,3 +123,7 @@
 ---
 
 1. In SO Details page totals and date could be different for LO, PL, Invoice.
+
+---
+
+1. is Journal entry for returns are correct?

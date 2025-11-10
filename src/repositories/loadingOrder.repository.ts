@@ -106,23 +106,8 @@ export const getLoadingOrderById = async (id: number) => {
                 attributes: ["id", "landedUnitCost"],
                 include: [
                   {
-                    association: "slab",
-                    attributes: ["id", "receivingLength", "receivingWidth",],
-                    include: [
-                      {
-                        association: "product",
-                        attributes: ["id", "isSlabType"],
-                      },
-                    ],
-                  },
-                  {
-                    association: "genericProduct",
-                    include: [
-                      {
-                        association: "product",
-                        attributes: ["id", "isSlabType"],
-                      },
-                    ],
+                    association: "product",
+                    attributes: ["id", "isSlabType"],
                   },
                 ],
               },
@@ -140,18 +125,18 @@ export const getLoadingOrderById = async (id: number) => {
         include: [
           {
             association: "inventoryProduct",
+
             include: [
+              {
+                association: "product",
+                attributes: ["id", 'name', "isSlabType"],
+              },
               {
                 association: "bin",
                 attributes: ["id", "name"],
               },
               {
                 association: "slab",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
               {
                 association: "genericProduct",
@@ -225,17 +210,19 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
             include: [
               {
                 association: "inventoryProduct",
-                attributes: ["id"],
+                attributes: ["id", "landedUnitCost", 'productId'],
+
                 include: [
                   {
+                    association: "product",
+                    attributes: ["id",],
+                  },
+                  {
                     association: "slab",
-                    attributes: ["id", "receivingLength", "receivingWidth", "landedUnitCost"],
-                    include: [
-                      {
-                        association: "product",
-                        attributes: ["id"],
-                      },
-                    ],
+                    attributes: ["id", "receivingLength", "receivingWidth"]
+                  },
+                  {
+                    association: "genericProduct",
                   },
                 ],
               },
@@ -255,24 +242,17 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
             association: "inventoryProduct",
             include: [
               {
+                association: "product",
+              },
+              {
                 association: "bin",
                 attributes: ["id", "name"],
               },
               {
                 association: "slab",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
               {
                 association: "genericProduct",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
             ],
           },

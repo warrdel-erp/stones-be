@@ -1,15 +1,16 @@
-import { sequelize } from "../config/database";
-import * as salesOrderRepository from "../repositories/salesOrder.repository";
-import * as salesOrderProductService from "../services/salesOrderProduct.service";
-import * as notesRepository from "../repositories/notes.repository";
-import * as customerRepository from "../repositories/customer.repository";
-import * as cartItemService from "../services/cartItem.service";
-import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import _ from "lodash";
-import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
-import { SALES_TAX, SCOP } from "../constants";
-import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import { Transaction } from "sequelize";
+import { sequelize } from "../config/database";
+import { SALES_TAX } from "../constants";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
+import * as customerRepository from "../repositories/customer.repository";
+import * as notesRepository from "../repositories/notes.repository";
+import * as salesOrderRepository from "../repositories/salesOrder.repository";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as cartItemService from "../services/cartItem.service";
+import * as salesOrderProductService from "../services/salesOrderProduct.service";
+import * as loadingOrderService from "../services/loadingOrder.service";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -124,7 +125,7 @@ export const getSalesOrderById = async (id: number) => {
   });
 
   // Group Products by productId and unit price.
-  salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
+  salesOrder.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
@@ -138,7 +139,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
 
   if (!!salesOrder?.salesOrderProducts) {
     // Group Products by productId and unit price.
-    salesOrder.products = getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder);
+    salesOrder.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
 
     // delete salesOrder.salesOrderProducts because it is in products;
     delete salesOrder.salesOrderProducts;
@@ -206,49 +207,6 @@ function getTotalAmount(salesOrderProducts: any) {
       }
     )
   );
-}
-
-function getSalesOrderProductAccordingToIdAndUnitPrice(salesOrder: any) {
-  let products = removeDuplicatesWithUnitPrice(
-    salesOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...salesOrderProduct?.inventoryProduct?.slab?.product || salesOrderProduct?.inventoryProduct?.genericProduct?.product,
-      unitPrice: salesOrderProduct?.unitPrice,
-    })) || []
-  );
-
-  // Map slabs to products
-  const newProducts = products.map((product) => {
-    const salesOrderProduct = salesOrder?.salesOrderProducts?.filter(
-      (salesOrderProduct: any) => {
-        let productId = null;
-        if (salesOrderProduct.inventoryProduct.slab) {
-          productId = salesOrderProduct.inventoryProduct.slab.product.id;
-        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
-          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
-        }
-
-        return (productId === product.id)
-          &&
-          (salesOrderProduct.unitPrice === product.unitPrice)
-
-      });
-
-    // remaining products means -> products not yet gone in loadingOrder.
-    const totalRemainingSoProducts = salesOrderProduct?.filter(
-      (e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.SALES_ORDER
-    );
-
-    return {
-      ...product,
-      taxApplied: !!salesOrderProduct?.[0]?.taxApplied,
-      salesOrderProduct,
-      totalAmount: product?.isSlabType ? getTotalAmount(salesOrderProduct) : _.sumBy(salesOrderProduct, (e: any) => Number(e.unitPrice)),
-      totalQuantity: product?.isSlabType ? getTotalQuantity(salesOrderProduct) : salesOrderProduct.length,
-      totalRemainingQty: product?.isSlabType ? getTotalQuantity(totalRemainingSoProducts) : totalRemainingSoProducts.length,
-    };
-  });
-
-  return newProducts;
 }
 
 // Get count of open purchase orders by client

@@ -316,24 +316,17 @@ export const getSalesOrderById = async (id: number) => {
             association: "inventoryProduct",
             include: [
               {
+                association: "product",
+              },
+              {
                 association: "bin",
                 attributes: ["id", "name"],
               },
               {
                 association: "slab",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
               {
                 association: "genericProduct",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
             ],
           },
@@ -387,24 +380,18 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
             association: "inventoryProduct",
             include: [
               {
+                association: "product",
+              },
+              {
                 association: "bin",
                 attributes: ["id", "name"],
               },
               {
                 association: "slab",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
+
               },
               {
                 association: "genericProduct",
-                include: [
-                  {
-                    association: "product",
-                  },
-                ],
               },
             ],
           },

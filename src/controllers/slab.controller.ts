@@ -65,3 +65,16 @@ export const bulkUpdateSlabs = catchAsync(async (req: Request, res: Response) =>
 
   return SuccessResponse(res, 200, `${affectedRows} slabs updated successfully.`, affectedRows);
 });
+
+// Check if all slabs in a SIPL are fully filled
+export const checkSiplSlabsFullyFilled = catchAsync(async (req: Request, res: Response) => {
+  const { siplId } = req.params;
+
+  if (!siplId || isNaN(Number(siplId))) {
+    throw new AppError("Invalid SIPL ID", 400);
+  }
+
+  const result = await slabService.checkSiplSlabsFullyFilled(Number(siplId));
+
+  return SuccessResponse(res, 200, result.message, result);
+});

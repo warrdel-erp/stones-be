@@ -188,22 +188,16 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
             include: [
               {
                 association: "inventoryProduct",
+
                 include: [
                   {
+                    association: "product",
+                  },
+                  {
                     association: "slab",
-                    include: [
-                      {
-                        association: "product",
-                      },
-                    ],
                   },
                   {
                     association: "genericProduct",
-                    include: [
-                      {
-                        association: "product",
-                      },
-                    ],
                   },
                 ],
               },

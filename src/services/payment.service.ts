@@ -12,23 +12,34 @@ import * as vendorRepository from "../repositories/vendor.repository";
 
 // Create credit debit note for payment
 const createCreditNoteForPayment = async (paymentData: any, paymentId: number, transaction: any) => {
-  if (!paymentData.creditNote?.amount || paymentData.payeeType !== PAYEE_TYPE.CUSTOMER) {
-    return null;
+
+  let note = null;
+  if (paymentData.creditNote?.amount && paymentData.payeeType == PAYEE_TYPE.CUSTOMER) {
+
+    note = {
+      amount: paymentData.creditNote.amount,
+      type: CREDIT_DEBIT_NOTE_TYPES.CREDIT,
+      entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.CUSTOMER,
+      entryIdFor: paymentData.payeeId,
+      referenceType: CREDIT_NOTE_REFERENCE_TYPES.PAYMENT,
+      referenceId: paymentId,
+      clientId: paymentData.clientId,
+    };
+
+  } else if (paymentData.debitNote?.amount && paymentData.payeeType == PAYEE_TYPE.VENDOR) {
+
+    note = {
+      amount: paymentData.debitNote.amount,
+      type: CREDIT_DEBIT_NOTE_TYPES.DEBIT,
+      entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.VENDOR,
+      entryIdFor: paymentData.payeeId,
+      referenceType: CREDIT_NOTE_REFERENCE_TYPES.PAYMENT,
+      referenceId: paymentId,
+      clientId: paymentData.clientId
+    };
   }
 
-  const creditNoteData = {
-    amount: paymentData.creditNote.amount,
-    type: CREDIT_DEBIT_NOTE_TYPES.CREDIT,
-    entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.CUSTOMER,
-    entryIdFor: paymentData.payeeId,
-    referenceType: CREDIT_NOTE_REFERENCE_TYPES.PAYMENT,
-    referenceId: paymentId,
-    clientId: paymentData.clientId,
-  };
-
-
-
-  return await creditDebitNoteRepository.createCreditDebitNote(creditNoteData, transaction);
+  return await creditDebitNoteRepository.createCreditDebitNote(note, transaction);
 };
 
 // Create a new payment

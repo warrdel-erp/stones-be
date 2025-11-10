@@ -138,12 +138,12 @@ export const getLoadingOrderById = async (id: number) => {
   loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
 
   // so product as per product and unitPrice.
-  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
+  loadingOrder.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder.salesOrderProducts);
 
   return loadingOrder;
 };
 
-// Get loading order by Id
+// Get loading order with salesOrderProducts, which are available for return as per returnId.
 export const getLoadingOrderAsPerReturn = async (returnId: number) => {
   const returnData = (await Return.findByPk(returnId, {
     include: [
@@ -171,27 +171,14 @@ export const getLoadingOrderAsPerReturn = async (returnId: number) => {
 
   loadingOrder.salesOrderProducts.push(...(soProductsAvailableToReturnAsPerInvoice.map(e => e.get({ plain: true }))))
 
-  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
-
-  if (!salesTax) {
-    throw new AppError('Error in getting tax value', 400);
-  }
-
   // Calculate total amount added in SO.
-  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
-
-  // Calculate total pl amount added in SO.
-  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
+  loadingOrder.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
 
   // so product as per product and unitPrice.
-  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
+  loadingOrder.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder?.salesOrderProducts);
 
-  // get payment terms constant data.
-  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
 
-  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
-
-  return loadingOrder;
+  return { ...loadingOrder, returnData };
 };
 
 // Get loading order by Id
@@ -200,7 +187,7 @@ export const getLoadingOrderOnlyAsPerReturn = async (returnId: number) => {
     include: [
       {
         association: 'soInvoice'
-      }
+      },
     ]
   }))?.get({ plain: true })
 
@@ -217,27 +204,17 @@ export const getLoadingOrderOnlyAsPerReturn = async (returnId: number) => {
     throw new AppError('Loading Order does not exists.', 400);
   }
 
-  const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
-
-  if (!salesTax) {
-    throw new AppError('Error in getting tax value', 400);
-  }
-
   // Calculate total amount added in SO.
-  loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
+  loadingOrder.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
 
-  // Calculate total pl amount added in SO.
-  loadingOrder.plAmount = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
 
   // so product as per product and unitPrice.
-  loadingOrder.products = getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder);
+  loadingOrder.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder?.salesOrderProducts);
 
   // get payment terms constant data.
-  loadingOrder.paymentTerms = PAYMENT_TERMS.find((e) => e.id == loadingOrder.paymentTerms);
 
-  loadingOrder.salesOrder.customer.salesTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax);
 
-  return loadingOrder;
+  return { ...loadingOrder, returnData };
 };
 
 
@@ -362,60 +339,40 @@ export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
   }
 }
 
-export function getLoadingOrderProductAccordingToIdAndUnitPrice(loadingOrder: any) {
+export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderProducts: any[] = []) {
 
   let products = removeDuplicatesWithUnitPrice(
-    loadingOrder?.salesOrderProducts.map((salesOrderProduct: any) => ({
-      ...(salesOrderProduct?.inventoryProduct?.slab?.product || salesOrderProduct?.inventoryProduct?.genericProduct?.product),
+    salesOrderProducts.map((salesOrderProduct: any) => ({
+      ...salesOrderProduct?.inventoryProduct?.product,
       unitPrice: salesOrderProduct.unitPrice,
     }))
   );
 
   // Map slabs to products
-  const newProducts = products.map((product) => {
-    const salesOrderProduct = loadingOrder.salesOrderProducts.filter(
+  const nestedProducts = products.map((product) => {
+
+    const salesOrderProductsAsPerLoadingOrder = salesOrderProducts.filter(
       (salesOrderProduct: any) => {
-        let productId = null;
-        if (salesOrderProduct.inventoryProduct.slab) {
-          productId = salesOrderProduct.inventoryProduct.slab.product.id;
-        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
-          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
-        }
-
-        return (productId === product.id)
-          &&
-          (salesOrderProduct.unitPrice == product.unitPrice)
-
-      }
-    );
-
-    const soProductsWithProductAndUnitPrice = loadingOrder.salesOrder.salesOrderProducts.filter(
-      (salesOrderProduct: any) => {
-        let productId = null;
-        if (salesOrderProduct.inventoryProduct.slab) {
-          productId = salesOrderProduct.inventoryProduct.slab.product.id;
-        } else if (salesOrderProduct.inventoryProduct.genericProduct) {
-          productId = salesOrderProduct.inventoryProduct.genericProduct.product.id;
-        }
+        let productId = salesOrderProduct.inventoryProduct.productId;
 
         return (productId === product.id)
           &&
           (salesOrderProduct.unitPrice === product.unitPrice)
-
       }
     );
 
+    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProductsAsPerLoadingOrder);
+
     return {
       ...product,
-      taxApplied: !!salesOrderProduct[0]?.taxApplied,
-      salesOrderProduct,
-      totalQuantity: getTotalLOQuantity(salesOrderProduct, product.isSlabType),
-      totalOrderQuantity: getTotalLoOrderQuantity(salesOrderProduct, product.isSlabType),
-      soQuantity: salesOrderService.getTotalQuantity(soProductsWithProductAndUnitPrice),
+      taxApplied: !!salesOrderProductsAsPerLoadingOrder[0]?.taxApplied,
+      salesOrderProduct: salesOrderProductsAsPerLoadingOrder,
+      totalQuantity: calculations.quantities.loadingOrder,
+      totalOrderQuantity: calculations.quantities.receiving,
     };
   });
 
-  return newProducts;
+  return nestedProducts;
 }
 
 // Get loading order by SO id
