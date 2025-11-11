@@ -134,6 +134,26 @@ export const updateInventoryProductsSellingPrice = async (ids: number[], selling
   return result;
 };
 
+/**
+ * Set landed unit cost for inventory products by siplId and productId
+ */
+export const setInventoryProductLandedUnitCost = async (
+  siplId: number,
+  productId: number,
+  landedUnitCost: number,
+  transaction?: Transaction
+) => {
+  const [updatedCount] = await models.InventoryProduct.update(
+    { landedUnitCost },
+    {
+      where: { siplId, productId },
+      transaction
+    }
+  );
+
+  return updatedCount;
+};
+
 export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string) => {
   // Find all inventory products where the specified slab field matches
   const inventoryProducts = await models.InventoryProduct.findAll({

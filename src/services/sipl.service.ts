@@ -48,27 +48,17 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
     await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
     const calculations = await siplService.getSiplCalculations(siplId, transaction);
 
-    // set landed unit cost for each product (slabs and generic products)
+    // Set landed unit cost for each product in inventory products
     await Promise.all(
       calculations.dataAccordingToProduct.map(
         async (productCalc: any) => {
-          if (productCalc.product.isSlabType) {
-            // For slab products, set landed unit cost
-            return await slabRepository.setUnitLandedCost(
-              siplId,
-              productCalc.product.id,
-              productCalc.landedUnitCost,
-              transaction
-            );
-          } else {
-            // For generic products, update status to IN_INVENTORY
-            return await genericProductRepository.setUnitLandedCost(
-              siplId,
-              productCalc.product.id,
-              productCalc.landedUnitCost,
-              transaction
-            );
-          }
+          // Update landed unit cost in inventory products (not in slabs or generic products)
+          return await inventoryProductRepository.setInventoryProductLandedUnitCost(
+            siplId,
+            productCalc.product.id,
+            productCalc.landedUnitCost,
+            transaction
+          );
         }
       )
     );

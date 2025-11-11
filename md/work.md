@@ -628,7 +628,7 @@ Email notification.
 4. Edit slabs => add receiving info (don’t show if slab not present.) ✅
 5. Show default receiving data as packaging.
 6. Reduce size of block and bundle.
-7. On receive inventory without fully filled. Not showing error
+7. On receive inventory without fully filled. Not showing error. ✅
 8. Services in return. ✅
 9. Vendor payment submit.
 10. Customer payment page. [!!!!!] ✅
