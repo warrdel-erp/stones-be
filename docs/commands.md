@@ -34,10 +34,10 @@ GRANT ALL PRIVILEGES ON production_univeristy_db.* TO 'erpedvantage-production'@
 FLUSH PRIVILEGES;
 
 
-sudo certbot --apache -d sso.erpedvantage.com
+sudo certbot --apache -d fe-stonecrm.warrdelstones.com
 ```
 
-sudo certbot --apache -d be-stonecrm.warrdelstones.com
+sudo certbot --apache -d stage.hiveerp.com
 
 ```
 <VirtualHost *:80>

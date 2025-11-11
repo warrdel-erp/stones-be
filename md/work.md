@@ -589,7 +589,7 @@ Email notification.
 5. Journal entry page. ✅
 6. Deliveries UI (Initiate Deliveries and Create new Vehicle). ✅
 7. Returns UI, Calculation and both type product feature. ✅
-8. SIPL two step process.
+8. SIPL two step process. ✅
 9. Vendor payment -> debit note to supplier if extra payment. ✅
 10. Vendor payment. ✅
 11. Advanced deposit design. -> due must be affected. ✅
@@ -619,3 +619,23 @@ Email notification.
 3. Refactor payment pages, and test end to end.
 4. remove old cart fns.
 5. view RO confirmed RO data API change as per return.
+
+---
+
+1. Tax selected by default in cart ✅
+2. Remove checkbox from cart. ✅
+3. "+" => add packaging info. In SIPL ✅
+4. Edit slabs => add receiving info (don’t show if slab not present.) ✅
+5. Show default receiving data as packaging.
+6. Reduce size of block and bundle.
+7. On receive inventory without fully filled. Not showing error
+8. Services in return. ✅
+9. Vendor payment submit.
+10. Customer payment page. [!!!!!] ✅
+11. Chart of account.
+12. Dead stock.
+13. If product is inactive it can’t be sold.
+14. Totals in customer payment.
+15. Customer Payment journal entry.
+16. Last closing entries in journal entries.
+17. SO should not be created without product.

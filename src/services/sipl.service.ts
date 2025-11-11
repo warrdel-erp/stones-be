@@ -12,6 +12,7 @@ import * as siplProductsRepository from "../repositories/siplProducts.repository
 import * as slabRepository from "../repositories/slab.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as siplService from "../services/sipl.service";
+import * as slabService from "../services/slab.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
@@ -23,6 +24,16 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
   const transaction = await sequelize.transaction();
 
   try {
+    // Check if all slabs are fully filled before receiving inventory
+    const slabsCheck = await slabService.checkSiplSlabsFullyFilled(siplId);
+
+    if (!slabsCheck.allFilled) {
+      throw new AppError(
+        `Cannot receive inventory. ${slabsCheck.message}. Unfilled slab IDs: ${slabsCheck.unfilledSlabIds.join(', ')}`,
+        400
+      );
+    }
+
     // Update the status of all slabs in the SIPL to IN_INVENTORY.
     const updatedSlab = await slabRepository.updateSlabStatusBySipl(siplId, transaction);
 
