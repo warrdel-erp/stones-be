@@ -33,7 +33,7 @@ export const getProducts = catchAsync(async (req: Request, res: Response) => {
 
 // Get all products
 export const getProductsWithCompactData = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, search, onlyWithSlabs, ...filter } = req.query;
+  const { page = 1, limit = 100, search, onlyWithSlabs, ...filter } = req.query;
 
   const result = await productService.fetchAllProductsWithCompactData(
     Number(page),
