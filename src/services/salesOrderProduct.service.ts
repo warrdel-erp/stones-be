@@ -1,6 +1,5 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
-import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
@@ -192,7 +191,7 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, data: a
   const transaction = await sequelize.transaction();
 
   try {
-    const salesOrderProduct = await salesOrderProductRepository.findByIdSimple(salesOrderProductId);
+    const { id, ...salesOrderProduct } = await salesOrderProductRepository.findByIdSimple(salesOrderProductId);
 
     if (!salesOrderProduct) {
       throw new Error("Sales Order Product not found.");
@@ -216,26 +215,16 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, data: a
     );
 
     // Update Sales Order Product
-    await salesOrderProductRepository.updateSalesOrderProduct(salesOrderProductId, data, transaction);
+    await salesOrderProductRepository.updateSalesOrderProduct(salesOrderProductId, { ...data, inventoryProductId: data.newInventoryProductId }, transaction);
 
-    // set new slab status as ALLOCATED
-    await slabRepository.updateSlabStatusByInventoryProduct(
-      data.newInventoryProductId,
-      INVENTORY_ITEM_STATUS.ALLOCATED,
-      transaction
-    );
+    // set new inventory product status as ALLOCATED
     await inventoryProductRepository.updateInventoryProductStatusById(
       data.newInventoryProductId,
       INVENTORY_ITEM_STATUS.ALLOCATED,
       transaction
     );
 
-    // reset old slab status as IN_INVENTORY
-    await slabRepository.updateSlabStatusByInventoryProduct(
-      salesOrderProduct.inventoryProductId,
-      INVENTORY_ITEM_STATUS.IN_INVENTORY,
-      transaction
-    );
+    // reset old inventory product status as IN_INVENTORY
     await inventoryProductRepository.updateInventoryProductStatusById(
       salesOrderProduct.inventoryProductId,
       INVENTORY_ITEM_STATUS.IN_INVENTORY,
@@ -247,4 +236,18 @@ export const swapSalesOrderProduct = async (salesOrderProductId: number, data: a
     transaction.rollback();
     throw error;
   }
+};
+
+export const getSwapHistory = async (salesOrderProductId: number) => {
+  // Verify that the sales order product exists
+  const salesOrderProduct = await salesOrderProductRepository.findByIdSimple(salesOrderProductId);
+
+  if (!salesOrderProduct) {
+    throw new AppError("Sales Order Product not found", 404);
+  }
+
+  // Get swap history
+  const swapHistory = await soProductSwapHistoryRepository.getSwapHistoryBySalesProductId(salesOrderProductId);
+
+  return swapHistory;
 };

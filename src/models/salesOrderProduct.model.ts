@@ -160,8 +160,8 @@ const SalesOrderProduct = sequelize.define(
 export default SalesOrderProduct;
 
 
-// hook to prevent update salesOrderd and inventoryProductId
+// hook to prevent update salesOrderId and inventoryProductId
 SalesOrderProduct.beforeUpdate((product: any) => {
   delete product.dataValues.salesOrderId;
-  delete product.dataValues.inventoryProductId;
+  // delete product.dataValues.inventoryProductId;
 });

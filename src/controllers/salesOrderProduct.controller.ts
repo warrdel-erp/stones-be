@@ -66,3 +66,11 @@ export const swapSalesOrderProduct = catchAsync(async (req: Request, res: Respon
 
   return SuccessResponse(res, 200, "Sales Order Product swapped successfully", data);
 });
+
+export const getSwapHistory = catchAsync(async (req: Request, res: Response) => {
+  const { soProductId } = req.params;
+
+  const swapHistory = await salesOrderProductService.getSwapHistory(Number(soProductId));
+
+  return SuccessResponse(res, 200, "Swap history fetched successfully", swapHistory);
+});

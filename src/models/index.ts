@@ -48,6 +48,7 @@ import Service from "./service.model";
 import TradeService from "./tradeService.model";
 import GenericProduct from "./genericProduct.model";
 import CreditDebitNote from "./creditDebitNote.model";
+import SoProductSwapHistory from "./soProductSwapHistory.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -634,6 +635,13 @@ AdvancedDeposit.hasOne(Payment, { foreignKey: 'paymentForId', as: 'payment' })
 CreditDebitNote.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(CreditDebitNote, { foreignKey: "clientId", as: "creditDebitNotes" });
 
+// SoProductSwapHistory associations
+SoProductSwapHistory.belongsTo(SalesOrderProduct, { foreignKey: "salesProductId", as: "salesOrderProduct" });
+SalesOrderProduct.hasMany(SoProductSwapHistory, { foreignKey: "salesProductId", as: "swapHistories" });
+
+SoProductSwapHistory.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProduct.hasMany(SoProductSwapHistory, { foreignKey: "inventoryProductId", as: "swapHistories" });
+
 export {
   Client,
   User,
@@ -683,5 +691,6 @@ export {
   TradeService,
   GenericProduct,
   CreditDebitNote,
-  CartItem
+  CartItem,
+  SoProductSwapHistory
 };

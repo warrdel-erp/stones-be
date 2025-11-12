@@ -385,6 +385,17 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
               {
                 association: "bin",
                 attributes: ["id", "name"],
+                include: [
+                  {
+                    association: "warehouse",
+                    include: [
+                      {
+                        association: "location",
+                        attributes: ["id", "location"],
+                      }
+                    ]
+                  }
+                ]
               },
               {
                 association: "slab",

@@ -127,3 +127,7 @@
 ---
 
 1. is Journal entry for returns are correct?
+
+---
+
+1. if product is swapped in PL then what will be dimensions for LO

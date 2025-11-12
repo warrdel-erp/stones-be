@@ -10,4 +10,7 @@ router.put("/:soProductId/pick", authenticateUser, salesOrderProductController.u
 // swap
 router.put("/:soProductId/swap", authenticateUser, salesOrderProductController.swapSalesOrderProduct);
 
+// get swap history
+router.get("/:soProductId/swap-history", authenticateUser, salesOrderProductController.getSwapHistory);
+
 export default router;
