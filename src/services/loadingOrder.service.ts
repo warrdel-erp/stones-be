@@ -434,7 +434,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
-    const customerTax = SALES_TAX.find((e) => e.id == loadingOrder.salesOrder.customer.salesTax.value);
+    const customerTax = loadingOrder.salesOrder.tax?.value || 0;
 
     // Journal Entry for with tax.
     await journalEntryRepository.create(
@@ -512,7 +512,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     );
 
     // Calculate county tax.
-    const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0;
+    const countyTax = customerTax ? customerTax - customerTax?.stateTax! : 0;
 
     // Journal Entry for county tax.
     await journalEntryRepository.create(
@@ -570,9 +570,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         await journalEntryRepository.create(
           {
             amount:
-              salesOrderProduct.inventoryProduct.slab.receivingLength *
-              salesOrderProduct.inventoryProduct.slab.receivingLength *
-              salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+              salesOrderProduct.receivingAreaSqIn *
+              salesOrderProduct.inventoryProduct.landedUnitCost,
             ledgerId: ledgerAccountForFinishedGoods.id,
             type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -595,9 +594,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         await journalEntryRepository.create(
           {
             amount:
-              salesOrderProduct.inventoryProduct.slab.receivingLength *
-              salesOrderProduct.inventoryProduct.slab.receivingWidth *
-              salesOrderProduct.inventoryProduct.slab.landedUnitCost,
+              salesOrderProduct.receivingAreaSqIn *
+              salesOrderProduct.inventoryProduct.landedUnitCost,
             ledgerId: ledgerAccountForCogs.id,
             type: JOURNAL_ENTRY_TYPE.DR,
 
