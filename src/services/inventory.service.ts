@@ -34,7 +34,7 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
 
       const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
 
-      let totalHoldQuantity = (_.sumBy(product?.inventoryProducts?.filter((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.isHold),
+      let totalHoldQuantity = (_.sumBy(product?.inventoryProducts?.filter((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold),
         (item: any) => item.slab?.receivingLength * item.slab?.receivingWidth
       ) / 144).toFixed(2);
 
@@ -75,7 +75,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
     const blocks = Array.from(blockGroups.entries()).map(([block, slabs]: any) => {
 
       const totalQuantity = (_.sumBy(slabs,
-        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.inventoryProduct?.isHold) ? item.receivingLength * item.receivingWidth : 0
+        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.inventoryProduct?.hold) ? item.receivingLength * item.receivingWidth : 0
       ) / 144).toFixed(2);
 
       return {
@@ -91,11 +91,11 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
 
     const totalSlabsCount = product.slabs.length;
 
-    const totalHoldQuantity = (_.sumBy(product.slabs.filter((e: any) => e.inventoryProduct?.isHold),
+    const totalHoldQuantity = (_.sumBy(product.slabs.filter((e: any) => e.inventoryProduct?.hold),
       (item: any) => item.receivingWidth * item.receivingWidth
     ) / 144).toFixed(2);
 
-    const totalHoldSlabsCount = product.slabs?.filter((e: any) => e.inventoryProduct?.isHold)?.length;
+    const totalHoldSlabsCount = product.slabs?.filter((e: any) => e.inventoryProduct?.hold)?.length;
 
     delete product.slabs;
 
@@ -130,7 +130,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
     const bundles = Array.from(bundleGroups.entries()).map(([bundle, slabs]: any) => {
 
       const totalQuantity = (_.sumBy(slabs,
-        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.inventoryProduct?.isHold) ? item.receivingLength * item.receivingWidth : 0
+        (item: any) => (item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.inventoryProduct?.hold) ? item.receivingLength * item.receivingWidth : 0
       ) / 144).toFixed(2);
 
       return {
@@ -146,11 +146,11 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
     const totalSlabsCount = product.slabs.length;
 
-    const totalHoldQuantity = (_.sumBy(product.slabs.filter((e: any) => e.inventoryProduct?.isHold),
+    const totalHoldQuantity = (_.sumBy(product.slabs.filter((e: any) => e.inventoryProduct?.hold),
       (item: any) => item.receivingWidth * item.receivingWidth
     ) / 144).toFixed(2);
 
-    const totalHoldSlabsCount = product.slabs?.filter((e: any) => e.inventoryProduct?.isHold)?.length;
+    const totalHoldSlabsCount = product.slabs?.filter((e: any) => e.inventoryProduct?.hold)?.length;
 
     delete product.slabs;
 

@@ -130,4 +130,7 @@
 
 ---
 
-1. if product is swapped in PL then what will be dimensions for LO
+1. if product is swapped in PL then what will be dimensions for LO.
+2. if product is added in cart or selection sheet and then it is sold what will happen.[show-an-alert]
+3. what after SO has been created from Selection sheet.
+4. can we remove unused columns from received inventory.

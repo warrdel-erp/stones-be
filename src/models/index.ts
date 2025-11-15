@@ -49,6 +49,9 @@ import TradeService from "./tradeService.model";
 import GenericProduct from "./genericProduct.model";
 import CreditDebitNote from "./creditDebitNote.model";
 import SoProductSwapHistory from "./soProductSwapHistory.model";
+import InventoryProductHold from "./inventoryProductHold.model";
+import SelectionSheet from "./selectionSheet.model";
+import SelectionSheetItem from "./selectionSheetItem.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
@@ -642,6 +645,34 @@ SalesOrderProduct.hasMany(SoProductSwapHistory, { foreignKey: "salesProductId", 
 SoProductSwapHistory.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasMany(SoProductSwapHistory, { foreignKey: "inventoryProductId", as: "swapHistories" });
 
+// InventoryProductHold associations
+InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProduct.hasOne(InventoryProductHold, { foreignKey: "inventoryProductId", as: "hold" });
+
+InventoryProductHold.belongsTo(User, { foreignKey: "createdById", as: "createdBy" });
+User.hasMany(InventoryProductHold, { foreignKey: "createdById", as: "inventoryProductHolds" });
+
+// SelectionSheet associations
+SelectionSheet.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Account.hasMany(SelectionSheet, { foreignKey: "createdById", as: "selectionSheets" });
+
+SelectionSheet.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(SelectionSheet, { foreignKey: "customerId", as: "selectionSheets" });
+
+SelectionSheet.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(SelectionSheet, { foreignKey: "clientId", as: "selectionSheets" });
+
+SelectionSheet.hasMany(SelectionSheetItem, { foreignKey: "selectionSheetId", as: "items" });
+
+// SelectionSheetItem associations
+SelectionSheetItem.belongsTo(SelectionSheet, { foreignKey: "selectionSheetId", as: "selectionSheet" });
+
+SelectionSheetItem.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId", as: "selectionSheetItems" });
+
+SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
+
 export {
   Client,
   User,
@@ -692,5 +723,8 @@ export {
   GenericProduct,
   CreditDebitNote,
   CartItem,
-  SoProductSwapHistory
+  SoProductSwapHistory,
+  InventoryProductHold,
+  SelectionSheet,
+  SelectionSheetItem
 };

@@ -263,6 +263,10 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
         required: true,
         include: [
           {
+            association: 'hold',
+            attributes: ['id']
+          },
+          {
             association: "cartItem"
           },
           {
@@ -288,6 +292,7 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
               },
             ],
           },
+
         ],
       },
       {

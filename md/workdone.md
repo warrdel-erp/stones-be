@@ -565,3 +565,21 @@ sticky navbar.
 1. cart item as per account.
 2. So creation from Cart.
 3. Inventory Icons design.
+
+---
+
+1. Decimal due error in customer payment. (If we pay full amount it still show some due amount in decimals).
+2. Changed all payment to 2 digits after decimal. for synchronization of BE and FE
+3. In customer payment So code label correction.
+4. hold unhold whole page reload issue resolved.
+5. Navbar Icon Badge UI adjustment.
+6. Removed checkboxes from Cart.
+7. Selection Sheet APIs are done.
+
+---
+
+1. Selection sheet frontend implementation.
+2. hold unhold in Add so products
+3. SO invoice journal entry error resolved [BE]
+
+\*\* meeting with Ram

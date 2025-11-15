@@ -28,15 +28,15 @@ const SalesOrderInvoice = sequelize.define(
       type: DataTypes.STRING,
     },
     amount: { // total amount without tax.
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
     taxableAmount: { // only amount that has to applied tax.
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
     taxValue: { // total tax value as per taxable amount.
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
     soInvoiceNumber: {
@@ -118,7 +118,7 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
   });
 
   soInvoice.clientSoInvoiceNumber = lastSoInvoiceAccordingToClient
-    ? lastSoInvoiceAccordingToClient.clientSoInvoiceNumber + 1
+    ? Number(lastSoInvoiceAccordingToClient.clientSoInvoiceNumber) + 1
     : 1;
 
   //  Generate soInvoiceNumber

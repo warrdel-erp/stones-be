@@ -16,7 +16,7 @@ const SalesOrderProduct = sequelize.define(
       primaryKey: true,
     },
     unitPrice: {
-      type: DataTypes.DECIMAL(10, 3),
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     isSlabType: {

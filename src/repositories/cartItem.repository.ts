@@ -137,3 +137,15 @@ export const deleteCartItemsByInventoryProductIdsAndAccountId = async (
     return deletedCount;
 };
 
+/**
+ * Get cart count for a given accountId
+ * Returns the number of cart items belonging to the user
+ */
+export const getCartCountByAccountId = async (accountId: number) => {
+    return await CartItem.count({
+        where: {
+            accountId: accountId,
+        },
+    });
+};
+

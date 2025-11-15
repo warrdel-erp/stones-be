@@ -4,9 +4,6 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-// hold-unHold slab
-router.put("/:id/hold", authenticateUser, inventoryProductController.updateInventoryProductHoldStatus);
-
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
 
@@ -22,7 +19,13 @@ router.get("/allocated", authenticateUser, inventoryProductController.getAllocat
 // put and remove slab to cart
 router.put("/:inventoryProductId/cart", authenticateUser, inventoryProductController.updateInventoryProductCartStatus);
 
-// get cart count
-router.get("/cartCount", authenticateUser, inventoryProductController.getCartCount);
+// Hold an inventory product
+router.post("/:id/hold", authenticateUser, inventoryProductController.holdInventoryProduct);
+
+// Unhold an inventory product
+router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdInventoryProduct);
+
+// Get hold details by hold ID
+router.get("/hold/:holdId", authenticateUser, inventoryProductController.getHoldById);
 
 export default router;

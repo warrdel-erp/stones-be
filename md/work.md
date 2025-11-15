@@ -622,20 +622,52 @@ Email notification.
 
 ---
 
-1. Tax selected by default in cart ✅
-2. Remove checkbox from cart. ✅
-3. "+" => add packaging info. In SIPL ✅
-4. Edit slabs => add receiving info (don’t show if slab not present.) ✅
-5. Show default receiving data as packaging.
-6. Reduce size of block and bundle.
-7. On receive inventory without fully filled. Not showing error. ✅
-8. Services in return. ✅
-9. Vendor payment submit.
-10. Customer payment page. [!!!!!] ✅
-11. Chart of account.
-12. Dead stock.
-13. If product is inactive it can’t be sold.
-14. Totals in customer payment.
+1. If product is inactive it can’t be sold.
+2. In create Customer first 3 section in one row. ✅
+3. Customer details first 3 in single. ✅
+4. Pick ticket -> loading order (in customer tab). ✅
+5. Journal entry page. ✅
+6. Deliveries UI (Initiate Deliveries and Create new Vehicle). ✅
+7. Returns UI, Calculation and both type product feature. ✅
+8. SIPL two step process. ✅
+9. Vendor payment -> debit note to supplier if extra payment. ✅
+10. Vendor payment. ✅
+11. Advanced deposit design. -> due must be affected. ✅
+12. Totals in customer payment.
+13. Customer payment submit popup. ✅
+14. Journal entry for credit note [Pending(what-is-account-for-credit-note-journal-entry) ()] and advanced deposit [is-this-one-is-correct]. ✅
 15. Customer Payment journal entry.
 16. Last closing entries in journal entries.
-17. SO should not be created without product.
+17. Cart to SO. ✅
+18. Direct SIPL. ✅
+19. Hold-Unhold. ✅
+20. Customer details page tab scroll. ✅
+21. cart item as per account. ✅
+22. So creation from Cart. ✅
+23. Inventory Icons design. ✅
+
+---
+
+1. Supplier SO inputs write and remove data then it accepting empty input.
+2. Freight forwarder deselect. ✅
+3. Other charges => services.
+4. Hold notes with User optional. [!!!]
+5. Swap. [!!!]
+6. Cart count. ✅
+7. Selection sheet. [!!!]
+8. print.
+9. share.
+
+---
+
+1. In receive inventory decimal has 3 digits -> change it to 2. ✅
+2. Cancel design in receive inventory.
+3. Cancel redirection from receive inventory.
+4. Payment terms in create LO.
+5. Supplier SO inputs write and remove data then it accepting empty input.
+6. Freight forwarder deselect.
+7. Other charges => services.
+8. Swap.
+9. Required fields must be labeled with "\*".
+10. Phone number must be only 10 digit in Supplier and Customer.
+11. Customer detail internal pages design.

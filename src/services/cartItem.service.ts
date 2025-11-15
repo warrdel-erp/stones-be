@@ -118,3 +118,12 @@ export const deleteCartItem = async (
 
     return { deleted: true };
 };
+
+/**
+ * Get cart count for the authenticated user
+ * Returns the number of cart items belonging to the user
+ */
+export const getCartCount = async (accountId: number) => {
+    const count = await cartItemRepository.getCartCountByAccountId(accountId);
+    return { count };
+};

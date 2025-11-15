@@ -216,9 +216,9 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
       productId,
       [Op.or]: [
         { status: INVENTORY_ITEM_STATUS.ALLOCATED },
-        // inventory product isHold true
-        // Use literal to OR against included association column
-        literal("`inventoryProduct`.`isHold` = true"),
+        // inventory product has hold record
+        // Use literal to check if hold exists via subquery
+        literal(`EXISTS (SELECT 1 FROM inventory_product_holds WHERE inventoryProductId = \`inventoryProduct\`.\`id\`)`),
       ],
     },
     include: [
@@ -244,12 +244,15 @@ export const getAvailableSlabsData = async (productId: number) => {
     where: {
       productId,
       status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      // Exclude slabs with holds using subquery
+      [Op.and]: [
+        literal(`NOT EXISTS (SELECT 1 FROM inventory_product_holds WHERE inventoryProductId = \`inventoryProduct\`.\`id\`)`),
+      ],
     },
     include: [
       {
         association: "inventoryProduct",
         required: true,
-        where: { isHold: false },
         attributes: [],
       },
     ],

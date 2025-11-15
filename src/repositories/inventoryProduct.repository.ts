@@ -245,6 +245,9 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
     where: filter,
     include: [
       {
+        association: 'hold',
+      },
+      {
         association: 'slab'
       },
       {
@@ -281,29 +284,8 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
   return await models.InventoryProduct.update({ isInCart }, { where: { id }, individualHooks: true });
 };
 
-export const getCartCount = async (clientId: number) => {
-
-  return await models.InventoryProduct.count({
-    where: {
-      isInCart: true,
-      clientId: clientId
-    }
-  });
-};
-
 export const findInventoryProductById = async (id: number) => {
-  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "isHold", "status", 'isSlabType', 'clientId'] });
-};
-
-
-// update hold status of slab
-export const updateInventoryProductHoldStatus = async (id: number, isHold: boolean) => {
-
-  // Update hold on inventory product instead of slab
-  return await models.InventoryProduct.update(
-    { isHold },
-    { where: { id: id }, individualHooks: true }
-  );
+  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId'] });
 };
 
 // get last landed cost.

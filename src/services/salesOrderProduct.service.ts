@@ -1,6 +1,7 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
+import * as inventoryProductHoldRepository from "../repositories/inventoryProductHold.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { INVENTORY_ITEM_STATUS } from "../constants";
@@ -23,7 +24,8 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
       const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
 
       // can't add to SO if it is in hold (check inventoryProduct hold)
-      if (inventoryProduct?.isHold) {
+      const hold = await inventoryProductHoldRepository.findHoldByInventoryProductId(product.inventoryProductId, transaction);
+      if (hold) {
         throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
       }
 

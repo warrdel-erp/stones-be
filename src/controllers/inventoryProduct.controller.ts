@@ -105,26 +105,42 @@ export const updateInventoryProductCartStatus = catchAsync(async (req: AuthReque
     return SuccessResponse(res, 200, "Inventory Product Cart status Updated successfully", result);
 });
 
-export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) => {
-    const clientId = req.user?.clientId;
-
-    if (!clientId) {
-        return res.status(401).json({ error: "Missing client information" });
-    }
-
-    const result = await inventoryProductService.getCartCount(clientId);
-    return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
-});
-
-export const updateInventoryProductHoldStatus = catchAsync(async (req: AuthRequest, res: Response) => {
+/**
+ * Hold an inventory product
+ */
+export const holdInventoryProduct = catchAsync(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
-    const { isHold } = req.body;
+    const { note } = req.body;
+    const accountId = req.user?.accountId;
 
-    if (typeof isHold !== "boolean") {
-        return res.status(400).json({ error: "`isHold` must be true or false" });
+    if (!accountId) {
+        return res.status(401).json({ error: "User not authenticated" });
     }
 
-    const result = await inventoryProductService.updateInventoryProductHoldStatus(Number(id), isHold);
+    const result = await inventoryProductService.holdInventoryProduct(Number(id), note, Number(accountId));
 
-    SuccessResponse(res, 200, "Slab Hold status Updated successfully", result);
+    return SuccessResponse(res, 200, "Inventory product placed on hold successfully", result);
 });
+
+/**
+ * Unhold an inventory product
+ */
+export const unholdInventoryProduct = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    const result = await inventoryProductService.unholdInventoryProduct(Number(id));
+
+    return SuccessResponse(res, 200, "Hold removed successfully", result);
+});
+
+/**
+ * Get hold details by hold ID
+ */
+export const getHoldById = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { holdId } = req.params;
+
+    const result = await inventoryProductService.getHoldById(Number(holdId));
+
+    return SuccessResponse(res, 200, "Hold details fetched successfully", result);
+});
+

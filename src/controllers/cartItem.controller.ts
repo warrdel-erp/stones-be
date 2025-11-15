@@ -58,3 +58,17 @@ export const deleteCartItem = catchAsync(async (req: AuthRequest, res: Response)
     return SuccessResponse(res, 200, "Cart item deleted successfully", {});
 });
 
+/**
+ * Get cart count for the authenticated user
+ * Returns the number of cart items belonging to the user
+ */
+export const getCartCount = catchAsync(async (req: AuthRequest, res: Response) => {
+    if (!req.user || !req.user.accountId) {
+        throw new AppError("User not authenticated or account ID missing", 401);
+    }
+
+    const result = await cartItemService.getCartCount(req.user.accountId);
+
+    return SuccessResponse(res, 200, "Cart count retrieved successfully", result);
+});
+

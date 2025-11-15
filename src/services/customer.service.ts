@@ -148,7 +148,7 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
         amount: advancedDeposit.amount,
         creationDate: advancedDeposit.createdAt,
         soId: advancedDeposit.salesOrderId,
-        code: advancedDeposit.salesOrder.clientSoNumber,
+        code: "SO " + advancedDeposit.salesOrder.clientSoNumber,
         accountName: advancedDeposit.ledgerAccount?.name,
         paymentMethod: advancedDeposit.payment?.paymentMethod,
         type: "advancedDeposit"
