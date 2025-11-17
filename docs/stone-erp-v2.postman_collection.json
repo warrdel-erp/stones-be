@@ -53,7 +53,8 @@
 									"console.log()"
 								],
 								"type": "text/javascript",
-								"packages": {}
+								"packages": {},
+								"requests": {}
 							}
 						},
 						{
@@ -71,7 +72,8 @@
 									"}"
 								],
 								"type": "text/javascript",
-								"packages": {}
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -80,7 +82,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\n//     \"email\": \"clinet1@gmail.com\",\n//     \"password\": \"client\"\n// }\n\n\n// {\n//     \"email\": \"user@gmail.com\",\n//     \"password\": \"user\"\n// }\n\n\n{\n    \"email\": \"contact1@techsolutions.com\",\n    \"password\": \"client\"\n}\n",
+							"raw": "// {\n//     \"email\": \"clinet1@gmail.com\",\n//     \"password\": \"client\"\n// }\n\n\n{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"user\"\n}\n\n\n// {\n//     \"email\": \"contact1@techsolutions.com\",\n//     \"password\": \"client\"\n// }\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -433,7 +435,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"locationId\": 3\n}",
+							"raw": "{\n    \"locationId\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -832,7 +834,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "3"
+									"value": "4"
 								}
 							]
 						}
@@ -1060,6 +1062,58 @@
 									"key": "onlyWithSlabs",
 									"value": "0",
 									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all products with less data",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "onlyWithSlabs",
+								"value": "false",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/api/product/compact?onlyWithSlabs=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"product",
+								"compact"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "onlyWithSlabs",
+									"value": "1"
 								}
 							]
 						}
@@ -1514,7 +1568,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"barcode\": \"BAR-001\",\n  \"productId\": 2,\n  \"siplProductId\": 2,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 5\n}\n",
+							"raw": "{\n  \"entryUnit\": \"in\",\n  \"packageLength\": 7.3,\n  \"packageWidth\": 5.7,\n  \"receivingLength\": 7.5,\n  \"receivingWidth\": 5.1,\n  \"block\": \"A1\",\n  \"lot\": \"L23\",\n  \"notes\": \"High-quality slab\",\n  \"productId\": 2,\n  \"siplProductId\": 2,\n  \"binId\": 1,\n  \"slabNumber\": 1,\n  \"quantity\": 5\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1828,7 +1882,51 @@
 							"variable": [
 								{
 									"key": "siplId",
-									"value": "2"
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkFullyFilled",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/slab/sipl/:siplId/checkFullyFilled",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"slab",
+								"sipl",
+								":siplId",
+								"checkFullyFilled"
+							],
+							"variable": [
+								{
+									"key": "siplId",
+									"value": "13"
 								}
 							]
 						}
@@ -1931,15 +2029,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/inventory/location/:locationId?page=1&limit=100&categorization=BLOCK",
+							"raw": "http://localhost:5002/api/inventory/location/1?page=1&limit=200",
+							"protocol": "http",
 							"host": [
-								"{{baseurl}}"
+								"localhost"
 							],
+							"port": "5002",
 							"path": [
 								"api",
 								"inventory",
 								"location",
-								":locationId"
+								"1"
 							],
 							"query": [
 								{
@@ -1947,18 +2047,18 @@
 									"value": "1"
 								},
 								{
-									"key": "limit",
-									"value": "100"
+									"key": "categorization",
+									"value": "BLOCK",
+									"disabled": true
 								},
 								{
-									"key": "categorization",
-									"value": "BLOCK"
-								}
-							],
-							"variable": [
+									"key": "genericOnly",
+									"value": "1",
+									"disabled": true
+								},
 								{
-									"key": "locationId",
-									"value": "1"
+									"key": "limit",
+									"value": "200"
 								}
 							]
 						}
@@ -2009,51 +2109,6 @@
 								{
 									"key": "slabId",
 									"value": "2"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cart",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"isInCart\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseurl}}/api/slab/:slabId/cart",
-							"host": [
-								"{{baseurl}}"
-							],
-							"path": [
-								"api",
-								"slab",
-								":slabId",
-								"cart"
-							],
-							"variable": [
-								{
-									"key": "slabId",
-									"value": "18"
 								}
 							]
 						}
@@ -2270,36 +2325,6 @@
 								"api",
 								"slab",
 								"bulkUpdate"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cart item count",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseurl}}/api/slab/cart/count",
-							"host": [
-								"{{baseurl}}"
-							],
-							"path": [
-								"api",
-								"slab",
-								"cart",
-								"count"
 							]
 						}
 					},
@@ -2603,6 +2628,42 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get all advanced deposits",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/customer/:id/advancedDeposits",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"customer",
+								":id",
+								"advancedDeposits"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2662,7 +2723,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/salesOrder?limit=100&page=1&tab=PACKAGING_LIST",
+							"raw": "{{baseurl}}/api/salesOrder?limit=100&page=1&customerId=1&status=open",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -2686,7 +2747,16 @@
 								},
 								{
 									"key": "tab",
-									"value": "PACKAGING_LIST"
+									"value": "PACKAGING_LIST",
+									"disabled": true
+								},
+								{
+									"key": "customerId",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "open"
 								}
 							]
 						}
@@ -2721,7 +2791,7 @@
 							"variable": [
 								{
 									"key": "SOId",
-									"value": "16"
+									"value": "3"
 								}
 							]
 						}
@@ -2885,6 +2955,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get total paid amount fot a SO",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrder/paidAmount/1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrder",
+								"paidAmount",
+								"1"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2908,7 +3008,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"salesOrderId\": 5,\n    \"soProducts\": [\n        {\n            \"id\": 4,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        },\n        {\n            \"id\": 5,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        }\n    ]\n}\n",
+							"raw": "{\n    \"loDate\": \"2025-02-28\",\n    \"expDeliveryDate\": \"2025-02-28\",\n    \"deliveryNotes\": \"Deliver before noon\",\n    \"deliveryType\": \"delivery\",\n    \"shippingAddressId\": 1,\n    \"paymentTerms\": \"Net 30\",\n    \"soProducts\": [\n        {\n            \"id\": 4,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        },\n        {\n            \"id\": 5,\n            \"loRemeasureLength\": 12,\n            \"loRemeasureWidth\": 14\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3609,6 +3709,16 @@
 				{
 					"name": "get by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -5641,7 +5751,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"amount\": 200,\n    \"salesOrderId\": 16,\n    \"paymentMethod\": \"cash\",\n    \"accountId\"\n}",
+							"raw": "{\n    \"amount\": 200,\n    \"salesOrderId\": 16,\n    \"paymentMethod\": \"cash\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5656,6 +5766,53 @@
 							"path": [
 								"api",
 								"advancedDeposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get advanced deposits without pagination",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/advancedDeposit/withoutPagination?salesOrderId=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"advancedDeposit",
+								"withoutPagination"
+							],
+							"query": [
+								{
+									"key": "salesOrderId",
+									"value": "3"
+								}
 							]
 						}
 					},
@@ -5868,7 +6025,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"truckId\": 2,\n    \"invocieIds\": [5,3,7]\n}",
+							"raw": "{\n    \"truckId\": 2,\n    \"invoiceIds\": [5,3,7]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5883,6 +6040,34 @@
 							"path": [
 								"api",
 								"delivery"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "approve",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceDeliveries\": [\n        {\n            \"id\": 1,\n            \"order\": 0\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery/approve",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"approve"
 							]
 						}
 					},
@@ -5917,15 +6102,30 @@
 						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "serviceCategory",
+			"item": [
 				{
-					"name": "approve orders",
+					"name": "add",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"id\": 1,\n        \"order\": 1\n    },\n    {\n        \"id\": 2,\n        \"order\": 2\n    }\n]",
+							"raw": "{\n    \"name\": \"Shipping\",\n    \"type\": \"sale\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5933,14 +6133,1228 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/delivery/approve-orders",
+							"raw": "{{baseurl}}/api/serviceCategory",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
-								"delivery",
-								"approve-orders"
+								"serviceCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/serviceCategory/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"serviceCategory",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping\",\n    \"type\": \"sale\",\n    \"clientId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/serviceCategory/1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"serviceCategory",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/serviceCategory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"serviceCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping\",\n    \"type\": \"sale\",\n    \"clientId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/serviceCategory/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"serviceCategory",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "service",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Service 2\",\n    \"ledgerAccountId\": 1,\n    \"serviceCategoryId\": 2,\n    \"description\": \"This is description\"\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/service",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"service"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping 3\"\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/service/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"service",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping\",\n    \"type\": \"sale\",\n    \"clientId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/service/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"service",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/service",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"service"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shipping\",\n    \"type\": \"sale\",\n    \"clientId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/serviceCategory/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"serviceCategory",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "trade service",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"referenceType\": \"loadingOrder\",\n    \"referenceId\": 1,\n    \"serviceId\": 2\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/tradeService",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"tradeService"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/tradeService?referenceType=saleOrder&referenceId=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"tradeService"
+							],
+							"query": [
+								{
+									"key": "referenceType",
+									"value": "saleOrder"
+								},
+								{
+									"key": "referenceId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventory products",
+			"item": [
+				{
+					"name": "Get Special filters",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/specialFilters?block=21",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								"specialFilters"
+							],
+							"query": [
+								{
+									"key": "siplId",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "block",
+									"value": "21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct?productId=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get allocated",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/allocated?customerId=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								"allocated"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update selling Price",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ids\": [1],\n    \"sellingPrice\": 4 \n} \n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/sellingPrice",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								"sellingPrice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isInCart\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/:inventoryProductId/cart",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								":inventoryProductId",
+								"cart"
+							],
+							"variable": [
+								{
+									"key": "inventoryProductId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cart item count",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/cartCount",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								"cartCount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hold",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"this is not\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/:id/hold",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								":id",
+								"hold"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "36"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get hold detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"this is not\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/:id/hold",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								":id",
+								"hold"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "36"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Un Hold",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/:id/hold",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								":id",
+								"hold"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "36"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Credit Debit note",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/creditDebitNote",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"creditDebitNote"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get allocated",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/creditDebitNote/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"creditDebitNote",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new note",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 12,\n    \"entryFor\": \"customer\",\n    \"entryIdFor\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/creditDebitNote",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"creditDebitNote"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem/count",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"inventoryProductId\": 34\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "41"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Selection Sheet",
+			"item": [
+				{
+					"name": "Get by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get list",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/cartItem/count",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"cartItem",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"inventoryProductId\": 34\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/selectionSheet",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"selectionSheet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/selectionSheet/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"selectionSheet",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
 							]
 						}
 					},

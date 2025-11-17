@@ -661,13 +661,26 @@ Email notification.
 ---
 
 1. In receive inventory decimal has 3 digits -> change it to 2. ✅
-2. Cancel design in receive inventory.
-3. Cancel redirection from receive inventory.
-4. Payment terms in create LO.
-5. Supplier SO inputs write and remove data then it accepting empty input.
-6. Freight forwarder deselect.
-7. Other charges => services.
-8. Swap.
-9. Required fields must be labeled with "\*".
-10. Phone number must be only 10 digit in Supplier and Customer.
-11. Customer detail internal pages design.
+2. Cancel design in receive inventory. ✅
+3. Cancel redirection from receive inventory. ✅
+4. Payment terms in create LO. ✅
+5. Supplier SO inputs write and remove data then it accepting empty input. ✅
+6. Table action Icon size correction. ✅
+7. Freight forwarder deselect. ✅
+8. Alert message design of receive inventory. ✅
+9. add product after creating of SO. ✅
+10. hold unhold management during swap. ✅
+
+---
+
+2. Swap.
+3. Required fields must be labeled with "\*".
+4. Phone number must be only 10 digit in Supplier and Customer.
+5. Customer detail internal pages design.
+6. Change initiate delivery process (first select invoices).
+7. Slabs can't be added after receive inventory.
+8. Delete button in SO before Invoice.
+
+---
+
+1. reusable components for Service

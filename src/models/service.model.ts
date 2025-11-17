@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import { UNITS_OF_MEASUREMENT } from "../constants";
 import LedgerAccount from "./ledgerAccount.model";
 import ServiceCategory from "./serviceCategory.model";
 
@@ -15,9 +16,15 @@ const Service = sequelize.define(
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        uom: {
+        uomId: {
             type: DataTypes.INTEGER,
             allowNull: true,
+        },
+        uom: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return UNITS_OF_MEASUREMENT.find((e) => e.id === this.get("uomId"));
+            },
         },
         basePrice: {
             type: DataTypes.FLOAT,

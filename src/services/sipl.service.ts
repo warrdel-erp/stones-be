@@ -18,6 +18,8 @@ import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
 import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as productRepository from "../repositories/product.repository";
+import * as tradeServiceService from "../services/tradeService.service";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 // Processes the inventory reception by updating slab and generic product statuses.
 export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
@@ -95,6 +97,22 @@ export async function createSIPLService(siplData: any, locationId: number, trans
 
     // Create SIPL
     let sipl: any = await siplRepository.createSIPL({ ...siplData, ...combinedSiplKeys }, transaction);
+
+    sipl = sipl.get({ plain: true });
+
+    // Create trade services for SIPL if they exist
+    // --------------------
+    if (Array.isArray(siplData.services) && siplData.services.length) {
+      await tradeServiceService.createMultipleTradeServices(
+        siplData.services,
+        TRADE_SERVICE_REFERENCE_TYPES.SIPL,
+        sipl.id,
+        siplData.clientId,
+        "purchase",
+        transaction
+      );
+    }
+    // --------------------
 
     let container;
     if (siplData.container) {

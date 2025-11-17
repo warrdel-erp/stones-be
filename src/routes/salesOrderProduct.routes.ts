@@ -5,12 +5,15 @@ import * as salesOrderProductController from "../controllers/salesOrderProduct.c
 const router = express.Router();
 
 // hold-unHold slab
+router.post("/bulkForSalesOrder/:salesOrderId", authenticateUser, salesOrderProductController.addSalesOrderProducts);
+
+// hold-unHold slab
 router.put("/:soProductId/pick", authenticateUser, salesOrderProductController.updateSoProductPickedStatus);
 
 // swap
 router.put("/:soProductId/swap", authenticateUser, salesOrderProductController.swapSalesOrderProduct);
 
 // get swap history
-router.get("/:soProductId/swap-history", authenticateUser, salesOrderProductController.getSwapHistory);
+router.get("/:soProductId/swapHistory", authenticateUser, salesOrderProductController.getSwapHistory);
 
-export default router;
+export default router; 

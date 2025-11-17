@@ -11,10 +11,10 @@ export const createServiceSchema = z.object({
         invalid_type_error: 'Ledger Account must be a number',
     }).int('Ledger Account must be an integer').positive('Ledger Account must be positive'),
 
-    uom: z.number({
-        required_error: 'UOM is required',
-        invalid_type_error: 'UOM must be a number',
-    }).int('UOM must be an integer').positive('UOM must be positive'),
+    uomId: z.number({
+        required_error: 'uomId is required',
+        invalid_type_error: 'uomId must be a number',
+    }).int('uomId must be an integer').positive('uomId must be positive'),
 
     basePrice: z.number({
         required_error: 'basePrice is required',

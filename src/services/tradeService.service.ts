@@ -5,6 +5,7 @@ import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { Transaction } from "sequelize";
+import { ensureServicesBelongToCategory } from "../services/service.service";
 
 export async function createTradeService(data: any, transaction?: Transaction) {
     if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
@@ -24,26 +25,38 @@ export async function createTradeService(data: any, transaction?: Transaction) {
 
 export async function listTradeServices(filters: any = {}) {
     const data = await tradeServiceRepository.findTradeServices(filters);
-
-    const finalData = data.map(tradeService => {
-        const plainData = tradeService.get({ plain: true })
-        plainData.service.uom = UNITS_OF_MEASUREMENT.find(e => e.id == plainData.service.uom);
-        return plainData
-    })
-
-    return finalData
+    return data
 }
 
 export async function deleteTradeService(id: number) {
     return tradeServiceRepository.deleteTradeServiceById(id);
 }
 
-export async function createMultipleTradeServices(services: any, transaction?: Transaction) {
-    if (Array.isArray(services)) {
-        const promises: Promise<any>[] = [];
-        for (const servicePayload of services) {
-            promises.push(createTradeService(servicePayload, transaction));
-        }
-        return await Promise.all(promises);
+export async function createMultipleTradeServices(
+    services: any[],
+    referenceType: string,
+    referenceId: number,
+    clientId: number,
+    categoryType: "purchase" | "sale",
+    transaction?: Transaction
+) {
+    if (!Array.isArray(services) || services.length === 0) {
+        return [];
     }
+
+    // Validate that all services belong to the specified category type
+    await ensureServicesBelongToCategory(services, clientId, categoryType);
+
+    const servicePayloads = services.map((service: any) => ({
+        ...service,
+        referenceType,
+        referenceId,
+        clientId,
+    }));
+
+    const promises: Promise<any>[] = [];
+    for (const servicePayload of servicePayloads) {
+        promises.push(createTradeService(servicePayload, transaction));
+    }
+    return await Promise.all(promises);
 }

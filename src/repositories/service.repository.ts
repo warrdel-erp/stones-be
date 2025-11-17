@@ -39,4 +39,45 @@ export const deleteService = async (id: number, clientId: number) => {
     });
     if (!service) return 0;
     return await models.Service.destroy({ where: { id } });
-}; 
+};
+
+export const getServiceOptions = async (clientId: number, type?: "purchase" | "sale") => {
+    return models.Service.findAll({
+        attributes: [
+            ["name", "label"],
+            ["id", "value"],
+
+        ],
+        include: [
+            {
+                association: "serviceCategory",
+                attributes: [],
+                where: {
+                    clientId,
+                    ...(type ? { type } : {})
+                },
+                required: true
+            }
+        ],
+        order: [["name", "ASC"]],
+    });
+};
+
+export const getServicesByIds = async (serviceIds: number[], clientId: number) => {
+    if (!serviceIds.length) {
+        return [];
+    }
+
+    return models.Service.findAll({
+        where: { id: serviceIds },
+        attributes: ["id", "name", "serviceCategoryId"],
+        include: [
+            {
+                association: "serviceCategory",
+                attributes: ["id", "type", "clientId"],
+                where: { clientId },
+                required: true,
+            },
+        ],
+    });
+};

@@ -241,11 +241,17 @@ export const updateInventoryProductStatusById = async (
 };
 
 export const getInventoryProducts = (filter: Record<string, string>, locationId?: number) => {
+
+  // const isHold = filter?.isHold === 'true';
+
+  let { isHold, ...restFilter } = filter;
+
   return models.InventoryProduct.findAll({
-    where: filter,
+    where: restFilter,
     include: [
       {
         association: 'hold',
+        required: !!Boolean(isHold),
       },
       {
         association: 'slab'

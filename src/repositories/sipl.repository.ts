@@ -186,6 +186,9 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
         as: "purchaseLocation",
         attributes: ["location"],
       },
+      {
+        association: 'tradeServices'
+      }
     ],
     transaction,
   });

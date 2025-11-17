@@ -133,4 +133,8 @@
 1. if product is swapped in PL then what will be dimensions for LO.
 2. if product is added in cart or selection sheet and then it is sold what will happen.[show-an-alert]
 3. what after SO has been created from Selection sheet.
-4. can we remove unused columns from received inventory.
+4. can we remove unused columns from received inventory?
+5. git hub resolved?
+6. Can we show Map in SO for customer address?
+7. If all slabs has been added in LO that should we disable "Create LO" button?
+8. 14. Slabs can't be added after receive inventory.

@@ -13,7 +13,6 @@ export const updateSalesOrderProducts = catchAsync(async (req: Request, res: Res
     throw new AppError("Invalid payload format. Expected an array.", 400);
   }
 
-
   const updatedProducts = await salesOrderProductService.updateSalesOrderProducts(products);
 
   return SuccessResponse(res, 200, "Sales order products updated successfully", updatedProducts);

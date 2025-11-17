@@ -45,7 +45,7 @@ import Delivery from "./Delivery.model";
 import InvoiceDelivery from "./InvoiceDelivery.model";
 import ServiceCategory from "./serviceCategory.model";
 import Service from "./service.model";
-import TradeService from "./tradeService.model";
+import TradeService, { TRADE_SERVICE_REFERENCE_TYPES } from "./tradeService.model";
 import GenericProduct from "./genericProduct.model";
 import CreditDebitNote from "./creditDebitNote.model";
 import SoProductSwapHistory from "./soProductSwapHistory.model";
@@ -672,6 +672,12 @@ InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId",
 
 SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
+
+LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices" })
+TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
+
+SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices" })
+TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 
 export {
   Client,

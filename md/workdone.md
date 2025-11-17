@@ -583,3 +583,23 @@ sticky navbar.
 3. SO invoice journal entry error resolved [BE]
 
 \*\* meeting with Ram
+
+---
+
+1. In receive inventory decimal has 3 digits -> change it to 2. ✅
+2. Cancel design in receive inventory. ✅
+3. Cancel redirection from receive inventory. ✅
+4. Payment terms in create LO. ✅
+5. Supplier SO inputs write and remove data then it accepting empty input. ✅
+6. Table action Icon size correction. ✅
+7. Freight forwarder deselect. ✅
+8. Alert message design of receive inventory. ✅
+9. add product after creating of SO. ✅
+10. hold unhold management during swap. ✅
+
+---
+
+1. Login Design Changes.
+2. Segregation of services for purchase and sales.
+3. Service popup input validation correction and loaders.
+4. Attach service during create SIPL from PO and direct.

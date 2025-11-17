@@ -51,16 +51,15 @@ export const createLoadingOrder = async (data: any) => {
 
     // Create trade services for loading order if it exists
     // --------------------
-    if (Array.isArray(data.services)) {
-      const servicePayload = data.services.map((e: any) => (
-        {
-          ...e,
-          referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
-          referenceId: loadingOrder.id,
-          clientId: data.clientId
-        }))
-
-      await tradeServiceService.createMultipleTradeServices(servicePayload, transaction);
+    if (Array.isArray(data.services) && data.services.length) {
+      await tradeServiceService.createMultipleTradeServices(
+        data.services,
+        TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+        loadingOrder.id,
+        data.clientId,
+        "sale",
+        transaction
+      );
     }
 
     // --------------------
