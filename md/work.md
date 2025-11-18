@@ -673,14 +673,37 @@ Email notification.
 
 ---
 
-2. Swap.
-3. Required fields must be labeled with "\*".
+2. Swap. ✅
+3. Required fields must be labeled with "\*". ✅
 4. Phone number must be only 10 digit in Supplier and Customer.
 5. Customer detail internal pages design.
 6. Change initiate delivery process (first select invoices).
-7. Slabs can't be added after receive inventory.
+7. Slabs can't be added after receive inventory?
 8. Delete button in SO before Invoice.
 
 ---
 
 1. reusable components for Service
+
+---
+
+1. Add SO Products Available.
+2. Reference no. In Advance deposit.
+3. Total due in Customer payment
+4. Advanced Deposit Settlement.
+5. Customer payment Customer Details.
+6. ALLOCATED details in Inventory slabs status.
+7. Cart inventory refresh issue.
+8. Customer in Hold, and also in Cart.
+9. Remove Supplier SO no. From PO.
+10. Due data according to payment terms
+11. Auto filling of bin, receiving data.
+12. Unit landed cost - if receiving data is not there.
+13. If receive inventory slab data is not fully filled then red mark specific slab.
+14. Calculations are wrong in Inventory.
+15. In SO if Slab is not invoiced then it could be deleted.
+16. In create Service Ledger account must be of services.
+17. Show totals of services.
+18. Create LO table calculations.
+19. Put sqrfeet as fixed.
+20. Freight bill.

@@ -137,4 +137,4 @@
 5. git hub resolved?
 6. Can we show Map in SO for customer address?
 7. If all slabs has been added in LO that should we disable "Create LO" button?
-8. 14. Slabs can't be added after receive inventory.
+8. Slabs can't be added after receive inventory?
