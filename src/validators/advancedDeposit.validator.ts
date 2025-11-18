@@ -16,6 +16,8 @@ export const createAdvancedDepositSchema = z.object({
         invalid_type_error: 'Payment method must be a string',
     }).min(1, 'Payment method cannot be empty'),
 
+    referenceNo: z.string().optional(),
+
     accountId: z.number({
         required_error: 'Account ID is required',
         invalid_type_error: 'Account ID must be a number',

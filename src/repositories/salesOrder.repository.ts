@@ -302,7 +302,15 @@ export const getSalesOrderById = async (id: number) => {
   return await models.SalesOrder.findOne({
     where: { id },
     include: [
-      { association: "customer" },
+      {
+        association: "customer",
+        include: [
+          {
+            association: "addresses",
+          }
+        ]
+
+      },
 
       { association: 'advancedDeposits' },
       { association: "createdBy" },

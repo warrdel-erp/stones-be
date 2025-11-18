@@ -28,7 +28,7 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
 
       // Calculate totalQuantity by summing area of all inventoryProducts (per slab), using product.inventoryProducts
       let totalAvailableQuantity = (
-        _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
+        _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
         / 144
       ).toFixed(2);
 
@@ -59,10 +59,6 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
   const finalData = data.products.map((product: any) => {
     product = product.get({ plain: true })
     const blockGroups = new Map<number, any>();
-
-    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
-    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom)?.name;
 
     for (const slab of product.slabs) {
       if (!blockGroups.has(slab.block)) {

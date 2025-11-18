@@ -366,8 +366,8 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
       ...product,
       taxApplied: !!salesOrderProductsAsPerLoadingOrder[0]?.taxApplied,
       salesOrderProduct: salesOrderProductsAsPerLoadingOrder,
-      totalQuantity: calculations.quantities.loadingOrder,
-      totalOrderQuantity: calculations.quantities.receiving,
+      totalQuantity: calculations.quantities.loadingOrder / 144,
+      totalOrderQuantity: calculations.quantities.receiving / 144,
     };
   });
 

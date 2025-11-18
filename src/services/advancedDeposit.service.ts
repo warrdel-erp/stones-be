@@ -10,6 +10,7 @@ interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
     paymentMethod: string;
+    referenceNo?: string;
     accountId: number
 }
 
@@ -62,6 +63,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
                 payeeType: PAYEE_TYPE.CUSTOMER,
                 amount: data.amount,
                 paymentMethod: data.paymentMethod,
+                referenceNo: advancedDeposit.id,
                 status: "completed",
                 clientId: salesOrder.clientId,
                 paymentFor: 'ADVANCED_DEPOSIT',

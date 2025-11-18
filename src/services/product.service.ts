@@ -1,4 +1,4 @@
-import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
+import { INVENTORY_ITEM_STATUS, PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
 import * as productRepository from "../repositories/product.repository";
@@ -6,6 +6,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import _ from "lodash";
 
 // Create a new product.
 export const addProduct = async (productData: any, userId: number, clientId: number) => {
@@ -58,11 +59,20 @@ export const fetchAllProductsWithCompactData = async (
 
   products.products = products.products.map((product: any) => {
 
-    product.kind = PRODUCT_KIND.find((e) => e.id == product.kind)?.value;
-    product.origin = COUNTRIES.find((e) => e.id == product.origin)?.name;
-    product.uom = UNITS_OF_MEASUREMENT.find((e) => e.id == product.uom);
+    product = product.get({ plain: true });
 
-    return product;
+    const totalAvailableQuantity = (
+      _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
+      / 144
+    ).toFixed(2)
+
+    const totalAvailableUnits = product?.inventoryProducts?.filter((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold).length;
+
+    return {
+      ...product,
+      totalAvailableQuantity,
+      totalAvailableUnits,
+    }
   });
 
   return products;

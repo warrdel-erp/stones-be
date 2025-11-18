@@ -603,3 +603,14 @@ sticky navbar.
 2. Segregation of services for purchase and sales.
 3. Service popup input validation correction and loaders.
 4. Attach service during create SIPL from PO and direct.
+
+---
+
+1. Add SO Products Available. ✅
+2. Reference no. In Advance deposit. ✅
+3. Validations in Advanced Deposit Popup. ✅
+4. Create SO validations. ✅
+5. Calculations are wrong in Inventory. ✅
+6. Swap error due to BE table ✅
+7. wrong data in SO Invoice. ✅
+8. Customer Data on Customer Payment ✅

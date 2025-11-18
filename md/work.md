@@ -687,23 +687,30 @@ Email notification.
 
 ---
 
-1. Add SO Products Available.
-2. Reference no. In Advance deposit.
-3. Total due in Customer payment
-4. Advanced Deposit Settlement.
-5. Customer payment Customer Details.
-6. ALLOCATED details in Inventory slabs status.
-7. Cart inventory refresh issue.
-8. Customer in Hold, and also in Cart.
-9. Remove Supplier SO no. From PO.
-10. Due data according to payment terms
-11. Auto filling of bin, receiving data.
-12. Unit landed cost - if receiving data is not there.
-13. If receive inventory slab data is not fully filled then red mark specific slab.
-14. Calculations are wrong in Inventory.
-15. In SO if Slab is not invoiced then it could be deleted.
-16. In create Service Ledger account must be of services.
-17. Show totals of services.
-18. Create LO table calculations.
-19. Put sqrfeet as fixed.
-20. Freight bill.
+1. Add SO Products Available. ✅
+2. Reference no. In Advance deposit. ✅
+3. Validations in Advanced Deposit Popup. ✅
+4. Create SO validations. ✅
+5. Swap error due to BE table ✅
+6. wrong data in SO Invoice. ✅
+7. Calculations are wrong in Inventory. ✅
+
+---
+
+1. Total due in Customer payment
+2. Advanced Deposit Settlement.
+3. Customer payment Customer Details.
+4. ALLOCATED details in Inventory slabs status.
+5. Cart inventory refresh issue.
+6. Customer in Hold, and also in Cart.
+7. Remove Supplier SO no. From PO.
+8. Due data according to payment terms
+9. Auto filling of bin, receiving data.
+10. Unit landed cost - if receiving data is not there.
+11. If receive inventory slab data is not fully filled then red mark specific slab.
+12. In SO if Slab is not invoiced then it could be deleted.
+13. In create Service Ledger account must be of services.
+14. Show totals of services.
+15. Create LO table calculations.
+16. Put sqrfeet as fixed.
+17. Freight bill.
