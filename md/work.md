@@ -697,20 +697,14 @@ Email notification.
 
 ---
 
-1. Total due in Customer payment
-2. Advanced Deposit Settlement.
-3. Customer payment Customer Details.
-4. ALLOCATED details in Inventory slabs status.
-5. Cart inventory refresh issue.
-6. Customer in Hold, and also in Cart.
-7. Remove Supplier SO no. From PO.
-8. Due data according to payment terms
-9. Auto filling of bin, receiving data.
-10. Unit landed cost - if receiving data is not there.
-11. If receive inventory slab data is not fully filled then red mark specific slab.
-12. In SO if Slab is not invoiced then it could be deleted.
-13. In create Service Ledger account must be of services.
-14. Show totals of services.
-15. Create LO table calculations.
-16. Put sqrfeet as fixed.
-17. Freight bill.
+1. Advanced Deposit Settlement.
+2. ALLOCATED details in Inventory slabs status.
+3. Cart inventory refresh issue.
+4. Customer in Hold, and also in Cart.
+5. Due date according to payment terms
+6. In SO if Slab is not invoiced then it could be deleted.
+7. Show totals of services.
+8. Create LO table calculations.
+9. Put sqrfeet as fixed.
+10. Freight bill.
+11. Journal entry will go during invoicing for Service.

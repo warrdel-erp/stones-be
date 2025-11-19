@@ -63,3 +63,5 @@ RewriteCond %{SERVER_NAME} =be-stonecrm.warrdelstones.com
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ```
+
+ALTER TABLE students ROW_FORMAT=DYNAMIC;

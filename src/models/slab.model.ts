@@ -8,6 +8,7 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
 import SIPLProduct from "./siplProduct.model";
 import Client from "./client.model";
+import _ from "lodash";
 
 const Slab = sequelize.define(
   "slabs",
@@ -42,6 +43,26 @@ const Slab = sequelize.define(
     receivingWidth: {
       type: DataTypes.FLOAT,
       allowNull: true,
+    },
+    packagedSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+
+        const length = Number(this.get("packageLength")) || 0;
+        const width = Number(this.get("packageWidth")) || 0;
+
+        return _.round(length * width / 144, 2);
+      },
+    },
+    receivedSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const length = Number(this.get("receivingLength")) || 0;
+        const width = Number(this.get("receivingWidth")) || 0;
+
+        return _.round(length * width / 144, 2);
+      },
+
     },
     block: {
       type: DataTypes.STRING,

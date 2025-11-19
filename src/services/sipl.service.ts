@@ -15,11 +15,13 @@ import * as siplService from "../services/sipl.service";
 import * as slabService from "../services/slab.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
-import { randomId } from "../helper";
+import { randomId, sumDecimal } from "../helper";
 import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as productRepository from "../repositories/product.repository";
 import * as tradeServiceService from "../services/tradeService.service";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
+import _ from "lodash";
+import Decimal from "decimal.js";
 
 // Processes the inventory reception by updating slab and generic product statuses.
 export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
@@ -303,12 +305,8 @@ export const getSIPLById = async (id: number) => {
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
     return {
       ...siplProduct,
-      totalReceivedQuantity: Number(
-        siplProduct.slabs.reduce((a: number, b: any) => a + b.receivingWidth * b.receivingLength, 0).toFixed(2)
-      ),
-      totalPackagingQuantity: Number(
-        siplProduct.slabs.reduce((a: number, b: any) => a + b.packageWidth * b.packageLength, 0).toFixed(2)
-      ),
+      totalReceivedQuantity: sumDecimal(siplProduct.slabs, "receivedSqrFt"),
+      totalPackagingQuantity: sumDecimal(siplProduct.slabs, "packagedSqrFt"),
     };
   });
 
@@ -388,40 +386,44 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     0
   );
 
+  // Calculate total trade services amount
+  const totalTradeServicesAmount = sumDecimal(
+    (siplData.tradeServices || []).map((ts: any) => ({
+      amount: Number(ts.quantity || 0) * Number(ts.price || 0),
+    })),
+    "amount"
+  );
+
   // Calculate total area of slabs that packaged.
   const totalPackagingArea = Number(
     siplData.siplProducts
       .reduce(
         (sum: number, siplProduct: any) =>
-          sum +
-          siplProduct.slabs.reduce((total: number, slab: any) => total + slab.packageLength * slab.packageWidth, 0),
+          sum + sumDecimal(siplProduct.slabs, "packagedSqrFt"),
         0
       )
-      .toFixed(2)
   );
 
   // Total quantity exists in a SIPL
-  const totalQuantity = siplData.siplProducts.reduce(
-    (total: number, siplProduct: any) => total + siplProduct.quantity,
-    0
-  );
+  const totalQuantity = sumDecimal(siplData.siplProducts, "quantity");
 
-  // Total amount of a SIPL
-  const totalAmount = siplData.siplProducts.reduce(
-    (total: number, siplProduct: any) => total + siplProduct.quantity * siplProduct.unitPrice,
-    0
+  // Total amount of a SIPL (products + trade services)
+  const totalProductsAmount = sumDecimal(
+    siplData.siplProducts.map((sp: any) => ({
+      amount: sp.quantity * sp.unitPrice,
+    })),
+    "amount"
   );
+  const totalAmount = sumDecimal([totalProductsAmount, totalTradeServicesAmount]);
 
   // Calculate total area of slabs that received.
   let totalReceivingQuantity = Number(
     siplData.siplProducts
       .reduce(
         (sum: number, siplProduct: any) =>
-          sum +
-          siplProduct.slabs.reduce((total: number, slab: any) => total + slab.receivingLength * slab.receivingWidth, 0),
+          sum + sumDecimal(siplProduct.slabs, "receivedSqrFt"),
         0
       )
-      .toFixed(2)
   );
 
   // // Total quantity of generic product.
@@ -432,22 +434,20 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
 
   // Unit bill price as per total area of all product's slab.
   const unitBillPrice = Number((totalBillsCharges / totalReceivingQuantity)) || 0;
+  const unitServicePrice = new Decimal(totalTradeServicesAmount).div(totalReceivingQuantity).toDecimalPlaces(2).toNumber() || 0;
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
     // total received area as per product.
-    let totalReceivedQuantity = Number(
-      siplProduct.slabs.reduce((a: number, b: any) => a + Number(b.receivingWidth * b.receivingLength), 0).toFixed(2)
-    );
+    let totalReceivedQuantity = sumDecimal(siplProduct.slabs, "receivedSqrFt");
+
 
     if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
       totalReceivedQuantity = siplProduct.genericProducts.length;
     }
 
     // total packaging area as per product.
-    const totalPackagingAreaPerProduct = Number(
-      siplProduct.slabs.reduce((a: number, b: any) => a + Number(b.packageWidth * b.packageLength), 0).toFixed(2)
-    );
+    const totalPackagingAreaPerProduct = sumDecimal(siplProduct.slabs, "packagedSqrFt");
 
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
@@ -455,9 +455,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     const unitCost = Number((totalSIPLProductPrice / totalReceivedQuantity));
 
     // Total unit charge is self unit charge + bill charge per unit area.
-    const landedUnitCost = unitCost + unitBillPrice;
-
-    console.log('landedUnitCost', landedUnitCost, unitCost, unitBillPrice)
+    const landedUnitCost = unitCost + unitBillPrice + unitServicePrice;
 
     let data: object = {}
 
@@ -504,6 +502,8 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     return data;
   });
 
+  const totalItemPrice = sumDecimal(dataAccordingToProduct, "totalPrice");
+
   return {
     dataAccordingToProduct,
     totalBillsCharges,
@@ -511,7 +511,10 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     totalReceivingQuantity,
     totalQuantity,
     totalAmount,
+    totalItemPrice,
     unitBillCharge: unitBillPrice,
+    totalTradeServicesAmount,
+    unitServicePrice,
     inventoryReceived: siplData.inventoryReceived,
   };
 };

@@ -614,3 +614,15 @@ sticky navbar.
 6. Swap error due to BE table ✅
 7. wrong data in SO Invoice. ✅
 8. Customer Data on Customer Payment ✅
+
+---
+
+1. Auto filling of bin, receiving data.
+2. data copy on individual columns on add slab.
+3. total Due in Customer payments.
+4. Remove Supplier SO no. From PO.
+5. Unit landed cost - if receiving data is not there.
+6. If receive inventory slab data is not fully filled then red mark specific slab.
+7. In create Service Ledger account must be of services.
+8. Floating Point error in js.
+9. service charges calculations in Purchase.
