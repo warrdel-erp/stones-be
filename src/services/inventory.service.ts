@@ -27,10 +27,18 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
       );
 
       // Calculate totalQuantity by summing area of all inventoryProducts (per slab), using product.inventoryProducts
-      let totalAvailableQuantity = (
-        _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
-        / 144
-      ).toFixed(2);
+      let totalAvailableQuantity = "0";
+
+
+      if (product.isSlabType) {
+
+        totalAvailableQuantity = (
+          _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
+          / 144
+        ).toFixed(2);
+      } else {
+        totalAvailableQuantity = product?.inventoryProducts?.length;
+      }
 
       const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
 

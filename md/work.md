@@ -708,3 +708,10 @@ Email notification.
 9. Put sqrfeet as fixed.
 10. Freight bill.
 11. Journal entry will go during invoicing for Service.
+
+12. Receiving date in SIPL
+
+13. SO can not be created without product.
+14. Additional address field in customer create.
+15. order of deliveries are changing in after approving deliveries.
+16. return FUll.

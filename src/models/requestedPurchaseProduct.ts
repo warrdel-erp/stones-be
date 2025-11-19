@@ -19,6 +19,10 @@ const RequestedPurchaseProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    noOfSlabs: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.STRING,
     },

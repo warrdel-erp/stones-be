@@ -20,6 +20,10 @@ const SIPLProduct = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    noOfSlabs: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
     },

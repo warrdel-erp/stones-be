@@ -83,6 +83,7 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
 /**
  * Check if all slabs in a SIPL are fully filled
  * A slab is fully filled if it has: block, bundle, receivingLength, receivingWidth, and binId in its inventory product
+ * If no slabs are present and only generic products exist, it is considered as success
  */
 export const checkSiplSlabsFullyFilled = async (siplId: number) => {
   // Fetch slabs with inventory products from repository
@@ -90,13 +91,32 @@ export const checkSiplSlabsFullyFilled = async (siplId: number) => {
 
   // Handle case when no slabs found
   if (slabs.length === 0) {
+    // Check if there are generic products for this SIPL
+    const genericProducts = await models.GenericProduct.findAll({
+      where: { siplId },
+      attributes: ['id']
+    });
+
+    // If generic products exist, consider it as success
+    if (genericProducts.length > 0) {
+      return {
+        allFilled: true,
+        totalSlabs: 0,
+        filledSlabs: 0,
+        unfilledSlabs: 0,
+        unfilledSlabIds: [],
+        message: 'No slabs found for this SIPL, but generic products are present. Ready for inventory reception.'
+      };
+    }
+
+    // No slabs and no generic products
     return {
       allFilled: false,
       totalSlabs: 0,
       filledSlabs: 0,
       unfilledSlabs: 0,
       unfilledSlabIds: [],
-      message: 'No slabs found for this SIPL'
+      message: 'No slabs or generic products found for this SIPL'
     };
   }
 

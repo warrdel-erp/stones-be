@@ -350,7 +350,7 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
   // Map slabs to products
   const nestedProducts = products.map((product) => {
 
-    const salesOrderProductsAsPerLoadingOrder = salesOrderProducts.filter(
+    const salesOrderProductsAsPerProduct = salesOrderProducts.filter(
       (salesOrderProduct: any) => {
         let productId = salesOrderProduct.inventoryProduct.productId;
 
@@ -360,14 +360,14 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
       }
     );
 
-    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProductsAsPerLoadingOrder);
+    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProductsAsPerProduct);
 
     return {
       ...product,
-      taxApplied: !!salesOrderProductsAsPerLoadingOrder[0]?.taxApplied,
-      salesOrderProduct: salesOrderProductsAsPerLoadingOrder,
-      totalQuantity: calculations.quantities.loadingOrder / 144,
-      totalOrderQuantity: calculations.quantities.receiving / 144,
+      taxApplied: !!salesOrderProductsAsPerProduct[0]?.taxApplied,
+      salesOrderProduct: salesOrderProductsAsPerProduct,
+      totalQuantity: product.isSlabType ? calculations.quantities.loadingOrder / 144 : salesOrderProductsAsPerProduct?.length,
+      totalOrderQuantity: product.isSlabType ? calculations.quantities.receiving / 144 : salesOrderProductsAsPerProduct?.length,
     };
   });
 

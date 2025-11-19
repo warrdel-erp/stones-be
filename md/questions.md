@@ -138,3 +138,4 @@
 6. Can we show Map in SO for customer address?
 7. If all slabs has been added in LO that should we disable "Create LO" button?
 8. Slabs can't be added after receive inventory?
+9. if Generic product is added in SIPL and not added receiving info then what will happen.

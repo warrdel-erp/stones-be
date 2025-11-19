@@ -626,3 +626,14 @@ sticky navbar.
 7. In create Service Ledger account must be of services.
 8. Floating Point error in js.
 9. service charges calculations in Purchase.
+
+--
+
+1. No. of Slabs in create PO.
+2. Remove
+   By Qty./Weight By Value User Def.
+3. Payment page colors [working]
+4. generic Product flow.
+5. Georgia Office address.
+6. set all address inside USA in seeder.
+7. Total distance, and estimated time.
