@@ -63,7 +63,10 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
     const payment: any = await paymentRepository.createPayment({ ...paymentData, accountId: paymentData.account }, transaction);
 
     // Step 2: Handle Credit Note Creation (if creditNote exists in paymentData)
-    const creditDebitNote = await createCreditNoteForPayment(paymentData, payment.id, transaction);
+    let creditDebitNote = {}
+    if (paymentData.creditNote || paymentData.debitNote) {
+      creditDebitNote = await createCreditNoteForPayment(paymentData, payment.id, transaction);
+    }
 
     // Step 3: Prepare Payment Bills
     const paymentBills = await Promise.all(

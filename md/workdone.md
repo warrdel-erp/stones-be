@@ -639,3 +639,4 @@ sticky navbar.
 7. Total distance, and estimated time.
 8. data shown for generic products at multiple places.
 9. hold un hold from cart.
+10. bug in payment without credit note.
