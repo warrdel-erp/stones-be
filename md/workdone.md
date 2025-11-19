@@ -630,10 +630,12 @@ sticky navbar.
 --
 
 1. No. of Slabs in create PO.
-2. Remove
-   By Qty./Weight By Value User Def.
+2. Remove from receive inventory
+   By Qty./Weight, By Value, User Def.
 3. Payment page colors [working]
 4. generic Product flow.
 5. Georgia Office address.
 6. set all address inside USA in seeder.
 7. Total distance, and estimated time.
+8. data shown for generic products at multiple places.
+9. hold un hold from cart.

@@ -715,3 +715,5 @@ Email notification.
 14. Additional address field in customer create.
 15. order of deliveries are changing in after approving deliveries.
 16. return FUll.
+17. loaders
+18. seeder data for services.

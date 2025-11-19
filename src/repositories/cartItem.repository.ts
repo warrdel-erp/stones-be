@@ -28,6 +28,9 @@ export const getCartItemsByAccountId = async (accountId: number) => {
                         association: 'genericProduct',
                     },
                     {
+                        association: 'hold',
+                    },
+                    {
                         association: "bin",
                         include: [
                             {
