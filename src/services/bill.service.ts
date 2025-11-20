@@ -33,7 +33,7 @@ export const createBill = async (billData: any, locationId: number) => {
       referenceId: billData.vendorId,
     });
 
-    const billJournalEntry = journalEntryService.createJournalEntryForBill(bill, transaction, locationId, ledgerAccount.id,)
+    await journalEntryService.createJournalEntryForBill(bill, transaction, locationId, ledgerAccount.id)
 
     for (const item of billData.items) {
       const billItem: any = await billItemRepository.createBillItem(

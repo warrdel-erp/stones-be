@@ -618,25 +618,31 @@ sticky navbar.
 ---
 
 1. Auto filling of bin, receiving data.
-2. data copy on individual columns on add slab.
-3. total Due in Customer payments.
-4. Remove Supplier SO no. From PO.
-5. Unit landed cost - if receiving data is not there.
-6. If receive inventory slab data is not fully filled then red mark specific slab.
-7. In create Service Ledger account must be of services.
-8. Floating Point error in js.
-9. service charges calculations in Purchase.
+2. Customer Data on Customer Payment
+3. data copy on individual columns on add slab.
+4. total Due in Customer payments.
+5. Remove Supplier SO no. From PO.
+6. Unit landed cost - if receiving data is not there.
+7. If receive inventory slab data is not fully filled then red mark specific slab.
+8. In create Service Ledger account must be of services.
+9. Floating Point error in js.
+10. service charges calculations in Purchase.
+11. No. of Slabs in create PO.
+12. Remove from receive inventory
+    By Qty./Weight, By Value, User Def.
+13. Payment page colors [working]
+14. generic Product flow.
+15. Georgia Office address.
+16. set all address inside USA in seeder.
+17. Total distance, and estimated time.
+18. data shown for generic products at multiple places.
+19. hold un hold from cart.
+20. bug in payment without credit note.
 
---
+---
 
-1. No. of Slabs in create PO.
-2. Remove from receive inventory
-   By Qty./Weight, By Value, User Def.
-3. Payment page colors [working]
-4. generic Product flow.
-5. Georgia Office address.
-6. set all address inside USA in seeder.
-7. Total distance, and estimated time.
-8. data shown for generic products at multiple places.
-9. hold un hold from cart.
-10. bug in payment without credit note.
+1. Freight Bill.
+2. Inventory calculations.
+3. delivery connection with LO.
+4. Delivery complete after Approved, Reject after creation.
+5. Delivery Location selection in LO.

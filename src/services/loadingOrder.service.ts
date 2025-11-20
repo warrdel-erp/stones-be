@@ -20,6 +20,7 @@ import * as tradeServiceService from '../services/tradeService.service';
 
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
+  DELIVERY_STATUS,
   JOURNAL_ENTRY_FOR_TYPES,
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
@@ -101,18 +102,23 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
   data.data = data.data.map((loadingOrder: any) => {
     loadingOrder = loadingOrder.get({ plain: true });
 
-    const salesTax = SALES_TAX.find(e => e.id == loadingOrder.salesOrder.customer.salesTax);
+    // Filter invoiceDeliveries to exclude those with rejected deliveries
+    // if (loadingOrder.invoiceDeliveries) {
+    //   loadingOrder.invoiceDeliveries = loadingOrder.invoiceDeliveries.filter((invoiceDelivery: any) => {
+    //     // Keep invoiceDelivery if it doesn't have a delivery, or if delivery status is not rejected
+    //     return !invoiceDelivery.delivery || invoiceDelivery.delivery.status !== DELIVERY_STATUS.REJECTED;
+    //   });
+    // }
 
-    if (!salesTax) {
-      throw new AppError('Error in getting tax value', 400);
-    }
+    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
 
     if (loadingOrder.packagingList) {
-      loadingOrder.plAmounts = getTotalPlAmount(loadingOrder.salesOrderProducts, salesTax.value);
+      loadingOrder.plAmounts = calcs.packagingList
     } else {
-
-      loadingOrder.amounts = getTotalLoadingOrderAmount(loadingOrder.salesOrderProducts, salesTax.value);
+      loadingOrder.amounts = calcs.loadingOrder;
     }
+
+    loadingOrder.quantities = calcs.quantities
 
     return loadingOrder;
   }) as any;

@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import SalesOrderInvoice from "./salesOrderInvoice.model";
+import LoadingOrder from "./loadingOrder.model";
 import Delivery from "./Delivery.model";
 
 const InvoiceDelivery = sequelize.define(
@@ -40,11 +40,11 @@ const InvoiceDelivery = sequelize.define(
             allowNull: true,
             defaultValue: 0,
         },
-        soInvoiceId: {
+        loadingOrderId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: SalesOrderInvoice,
+                model: LoadingOrder,
                 key: "id",
             },
             onDelete: "CASCADE",

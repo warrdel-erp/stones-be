@@ -375,7 +375,14 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
   return await models.SalesOrder.findOne({
     where: { id },
     include: [
-      { association: "customer" },
+      {
+        association: "customer",
+        include: [
+          {
+            association: 'addresses'
+          }
+        ]
+      },
       { association: "shippingAddress" },
       { association: "notes" },
       { association: "soLocation" },

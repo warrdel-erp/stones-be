@@ -1,20 +1,20 @@
 import { sequelize } from "../config/database";
 import * as deliveryRepository from "../repositories/delivery.repository";
-import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { DELIVERY_STATUS } from "../constants/tableTypes";
 
-export const initiateDelivery = async (truckId: number, soInvoiceIds: number[], clientId: number) => {
+export const initiateDelivery = async (truckId: number, loadingOrderIds: number[], clientId: number) => {
     // 1. Check if truck already has a pending delivery
     const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);
     if (existingPendingDelivery) {
         throw new Error("This truck already has a pending delivery. Please complete or cancel the existing delivery before initiating a new one.");
     }
 
-    // 2. Check if any soInvoice already has an InvoiceDelivery
-    const existingInvoiceDeliveries = await deliveryRepository.findInvoiceDeliveriesBySoInvoiceIds(soInvoiceIds);
-    if (existingInvoiceDeliveries.length > 0) {
-        const usedIds = existingInvoiceDeliveries.map((d: any) => d.soInvoiceId).join(", ");
-        throw new Error(`The following Sales Order Invoices already have a delivery assigned: [${usedIds}]. Please remove them from your request.`);
+    // 2. Check if any loadingOrder already has an InvoiceDelivery
+    const existingInvoiceDeliveries = await deliveryRepository.findInvoiceDeliveriesByLoadingOrderIds(loadingOrderIds);
+    if (existingInvoiceDeliveries?.length > 0) {
+        const usedIds = existingInvoiceDeliveries.map((d: any) => d.loadingOrderId).join(", ");
+        throw new Error(`The following Loading Orders already have a delivery assigned: [${usedIds}]. Please remove them from your request.`);
     }
 
     const fromLocation = [0, 0];
@@ -23,24 +23,28 @@ export const initiateDelivery = async (truckId: number, soInvoiceIds: number[], 
         // 3. Create Delivery
         const delivery = await deliveryRepository.createDelivery(truckId, clientId, transaction);
         const invoiceDeliveries = [];
-        for (const soInvoiceId of soInvoiceIds) {
-            // Fetch soInvoice with nested loadingOrder -> salesOrder
-            const soInvoice: any = await soInvoiceRepository.findSoInvoiceWithAssociations(soInvoiceId, transaction);
+        for (const loadingOrderId of loadingOrderIds) {
+            // Fetch loadingOrder with nested salesOrder
+            const loadingOrder: any = await loadingOrderRepository.getLoadingOrderById(loadingOrderId);
 
-            const shippingAddress = soInvoice?.loadingOrder?.salesOrder.shippingAddress;
-            const soLocation = soInvoice?.loadingOrder?.salesOrder.soLocation;
+            if (!loadingOrder) {
+                throw new Error(`Loading Order with id ${loadingOrderId} not found`);
+            }
 
-            // ASSUMPTION: In one delivery, all soInvoices have the same start location
+            const shippingAddress = loadingOrder?.shippingAddress;
+            const soLocation = loadingOrder?.salesOrder?.soLocation;
+
+            // ASSUMPTION: In one delivery, all loadingOrders have the same start location
             if (fromLocation[0] === 0 && fromLocation[1] === 0) {
                 fromLocation[0] = soLocation.lat;
                 fromLocation[1] = soLocation.long;
             }
 
             if (fromLocation[0] !== soLocation.lat && fromLocation[1] !== soLocation.long) {
-                throw new Error(`The Sales Order Invoices have different locations. Please ensure all Sales Order Invoices have the same start location.`);
+                throw new Error(`The Loading Orders have different locations. Please ensure all Loading Orders have the same start location.`);
             }
 
-            if (!shippingAddress || !soLocation) throw new Error(`shippingAddress or soLocation missing for soInvoice ${soInvoiceId}`);
+            if (!shippingAddress || !soLocation) throw new Error(`shippingAddress or soLocation missing for loadingOrder ${loadingOrderId}`);
 
             const invoiceDelivery = await deliveryRepository.createInvoiceDelivery({
                 toLat: shippingAddress.lat,
@@ -50,7 +54,7 @@ export const initiateDelivery = async (truckId: number, soInvoiceIds: number[], 
                 fromAddress: soLocation.address,
                 fromLat: soLocation.lat,
                 fromLng: soLocation.long,
-                soInvoiceId,
+                loadingOrderId,
                 deliveryId: delivery.get('id') as number
             }, transaction);
 
@@ -98,5 +102,59 @@ export const approveDeliveryOrders = async (orders: Array<{ id: number, order: n
         await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.APPROVED, transaction);
 
         return result;
+    });
+};
+
+export const completeDelivery = async (deliveryId: number, clientId: number) => {
+    return await sequelize.transaction(async (transaction) => {
+        // Find the delivery and verify it belongs to the client
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId, clientId);
+
+        if (!delivery) {
+            throw new Error(`Delivery with id ${deliveryId} not found or does not belong to your client.`);
+        }
+
+        const deliveryData = delivery.get({ plain: true });
+
+        // Check if delivery is already completed
+        if (deliveryData.status === DELIVERY_STATUS.COMPLETED) {
+            throw new Error("Delivery is already completed.");
+        }
+
+        // Check if delivery is approved before completing
+        if (deliveryData.status !== DELIVERY_STATUS.APPROVED) {
+            throw new Error(`Cannot complete delivery. Delivery must be approved first. Current status: ${deliveryData.status}`);
+        }
+
+        // Update delivery status to COMPLETED
+        const completedDelivery = await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.COMPLETED, transaction);
+
+        // Fetch updated delivery with associations
+        // const completedDelivery = await deliveryRepository.findDeliveryById(deliveryId, clientId);
+
+        return completedDelivery;
+    });
+};
+
+export const rejectDelivery = async (deliveryId: number, clientId: number) => {
+    return await sequelize.transaction(async (transaction) => {
+        // Find the delivery and verify it belongs to the client
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId, clientId);
+
+        if (!delivery) {
+            throw new Error(`Delivery with id ${deliveryId} not found or does not belong to your client.`);
+        }
+
+        const deliveryData = delivery.get({ plain: true });
+
+        // Check if delivery is pending before rejecting
+        if (deliveryData.status !== DELIVERY_STATUS.PENDING) {
+            throw new Error("Only pending deliveries could be rejected.");
+        }
+
+        // Update delivery status to REJECTED
+        const rejectedDelivery = await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.REJECTED, transaction);
+
+        return rejectedDelivery;
     });
 }; 

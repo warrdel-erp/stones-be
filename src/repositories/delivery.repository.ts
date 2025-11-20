@@ -9,10 +9,10 @@ export const findPendingDeliveryByTruck = async (truckId: number) => {
     });
 };
 
-export const findInvoiceDeliveriesBySoInvoiceIds = async (soInvoiceIds: number[]) => {
+export const findInvoiceDeliveriesByLoadingOrderIds = async (loadingOrderIds: number[]) => {
     return InvoiceDelivery.findAll({
         where: {
-            soInvoiceId: { [Op.in]: soInvoiceIds }
+            loadingOrderId: { [Op.in]: loadingOrderIds }
         }
     });
 };
@@ -29,7 +29,7 @@ export const createInvoiceDelivery = async (
         toLat: number,
         toLng: number,
         toAddress: string,
-        soInvoiceId: number,
+        loadingOrderId: number,
         deliveryId: number
     },
     transaction: Transaction
@@ -46,7 +46,7 @@ export const getAllDeliveriesByClientId = async (filter: any, clientId: number) 
                 association: "invoiceDeliveries",
                 include: [
                     {
-                        association: "soInvoice"
+                        association: "loadingOrder"
                     }
                 ]
             },
@@ -83,4 +83,27 @@ export const updateDeliveryStatus = async (deliveryIds: number[], status: string
             transaction
         }
     );
+};
+
+export const findDeliveryById = async (deliveryId: number, clientId?: number) => {
+    const where: any = { id: deliveryId };
+    if (clientId) {
+        where.clientId = clientId;
+    }
+    return Delivery.findOne({
+        where,
+        include: [
+            {
+                association: "invoiceDeliveries",
+                include: [
+                    {
+                        association: "loadingOrder"
+                    }
+                ]
+            },
+            {
+                association: 'truck'
+            }
+        ],
+    });
 }; 

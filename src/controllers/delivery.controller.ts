@@ -1,14 +1,20 @@
 import { Request, Response } from "express";
 import * as deliveryService from "../services/delivery.service";
-import { SuccessResponse } from "../helper/response";
+import { ErrorResponse, SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { DeliveryOrderApprovalInput } from "../validators";
 
 export const initiateDelivery = async (req: AuthRequest, res: Response) => {
-    const { truckId, soInvoiceIds } = req.body;
+    const { truckId, loadingOrderIds } = req.body;
     const clientId = Number(req.user?.clientId);
+
+    if (!loadingOrderIds?.length) {
+        ErrorResponse(res, 400, "Loading order ids are required", {});
+        return
+    }
+
     try {
-        const result = await deliveryService.initiateDelivery(truckId, soInvoiceIds, clientId);
+        const result = await deliveryService.initiateDelivery(truckId, loadingOrderIds, clientId);
         SuccessResponse(res, 201, "Delivery initiated successfully", result);
     } catch (err: any) {
         res.status(400).json({ success: false, message: err.message || "Failed to initiate delivery" });
@@ -36,5 +42,39 @@ export const approveDeliveryOrders = async (req: AuthRequest, res: Response): Pr
         SuccessResponse(res, 200, "Delivery orders approved successfully", result);
     } catch (err: any) {
         res.status(400).json({ success: false, message: err.message || "Failed to approve delivery orders" });
+    }
+};
+
+export const completeDelivery = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { deliveryId } = req.params;
+    const clientId = Number(req.user?.clientId);
+
+    if (!deliveryId || isNaN(Number(deliveryId))) {
+        ErrorResponse(res, 400, "Valid delivery ID is required", {});
+        return;
+    }
+
+    try {
+        const result = await deliveryService.completeDelivery(Number(deliveryId), clientId);
+        SuccessResponse(res, 200, "Delivery completed successfully", result);
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message || "Failed to complete delivery" });
+    }
+};
+
+export const rejectDelivery = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { deliveryId } = req.params;
+    const clientId = Number(req.user?.clientId);
+
+    if (!deliveryId || isNaN(Number(deliveryId))) {
+        ErrorResponse(res, 400, "Valid delivery ID is required", {});
+        return;
+    }
+
+    try {
+        const result = await deliveryService.rejectDelivery(Number(deliveryId), clientId);
+        SuccessResponse(res, 200, "Delivery rejected successfully", result);
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message || "Failed to reject delivery" });
     }
 }; 

@@ -139,3 +139,4 @@
 7. If all slabs has been added in LO that should we disable "Create LO" button?
 8. Slabs can't be added after receive inventory?
 9. if Generic product is added in SIPL and not added receiving info then what will happen.
+10. how to show generic products quantity, because there could be both types of product in single LO.

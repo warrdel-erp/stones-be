@@ -1,6 +1,6 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
-import { LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { DELIVERY_STATUS, LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { RETURN_STATUS } from "../models/return.model";
 
 // Create new LO
@@ -42,6 +42,23 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
       },
       { model: models.PackagingList, as: "packagingList" },
       { model: models.SalesOrderProduct, as: "salesOrderProducts" },
+      { association: 'shippingAddress' },
+      {
+        association: 'invoiceDeliveries',
+        required: false,
+        separate: true,
+        include: [
+          {
+            association: 'delivery',
+            where: {
+              status: {
+                [Op.notIn]: [DELIVERY_STATUS.REJECTED]
+              }
+            },
+            required: true
+          }
+        ]
+      }
     ],
     limit,
     offset,
@@ -115,7 +132,7 @@ export const getLoadingOrderById = async (id: number) => {
           },
           {
             association: "soLocation",
-            attributes: ["id", "location"],
+            attributes: ["id", "location", 'lat', 'long', 'address'],
           },
         ],
       },

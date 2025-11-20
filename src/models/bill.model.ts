@@ -5,6 +5,7 @@ import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import SIPL from "./sipl.model";
 import Client from "./client.model";
+import { PAYMENT_TERMS } from "../constants";
 
 const Bill = sequelize.define(
   "bills",
@@ -48,9 +49,15 @@ const Bill = sequelize.define(
       type: DataTypes.ENUM("freight"),
       allowNull: false,
     },
-    paymentTerms: {
-      type: DataTypes.STRING,
+    paymentTermId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
     },
     referenceType: {
       type: DataTypes.ENUM(...Object.values(BILL_REFERENCE_TYPES)), // Could be "sipl" or other types
