@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    queryInterface.addColumn("sipls", "receivedDate", {
+    await queryInterface.addColumn("sipls", "receivedDate", {
       type: Sequelize.DATEONLY,
       allowNull: true,
     });
