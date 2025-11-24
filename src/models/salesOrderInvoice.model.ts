@@ -142,3 +142,5 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
 });
 
 export default SalesOrderInvoice;
+
+

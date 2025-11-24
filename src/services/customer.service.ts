@@ -13,6 +13,8 @@ import * as advancedDepositRepository from "../repositories/advancedDeposit.repo
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
+import _ from "lodash";
+import { sumDecimal } from "../helper";
 
 // Service function to create a customer.
 export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
@@ -143,6 +145,8 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
     customerAdvancedDeposits.map(async (advancedDeposit: any) => {
       advancedDeposit = advancedDeposit.get({ plain: true });
 
+      const totalSettledAmount = sumDecimal(advancedDeposit.settlements, "amount")
+
       return {
         id: advancedDeposit.id,
         amount: advancedDeposit.amount,
@@ -151,6 +155,7 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
         code: "SO " + advancedDeposit.salesOrder.clientSoNumber,
         accountName: advancedDeposit.ledgerAccount?.name,
         paymentMethod: advancedDeposit.payment?.paymentMethod,
+        paidAmount: totalSettledAmount,
         type: "advancedDeposit"
       };
     })

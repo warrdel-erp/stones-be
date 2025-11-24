@@ -14,6 +14,7 @@ export const createTradeService = catchAsync(async (req: AuthRequest, res: Respo
 export const listTradeServices = catchAsync(async (req: AuthRequest, res: Response) => {
     const filters = req.query;
     const tradeServices = await tradeService.listTradeServices(filters);
+
     SuccessResponse(res, 200, "TradeServices fetched", tradeServices);
 });
 

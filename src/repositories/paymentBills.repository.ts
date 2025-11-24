@@ -1,6 +1,7 @@
-import { Transaction, where } from "sequelize";
+import { Transaction } from "sequelize";
 import * as models from "../models";
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { sumDecimal } from "../helper";
 
 /**
  * Bulk insert payment bills.
@@ -14,6 +15,17 @@ export const getTotalPaidAmountOfBill = async (
   referenceId: number,
   referenceType: (typeof PAYMENT_BILL_REFERENCE_TYPES)[keyof typeof PAYMENT_BILL_REFERENCE_TYPES]
 ) => {
-  const amount = await models.PaymentBill.sum("amount", { where: { referenceId, referenceType } });
-  return amount || 0;
+  // Get the sum of PaymentBill amounts
+  const paymentBillAmount = await models.PaymentBill.sum("amount", { where: { referenceId, referenceType } });
+
+  // If referenceType is SO_INVOICE, also include AdvancedDepositSettlement amounts
+  let settlementAmount = 0;
+  if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE) {
+    settlementAmount = await models.AdvancedDepositSettlement.sum("amount", {
+      where: { soInvoiceId: referenceId },
+    }) || 0;
+  }
+
+  const totalAmount = sumDecimal([(paymentBillAmount || 0), settlementAmount]);
+  return totalAmount;
 };

@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Service from "./service.model";
 import Client from "./client.model";
+import Decimal from "decimal.js";
 
 export const TRADE_SERVICE_REFERENCE_TYPES = {
     LOADING_ORDER: "loadingOrder",
@@ -27,7 +28,15 @@ const TradeService = sequelize.define(
             type: DataTypes.ENUM(...Object.values(TRADE_SERVICE_REFERENCE_TYPES)),
             allowNull: false,
         },
-
+        total: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                const quantity = new Decimal(Number(this.get("quantity")) || 0);
+                const price = new Decimal(Number(this.get("price")) || 0);
+                const result = quantity.mul(price);
+                return Number(result.toDecimalPlaces(2));
+            },
+        },
         referenceId: {
             type: DataTypes.INTEGER,
             allowNull: false,

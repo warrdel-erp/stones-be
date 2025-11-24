@@ -9,15 +9,18 @@ import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repo
 import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
 import * as customerRepository from "../repositories/customer.repository";
 import * as vendorRepository from "../repositories/vendor.repository";
+import * as models from "../models";
+import { Transaction } from "sequelize";
+import _ from "lodash";
 
 // Create credit debit note for payment
-const createCreditNoteForPayment = async (paymentData: any, paymentId: number, transaction: any) => {
+const createCreditNoteForPayment = async (amount: number, paymentData: any, paymentId: number, transaction: any) => {
 
   let note = null;
   if (paymentData.creditNote?.amount && paymentData.payeeType == PAYEE_TYPE.CUSTOMER) {
 
     note = {
-      amount: paymentData.creditNote.amount,
+      amount: amount,
       type: CREDIT_DEBIT_NOTE_TYPES.CREDIT,
       entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.CUSTOMER,
       entryIdFor: paymentData.payeeId,
@@ -29,7 +32,7 @@ const createCreditNoteForPayment = async (paymentData: any, paymentId: number, t
   } else if (paymentData.debitNote?.amount && paymentData.payeeType == PAYEE_TYPE.VENDOR) {
 
     note = {
-      amount: paymentData.debitNote.amount,
+      amount: amount,
       type: CREDIT_DEBIT_NOTE_TYPES.DEBIT,
       entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.VENDOR,
       entryIdFor: paymentData.payeeId,
@@ -48,13 +51,9 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
     throw new Error("Invalid request: Payment and bills data are required");
   }
 
-  // Validate total amount
-  // const totalBillAmount = billsData.reduce((sum, bill) => sum + bill.amount, 0);
+  const totalPaymentBillsAmount = _.sumBy(billsData, 'amount');
 
-  // if (totalBillAmount !== paymentData.amount) {
-  //   throw new AppError("Total bill amount does not match payment amount", 400);
-  // }
-
+  const creditDebitNoteAmount = paymentData.amount - totalPaymentBillsAmount;
   // Begin transaction
   const transaction = await sequelize.transaction();
 
@@ -64,8 +63,8 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
 
     // Step 2: Handle Credit Note Creation (if creditNote exists in paymentData)
     let creditDebitNote = {}
-    if (paymentData.creditNote || paymentData.debitNote) {
-      creditDebitNote = await createCreditNoteForPayment(paymentData, payment.id, transaction);
+    if (creditDebitNoteAmount > 0) {
+      creditDebitNote = await createCreditNoteForPayment(totalPaymentBillsAmount, paymentData, payment.id, transaction);
     }
 
     // Step 3: Prepare Payment Bills
@@ -206,3 +205,4 @@ export const getTotalAmountByPayeeTypeAndClientId = async (payeeType: string, cl
 
   return totalAmount || 0; // Return 0 if no payments found
 }
+

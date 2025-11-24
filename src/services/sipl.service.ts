@@ -24,7 +24,7 @@ import _ from "lodash";
 import Decimal from "decimal.js";
 
 // Processes the inventory reception by updating slab and generic product statuses.
-export const receiveInventory = async (siplId: number, clientId: number, locationId: number): Promise<number> => {
+export const receiveInventory = async (siplId: number, receivedDate: string, clientId: number, locationId: number): Promise<number> => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -49,7 +49,7 @@ export const receiveInventory = async (siplId: number, clientId: number, locatio
     }
 
     // Update SIPL inventoryReceived status.
-    await siplRepository.updateSIPL(siplId, { inventoryReceived: true }, transaction);
+    await siplRepository.updateSIPL(siplId, { inventoryReceived: true, receivedDate }, transaction);
     const calculations = await siplService.getSiplCalculations(siplId, transaction);
 
     // Set landed unit cost for each product in inventory products

@@ -80,6 +80,10 @@ const SIPL = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    receivedDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
     purchaseOrderId: {
       type: DataTypes.INTEGER,
       references: {

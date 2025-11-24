@@ -16,3 +16,11 @@ export const getServiceOptions = catchAsync(async (req: AuthRequest, res: Respon
 
     SuccessResponse(res, 200, "Service options fetched successfully.", data);
 });
+
+export const getCustomerInvoiceOptions = catchAsync(async (req: AuthRequest, res: Response) => {
+    const customerId = Number(req.params.customerId);
+
+    const data = await optionsService.getCustomerInvoiceOptions(customerId);
+
+    SuccessResponse(res, 200, "Customer invoice options fetched successfully.", data);
+});

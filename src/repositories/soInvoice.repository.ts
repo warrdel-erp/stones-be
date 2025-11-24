@@ -127,6 +127,17 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
   });
 };
 
+/**
+ * Fetch all invoices
+ */
+export const getCustomerAllInvoicesOptions = async (filter: WhereOptions, transaction?: Transaction) => {
+  return await models.SalesOrderInvoice.findAll({
+    attributes: [["id", 'value'], ["invoiceCode", 'label']],
+    where: filter,
+    transaction,
+  });
+};
+
 export const getTotalAmountFromLastNDays = async (fromDate: string, toDate: string, clientId: number) => {
   const from = new Date(fromDate);
   const to = new Date(toDate);

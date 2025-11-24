@@ -39,6 +39,7 @@ import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
 import AdvancedDeposit from "./advancedDeposit.model";
+import AdvancedDepositSettlement from "./advancedDepositSettlement.model";
 import Return from "./return.model";
 import ReturnProduct from "./returnProduct.model";
 import Delivery from "./Delivery.model";
@@ -459,7 +460,14 @@ PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInv
 SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
 
 PaymentBill.belongsTo(AdvancedDeposit, { foreignKey: "referenceId", as: "advancedDeposit", constraints: false });
-AdvancedDeposit.hasOne(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
+AdvancedDeposit.hasOne(PaymentBill, { foreignKey: "referenceId", as: "paymentBill", constraints: false });
+
+// AdvancedDepositSettlement associations
+AdvancedDepositSettlement.belongsTo(SalesOrderInvoice, { foreignKey: "soInvoiceId", as: "soInvoice" });
+SalesOrderInvoice.hasMany(AdvancedDepositSettlement, { foreignKey: "soInvoiceId", as: "advancedDepositSettlements" });
+
+AdvancedDepositSettlement.belongsTo(AdvancedDeposit, { foreignKey: "advancedDepositId", as: "advancedDeposit" });
+AdvancedDeposit.hasMany(AdvancedDepositSettlement, { foreignKey: "advancedDepositId", as: "settlements" });
 
 // Loading order belongs to one SalesOrderProduct (one SalesOrderProduct can have one loadingOrderProduct)
 LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
@@ -719,6 +727,7 @@ export {
   Account,
   Company,
   AdvancedDeposit,
+  AdvancedDepositSettlement,
   Return,
   ReturnProduct,
   Delivery,

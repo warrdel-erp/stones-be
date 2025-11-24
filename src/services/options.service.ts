@@ -1,5 +1,6 @@
 import { AppError } from "../helper/appError";
 import * as serviceRepository from "../repositories/service.repository";
+import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 
 type ServiceOptionFilters = {
     purchaseOnly?: boolean;
@@ -25,5 +26,15 @@ export const getServiceOptions = async (clientId: number, filters: ServiceOption
     const services = await serviceRepository.getServiceOptions(clientId, typeFilter);
 
     return services
+};
+
+export const getCustomerInvoiceOptions = async (customerId: number) => {
+    if (!customerId) {
+        throw new AppError("Customer ID is required.", 400);
+    }
+
+    const invoices = await soInvoiceRepository.getCustomerAllInvoicesOptions({ customerId });
+
+    return invoices
 };
 

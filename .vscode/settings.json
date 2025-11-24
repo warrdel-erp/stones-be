@@ -1,4 +1,5 @@
 {
+    "serverReadyAction.enabled": false,
     "cSpell.words": [
         "AOCI",
         "distunguation",

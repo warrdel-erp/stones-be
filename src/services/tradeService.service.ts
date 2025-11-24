@@ -6,6 +6,7 @@ import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { Transaction } from "sequelize";
 import { ensureServicesBelongToCategory } from "../services/service.service";
+import { sumDecimal } from "../helper";
 
 export async function createTradeService(data: any, transaction?: Transaction) {
     if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
@@ -24,8 +25,12 @@ export async function createTradeService(data: any, transaction?: Transaction) {
 }
 
 export async function listTradeServices(filters: any = {}) {
-    const data = await tradeServiceRepository.findTradeServices(filters);
-    return data
+    const data: any = await tradeServiceRepository.findTradeServices(filters);
+
+
+    const serviceTotal = sumDecimal(data.map((e: any) => e.total));
+
+    return { data, serviceTotal }
 }
 
 export async function deleteTradeService(id: number) {

@@ -33,6 +33,7 @@ export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
   BILL_ITEM: "bill_item",
   BILL: "bill",
   LOADING_ORDER: "loading_order",
+  TRADE_SERVICE: "trade_service",
 } as const;
 
 export const JOURNAL_ENTRY_PROCESS_TYPE = {

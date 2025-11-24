@@ -6,6 +6,7 @@ import LoadingOrder from "./loadingOrder.model";
 import SalesOrder from "./salesOrder.model";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { getPercentageValue } from "../helper";
+import Decimal from "decimal.js";
 
 const SalesOrderProduct = sequelize.define(
   "sales_order_products",
@@ -101,6 +102,30 @@ const SalesOrderProduct = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    plSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const length = Decimal(Number(this.get("plRemeasureLength")) || 0);
+        const width = Decimal(Number(this.get("plRemeasureWidth")) || 0);
+
+        return length.mul(width).div(144).toNumber();
+      }
+    },
+    loSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const length = Decimal(Number(this.get("loRemeasureLength")) || 0);
+        const width = Decimal(Number(this.get("loRemeasureWidth")) || 0);
+
+        return length.mul(width).div(144).toNumber();
+      }
+    },
+    finalSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        this.get("plSqrFt") || this.get("loSqrFt");
+      }
     },
     amount: {
       type: DataTypes.VIRTUAL,

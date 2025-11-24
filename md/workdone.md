@@ -646,3 +646,10 @@ sticky navbar.
 3. delivery connection with LO.
 4. Delivery complete after Approved, Reject after creation.
 5. Delivery Location selection in LO.
+
+---
+
+1. Services integration and calculations in LO, PL, Invoice
+2. Journal entry will go during invoicing for Service.
+3. Receiving date in SIPL
+4. Advanced Deposit Settlement.

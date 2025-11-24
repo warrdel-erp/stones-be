@@ -14,12 +14,17 @@ export const receiveInventoryController = catchAsync(async (req: AuthRequest, re
 
   const clientId = req.user?.clientId; // Get client ID from request
   const locationId = req.user?.defaultLocationId;
+  const receivedDate = req.body.receivedDate;
+
+  if (!receivedDate) {
+    throw new AppError("Received date is required.", 400);
+  }
 
   if (!id) {
     throw new AppError("SIPL ID is required.", 400);
   }
 
-  const updatedCount = await siplService.receiveInventory(Number(id), clientId!, Number(locationId));
+  const updatedCount = await siplService.receiveInventory(Number(id), receivedDate, clientId!, Number(locationId));
 
   if (updatedCount === 0) {
     throw new AppError("No slabs found or already in inventory.", 404);

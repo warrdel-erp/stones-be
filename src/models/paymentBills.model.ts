@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Payment from "./payment.model";
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import SalesOrderInvoice from "./salesOrderInvoice.model";
 
 const PaymentBill = sequelize.define(
   "PaymentBill",
@@ -46,3 +47,5 @@ const PaymentBill = sequelize.define(
 );
 
 export default PaymentBill;
+
+

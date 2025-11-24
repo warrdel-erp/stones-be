@@ -45,19 +45,13 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
   data.rows = data.rows.map((invoice: any) => {
     invoice = invoice.get({ plain: true });
 
-    if (invoice.loadingOrder.packagingList) {
-      invoice.totalQuantity = _.sumBy(
-        invoice.loadingOrder.salesOrderProducts,
-        (item: any) => item.plRemeasureLength * item.plRemeasureWidth
-      );
-    } else {
-      invoice.totalQuantity = _.sumBy(
-        invoice.loadingOrder.salesOrderProducts,
-        (item: any) => item.loRemeasureLength * item.loRemeasureWidth
-      );
-    }
+    invoice.totalQuantity = _.sumBy(
+      invoice.loadingOrder.salesOrderProducts,
+      (item: any) => item.isSlabType ? item.finalSqrFt : 1
+    );
 
-    invoice.totalSlabs = invoice.loadingOrder.salesOrderProducts.length;
+    invoice.totalSlabs = invoice.loadingOrder.salesOrderProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
+    invoice.totalGenericProducts = invoice.loadingOrder.salesOrderProducts.length - invoice.totalSlabs;
 
     return { ...invoice };
   });
