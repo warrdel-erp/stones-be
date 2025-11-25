@@ -65,3 +65,26 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ```
 
 ALTER TABLE students ROW_FORMAT=DYNAMIC;
+
+## Stone deployment commands
+
+1. If not refreshing DB
+
+```
+cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app/
+sudo git pull
+sudo pnpm i
+pnpm run migrate:all
+pm2 restart 1
+```
+
+2. If refreshing DB
+
+```
+cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app/
+sudo git pull
+sudo pnpm i
+pnpm run migrate:all
+pnpm run seed:all
+pm2 restart 1
+```
