@@ -653,3 +653,8 @@ sticky navbar.
 2. Journal entry will go during invoicing for Service.
 3. Receiving date in SIPL
 4. Advanced Deposit Settlement.
+
+---
+
+1. Advanced deposit calculations in customer Payment.
+2. Advanced deposit code generation.

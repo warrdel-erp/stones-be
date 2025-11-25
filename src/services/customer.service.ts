@@ -15,6 +15,7 @@ import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import _ from "lodash";
 import { sumDecimal } from "../helper";
+import { decimalSubtract } from "../helper/decimal";
 
 // Service function to create a customer.
 export const registerCustomer = async (customerData: any, addresses: any[], clientId: number) => {
@@ -115,15 +116,19 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
 
       soInvoice = soInvoice.get({ plain: true });
 
+      const settledWithAdvancedDeposits = soInvoice.advancedDepositSettlements.map((e: any) => e.advancedDeposit.code).join(" | ")
+
       return {
         id: soInvoice.id,
         dueDate: soInvoice.loadingOrder.expDeliveryDate,
         amount: soInvoice.amount,
         paidAmount,
+        dueAmount: decimalSubtract(soInvoice.amount, paidAmount),
         creationDate: soInvoice.createdAt,
         code: soInvoice.invoiceCode,
         loNumber: soInvoice.loadingOrder.clientLoNumber,
         loDate: soInvoice.loadingOrder.loDate,
+        settledWithAdvancedDeposits,
         type: "invoice"
       };
     })
@@ -152,10 +157,11 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
         amount: advancedDeposit.amount,
         creationDate: advancedDeposit.createdAt,
         soId: advancedDeposit.salesOrderId,
-        code: "SO " + advancedDeposit.salesOrder.clientSoNumber,
+        code: advancedDeposit.code,
         accountName: advancedDeposit.ledgerAccount?.name,
         paymentMethod: advancedDeposit.payment?.paymentMethod,
         paidAmount: totalSettledAmount,
+        dueAmount: decimalSubtract(advancedDeposit.amount, totalSettledAmount),
         type: "advancedDeposit"
       };
     })

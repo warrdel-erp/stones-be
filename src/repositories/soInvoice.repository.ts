@@ -122,6 +122,16 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
         model: models.LoadingOrder,
         as: "loadingOrder",
       },
+      {
+        association: 'advancedDepositSettlements',
+        attributes: ['id'],
+        include: [
+          {
+            association: 'advancedDeposit',
+            attributes: ['id', 'code']
+          }
+        ]
+      }
     ],
     transaction,
   });

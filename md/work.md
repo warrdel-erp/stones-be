@@ -697,25 +697,25 @@ Email notification.
 
 ---
 
-2. ALLOCATED details in Inventory slabs status.
-3. Cart inventory refresh issue.
-4. Customer in Hold, and also in Cart.
-5. Due date according to payment terms
-6. In SO if Slab is not invoiced then it could be deleted.
-7. Create LO table calculations.
-8. Put sqrfeet as fixed.
-9. SO can not be created without product.
-10. Additional address field in customer create.
-11. Order of deliveries are changing in after approving deliveries.
-12. return FUll.
-13. loaders
-14. seeder data for services.
-15. Drop-down, ascending order.
-16. Unit landed cost on SIPL page.
-17. Landed cost, in inventory.
-18. LO could be assigned deliveries.
-19. Shortest path between delivery addresses.
-20. Note in Cart.
-21. Hold from cart.
+1. ALLOCATED details in Inventory slabs status.
+2. Cart inventory refresh issue.
+3. Customer in Hold, and also in Cart.
+4. Due date according to payment terms
+5. In SO if Slab is not invoiced then it could be deleted.
+6. Create LO table calculations.
+7. Put sqrfeet as fixed.
+8. SO can not be created without product.
+9. Additional address field in customer create.
+10. Order of deliveries are changing in after approving deliveries.
+11. return FUll.
+12. loaders
+13. seeder data for services.
+14. Drop-down, ascending order.
+15. Unit landed cost on SIPL page.
+16. Landed cost, in inventory.
+17. LO could be assigned deliveries.
+18. Shortest path between delivery addresses.
+19. Note in Cart.
+20. Hold from cart.
 
 ——
