@@ -68,3 +68,18 @@ export const getCustomerByIdSimple = async (id: number) => {
 
   return data?.get({ plain: true });
 };
+
+// Get customer options for dropdowns/selects
+export const getCustomerOptions = async (clientId: number, status?: string) => {
+  return models.Customer.findAll({
+    attributes: [
+      ["name", "label"],
+      ["id", "value"],
+    ],
+    where: {
+      clientId,
+      ...(status ? { status } : {}),
+    },
+    order: [["name", "ASC"]],
+  });
+};

@@ -1,5 +1,6 @@
 import { Op, Transaction } from "sequelize";
 import * as models from "../models";
+import * as decimals from "../helper/decimal";
 
 export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
@@ -75,6 +76,14 @@ export const updatePickedStatus = async (id: number, picked: boolean) => {
   return await models.SalesOrderProduct.update({ picked }, { where: { id } });
 };
 
+// Delete a SalesOrderProduct by ID
+export const deleteSalesOrderProduct = async (id: number, transaction?: Transaction) => {
+  return await models.SalesOrderProduct.destroy({
+    where: { id },
+    transaction,
+  });
+};
+
 export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
   const calcs = {
     receiving: {
@@ -111,51 +120,55 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
 
   for (const salesOrderProduct of salesOrderProducts) {
     // Calculate for receiving
-    calcs.receiving.subTotal += salesOrderProduct.amount;
+    calcs.receiving.subTotal = decimals.decimalAdd(calcs.receiving.subTotal, Number(salesOrderProduct.amount) || 0);
+
     if (salesOrderProduct.taxApplied) {
-      calcs.receiving.taxable += salesOrderProduct.amount;
+      calcs.receiving.taxable = decimals.decimalAdd(calcs.receiving.taxable, Number(salesOrderProduct.amount) || 0);
     }
-    calcs.receiving.tax += salesOrderProduct.taxAmount;
+
+    calcs.receiving.tax = decimals.decimalAdd(calcs.receiving.tax, Number(salesOrderProduct.taxAmount) || 0);
 
     // Calculate for loading order
-    calcs.loadingOrder.subTotal += salesOrderProduct.loAmount;
+    calcs.loadingOrder.subTotal = decimals.decimalAdd(calcs.loadingOrder.subTotal, Number(salesOrderProduct.loAmount) || 0);
     if (salesOrderProduct.taxApplied) {
-      calcs.loadingOrder.taxable += salesOrderProduct.loAmount;
+      calcs.loadingOrder.taxable = decimals.decimalAdd(calcs.loadingOrder.taxable, Number(salesOrderProduct.loAmount) || 0);
     }
 
-    calcs.loadingOrder.tax += salesOrderProduct.loTaxAmount;
+    calcs.loadingOrder.tax = decimals.decimalAdd(calcs.loadingOrder.tax, Number(salesOrderProduct.loTaxAmount) || 0);
 
     // Calculate for packaging list
-    calcs.packagingList.subTotal += salesOrderProduct.plAmount;
+    calcs.packagingList.subTotal = decimals.decimalAdd(calcs.packagingList.subTotal, Number(salesOrderProduct.plAmount) || 0);
     if (salesOrderProduct.taxApplied) {
-      calcs.packagingList.taxable += salesOrderProduct.plAmount;
+      calcs.packagingList.taxable = decimals.decimalAdd(calcs.packagingList.taxable, Number(salesOrderProduct.plAmount) || 0);
     }
 
     if (salesOrderProduct.isSlabType) {
-      calcs.quantities.receiving += salesOrderProduct.receivingAreaSqIn
-      calcs.quantities.loadingOrder += salesOrderProduct.loRemeasureLength * salesOrderProduct.loRemeasureWidth;
-      calcs.quantities.packagingList += salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth;
+      calcs.quantities.receiving = decimals.decimalAdd(calcs.quantities.receiving, Number(salesOrderProduct.receivingAreaSqFt) || 0);
+
+      calcs.quantities.loadingOrder = decimals.decimalAdd(calcs.quantities.loadingOrder, salesOrderProduct.loSqrFt);
+
+      calcs.quantities.packagingList = decimals.decimalAdd(calcs.quantities.packagingList, salesOrderProduct.plSqrFt);
     } else {
-      calcs.quantities.receiving += 1;
+      calcs.quantities.receiving = decimals.decimalAdd(calcs.quantities.receiving, 1);
 
       // if plAmount exists that means it is in packaging list
       if (salesOrderProduct.plAmount) {
-        calcs.quantities.packagingList += 1;
+        calcs.quantities.packagingList = decimals.decimalAdd(calcs.quantities.packagingList, 1);
       }
 
       // if loAmount exists that means it is in loading order
       if (salesOrderProduct.loAmount) {
-        calcs.quantities.loadingOrder += 1;
+        calcs.quantities.loadingOrder = decimals.decimalAdd(calcs.quantities.loadingOrder, 1);
       }
 
     }
 
-    calcs.packagingList.tax += salesOrderProduct.plTaxAmount;
+    calcs.packagingList.tax = decimals.decimalAdd(calcs.packagingList.tax, Number(salesOrderProduct.plTaxAmount) || 0);
   }
 
-  calcs.receiving.total = calcs.receiving.subTotal + calcs.receiving.tax;
-  calcs.loadingOrder.total = calcs.loadingOrder.subTotal + calcs.loadingOrder.tax;
-  calcs.packagingList.total = calcs.packagingList.subTotal + calcs.packagingList.tax;
+  calcs.receiving.total = decimals.decimalAdd(calcs.receiving.subTotal, calcs.receiving.tax);
+  calcs.loadingOrder.total = decimals.decimalAdd(calcs.loadingOrder.subTotal, calcs.loadingOrder.tax);
+  calcs.packagingList.total = decimals.decimalAdd(calcs.packagingList.subTotal, calcs.packagingList.tax);
 
   if (calcs.packagingList.total) {
     calcs.final = calcs.packagingList;

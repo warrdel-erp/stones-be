@@ -30,6 +30,20 @@ export const getAllocatedInventoryProductsAccordingToCustomer = async (customerI
     return await inventoryProductRepository.getAllocatedInventoryProductsAccordingToCustomer(customerId);
 };
 
+export const getAllocatedInventoryProductDetails = async (inventoryProductId: number) => {
+
+    const data: any = await inventoryProductRepository.getAllocatedInventoryProductWithSalesOrderAndCustomer(inventoryProductId);
+
+    if (!data) {
+        throw new AppError("Allocated inventory product not found", 404);
+    }
+
+    data.salesOrderProduct = data.salesOrderProducts[0]
+
+    delete data.salesOrderProducts;
+
+    return data;
+};
 
 export const getInventoryProducts = (filter: Record<string, string>, locationId: number) => {
     return inventoryProductRepository.getInventoryProducts(filter, locationId)
@@ -45,8 +59,8 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
  */
 export const holdInventoryProduct = async (
     inventoryProductId: number,
-    note: string | undefined,
-    userId: number
+    data: { note: string | undefined, customerId?: number },
+    accountId: number
 ) => {
     const transaction = await sequelize.transaction();
 
@@ -76,9 +90,9 @@ export const holdInventoryProduct = async (
         // Create hold record
         const hold = await inventoryProductHoldRepository.createHold(
             {
+                ...data,
                 inventoryProductId,
-                note,
-                createdById: userId,
+                createdById: accountId,
             },
             transaction
         );
@@ -136,5 +150,115 @@ export const getHoldById = async (holdId: number) => {
     }
 
     return hold;
+};
+
+/**
+ * Create multiple holds on inventory products with a given customerId
+ */
+export const createBulkHolds = async (
+    inventoryProductIds: number[],
+    customerId: number,
+    data: { note?: string },
+    accountId: number
+) => {
+    if (!Array.isArray(inventoryProductIds) || inventoryProductIds.length === 0) {
+        throw new AppError("Inventory product IDs array is required and must not be empty", 400);
+    }
+
+    if (!customerId) {
+        throw new AppError("Customer ID is required", 400);
+    }
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        const holdsData: Array<{ inventoryProductId: number; note?: string; createdById: number; customerId: number }> = [];
+        const errors: Array<{ inventoryProductId: number; error: string }> = [];
+
+        // Validate each inventory product
+        for (const inventoryProductId of inventoryProductIds) {
+            // Check if inventory product exists
+            const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(inventoryProductId, transaction);
+
+            if (!inventoryProduct) {
+                errors.push({
+                    inventoryProductId,
+                    error: "Inventory product not found"
+                });
+                continue;
+            }
+
+            // Check if product is in valid status to be held
+            if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+                errors.push({
+                    inventoryProductId,
+                    error: "Inventory product not in inventory."
+                })
+
+                continue;
+            }
+
+            // Check if hold already exists
+            const existingHold = await inventoryProductHoldRepository.findHoldByInventoryProductId(
+                inventoryProductId,
+                transaction
+            );
+
+            if (existingHold) {
+                errors.push({
+                    inventoryProductId,
+                    error: "Inventory product is already on hold"
+                });
+                continue;
+            }
+
+            // Check if product is in valid status to be held
+            if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+                errors.push({
+                    inventoryProductId,
+                    error: `Inventory product cannot be held. Current status: ${inventoryProduct.status}`
+                });
+                continue;
+            }
+
+            // Add to holds data if all validations pass
+            holdsData.push({
+                inventoryProductId,
+                note: data.note,
+                createdById: accountId,
+                customerId,
+            });
+        }
+
+        // If there are errors, return them
+        if (errors.length > 0) {
+            // await transaction.rollback();
+            throw new AppError("Some inventory products could not be placed on hold", 400, {
+                errors,
+                successfulCount: 0,
+                failedCount: errors.length,
+            });
+        }
+
+        // Create all holds
+        const createdHolds = await inventoryProductHoldRepository.createBulkHolds(holdsData, transaction);
+
+        await transaction.commit();
+
+        return {
+            holds: createdHolds,
+            successfulCount: createdHolds.length,
+            failedCount: 0,
+        };
+    } catch (error: any) {
+        await transaction.rollback();
+
+        // If it's already an AppError, rethrow it
+        if (error instanceof AppError) {
+            throw error;
+        }
+
+        throw new AppError(error.message || "Failed to create bulk holds", 400);
+    }
 };
 

@@ -33,12 +33,12 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
         throw new AppError(`Inventory product is not in inventory. Inventory product is ${inventoryProduct.status} with id: ${inventoryProduct.id}, and inventoryProductId: ${product.inventoryProductId}`, 400);
       }
 
-      // Calculate receivingAreaSqIn if it's a slab type
-      let receivingAreaSqIn = null;
+      // Calculate receivingAreaSqFt if it's a slab type
+      let receivingAreaSqFt = null;
       if (inventoryProduct.isSlabType) {
         const slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
         if (slab) {
-          receivingAreaSqIn = slab.receivingLength * slab.receivingWidth;
+          receivingAreaSqFt = slab.receivedSqrFt;
         }
       }
 
@@ -48,7 +48,7 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
           ...product,
           salesOrderId,
           isSlabType: inventoryProduct.isSlabType,
-          receivingAreaSqIn
+          receivingAreaSqFt
         },
         transaction
       );
@@ -252,4 +252,42 @@ export const getSwapHistory = async (salesOrderProductId: number) => {
   const swapHistory = await soProductSwapHistoryRepository.getSwapHistoryBySalesProductId(salesOrderProductId);
 
   return swapHistory;
+};
+
+export const deleteSalesOrderProduct = async (soProductId: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Find the sales order product
+    const salesOrderProduct = await salesOrderProductRepository.findByIdSimple(soProductId, transaction);
+
+    if (!salesOrderProduct) {
+      throw new AppError("Sales Order Product not found", 404);
+    }
+
+    // Only allow deletion if stage is "saleOrder"
+    if (salesOrderProduct.stage !== SALE_ORDER_PRODUCT_STAGES.SALES_ORDER) {
+      throw new AppError(
+        `Cannot delete sales order product. Current stage is "${salesOrderProduct.stage}". Deletion is only allowed when stage is "saleOrder".`,
+        400
+      );
+    }
+
+    // Revert inventory product status back to IN_INVENTORY
+    await inventoryProductRepository.updateInventoryProductStatusById(
+      salesOrderProduct.inventoryProductId,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      transaction
+    );
+
+    // Delete the sales order product
+    await salesOrderProductRepository.deleteSalesOrderProduct(soProductId, transaction);
+
+    await transaction.commit();
+
+    return { message: "Sales Order Product deleted successfully" };
+  } catch (error: any) {
+    await transaction.rollback();
+    throw error;
+  }
 };

@@ -246,7 +246,7 @@ export const createJournalEntryForReceiveInventory = async (
     for (let slab of slabs) {
       slab = slab.get ? (slab.get({ plain: true }) as any) : (slab as any);
       const slabAny: any = slab;
-      const amount = slabAny.receivingLength * slabAny.receivingWidth * productCalc.landedUnitCost;
+      const amount = slabAny.receivedSqrFt * productCalc.landedUnitCost;
 
       await journalEntryRepository.create({
         amount,

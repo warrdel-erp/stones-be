@@ -16,16 +16,23 @@ router.put("/sellingPrice", authenticateUser, inventoryProductController.updateI
 // Get allocated inventory products according to customer
 router.get("/allocated", authenticateUser, inventoryProductController.getAllocatedInventoryProductsAccordingToCustomer);
 
+// Get allocated inventory products with sales order and customer details
+router.get("/:id/allocatedDetails", authenticateUser, inventoryProductController.getAllocatedInventoryProductDetails);
+
 // put and remove slab to cart
 router.put("/:inventoryProductId/cart", authenticateUser, inventoryProductController.updateInventoryProductCartStatus);
+
+// Get hold details by hold ID
+router.get("/hold/:holdId", authenticateUser, inventoryProductController.getHoldById);
 
 // Hold an inventory product
 router.post("/:id/hold", authenticateUser, inventoryProductController.holdInventoryProduct);
 
+// Create multiple holds on inventory products with customerId
+router.post("/holds/bulk", authenticateUser, inventoryProductController.createBulkHolds);
+
 // Unhold an inventory product
 router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdInventoryProduct);
 
-// Get hold details by hold ID
-router.get("/hold/:holdId", authenticateUser, inventoryProductController.getHoldById);
 
 export default router;

@@ -22,6 +22,7 @@ import * as tradeServiceService from "../services/tradeService.service";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import _ from "lodash";
 import Decimal from "decimal.js";
+import { decimalDivide } from "../helper/decimal";
 
 // Processes the inventory reception by updating slab and generic product statuses.
 export const receiveInventory = async (siplId: number, receivedDate: string, clientId: number, locationId: number): Promise<number> => {
@@ -303,10 +304,15 @@ export const getSIPLById = async (id: number) => {
 
   // Calculate totalReceivedQuantity, totalPackagingQuantity
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
+
+    const totalReceivedQuantity = sumDecimal(siplProduct.slabs, "receivedSqrFt")
+    const itemUnitCost = decimalDivide(siplProduct.totalCost, totalReceivedQuantity)
+
     return {
       ...siplProduct,
-      totalReceivedQuantity: sumDecimal(siplProduct.slabs, "receivedSqrFt"),
+      totalReceivedQuantity,
       totalPackagingQuantity: sumDecimal(siplProduct.slabs, "packagedSqrFt"),
+      itemUnitCost
     };
   });
 

@@ -15,6 +15,10 @@ const CustomerAddress = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    addressLine: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     unit: {
       type: DataTypes.STRING,
       allowNull: true,

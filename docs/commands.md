@@ -88,3 +88,29 @@ pnpm run migrate:all
 pnpm run seed:all
 pm2 restart 1
 ```
+
+## University deployment commands for staging
+
+```
+sudo mariadb
+use stage_univeristy_db;
+```
+
+```
+cd /var/www/html/bestage.hiveerp.com/university-erp-be/
+sudo git pull
+sudo npm i
+pm2 restart 0
+```
+
+## University deployment commands for production
+
+```
+cd ~/temp-univ-be/university-erp-be/
+sudo git pull
+sudo npm i
+npm run docker:build
+docker stop univ-be
+docker rm univ-be
+npm run docker:run
+```

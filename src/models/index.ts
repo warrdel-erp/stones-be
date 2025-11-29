@@ -657,8 +657,11 @@ InventoryProduct.hasMany(SoProductSwapHistory, { foreignKey: "inventoryProductId
 InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasOne(InventoryProductHold, { foreignKey: "inventoryProductId", as: "hold" });
 
-InventoryProductHold.belongsTo(User, { foreignKey: "createdById", as: "createdBy" });
-User.hasMany(InventoryProductHold, { foreignKey: "createdById", as: "inventoryProductHolds" });
+InventoryProductHold.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Account.hasMany(InventoryProductHold, { foreignKey: "createdById", as: "inventoryProductHolds" });
+
+InventoryProductHold.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(InventoryProductHold, { foreignKey: "customerId", as: "inventoryProductHolds" });
 
 // SelectionSheet associations
 SelectionSheet.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });

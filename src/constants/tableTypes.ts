@@ -121,6 +121,7 @@ export const SALE_ORDER_PRODUCT_STAGES = {
   LOADING_ORDER: "loadingOrder",
   PACKAGING_LIST: "packagingList",
   INVOICED: "invoiced",
+  CLOSED: "closed",
 } as const;
 
 export const SALES_ORDER_STATUS = {

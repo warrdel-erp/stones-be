@@ -16,4 +16,7 @@ router.put("/:soProductId/swap", authenticateUser, salesOrderProductController.s
 // get swap history
 router.get("/:soProductId/swapHistory", authenticateUser, salesOrderProductController.getSwapHistory);
 
+// delete sales order product
+router.delete("/:soProductId", authenticateUser, salesOrderProductController.deleteSalesOrderProduct);
+
 export default router; 

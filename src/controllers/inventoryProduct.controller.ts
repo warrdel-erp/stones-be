@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
+import { AppError } from "../helper/appError";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
@@ -81,6 +82,17 @@ export const getAllocatedInventoryProductsAccordingToCustomer = catchAsync(async
     return SuccessResponse(res, 200, "Allocated inventory products fetched successfully", data);
 });
 
+export const getAllocatedInventoryProductDetails = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    if (!Number(id)) {
+        throw new AppError('inventoryProductId is required', 400);
+    }
+
+    const data = await inventoryProductService.getAllocatedInventoryProductDetails(Number(id));
+
+    return SuccessResponse(res, 200, "Allocated inventory products with sales order and customer fetched successfully", data);
+});
 
 export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
     const filter = req.query;
@@ -110,14 +122,14 @@ export const updateInventoryProductCartStatus = catchAsync(async (req: AuthReque
  */
 export const holdInventoryProduct = catchAsync(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
-    const { note } = req.body;
+    const data = req.body;
     const accountId = req.user?.accountId;
 
     if (!accountId) {
         return res.status(401).json({ error: "User not authenticated" });
     }
 
-    const result = await inventoryProductService.holdInventoryProduct(Number(id), note, Number(accountId));
+    const result = await inventoryProductService.holdInventoryProduct(Number(id), data, Number(accountId));
 
     return SuccessResponse(res, 200, "Inventory product placed on hold successfully", result);
 });
@@ -142,5 +154,34 @@ export const getHoldById = catchAsync(async (req: AuthRequest, res: Response) =>
     const result = await inventoryProductService.getHoldById(Number(holdId));
 
     return SuccessResponse(res, 200, "Hold details fetched successfully", result);
+});
+
+/**
+ * Create multiple holds on inventory products with a given customerId
+ */
+export const createBulkHolds = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { inventoryProductIds, customerId, note } = req.body;
+    const accountId = req.user?.accountId;
+
+    if (!accountId) {
+        return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!inventoryProductIds || !Array.isArray(inventoryProductIds) || inventoryProductIds.length === 0) {
+        return res.status(400).json({ error: "inventoryProductIds array is required and must not be empty" });
+    }
+
+    if (!customerId) {
+        return res.status(400).json({ error: "customerId is required" });
+    }
+
+    const result = await inventoryProductService.createBulkHolds(
+        inventoryProductIds.map((id: any) => Number(id)),
+        Number(customerId),
+        { note },
+        Number(accountId)
+    );
+
+    return SuccessResponse(res, 200, `Successfully created ${result.successfulCount} hold(s)`, result);
 });
 

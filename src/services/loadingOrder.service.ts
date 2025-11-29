@@ -371,8 +371,9 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
       ...product,
       taxApplied: !!salesOrderProductsAsPerProduct[0]?.taxApplied,
       salesOrderProduct: salesOrderProductsAsPerProduct,
-      totalQuantity: product.isSlabType ? calculations.quantities.loadingOrder / 144 : salesOrderProductsAsPerProduct?.length,
-      totalOrderQuantity: product.isSlabType ? calculations.quantities.receiving / 144 : salesOrderProductsAsPerProduct?.length,
+      calculations,
+      totalQuantity: calculations.quantities.loadingOrder,
+      totalOrderQuantity: calculations.quantities.receiving,
     };
   });
 
@@ -633,7 +634,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         await journalEntryRepository.create(
           {
             amount:
-              salesOrderProduct.receivingAreaSqIn *
+              salesOrderProduct.receivingAreaSqFt *
               salesOrderProduct.inventoryProduct.landedUnitCost,
             ledgerId: ledgerAccountForFinishedGoods.id,
             type: JOURNAL_ENTRY_TYPE.CR,
@@ -657,7 +658,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         await journalEntryRepository.create(
           {
             amount:
-              salesOrderProduct.receivingAreaSqIn *
+              salesOrderProduct.receivingAreaSqFt *
               salesOrderProduct.inventoryProduct.landedUnitCost,
             ledgerId: ledgerAccountForCogs.id,
             type: JOURNAL_ENTRY_TYPE.DR,

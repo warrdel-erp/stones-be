@@ -5,6 +5,7 @@ import User from "./user.model";
 import Vendor from "./vendor.model";
 import Client from "./client.model";
 import { PO_STATUS } from "../constants/tableTypes";
+import { PAYMENT_TERMS } from "../constants";
 
 const PurchaseOrder = sequelize.define(
   "PurchaseOrder",
@@ -22,9 +23,15 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
     },
-    paymentTerm: {
+    paymentTermId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
     },
     status: {
       type: DataTypes.ENUM(...Object.values(PO_STATUS)),

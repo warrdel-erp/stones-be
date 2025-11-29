@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import SIPL from "./sipl.model";
 import Product from "./product.model";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
+import * as decimal from '../helper/decimal'
 
 const SIPLProduct = sequelize.define(
   "sipl_products",
@@ -30,6 +31,16 @@ const SIPLProduct = sequelize.define(
     supplierNote: {
       type: DataTypes.TEXT,
     },
+    totalCost: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const quantity = Number(this.get("quantity"));
+        const unitCost = Number(this.get("unitPrice"));
+
+        return decimal.decimalMultiply(quantity, unitCost)
+      }
+    },
+
     siplId: {
       type: DataTypes.INTEGER,
       allowNull: false,

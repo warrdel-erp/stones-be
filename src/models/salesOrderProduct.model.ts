@@ -5,8 +5,10 @@ import PackagingList from "./packagingList.model";
 import LoadingOrder from "./loadingOrder.model";
 import SalesOrder from "./salesOrder.model";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
-import { getPercentageValue } from "../helper";
-import Decimal from "decimal.js";
+import { convertSqrInchToFt, getPercentageValue } from "../helper";
+// import Decimal from "decimal.js";
+
+import * as decimals from '../helper/decimal'
 
 const SalesOrderProduct = sequelize.define(
   "sales_order_products",
@@ -54,7 +56,7 @@ const SalesOrderProduct = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
-    receivingAreaSqIn: {
+    receivingAreaSqFt: {
       type: DataTypes.FLOAT,
       allowNull: true,
     },
@@ -106,67 +108,87 @@ const SalesOrderProduct = sequelize.define(
     plSqrFt: {
       type: DataTypes.VIRTUAL,
       get() {
-        const length = Decimal(Number(this.get("plRemeasureLength")) || 0);
-        const width = Decimal(Number(this.get("plRemeasureWidth")) || 0);
+        const length = Number(this.get("plRemeasureLength")) || 0;
+        const width = Number(this.get("plRemeasureWidth")) || 0;
 
-        return length.mul(width).div(144).toNumber();
+        const area = decimals.decimalMultiply(length, width);
+
+        return convertSqrInchToFt(area);
       }
     },
     loSqrFt: {
       type: DataTypes.VIRTUAL,
       get() {
-        const length = Decimal(Number(this.get("loRemeasureLength")) || 0);
-        const width = Decimal(Number(this.get("loRemeasureWidth")) || 0);
+        const length = Number(this.get("loRemeasureLength")) || 0;
+        const width = Number(this.get("loRemeasureWidth")) || 0;
 
-        return length.mul(width).div(144).toNumber();
+        const area = decimals.decimalMultiply(length, width);
+
+        return convertSqrInchToFt(area);
       }
     },
     finalSqrFt: {
       type: DataTypes.VIRTUAL,
       get() {
-        this.get("plSqrFt") || this.get("loSqrFt");
+        return this.get("plSqrFt") || this.get("loSqrFt");
       }
     },
     amount: {
       type: DataTypes.VIRTUAL,
       get() {
-        return this.get("isSlabType") ? (Number(this.get("receivingAreaSqIn")) * Number(this.get("unitPrice")) / 144) : Number(this.get("unitPrice"));
+        if (this.get("isSlabType")) {
+          return decimals.decimalMultiply(Number(this.get("receivingAreaSqFt")) || 0, Number(this.get("unitPrice")) || 0);
+        }
+        return Number(this.get("unitPrice")) || 0;
       },
     },
     loAmount: {
       type: DataTypes.VIRTUAL,
       get() {
         if (this.get("isSlabType")) {
-          return Number(this.get("loRemeasureLength")) * Number(this.get("loRemeasureWidth")) * Number(this.get("unitPrice")) / 144;
+          const area = Number(this.get("loSqrFt"))
+          const areaWithPrice = decimals.decimalMultiply(area, Number(this.get("unitPrice")) || 0);
+          return areaWithPrice
         }
-        return Number(this.get("unitPrice"));
+        return Number(this.get("unitPrice")) || 0;
       },
     },
     plAmount: {
       type: DataTypes.VIRTUAL,
       get() {
         if (this.get("isSlabType")) {
-          return Number(this.get("plRemeasureLength")) * Number(this.get("plRemeasureWidth")) * Number(this.get("unitPrice")) / 144;
+          const area = Number(this.get("plSqrFt"))
+          const areaWithPrice = decimals.decimalMultiply(area, Number(this.get("unitPrice")) || 0);
+          return areaWithPrice;
         }
-        return Number(this.get("unitPrice"));
+        return Number(this.get("unitPrice")) || 0;
       },
     },
     plTaxAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        return getPercentageValue(Number(this.get("plAmount")), Number(this.get("taxPercentage")));
+        const amount = Number(this.get("plAmount")) || 0;
+        const percentage = Number(this.get("taxPercentage")) || 0;
+        const multiplied = decimals.decimalMultiply(amount, percentage);
+        return decimals.decimalDivide(multiplied, 100);
       },
     },
     loTaxAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        return getPercentageValue(Number(this.get("loAmount")), Number(this.get("taxPercentage")));
+        const amount = Number(this.get("loAmount")) || 0;
+        const percentage = Number(this.get("taxPercentage")) || 0;
+        const multiplied = decimals.decimalMultiply(amount, percentage);
+        return decimals.decimalDivide(multiplied, 100);
       },
     },
     taxAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        return getPercentageValue(Number(this.get("amount")), Number(this.get("taxPercentage")));
+        const amount = Number(this.get("amount")) || 0;
+        const percentage = Number(this.get("taxPercentage")) || 0;
+        const multiplied = decimals.decimalMultiply(amount, percentage);
+        return decimals.decimalDivide(multiplied, 100);
       },
     },
   },

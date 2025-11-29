@@ -89,7 +89,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
     expiryDate,
     dueDate,
     shipDate,
-    paymentTerm,
+    paymentTermId,
     services
   } = req.body;
   const { internalNote, printableNote } = req.body; // Extract notes separately
@@ -135,7 +135,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       etaDate,
       container,
       expiryDate,
-      paymentTerm
+      paymentTerm: paymentTermId
     };
 
     const notesData = { internal: internalNote, printable: printableNote };

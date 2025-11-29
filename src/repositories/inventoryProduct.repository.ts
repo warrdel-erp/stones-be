@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import * as models from "../models";
 import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -97,6 +98,15 @@ export const getInventoryProductsBySIPL = async (siplId: number) => {
       siplId
     },
     include: [
+      {
+        association: 'slab'
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'hold'
+      },
       {
         association: "bin",
         include: [
@@ -206,6 +216,42 @@ export const getAllocatedInventoryProductsAccordingToCustomer = (customerId: num
   return data;
 }
 
+export const getAllocatedInventoryProductWithSalesOrderAndCustomer = async (inventoryProductId: number) => {
+  const whereClause: any = {
+    id: inventoryProductId,
+    status: INVENTORY_ITEM_STATUS.ALLOCATED,
+  };
+
+  const result = await models.InventoryProduct.findOne({
+    where: whereClause,
+    include: [
+      {
+        association: 'salesOrderProducts',
+        required: true,
+        where: {
+          stage: {
+            [Op.notIn]: [SALE_ORDER_PRODUCT_STAGES.CLOSED, SALE_ORDER_PRODUCT_STAGES.INVOICED]
+          }
+        },
+        include: [
+          {
+            association: 'salesOrder',
+            required: true,
+            include: [
+              {
+                association: 'customer'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  });
+
+  // Convert to plain object to get virtual fields computed
+  return result ? result.get({ plain: true }) : null;
+}
+
 // Update status of all InventoryProducts for a given SIPL
 export const updateInventoryProductStatusBySipl = async (
   siplId: number,
@@ -290,8 +336,8 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
   return await models.InventoryProduct.update({ isInCart }, { where: { id }, individualHooks: true });
 };
 
-export const findInventoryProductById = async (id: number) => {
-  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId'] });
+export const findInventoryProductById = async (id: number, transaction?: Transaction) => {
+  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId'], transaction });
 };
 
 // get last landed cost.

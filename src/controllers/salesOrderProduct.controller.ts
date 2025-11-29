@@ -73,3 +73,15 @@ export const getSwapHistory = catchAsync(async (req: Request, res: Response) => 
 
   return SuccessResponse(res, 200, "Swap history fetched successfully", swapHistory);
 });
+
+export const deleteSalesOrderProduct = catchAsync(async (req: Request, res: Response) => {
+  const { soProductId } = req.params;
+
+  if (!soProductId) {
+    throw new AppError("Sales Order Product ID is required", 400);
+  }
+
+  const result = await salesOrderProductService.deleteSalesOrderProduct(Number(soProductId));
+
+  return SuccessResponse(res, 200, result.message || "Sales Order Product deleted successfully", result);
+});

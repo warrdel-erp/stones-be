@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
-import User from "./user.model";
 import Account from "./Account.model";
+import Customer from "./customer.model";
 
 const InventoryProductHold = sequelize.define(
   "InventoryProductHold",
@@ -37,6 +37,16 @@ const InventoryProductHold = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    customerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Customer,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "inventory_product_holds",
@@ -45,4 +55,3 @@ const InventoryProductHold = sequelize.define(
 );
 
 export default InventoryProductHold;
-

@@ -1,4 +1,5 @@
 import Decimal from "decimal.js";
+import { decimalDivide } from "./decimal";
 
 export const removeDuplicates = (array: any[]) =>
   array.filter((item, index, self) => index === self.findIndex((obj) => obj.id === item.id));
@@ -37,3 +38,7 @@ export const sumDecimal = (array: any[] | null | undefined, key?: string): numbe
 
   return Number(sum.toDecimalPlaces(2));
 };
+
+export const convertSqrInchToFt = (sqrIn: number) => {
+  return decimalDivide(sqrIn, 144)
+}

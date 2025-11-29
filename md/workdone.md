@@ -658,3 +658,34 @@ sticky navbar.
 
 1. Advanced deposit calculations in customer Payment.
 2. Advanced deposit code generation.
+3. SIPL Journal entry error.
+
+---
+
+1. ALLOCATED details in Inventory slabs status.
+2. FE code structure changes.
+3. Customer association with hold.
+4. Hold from Cart.
+5. Due date according to payment terms in sipl
+6. In SO if Slab is not invoiced then it could be deleted.
+
+---
+
+1. Create-LO, Create-PL, PL-details table calculations.
+2. SO can not be created without product.
+3. Customer Map error (web crashing).
+4. Additional address field in customer create.
+
+---
+
+1. Order of deliveries are changing in after approving deliveries.
+2. Unit landed cost on SIPL page.
+3. Remove shipment term from PO.
+4. Journal entry error in SIPL (multiplying by 144).
+5. LO expected delivery selection error.
+6. Total due amount should be fixed in customer payment.
+
+---
+
+1. Journal entry multiplied by 144 in SO. [!!!]
+2. Put sqrFeet as fixed.

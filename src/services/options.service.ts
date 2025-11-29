@@ -1,6 +1,8 @@
 import { AppError } from "../helper/appError";
 import * as serviceRepository from "../repositories/service.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+import * as customerRepository from "../repositories/customer.repository";
+import { CUSTOMER_STATUS } from "../constants/tableTypes";
 
 type ServiceOptionFilters = {
     purchaseOnly?: boolean;
@@ -35,6 +37,17 @@ export const getCustomerInvoiceOptions = async (customerId: number) => {
 
     const invoices = await soInvoiceRepository.getCustomerAllInvoicesOptions({ customerId });
 
-    return invoices
+    return invoices;
+};
+
+export const getCustomerOptions = async (clientId: number, activeOnly: boolean = true) => {
+    if (!clientId) {
+        throw new AppError("Client context missing.", 400);
+    }
+
+    const status = activeOnly ? CUSTOMER_STATUS.ACTIVE : undefined;
+    const customers = await customerRepository.getCustomerOptions(clientId, status);
+
+    return customers;
 };
 

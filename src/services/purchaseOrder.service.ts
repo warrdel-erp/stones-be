@@ -189,7 +189,9 @@ export const getPurchaseOrderById = async (id: number) => {
     return null; // Handle case where PO does not exist
   }
 
-  purchaseOrder.paymentTerm = PAYMENT_TERMS.find((k) => k.id == purchaseOrder.paymentTerm)?.value;
+  // paymentTerm virtual field is now automatically provided by the model
+  // Optionally override to just the value if needed:
+  // purchaseOrder.paymentTerm = purchaseOrder.paymentTerm?.value;
 
   // Get vendor scope for purchaseOrder
   purchaseOrder.supplier.vendorScope = SCOP.find((k) => k.id == purchaseOrder.supplier.vendorScope)?.value;

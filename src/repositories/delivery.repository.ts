@@ -48,7 +48,8 @@ export const getAllDeliveriesByClientId = async (filter: any, clientId: number) 
                     {
                         association: "loadingOrder"
                     }
-                ]
+                ],
+                // order: [['order', 'asc']]
             },
             {
                 association: 'truck'
