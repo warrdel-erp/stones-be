@@ -306,7 +306,7 @@ export const getSIPLById = async (id: number) => {
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
 
     const totalReceivedQuantity = sumDecimal(siplProduct.slabs, "receivedSqrFt")
-    const itemUnitCost = decimalDivide(siplProduct.totalCost, totalReceivedQuantity)
+    const itemUnitCost = totalReceivedQuantity && decimalDivide(siplProduct.totalCost, totalReceivedQuantity)
 
     return {
       ...siplProduct,
