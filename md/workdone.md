@@ -689,3 +689,9 @@ sticky navbar.
 
 1. Journal entry multiplied by 144 in SO. [!!!]
 2. Put sqrFeet as fixed.
+3. Tax in customer payment. [!!!]
+4. seeder data for services.
+
+---
+
+1. Chart of account design. [!!!]

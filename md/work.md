@@ -697,18 +697,14 @@ Email notification.
 
 ---
 
----
-
 1. return FUll.
 2. loaders
-3. seeder data for services.
-4. Drop-down, ascending order.
-5. Shortest path between delivery addresses.
-6. Container in SIPL.
-7. Tax in customer payment. [!!!]
-8. change SIPL page design.
-9. show swap history.
-10. Drawers designs. [!!!]
-11. Chart of account design. [!!!]
+3. Drop-down, ascending order.
+4. Shortest path between delivery addresses.
+5. Container in SIPL.
+6. Change SIPL page design.
+7. show swap history.
+8. Drawers designs. [!!!]
+9. payment Detail page [!!!]
 
 ——-

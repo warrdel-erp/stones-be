@@ -121,7 +121,7 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
       return {
         id: soInvoice.id,
         dueDate: soInvoice.loadingOrder.expDeliveryDate,
-        amount: soInvoice.amount,
+        amount: soInvoice.finalAmount,
         paidAmount,
         dueAmount: decimalSubtract(soInvoice.amount, paidAmount),
         creationDate: soInvoice.createdAt,

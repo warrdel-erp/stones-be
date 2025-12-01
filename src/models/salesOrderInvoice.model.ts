@@ -5,6 +5,7 @@ import LoadingOrder from "./loadingOrder.model";
 import Client from "./client.model";
 import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
+import * as decimal from '../helper/decimal'
 
 export type SoInvoice = {
   customerId: number;
@@ -38,6 +39,12 @@ const SalesOrderInvoice = sequelize.define(
     taxValue: { // total tax value as per taxable amount.
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+    finalAmount: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return decimal.decimalAdd(Number(this.get('amount')), Number(this.get('taxValue')))
+      }
     },
     soInvoiceNumber: {
       type: DataTypes.INTEGER,
