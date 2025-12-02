@@ -704,7 +704,25 @@ Email notification.
 5. Container in SIPL.
 6. Change SIPL page design.
 7. show swap history.
-8. Drawers designs. [!!!]
-9. payment Detail page [!!!]
+8. payment Detail page [!!!]
+9. Only show left quantity
+10. Direct SIPL.
+11. Inventory received date.
+12. Bundle block in inventory.
+13. Totals in Supplier payment.
+14. On payment submit if there is debit note amount is 0 then change button label.
+15. Final entry in Journal Entry.
+16. Payment Journal entry of supplier (vendor is wrong).
+17. In Allocated details show createdBy user.
+18. Service in Print invoice.
+19. Due amount must be in (-ve) of advanced deposit.
+20. Service change in customer payment. [!!!]
+21. Freight going into sales journal entry. [!!!]
+22. Total profit in LO and SO.
+23. Directly open ledger from COA.
+24. SSO refreshing error.
+25. Route loader
+26. Put condition that total paid amount for invoice must not exceed it's total amount.
+27. change value of selling price in add product to SO.
 
 ——-

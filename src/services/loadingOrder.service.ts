@@ -17,6 +17,7 @@ import * as loadingOrderService from "../services/loadingOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as tradeServiceService from '../services/tradeService.service';
+import * as decimal from '../helper/decimal'
 
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
@@ -413,6 +414,12 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     const invoiceAmountObj = loadingOrder.packagingList ? loadingOrder.calculations.packagingList : loadingOrder.calculations.loadingOrder
 
+    let serviceTotals = 0;
+
+    if (!!loadingOrder?.tradeServices) {
+      serviceTotals = decimal.decimalSum(loadingOrder.tradeServices.map((e: any) => e.total));
+    }
+
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
       {
@@ -422,6 +429,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         amount: invoiceAmountObj.subTotal,
         taxableAmount: invoiceAmountObj.taxable,
         taxValue: invoiceAmountObj.tax,
+        totalServiceCharges: serviceTotals,
         salesOrderId: loadingOrder.salesOrder.id,
       },
       transaction

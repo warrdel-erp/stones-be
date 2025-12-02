@@ -236,7 +236,7 @@ export const settleAdvancedDeposit = async (
                 throw new AppError(`Invoice with ID ${invoiceId} does not exist.`, 400);
             }
 
-            const invoiceAmount = new Decimal(soInvoice.amount);
+            const invoiceAmount = new Decimal(soInvoice.finalAmount);
 
             // Get total paid amount from PaymentBills (this already includes existing AdvancedDepositSettlements)
             const totalPaidAmount = await paymentBillsRepository.getTotalPaidAmountOfBill(

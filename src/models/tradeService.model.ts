@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Service from "./service.model";
 import Client from "./client.model";
 import Decimal from "decimal.js";
+import * as decimal from '../helper/decimal'
 
 export const TRADE_SERVICE_REFERENCE_TYPES = {
     LOADING_ORDER: "loadingOrder",
@@ -31,10 +32,10 @@ const TradeService = sequelize.define(
         total: {
             type: DataTypes.VIRTUAL,
             get() {
-                const quantity = new Decimal(Number(this.get("quantity")) || 0);
-                const price = new Decimal(Number(this.get("price")) || 0);
-                const result = quantity.mul(price);
-                return Number(result.toDecimalPlaces(2));
+                const quantity = (Number(this.get("quantity")) || 0);
+                const price = (Number(this.get("price")) || 0);
+                const result = decimal.decimalMultiply(quantity, price);
+                return result;
             },
         },
         referenceId: {

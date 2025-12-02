@@ -14,7 +14,8 @@ export type SoInvoice = {
   amount: number;
   salesOrderId: number;
   taxableAmount: number;
-  taxValue: number
+  taxValue: number;
+  totalServiceCharges: number;
 };
 
 const SalesOrderInvoice = sequelize.define(
@@ -40,10 +41,18 @@ const SalesOrderInvoice = sequelize.define(
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
+    totalServiceCharges: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
     finalAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        return decimal.decimalAdd(Number(this.get('amount')), Number(this.get('taxValue')))
+        const amount = Number(this.get('amount')) || 0;
+        const taxValue = Number(this.get('taxValue')) || 0;
+        const serviceCharges = Number(this.get('totalServiceCharges')) || 0;
+        return decimal.decimalAdd(decimal.decimalAdd(amount, taxValue), serviceCharges);
       }
     },
     soInvoiceNumber: {

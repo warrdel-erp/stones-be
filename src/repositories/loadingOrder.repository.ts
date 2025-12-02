@@ -199,7 +199,7 @@ export const getLoadingOrderById = async (id: number) => {
       },
       {
         association: 'tradeServices',
-        attributes: ['id', 'total'],
+        // attributes: ['id', 'total'],
         include: [
           {
             association: 'service',

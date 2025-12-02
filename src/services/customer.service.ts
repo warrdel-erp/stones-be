@@ -123,7 +123,7 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
         dueDate: soInvoice.loadingOrder.expDeliveryDate,
         amount: soInvoice.finalAmount,
         paidAmount,
-        dueAmount: decimalSubtract(soInvoice.amount, paidAmount),
+        dueAmount: decimalSubtract(soInvoice.finalAmount, paidAmount),
         creationDate: soInvoice.createdAt,
         code: soInvoice.invoiceCode,
         loNumber: soInvoice.loadingOrder.clientLoNumber,
@@ -161,7 +161,7 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
         accountName: advancedDeposit.ledgerAccount?.name,
         paymentMethod: advancedDeposit.payment?.paymentMethod,
         paidAmount: totalSettledAmount,
-        dueAmount: decimalSubtract(advancedDeposit.amount, totalSettledAmount),
+        dueAmount: '-' + decimalSubtract(advancedDeposit.amount, totalSettledAmount),
         type: "advancedDeposit"
       };
     })
