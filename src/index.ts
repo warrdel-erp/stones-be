@@ -39,7 +39,7 @@ import productSubCategoryRoutes from "./routes/productSubCategory.routes";
 import productGroupRoutes from "./routes/productGroup.routes";
 import productBaseColorRoutes from "./routes/productBaseColor.routes";
 import productFinishRoutes from "./routes/productFinish.routes";
-import soInvoiceRoutes from "./routes/soInvoice.routes";
+import soInvoiceRoutes from "./routes/salesOrderInvoice.routes";
 import authRoutes from "./routes/auth.routes";
 import accountRoutes from "./routes/account.routes";
 import advancedDepositRoutes from "./routes/advancedDeposit.routes";

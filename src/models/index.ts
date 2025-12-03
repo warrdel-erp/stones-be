@@ -34,7 +34,7 @@ import SalesOrderInvoice from "./salesOrderInvoice.model";
 import Truck from "./truck.model";
 import Account from "./Account.model";
 import CartItem from "./cartItem.model";
-import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { CUSTOMER_ADDRESS_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import ProductGroup from "./productGroup.model";
 import ProductBaseColor from "./productBaseColor.model";
 import ProductFinish from "./productFinish.model";
@@ -450,17 +450,17 @@ Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
 PaymentBill.belongsTo(Payment, { foreignKey: "paymentId", as: "payment" });
 Payment.hasMany(PaymentBill, { foreignKey: "paymentId", as: "paymentBills" });
 
-PaymentBill.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false });
-SIPL.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
+PaymentBill.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, });
+SIPL.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false, scope: { referenceType: PAYMENT_BILL_REFERENCE_TYPES.SIPL } });
 
-PaymentBill.belongsTo(Bill, { foreignKey: "referenceId", as: "bill", constraints: false });
-Bill.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
+PaymentBill.belongsTo(Bill, { foreignKey: "referenceId", as: "bill", constraints: false, });
+Bill.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false, scope: { referenceType: PAYMENT_BILL_REFERENCE_TYPES.BILL } });
 
-PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInvoice", constraints: false });
-SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false });
+PaymentBill.belongsTo(SalesOrderInvoice, { foreignKey: "referenceId", as: "soInvoice", constraints: false, });
+SalesOrderInvoice.hasMany(PaymentBill, { foreignKey: "referenceId", as: "paymentBills", constraints: false, scope: { referenceType: PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE } });
 
-PaymentBill.belongsTo(AdvancedDeposit, { foreignKey: "referenceId", as: "advancedDeposit", constraints: false });
-AdvancedDeposit.hasOne(PaymentBill, { foreignKey: "referenceId", as: "paymentBill", constraints: false });
+PaymentBill.belongsTo(AdvancedDeposit, { foreignKey: "referenceId", as: "advancedDeposit", constraints: false, });
+AdvancedDeposit.hasOne(PaymentBill, { foreignKey: "referenceId", as: "paymentBill", constraints: false, scope: { referenceType: PAYMENT_BILL_REFERENCE_TYPES.ADVANCED_DEPOSIT } });
 
 // AdvancedDepositSettlement associations
 AdvancedDepositSettlement.belongsTo(SalesOrderInvoice, { foreignKey: "soInvoiceId", as: "soInvoice" });

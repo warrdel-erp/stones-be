@@ -263,7 +263,6 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
       },
       {
         association: "salesOrderProducts",
-        required: false,
         include: [
           {
             association: "inventoryProduct",

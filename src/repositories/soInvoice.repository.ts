@@ -37,7 +37,6 @@ export const getAllInvoicesList = async (
     where: {
       ...filter,
       clientId,
-
     },
     include: [
       {
@@ -95,8 +94,6 @@ export const getAllInvoicesList = async (
           },
         ],
       },
-      {
-      }
     ],
     transaction,
     limit,

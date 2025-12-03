@@ -701,4 +701,10 @@ sticky navbar.
 
 ---
 
-1.
+1. Freight bill entry error in SIPL.
+2. SO invoice service journal entry error.
+3. return FUll.
+4. payment Detail page [!!!]
+5. Direct SIPL.
+
+\*\* problem -> if I add 1000 slabs.

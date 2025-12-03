@@ -262,7 +262,6 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
             clientId,
         });
 
-
         // Update status of all products to IN_INVENTORY
         for (const returnProduct of returnRecord.returnProducts) {
             // Check if it's a slab or generic product

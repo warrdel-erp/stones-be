@@ -172,9 +172,9 @@ export const getLoadingOrderAsPerReturn = async (returnId: number) => {
   }
 
   // these are product for an invoice that are available for invoicing
-  const soProductsAvailableToReturnAsPerInvoice = await salesOrderInvoiceService.getSalesOrderProductsWithoutReturns(loadingOrder.salesOrderInvoice.id)
+  // const soProductsAvailableToReturnAsPerInvoice = await salesOrderInvoiceService.getSalesOrderProductsWithoutReturns(loadingOrder.salesOrderInvoice.id)
 
-  loadingOrder.salesOrderProducts.push(...(soProductsAvailableToReturnAsPerInvoice.map(e => e.get({ plain: true }))))
+  // loadingOrder.salesOrderProducts.push(...(soProductsAvailableToReturnAsPerInvoice.map(e => e.get({ plain: true }))))
 
   // Calculate total amount added in SO.
   loadingOrder.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
@@ -452,61 +452,61 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     // -------- Journal entry for Services ------------
     const tradeServices = loadingOrder.tradeServices;
 
-    for (const tradeService of tradeServices) {
+    // for (const tradeService of tradeServices) {
 
-      // ----- Journal entry for Service -----
-      await journalEntryRepository.create(
-        {
-          amount: tradeService.total,
-          ledgerId: tradeService.service.ledgerAccountId,
-          type: JOURNAL_ENTRY_TYPE.DR,
+    //   // ----- Journal entry for Service -----
+    //   await journalEntryRepository.create(
+    //     {
+    //       amount: tradeService.total,
+    //       ledgerId: tradeService.service.ledgerAccountId,
+    //       type: JOURNAL_ENTRY_TYPE.CR,
 
-          // ----- Trade service reference -----
-          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
-          subReferenceId: tradeService.id,
+    //       // ----- Trade service reference -----
+    //       subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
+    //       subReferenceId: tradeService.id,
 
-          // ----- Loading order invoice reference -----
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
-          referenceId: invoice.id,
+    //       // ----- Loading order invoice reference -----
+    //       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    //       referenceId: invoice.id,
 
-          // ----- Loading order entry for -----
-          entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id,
+    //       // ----- Loading order entry for -----
+    //       entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    //       entryForId: loadingOrder.id,
 
-          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-          locationId,
-          partyLedgerAccountId: ledgerAccount.id,
-        },
-        transaction
-      );
+    //       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+    //       locationId,
+    //       partyLedgerAccountId: ledgerAccount.id,
+    //     },
+    //     transaction
+    //   );
 
-      // ----- Journal entry for Service Party Ledger Account -----
-      await journalEntryRepository.create(
-        {
-          amount: tradeService.total,
-          ledgerId: ledgerAccount.id,
-          type: JOURNAL_ENTRY_TYPE.DR,
+    //   // ----- Journal entry for Service Party Ledger Account -----
+    //   // await journalEntryRepository.create(
+    //   //   {
+    //   //     amount: tradeService.total,
+    //   //     ledgerId: ledgerAccount.id,
+    //   //     type: JOURNAL_ENTRY_TYPE.DR,
 
-          // ----- Trade service reference -----
-          subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
-          subReferenceId: tradeService.id,
+    //   //     // ----- Trade service reference -----
+    //   //     subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
+    //   //     subReferenceId: tradeService.id,
 
-          // ----- Loading order invoice reference -----
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
-          referenceId: invoice.id,
+    //   //     // ----- Loading order invoice reference -----
+    //   //     referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    //   //     referenceId: invoice.id,
 
-          // ----- Loading order entry for -----
-          entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-          entryForId: loadingOrder.id,
+    //   //     // ----- Loading order entry for -----
+    //   //     entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    //   //     entryForId: loadingOrder.id,
 
-          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-          locationId,
-          partyLedgerAccountId: tradeService.service.ledgerAccountId,
-        },
-        transaction
-      );
+    //   //     processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+    //   //     locationId,
+    //   //     partyLedgerAccountId: tradeService.service.ledgerAccountId,
+    //   //   },
+    //   //   transaction
+    //   // );
 
-    }
+    // }
 
     // Journal Entry for with tax.
     await journalEntryRepository.create(

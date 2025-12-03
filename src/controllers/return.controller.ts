@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as returnService from "../services/return.service";
+import { AppError } from "../helper/appError";
 
 export const createReturn = catchAsync(async (req: AuthRequest, res: Response) => {
     const { productIds, invoiceId } = req.body;
@@ -10,7 +11,7 @@ export const createReturn = catchAsync(async (req: AuthRequest, res: Response) =
     const clientId = req.user?.clientId;
 
     if (!userId) {
-        throw new Error("User not authenticated");
+        throw new AppError("User not authenticated", 401);
     }
     const returnRecord = await returnService.createReturn(Number(invoiceId), productIds, userId,);
     SuccessResponse(res, 201, "Return created successfully", returnRecord);
@@ -18,7 +19,6 @@ export const createReturn = catchAsync(async (req: AuthRequest, res: Response) =
 
 export const confirmReturn = catchAsync(async (req: AuthRequest, res: Response) => {
     const { returnId } = req.params;
-
     const clientId = req.user?.clientId;
 
     const returnRecord = await returnService.confirmReturn(Number(returnId), Number(clientId));
@@ -50,6 +50,11 @@ export const updateReturnProductsAndConfirm = catchAsync(async (req: AuthRequest
     const { productIds } = req.body;
     const { returnId } = req.params;
     const clientId = req.user?.clientId;
+
+    if (!productIds.length) {
+        throw new AppError('productIds are required', 400);
+    }
+
     const returnRecord = await returnService.updateReturnProductsAndConfirm(Number(returnId), productIds, Number(clientId));
     SuccessResponse(res, 200, "Return products updated and confirmed successfully", returnRecord);
 }); 

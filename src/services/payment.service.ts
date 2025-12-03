@@ -1,5 +1,5 @@
 import { sequelize } from "../config/database";
-import { PAYMENT_BILL_REFERENCE_TYPES, CREDIT_DEBIT_NOTE_TYPES, CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES, CREDIT_NOTE_REFERENCE_TYPES, PAYEE_TYPE } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, CREDIT_DEBIT_NOTE_TYPES, CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES, CREDIT_NOTE_REFERENCE_TYPES, PAYEE_TYPE, PAYMENT_STATUS } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import * as billRepository from "../repositories/bill.repository";
 import * as paymentRepository from "../repositories/payment.repository";
@@ -59,7 +59,7 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
 
   try {
     // Step 1: Create Payment
-    const payment: any = await paymentRepository.createPayment({ ...paymentData, accountId: paymentData.account }, transaction);
+    const payment: any = await paymentRepository.createPayment({ ...paymentData, accountId: paymentData.account, status: PAYMENT_STATUS.COMPLETE }, transaction);
 
     // Step 2: Handle Credit Note Creation (if creditNote exists in paymentData)
     let creditDebitNote = {}
@@ -144,13 +144,16 @@ export const getPayment = async (id: number) => {
 
   const processedPaymentBills = plainPayment.paymentBills.map((bill: any) => {
     let reference = null;
-    if (bill.referenceType === "sipl") {
+    if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
       reference = bill.sipl;
-    } else if (bill.referenceType === "bill") {
+    } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
       reference = bill.bill;
-    } else if (bill.referenceType === "soInvoice") {
+    } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE) {
       reference = bill.soInvoice;
+    } else if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.ADVANCED_DEPOSIT) {
+      reference = bill.advancedDeposit;
     }
+
     delete bill.sipl;
     delete bill.bill;
     delete bill.soInvoice;

@@ -697,36 +697,39 @@ Email notification.
 
 ---
 
-1. return FUll.
-2. loaders
-3. Drop-down, ascending order.
-4. Shortest path between delivery addresses.
-5. Container in SIPL.
-6. Change SIPL page design.
-7. show swap history.
-8. payment Detail page [!!!]
-9. Only show left quantity
-10. Direct SIPL.
-11. Inventory received date.
-12. Bundle block in inventory.
-13. Totals in Supplier payment.
-14. On payment submit if there is debit note amount is 0 then change button label.
-15. Final entry in Journal Entry.
-16. Payment Journal entry of supplier (vendor is wrong).
-17. In Allocated details show createdBy user.
-18. Service in Print invoice.
-19. Freight going into sales journal entry. [!!!]
-20. Total profit in LO and SO.
-21. Directly open ledger from COA.
-22. SSO refreshing error.
-23. Route loader
-24. Put condition that total paid amount for invoice must not exceed it's total amount.
-25. change value of selling price in add product to SO.
-26. Freight bill could be edited.
-27. Invoice total also add freight bill.
-28. Transaction Id in applied payment of SIPL.
-29. Remove walk through. And .
-30. Due amount in advance deposit.
-31. Service amount in SO payment summary.
+1. loaders
+2. Drop-down, ascending order.
+3. Shortest path between delivery addresses.
+4. Container in SIPL.
+5. Change SIPL page design.
+6. show swap history.
+7. Only show left quantity in SIPL.
+8. Inventory received date.
+9. Bundle block in inventory.
+10. Totals in Supplier payment.
+11. On payment submit if there is debit note amount is 0 then change button label.
+12. Final entry in Journal Entry.
+13. Payment Journal entry of supplier (vendor is wrong).
+14. In Allocated details show createdBy user.
+15. Service in Print invoice.
+16. Total profit in LO and SO.
+17. Directly open ledger from COA.
+18. SSO refreshing error.
+19. Route loader
+20. Put condition that total paid amount for invoice must not exceed it's total amount.
+21. change value of selling price in add product to SO.
+22. Freight bill could be edited.
+23. Invoice total also add freight bill.
+24. Transaction Id in applied payment of SIPL.
+25. Due amount in advance deposit.
+26. Service amount in SO payment summary.
+27. Service journal entry in PO.
+28. Add Pay freight bill option in payments.
+29. If I pay payment without applying.
+30. Loader in vendor payment.
+31. Serial number Of inventory Product in SIPL.
+32. Freight bill entry after received inventory is going multiple time.
+33. Service journal entry error.
+34. Advanced deposit entry for customer goes into CR.
 
 ——-

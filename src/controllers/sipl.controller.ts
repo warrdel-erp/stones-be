@@ -135,7 +135,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       etaDate,
       container,
       expiryDate,
-      paymentTerm: paymentTermId
+      paymentTermId
     };
 
     const notesData = { internal: internalNote, printable: printableNote };

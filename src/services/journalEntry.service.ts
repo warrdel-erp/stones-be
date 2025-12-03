@@ -217,10 +217,10 @@ export const createJournalEntryForReceiveInventory = async (
     for (const bill of siplData.bills) {
       for (const billItem of bill.billItems) {
         // Unit freight item cost (amount / total received area of all products in sipl).
-        // const unitFreightItemCost = billItem.amount / calculations.totalReceivingQuantity;
+        const unitFreightItemCost = decimal.decimalDivide(billItem.amount, calculations.totalReceivingQuantity);
 
         await journalEntryRepository.create({
-          amount: billItem.amount,
+          amount: decimal.decimalMultiply(unitFreightItemCost, productCalc.totalReceivedArea),
           ledgerId: billItem.ledgerAccountId,
           type: JOURNAL_ENTRY_TYPE.CR,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
@@ -452,7 +452,7 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
     await journalEntryRepository.create({
       amount: Number(tradeService.quantity) * Number(tradeService.price),
       ledgerId: service.ledgerAccountId,
-      type: JOURNAL_ENTRY_TYPE.DR,
+      type: JOURNAL_ENTRY_TYPE.CR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
       referenceId: loadingOrder.id,
@@ -465,7 +465,7 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
     await journalEntryRepository.create({
       amount: Number(tradeService.quantity) * Number(tradeService.price),
       ledgerId: customerLedgerAccountObj.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
+      type: JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
       referenceId: loadingOrder.id,

@@ -49,7 +49,21 @@ export const getPaymentById = async (id: number) => {
         ]
       },
       {
-        association: 'paymentBills'
+        association: 'paymentBills',
+        include: [
+          {
+            association: 'sipl'
+          },
+          {
+            association: 'bill'
+          },
+          {
+            association: 'soInvoice'
+          },
+          {
+            association: 'advancedDeposit'
+          },
+        ]
       }
     ]
   });

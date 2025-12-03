@@ -95,30 +95,59 @@ pnpm run initialize:db
 pm2 restart 1
 ```
 
+## Automated Deployment
+
+Two automated deployment scripts are available in the project root:
+
+### Standard Deployment (with data preservation)
+
+```bash
+./deploy.sh
+```
+
+### Fresh Database Deployment (drops all data)
+
+```bash
+./deploy-fresh-db.sh
+```
+
+See `DEPLOYMENT.md` for detailed instructions.
+
+```
+
 ## University deployment commands for staging
 
 ```
+
 sudo mariadb
+
 ```
 
 ```
+
 use stage_univeristy_db;
+
 ```
 
 ```
+
 use production_univeristy_db;
+
 ```
 
 ```
+
 cd /var/www/html/bestage.hiveerp.com/university-erp-be/
 sudo git pull
 sudo npm i
 pm2 restart 0
+
 ```
 
 ## University deployment commands for production
 
 ```
+
 cd ~/temp-univ-be/university-erp-be/
 sudo git pull
 sudo npm i
@@ -126,4 +155,7 @@ npm run docker:build
 docker stop univ-be
 docker rm univ-be
 npm run docker:run
+
+```
+
 ```
