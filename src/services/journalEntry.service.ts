@@ -21,6 +21,8 @@ import * as tradeServiceRepository from "../repositories/tradeService.repository
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
+import * as decimal from '../helper/decimal'
+
 
 export const createJournalEntryForBill = async (
   freightBillData: any,
@@ -215,10 +217,10 @@ export const createJournalEntryForReceiveInventory = async (
     for (const bill of siplData.bills) {
       for (const billItem of bill.billItems) {
         // Unit freight item cost (amount / total received area of all products in sipl).
-        const unitFreightItemCost = billItem.amount / calculations.totalReceivingQuantity;
+        // const unitFreightItemCost = billItem.amount / calculations.totalReceivingQuantity;
 
         await journalEntryRepository.create({
-          amount: unitFreightItemCost * productCalc.totalReceivedArea,
+          amount: billItem.amount,
           ledgerId: billItem.ledgerAccountId,
           type: JOURNAL_ENTRY_TYPE.CR,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
@@ -246,7 +248,7 @@ export const createJournalEntryForReceiveInventory = async (
     for (let slab of slabs) {
       slab = slab.get ? (slab.get({ plain: true }) as any) : (slab as any);
       const slabAny: any = slab;
-      const amount = slabAny.receivedSqrFt * productCalc.landedUnitCost;
+      const amount = decimal.decimalMultiply(slabAny.receivedSqrFt, productCalc.landedUnitCost);
 
       await journalEntryRepository.create({
         amount,
@@ -278,12 +280,14 @@ export async function createJournalEntriesForPaymentBills(bill: any, paymentData
 
   const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
     referenceId: paymentData.payeeId,
-  });
-
-  const ledgerAccountForCashBank: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-    key: DEFAULT_LEDGER_ACCOUNT_KEYS.CASH_BANK,
+    referenceType: paymentData.payeeType,
     clientId: paymentData.clientId,
   });
+
+  // const ledgerAccountForCashBank: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+  //   key: DEFAULT_LEDGER_ACCOUNT_KEYS.CASH_BANK,
+  //   clientId: paymentData.clientId,
+  // });
 
   if (bill.referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
 

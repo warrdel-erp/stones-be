@@ -715,14 +715,18 @@ Email notification.
 16. Payment Journal entry of supplier (vendor is wrong).
 17. In Allocated details show createdBy user.
 18. Service in Print invoice.
-19. Due amount must be in (-ve) of advanced deposit.
-20. Service change in customer payment. [!!!]
-21. Freight going into sales journal entry. [!!!]
-22. Total profit in LO and SO.
-23. Directly open ledger from COA.
-24. SSO refreshing error.
-25. Route loader
-26. Put condition that total paid amount for invoice must not exceed it's total amount.
-27. change value of selling price in add product to SO.
+19. Freight going into sales journal entry. [!!!]
+20. Total profit in LO and SO.
+21. Directly open ledger from COA.
+22. SSO refreshing error.
+23. Route loader
+24. Put condition that total paid amount for invoice must not exceed it's total amount.
+25. change value of selling price in add product to SO.
+26. Freight bill could be edited.
+27. Invoice total also add freight bill.
+28. Transaction Id in applied payment of SIPL.
+29. Remove walk through. And .
+30. Due amount in advance deposit.
+31. Service amount in SO payment summary.
 
 ——-

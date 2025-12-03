@@ -28,7 +28,6 @@ router.get("/:siplId/barcode", authenticateUser, siplController.getAllBarcode);
 // Get new combined slab number
 router.get('/:siplId/newCombinedSlabNumber', authenticateUser, siplController.getNewCombinedSlabNumberController);
 
-
 // get SIPL by id with less data
 router.get("/:id/less", authenticateUser, siplController.getSIPLBySlabIdSimple);
 

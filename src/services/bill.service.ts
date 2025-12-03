@@ -6,6 +6,7 @@ import * as journalEntryService from "./journalEntry.service";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository"
 
 import * as siplService from "./sipl.service";
+import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 
 export const createBill = async (billData: any, locationId: number) => {
   if (!billData.items || !Array.isArray(billData.items)) {
@@ -31,6 +32,7 @@ export const createBill = async (billData: any, locationId: number) => {
 
     const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
       referenceId: billData.vendorId,
+      referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR
     });
 
     await journalEntryService.createJournalEntryForBill(bill, transaction, locationId, ledgerAccount.id)

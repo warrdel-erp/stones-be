@@ -91,8 +91,7 @@ exit;
 cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app/
 sudo git pull
 sudo pnpm i
-pnpm run migrate:all
-pnpm run seed:all
+pnpm run initialize:db
 pm2 restart 1
 ```
 
