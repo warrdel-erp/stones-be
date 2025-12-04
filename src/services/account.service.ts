@@ -91,4 +91,19 @@ export const authenticateAccount = async (email: string, password: string) => {
 export const checkEmailAvailability = async (email: string) => {
     const account = await accountRepository.getAccountByEmail(email);
     return !!account;
+};
+
+// Get account by ID
+export const getAccountById = async (id: number) => {
+    const account = await accountRepository.getAccountById(id);
+
+    if (!account) {
+        throw new AppError("Account not found", 404);
+    }
+
+    // Return plain object without password
+    const accountData = account.get({ plain: true });
+    delete accountData.password;
+
+    return accountData;
 }; 

@@ -140,7 +140,10 @@ export const getAdvancedDepositById = async (id: number) => {
         include: [
             {
                 association: 'salesOrder',
-                attributes: ['id', 'clientSoNumber', 'clientId']
+                attributes: ['id', 'clientSoNumber', 'clientId'],
+                include: [
+                    { association: 'createdBy' }
+                ]
             },
             {
                 association: 'settlements',

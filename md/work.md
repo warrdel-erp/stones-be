@@ -706,30 +706,37 @@ Email notification.
 7. Only show left quantity in SIPL.
 8. Inventory received date.
 9. Bundle block in inventory.
-10. Totals in Supplier payment.
-11. On payment submit if there is debit note amount is 0 then change button label.
-12. Final entry in Journal Entry.
-13. Payment Journal entry of supplier (vendor is wrong).
-14. In Allocated details show createdBy user.
-15. Service in Print invoice.
-16. Total profit in LO and SO.
-17. Directly open ledger from COA.
-18. SSO refreshing error.
-19. Route loader
-20. Put condition that total paid amount for invoice must not exceed it's total amount.
-21. change value of selling price in add product to SO.
-22. Freight bill could be edited.
-23. Invoice total also add freight bill.
-24. Transaction Id in applied payment of SIPL.
-25. Due amount in advance deposit.
-26. Service amount in SO payment summary.
-27. Service journal entry in PO.
-28. Add Pay freight bill option in payments.
-29. If I pay payment without applying.
-30. Loader in vendor payment.
-31. Serial number Of inventory Product in SIPL.
-32. Freight bill entry after received inventory is going multiple time.
-33. Service journal entry error.
-34. Advanced deposit entry for customer goes into CR.
+10. Final entry in Journal Entry.
+
+11. Total profit in LO and SO.
+12. Directly open ledger from COA.
+13. SSO refreshing error.
+14. Route loader.
+15. Put condition that total paid amount for invoice must not exceed it's total amount.
+16. change value of selling price in add product to SO.
+17. Freight bill could be edited.
+18. Invoice total also add freight bill.
+19. Transaction Id in applied payment of SIPL.
+20. Due amount in advance deposit.
+21. Service amount in SO payment summary.
+22. Service journal entry in PO.
+23. Add Pay freight bill option in payments.
+24. If I pay payment without applying.
+25. Loader in vendor payment.
+26. Serial number Of inventory Product in SIPL.
+27. Freight bill entry after received inventory is going multiple time.
+28. Service journal entry error.
+29. Advanced deposit entry for customer goes into CR.
+30. Max slab limit will be 50.
+31. On receive inventory freight journal entry is going twice.
+32. Inventory Varience in Journal entry in SIPL, SO.
+33. Show total of LO with tax in SO detail page.
+34. If Multiple LO in single SO. Then total of invoice is not with tax. -> also in Journal entry.
+35. Time in payment info -> payment detail page.
+36. Settle invoice info in advance deposit in transaction “Applied”.
+37. Show all inventory products in pending.
+38. Confirm return journal entry is \* 144.
+39. Service charge in returns will be beared by customer. (With option.)
+40. Journal entry of services in returns.
 
 ——-

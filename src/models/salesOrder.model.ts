@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import User from "./user.model";
+import Account from "./Account.model";
 import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
@@ -52,13 +52,15 @@ const SalesOrder = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    userId: {
+    accountId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: User,
+        model: Account,
         key: "id",
       },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     customerId: {
       type: DataTypes.INTEGER,

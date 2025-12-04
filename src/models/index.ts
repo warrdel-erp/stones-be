@@ -330,9 +330,9 @@ JournalEntry.belongsTo(Product, {
 User.hasMany(Customer, { foreignKey: "createdBy", as: "customers" });
 Customer.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 
-// SO-User (one 'User' have multiple 'SO') (one 'SO' have one 'User')
-User.hasMany(SalesOrder, { foreignKey: "userId", as: "salesOrders" });
-SalesOrder.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
+// SO-Account (one 'Account' have multiple 'SO') (one 'SO' have one 'Account')
+Account.hasMany(SalesOrder, { foreignKey: "accountId", as: "salesOrders" });
+SalesOrder.belongsTo(Account, { foreignKey: "accountId", as: "createdBy" });
 
 // One Customer has Many SalesOrders, One SalesOrder belongs to One Customer
 Customer.hasMany(SalesOrder, { foreignKey: "customerId" });

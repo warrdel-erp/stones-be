@@ -51,7 +51,13 @@ export const getAllSalesOrders = async (
       },
       {
         association: "createdBy",
-        attributes: ["id", "username", "phone"],
+        attributes: ["id", "email"],
+        include: [
+          {
+            association: "user",
+            attributes: ["id", "username", "phone"],
+          },
+        ],
       },
       {
         association: "soLocation",
@@ -117,7 +123,13 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
       },
       {
         association: "createdBy",
-        attributes: ["id", "username", "phone"],
+        attributes: ["id", "email"],
+        include: [
+          {
+            association: "user",
+            attributes: ["id", "username", "phone"],
+          },
+        ],
       },
       {
         association: "soLocation",
@@ -195,7 +207,13 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
       },
       {
         association: "createdBy",
-        attributes: ["id", "username", "phone"],
+        attributes: ["id", "email"],
+        include: [
+          {
+            association: "user",
+            // attributes: ["id", "username", "phone"],
+          },
+        ],
       },
       {
         association: "soLocation",

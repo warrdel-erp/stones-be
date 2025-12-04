@@ -707,4 +707,11 @@ sticky navbar.
 4. payment Detail page [!!!]
 5. Direct SIPL.
 
-\*\* problem -> if I add 1000 slabs.
+---
+
+1. Totals in Supplier payment.
+2. On payment submit if there is debit note amount is 0 then change button label.
+3. In Allocated details show createdBy user.
+4. Service in Print invoice. [!!!].
+5. SO invoice Redesign.
+6. Inventory page BL-BN-SN and column width changes.

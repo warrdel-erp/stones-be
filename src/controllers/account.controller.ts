@@ -38,4 +38,17 @@ export const checkEmailExists = catchAsync(async (req: AuthRequest, res: Respons
     return SuccessResponse(res, 200, "Email check completed", { exists });
 });
 
+// Get account by ID
+export const getAccountById = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    if (!id) {
+        throw new AppError("Account ID is required", 400);
+    }
+
+    const account = await accountService.getAccountById(Number(id));
+
+    return SuccessResponse(res, 200, "Account fetched successfully", account);
+});
+
 

@@ -231,7 +231,7 @@ export const getAllocatedInventoryProductWithSalesOrderAndCustomer = async (inve
         where: {
           stage: {
             [Op.notIn]: [SALE_ORDER_PRODUCT_STAGES.CLOSED, SALE_ORDER_PRODUCT_STAGES.INVOICED]
-          }
+          },
         },
         include: [
           {
@@ -240,7 +240,20 @@ export const getAllocatedInventoryProductWithSalesOrderAndCustomer = async (inve
             include: [
               {
                 association: 'customer'
-              }
+              },
+              {
+                association: 'createdBy',
+                attributes: ['id'],
+                include: [
+                  {
+                    association: 'user',
+                  },
+                  {
+                    association: 'client',
+                  },
+                ]
+
+              },
             ]
           }
         ]

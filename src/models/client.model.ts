@@ -18,6 +18,12 @@ const Client = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    fullName: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.get('firstName') + ' ' + this.get('lastName')
+      },
+    },
     phone: {
       type: DataTypes.STRING(255),
       allowNull: false,
