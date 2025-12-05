@@ -68,17 +68,23 @@ export const updateClient = async (id: number, updateData: any) => {
  */
 export const getClientById = async (clientId: number, options?: any) => {
   return await Client.findByPk(clientId, {
-    attributes: { exclude: ['password'] },
     include: [
       {
         association: 'users',
-        include: ['account']
+        include: [
+          {
+            association: 'account',
+            attributes: { exclude: ['password'] }
+          }
+        ]
       },
       {
         association: 'company'
       },
       {
-        association: 'account'
+        association: 'account',
+        attributes: { exclude: ['password'] }
+
       }
     ],
     ...options

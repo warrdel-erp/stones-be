@@ -715,3 +715,9 @@ sticky navbar.
 4. Service in Print invoice. [!!!].
 5. SO invoice Redesign.
 6. Inventory page BL-BN-SN and column width changes.
+
+---
+
+1. location Page. [!!!]
+2. User profile page. [!!!]
+3. icons changed.

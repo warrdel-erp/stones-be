@@ -707,7 +707,6 @@ Email notification.
 8. Inventory received date.
 9. Bundle block in inventory.
 10. Final entry in Journal Entry.
-
 11. Total profit in LO and SO.
 12. Directly open ledger from COA.
 13. SSO refreshing error.
@@ -728,15 +727,13 @@ Email notification.
 28. Service journal entry error.
 29. Advanced deposit entry for customer goes into CR.
 30. Max slab limit will be 50.
-31. On receive inventory freight journal entry is going twice.
-32. Inventory Varience in Journal entry in SIPL, SO.
-33. Show total of LO with tax in SO detail page.
-34. If Multiple LO in single SO. Then total of invoice is not with tax. -> also in Journal entry.
-35. Time in payment info -> payment detail page.
-36. Settle invoice info in advance deposit in transaction “Applied”.
-37. Show all inventory products in pending.
-38. Confirm return journal entry is \* 144.
-39. Service charge in returns will be beared by customer. (With option.)
-40. Journal entry of services in returns.
+31. Inventory Variance in Journal entry in SIPL, SO.
+32. Show total of LO with tax in SO detail page.
+33. If Multiple LO in single SO. Then total of invoice is not with tax. -> also in Journal entry.
+34. Time in payment info -> payment detail page.
+35. Settle invoice info in advance deposit in transaction “Applied”.
+36. Show all inventory products in pending.
+37. Confirm return journal entry is \* 144.
+38. Service charge in returns will be beared by customer. (With option.)
 
 ——-
