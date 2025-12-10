@@ -690,14 +690,14 @@ sticky navbar.
 1. Journal entry multiplied by 144 in SO. [!!!]
 2. Put sqrFeet as fixed.
 3. Tax in customer payment. [!!!]
-4. seeder data for services.
 
 ---
 
-1. Chart of account design. [!!!]
-2. Drawers designs. [!!!]
-3. Service change in customer payment. [!!!]
-4. Due amount must be in (-ve) of advanced deposit.
+1. seeder data for services.
+2. Chart of account design. [!!!]
+3. Drawers designs. [!!!]
+4. Service change in customer payment. [!!!]
+5. Due amount must be in (-ve) of advanced deposit.
 
 ---
 
@@ -721,3 +721,21 @@ sticky navbar.
 1. location Page. [!!!]
 2. User profile page. [!!!]
 3. icons changed.
+4. Container design in SIPL.
+5. components consistency and demos.
+6. Change SIPL page design.
+
+---
+
+1. Inventory received date. [!]
+2. Invoice total also add freight bill. [!]
+3. Confirm return journal entry is \* 144. [!]
+4. Max slab limit will be 50. [!]
+5. Max Generic products limit will be 50. [!]
+
+---
+
+1. Journal entry button design in SIPL and SO.
+2. Journal Entry page design.
+3. Serial number Of inventory Product in SIPL in journal entry. [!]
+4. Advanced deposit entry for customer goes opposite (in CR). [!]

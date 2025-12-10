@@ -282,7 +282,7 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
                 // #5
                 await journalEntryRepository.create(
                     {
-                        amount: slabData.receivingLength * slabData.receivingLength * inventoryProduct.landedUnitCost,
+                        amount: slabData.receivedSqrFt * inventoryProduct.landedUnitCost,
                         ledgerId: ledgerAccountForFinishedGoods.id,
                         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -306,7 +306,7 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
                 // #6
                 await journalEntryRepository.create(
                     {
-                        amount: slabData.receivingLength * slabData.receivingLength * inventoryProduct.landedUnitCost,
+                        amount: slabData.receivedSqrFt * inventoryProduct.landedUnitCost,
                         ledgerId: ledgerAccountForCogs.id,
                         type: JOURNAL_ENTRY_TYPE.CR,
 

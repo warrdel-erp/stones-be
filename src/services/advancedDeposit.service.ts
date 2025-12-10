@@ -93,7 +93,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
             {
                 amount: data.amount,
                 ledgerId: data.accountId,
-                type: JOURNAL_ENTRY_TYPE.CR,
+                type: JOURNAL_ENTRY_TYPE.DR,
                 // reference is the BILL.
                 referenceId: advancedDeposit.id,
                 referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
@@ -110,7 +110,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
             {
                 amount: data.amount,
                 ledgerId: salesOrder.customer.ledgerAccount.id,
-                type: JOURNAL_ENTRY_TYPE.DR,
+                type: JOURNAL_ENTRY_TYPE.CR,
 
                 referenceId: advancedDeposit.id,
                 referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,

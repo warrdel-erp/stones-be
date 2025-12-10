@@ -113,8 +113,6 @@ Two automated deployment scripts are available in the project root:
 
 See `DEPLOYMENT.md` for detailed instructions.
 
-```
-
 ## University deployment commands for staging
 
 ```
@@ -155,7 +153,6 @@ npm run docker:build
 docker stop univ-be
 docker rm univ-be
 npm run docker:run
-
-```
+docker ps
 
 ```

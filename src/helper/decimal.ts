@@ -1,11 +1,6 @@
 import Decimal from 'decimal.js';
 
 /**
- * Common Decimal utility functions with 2 decimal places
- * All functions take number and return number with 2 decimal places
- */
-
-/**
  * Add two numbers with 2 decimal places
  */
 export const decimalAdd = (a: number, b: number): number => {

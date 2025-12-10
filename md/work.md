@@ -700,40 +700,26 @@ Email notification.
 1. loaders
 2. Drop-down, ascending order.
 3. Shortest path between delivery addresses.
-4. Container in SIPL.
-5. Change SIPL page design.
-6. show swap history.
-7. Only show left quantity in SIPL.
-8. Inventory received date.
-9. Bundle block in inventory.
-10. Final entry in Journal Entry.
-11. Total profit in LO and SO.
-12. Directly open ledger from COA.
-13. SSO refreshing error.
-14. Route loader.
-15. Put condition that total paid amount for invoice must not exceed it's total amount.
-16. change value of selling price in add product to SO.
-17. Freight bill could be edited.
-18. Invoice total also add freight bill.
-19. Transaction Id in applied payment of SIPL.
-20. Due amount in advance deposit.
-21. Service amount in SO payment summary.
-22. Service journal entry in PO.
-23. Add Pay freight bill option in payments.
-24. If I pay payment without applying.
-25. Loader in vendor payment.
-26. Serial number Of inventory Product in SIPL.
-27. Freight bill entry after received inventory is going multiple time.
-28. Service journal entry error.
-29. Advanced deposit entry for customer goes into CR.
-30. Max slab limit will be 50.
-31. Inventory Variance in Journal entry in SIPL, SO.
-32. Show total of LO with tax in SO detail page.
-33. If Multiple LO in single SO. Then total of invoice is not with tax. -> also in Journal entry.
-34. Time in payment info -> payment detail page.
-35. Settle invoice info in advance deposit in transaction “Applied”.
-36. Show all inventory products in pending.
-37. Confirm return journal entry is \* 144.
-38. Service charge in returns will be beared by customer. (With option.)
+4. Container implementation in SIPL.
+5. show swap history.
+6. Only show left quantity in SIPL.
+7. Bundle block in inventory. [!]
+8. Final entry in Journal Entry.
+9. Total profit in LO and SO.
+10. Directly open ledger from COA.
+11. Route loader.
+12. Put condition that total paid amount for invoice must not exceed it's total amount. [BE]
+13. Freight bill could be edited (with journal entry).
+14. Due amount of SO with advance deposit.
+15. Service journal entry in PO. [!] [discussion]
+16. Add Pay freight bill option in payments.
+17. If I pay payment without applying behavior.
+18. Loader in vendor payment. [!]
+19. Inventory Variance in Journal entry in SIPL, SO. [!]
+20. Show total of LO with tax in SO detail page.
+21. If Multiple LO in single SO. Then total of invoice is not with tax. -> also in Journal entry. [!!!]
+22. Time in payment info -> payment detail page.
+23. Service charge in returns will be bared by customer. (With option.)
+24. use helmet library.
 
 ——-

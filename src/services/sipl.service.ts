@@ -420,7 +420,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     })),
     "amount"
   );
-  const totalAmount = sumDecimal([totalProductsAmount, totalTradeServicesAmount]);
+  const totalAmount = sumDecimal([totalProductsAmount, totalTradeServicesAmount, totalBillsCharges]);
 
   // Calculate total area of slabs that received.
   let totalReceivingQuantity = Number(

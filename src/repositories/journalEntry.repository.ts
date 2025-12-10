@@ -43,6 +43,7 @@ export const findAll = async (filters: any, clientId: number) => {
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB:
         entry.subReferenceData = await models.Slab.findOne({
           where: { id: entry.subReferenceId },
+          include: 'inventoryProduct'
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT:
