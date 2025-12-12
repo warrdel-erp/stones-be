@@ -1,13 +1,15 @@
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as salesOrderRepository from '../repositories/salesOrder.repository'
 import * as soProductSwapHistoryRepository from "../repositories/soProductSwapHistory.repository";
 import * as inventoryProductHoldRepository from "../repositories/inventoryProductHold.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
-import { INVENTORY_ITEM_STATUS } from "../constants";
+import { INVENTORY_ITEM_STATUS, SALES_TAX } from "../constants";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+
 
 // Create multiple SalesOrderProduct entries
 export const createSalesOrderProducts = async (products: any[], salesOrderId: number, transaction?: Transaction) => {
@@ -42,12 +44,15 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
         }
       }
 
+      const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction)
+
       // Create new sales order product entry
       const newProduct = await salesOrderProductRepository.createSalesOrderProduct(
         {
           ...product,
           salesOrderId,
           isSlabType: inventoryProduct.isSlabType,
+          taxPercentage: product.taxApplied ? SALES_TAX.find((e) => e.id == salesOrder?.taxId)?.value : 0,
           receivingAreaSqFt
         },
         transaction

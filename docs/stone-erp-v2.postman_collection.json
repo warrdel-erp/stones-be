@@ -37,6 +37,70 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "User profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/auth/userProfile",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"userProfile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/account/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"account",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -82,7 +146,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\n//     \"email\": \"clinet1@gmail.com\",\n//     \"password\": \"client\"\n// }\n\n\n{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"user\"\n}\n\n\n// {\n//     \"email\": \"contact1@techsolutions.com\",\n//     \"password\": \"client\"\n// }\n",
+							"raw": "// {\n//     \"email\": \"clinet1@gmail.com\",\n//     \"password\": \"client\"\n// }\n\n\n// {\n//     \"email\": \"user@gmail.com\",\n//     \"password\": \"user\"\n// }\n\n\n{\n    \"email\": \"contact1@techsolutions.com\",\n    \"password\": \"SecurePass123\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1298,7 +1362,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"billNumber\": 1001,\n    \"type\": \"freight\",\n    \"paymentTerms\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 653,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 400,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}\n",
+							"raw": "{\n    \"type\": \"freight\",\n    \"paymentTermId\": 1,\n    \"referenceType\": \"sipl\",\n    \"referenceId\": 1,\n    \"invoice\": 4,\n    \"invoiceDate\": \"2035-3-4\",\n    \"dueDate\": \"2035-3-4\",\n    \"billDate\": \"2035-3-4\",\n    \"vendorId\": 2,\n    \"items\": [\n        {\n            \"service\": \"Logistics Service\",\n            \"amount\": 653,\n            \"description\": \"thib i description\",\n            \"ledgerAccountId\": 1\n        },\n        {\n            \"service\": \"Handling Charges\",\n            \"amount\": 400,\n            \"ledgerAccountId\": 2\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2029,7 +2093,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5002/api/inventory/location/1?page=1&limit=200",
+							"raw": "http://localhost:5002/api/inventory/location/1?page=1&categorization=BLOCK&limit=200",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -2048,8 +2112,7 @@
 								},
 								{
 									"key": "categorization",
-									"value": "BLOCK",
-									"disabled": true
+									"value": "BLOCK"
 								},
 								{
 									"key": "genericOnly",
@@ -3044,7 +3107,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/loadingOrder?notInvoicedOnly=true",
+							"raw": "{{baseurl}}/api/loadingOrder",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -3055,7 +3118,8 @@
 							"query": [
 								{
 									"key": "notInvoicedOnly",
-									"value": "true"
+									"value": "true",
+									"disabled": true
 								}
 							]
 						}
@@ -3658,7 +3722,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"paymentType\": \"outgoing\",\n    \"payeeId\": 1,\n    \"payeeType\": \"vendor\",\n    \"amount\": 20,\n    \"paymentMethod\": \"cash\",\n    \"referenceNo\": 23,\n    \"referenceDate\":\"3023-11-05\",\n    \"transactionId\": \"TN1245689\",\n    \"status\": \"completed\",\n    \"remark\": \"this si remark\",\n    \"bills\": [\n        // {\n        //     \"referenceId\": 2,\n        //     \"referenceType\": \"BILL\",\n        //     \"amount\": 18,\n        //     \"description\": \"this is description\"\n        // }\n        {\n            \"referenceId\": 1,\n            \"referenceType\": \"SIPL\",\n            \"amount\": 20\n        }\n    ]\n}\n",
+							"raw": "{\n    \"paymentType\": \"outgoing\",\n    \"payeeId\": 1,\n    \"payeeType\": \"vendor\",\n    \"amount\": 20,\n    \"paymentMethod\": \"cash\",\n    \"referenceNo\": 23,\n    \"referenceDate\":\"3023-11-05\",\n    \"transactionId\": \"TN1245689\",\n    \"status\": \"completed\",\n    \"remark\": \"this si remark\",\n    \"bills\": [\n        // {\n        //     \"referenceId\": 2,\n        //     \"referenceType\": \"BILL\",\n        //     \"amount\": 18,\n        //     \"description\": \"this is description\"\n        // }\n        {\n            \"referenceId\": 1,\n            \"referenceType\": \"SIPL\",\n            \"amount\": 20,\n            \"advencedDepositSettlement\": {\n                \"amount\": 1000,\n                \"advancedDepositId\": 1\n            }\n\n        }\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4216,6 +4280,84 @@
 								{
 									"key": "soProductId",
 									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrderProduct/:salesOrderId",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrderProduct",
+								":salesOrderId"
+							],
+							"variable": [
+								{
+									"key": "salesOrderId",
+									"value": "11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get swap history",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 200,\n    \"salesOrderId\": 16,\n    \"paymentMethod\": \"cash\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/salesOrderProduct/:id/swapHistory",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"salesOrderProduct",
+								":id",
+								"swapHistory"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12"
 								}
 							]
 						}
@@ -5817,6 +5959,98 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get advanced by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/advancedDeposit/:id",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"advancedDeposit",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "settle advanced deposit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"invoiceId\": 1,\n        \"amount\": 5\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/advancedDeposit/:id/settle",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"advancedDeposit",
+								":id",
+								"settle"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -6068,6 +6302,96 @@
 								"api",
 								"delivery",
 								"approve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "complete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceDeliveries\": [\n        {\n            \"id\": 1,\n            \"order\": 0\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery/:deliveryId/complete",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								":deliveryId",
+								"complete"
+							],
+							"variable": [
+								{
+									"key": "deliveryId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reject",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceDeliveries\": [\n        {\n            \"id\": 1,\n            \"order\": 0\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/delivery/:deliveryId/reject",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								":deliveryId",
+								"reject"
+							],
+							"variable": [
+								{
+									"key": "deliveryId",
+									"value": "7"
+								}
 							]
 						}
 					},
@@ -6644,7 +6968,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/inventoryProduct/specialFilters?block=21",
+							"raw": "{{baseurl}}/api/inventoryProduct/specialFilters?siplId=1",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -6656,12 +6980,12 @@
 							"query": [
 								{
 									"key": "siplId",
-									"value": "1",
-									"disabled": true
+									"value": "1"
 								},
 								{
 									"key": "block",
-									"value": "21"
+									"value": "21",
+									"disabled": true
 								}
 							]
 						}
@@ -6696,6 +7020,42 @@
 								{
 									"key": "productId",
 									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Details of allocations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/:id/allocatedDetails",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								":id",
+								"allocatedDetails"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
 								}
 							]
 						}
@@ -6895,7 +7255,7 @@
 					"response": []
 				},
 				{
-					"name": "Get hold detail",
+					"name": "Bulk Hold",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -6911,6 +7271,48 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
+							"raw": "{\n    \"inventoryProductIds\": [\n        20,\n        21,\n        22\n    ],\n    \"customerId\": 1,\n    \"note\": \"this is note\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/inventoryProduct/holds/bulk",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"inventoryProduct",
+								"holds",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get hold detail",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
 							"raw": "{\n    \"note\": \"this is not\"\n}",
 							"options": {
 								"raw": {
@@ -6919,20 +7321,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseurl}}/api/inventoryProduct/:id/hold",
+							"raw": "{{baseurl}}/api/inventoryProduct/hold/:id",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
 								"inventoryProduct",
-								":id",
-								"hold"
+								"hold",
+								":id"
 							],
 							"variable": [
 								{
 									"key": "id",
-									"value": "36"
+									"value": "7"
 								}
 							]
 						}
@@ -7238,13 +7640,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/cartItem",
+							"raw": "{{baseurl}}/api/selectionSheet/:id",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
-								"cartItem"
+								"selectionSheet",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -7266,14 +7675,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseurl}}/api/cartItem/count",
+							"raw": "{{baseurl}}/api/selectionSheet",
 							"host": [
 								"{{baseurl}}"
 							],
 							"path": [
 								"api",
-								"cartItem",
-								"count"
+								"selectionSheet"
 							]
 						}
 					},
@@ -7296,7 +7704,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"inventoryProductId\": 34\n}",
+							"raw": "{\n    \"customerId\": 1,\n    \"inventoryProductIds\": [38, 39]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7355,6 +7763,112 @@
 									"key": "id",
 									"value": "1"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "options",
+			"item": [
+				{
+					"name": "Services",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/options/services?purchaseOnly=true",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"options",
+								"services"
+							],
+							"query": [
+								{
+									"key": "purchaseOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invoices for a customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/options/customer/:customerId/invoices",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"options",
+								"customer",
+								":customerId",
+								"invoices"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "customers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/options/customers",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"options",
+								"customers"
 							]
 						}
 					},

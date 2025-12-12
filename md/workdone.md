@@ -739,3 +739,21 @@ sticky navbar.
 2. Journal Entry page design.
 3. Serial number Of inventory Product in SIPL in journal entry. [!]
 4. Advanced deposit entry for customer goes opposite (in CR). [!]
+5. Bundle block data in inventory. [!]. [big-one]
+
+---
+
+1. Loader in vendor payment. [!]
+2. Info card of customer, vendor, addresses design change.
+3. show swap history. [!]
+4. If product added after SO creation then it's tax is not calculated. [!!!]
+5. After SalesOrder creations adding product's tax will go as per previous added products, or true(if not). [!!!]
+
+---
+
+1. stuck in univ migration for prod (error).
+2. journal entry page heading.
+3. misalignment of journal entries table columns.
+4. flickering of pages and table data.
+5. mark \* to required in Create product.
+6. loaders [Big one].

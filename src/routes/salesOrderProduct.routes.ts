@@ -8,6 +8,9 @@ const router = express.Router();
 router.post("/bulkForSalesOrder/:salesOrderId", authenticateUser, salesOrderProductController.addSalesOrderProducts);
 
 // hold-unHold slab
+/**
+ * @Deprecated
+ */
 router.put("/:soProductId/pick", authenticateUser, salesOrderProductController.updateSoProductPickedStatus);
 
 // swap

@@ -515,4 +515,8 @@ export const getTotalPaidAmountForSO = (id: number) => {
     ],
     group: ['id']
   })
-} 
+}
+
+export const getSimpleSalesOrder = (id: number, transaction?: Transaction) => {
+  return models.SalesOrder.findByPk(id, { transaction })
+}

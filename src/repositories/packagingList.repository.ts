@@ -69,7 +69,12 @@ export const getPackagingListById = async (id: number) => {
                 {
                   association: "genericProduct",
                 },
+
               ],
+            },
+            {
+              association: "swapHistories",
+              attributes: ['id']
             },
           ],
         },

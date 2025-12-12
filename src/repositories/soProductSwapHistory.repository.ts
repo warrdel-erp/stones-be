@@ -14,33 +14,33 @@ export const getSwapHistoryBySalesProductId = async (salesProductId: number) => 
     include: [
       {
         association: "inventoryProduct",
-        attributes: ["id", "isSlabType"],
+        // attributes: ["id", "isSlabType"],
         include: [
           {
             association: "product",
-            attributes: ["id", "name", "code"],
+            attributes: ["id", "name"],
             include: [
               {
-                association: "productGroup",
+                association: "group",
                 attributes: ["id", "name"],
               },
               {
-                association: "productBaseColor",
+                association: "baseColor",
                 attributes: ["id", "name"],
               },
               {
-                association: "productFinish",
+                association: "finish",
                 attributes: ["id", "name"],
               }
             ]
           },
           {
             association: "slab",
-            attributes: ["id", "receivingLength", "receivingWidth", "receivingThickness"],
+            // attributes: ["id", "receivingLength", "receivingWidth"],
           },
           {
             association: "genericProduct",
-            attributes: ["id", "name"],
+            // attributes: ["id", "name"],
           }
         ]
       }

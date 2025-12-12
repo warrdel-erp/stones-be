@@ -138,6 +138,7 @@ use production_univeristy_db;
 cd /var/www/html/bestage.hiveerp.com/university-erp-be/
 sudo git pull
 sudo npm i
+npm run migrate
 pm2 restart 0
 
 ```
@@ -153,6 +154,7 @@ npm run docker:build
 docker stop univ-be
 docker rm univ-be
 npm run docker:run
+npm run migrate
 docker ps
 
 ```

@@ -180,6 +180,10 @@ export const getLoadingOrderById = async (id: number) => {
                 }
               }
             ]
+          },
+          {
+            association: 'swapHistories',
+            attributes: ['id']
           }
         ],
       },

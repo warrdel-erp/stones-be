@@ -27,14 +27,9 @@ export const createSalesOrder = async (data: any) => {
     // Create sales order
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
 
-    // Add Tax percentage to salesOrderProduct
-    const productsWithTaxPercentage = data.products.map((product: any) => ({
-      ...product,
-      taxPercentage: SALES_TAX.find((e) => e.id == data.taxId)?.value || 0
-    }));
-
+    // Create sales order products
     const salesOrderProducts = await salesOrderProductService.createSalesOrderProducts(
-      productsWithTaxPercentage,
+      data.products,
       salesOrder.id,
       transaction
     );
