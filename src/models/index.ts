@@ -684,10 +684,10 @@ InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId",
 SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
 
-LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false })
+LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } })
 TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
 
-SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false })
+SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } })
 TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 
 export {

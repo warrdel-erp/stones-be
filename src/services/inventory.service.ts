@@ -81,7 +81,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
         const block = slab.block || null;
         if (!blockGroups.has(block)) {
           blockGroups.set(block, []);
-        }
+      }
 
         const inventoryProductData = {
           ...invProduct.get({ plain: true }),
@@ -101,9 +101,9 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
           )
         );
 
-        return {
-          block,
-          totalQuantity,
+      return {
+        block,
+        totalQuantity,
           inventoryProducts
         };
       });
@@ -136,13 +136,13 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
 
       delete product.inventoryProducts;
 
-      return {
-        ...product,
+    return {
+      ...product,
         totalAvailableQuantity,
         totalSlabsCount,
-        totalHoldQuantity,
-        blocks
-      };
+      totalHoldQuantity,
+      blocks
+    };
     })
   );
 
@@ -178,7 +178,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
         const lot = slab.lot || null;
         if (!bundleGroups.has(lot)) {
           bundleGroups.set(lot, []);
-        }
+      }
 
         const inventoryProductData = {
           ...invProduct.get({ plain: true }),
@@ -198,9 +198,9 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
           )
         );
 
-        return {
-          bundle,
-          totalQuantity,
+      return {
+        bundle,
+        totalQuantity,
           inventoryProducts
         };
       });
@@ -233,13 +233,13 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
       delete product.inventoryProducts;
 
-      return {
-        ...product,
+    return {
+      ...product,
         totalAvailableQuantity,
         totalSlabsCount,
-        totalHoldQuantity,
-        bundles
-      };
+      totalHoldQuantity,
+      bundles
+    };
     })
   );
 
