@@ -187,6 +187,14 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
         attributes: ["location"],
       },
       {
+        association: 'paymentBills',
+        include: [{
+          association: 'payment',
+          attributes: ['transactionCode']
+
+        }]
+      },
+      {
         association: 'tradeServices'
       }
     ],
@@ -217,9 +225,6 @@ export const getAllSIPLs = async (page: number, limit: number, clientId: number)
         model: models.Container,
         as: "containers",
         required: false,
-        where: {
-          referenceType: 'sipl'
-        }
       },
       {
         model: models.Location,

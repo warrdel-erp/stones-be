@@ -757,3 +757,17 @@ sticky navbar.
 4. flickering of pages and table data.
 5. mark \* to required in Create product.
 6. loaders [Big one].
+
+---
+
+1. Container implementation in SIPL. [!]
+2. Async action loading in table action.
+3. Directly open ledger from COA. [!]
+4. design freight bill page [!!]
+5. Only show left quantity in SIPL. [!]
+6. Put condition that total paid amount for invoice must not exceed it's total amount. [BE] [!]
+7. If I pay payment without applying (behavior). [!]
+8. Route loader. [idea-dropped-as-no-need-in-react]
+9. Payment details in SIPL page.
+10. Time in payment info -> payment detail page.
+11. use helmet library in BE.

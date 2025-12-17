@@ -26,6 +26,7 @@
     "decimal.js": "^10.6.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "helmet": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mysql2": "^3.12.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/helmet": "^4.0.0",
     "@types/node": "^22.13.5",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.19.1",

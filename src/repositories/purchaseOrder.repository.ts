@@ -71,10 +71,6 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
         attributes: ["name", "vendorScope"],
       },
       {
-        model: models.Container,
-        as: "container",
-      },
-      {
         model: models.RequestedPurchaseProduct,
         as: "requestedPurchaseProducts",
         include: [
@@ -200,10 +196,6 @@ export const getPurchaseOrderById = async (id: number) => {
       {
         model: models.Vendor,
         as: "supplier",
-      },
-      {
-        model: models.Container,
-        as: "container",
       },
       {
         model: models.RequestedPurchaseProduct,

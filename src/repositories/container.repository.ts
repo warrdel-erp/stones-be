@@ -26,3 +26,11 @@ export const updateContainer = async (id: number, data: any) => {
 export const deleteContainer = async (id: number) => {
   return await models.Container.destroy({ where: { id } });
 };
+
+// Get Containers By SIPL ID
+export const getContainersBySiplId = async (siplId: number) => {
+  return await models.Container.findAll({
+    where: { siplId },
+    order: [["createdAt", "ASC"]],
+  });
+};

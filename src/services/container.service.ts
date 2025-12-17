@@ -19,3 +19,7 @@ export const updateContainer = async (id: number, data: any) => {
 export const deleteContainer = async (id: number) => {
   return await containerRepository.deleteContainer(id);
 };
+
+export const getContainersBySiplId = async (siplId: number) => {
+  return await containerRepository.getContainersBySiplId(siplId);
+};

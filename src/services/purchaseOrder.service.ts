@@ -1,15 +1,14 @@
 import * as poRepository from "../repositories/purchaseOrder.repository";
-import * as soRepository from "../repositories/salesOrder.repository";
 import { sequelize } from "../config/database";
 import * as notesRepository from "../repositories/notes.repository";
 import * as requestedPurchaseProductRepository from "../repositories/requestedPurchaseProduct.repository";
 import * as siplProductRepository from "../repositories/siplProducts.repository";
-import * as containerService from "../services/container.service";
 import { Transaction } from "sequelize";
-import { PAYMENT_TERMS, SCOP } from "../constants";
+import { SCOP } from "../constants";
 import * as paymentBillsRepository from '../repositories/paymentBills.repository'
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import _ from "lodash";
+import * as decimal from '../helper/decimal'
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -25,15 +24,6 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     // Create purchase order
     const newPO: any = await poRepository.createPurchaseOrder(poData, transaction);
 
-    // Create corresponding container.
-    let container;
-    if (poData.container) {
-      container = await containerService.createContainer({
-        number: poData.container,
-        referenceType: "purchase_order",
-        referenceId: newPO.id,
-      });
-    }
     let freightDetail;
 
     // Create Freight Detail (if provided)
@@ -203,9 +193,15 @@ export const getPurchaseOrderById = async (id: number) => {
   // If requestedPurchaseProducts exist, compute totalQuantity per requestedPurchaseProduct
   if (purchaseOrder?.requestedPurchaseProducts) {
     purchaseOrder.requestedPurchaseProducts = purchaseOrder.requestedPurchaseProducts.map((rpp: any) => {
+
       const fulfilledQuantityBySipl =
         rpp.siplProducts?.reduce((sum: number, sp: any) => sum + (sp.quantity || 0), 0) || 0;
-      return { ...rpp, fulfilledQuantityBySipl };
+
+      return {
+        ...rpp,
+        fulfilledQuantityBySipl,
+        leftQuantity: decimal.decimalSubtract(rpp.quantity, fulfilledQuantityBySipl)
+      };
     });
   }
 

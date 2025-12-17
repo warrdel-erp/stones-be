@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import cors from "cors";
+import helmet from "helmet";
 import express, { urlencoded } from "express";
 import { connectDB } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
@@ -59,6 +60,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+  })
+);
+
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 // Routes

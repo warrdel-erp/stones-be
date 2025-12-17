@@ -22,6 +22,9 @@ router.get("/:id/getReceiveInventoryData", authenticateUser, siplController.getR
 // Add container to SIPL
 router.post("/:id/addContainer", authenticateUser, siplController.addContainer);
 
+// Get all containers of a SIPL
+router.get("/:id/containers", authenticateUser, siplController.getSIPLContainers);
+
 // Get all barcode
 router.get("/:siplId/barcode", authenticateUser, siplController.getAllBarcode);
 

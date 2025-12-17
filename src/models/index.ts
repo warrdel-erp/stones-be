@@ -436,12 +436,12 @@ LedgerAccount.hasMany(BillItem, { foreignKey: "ledgerAccountId", as: "billItems"
 BillItem.belongsTo(LedgerAccount, { foreignKey: "ledgerAccountId", as: "ledgerAccount" });
 
 // One SIPL can have multiple Container.
-SIPL.hasMany(Container, { foreignKey: "referenceId", constraints: false, as: "containers" });
-Container.belongsTo(SIPL, { foreignKey: "referenceId", constraints: false, as: "sipl" });
+SIPL.hasMany(Container, { foreignKey: "siplId", as: "containers" });
+Container.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
 
-// One purchase order can have one container.
-PurchaseOrder.hasOne(Container, { foreignKey: "referenceId", constraints: false, as: "container" });
-Container.belongsTo(PurchaseOrder, { foreignKey: "referenceId", constraints: false, as: "purchaseOrder" });
+// Container belongs to Client
+Container.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(Container, { foreignKey: "clientId", as: "containers" });
 
 Product.belongsTo(Bin, { foreignKey: "binId", as: "bin" });
 Bin.hasMany(Product, { foreignKey: "binId", as: "products" });
@@ -684,11 +684,11 @@ InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId",
 SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
 
-LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices" })
-TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
+LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false })
+TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
 
-SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices" })
-TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
+SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false })
+TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 
 export {
   Client,

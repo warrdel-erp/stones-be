@@ -1,5 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import SIPL from "./sipl.model";
+import Client from "./client.model";
 
 const Container = sequelize.define(
   "Container",
@@ -9,21 +11,33 @@ const Container = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    number: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    siplId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: SIPL,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    referenceType: {
-      type: DataTypes.ENUM("sipl", "purchase_order"),
-      allowNull: false,
-    },
-    referenceId: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
     },
   },
   {
@@ -32,10 +46,10 @@ const Container = sequelize.define(
   }
 );
 
-// Hook to prevent updating referenceId, referenceType
+// Hook to prevent updating siplId and clientId
 Container.beforeUpdate((container: any) => {
-  delete container.dataValues.referenceId;
-  delete container.dataValues.referenceType;
+  delete container.dataValues.siplId;
+  delete container.dataValues.clientId;
 });
 
 export default Container;

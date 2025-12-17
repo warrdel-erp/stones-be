@@ -119,7 +119,7 @@ export async function createSIPLService(siplData: any, locationId: number, trans
 
     let container;
     if (siplData.container) {
-      container = await addContainer({ number: siplData.container }, sipl.id, transaction);
+      container = await addContainer({ name: siplData.container }, sipl.id, siplData.clientId, transaction);
     }
 
     const productsWithSIPLId: any[] = [];
@@ -164,12 +164,12 @@ export async function createSIPLService(siplData: any, locationId: number, trans
   }
 }
 
-export const addContainer = async (containerData: Object, siplId: number, transaction?: Transaction) => {
+export const addContainer = async (containerData: Object, siplId: number, clientId: number, transaction?: Transaction) => {
   const container = await containerRepository.createContainer(
     {
       ...containerData,
-      referenceType: "sipl",
-      referenceId: siplId,
+      siplId,
+      clientId,
     },
     transaction
   );
@@ -548,4 +548,9 @@ export const getAllBarcode: any = async (siplId: number) => {
 // Get new combined slab number
 export const getNewCombinedSlabNumberService = async (siplId: number) => {
   return await inventoryProductRepository.getNewCombinedNumber(siplId);
+};
+
+// Get all containers of a SIPL
+export const getSIPLContainers = async (siplId: number) => {
+  return await containerRepository.getContainersBySiplId(siplId);
 };

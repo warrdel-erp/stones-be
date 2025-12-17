@@ -699,24 +699,15 @@ Email notification.
 
 1. Drop-down, ascending order.
 2. Shortest path between delivery addresses.
-3. Container implementation in SIPL. [!] [discussion-of-adding-from-po-sipl]
-4. Only show left quantity in SIPL.
-5. Final entry in Journal Entry.
-6. Total profit in LO and SO.
-7. Directly open ledger from COA. [!]
-8. Route loader.
-9. Put condition that total paid amount for invoice must not exceed it's total amount. [BE] [!]
-10. Freight bill could be edited (with journal entry).
-11. Due amount of SO with advance deposit. [!]
+3. Total profit in LO and SO.
+4. Freight bill could be edited (with journal entry).
+5. Due amount of SO with advance deposit. [!] [discuss-again]
+6. Add Pay freight bill option in payments. [discuss-again]
+7. Inventory Variance in Journal entry in SIPL, SO. [!]
+8. Show total of LO with tax in SO detail page. [!]
+9. Service charge in returns will be bared by customer. (With option.)
+10. Test whole project with generic product and combination of slab and generic products. [!]
+11. Service charge is being added in SIPL even if it was not added. [!!]
 12. Service journal entry in PO. [!] [discussion]
-13. Add Pay freight bill option in payments.
-14. If I pay payment without applying behavior. [!]
-15. Inventory Variance in Journal entry in SIPL, SO. [!]
-16. Show total of LO with tax in SO detail page. [!]
-17. Time in payment info -> payment detail page.
-18. Service charge in returns will be bared by customer. (With option.)
-19. use helmet library in BE.
-20. Test whole project with generic product and combination of slab and generic products. [!]
-21. design freight bill page [!!]
 
 ——-

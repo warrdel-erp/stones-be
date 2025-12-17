@@ -6,12 +6,110 @@ import * as paymentRepository from "../repositories/payment.repository";
 import * as paymentBillsRepository from "../repositories/paymentBills.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repository";
+import * as siplService from "../services/sipl.service";
 import { createJournalEntriesForPaymentBills } from "./journalEntry.service";
 import * as customerRepository from "../repositories/customer.repository";
 import * as vendorRepository from "../repositories/vendor.repository";
 import * as models from "../models";
 import { Transaction } from "sequelize";
 import _ from "lodash";
+import { decimalAdd, decimalSubtract, decimalGreaterThan } from "../helper/decimal";
+
+/**
+ * Customer payments guard:
+ * For each Sales Order Invoice, ensure:
+ *   totalInvoiceAmount >= alreadyPaid (includes settled advanced deposits) + requestedPaymentAmount
+ */
+const assertCustomerInvoicePayments = async (billsData: any[]) => {
+  // Group requested amounts per invoice
+  const requested = new Map<number, number>();
+  for (const bill of billsData) {
+    if (bill.referenceType !== PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE) continue;
+    const invoiceId = Number(bill.referenceId);
+    const amt = Number(bill.amount || 0);
+    requested.set(invoiceId, decimalAdd(requested.get(invoiceId) || 0, amt));
+  }
+
+  for (const [invoiceId, requestedAmount] of requested.entries()) {
+    const invoice: any = await models.SalesOrderInvoice.findByPk(invoiceId);
+    if (!invoice) {
+      throw new AppError(`Invoice with ID ${invoiceId} not found.`, 400);
+    }
+
+    const totalInvoiceAmount = Number(invoice.finalAmount || 0);
+    // alreadyPaid includes settled Advanced Deposits via repository helper
+    const alreadyPaid =
+      (await paymentBillsRepository.getTotalPaidAmountOfBill(
+        invoiceId,
+        PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE
+      )) || 0;
+
+    const totalAfterPayment = decimalAdd(alreadyPaid, requestedAmount);
+    if (decimalGreaterThan(totalAfterPayment, totalInvoiceAmount)) {
+      const remaining = decimalSubtract(totalInvoiceAmount, alreadyPaid);
+      throw new AppError(
+        `Invoice ${invoiceId} overpayment: remaining ${remaining.toFixed(2)}, attempted ${requestedAmount.toFixed(2)}.`,
+        400
+      );
+    }
+  }
+};
+
+/**
+ * Vendor payments guard:
+ * For each SIPL/Bill, ensure:
+ *   totalDocumentAmount >= alreadyPaid + requestedPaymentAmount
+ */
+const assertVendorPayments = async (billsData: any[]) => {
+  // Group requested amounts per reference (SIPL/BILL)
+  const requested = new Map<string, { referenceType: string; referenceId: number; amount: number }>();
+
+  for (const bill of billsData) {
+    if (
+      bill.referenceType !== PAYMENT_BILL_REFERENCE_TYPES.SIPL &&
+      bill.referenceType !== PAYMENT_BILL_REFERENCE_TYPES.BILL
+    )
+      continue;
+
+    const referenceId = Number(bill.referenceId);
+    const referenceType = bill.referenceType;
+    const key = `${referenceType}:${referenceId}`;
+    const amt = Number(bill.amount || 0);
+
+    const current = requested.get(key) || { referenceType, referenceId, amount: 0 };
+    current.amount = decimalAdd(current.amount, amt);
+    requested.set(key, current);
+  }
+
+  for (const { referenceType, referenceId, amount: requestedAmount } of requested.values()) {
+    let totalDocumentAmount = 0;
+
+    if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
+      const siplCalc = await siplService.getSiplCalculations(referenceId);
+      totalDocumentAmount = Number(siplCalc.totalAmount || 0);
+    } else if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
+      const billRecord: any = await billRepository.getBillByPk(referenceId);
+      if (!billRecord) {
+        throw new AppError(`Bill with ID ${referenceId} not found.`, 400);
+      }
+      totalDocumentAmount = Number(billRecord.amount || 0);
+    }
+
+    const alreadyPaid =
+      (await paymentBillsRepository.getTotalPaidAmountOfBill(referenceId, referenceType as any)) || 0;
+
+    const totalAfterPayment = decimalAdd(alreadyPaid, requestedAmount);
+    if (decimalGreaterThan(totalAfterPayment, totalDocumentAmount)) {
+      const remaining = decimalSubtract(totalDocumentAmount, alreadyPaid);
+      throw new AppError(
+        `Reference ${referenceType} ID ${referenceId} overpayment: remaining ${remaining.toFixed(
+          2
+        )}, attempted ${requestedAmount.toFixed(2)}.`,
+        400
+      );
+    }
+  }
+};
 
 // Create credit debit note for payment
 const createCreditNoteForPayment = async (amount: number, paymentData: any, paymentId: number, transaction: any) => {
@@ -49,6 +147,13 @@ const createCreditNoteForPayment = async (amount: number, paymentData: any, paym
 export const processPayment = async (paymentData: any, billsData: any[], locationId: number) => {
   if (!paymentData || !billsData || !Array.isArray(billsData) || billsData.length === 0) {
     throw new Error("Invalid request: Payment and bills data are required");
+  }
+
+  // Validate that payments do not exceed document totals.
+  if (paymentData.payeeType === PAYEE_TYPE.CUSTOMER) {
+    await assertCustomerInvoicePayments(billsData);
+  } else if (paymentData.payeeType === PAYEE_TYPE.VENDOR) {
+    await assertVendorPayments(billsData);
   }
 
   const totalPaymentBillsAmount = _.sumBy(billsData, 'amount');

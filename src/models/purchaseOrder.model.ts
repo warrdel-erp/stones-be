@@ -84,6 +84,10 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    container: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.INTEGER,
       references: {

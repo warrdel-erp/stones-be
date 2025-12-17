@@ -50,10 +50,15 @@ export const createSIPLController = catchAsync(async (req: AuthRequest, res: Res
   res.status(201).json({ success: true, data: sipl });
 });
 
-export const addContainer = catchAsync(async (req: Request, res: Response) => {
+export const addContainer = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
+  const clientId = req.user?.clientId;
 
-  const container = await siplService.addContainer(req.body, Number(id));
+  if (!clientId) {
+    throw new AppError("Client ID is required.", 400);
+  }
+
+  const container = await siplService.addContainer(req.body, Number(id), clientId);
   SuccessResponse(res, 201, "Container added successfully", container);
 });
 
@@ -292,4 +297,17 @@ export const getSIPLBySlabIdSimple = catchAsync(async (req: Request, res: Respon
   const sipl = await siplService.getSIPLByIdSimple(Number(id));
 
   SuccessResponse(res, 200, "SIPL fetched successfully", sipl);
+});
+
+// Get all containers of a SIPL
+export const getSIPLContainers = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new AppError("SIPL ID is required.", 400);
+  }
+
+  const containers = await siplService.getSIPLContainers(Number(id));
+
+  SuccessResponse(res, 200, "Containers fetched successfully", containers);
 });
