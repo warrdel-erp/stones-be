@@ -16,6 +16,16 @@ type UserRegistrationData = {
   clientId: number;
 };
 
+type CreateUserByAccountData = {
+  username: string;
+  userid: string;
+  email: string;
+  password: string;
+  phone: string;
+  clientId: number;
+  defaultLocationId?: number;
+};
+
 // Register User
 export const registerUser = async (userData: UserRegistrationData) => {
   // Start a transaction
@@ -26,6 +36,17 @@ export const registerUser = async (userData: UserRegistrationData) => {
     const client = await clientRepository.checkClientExists(userData.clientId);
     if (!client) {
       throw new AppError("Client not found", 404);
+    }
+
+    // Check if userid or phone already exists
+    const existingUserById = await userRepository.getUserByUserId(userData.userid);
+    if (existingUserById) {
+      throw new AppError("User ID already exists", 400);
+    }
+
+    const existingUserByPhone = await userRepository.getUserByPhone(userData.phone);
+    if (existingUserByPhone) {
+      throw new AppError("Phone number already exists", 400);
     }
 
     // Extract account data
@@ -49,6 +70,57 @@ export const registerUser = async (userData: UserRegistrationData) => {
     return user;
   } catch (error) {
     // If any error occurs, rollback the transaction
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+// Create User by Authenticated Account
+export const createUserByAccount = async (
+  userData: CreateUserByAccountData,
+  createdByAccountId: number
+) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Validate client exists
+    const client = await clientRepository.checkClientExists(userData.clientId);
+    if (!client) {
+      throw new AppError("Client not found", 404);
+    }
+
+    // Check if userid or phone already exists
+    const existingUserById = await userRepository.getUserByUserId(userData.userid);
+    if (existingUserById) {
+      throw new AppError("User ID already exists", 400);
+    }
+
+    const existingUserByPhone = await userRepository.getUserByPhone(userData.phone);
+    if (existingUserByPhone) {
+      throw new AppError("Phone number already exists", 400);
+    }
+
+    // Extract account data
+    const { email, password } = userData;
+
+    // Create account for the new user
+    const account = await accountService.createAccount({ email, password }, transaction);
+
+    // Create user with account reference and createdById
+    const user = await userRepository.createUser({
+      username: userData.username,
+      userid: userData.userid,
+      phone: userData.phone,
+      clientId: userData.clientId,
+      accountId: account.getDataValue('id'),
+      defaultLocationId: userData.defaultLocationId,
+      createdById: createdByAccountId,
+    } as any, transaction);
+
+    await transaction.commit();
+
+    return user;
+  } catch (error) {
     await transaction.rollback();
     throw error;
   }

@@ -15,6 +15,8 @@ import * as companyRepository from "../repositories/company.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as userRepository from '../repositories/user.repository'
 import * as accountService from "./account.service";
+import * as accountPermissionRepository from "../repositories/accountPermission.repository";
+import { PERMISSIONS } from "../constants/permissions";
 
 type ClientRegistrationData = {
   firstName: string;
@@ -58,6 +60,14 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
       ...clientDetails,
       accountId: account.getDataValue('id')
     }, transaction);
+
+    // Assign all permissions to the client account
+    const allPermissionValues = Object.values(PERMISSIONS).map(p => p.value);
+    const permissionsToAssign = allPermissionValues.map(permission => ({
+      accountId: account.getDataValue('id'),
+      permission
+    }));
+    await accountPermissionRepository.createAccountPermissions(permissionsToAssign, transaction);
 
     // Create company if company data is provided
     if (company) {

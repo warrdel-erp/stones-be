@@ -26,6 +26,11 @@ export const getUserByUserId = async (userid: string) => {
   return await models.User.findOne({ where: { userid } });
 };
 
+// Get User by Phone
+export const getUserByPhone = async (phone: string) => {
+  return await models.User.findOne({ where: { phone } });
+};
+
 // Adds a location to a user by inserting a record into the user_locations table.
 export const addUserLocation = async (userId: number, locationId: number) => {
   const user = await models.User.findByPk(userId);

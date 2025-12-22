@@ -53,10 +53,16 @@ import SoProductSwapHistory from "./soProductSwapHistory.model";
 import InventoryProductHold from "./inventoryProductHold.model";
 import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
+import AccountPermission from "./AccountPermission.model";
 
+// Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 Client.hasMany(User, { foreignKey: "clientId", as: "users" });
 User.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// User-AccountPermission relation
+Account.hasMany(AccountPermission, { foreignKey: "accountId", as: "permissions" });
+AccountPermission.belongsTo(Account, { foreignKey: "accountId", as: "account" });
 
 // Define associations
 User.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
@@ -65,6 +71,10 @@ Account.hasOne(User, { foreignKey: 'accountId', as: 'user' });
 // Define associations
 Client.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
 Account.hasOne(Client, { foreignKey: 'accountId', as: 'client' });
+
+// User createdBy reference to Account
+User.belongsTo(Account, { foreignKey: 'createdById', as: 'createdBy' });
+Account.hasMany(User, { foreignKey: 'createdById', as: 'createdUsers' });
 
 // CartItem reverse associations (hasMany/hasOne defined here for Account, InventoryProduct, and Client)
 Account.hasMany(CartItem, { foreignKey: "accountId", as: "cartItems" });
@@ -744,5 +754,6 @@ export {
   SoProductSwapHistory,
   InventoryProductHold,
   SelectionSheet,
-  SelectionSheetItem
+  SelectionSheetItem,
+  AccountPermission
 };

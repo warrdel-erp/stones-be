@@ -59,6 +59,16 @@ const User = sequelize.define(
         key: "id",
       },
     },
+    createdById: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Account,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "users",

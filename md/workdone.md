@@ -771,3 +771,14 @@ sticky navbar.
 9. Payment details in SIPL page.
 10. Time in payment info -> payment detail page.
 11. use helmet library in BE.
+12. Service charge is being added in SIPL even if it was not added. [!!]
+13. Pagination in SO & PO list.
+14. Show total of LO with tax in SO detail page. [!]
+
+---
+
+1. permisison control for user.
+2. user control by client.
+3. dashboard Data reduction.
+
+---

@@ -701,13 +701,13 @@ Email notification.
 2. Shortest path between delivery addresses.
 3. Total profit in LO and SO.
 4. Freight bill could be edited (with journal entry).
-5. Due amount of SO with advance deposit. [!] [discuss-again]
-6. Add Pay freight bill option in payments. [discuss-again]
-7. Inventory Variance in Journal entry in SIPL, SO. [!]
-8. Show total of LO with tax in SO detail page. [!]
-9. Service charge in returns will be bared by customer. (With option.)
-10. Test whole project with generic product and combination of slab and generic products. [!]
-11. Service charge is being added in SIPL even if it was not added. [!!]
-12. Service journal entry in PO. [!] [discussion]
-
+5. Inventory Variance in Journal entry in SIPL, SO. [!]
+6. Service charge in returns will be bared by customer. (With option.)
+7. Test whole project with generic product and combination of slab and generic products. [!]
+8. Due amount of SO with advance deposit. [!] [discuss-again]
+9. Service journal entry in PO. [!] [discussion]
+10. design of create Journal entry page.
+11. users page heading.
+12. create User in client profile.
+13. creadit note create page design.
 ——-

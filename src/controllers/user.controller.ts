@@ -111,3 +111,30 @@ export const getClientUsers = catchAsync(async (req: AuthRequest, res: Response)
   const users = await userService.getUsersByClientId(req.user.clientId);
   return SuccessResponse(res, 200, "Users retrieved successfully", users);
 });
+
+// Create User by Authenticated Account
+export const createUserByAccountController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const accountId = req.user?.accountId;
+  const clientId = req.user?.clientId;
+
+  if (!accountId || !clientId) {
+    throw new AppError("User not authenticated", 401);
+  }
+
+  const { username, userid, email, password, phone, defaultLocationId } = req.body;
+
+  const user = await userService.createUserByAccount(
+    {
+      username,
+      userid,
+      email,
+      password,
+      phone,
+      clientId,
+      defaultLocationId,
+    },
+    accountId
+  );
+
+  return SuccessResponse(res, 201, "User created successfully", user);
+});

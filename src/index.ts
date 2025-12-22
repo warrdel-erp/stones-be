@@ -55,6 +55,7 @@ import creditDebitNoteRoutes from "./routes/creditDebitNote.routes";
 import cartItemRoutes from "./routes/cartItem.routes";
 import selectionSheetRoutes from "./routes/selectionSheet.routes";
 import optionsRoutes from "./routes/options.routes";
+import permissionRoutes from "./routes/permission.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -116,6 +117,7 @@ app.use("/api/creditDebitNote", creditDebitNoteRoutes);
 app.use("/api/cartItem", cartItemRoutes);
 app.use("/api/selectionSheet", selectionSheetRoutes);
 app.use("/api/options", optionsRoutes);
+app.use("/api/permission", permissionRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

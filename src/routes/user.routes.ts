@@ -1,6 +1,8 @@
 import { Router } from "express";
 import * as userController from "../controllers/user.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import { validateRequest } from "../middleware/validationMiddleware";
+import { createUserByAccountSchema } from "../validators";
 
 const router = Router();
 
@@ -27,6 +29,9 @@ router.get("/:id", userController.getUser);
 
 // Update User.
 router.put("/:id", userController.updateUserController);
+
+// Create User by Authenticated Account
+router.post("/createUser", authenticateUser, validateRequest(createUserByAccountSchema), userController.createUserByAccountController);
 
 
 export default router;
