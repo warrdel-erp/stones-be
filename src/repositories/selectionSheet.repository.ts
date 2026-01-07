@@ -174,3 +174,28 @@ export const findSelectionSheetByIdAndClient = async (
   });
 };
 
+/**
+ * Find selection sheet item by ID and client
+ */
+export const findSelectionSheetItemByIdAndClient = async (
+  id: number,
+  clientId: number
+) => {
+  return await models.SelectionSheetItem.findOne({
+    where: { id, clientId },
+  });
+};
+
+/**
+ * Delete selection sheet item by ID
+ */
+export const deleteSelectionSheetItem = async (
+  id: number,
+  transaction?: Transaction
+) => {
+  return await models.SelectionSheetItem.destroy({
+    where: { id },
+    transaction,
+  });
+};
+

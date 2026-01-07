@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as tradeServiceController from "../controllers/tradeService.controller";
 import { validateRequest } from "../middleware/validationMiddleware";
-import { createTradeServiceSchema } from "../validators";
+import { createTradeServiceSchema, updateTradeServiceSchema } from "../validators";
 import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
@@ -9,6 +9,8 @@ const router = Router();
 router.post("/", authenticateUser, validateRequest(createTradeServiceSchema), tradeServiceController.createTradeService);
 
 router.get("/", authenticateUser, tradeServiceController.listTradeServices);
+
+router.put("/:id", authenticateUser, validateRequest(updateTradeServiceSchema), tradeServiceController.updateTradeService);
 
 router.delete("/:id", authenticateUser, tradeServiceController.deleteTradeService);
 

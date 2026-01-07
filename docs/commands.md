@@ -113,7 +113,7 @@ Two automated deployment scripts are available in the project root:
 
 See `DEPLOYMENT.md` for detailed instructions.
 
-## University deployment commands for staging
+## University deployment DB
 
 ```
 
@@ -132,6 +132,8 @@ use stage_univeristy_db;
 use production_univeristy_db;
 
 ```
+
+## University deployment commands for staging
 
 ```
 

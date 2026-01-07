@@ -86,10 +86,13 @@ export const deleteSalesOrderProduct = async (id: number, transaction?: Transact
 
 export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
   const calcs = {
-    receiving: {
+    soReceiving: {
       subTotal: 0, // total of each "amount"
       taxable: 0, // total of each "amount" with taxApplied = true
       tax: 0, // taxAmount
+      total: 0, // subTotal + tax
+    },
+    receiving: {
       total: 0, // subTotal + tax
     },
     loadingOrder: {
@@ -119,14 +122,18 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
   }
 
   for (const salesOrderProduct of salesOrderProducts) {
-    // Calculate for receiving
-    calcs.receiving.subTotal = decimals.decimalAdd(calcs.receiving.subTotal, Number(salesOrderProduct.amount) || 0);
+
+    // SO amounts as per receiving dimensions -----
+    calcs.soReceiving.subTotal = decimals.decimalAdd(calcs.soReceiving.subTotal, Number(salesOrderProduct.amount) || 0);
 
     if (salesOrderProduct.taxApplied) {
-      calcs.receiving.taxable = decimals.decimalAdd(calcs.receiving.taxable, Number(salesOrderProduct.amount) || 0);
+      calcs.soReceiving.taxable = decimals.decimalAdd(calcs.soReceiving.taxable, Number(salesOrderProduct.amount) || 0);
     }
 
-    calcs.receiving.tax = decimals.decimalAdd(calcs.receiving.tax, Number(salesOrderProduct.taxAmount) || 0);
+    calcs.soReceiving.tax = decimals.decimalAdd(calcs.soReceiving.tax, Number(salesOrderProduct.taxAmount) || 0);
+
+    // Calculate for receiving ------
+    calcs.receiving.total = decimals.decimalAdd(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct.landedUnitCost) || 0);
 
     // Calculate for loading order
     calcs.loadingOrder.subTotal = decimals.decimalAdd(calcs.loadingOrder.subTotal, Number(salesOrderProduct.loAmount) || 0);
@@ -166,7 +173,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
     calcs.packagingList.tax = decimals.decimalAdd(calcs.packagingList.tax, Number(salesOrderProduct.plTaxAmount) || 0);
   }
 
-  calcs.receiving.total = decimals.decimalAdd(calcs.receiving.subTotal, calcs.receiving.tax);
+  calcs.soReceiving.total = decimals.decimalAdd(calcs.soReceiving.subTotal, calcs.soReceiving.tax);
   calcs.loadingOrder.total = decimals.decimalAdd(calcs.loadingOrder.subTotal, calcs.loadingOrder.tax);
   calcs.packagingList.total = decimals.decimalAdd(calcs.packagingList.subTotal, calcs.packagingList.tax);
 
@@ -177,7 +184,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
     calcs.final = calcs.loadingOrder;
     calcs.quantities.final = calcs.quantities.loadingOrder
   } else {
-    calcs.final = calcs.receiving;
+    calcs.final.total = calcs.receiving.total;
     calcs.quantities.final = calcs.quantities.receiving
   }
 

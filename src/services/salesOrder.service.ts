@@ -12,6 +12,7 @@ import * as cartItemService from "../services/cartItem.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as loadingOrderService from "../services/loadingOrder.service";
 
+
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
   try {
@@ -95,6 +96,7 @@ export const getAllSalesOrders = async (
 
     salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
 
+    salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
     salesOrder.fulFilled = getPercentageValueFromValue(salesOrder.salesOrderProducts.length, salesOrder.salesOrderProducts.filter((e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED).length)
 
     return salesOrder;

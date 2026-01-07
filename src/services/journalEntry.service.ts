@@ -9,6 +9,7 @@ import {
   PAYMENT_BILL_REFERENCE_TYPES,
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
+import JournalEntryModel from "../models/journalEntry.model";
 
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
@@ -22,6 +23,7 @@ import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as decimal from '../helper/decimal'
+import * as models from "../models";
 
 
 export const createJournalEntryForBill = async (
@@ -270,7 +272,183 @@ export const createJournalEntryForReceiveInventory = async (
   // Journal entry for Services.
   await createJournalEntriesForTradeServicesOfSIPL(siplData, locationId, transaction)
 
+  // Balance inventory variance for SIPL
+  await balanceInventoryVarianceForSIPL(siplId, clientId, locationId, transaction);
+
 };
+
+/**
+ * Create journal entries for slab split
+ * Creates a CR entry for the original (broken) slab and DR entries for each new slab
+ */
+export const createJournalEntriesForSlabSplit = async (
+  originalSlab: any,
+  originalInventoryProduct: any,
+  newSlabs: any[],
+  siplId: number,
+  clientId: number,
+  transaction: Transaction
+) => {
+  // Get ledger accounts
+  const ledgerAccountForSlabs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+    clientId,
+  });
+
+  // Get locationId from inventory product's bin -> warehouse -> location
+  const inventoryProductWithLocation: any = await models.InventoryProduct.findByPk(originalInventoryProduct.id, {
+    include: [
+      {
+        association: "bin",
+        required: true,
+        include: [
+          {
+            association: "warehouse",
+            required: true,
+            include: [
+              {
+                association: "location",
+                attributes: ["id"],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    transaction,
+  });
+
+  const locationId = inventoryProductWithLocation?.bin?.warehouse?.location?.id;
+
+  if (!locationId) {
+    throw new AppError("Location not found for inventory product", 400);
+  }
+
+  // Calculate amount for original slab (receivedSqrFt * landedUnitCost)
+  const originalSlabReceivedSqrFt = (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+  const originalAmount = decimal.decimalMultiply(originalSlabReceivedSqrFt, originalInventoryProduct.landedUnitCost);
+
+  // Create CR entry for the original (broken) slab
+  await journalEntryRepository.create({
+    amount: originalAmount,
+    ledgerId: ledgerAccountForSlabs.id,
+    type: JOURNAL_ENTRY_TYPE.CR,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.SLAB_SPLIT,
+    subReferenceId: originalSlab.id,
+    subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+    referenceId: siplId,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: siplId,
+    locationId,
+  }, transaction);
+
+  // Create DR entries for each new slab
+  for (const newSlab of newSlabs) {
+    // Convert to plain object if it's a Sequelize instance
+    const slabData = newSlab.get ? newSlab.get({ plain: true }) : newSlab;
+    const newSlabReceivedSqrFt = (slabData.receivingLength * slabData.receivingWidth) / 144;
+    const newAmount = decimal.decimalMultiply(newSlabReceivedSqrFt, originalInventoryProduct.landedUnitCost);
+
+    await journalEntryRepository.create({
+      amount: newAmount,
+      ledgerId: ledgerAccountForSlabs.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SLAB_SPLIT,
+      subReferenceId: slabData.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: siplId,
+      locationId,
+    }, transaction);
+  }
+};
+
+/**
+ * Balance inventory variance for SIPL by checking total debit and credit entries
+ * and creating a balancing entry if there's a difference
+ */
+export async function balanceInventoryVarianceForSIPL(
+  siplId: number,
+  clientId: number,
+  locationId: number,
+  transaction: Transaction
+) {
+  // Get all journal entries for this SIPL
+  const journalEntries = await JournalEntryModel.findAll({
+    where: {
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: siplId,
+    },
+    transaction,
+    raw: true,
+  }) as any[];
+
+  // Calculate total debit and credit amounts
+  const debitAmounts: number[] = [];
+  const creditAmounts: number[] = [];
+
+  for (const entry of journalEntries) {
+    const amount = parseFloat(entry.amount);
+    if (entry.type === JOURNAL_ENTRY_TYPE.DR) {
+      debitAmounts.push(amount);
+    } else if (entry.type === JOURNAL_ENTRY_TYPE.CR) {
+      creditAmounts.push(amount);
+    }
+  }
+
+  const totalDebit = decimal.decimalSum(debitAmounts);
+  const totalCredit = decimal.decimalSum(creditAmounts);
+
+  // Calculate the difference
+  const difference = decimal.decimalSubtract(totalDebit, totalCredit);
+
+  // If there's a difference, create a balancing entry
+  if (difference != 0) {
+    // Get inventory variance ledger account
+    const inventoryVarianceLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
+      clientId,
+    }, transaction);
+
+    if (!inventoryVarianceLedgerAccount) {
+      throw new AppError("Inventory variance ledger account not found", 404);
+    }
+
+    const inventoryVarianceLedgerAccountObj = inventoryVarianceLedgerAccount.get({ plain: true });
+
+    // Determine the type of balancing entry needed
+    // If debit > credit, we need a credit entry to balance
+    // If credit > debit, we need a debit entry to balance
+    const balancingType = Number(difference) > 0 ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
+    const balancingAmount = Math.abs(Number(difference));
+
+    // Get finished goods ledger account for party ledger account
+    const finishedGoodsLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+      clientId,
+    }, transaction);
+
+    if (!finishedGoodsLedgerAccount) {
+      throw new AppError("Finished goods ledger account not found", 404);
+    }
+
+    // Create the balancing journal entry
+    await journalEntryRepository.create({
+      amount: balancingAmount,
+      ledgerId: inventoryVarianceLedgerAccountObj.id,
+      type: balancingType,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+      entryForId: siplId,
+      locationId,
+    }, transaction);
+  }
+}
 
 export async function createJournalEntriesForPaymentBills(bill: any, paymentData: any, transaction: Transaction, locationId: number) {
 
@@ -422,7 +600,7 @@ async function createJournalEntryForBillForPaymentBill(bill: any, ledgerAccount:
 export async function createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder: any, locationId: number, transaction: Transaction) {
   // Find all trade services for this loading order
   const tradeServices = await tradeServiceRepository.findTradeServices({
-    referenceType: "loadingOrder",
+    referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
     referenceId: loadingOrder.id
   });
 
@@ -471,6 +649,81 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
       referenceId: loadingOrder.id,
       entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
       entryForId: loadingOrder.id,
+      locationId: locationId,
+      partyLedgerAccountId: service.ledgerAccountId
+    }, transaction);
+
+  }
+}
+export async function createJournalEntriesForTradeServicesOfReturns(returnData: any, locationId: number, transaction: Transaction) {
+  // Get loading order for customerId and locationId
+  if (!returnData) throw new AppError("RO not found", 404);
+
+  if (!returnData?.soInvoice?.customerId) {
+    throw new AppError('customer Id is required for services journal entry', 400)
+  }
+
+  // Find all trade services for this loading order
+  const tradeServices = await tradeServiceRepository.findTradeServices({
+    referenceType: TRADE_SERVICE_REFERENCE_TYPES.RETURN,
+    referenceId: returnData.id
+  });
+
+  if (!tradeServices.length) return;
+
+
+  // Get customer ledger account
+  const customerLedgerAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    referenceId: returnData.soInvoice.customerId,
+    referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
+  }, transaction);
+
+  if (!customerLedgerAccount) throw new AppError("Customer ledger account not found", 404);
+
+  const customerLedgerAccountObj = customerLedgerAccount?.get({ plain: true });
+
+  for (const tradeServiceInstance of tradeServices) {
+    const tradeService = tradeServiceInstance.get ? tradeServiceInstance.get({ plain: true }) : tradeServiceInstance;
+
+    const service = tradeService.service;
+    if (!service || !service.ledgerAccountId) {
+      throw new AppError("TradeService's service or ledgerAccountId not found", 400);
+    }
+
+    await journalEntryRepository.create({
+      amount: tradeService.total,
+      ledgerId: service.ledgerAccountId,
+      type: tradeService.applyToCustomer ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR,
+
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+      referenceId: returnData.id,
+
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
+      subReferenceId: tradeService.id,
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+      entryForId: returnData.id,
+      locationId: locationId,
+      partyLedgerAccountId: customerLedgerAccountObj.id
+    }, transaction);
+
+    await journalEntryRepository.create({
+      amount: tradeService.total,
+      ledgerId: customerLedgerAccountObj.id,
+      type: tradeService.applyToCustomer ? JOURNAL_ENTRY_TYPE.DR : JOURNAL_ENTRY_TYPE.CR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+      referenceId: returnData.id,
+
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.TRADE_SERVICE,
+      subReferenceId: tradeService.id,
+
+
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+      entryForId: returnData.id,
       locationId: locationId,
       partyLedgerAccountId: service.ledgerAccountId
     }, transaction);

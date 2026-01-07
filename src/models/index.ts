@@ -54,6 +54,7 @@ import InventoryProductHold from "./inventoryProductHold.model";
 import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import AccountPermission from "./AccountPermission.model";
+import TermsCondition from "./termsCondition.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -236,6 +237,10 @@ Product.hasMany(Slab, { foreignKey: "productId" });
 // Slab-SIPL (one 'Slab' belongs to one 'SIPL') (one 'SIPL' have multiple 'Slabs' )
 Slab.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
 SIPL.hasMany(Slab, { foreignKey: "siplId", as: "slabs" });
+
+// Slab self-reference (parent-child relationship for broken slabs)
+Slab.belongsTo(Slab, { foreignKey: "parentSlabId", as: "parentSlab" });
+Slab.hasMany(Slab, { foreignKey: "parentSlabId", as: "childSlabs" });
 
 // One Location has One Warehouse
 Location.hasOne(Warehouse, { foreignKey: "locationId" });
@@ -700,6 +705,10 @@ TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOr
 SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } })
 TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 
+// Client-TermsCondition relation (one-to-one: one Client has one TermsCondition)
+Client.hasOne(TermsCondition, { foreignKey: "clientId", as: "termsCondition" });
+TermsCondition.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
 export {
   Client,
   User,
@@ -755,5 +764,6 @@ export {
   InventoryProductHold,
   SelectionSheet,
   SelectionSheetItem,
-  AccountPermission
+  AccountPermission,
+  TermsCondition
 };

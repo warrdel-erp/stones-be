@@ -16,5 +16,8 @@ router.get("/:id", authenticateUser, selectionSheetController.getSelectionSheetB
 // Delete selection sheet
 router.delete("/:id", authenticateUser, selectionSheetController.deleteSelectionSheet);
 
+// Delete selection sheet item
+router.delete("/items/:itemId", authenticateUser, selectionSheetController.deleteSelectionSheetItem);
+
 export default router;
 

@@ -65,3 +65,19 @@ export const getLedgerAccountById = async (id: number) => {
 // export const deleteLedgerAccount = async (id: number) => {
 //   return models.LedgerAccount.destroy({ where: { id } });
 // };
+
+export const getLedgerAccountOptions = async (clientId: number, filters: any = {}) => {
+  const whereCondition: any = {
+    ...filters,
+    clientId,
+  };
+
+  return await models.LedgerAccount.findAll({
+    attributes: [
+      ["name", "label"],
+      ["id", "value"],
+    ],
+    where: whereCondition,
+    order: [["name", "ASC"]],
+  });
+};

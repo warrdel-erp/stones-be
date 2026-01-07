@@ -407,3 +407,25 @@ export const getProductsWithSlabsByLocation = async (locationId: number) => {
     ],
   });
 };
+
+// Get product options for dropdowns/selects
+export const getProductOptions = async (clientId: number, status?: string) => {
+  return models.Product.findAll({
+    attributes: [
+      ["name", "label"],
+      ["id", "value"],
+    ],
+    where: {
+      ...(status ? { status } : {}),
+    },
+    include: [
+      {
+        model: models.User,
+        attributes: [],
+        where: { clientId },
+        required: true,
+      },
+    ],
+    order: [["name", "ASC"]],
+  });
+};

@@ -18,6 +18,17 @@ export const listTradeServices = catchAsync(async (req: AuthRequest, res: Respon
     SuccessResponse(res, 200, "TradeServices fetched", tradeServices);
 });
 
+export const updateTradeService = catchAsync(async (req: AuthRequest, res: Response) => {
+    const id = Number(req.params.id);
+    const payload = { ...req.body };
+
+    const updatedTradeService = await tradeService.updateTradeService(id, payload);
+    if (!updatedTradeService) {
+        return res.status(404).json({ message: "TradeService not found" });
+    }
+    SuccessResponse(res, 200, "TradeService updated", updatedTradeService);
+});
+
 export const deleteTradeService = catchAsync(async (req: AuthRequest, res: Response) => {
     const id = Number(req.params.id);
     const deleted = await tradeService.deleteTradeService(id);

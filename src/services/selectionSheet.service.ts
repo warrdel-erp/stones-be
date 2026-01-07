@@ -132,3 +132,23 @@ export const deleteSelectionSheet = async (id: number, clientId: number) => {
     return { message: "Selection sheet deleted successfully" };
 };
 
+/**
+ * Delete selection sheet item
+ */
+export const deleteSelectionSheetItem = async (id: number, clientId: number) => {
+  // Validate selection sheet item exists and belongs to client
+  const item = await selectionSheetRepository.findSelectionSheetItemByIdAndClient(id, clientId);
+
+  if (!item) {
+    throw new AppError("Selection sheet item not found", 404);
+  }
+
+  const deletedCount = await selectionSheetRepository.deleteSelectionSheetItem(id);
+
+  if (deletedCount === 0) {
+    throw new AppError("Failed to delete selection sheet item", 500);
+  }
+
+  return { message: "Selection sheet item deleted successfully" };
+};
+

@@ -44,7 +44,7 @@ export const getAllCustomers = async (page: number, limit: number, clientId: num
   return { customers, total, page, limit };
 };
 
-// Get all customers.
+// Get customer by Id.
 export const getCustomerById = async (id: number) => {
   const data = await models.Customer.findByPk(id, {
     include: [
@@ -82,4 +82,13 @@ export const getCustomerOptions = async (clientId: number, status?: string) => {
     },
     order: [["name", "ASC"]],
   });
+};
+
+// Get customer minimal data (less detailed)
+export const getCustomerMinimal = async (id: number, clientId: number) => {
+  const data = await models.Customer.findOne({
+    where: { id, clientId },
+  });
+
+  return data?.get({ plain: true });
 };

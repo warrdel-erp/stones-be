@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthRequest } from "../middleware/authMiddleware";
 import * as customerAddressService from "../services/customerAddress.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
@@ -22,4 +23,13 @@ export const getAddressesByCustomerId = catchAsync(async (req: Request, res: Res
     message: "Customer addresses retrieved successfully",
     data: addresses,
   });
+});
+
+export const getCustomerAddressById = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = req.user?.clientId;
+
+  const address = await customerAddressService.getCustomerAddressById(Number(id), Number(clientId));
+
+  SuccessResponse(res, 200, "Customer address retrieved successfully", address);
 });

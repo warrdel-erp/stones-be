@@ -11,10 +11,13 @@ router.post("/", authenticateUser, customerController.createCustomerController);
 // create address for customer
 router.post("/address", authenticateUser, customerAddressController.createCustomerAddress);
 
+// Get customer address by id
+router.get("/address/:id", authenticateUser, customerAddressController.getCustomerAddressById);
+
 // Get all addresses of customer
 router.get("/:customerId/addresses", customerAddressController.getAddressesByCustomerId);
 
-// Update vendor.
+// Update customer.
 router.put("/:id", authenticateUser, customerController.updateCustomerController);
 
 // Get all customers.
@@ -26,7 +29,10 @@ router.get("/:customerId/invoices", authenticateUser, customerController.getInvo
 // get customer advanced deposits.
 router.get("/:customerId/advancedDeposits", authenticateUser, customerController.getAdvancedDepositsByCustomerId);
 
-// Get vendor by id.
+// Get customer minimal data (less detailed)
+router.get("/minimal/:id", authenticateUser, customerController.getCustomerMinimalController);
+
+// Get customer by id.
 router.get("/:id", authenticateUser, customerController.getCustomerByIdController);
 
 export default router;

@@ -84,11 +84,15 @@ const Slab = sequelize.define(
         msg: "unique barcode",
       },
     },
+    /**
+     * @deprecated
+     */
     status: {
       type: DataTypes.ENUM(...Object.values(INVENTORY_ITEM_STATUS)),
       allowNull: true,
       defaultValue: INVENTORY_ITEM_STATUS.INITIATE,
     },
+
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -156,6 +160,21 @@ const Slab = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
+    },
+    isBroken: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    parentSlabId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "slabs",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
   },
   {

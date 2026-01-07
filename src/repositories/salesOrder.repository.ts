@@ -68,11 +68,10 @@ export const getAllSalesOrders = async (
       },
       {
         association: "salesOrderProducts",
-        attributes: ["id", "unitPrice", "stage"],
         include: [
           {
             association: "inventoryProduct",
-            attributes: ["id"],
+            attributes: ["id", 'landedUnitCost'],
             include: [
               {
                 association: "slab",
@@ -377,7 +376,12 @@ export const getSalesOrderById = async (id: number) => {
             attributes: ['id', 'code'],
           },
           {
-            association: 'salesOrderProducts'
+            association: 'salesOrderProducts',
+            include: [
+              {
+                association: 'inventoryProduct'
+              }
+            ]
           },
           {
             association: "salesOrderInvoice"

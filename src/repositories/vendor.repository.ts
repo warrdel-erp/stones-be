@@ -112,3 +112,27 @@ export const getVendorsForMaster = async (clientId: number) => {
     ],
   });
 };
+
+// Get vendor options for dropdowns/selects
+export const getVendorOptions = async (clientId: number, status?: string, type?: string) => {
+  return models.Vendor.findAll({
+    attributes: [
+      ["name", "label"],
+      ["id", "value"],
+    ],
+    where: {
+      ...(status ? { status } : {}),
+      ...(type ? { type } : {}),
+    },
+    include: [
+      {
+        model: models.User,
+        as: "user",
+        attributes: [],
+        where: { clientId },
+        required: true,
+      },
+    ],
+    order: [["name", "ASC"]],
+  });
+};

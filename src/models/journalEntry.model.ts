@@ -24,7 +24,7 @@ export type JournalEntry = {
   entryFor?: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
   entryForId?: number,
   locationId: number,
-  partyLedgerAccountId: number | null
+  partyLedgerAccountId?: number | null
 };
 
 const JournalEntry = sequelize.define(

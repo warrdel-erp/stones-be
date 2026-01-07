@@ -106,4 +106,30 @@ export const getAccountById = async (id: number) => {
     delete accountData.password;
 
     return accountData;
+};
+
+// Change password
+export const changePassword = async (accountId: number, oldPassword: string, newPassword: string) => {
+    // Get account by ID
+    const account = await accountRepository.getAccountById(accountId) as AccountInstance | null;
+    
+    if (!account) {
+        throw new AppError("Account not found", 404);
+    }
+
+    // Verify old password
+    const currentPassword = account.getDataValue('password');
+    const isMatch = await bcrypt.compare(oldPassword, currentPassword);
+    
+    if (!isMatch) {
+        throw new AppError("Old password is incorrect", 400);
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await accountRepository.updateAccount(accountId, { password: hashedPassword });
+
+    return { message: "Password changed successfully" };
 }; 

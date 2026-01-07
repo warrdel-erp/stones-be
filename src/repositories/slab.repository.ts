@@ -54,6 +54,24 @@ export const getLastSlabNumber = async (productId: number, siplId: number) => {
   return existingSlab ? existingSlab.slabNumber : 0;
 };
 
+/**
+ * Check if a slab with the given productId, siplId, and slabNumber already exists
+ */
+export const checkSlabNumberExists = async (
+  productId: number,
+  siplId: number,
+  slabNumber: number,
+  transaction?: Transaction
+) => {
+  const existingSlab = await Slab.findOne({
+    where: { productId, siplId, slabNumber },
+    transaction,
+    attributes: ["id"],
+  });
+
+  return !!existingSlab;
+};
+
 // Create slabs
 export const getSlabByInventoryProductId = async (inventoryProductId: number, transaction?: Transaction) => {
   return await models.Slab.findOne({ where: { inventoryProductId }, transaction });
@@ -92,6 +110,9 @@ export const findByIdSimple = async (slabId: number) => {
 export const findByIdWithLogs = async (slabId: number) => {
   const slab = await models.Slab.findByPk(slabId, {
     include: [
+      {
+        association: 'inventoryProduct'
+      },
       {
         model: models.SlabRemeasurement,
         as: "remeasurements",
@@ -300,6 +321,61 @@ export const getSlabsWithInventoryProductBySiplId = async (siplId: number) => {
       }
     ]
   });
+};
+
+/**
+ * Get all parent slabs for a child slab by traversing up the parentSlabId chain
+ * Returns array of parents from immediate parent to root parent
+ */
+export const getSlabSplitHistory = async (slabId: number) => {
+  // Get the starting slab
+  let currentSlab: any = await models.Slab.findByPk(slabId, {
+    include: [
+      {
+        association: "inventoryProduct",
+      },
+      {
+        association: "product",
+        attributes: ["id", "name"],
+      },
+    ],
+  });
+
+  if (!currentSlab) {
+    return null;
+  }
+
+  const parents: any[] = [];
+  const childSlab = currentSlab.get({ plain: true });
+
+  // Traverse up the parent chain
+  while (currentSlab.parentSlabId) {
+    const parent: any = await models.Slab.findByPk(currentSlab.parentSlabId, {
+      include: [
+        {
+          association: "inventoryProduct",
+        },
+        {
+          association: "product",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+
+    if (!parent) {
+      break;
+    }
+
+    const parentData = parent.get({ plain: true });
+    parents.push(parentData);
+    currentSlab = parent;
+  }
+
+  return {
+    childSlab,
+    parents, // Array from immediate parent to root parent
+    totalParents: parents.length,
+  };
 };
 
 

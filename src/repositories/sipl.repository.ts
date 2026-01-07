@@ -1,6 +1,7 @@
 import { col, fn, Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { AppError } from "../helper/appError";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
@@ -267,7 +268,10 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
     include: [
       {
         association: "inventoryProducts",
-        where: { productId },
+        where: {
+          productId,
+          status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
+        },
         required: true,
         include: [
           {

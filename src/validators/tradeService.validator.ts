@@ -5,9 +5,10 @@ export const createTradeServiceSchema = z.object({
     referenceType: z.enum([
         TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
         TRADE_SERVICE_REFERENCE_TYPES.SIPL,
+        TRADE_SERVICE_REFERENCE_TYPES.RETURN,
     ], {
         required_error: "Reference type is required",
-        invalid_type_error: "Reference type must be loadingOrder or purchaseOrder",
+        invalid_type_error: "Reference type must be loadingOrder, sipl, or return",
     }),
     referenceId: z.number({
         required_error: "Reference ID is required",
@@ -25,6 +26,18 @@ export const createTradeServiceSchema = z.object({
         required_error: "Service ID is required",
         invalid_type_error: "Service ID must be a number",
     }).int("Service ID must be an integer").positive("Service ID must be positive"),
+    applyToCustomer: z.boolean().optional(),
 });
 
-export type CreateTradeServiceInput = z.infer<typeof createTradeServiceSchema>; 
+export const updateTradeServiceSchema = z.object({
+    quantity: z.number({
+        invalid_type_error: "Quantity must be a number",
+    }).int("Quantity must be an integer").positive("Quantity must be positive").optional(),
+    price: z.number({
+        invalid_type_error: "Price must be a number",
+    }).positive("Price must be positive").optional(),
+    applyToCustomer: z.boolean().optional(),
+});
+
+export type CreateTradeServiceInput = z.infer<typeof createTradeServiceSchema>;
+export type UpdateTradeServiceInput = z.infer<typeof updateTradeServiceSchema>; 

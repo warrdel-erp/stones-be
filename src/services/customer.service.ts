@@ -103,6 +103,17 @@ export const fetchCustomerById = async (id: number) => {
   return customer
 };
 
+// Get customer minimal data (less detailed)
+export const getCustomerMinimal = async (id: number, clientId: number) => {
+  const customer = await customerRepository.getCustomerMinimal(id, clientId);
+
+  if (!customer) {
+    throw new AppError("Customer not found", 404);
+  }
+
+  return customer;
+};
+
 // Get invoices for a customer
 export const getInvoicesByCustomerId = async (customerId: number) => {
   let invoices: any = await soInvoiceRepository.getAllInvoices({ customerId });

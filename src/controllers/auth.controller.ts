@@ -36,4 +36,20 @@ export const getUserProfile = catchAsync(async (req: AuthRequest, res: Response)
     }
 
     SuccessResponse(res, 200, "User profile fetched successfully", profile);
+});
+
+export const changePassword = catchAsync(async (req: AuthRequest, res: Response) => {
+    if (!req.user || !req.user.accountId) {
+        throw new AppError("User not authenticated", 401);
+    }
+
+    const { oldPassword, newPassword } = req.body;
+    
+    const result = await accountService.changePassword(
+        req.user.accountId,
+        oldPassword,
+        newPassword
+    );
+
+    SuccessResponse(res, 200, "Password changed successfully", result);
 }); 

@@ -80,3 +80,19 @@ export const deleteSelectionSheet = catchAsync(async (req: AuthRequest, res: Res
     return SuccessResponse(res, 200, "Selection sheet deleted successfully", result);
 });
 
+/**
+ * Delete selection sheet item
+ */
+export const deleteSelectionSheetItem = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { itemId } = req.params;
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Missing client information", 401);
+    }
+
+    const result = await selectionSheetService.deleteSelectionSheetItem(Number(itemId), clientId);
+
+    return SuccessResponse(res, 200, "Selection sheet item deleted successfully", result);
+});
+

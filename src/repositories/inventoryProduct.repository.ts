@@ -13,7 +13,9 @@ export const createInventoryProductsWithCombinedNumbers = async (
   sellingPrice: number,
   productId: number,
   clientId: number,
-  transaction: Transaction
+  transaction: Transaction,
+  status?: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
+  landedUnitCost?: number
 ) => {
   const sipl: any = await models.SIPL.findByPk(siplId, {
     attributes: ["invoiceCode"],
@@ -43,7 +45,9 @@ export const createInventoryProductsWithCombinedNumbers = async (
     sellingPrice,
     siplId,
     productId,
-    clientId
+    clientId,
+    ...(status && { status }),
+    ...(landedUnitCost !== undefined && landedUnitCost !== null && { landedUnitCost }),
   }));
 
   return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
@@ -306,7 +310,10 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
   let { isHold, ...restFilter } = filter;
 
   return models.InventoryProduct.findAll({
-    where: restFilter,
+    where: {
+      ...restFilter,
+      status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
+    },
     include: [
       {
         association: 'hold',

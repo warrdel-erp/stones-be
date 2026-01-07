@@ -5,6 +5,7 @@ import * as slabRemeasurementService from "../services/slabRemeasurement.service
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { SplitSlabInput } from "../validators";
 
 // 🔹 Get SlabLogs by SlabId
 export const getSlabWithLogs = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -77,4 +78,38 @@ export const checkSiplSlabsFullyFilled = catchAsync(async (req: Request, res: Re
   const result = await slabService.checkSiplSlabsFullyFilled(Number(siplId));
 
   return SuccessResponse(res, 200, result.message, result);
+});
+
+// Split a slab into multiple pieces
+export const splitSlab = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { slabId } = req.params;
+  const body: SplitSlabInput = req.body;
+  const userId = req.user?.id;
+  const clientId = req.user?.clientId;
+
+  if (!slabId || isNaN(Number(slabId))) {
+    throw new AppError("Invalid slab ID", 400);
+  }
+
+  if (!clientId) {
+    throw new AppError("Client ID is required", 400);
+  }
+
+  const result = await slabService.splitSlab(Number(slabId), body.slabs, userId, clientId);
+
+  return SuccessResponse(res, 200, "Slab split successfully", result);
+});
+
+// Get split history for a slab
+export const getSlabSplitHistory = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { slabId } = req.params;
+  const clientId = req.user?.clientId;
+
+  if (!slabId || isNaN(Number(slabId))) {
+    throw new AppError("Invalid slab ID", 400);
+  }
+
+  const history = await slabService.getSlabSplitHistory(Number(slabId), clientId);
+
+  return SuccessResponse(res, 200, "Slab split history fetched successfully", history);
 });

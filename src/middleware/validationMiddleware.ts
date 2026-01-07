@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { AnyZodObject, ZodError } from 'zod';
+import { ZodError, ZodTypeAny } from 'zod';
 import { AppError } from '../helper/appError';
 import catchAsync from '../helper/asyncCatch';
 
-export const validateRequest = (schema: AnyZodObject) => {
+export const validateRequest = (schema: ZodTypeAny) => {
     return catchAsync(async (req: Request, _: Response, next: NextFunction): Promise<void> => {
         try {
             await schema.parseAsync(req.body);

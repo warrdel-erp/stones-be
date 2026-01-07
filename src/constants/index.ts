@@ -3,6 +3,7 @@ export const INVENTORY_ITEM_STATUS = {
   IN_INVENTORY: "IN_INVENTORY",
   ALLOCATED: "ALLOCATED",
   SOLD: "SOLD",
+  BROKEN: "BROKEN",
 } as const;
 
 export const PRODUCT_COLORS = {

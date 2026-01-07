@@ -8,6 +8,7 @@ import * as decimal from '../helper/decimal'
 export const TRADE_SERVICE_REFERENCE_TYPES = {
     LOADING_ORDER: "loadingOrder",
     SIPL: "sipl",
+    RETURN: "return",
 } as const;
 
 const TradeService = sequelize.define(
@@ -25,10 +26,6 @@ const TradeService = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
-        referenceType: {
-            type: DataTypes.ENUM(...Object.values(TRADE_SERVICE_REFERENCE_TYPES)),
-            allowNull: false,
-        },
         total: {
             type: DataTypes.VIRTUAL,
             get() {
@@ -37,6 +34,10 @@ const TradeService = sequelize.define(
                 const result = decimal.decimalMultiply(quantity, price);
                 return result;
             },
+        },
+        referenceType: {
+            type: DataTypes.ENUM(...Object.values(TRADE_SERVICE_REFERENCE_TYPES)),
+            allowNull: false,
         },
         referenceId: {
             type: DataTypes.INTEGER,
@@ -61,6 +62,10 @@ const TradeService = sequelize.define(
             },
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
+        },
+        applyToCustomer: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
         },
     },
     {

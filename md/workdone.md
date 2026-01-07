@@ -777,8 +777,51 @@ sticky navbar.
 
 ---
 
-1. permisison control for user.
+1. permission control for user.
 2. user control by client.
 3. dashboard Data reduction.
 
 ---
+
+1. Drop-down, ascending order. [in-SO]
+2. Total profit in LO & SO.
+
+---
+
+1. users page heading.
+2. create User in client profile.
+3. Services in Returns.
+4. work on inventory variance but still pending.
+5. dropdown and Details APIs in LO, PL, PO.
+
+---
+
+1. journal entry for services in Return.
+2. Credit note create page design.
+3. Design of create Journal entry page.
+4. Change password feature.
+5. Show containers in SIPL page top details in PO.
+6. Vendor payment total amount.
+7. payment Restriction to only two decimal places.
+8. sso univ domain change.
+
+---
+
+1. Inventory Variance in Journal entry in SIPL, SO.
+2. Service charge in returns will be bared by customer.
+3. Total profit-loss in sales and LO.
+4. Drop-down, ascending order.
+5. Terms and conditions CRUD.
+6. Settings page design.
+7. Put "settings" in sidebar as "master data" in sidebar.
+8. set terms and conditions directly from invoice.
+9. Cancel return.
+10. Split slab in inventory.
+11. don't show that broken slab in inventory and SO add products.
+12. If broken slab is in selection sheet then show alert same as cart.
+13. Only Inventory slabs could be split.
+14. Split history.
+15. No opposite party for inventory variance and split slab journal entries.
+16. Slab Number during split.
+17. Total area during split can not be exceed then previous.
+18. Journal entry for split slab

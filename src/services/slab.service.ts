@@ -3,7 +3,12 @@ import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as productRepository from "../repositories/product.repository";
+import * as journalEntryService from "../services/journalEntry.service";
 import * as models from "../models";
+import { INVENTORY_ITEM_STATUS } from "../constants";
+import { randomId } from "../helper";
 
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
@@ -154,4 +159,212 @@ export const checkSiplSlabsFullyFilled = async (siplId: number) => {
       ? 'All slabs are fully filled'
       : `${slabs.length - filledCount} slab(s) are not fully filled`
   };
+};
+
+/**
+ * Split a slab into multiple pieces
+ * Only IN_INVENTORY InventoryProduct can be split
+ * Marks the original slab and InventoryProduct as isBroken
+ * Creates new slabs with new barcode, serialNumber, slabNumber, and parentSlabId
+ * Creates corresponding InventoryProducts for the new slabs
+ * @param slabId - ID of the slab to split
+ * @param slabsData - Array of objects containing receivingLength, receivingWidth, and slabNumber for each new piece (validated by middleware)
+ * @param userId - ID of the user performing the split
+ * @param clientId - ID of the client (for authorization check)
+ */
+export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLength: number; receivingWidth: number; slabNumber: number }>, userId?: number, clientId?: number) => {
+  const pieces = slabsData.length;
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Get the original slab with its inventory product
+    const originalSlab: any = await models.Slab.findByPk(slabId, {
+      include: [
+        {
+          association: "inventoryProduct",
+          required: true,
+        },
+        {
+          association: "sipl",
+          attributes: ["id", "purchaseOrderId"],
+        },
+      ],
+      transaction,
+    });
+
+    if (!originalSlab) {
+      throw new AppError("Slab not found", 404);
+    }
+
+    // Validate that the slab belongs to the correct client
+    if (clientId && originalSlab.clientId !== clientId) {
+      throw new AppError("Slab does not belong to your client", 403);
+    }
+
+    const inventoryProduct = originalSlab.inventoryProduct;
+
+    if (!inventoryProduct) {
+      throw new AppError("Slab does not have an associated inventory product", 400);
+    }
+
+    // Check if the inventory product status is IN_INVENTORY
+    if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+      throw new AppError(
+        `Only IN_INVENTORY inventory products can be split. Current status: ${inventoryProduct.status}`,
+        400
+      );
+    }
+
+    // Check if the slab is already broken
+    if (originalSlab.isBroken) {
+      throw new AppError("This slab is already marked as broken", 400);
+    }
+
+    // Mark the original slab and inventory product as broken
+    await models.Slab.update(
+      { isBroken: true, updatedBy: userId },
+      { where: { id: slabId }, transaction }
+    );
+
+    await models.InventoryProduct.update(
+      { status: INVENTORY_ITEM_STATUS.BROKEN },
+      { where: { id: inventoryProduct.id }, transaction }
+    );
+
+    // Get the SIPL to get purchaseOrderId
+    const sipl = originalSlab.sipl;
+    if (!sipl) {
+      throw new AppError("Slab does not have an associated SIPL", 400);
+    }
+
+    // Get selling price from product
+    const product: any = await productRepository.getProductByIdSimple(originalSlab.productId);
+    const sellingPrice = product?.singleUnitPrice;
+
+    // Create new InventoryProducts for the split pieces with IN_INVENTORY status and landedUnitCost
+    const newInventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
+      inventoryProduct.binId,
+      pieces,
+      originalSlab.siplId,
+      true, // isSlabType = true for slabs
+      sellingPrice,
+      originalSlab.productId,
+      originalSlab.clientId,
+      transaction,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      inventoryProduct.landedUnitCost
+    );
+
+    // Get the last serial number for the SIPL
+    const lastSerialNumber = await slabRepository.getLastSerialNumber(sipl.purchaseOrderId, originalSlab.siplId);
+
+    // Validate that all slabNumbers are unique and don't already exist
+    const slabNumbers = slabsData.map((slab) => slab.slabNumber);
+    const uniqueSlabNumbers = new Set(slabNumbers);
+
+    if (slabNumbers.length !== uniqueSlabNumbers.size) {
+      throw new AppError("Duplicate slabNumbers found. Each piece must have a unique slabNumber", 400);
+    }
+
+    // Check if any of the provided slabNumbers already exist
+    for (const slabData of slabsData) {
+      const exists = await slabRepository.checkSlabNumberExists(
+        originalSlab.productId,
+        originalSlab.siplId,
+        slabData.slabNumber,
+        transaction
+      );
+
+      if (exists) {
+        throw new AppError(
+          `Slab with productId ${originalSlab.productId}, siplId ${originalSlab.siplId}, and slabNumber ${slabData.slabNumber} already exists`,
+          400
+        );
+      }
+    }
+
+    // Create new slabs for each piece
+    const newSlabs = newInventoryProducts.map((inventoryProduct: any, index: number) => ({
+      serialNumber: lastSerialNumber + index + 1,
+      slabNumber: slabsData[index].slabNumber,
+      barcode: randomId().toUpperCase(),
+      entryUnit: originalSlab.entryUnit,
+      packageLength: null, // Packaging data is null for split slabs
+      packageWidth: null, // Packaging data is null for split slabs
+      receivingLength: slabsData[index].receivingLength,
+      receivingWidth: slabsData[index].receivingWidth,
+      block: originalSlab.block,
+      lot: originalSlab.lot,
+      notes: originalSlab.notes,
+      status: originalSlab.status,
+      inventoryProductId: inventoryProduct.id,
+      purchaseOrderId: sipl.purchaseOrderId,
+      siplId: originalSlab.siplId,
+      siplProductId: originalSlab.siplProductId,
+      productId: originalSlab.productId,
+      clientId: originalSlab.clientId,
+      parentSlabId: slabId,
+      createdBy: userId,
+      updatedBy: userId,
+      isBroken: false,
+    }));
+
+    const createdSlabs = await slabRepository.createSlabs(newSlabs, transaction);
+
+    // Create journal entries for slab split (CR for original, DR for new slabs)
+    await journalEntryService.createJournalEntriesForSlabSplit(
+      originalSlab,
+      inventoryProduct,
+      createdSlabs,
+      originalSlab.siplId,
+      originalSlab.clientId,
+      transaction
+    );
+
+    await transaction.commit();
+
+    return {
+      originalSlab: {
+        id: originalSlab.id,
+        isBroken: true,
+      },
+      newSlabs: createdSlabs,
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Get split history for a slab
+ * Returns the child slab and all its parents (from immediate parent to root)
+ */
+export const getSlabSplitHistory = async (slabId: number, clientId?: number) => {
+  // First verify the slab exists and belongs to the client
+  const slab: any = await models.Slab.findByPk(slabId, {
+    include: [
+      {
+        association: "inventoryProduct",
+      },
+    ],
+  });
+
+  if (!slab) {
+    throw new AppError("Slab not found", 404);
+  }
+
+  // Validate that the slab belongs to the correct client
+  if (clientId && slab.clientId !== clientId) {
+    throw new AppError("Slab does not belong to your client", 403);
+  }
+
+  const history = await slabRepository.getSlabSplitHistory(slabId);
+
+  if (!history) {
+    throw new AppError("Could not retrieve split history", 500);
+  }
+
+  return history;
 };

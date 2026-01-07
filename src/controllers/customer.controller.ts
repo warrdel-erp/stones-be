@@ -52,6 +52,15 @@ export const getCustomerByIdController = catchAsync(async (req: Request, res: Re
   return SuccessResponse(res, 200, "Customer retrieved successfully", customer);
 });
 
+// Get customer minimal data (less detailed)
+export const getCustomerMinimalController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = req.user?.clientId;
+
+  const customer = await customerService.getCustomerMinimal(Number(id), Number(clientId));
+  return SuccessResponse(res, 200, "Customer minimal data retrieved successfully", customer);
+});
+
 // Get all invoices related to a customer
 export const getInvoicesByCustomerId = catchAsync(async (req: Request, res: Response) => {
   const customerId = parseInt(req.params.customerId);

@@ -29,6 +29,7 @@ import requestedPurchaseProductRoute from "./routes/requestedPurchaseProduct.rou
 import siplProductRoute from "./routes/siplProduct.routes";
 import paymentRoutes from "./routes/payment.routes";
 import ledgerAccountRoutes from "./routes/ledgerAccount.routes";
+import locationRoutes from "./routes/location.routes";
 import notesRoutes from "./routes/note.routes";
 import containerRoutes from "./routes/container.routes";
 import masterRoutes from "./routes/master.routes";
@@ -56,6 +57,7 @@ import cartItemRoutes from "./routes/cartItem.routes";
 import selectionSheetRoutes from "./routes/selectionSheet.routes";
 import optionsRoutes from "./routes/options.routes";
 import permissionRoutes from "./routes/permission.routes";
+import termsConditionRoutes from "./routes/termsCondition.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -93,6 +95,7 @@ app.use("/api/requestedPurchaseProduct", requestedPurchaseProductRoute);
 app.use("/api/siplProduct", siplProductRoute);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/ledgerAccount", ledgerAccountRoutes);
+app.use("/api/location", locationRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/container", containerRoutes);
 app.use("/api/master", masterRoutes);
@@ -118,6 +121,7 @@ app.use("/api/cartItem", cartItemRoutes);
 app.use("/api/selectionSheet", selectionSheetRoutes);
 app.use("/api/options", optionsRoutes);
 app.use("/api/permission", permissionRoutes);
+app.use("/api/termsCondition", termsConditionRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

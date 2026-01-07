@@ -103,8 +103,8 @@ export const checkExistingActiveReturns = async (salesOrderProductId: number) =>
     });
 };
 
-export const getReturnById = async (returnId: number) => {
-    return await Return.findByPk(returnId);
+export const getReturnById = async (returnId: number, transaction?: Transaction) => {
+    return await Return.findByPk(returnId, { transaction });
 };
 
 export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter?: any) => {

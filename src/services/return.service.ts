@@ -18,6 +18,9 @@ import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFE
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import { getPercentageValue } from "../helper";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as tradeServiceService from '../services/tradeService.service';
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
+import * as journalEntryServices from '../services/journalEntry.service'
 
 interface InvoiceWithProducts {
     loadingOrder: {
@@ -27,7 +30,7 @@ interface InvoiceWithProducts {
     };
 }
 
-export const createReturn = async (invoiceId: number, productIds: number[], userId: number) => {
+export const createReturn = async (invoiceId: number, productIds: number[], userId: number, services?: any[], clientId?: number) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -77,6 +80,18 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
             transaction
         );
 
+        // Create trade services for return if they exist
+        if (Array.isArray(services) && services.length && clientId) {
+            await tradeServiceService.createMultipleTradeServices(
+                services,
+                TRADE_SERVICE_REFERENCE_TYPES.RETURN,
+                returnRecord.id,
+                clientId,
+                "sale",
+                transaction
+            );
+        }
+
         // Create return products
         const returnProducts = productIds.map((salesOrderProductId) => ({
             returnId: returnRecord.id,
@@ -110,7 +125,7 @@ export const getReturnById = async (returnId: number, transaction?: Transaction)
     return returnRecord;
 }
 
-export const confirmReturn = async (returnId: number, clientId: number, pTransaction?: Transaction) => {
+export const confirmReturn = async (returnId: number, locationId: number, clientId: number, pTransaction?: Transaction) => {
     const transaction = pTransaction || await sequelize.transaction();
     const shouldCommit = !pTransaction;
 
@@ -144,6 +159,8 @@ export const confirmReturn = async (returnId: number, clientId: number, pTransac
             clientId,
         });
 
+        // Journal entries for services attached with return. 
+        await journalEntryServices.createJournalEntriesForTradeServicesOfReturns(returnRecord, locationId, transaction)
         // #1
         // Journal Entry for with tax.
         await journalEntryRepository.create(
@@ -383,7 +400,7 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
     return await returnRepository.getAllReturnsPaginated(page, limit, clientId, filter);
 };
 
-export const updateReturnProductsAndConfirm = async (returnId: number, productIds: number[], clientId: number) => {
+export const updateReturnProductsAndConfirm = async (returnId: number, locationId: number, productIds: number[], clientId: number) => {
     const transaction = await sequelize.transaction();
     try {
 
@@ -411,7 +428,7 @@ export const updateReturnProductsAndConfirm = async (returnId: number, productId
         await returnRepository.createReturnProducts(newReturnProducts, transaction);
 
         // 4. Call confirmReturn with the transaction
-        const confirmedReturn = await confirmReturn(returnId, clientId, transaction);
+        const confirmedReturn = await confirmReturn(returnId, locationId, clientId, transaction);
 
         await transaction.commit();
 

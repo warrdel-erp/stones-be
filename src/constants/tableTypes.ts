@@ -46,6 +46,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   SO_INVOICE_PAYMENT: "so_invoice_payment",
   CONFIRM_RETURN: "confirm_return",
   ADVANCE_DEPOSIT: "advance_deposit",
+  SLAB_SPLIT: "slab_split",
   CUSTOM: "custom",
 } as const;
 

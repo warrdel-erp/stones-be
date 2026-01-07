@@ -6,22 +6,23 @@ import * as returnService from "../services/return.service";
 import { AppError } from "../helper/appError";
 
 export const createReturn = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { productIds, invoiceId } = req.body;
+    const { productIds, invoiceId, services } = req.body;
     const userId = req.user?.id;
     const clientId = req.user?.clientId;
 
     if (!userId) {
         throw new AppError("User not authenticated", 401);
     }
-    const returnRecord = await returnService.createReturn(Number(invoiceId), productIds, userId,);
+    const returnRecord = await returnService.createReturn(Number(invoiceId), productIds, userId, services, Number(clientId));
     SuccessResponse(res, 201, "Return created successfully", returnRecord);
 });
 
 export const confirmReturn = catchAsync(async (req: AuthRequest, res: Response) => {
     const { returnId } = req.params;
     const clientId = req.user?.clientId;
+    const locationId = req.user?.defaultLocationId;
 
-    const returnRecord = await returnService.confirmReturn(Number(returnId), Number(clientId));
+    const returnRecord = await returnService.confirmReturn(Number(returnId), Number(locationId), Number(clientId));
     SuccessResponse(res, 200, "Return confirmed successfully", returnRecord);
 });
 
@@ -50,11 +51,12 @@ export const updateReturnProductsAndConfirm = catchAsync(async (req: AuthRequest
     const { productIds } = req.body;
     const { returnId } = req.params;
     const clientId = req.user?.clientId;
+    const locationId = req.user?.defaultLocationId;
 
     if (!productIds.length) {
         throw new AppError('productIds are required', 400);
     }
 
-    const returnRecord = await returnService.updateReturnProductsAndConfirm(Number(returnId), productIds, Number(clientId));
+    const returnRecord = await returnService.updateReturnProductsAndConfirm(Number(returnId), Number(locationId), productIds, Number(clientId));
     SuccessResponse(res, 200, "Return products updated and confirmed successfully", returnRecord);
 }); 

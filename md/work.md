@@ -697,17 +697,19 @@ Email notification.
 
 ---
 
-1. Drop-down, ascending order.
-2. Shortest path between delivery addresses.
-3. Total profit in LO and SO.
-4. Freight bill could be edited (with journal entry).
-5. Inventory Variance in Journal entry in SIPL, SO. [!]
-6. Service charge in returns will be bared by customer. (With option.)
-7. Test whole project with generic product and combination of slab and generic products. [!]
-8. Due amount of SO with advance deposit. [!] [discuss-again]
-9. Service journal entry in PO. [!] [discussion]
-10. design of create Journal entry page.
-11. users page heading.
-12. create User in client profile.
-13. creadit note create page design.
-——-
+1. Service journal entry in PO. [!] [discussion]
+2. Shortest path between delivery addresses. [skip-for-technical-reasons]
+
+3. Freight bill could be edited (with journal entry).
+4. Test whole project with generic product and combination of slab and generic products. [!]
+5. Profile image
+6. Change location access for user from client.
+
+7. Show adjustments in separate module in sidebar
+8. Total area difference in split.
+9. Sorting in table.
+10. Cancel LO, SO
+11. Dr. In Transit -> inventory variance in Journal entry
+12. show generic PRoduct info as well in inventory drawer
+
+`you can test the software on client side as well.`
