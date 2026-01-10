@@ -11,6 +11,7 @@ import * as models from '../models'
 import { AppError } from "../helper/appError";
 import { sumDecimal } from "../helper";
 import Decimal from "decimal.js";
+import { scoped } from "../utils/scoped";
 interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
@@ -51,7 +52,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         }
 
         // Create advanced deposit
-        const advancedDeposit: any = await AdvancedDeposit.create(
+        const advancedDeposit: any = await scoped(AdvancedDeposit).create(
             {
                 amount: data.amount,
                 salesOrderId: data.salesOrderId,
@@ -61,7 +62,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         );
 
         // Create payment record
-        const payment: any = await Payment.create(
+        const payment: any = await scoped(Payment).create(
             {
                 paymentType: PAYMENT_TYPE.INCOMING,
                 payeeId: salesOrder.customer.id,
@@ -78,7 +79,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         );
 
         // Create payment bill record
-        await PaymentBill.create(
+        await scoped(PaymentBill).create(
             {
                 paymentId: payment.id,
                 referenceId: advancedDeposit.id,
@@ -264,7 +265,7 @@ export const settleAdvancedDeposit = async (
             }
 
             // Create the settlement
-            const createdSettlement = await models.AdvancedDepositSettlement.create(
+            const createdSettlement = await scoped(models.AdvancedDepositSettlement).create(
                 {
                     amount: settlementAmount.toNumber(),
                     soInvoiceId: invoiceId,

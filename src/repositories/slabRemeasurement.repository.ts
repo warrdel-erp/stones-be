@@ -1,7 +1,8 @@
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export async function createSlabLog(slabLogData: any, transaction?: any) {
-  return await models.SlabRemeasurement.create(slabLogData, { transaction });
+  return await scoped(models.SlabRemeasurement).create(slabLogData, { transaction });
 }
 
 export async function getSlabLogsBySlabId(slabId: number) {

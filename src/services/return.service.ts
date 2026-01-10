@@ -177,7 +177,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccountForGoodsSold.id,
             },
             transaction
@@ -199,7 +199,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -235,7 +235,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -260,7 +260,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -314,7 +314,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                         partyLedgerAccountId: ledgerAccountForCogs.id,
                     },
                     transaction
@@ -338,7 +338,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.soLocationId,
+                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
                         partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
                     },
                     transaction

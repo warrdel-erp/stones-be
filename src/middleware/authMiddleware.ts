@@ -4,6 +4,7 @@ import { AppError } from "../helper/appError";
 import * as userRepository from "../repositories/user.repository";
 import * as clientRepository from "../repositories/client.repository";
 import catchAsync from "../helper/asyncCatch";
+import { requestContext } from "../utils/requestContext";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -81,13 +82,31 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
   // Try to authenticate as a user
   const userAuthenticated = await authenticateUserFromToken(decoded, req);
   if (userAuthenticated) {
-    return next();
+    requestContext.run(
+      {
+        clientId: req.user?.clientId,
+        locationId: req.user?.defaultLocationId,
+      },
+      () => {
+        next();
+      }
+    );
+    return;
   }
 
   // If not a user, try as a client
   const clientAuthenticated = await authenticateClientFromToken(decoded, req);
   if (clientAuthenticated) {
-    return next();
+    requestContext.run(
+      {
+        clientId: req.user?.clientId,
+        locationId: req.user?.defaultLocationId,
+      },
+      () => {
+        next();
+      }
+    );
+    return;
   }
 
   // If neither authentication succeeded

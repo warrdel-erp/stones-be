@@ -700,16 +700,26 @@ Email notification.
 1. Service journal entry in PO. [!] [discussion]
 2. Shortest path between delivery addresses. [skip-for-technical-reasons]
 
-3. Freight bill could be edited (with journal entry).
-4. Test whole project with generic product and combination of slab and generic products. [!]
-5. Profile image
-6. Change location access for user from client.
+3. automate deployment [!!!!!!]
+4. Freight bill could be edited (with journal entry).
+5. Test whole project with generic product and combination of slab and generic products. [!]
+6. Profile image
+7. Change location access for user from client.
+8. Show adjustments in separate module in sidebar.
+9. Total area difference in split.
+10. Sorting in table.
+11. Cancel LO, SO
+12. Dr. In Transit -> inventory variance in Journal entry
+13. show generic PRoduct info as well in inventory drawer
+14. add so product is showing slabs other than in_inventory. [!!!]
 
-7. Show adjustments in separate module in sidebar
-8. Total area difference in split.
-9. Sorting in table.
-10. Cancel LO, SO
-11. Dr. In Transit -> inventory variance in Journal entry
-12. show generic PRoduct info as well in inventory drawer
+---
 
-`you can test the software on client side as well.`
+1. Put locationId and clientId in each Table as needed.
+2. write scopeConfig for each modal.
+3. write common scoping functions.
+4. change all implementation.
+5. check if SlabRemeasurement table used anywhere.
+6. remove loadingOrderProducts.
+7. remove global hooks like "beforeValidate"
+8. return, soProductHistory, payment also lies under location scope

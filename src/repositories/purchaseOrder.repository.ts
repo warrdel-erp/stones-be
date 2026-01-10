@@ -2,12 +2,13 @@ import { col, fn, literal, Op, Sequelize, Transaction, WhereOptions } from "sequ
 import * as models from "../models";
 import { PO_STATUS } from "../constants/tableTypes";
 import { get } from "lodash";
+import { scoped } from "../utils/scoped";
 
 /**
  * Create a new Purchase Order in the database.
  */
 export const createPurchaseOrder = async (poData: any, transaction?: Transaction) => {
-  return await models.PurchaseOrder.create(poData, { transaction, hooks: true });
+  return await scoped(models.PurchaseOrder).create(poData, { transaction, hooks: true });
 };
 
 // create SIPL Product
@@ -21,7 +22,7 @@ export async function createRequestedPurchaseProducts(
     purchaseOrderId,
   }));
 
-  return await models.RequestedPurchaseProduct.bulkCreate(productsWithPoId, { transaction });
+  return await scoped(models.RequestedPurchaseProduct).bulkCreate(productsWithPoId, { transaction });
 }
 
 // Create freight Details
@@ -30,7 +31,7 @@ export async function createFreightDetail(
   { purchaseOrderId, siplId }: { purchaseOrderId?: number; siplId?: number },
   transaction?: Transaction
 ) {
-  return await models.FreightDetail.create({ ...freightData, siplId, purchaseOrderId }, { transaction });
+  return await scoped(models.FreightDetail).create({ ...freightData, siplId, purchaseOrderId }, { transaction });
 }
 
 // Get po with pagination

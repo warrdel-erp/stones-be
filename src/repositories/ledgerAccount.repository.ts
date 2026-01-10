@@ -2,15 +2,16 @@ import { Op, Sequelize, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { FREIGHT_BILL_ACCOUNT_KEYS } from "../constants/coa";
+import { scoped } from "../utils/scoped";
 
 // Create ledger account.
 export const createLedgerAccount = async (data: LedgerAccount, transaction?: Transaction) => {
-  return await models.LedgerAccount.create(data, { transaction });
+  return await scoped(models.LedgerAccount).create(data, { transaction });
 };
 
 // Create ledger account.
 export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction?: Transaction) => {
-  const accounts = await models.LedgerAccount.bulkCreate(data, { transaction, returning: true, individualHooks: true });
+  const accounts = await scoped(models.LedgerAccount).bulkCreate(data, { transaction, returning: true, individualHooks: true });
   return accounts;
 };
 

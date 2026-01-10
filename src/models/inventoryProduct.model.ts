@@ -5,6 +5,7 @@ import SIPL from "./sipl.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import Product from "./product.model";
 import Client from "./client.model";
+import Location from "./location.model";
 
 const InventoryProduct = sequelize.define(
   "InventoryProduct",
@@ -77,12 +78,28 @@ const InventoryProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "inventory_products",
     timestamps: true,
   }
 );
+
+// Scope configuration for InventoryProduct model
+(InventoryProduct as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default InventoryProduct;
 

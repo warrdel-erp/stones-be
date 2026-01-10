@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 /**
  * Create a new selection sheet with items
@@ -12,7 +13,7 @@ export const createSelectionSheet = async (
   },
   transaction?: Transaction
 ) => {
-  return await models.SelectionSheet.create(data, { transaction });
+  return await scoped(models.SelectionSheet).create(data, { transaction });
 };
 
 /**
@@ -26,15 +27,15 @@ export const createSelectionSheetItems = async (
   }>,
   transaction?: Transaction
 ) => {
-  return await models.SelectionSheetItem.bulkCreate(items, { transaction });
+  return await scoped(models.SelectionSheetItem).bulkCreate(items, { transaction });
 };
 
 /**
  * Get selection sheet by ID with all details
  */
 export const getSelectionSheetById = async (id: number) => {
-
-  const products = (await models.Product.findAll({
+  const productScoped = scoped(models.Product);
+  const products = (await productScoped.findAll({
     attributes: ['id', 'name'],
     include: [
       {

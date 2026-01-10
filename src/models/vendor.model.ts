@@ -172,4 +172,10 @@ const Vendor = sequelize.define(
   }
 );
 
+// Scope configuration for Vendor model
+(Vendor as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default Vendor;

@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Truck from "./truck.model";
 import { DELIVERY_STATUS } from "../constants/tableTypes";
 import Client from "./client.model";
+import Location from "./location.model";
 
 const Delivery = sequelize.define(
     "Delivery",
@@ -35,11 +36,27 @@ const Delivery = sequelize.define(
             onDelete: "RESTRICT",
             onUpdate: "CASCADE",
         },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Location,
+                key: "id",
+            },
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE",
+        },
     },
     {
         tableName: "deliveries",
         timestamps: true,
     }
 );
+
+// Scope configuration for Delivery model
+(Delivery as any).scopeConfig = {
+    client: true,
+    location: true,
+};
 
 export default Delivery; 

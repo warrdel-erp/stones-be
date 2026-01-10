@@ -6,12 +6,13 @@ import Location from "../models/location.model";
 import { RETURN_STATUS } from "../models/return.model";
 import SalesOrder from "../models/salesOrder.model";
 import { SoInvoice } from "../models/salesOrderInvoice.model";
+import { scoped } from "../utils/scoped";
 
 /**
  * Create a new invoice
  */
 export const createInvoice = async (data: SoInvoice, transaction: Transaction) => {
-  return await models.SalesOrderInvoice.create(data, { transaction });
+  return await scoped(models.SalesOrderInvoice).create(data, { transaction });
 };
 
 /**

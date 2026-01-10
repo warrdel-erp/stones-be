@@ -4,6 +4,7 @@ import * as models from "../models";
 import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -50,7 +51,7 @@ export const createInventoryProductsWithCombinedNumbers = async (
     ...(landedUnitCost !== undefined && landedUnitCost !== null && { landedUnitCost }),
   }));
 
-  return await models.InventoryProduct.bulkCreate(inventoryProductsData, { transaction });
+  return await scoped(models.InventoryProduct).bulkCreate(inventoryProductsData, { transaction });
 };
 
 const getLastInventoryProductAsPerSipl = (siplId: number, transaction?: Transaction) => {

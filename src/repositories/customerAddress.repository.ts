@@ -1,14 +1,15 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { CUSTOMER_ADDRESS_TYPES } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 export const createCustomerAddress = async (data: any, transaction?: Transaction) => {
-  return await models.CustomerAddress.create(data, { transaction });
+  return await scoped(models.CustomerAddress).create(data, { transaction });
 };
 
 // Create multiple addresses
 export const createBulkCustomerAddress = async (data: any, transaction?: Transaction) => {
-  return await models.CustomerAddress.bulkCreate(data, { transaction });
+  return await scoped(models.CustomerAddress).bulkCreate(data, { transaction });
 };
 
 export const getAddressesByCustomerId = async (

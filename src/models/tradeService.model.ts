@@ -74,5 +74,11 @@ const TradeService = sequelize.define(
     }
 );
 
+// Scope configuration for TradeService model
+(TradeService as any).scopeConfig = {
+    client: true,
+    location: false,
+};
+
 export default TradeService;
 export type TradeServiceReferenceType = keyof typeof TRADE_SERVICE_REFERENCE_TYPES; 

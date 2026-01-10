@@ -102,10 +102,10 @@ Location.belongsToMany(User, {
   foreignKey: "locationId",
 });
 
-// PurchaseOrder-PurchaseLocation (one 'PurchaseOrder' have one 'purchaseLocation')
+// PurchaseOrder-Location (one 'PurchaseOrder' have one 'location')
 PurchaseOrder.belongsTo(Location, {
   as: "purchaseLocation",
-  foreignKey: "purchaseLocationId",
+  foreignKey: "locationId",
 });
 
 // PurchaseOrder-ShipmentLocation (one 'PurchaseOrder' have one 'shipmentLocation')
@@ -114,10 +114,10 @@ PurchaseOrder.belongsTo(Location, {
   foreignKey: "shipmentLocationId",
 });
 
-// SIPL-PurchaseLocation (one 'SIPL' have one 'purchaseLocation')
+// SIPL-Location (one 'SIPL' have one 'location')
 SIPL.belongsTo(Location, {
   as: "purchaseLocation",
-  foreignKey: "purchaseLocationId",
+  foreignKey: "locationId",
 });
 
 // SIPL-ShipmentLocation (one 'SIPL' have one 'shipmentLocation')
@@ -376,8 +376,8 @@ CustomerAddress.hasMany(SalesOrder, { foreignKey: "shippingAddressId" });
 LoadingOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
 CustomerAddress.hasMany(LoadingOrder, { foreignKey: "shippingAddressId" });
 
-SalesOrder.belongsTo(Location, { foreignKey: "soLocationId", as: "soLocation" });
-Location.hasMany(SalesOrder, { foreignKey: "soLocationId", as: "salesOrders" });
+SalesOrder.belongsTo(Location, { foreignKey: "locationId", as: "soLocation" });
+Location.hasMany(SalesOrder, { foreignKey: "locationId", as: "salesOrders" });
 
 // One Customer can have multiple addresses
 CustomerAddress.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
@@ -708,6 +708,102 @@ TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraint
 // Client-TermsCondition relation (one-to-one: one Client has one TermsCondition)
 Client.hasOne(TermsCondition, { foreignKey: "clientId", as: "termsCondition" });
 TermsCondition.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-Product relation
+Client.hasMany(Product, { foreignKey: "clientId", as: "products" });
+Product.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-ProductBaseColor relation
+Client.hasMany(ProductBaseColor, { foreignKey: "clientId", as: "productBaseColors" });
+ProductBaseColor.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-ProductGroup relation
+Client.hasMany(ProductGroup, { foreignKey: "clientId", as: "productGroups" });
+ProductGroup.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-AdvancedDeposit relation
+Client.hasMany(AdvancedDeposit, { foreignKey: "clientId", as: "advancedDeposits" });
+AdvancedDeposit.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-AdvancedDepositSettlement relation
+Client.hasMany(AdvancedDepositSettlement, { foreignKey: "clientId", as: "advancedDepositSettlements" });
+AdvancedDepositSettlement.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-BillItem relation
+Client.hasMany(BillItem, { foreignKey: "clientId", as: "billItems" });
+BillItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-Bin relation
+Client.hasMany(Bin, { foreignKey: "clientId", as: "bins" });
+Bin.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-CustomerAddress relation
+Client.hasMany(CustomerAddress, { foreignKey: "clientId", as: "customerAddresses" });
+CustomerAddress.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-GenericProduct relation
+Client.hasMany(GenericProduct, { foreignKey: "clientId", as: "genericProducts" });
+GenericProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-InventoryProductHold relation
+Client.hasMany(InventoryProductHold, { foreignKey: "clientId", as: "inventoryProductHolds" });
+InventoryProductHold.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-JournalEntry relation
+Client.hasMany(JournalEntry, { foreignKey: "clientId", as: "journalEntries" });
+JournalEntry.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-LoadingOrderProduct relation
+Client.hasMany(LoadingOrderProduct, { foreignKey: "clientId", as: "loadingOrderProducts" });
+LoadingOrderProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-Notes relation
+Client.hasMany(Notes, { foreignKey: "clientId", as: "notes" });
+Notes.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-PaymentBill relation
+Client.hasMany(PaymentBill, { foreignKey: "clientId", as: "paymentBills" });
+PaymentBill.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-RequestedPurchaseProduct relation
+Client.hasMany(RequestedPurchaseProduct, { foreignKey: "clientId", as: "requestedPurchaseProducts" });
+RequestedPurchaseProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-ReturnProduct relation
+Client.hasMany(ReturnProduct, { foreignKey: "clientId", as: "returnProducts" });
+ReturnProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-SalesOrderProduct relation
+Client.hasMany(SalesOrderProduct, { foreignKey: "clientId", as: "salesOrderProducts" });
+SalesOrderProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-Service relation
+Client.hasMany(Service, { foreignKey: "clientId", as: "services" });
+Service.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-SIPLProduct relation
+Client.hasMany(SIPLProduct, { foreignKey: "clientId", as: "siplProducts" });
+SIPLProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-SlabRemeasurement relation
+Client.hasMany(SlabRemeasurement, { foreignKey: "clientId", as: "slabRemeasurements" });
+SlabRemeasurement.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-SoProductSwapHistory relation
+Client.hasMany(SoProductSwapHistory, { foreignKey: "clientId", as: "soProductSwapHistories" });
+SoProductSwapHistory.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-Warehouse relation
+Client.hasMany(Warehouse, { foreignKey: "clientId", as: "warehouses" });
+Warehouse.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-FreightDetail relation
+Client.hasMany(FreightDetail, { foreignKey: "clientId", as: "freightDetails" });
+FreightDetail.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Client-InvoiceDelivery relation
+Client.hasMany(InvoiceDelivery, { foreignKey: "clientId", as: "invoiceDeliveries" });
+InvoiceDelivery.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 export {
   Client,

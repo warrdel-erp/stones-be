@@ -8,6 +8,7 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SLAB_ENTRY_UNIT } from "../constants/tableTypes";
 import SIPLProduct from "./siplProduct.model";
 import Client from "./client.model";
+import Location from "./location.model";
 import _ from "lodash";
 
 const Slab = sequelize.define(
@@ -176,6 +177,16 @@ const Slab = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "slabs",
@@ -199,5 +210,11 @@ Slab.beforeUpdate((slab) => {
   delete slab.dataValues.siplId;
   delete slab.dataValues.siplProductId;
 });
+
+// Scope configuration for Slab model
+(Slab as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default Slab;

@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Location from "./location.model";
+import Client from "./client.model";
 
 const Warehouse = sequelize.define(
   "warehouses",
@@ -20,11 +21,27 @@ const Warehouse = sequelize.define(
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "warehouses",
     timestamps: true,
   }
 );
+
+// Scope configuration for Warehouse model
+(Warehouse as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default Warehouse;

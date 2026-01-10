@@ -13,18 +13,18 @@ export const createPurchaseOrderController = catchAsync(async (req: AuthRequest,
   const userId = req.user?.id;
   const clientId = req.user?.clientId;
 
-  const { purchaseLocationId, shipmentLocationId, supplierId } = req.body;
+  const { locationId, shipmentLocationId, supplierId } = req.body;
   const { internalNote, printableNote } = req.body; // Extract notes separately
 
   // Validate required fields
-  if (!purchaseLocationId || !shipmentLocationId || !supplierId) {
-    throw new AppError("Missing required fields: purchaseLocationId, shipmentLocationId, supplierId", 400);
+  if (!locationId || !shipmentLocationId || !supplierId) {
+    throw new AppError("Missing required fields: locationId, shipmentLocationId, supplierId", 400);
   }
 
   const notesData = { internal: internalNote, printable: printableNote };
 
   // Call service function
-  const newPO = await poService.registerPurchaseOrder({ ...req.body, userId, clientId }, notesData);
+  const newPO = await poService.registerPurchaseOrder({ ...req.body, userId }, notesData);
 
   return SuccessResponse(res, 201, "Purchase Order created successfully.", newPO);
 });

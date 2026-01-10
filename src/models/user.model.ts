@@ -76,5 +76,10 @@ const User = sequelize.define(
   }
 );
 
+// Scope configuration for User model
+(User as any).scopeConfig = {
+  client: true,
+  location: false,
+};
 
 export default User;

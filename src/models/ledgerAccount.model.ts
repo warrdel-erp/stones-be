@@ -135,4 +135,10 @@ async function assignLedgerAccountCode(ledgerAccount: any, transaction?: Transac
   }
 }
 
+// Scope configuration for LedgerAccount model
+(LedgerAccount as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default LedgerAccount;

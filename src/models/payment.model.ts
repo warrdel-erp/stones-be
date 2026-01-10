@@ -154,6 +154,12 @@ Payment.beforeCreate(async (payment: any) => {
   }
 });
 
+// Scope configuration for Payment model
+(Payment as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default Payment;
 
 

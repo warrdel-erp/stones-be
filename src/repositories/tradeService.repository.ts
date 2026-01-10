@@ -1,8 +1,9 @@
 import TradeService from "../models/tradeService.model";
 import { Op, Transaction } from "sequelize";
+import { scoped } from "../utils/scoped";
 
 export async function createTradeService(data: any, transaction?: Transaction) {
-    return TradeService.create(data, { transaction });
+    return scoped(TradeService).create(data, { transaction });
 }
 
 export async function findTradeServices(filters: any = {}) {

@@ -2,6 +2,7 @@ import { Op, Transaction, Model } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 import User from "../models/user.model";
+import { scoped } from "../utils/scoped";
 
 type UserAttributes = {
   username: string;
@@ -13,7 +14,7 @@ type UserAttributes = {
 
 // Create a new user
 export const createUser = async (userData: UserAttributes, transaction?: Transaction) => {
-  return await models.User.create(userData as any, { transaction });
+  return await scoped(models.User).create(userData as any, { transaction });
 };
 
 // Get User by Email

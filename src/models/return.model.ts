@@ -99,5 +99,11 @@ Return.beforeCreate(async (returnRecord: any) => {
     returnRecord.code = `RO ${invoiceNumber}-${returnNumber}`;
 });
 
+// Scope configuration for Return model
+(Return as any).scopeConfig = {
+    client: true,
+    location: false,
+};
+
 export { RETURN_STATUS };
 export default Return; 

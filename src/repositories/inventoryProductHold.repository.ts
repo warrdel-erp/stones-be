@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 /**
  * Create a hold on an inventory product
@@ -8,7 +9,7 @@ export const createHold = async (
   data: { inventoryProductId: number; note?: string; createdById: number; customerId?: number },
   transaction?: Transaction
 ) => {
-  return await models.InventoryProductHold.create(data, { transaction });
+  return await scoped(models.InventoryProductHold).create(data, { transaction });
 };
 
 /**
@@ -18,7 +19,7 @@ export const createBulkHolds = async (
   holdsData: Array<{ inventoryProductId: number; note?: string; createdById: number; customerId?: number }>,
   transaction?: Transaction
 ) => {
-  return await models.InventoryProductHold.bulkCreate(holdsData, { transaction });
+  return await scoped(models.InventoryProductHold).bulkCreate(holdsData, { transaction });
 };
 
 /**

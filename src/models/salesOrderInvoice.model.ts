@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Customer from "./customer.model";
 import LoadingOrder from "./loadingOrder.model";
 import Client from "./client.model";
+import * as models from "./index";
 import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
 import * as decimal from '../helper/decimal'
@@ -105,6 +106,16 @@ const SalesOrderInvoice = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "sales_order_invoices",
@@ -156,6 +167,12 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
   soInvoice.soInvoiceNumber = lastInvAccordingToSo ? lastInvAccordingToSo.soInvoiceNumber + 1 : 1;
   soInvoice.invoiceCode = `INV ${salesOrder.clientSoNumber}-${soInvoice.soInvoiceNumber}`;
 });
+
+// Scope configuration for SalesOrderInvoice model
+(SalesOrderInvoice as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SalesOrderInvoice;
 

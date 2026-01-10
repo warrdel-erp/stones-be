@@ -1,13 +1,14 @@
-import { col, fn, literal, Op, Sequelize } from "sequelize";
-import * as models from "../models";
-import { CustomUpdateOptions } from "../types/custom";
+import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
-import * as slabRepository from '../repositories/slab.repository'
-import * as genericProductRepository from './genericProduct.repository'
-import * as inventoryProductRepository from './inventoryProduct.repository'
+import * as models from "../models";
+import * as slabRepository from '../repositories/slab.repository';
+import { CustomUpdateOptions } from "../types/custom";
+import { scoped } from "../utils/scoped";
+import * as genericProductRepository from './genericProduct.repository';
+import * as inventoryProductRepository from './inventoryProduct.repository';
 
 export const createProduct = async (productData: any) => {
-  return await models.Product.create(productData);
+  return await scoped(models.Product).create(productData);
 };
 
 // Get all products with minimal data (only subcategory and group)
@@ -24,7 +25,8 @@ export const getAllProductsMinimal = async (
     whereClause.name = { [Op.like]: `%${search}%` };
   }
 
-  const { count, rows } = await models.Product.findAndCountAll({
+  const productScoped = scoped(models.Product);
+  const { count, rows } = await productScoped.findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -75,10 +77,12 @@ export const getAllProducts = async (
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
+  const productScoped = scoped(models.Product);
+
   // If onlyWithSlabs is true, we need to handle it differently
   if (onlyWithSlabs) {
     // First get product IDs that have either slabs or generic products
-    const productsWithInventory = await models.Product.findAll({
+    const productsWithInventory = await productScoped.findAll({
       attributes: ['id'],
       include: [
         {
@@ -93,7 +97,7 @@ export const getAllProducts = async (
     const productIds = productsWithInventory.map((p: any) => p.id);
 
     // Now get the full product details with these IDs
-    let { rows: products, count: total } = await models.Product.findAndCountAll({
+    let { rows: products, count: total } = await productScoped.findAndCountAll({
       where: {
         ...whereClause,
         ...filter,
@@ -129,7 +133,7 @@ export const getAllProducts = async (
       order: [["name", "ASC"]],
     });
 
-    products = await Promise.all(products.map(async e => {
+    products = await Promise.all(products.map(async (e: any) => {
       const plainProduct: any = e.get({ plain: true });
 
       plainProduct.averageLandedCost = await inventoryProductRepository.getAverageLandedCost(plainProduct.id);
@@ -142,7 +146,7 @@ export const getAllProducts = async (
   } else {
 
     // Original query for when onlyWithSlabs is false
-    const { rows: products, count: total } = await models.Product.findAndCountAll({
+    const { rows: products, count: total } = await productScoped.findAndCountAll({
       where: { ...whereClause, ...filter },
       include: [
         {
@@ -236,11 +240,13 @@ export const getAllProductsWithCompactData = async (
   const offset = (page - 1) * limit;
   const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
+  const productScoped = scoped(models.Product);
+
   // If onlyWithSlabs is true, we need to handle it differently
   if (onlyWithSlabs) {
 
     // Now get the full product details with these IDs
-    let { rows: products, count: total }: any = await models.Product.findAndCountAll({
+    let { rows: products, count: total }: any = await productScoped.findAndCountAll({
       where: {
         ...whereClause,
         ...filter,
@@ -284,7 +290,7 @@ export const getAllProductsWithCompactData = async (
     return { products, total, page, limit };
   } else {
     // Original query for when onlyWithSlabs is false
-    let { rows: products, count: total }: any = await models.Product.findAndCountAll({
+    let { rows: products, count: total }: any = await productScoped.findAndCountAll({
       where: { ...whereClause, ...filter },
       include: [
         {
@@ -332,12 +338,14 @@ const getCountDataForProducts = async (products: any[]) => {
 
 // get product by id
 export const getProductByIdSimple = async (id: number) => {
-  return (await models.Product.findByPk(id))?.get({ plain: true });
+  const productScoped = scoped(models.Product);
+  return (await productScoped.findByPk(id))?.get({ plain: true });
 };
 
 // get product details by id
 export const getProductById = async (id: number) => {
-  return await models.Product.findOne({
+  const productScoped = scoped(models.Product);
+  return await productScoped.findOne({
     where: { id },
     include: [
       { model: models.ProductGroup, as: "group" },
@@ -369,7 +377,8 @@ export const getProductById = async (id: number) => {
 
 // Update product by ID
 export const updateProduct = async (id: number, updateData: any, userId: number) => {
-  const [updatedRows] = await models.Product.update(updateData, {
+  const productScoped = scoped(models.Product);
+  const [updatedRows] = await productScoped.update(updateData, {
     where: { id },
     individualHooks: true,
     userId: userId,
@@ -377,12 +386,13 @@ export const updateProduct = async (id: number, updateData: any, userId: number)
 
   if (!updatedRows) return null;
 
-  return await models.Product.findByPk(id);
+  return await productScoped.findByPk(id);
 };
 
 // Get product with specific location.
 export const getProductsWithSlabsByLocation = async (locationId: number) => {
-  return await models.Product.findAll({
+  const productScoped = scoped(models.Product);
+  return await productScoped.findAll({
     include: [
       {
         model: models.Slab,
@@ -410,7 +420,8 @@ export const getProductsWithSlabsByLocation = async (locationId: number) => {
 
 // Get product options for dropdowns/selects
 export const getProductOptions = async (clientId: number, status?: string) => {
-  return models.Product.findAll({
+  const productScoped = scoped(models.Product);
+  return productScoped.findAll({
     attributes: [
       ["name", "label"],
       ["id", "value"],

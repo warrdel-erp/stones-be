@@ -9,6 +9,7 @@ import User from "./user.model";
 import Bin from "./bin.model";
 import ProductFinish from "./productFinish.model";
 import LedgerAccount from "./ledgerAccount.model";
+import Client from "./client.model";
 import { PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 
@@ -195,6 +196,16 @@ const Product = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "products",
@@ -214,5 +225,11 @@ Product.beforeUpdate((product, options) => {
     throw new AppError("createdBy cannot be updated.", 400);
   }
 });
+
+// Scope configuration for Product model
+(Product as any).scopeConfig = {
+  client: true,
+  location: false,
+};
 
 export default Product;

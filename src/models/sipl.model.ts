@@ -91,7 +91,7 @@ const SIPL = sequelize.define(
         key: "id",
       },
     },
-    purchaseLocationId: {
+    locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -151,6 +151,12 @@ SIPL.beforeCreate(async (sipl: any) => {
   sipl.clientInvoiceNumber = lastSIPLAccordingToClient ? lastSIPLAccordingToClient.clientInvoiceNumber + 1 : 1;
 
 });
+
+// Scope configuration for SIPL model
+(SIPL as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SIPL;
 

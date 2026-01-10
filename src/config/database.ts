@@ -1,6 +1,7 @@
 import { Sequelize } from "sequelize-typescript";
 import { DB_CONFIG } from "./dbConfig";
 import dotenv from "dotenv";
+import { applyTenantHooks } from "./tenantHooks";
 dotenv.config();
 
 export const sequelize = new Sequelize({
@@ -12,6 +13,9 @@ export const sequelize = new Sequelize({
   logging: false,
   dialect: "mysql",
 });
+
+// Apply tenant isolation hooks
+applyTenantHooks(sequelize);
 
 export const connectDB = async () => {
   try {

@@ -1,10 +1,11 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 // Create a new customer in the database.
 export const createCustomer = async (customerData: any, transaction?: Transaction) => {
-  return await models.Customer.create(customerData, { transaction });
+  return await scoped(models.Customer).create(customerData, { transaction });
 };
 
 // Update Customer

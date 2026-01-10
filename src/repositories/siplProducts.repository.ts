@@ -1,9 +1,10 @@
 import { FindOptions, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
+import { scoped } from "../utils/scoped";
 
 export const createBulkSIPLProducts = async (data: any, transaction: Transaction) => {
-  return await models.SIPLProduct.bulkCreate(data, { transaction });
+  return await scoped(models.SIPLProduct).bulkCreate(data, { transaction });
 };
 
 // find product by id

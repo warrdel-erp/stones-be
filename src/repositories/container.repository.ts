@@ -1,9 +1,10 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 // Create Container
 export const createContainer = async (data: any, transaction?: Transaction) => {
-  return await models.Container.create(data, { transaction });
+  return await scoped(models.Container).create(data, { transaction });
 };
 
 // Get All Containers

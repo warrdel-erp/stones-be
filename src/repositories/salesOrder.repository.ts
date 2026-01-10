@@ -2,10 +2,11 @@ import { Transaction, Op, Sequelize, fn, cast, col } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 // Create new Sales Order
 export const createSalesOrder = async (data: any, transaction?: Transaction) => {
-  return await models.SalesOrder.create(data, { transaction });
+  return await scoped(models.SalesOrder).create(data, { transaction });
 };
 
 // Get all sales order

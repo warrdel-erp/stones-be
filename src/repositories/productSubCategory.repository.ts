@@ -1,7 +1,8 @@
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export const createProductSubCategory = async (payload: any) => {
-  return await models.ProductSubCategory.create(payload);
+  return await scoped(models.ProductSubCategory).create(payload);
 };
 
 export const getAllProductSubCategories = async (clientId: number) => {

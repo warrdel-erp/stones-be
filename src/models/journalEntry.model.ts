@@ -10,6 +10,7 @@ import {
 import LedgerAccount from "./ledgerAccount.model";
 import User from "./user.model";
 import Location from "./location.model";
+import Client from "./client.model";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 
 export type JournalEntry = {
@@ -110,6 +111,16 @@ const JournalEntry = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
       defaultValue: 0.0,
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     }
   },
   {
@@ -152,5 +163,11 @@ JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
     entry.balance = lastBalance - amount;
   }
 });
+
+// Scope configuration for JournalEntry model
+(JournalEntry as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default JournalEntry; 

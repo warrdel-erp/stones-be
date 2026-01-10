@@ -1,11 +1,12 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export const createSoProductSwapHistory = async (
   data: { inventoryProductId: number; salesProductId: number },
   transaction?: Transaction
 ) => {
-  return await models.SoProductSwapHistory.create(data, { transaction });
+  return await scoped(models.SoProductSwapHistory).create(data, { transaction });
 };
 
 export const getSwapHistoryBySalesProductId = async (salesProductId: number) => {

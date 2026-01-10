@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
 import LoadingOrder from "./loadingOrder.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
+import Client from "./client.model";
 
 const LoadingOrderProduct = sequelize.define(
   "LoadingOrderProduct",
@@ -66,6 +67,16 @@ const LoadingOrderProduct = sequelize.define(
       },
       onUpdate: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "loading_order_products",
@@ -92,5 +103,11 @@ LoadingOrderProduct.beforeUpdate((product: any) => {
   delete product.dataValues.salesOrderProductId;
   delete product.dataValues.loadingOrderId;
 });
+
+// Scope configuration for LoadingOrderProduct model
+(LoadingOrderProduct as any).scopeConfig = {
+  client: true,
+  location: false,
+};
 
 export default LoadingOrderProduct;

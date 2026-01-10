@@ -1,8 +1,9 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export const createCreditDebitNote = async (creditDebitNoteData: any, transaction?: Transaction) => {
-    return await models.CreditDebitNote.create(creditDebitNoteData, { transaction });
+    return await scoped(models.CreditDebitNote).create(creditDebitNoteData, { transaction });
 };
 
 export const getAllCreditDebitNotes = async (filters: any = {}, page: number = 1, limit: number = 10) => {

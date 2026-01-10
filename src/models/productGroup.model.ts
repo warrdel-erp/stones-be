@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user.model"; // adjust the path if needed
+import Client from "./client.model";
 
 const ProductGroup = sequelize.define(
     "ProductGroup",
@@ -41,11 +42,27 @@ const ProductGroup = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "SET NULL",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
     },
     {
         tableName: "product_groups",
         timestamps: true,
     }
 );
+
+// Scope configuration for ProductGroup model
+(ProductGroup as any).scopeConfig = {
+    client: true,
+    location: false,
+};
 
 export default ProductGroup;

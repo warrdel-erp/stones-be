@@ -1,13 +1,15 @@
 import { CartItem, Product } from "../models";
 import { Transaction } from "sequelize";
 import { AppError } from "../helper/appError";
+import { scoped } from "../utils/scoped";
 
 /**
  * Get cart items for a given accountId
  * Returns products with their inventory products that are in cart
  */
 export const getCartItemsByAccountId = async (accountId: number) => {
-    return Product.findAll({
+    const productScoped = scoped(Product);
+    return productScoped.findAll({
         attributes: ["id", 'name', "singleUnitPrice"],
         include: [
             {

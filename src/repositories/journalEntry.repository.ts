@@ -3,15 +3,16 @@ import * as models from "../models";
 import { type JournalEntry } from "../models/journalEntry.model";
 import { JOURNAL_ENTRY_SUB_REFERENCE_TYPES } from "../constants/tableTypes";
 import { JOURNAL_ENTRY_REFERENCE_TYPES } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 // Create ledger account.
 export const create = async (data: JournalEntry, transaction?: Transaction) => {
-  return await models.JournalEntry.create(data, { transaction });
+  return await scoped(models.JournalEntry).create(data, { transaction });
 };
 
 // Create ledger account.
 export const createBulk = async (data: JournalEntry[], transaction?: Transaction) => {
-  return await models.JournalEntry.bulkCreate(data, { transaction, individualHooks: true });
+  return await scoped(models.JournalEntry).bulkCreate(data, { transaction, individualHooks: true });
 };
 
 // Fetch find journal entries with filters.
@@ -47,7 +48,8 @@ export const findAll = async (filters: any, clientId: number) => {
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PRODUCT:
-        entry.subReferenceData = await models.Product.findOne({
+        const productScoped = scoped(models.Product);
+        entry.subReferenceData = await productScoped.findOne({
           where: { id: entry.subReferenceId },
         });
         break;

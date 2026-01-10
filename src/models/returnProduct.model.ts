@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Return from "./return.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
+import Client from "./client.model";
 
 const ReturnProduct = sequelize.define(
     "ReturnProduct",
@@ -31,6 +32,16 @@ const ReturnProduct = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
     },
     {
         tableName: "return_products",
@@ -43,5 +54,11 @@ const ReturnProduct = sequelize.define(
         ],
     }
 );
+
+// Scope configuration for ReturnProduct model
+(ReturnProduct as any).scopeConfig = {
+    client: true,
+    location: false,
+};
 
 export default ReturnProduct; 

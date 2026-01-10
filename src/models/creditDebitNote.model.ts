@@ -53,4 +53,10 @@ const CreditDebitNote = sequelize.define(
 //     as: "client",
 // });
 
+// Scope configuration for CreditDebitNote model
+(CreditDebitNote as any).scopeConfig = {
+    client: true,
+    location: false,
+};
+
 export default CreditDebitNote;

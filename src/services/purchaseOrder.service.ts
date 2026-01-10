@@ -27,7 +27,7 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     let freightDetail;
 
     // Create Freight Detail (if provided)
-    if (poData.freightDetail) {
+    if (!!Object.keys(poData.freightDetail).length) {
       freightDetail = await poRepository.createFreightDetail(
         poData.freightDetail,
         { purchaseOrderId: newPO.id },

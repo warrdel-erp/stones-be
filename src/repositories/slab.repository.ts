@@ -3,6 +3,7 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import { col, fn, literal, Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
+import { scoped } from "../utils/scoped";
 
 // Finds all slabs by SIPL ID and updates their status.
 export const updateSlabStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
@@ -31,7 +32,7 @@ export const setUnitLandedCost = async (
 
 // Create slabs
 export const createSlabs = async (slabData: any, transaction?: Transaction) => {
-  return await models.Slab.bulkCreate(slabData, { transaction, individualHooks: true });
+  return await scoped(models.Slab).bulkCreate(slabData, { transaction, individualHooks: true });
 };
 
 export const getLastSerialNumber = async (purchaseOrderId: number, siplId: number) => {

@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
+import Client from "./client.model";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 const SoProductSwapHistory = sequelize.define(
@@ -52,11 +53,27 @@ const SoProductSwapHistory = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
   },
   {
     tableName: "so_product_swap_histories",
     timestamps: true,
   }
 );
+
+// Scope configuration for SoProductSwapHistory model
+(SoProductSwapHistory as any).scopeConfig = {
+  client: true,
+  location: false,
+};
 
 export default SoProductSwapHistory;

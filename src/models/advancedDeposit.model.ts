@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SalesOrder from "./salesOrder.model";
 import LedgerAccount from "./ledgerAccount.model";
+import Client from "./client.model";
+import * as models from "./index";
 import { AppError } from "../helper/appError";
 
 const AdvancedDeposit = sequelize.define(
@@ -47,6 +49,26 @@ const AdvancedDeposit = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "RESTRICT",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: models.Location,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "SET NULL",
+        },
     },
     {
         tableName: "advanced_deposits",
@@ -59,6 +81,12 @@ const AdvancedDeposit = sequelize.define(
         ]
     }
 );
+
+// Scope configuration for AdvancedDeposit model
+(AdvancedDeposit as any).scopeConfig = {
+    client: true,
+    location: true,
+};
 
 export default AdvancedDeposit;
 

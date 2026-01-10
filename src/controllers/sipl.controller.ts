@@ -78,7 +78,7 @@ export const getAllBarcode = catchAsync(async (req: Request, res: Response) => {
 export const createDirectSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
   const {
     poDate,
-    purchaseLocationId,
+    locationId,
     shipmentLocationId,
     supplierId,
     userId,
@@ -101,7 +101,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
 
   const createdBy = req.user?.id; // Get user ID from request
   const clientId = req.user?.clientId;
-  const locationId = req.user?.defaultLocationId;
+  const userLocationId = req.user?.defaultLocationId;
 
   // There is problem in adding transaction that sipl product needs id of requestedProductId but it is not been created
 
@@ -111,7 +111,7 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
     // Validate required fields
     if (
       !poDate ||
-      !purchaseLocationId ||
+      !locationId ||
       !shipmentLocationId ||
       !supplierId ||
       !products ||
@@ -123,14 +123,14 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       !dueDate
     ) {
       throw new AppError(
-        "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, purchaseLocationId, shipmentLocationId, supplierId, clientInvoiceDate, dueDate, shipDate",
+        "Missing required fields: poDate, supplierInvoiceDate,  supplierInvoiceNumber, locationId, shipmentLocationId, supplierId, clientInvoiceDate, dueDate, shipDate",
         400
       );
     }
 
     const poData = {
       poDate,
-      purchaseLocationId,
+      locationId,
       shipmentLocationId,
       supplierId,
       userId,
@@ -171,14 +171,14 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       supplierInvoiceNumber,
       supplierInvoiceDate,
       updatedBy: createdBy,
-      purchaseLocationId,
+      locationId,
       shipmentLocationId,
       dueDate,
       shipDate,
       services
     };
 
-    const sipl = await siplService.createSIPLService(siplData, Number(locationId), transaction);
+    const sipl = await siplService.createSIPLService(siplData, Number(userLocationId), transaction);
 
     transaction.commit();
     SuccessResponse(res, 201, "SIPL with PO is been created successfully", { sipl, newPO });

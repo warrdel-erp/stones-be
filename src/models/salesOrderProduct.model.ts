@@ -4,6 +4,8 @@ import InventoryProduct from "./inventoryProduct.model";
 import PackagingList from "./packagingList.model";
 import LoadingOrder from "./loadingOrder.model";
 import SalesOrder from "./salesOrder.model";
+import Client from "./client.model";
+import * as models from "./index";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { convertSqrInchToFt, getPercentageValue } from "../helper";
 // import Decimal from "decimal.js";
@@ -191,6 +193,26 @@ const SalesOrderProduct = sequelize.define(
         return decimals.decimalDivide(multiplied, 100);
       },
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "sales_order_products",
@@ -203,6 +225,12 @@ const SalesOrderProduct = sequelize.define(
     ],
   }
 );
+
+// Scope configuration for SalesOrderProduct model
+(SalesOrderProduct as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SalesOrderProduct;
 

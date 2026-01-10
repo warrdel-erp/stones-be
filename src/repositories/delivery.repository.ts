@@ -2,6 +2,7 @@ import Delivery from "../models/Delivery.model";
 import InvoiceDelivery from "../models/InvoiceDelivery.model";
 import { Op, Transaction } from "sequelize";
 import { DELIVERY_STATUS } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 export const findPendingDeliveryByTruck = async (truckId: number) => {
     return Delivery.findOne({
@@ -18,7 +19,7 @@ export const findInvoiceDeliveriesByLoadingOrderIds = async (loadingOrderIds: nu
 };
 
 export const createDelivery = async (truckId: number, clientId: number, transaction: Transaction) => {
-    return Delivery.create({ truckId, clientId, status: DELIVERY_STATUS.PENDING }, { transaction });
+    return scoped(Delivery).create({ truckId, clientId, status: DELIVERY_STATUS.PENDING }, { transaction });
 };
 
 export const createInvoiceDelivery = async (
@@ -34,7 +35,7 @@ export const createInvoiceDelivery = async (
     },
     transaction: Transaction
 ) => {
-    return InvoiceDelivery.create(data, { transaction });
+    return scoped(InvoiceDelivery).create(data, { transaction });
 };
 
 export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {

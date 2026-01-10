@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import { UNITS_OF_MEASUREMENT } from "../constants";
 import LedgerAccount from "./ledgerAccount.model";
 import ServiceCategory from "./serviceCategory.model";
+import Client from "./client.model";
 
 const Service = sequelize.define(
     "Service",
@@ -54,11 +55,27 @@ const Service = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
     },
     {
         tableName: "services",
         timestamps: true,
     }
 );
+
+// Scope configuration for Service model
+(Service as any).scopeConfig = {
+    client: true,
+    location: false,
+};
 
 export default Service; 

@@ -43,6 +43,12 @@ const TermsCondition = sequelize.define(
   }
 );
 
+// Scope configuration for TermsCondition model
+(TermsCondition as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default TermsCondition;
 
 

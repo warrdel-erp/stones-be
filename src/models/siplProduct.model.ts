@@ -3,6 +3,8 @@ import { sequelize } from "../config/database";
 import SIPL from "./sipl.model";
 import Product from "./product.model";
 import RequestedPurchaseProduct from "./requestedPurchaseProduct";
+import Client from "./client.model";
+import * as models from "./index";
 import * as decimal from '../helper/decimal'
 
 const SIPLProduct = sequelize.define(
@@ -61,11 +63,37 @@ const SIPLProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "sipl_products",
     timestamps: true,
   }
 );
+
+// Scope configuration for SIPLProduct model
+(SIPLProduct as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SIPLProduct;

@@ -1,6 +1,7 @@
 import { FindOptions, Sequelize, Transaction, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 // find product by id
 export const findById = async (id: number, transaction?: Transaction) => {
@@ -34,7 +35,7 @@ export const updateProduct = async (id: number, data: any) => {
 
 // Create new product
 export const createProduct = async (data: any) => {
-  return await models.RequestedPurchaseProduct.create(data);
+  return await scoped(models.RequestedPurchaseProduct).create(data);
 };
 
 // Delete product by id

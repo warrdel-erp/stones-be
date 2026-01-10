@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import SIPL from "./sipl.model";
 import Client from "./client.model";
+import * as models from "./index";
 
 const Container = sequelize.define(
   "Container",
@@ -35,6 +36,16 @@ const Container = sequelize.define(
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -51,5 +62,11 @@ Container.beforeUpdate((container: any) => {
   delete container.dataValues.siplId;
   delete container.dataValues.clientId;
 });
+
+// Scope configuration for Container model
+(Container as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default Container;

@@ -1,9 +1,10 @@
 import { col, fn, Op, Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
-  return await models.Bill.create(billData, { transaction });
+  return await scoped(models.Bill).create(billData, { transaction });
 };
 
 export const getBillByPk = async (id: number) => {

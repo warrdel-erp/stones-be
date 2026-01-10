@@ -1,6 +1,7 @@
 import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import * as decimals from "../helper/decimal";
+import { scoped } from "../utils/scoped";
 
 export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
@@ -32,7 +33,7 @@ export const findByInventoryProductIdAndSalesOrderId = async (
 
 // Create a new SalesOrderProduct entry.
 export const createSalesOrderProduct = async (productData: any, transaction?: Transaction) => {
-  return models.SalesOrderProduct.create(productData, { transaction });
+  return scoped(models.SalesOrderProduct).create(productData, { transaction });
 };
 
 // Update an existing SalesOrderProduct entry.

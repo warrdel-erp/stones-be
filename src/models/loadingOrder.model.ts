@@ -4,6 +4,7 @@ import SalesOrder from "./salesOrder.model";
 import { AppError } from "../helper/appError";
 import Client from "./client.model";
 import CustomerAddress from "./customerAddress.model";
+import * as models from "./index";
 import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
 
@@ -78,6 +79,16 @@ const LoadingOrder = sequelize.define(
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
     paymentTerm: {
       type: DataTypes.VIRTUAL,
       get() {
@@ -144,5 +155,11 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
   loadingOrder.code = `LO ${salesOrder.clientSoNumber}-${loadingOrder.soLoadingOrderNumber}`;
 
 });
+
+// Scope configuration for LoadingOrder model
+(LoadingOrder as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default LoadingOrder;

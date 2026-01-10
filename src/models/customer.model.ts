@@ -178,4 +178,10 @@ const Customer = sequelize.define(
   }
 );
 
+// Scope configuration for Customer model
+(Customer as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default Customer;

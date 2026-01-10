@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 //  Find LoadingOrderProduct by Id and loading order Id.
 export const findByIdAndLoadingOrderId = async (
@@ -11,7 +12,7 @@ export const findByIdAndLoadingOrderId = async (
 
 // Create a new LoadingOrderProduct entry.
 export const createLoadingOrderProduct = async (productData: any, transaction?: Transaction) => {
-  return models.LoadingOrderProduct.create(productData, { transaction });
+  return scoped(models.LoadingOrderProduct).create(productData, { transaction });
 };
 
 // Update an existing LoadingOrderProduct entry.

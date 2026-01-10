@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import LoadingOrder from "./loadingOrder.model";
 import Client from "./client.model";
 import SalesOrder from "./salesOrder.model";
+import * as models from "./index";
 import { AppError } from "../helper/appError";
 
 const PackagingList = sequelize.define(
@@ -56,6 +57,16 @@ const PackagingList = sequelize.define(
       },
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
   },
   {
@@ -111,5 +122,10 @@ PackagingList.beforeCreate(async (packagingList: any) => {
 
 });
 
+// Scope configuration for PackagingList model
+(PackagingList as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default PackagingList;

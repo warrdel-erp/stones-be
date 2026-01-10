@@ -5,6 +5,7 @@ import User from "./user.model";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import SIPL from "./sipl.model";
 import Client from "./client.model";
+import Location from "./location.model";
 import { PAYMENT_TERMS } from "../constants";
 
 const Bill = sequelize.define(
@@ -97,6 +98,16 @@ const Bill = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "bills",
@@ -153,6 +164,12 @@ Bill.beforeCreate(async (bill: any) => {
   }
 
 });
+
+// Scope configuration for Bill model
+(Bill as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default Bill;
 

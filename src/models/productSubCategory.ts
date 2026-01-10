@@ -37,4 +37,10 @@ const ProductSubCategory = sequelize.define(
   }
 );
 
+// Scope configuration for ProductSubCategory model
+(ProductSubCategory as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default ProductSubCategory;

@@ -47,4 +47,10 @@ const Truck = sequelize.define(
   }
 );
 
+// Scope configuration for Truck model
+(Truck as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default Truck;

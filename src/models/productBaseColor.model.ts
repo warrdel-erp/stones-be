@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user.model"; // Adjust the path if needed
+import Client from "./client.model";
 
 const ProductBaseColor = sequelize.define(
     "ProductBaseColor",
@@ -39,11 +40,27 @@ const ProductBaseColor = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "SET NULL",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
     },
     {
         tableName: "product_base_colors",
         timestamps: true,
     }
 );
+
+// Scope configuration for ProductBaseColor model
+(ProductBaseColor as any).scopeConfig = {
+    client: true,
+    location: false,
+};
 
 export default ProductBaseColor;

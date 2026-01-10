@@ -825,3 +825,7 @@ sticky navbar.
 16. Slab Number during split.
 17. Total area during split can not be exceed then previous.
 18. Journal entry for split slab
+
+---
+
+1. Disable PurchaseLocation and Shipping location for PO and SIPL.

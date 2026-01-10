@@ -1,8 +1,9 @@
 import * as models from "../models";
 import { Op } from "sequelize";
+import { scoped } from "../utils/scoped";
 
 export const create = async (data: any) => {
-  return models.Truck.create(data);
+  return scoped(models.Truck).create(data);
 };
 
 export const findAll = async (page: number, limit: number, filters?: { [key: string]: any }) => {

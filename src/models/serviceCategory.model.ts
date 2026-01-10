@@ -34,4 +34,10 @@ const ServiceCategory = sequelize.define(
     }
 );
 
+// Scope configuration for ServiceCategory model
+(ServiceCategory as any).scopeConfig = {
+    client: true,
+    location: false,
+};
+
 export default ServiceCategory; 

@@ -1,10 +1,11 @@
 import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { scoped } from "../utils/scoped";
 
 // Create a new vendor in the database.
 export const createVendor = async (vendorData: any, transaction?: Transaction) => {
-  return await models.Vendor.create(vendorData, { transaction });
+  return await scoped(models.Vendor).create(vendorData, { transaction });
 };
 
 // Update Vendor

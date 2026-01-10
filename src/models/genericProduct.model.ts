@@ -5,6 +5,8 @@ import Product from "./product.model";
 import SIPL from "./sipl.model";
 import InventoryProduct from "./inventoryProduct.model";
 import SIPLProduct from "./siplProduct.model";
+import Client from "./client.model";
+import Location from "./location.model";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 
 const GenericProduct = sequelize.define(
@@ -89,11 +91,37 @@ const GenericProduct = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "SET NULL",
         },
+        clientId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Client,
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "RESTRICT",
+        },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Location,
+                key: "id",
+            },
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE",
+        },
     },
     {
         tableName: "generic_products",
         timestamps: true,
     }
 );
+
+// Scope configuration for GenericProduct model
+(GenericProduct as any).scopeConfig = {
+    client: true,
+    location: true,
+};
 
 export default GenericProduct; 

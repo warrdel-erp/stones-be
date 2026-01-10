@@ -1,9 +1,10 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 // Create new LO
 export const createPackagingList = async (data: any, transaction?: Transaction) => {
-  return await models.PackagingList.create(data, { transaction });
+  return await scoped(models.PackagingList).create(data, { transaction });
 };
 
 // Get all LO

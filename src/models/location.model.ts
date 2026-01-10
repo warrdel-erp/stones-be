@@ -60,4 +60,10 @@ const Location = sequelize.define(
   }
 );
 
+// Scope configuration for Location model
+(Location as any).scopeConfig = {
+  client: true,
+  location: false,
+};
+
 export default Location;

@@ -1,7 +1,8 @@
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export const create = async (data: any) => {
-    return await models.ProductBaseColor.create(data);
+    return await scoped(models.ProductBaseColor).create(data);
 };
 
 export const findAll = async (clientId: number) => {

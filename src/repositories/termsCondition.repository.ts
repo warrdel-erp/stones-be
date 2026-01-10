@@ -1,10 +1,11 @@
 import { Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { type TermsCondition } from "../models/termsCondition.model";
+import { scoped } from "../utils/scoped";
 
 // Create terms condition.
 export const createTermsCondition = async (data: TermsCondition, transaction?: Transaction) => {
-  return await models.TermsCondition.create(data, { transaction });
+  return await scoped(models.TermsCondition).create(data, { transaction });
 };
 
 // Get terms condition by filter.

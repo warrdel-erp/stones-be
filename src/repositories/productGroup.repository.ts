@@ -1,8 +1,9 @@
 import * as models from "../models";
 import ProductGroup from "../models/productGroup.model";
+import { scoped } from "../utils/scoped";
 
 export const create = async (data: any) => {
-    return await ProductGroup.create(data);
+    return await scoped(ProductGroup).create(data);
 };
 
 export const findAll = async (clientId: number) => {

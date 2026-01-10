@@ -2,10 +2,11 @@ import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { DELIVERY_STATUS, LOADING_ORDER_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { RETURN_STATUS } from "../models/return.model";
+import { scoped } from "../utils/scoped";
 
 // Create new LO
 export const createLoadingOrder = async (data: any, transaction?: Transaction) => {
-  return await models.LoadingOrder.create(data, { transaction });
+  return await scoped(models.LoadingOrder).create(data, { transaction });
 };
 
 // Get all LO
@@ -41,7 +42,14 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
         ],
       },
       { model: models.PackagingList, as: "packagingList" },
-      { model: models.SalesOrderProduct, as: "salesOrderProducts" },
+      {
+        association: "salesOrderProducts",
+        include: [
+          {
+            association: 'inventoryProduct'
+          }
+        ]
+      },
       { association: 'shippingAddress' },
       {
         association: 'invoiceDeliveries',

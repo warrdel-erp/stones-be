@@ -4,6 +4,7 @@ import Location from "./location.model";
 import User from "./user.model";
 import Vendor from "./vendor.model";
 import Client from "./client.model";
+import * as models from "./index";
 import { PO_STATUS } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
 
@@ -37,10 +38,11 @@ const PurchaseOrder = sequelize.define(
       type: DataTypes.ENUM(...Object.values(PO_STATUS)),
       defaultValue: PO_STATUS.OPEN,
     },
-    purchaseLocationId: {
+    locationId: {
       type: DataTypes.INTEGER,
+      allowNull: true,
       references: {
-        model: Location,
+        model: models.Location,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -134,5 +136,11 @@ PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
 
   purchaseOrder.clientPoNumber = !!lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
 });
+
+// Scope configuration for PurchaseOrder model
+(PurchaseOrder as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default PurchaseOrder;

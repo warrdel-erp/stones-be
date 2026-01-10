@@ -56,4 +56,10 @@ const ProductFinish = sequelize.define(
     }
 );
 
+// Scope configuration for ProductFinish model
+(ProductFinish as any).scopeConfig = {
+    client: true,
+    location: false,
+};
+
 export default ProductFinish;

@@ -3,6 +3,8 @@ import { sequelize } from "../config/database";
 import SIPL from "./sipl.model";
 import Vendor from "./vendor.model";
 import PurchaseOrder from "./purchaseOrder.model";
+import Client from "./client.model";
+import * as models from "./index";
 
 const FreightDetail = sequelize.define(
   "FreightDetail",
@@ -80,6 +82,26 @@ const FreightDetail = sequelize.define(
       },
       onUpdate: "CASCADE",
     },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Client,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: models.Location,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "freight_details",
@@ -87,5 +109,11 @@ const FreightDetail = sequelize.define(
     paranoid: true,
   }
 );
+
+// Scope configuration for FreightDetail model
+(FreightDetail as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default FreightDetail;

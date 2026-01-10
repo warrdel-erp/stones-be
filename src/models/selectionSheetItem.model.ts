@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import SelectionSheet from "./selectionSheet.model";
 import InventoryProduct from "./inventoryProduct.model";
 import Client from "./client.model";
+import Location from "./location.model";
 
 const SelectionSheetItem = sequelize.define(
   "SelectionSheetItem",
@@ -42,6 +43,16 @@ const SelectionSheetItem = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "selection_sheet_items",
@@ -54,6 +65,12 @@ const SelectionSheetItem = sequelize.define(
     ],
   }
 );
+
+// Scope configuration for SelectionSheetItem model
+(SelectionSheetItem as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SelectionSheetItem;
 

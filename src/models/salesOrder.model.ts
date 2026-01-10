@@ -87,13 +87,15 @@ const SalesOrder = sequelize.define(
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
-    soLocationId: {
+    locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: models.Location,
         key: "id",
       },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     taxId: {
       type: DataTypes.INTEGER,
@@ -139,5 +141,11 @@ SalesOrder.beforeCreate(async (salesOrder: any) => {
 
   salesOrder.clientSoNumber = !!lastSOAccordingToClient ? lastSOAccordingToClient.clientSoNumber + 1 : 1;
 });
+
+// Scope configuration for SalesOrder model
+(SalesOrder as any).scopeConfig = {
+  client: true,
+  location: true,
+};
 
 export default SalesOrder;

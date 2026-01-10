@@ -2,10 +2,11 @@ import { col, fn, Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { AppError } from "../helper/appError";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import { scoped } from "../utils/scoped";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
-  return await models.SIPL.create(siplData, { transaction });
+  return await scoped(models.SIPL).create(siplData, { transaction });
 }
 
 // Get latest invoice number
