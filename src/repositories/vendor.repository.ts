@@ -10,7 +10,7 @@ export const createVendor = async (vendorData: any, transaction?: Transaction) =
 
 // Update Vendor
 export const updateVendorById = async (id: number, data: any) => {
-  const [updatedCount] = await models.Vendor.update(data, {
+  const [updatedCount] = await scoped(models.Vendor).update(data, {
     where: { id },
   });
 
@@ -25,7 +25,7 @@ export const updateVendorById = async (id: number, data: any) => {
 export const getAllVendors = async (page: number, limit: number, filter?: WhereOptions) => {
   const offset = (page - 1) * limit;
 
-  const { rows: vendors, count: total } = await models.Vendor.findAndCountAll({
+  const { rows: vendors, count: total } = await scoped(models.Vendor).findAndCountAll({
     where: filter,
     include: [
       {
@@ -43,7 +43,7 @@ export const getAllVendors = async (page: number, limit: number, filter?: WhereO
 
 // Find vendor by ID
 export const findVendorById = async (id: number) => {
-  return await models.Vendor.findOne({
+  return await scoped(models.Vendor).findOne({
     where: { id },
     include: [
       {
@@ -62,7 +62,7 @@ export const findVendorById = async (id: number) => {
 };
 
 export const findVendorAccordingToSIPL = async (id: number) => {
-  return await models.Vendor.findAll({
+  return await scoped(models.Vendor).findAll({
     where: {
       [Op.or]: [
         { "$purchaseOrder.sipls.id$": id }, // Alias-based filtering
@@ -100,7 +100,7 @@ export const findVendorAccordingToSIPL = async (id: number) => {
 };
 
 export const getVendorsForMaster = async (clientId: number) => {
-  return await models.Vendor.findAll({
+  return await scoped(models.Vendor).findAll({
     attributes: ["id", "name"], // Fetch only id and name
     where: { status: "active" }, // Fetch only active vendors
     include: [
@@ -116,7 +116,7 @@ export const getVendorsForMaster = async (clientId: number) => {
 
 // Get vendor options for dropdowns/selects
 export const getVendorOptions = async (clientId: number, status?: string, type?: string) => {
-  return models.Vendor.findAll({
+  return scoped(models.Vendor).findAll({
     attributes: [
       ["name", "label"],
       ["id", "value"],

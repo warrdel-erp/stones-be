@@ -15,7 +15,7 @@ router.post("/address", authenticateUser, customerAddressController.createCustom
 router.get("/address/:id", authenticateUser, customerAddressController.getCustomerAddressById);
 
 // Get all addresses of customer
-router.get("/:customerId/addresses", customerAddressController.getAddressesByCustomerId);
+router.get("/:customerId/addresses", authenticateUser, customerAddressController.getAddressesByCustomerId);
 
 // Update customer.
 router.put("/:id", authenticateUser, customerController.updateCustomerController);

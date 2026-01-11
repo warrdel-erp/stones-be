@@ -9,6 +9,7 @@ import * as journalEntryService from "../services/journalEntry.service";
 import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
+import { scoped } from "../utils/scoped";
 
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
@@ -61,7 +62,7 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
         }
 
         // Update the inventory product's binId
-        const [updatedInventoryProduct] = await models.InventoryProduct.update(
+        const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
           { binId },
           {
             where: { id: slab.inventoryProductId },
@@ -97,7 +98,7 @@ export const checkSiplSlabsFullyFilled = async (siplId: number) => {
   // Handle case when no slabs found
   if (slabs.length === 0) {
     // Check if there are generic products for this SIPL
-    const genericProducts = await models.GenericProduct.findAll({
+    const genericProducts = await scoped(models.GenericProduct).findAll({
       where: { siplId },
       attributes: ['id']
     });
@@ -222,12 +223,12 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
     }
 
     // Mark the original slab and inventory product as broken
-    await models.Slab.update(
+    await scoped(models.Slab).update(
       { isBroken: true, updatedBy: userId },
       { where: { id: slabId }, transaction }
     );
 
-    await models.InventoryProduct.update(
+    await scoped(models.InventoryProduct).update(
       { status: INVENTORY_ITEM_STATUS.BROKEN },
       { where: { id: inventoryProduct.id }, transaction }
     );

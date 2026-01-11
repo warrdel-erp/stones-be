@@ -10,7 +10,7 @@ const Location = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    location: {
+    locationName: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
@@ -21,7 +21,7 @@ const Location = sequelize.define(
     contactNumber: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      validate: { max: 10, min: 10 },
+      // validate: { max: 10, min: 10 },
     },
     contactMail: {
       type: DataTypes.STRING(255),
@@ -33,6 +33,10 @@ const Location = sequelize.define(
     address: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    addressLine: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     lat: {
       type: DataTypes.DECIMAL(10, 8),

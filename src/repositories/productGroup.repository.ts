@@ -7,7 +7,7 @@ export const create = async (data: any) => {
 };
 
 export const findAll = async (clientId: number) => {
-    return await ProductGroup.findAll({
+    return await scoped(ProductGroup).findAll({
         include: [
             {
                 model: models.User,

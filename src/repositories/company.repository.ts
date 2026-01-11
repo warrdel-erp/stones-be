@@ -1,18 +1,19 @@
 import { Transaction } from "sequelize";
 import Company from "../models/company.model";
+import { scoped } from "../utils/scoped";
 
 export const createCompany = async (companyData: any, transaction?: Transaction) => {
-    return await Company.create(companyData, { transaction });
+    return await scoped(Company).create(companyData, { transaction });
 };
 
 export const getCompanyByClientId = async (clientId: number) => {
-    return await Company.findOne({
+    return await scoped(Company).findOne({
         where: { clientId },
     });
 };
 
 export const updateCompany = async (clientId: number, updateData: any, transaction?: Transaction) => {
-    const [updatedRows] = await Company.update(updateData, {
+    const [updatedRows] = await scoped(Company).update(updateData, {
         where: { clientId },
         transaction,
     });

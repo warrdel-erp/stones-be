@@ -6,7 +6,7 @@ import helmet from "helmet";
 import express, { urlencoded } from "express";
 import { connectDB } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
-import { syncModels } from "./config/syncModels";
+// import { syncModels } from "./config/syncModels";
 
 // Routes
 import clientRoute from "./routes/client.routes";

@@ -1,7 +1,8 @@
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 export async function findBinsByLocation(locationId: number) {
-  return await models.Bin.findAll({
+  return await scoped(models.Bin).findAll({
     attributes: ["id", "name"],
     include: [
       {

@@ -17,7 +17,7 @@ export const getAllSalesOrders = async (
   filter?: { [k: string]: string }
 ) => {
   const offset = (page - 1) * limit;
-  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
     where: {
       clientId,
       ...filter,
@@ -95,7 +95,7 @@ export const getAllSalesOrders = async (
 // Get all sales order
 export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
-  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
     where: {
       clientId,
     },
@@ -167,7 +167,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
 // Get all sales order
 export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
-  const { rows: data, count: total } = await models.SalesOrder.findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
     where: {
       clientId,
       id: {
@@ -264,7 +264,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
 //     dateRange.poDate = { [Op.lte]: toDate };
 //   }
 
-//   const pos: any = await models.SalesOrder.findAndCountAll({
+//   const pos: any = await scoped(models.SalesOrder).findAndCountAll({
 //     where: {
 //       clientId
 //     },
@@ -317,7 +317,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
 
 // Get One SO
 export const getSalesOrderById = async (id: number) => {
-  return await models.SalesOrder.findOne({
+  return await scoped(models.SalesOrder).findOne({
     where: { id },
     include: [
       {
@@ -395,7 +395,7 @@ export const getSalesOrderById = async (id: number) => {
 
 // Get One SO
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
-  return await models.SalesOrder.findOne({
+  return await scoped(models.SalesOrder).findOne({
     where: { id },
     include: [
       {
@@ -478,7 +478,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
 
 // Get latest SO number
 export const getSoNumber = async (clientId: number) => {
-  const lastSO: any = await models.SalesOrder.findOne({
+  const lastSO: any = await scoped(models.SalesOrder).findOne({
     where: { clientId },
     order: [["clientSoNumber", "DESC"]],
     attributes: ["clientSoNumber"],
@@ -489,7 +489,7 @@ export const getSoNumber = async (clientId: number) => {
 
 // Get all open SO by clientId
 export const countOpenSOByClientId = async (clientId: number) => {
-  return await models.SalesOrder.count({
+  return await scoped(models.SalesOrder).count({
     where: {
       clientId,
       status: SALES_ORDER_STATUS.OPEN,

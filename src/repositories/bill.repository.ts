@@ -19,7 +19,7 @@ export const getBillByPk = async (id: number) => {
 };
 
 export const findOne = async (filter: WhereOptions) => {
-  return await models.Bill.findOne({
+  return await scoped(models.Bill).findOne({
     where: filter,
   });
 };
@@ -30,7 +30,7 @@ export const getAllBills = async (page: number, limit: number, clientId: number,
   // Build where clause dynamically if filters are provided
   const whereClause = filters ? { ...filters, clientId } : {};
 
-  return await models.Bill.findAndCountAll({
+  return await scoped(models.Bill).findAndCountAll({
     where: whereClause,
     include: [
       {
@@ -52,7 +52,7 @@ export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => 
   // Build where clause dynamically if filters are provided
   let whereClause = filters ? { ...filters } : {};
 
-  return await models.Bill.findAll({
+  return await scoped(models.Bill).findAll({
     where: whereClause,
     include: [
       {
@@ -76,7 +76,7 @@ export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => 
 
 // Get latest Bill number
 export const getBillNumber = async (clientId: number) => {
-  let lastBill: any = await models.Bill.findOne({
+  let lastBill: any = await scoped(models.Bill).findOne({
     where: { clientId: clientId },
     order: [["clientBillNumber", "DESC"]],
   });
@@ -86,7 +86,7 @@ export const getBillNumber = async (clientId: number) => {
 
 // does all given bills belong to the given vendor
 export const areBillsBelongingToVendor = async (vendorId: number, billIds: number[]): Promise<boolean> => {
-  const count = await models.Bill.count({
+  const count = await scoped(models.Bill).count({
     where: {
       id: {
         [Op.in]: billIds, // Get only bills that match the given IDs
@@ -99,7 +99,7 @@ export const areBillsBelongingToVendor = async (vendorId: number, billIds: numbe
 };
 
 export const getTotalBillValueByClient = async (clientId: number) => {
-  const result = await models.Bill.findOne({
+  const result = await scoped(models.Bill).findOne({
     include: [
       {
         model: models.User,
@@ -118,7 +118,7 @@ export const getTotalBillValueByClient = async (clientId: number) => {
 };
 
 export const getLastBillAsPerSIPL = async (siplId: number) => {
-  return await models.Bill.findOne({
+  return await scoped(models.Bill).findOne({
     where: {
       referenceType: BILL_REFERENCE_TYPES.SIPL,
       referenceId: siplId,

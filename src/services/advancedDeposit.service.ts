@@ -163,7 +163,7 @@ export const getAdvancedDepositById = async (id: number) => {
  * Get all advanced deposits for a sales order
  */
 export const getAdvancedDepositsBySalesOrderId = async (salesOrderId: number) => {
-    return await AdvancedDeposit.findAll({
+    return await scoped(AdvancedDeposit).findAll({
         where: { salesOrderId },
         include: [
             {
@@ -201,7 +201,7 @@ export const settleAdvancedDeposit = async (
         const advancedDepositAmount = new Decimal(advancedDeposit.amount);
 
         // Get all existing settlements for this advanced deposit
-        const existingSettlements = await models.AdvancedDepositSettlement.findAll({
+        const existingSettlements = await scoped(models.AdvancedDepositSettlement).findAll({
             where: { advancedDepositId },
             transaction,
         });

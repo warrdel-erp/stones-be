@@ -34,7 +34,7 @@ export const getAllInvoicesList = async (
     }
   }
 
-  return await models.SalesOrderInvoice.findAndCountAll({
+  return await scoped(models.SalesOrderInvoice).findAndCountAll({
     where: {
       ...filter,
       clientId,
@@ -108,7 +108,7 @@ export const getAllInvoicesList = async (
  * Fetch all invoices
  */
 export const getAllInvoices = async (filter: WhereOptions, transaction?: Transaction) => {
-  return await models.SalesOrderInvoice.findAll({
+  return await scoped(models.SalesOrderInvoice).findAll({
     where: filter,
     include: [
       {
@@ -139,7 +139,7 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
  * Fetch all invoices
  */
 export const getCustomerAllInvoicesOptions = async (filter: WhereOptions, transaction?: Transaction) => {
-  return await models.SalesOrderInvoice.findAll({
+  return await scoped(models.SalesOrderInvoice).findAll({
     attributes: [["id", 'value'], ["invoiceCode", 'label']],
     where: filter,
     transaction,
@@ -151,7 +151,7 @@ export const getTotalAmountFromLastNDays = async (fromDate: string, toDate: stri
   const to = new Date(toDate);
   to.setHours(23, 59, 59, 999);
 
-  const result: any = await models.SalesOrderInvoice.findOne({
+  const result: any = await scoped(models.SalesOrderInvoice).findOne({
     attributes: [[fn("SUM", col("amount")), "totalAmount"]],
     where: {
       clientId,
@@ -166,7 +166,7 @@ export const getTotalAmountFromLastNDays = async (fromDate: string, toDate: stri
 };
 
 export const getTotalAmountForClient = async (clientId: number) => {
-  const result: any = await models.SalesOrderInvoice.findOne({
+  const result: any = await scoped(models.SalesOrderInvoice).findOne({
     attributes: [[fn("SUM", col("amount")), "totalAmount"]],
     where: {
       clientId,
@@ -178,7 +178,7 @@ export const getTotalAmountForClient = async (clientId: number) => {
 };
 
 export const assignTruck = async (id: number, truckId: number) => {
-  await models.SalesOrderInvoice.update({ truckId, truckAssignedOn: new Date() }, { where: { id } });
+  await scoped(models.SalesOrderInvoice).update({ truckId, truckAssignedOn: new Date() }, { where: { id } });
 };
 
 export const getInvoiceById = async (id: number, transaction?: Transaction) => {
@@ -266,7 +266,7 @@ export const getSalesOrderProductsWithoutReturns = async (
   transaction?: Transaction
 ) => {
   // First get all sales order products for the invoice
-  const allProducts = await models.SalesOrderProduct.findAll({
+  const allProducts = await scoped(models.SalesOrderProduct).findAll({
     where: {
       ...filter,
       '$loadingOrder.salesOrderInvoice.id$': soInvoiceId
@@ -318,7 +318,7 @@ export const getSalesOrderProductsWithoutReturns = async (
   });
 
   // Filter out products that have returns with status other than COMPLETE or INITIATED
-  return allProducts.filter(product => {
+  return allProducts.filter((product: any) => {
 
     const returnProducts = product.get('returnProducts') as any[];
 

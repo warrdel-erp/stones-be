@@ -1,15 +1,16 @@
 import { col, fn, literal, Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import { scoped } from "../utils/scoped";
 
 // Create generic product
 export const createGenericProduct = async (genericProductData: any, transaction?: Transaction) => {
-    return await models.GenericProduct.bulkCreate(genericProductData, { transaction, individualHooks: true });
+    return await scoped(models.GenericProduct).bulkCreate(genericProductData, { transaction, individualHooks: true });
 };
 
 // Finds all generic products by SIPL ID and updates their status.
 export const updateGenericProductStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
-    const [updatedCount] = await models.GenericProduct.update(
+    const [updatedCount] = await scoped(models.GenericProduct).update(
         { status: INVENTORY_ITEM_STATUS.IN_INVENTORY },
         { where: { siplId, status: INVENTORY_ITEM_STATUS.INITIATE }, individualHooks: true, transaction } // Only update generic products that are initiated
     );
@@ -24,7 +25,7 @@ export const setUnitLandedCost = async (
     landedUnitCost: number,
     transaction: Transaction
 ): Promise<number> => {
-    const [updatedCount] = await models.GenericProduct.update(
+    const [updatedCount] = await scoped(models.GenericProduct).update(
         { status: INVENTORY_ITEM_STATUS.IN_INVENTORY, landedUnitCost },
         { where: { siplId, productId }, individualHooks: true, transaction } // Update generic products status to IN_INVENTORY
     );
@@ -40,7 +41,7 @@ export const updateGenericProductStatusByInventoryProduct = async (
     additionalObj?: any
 ) => {
     // Find the related generic product
-    const genericProduct = await models.GenericProduct.findOne({
+    const genericProduct = await scoped(models.GenericProduct).findOne({
         where: { inventoryProductId },
         transaction,
     });
@@ -50,19 +51,19 @@ export const updateGenericProductStatusByInventoryProduct = async (
     }
 
     // Update the status
-    await models.GenericProduct.update({ status, ...additionalObj }, { where: { inventoryProductId }, individualHooks: true, transaction });
+    await scoped(models.GenericProduct).update({ status, ...additionalObj }, { where: { inventoryProductId }, individualHooks: true, transaction });
 
     return genericProduct;
 };
 
 // Create generic product
 export const getGenericProductByInventoryProductId = async (inventoryProductId: number, transaction?: Transaction) => {
-    return await models.GenericProduct.findOne({ where: { inventoryProductId }, transaction });
+    return await scoped(models.GenericProduct).findOne({ where: { inventoryProductId }, transaction });
 };
 
 // Get all generic products
 export const getAllGenericProducts = async (filters?: any, transaction?: Transaction, locationId?: number) => {
-    return await models.GenericProduct.findAll({
+    return await scoped(models.GenericProduct).findAll({
         where: filters,
         include: [
             {
@@ -107,7 +108,7 @@ export const getAllGenericProducts = async (filters?: any, transaction?: Transac
 
 // Get data
 export const getAvailableGenericProductData = async (productId: number) => {
-    const data = await models.GenericProduct.findAll({
+    const data = await scoped(models.GenericProduct).findAll({
         where: {
             productId,
             [Op.and]: [{ status: INVENTORY_ITEM_STATUS.IN_INVENTORY }, { isHold: false }],

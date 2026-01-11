@@ -7,6 +7,7 @@ import * as models from "./index";
 import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
 import * as decimal from '../helper/decimal'
+import { scoped } from "../utils/scoped";
 
 export type SoInvoice = {
   customerId: number;
@@ -139,7 +140,7 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
     throw new Error("Client ID is required to generate clientSoInvoiceNumber.");
   }
 
-  const lastSoInvoiceAccordingToClient: any = await SalesOrderInvoice.findOne({
+  const lastSoInvoiceAccordingToClient: any = await scoped(SalesOrderInvoice).findOne({
     where: { clientId: soInvoice.clientId },
     order: [["clientSoInvoiceNumber", "DESC"]],
   });
@@ -153,7 +154,7 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
     throw new AppError("salesOrderId is required to generate soInvoiceNumber.", 400);
   }
 
-  const lastInvAccordingToSo: any = await SalesOrderInvoice.findOne({
+  const lastInvAccordingToSo: any = await scoped(SalesOrderInvoice).findOne({
     where: { salesOrderId: soInvoice.salesOrderId },
     order: [["soInvoiceNumber", "DESC"]],
   });

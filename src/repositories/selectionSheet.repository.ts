@@ -103,7 +103,7 @@ export const getAllSelectionSheets = async (
 ) => {
   const offset = (page - 1) * limit;
 
-  const { rows: data, count: total } = await models.SelectionSheet.findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.SelectionSheet).findAndCountAll({
     where: {
       clientId,
       createdById: accountId
@@ -157,7 +157,7 @@ export const deleteSelectionSheet = async (
   id: number,
   transaction?: Transaction
 ) => {
-  return await models.SelectionSheet.destroy({
+  return await scoped(models.SelectionSheet).destroy({
     where: { id },
     transaction,
   });
@@ -170,7 +170,7 @@ export const findSelectionSheetByIdAndClient = async (
   id: number,
   clientId: number
 ) => {
-  return await models.SelectionSheet.findOne({
+  return await scoped(models.SelectionSheet).findOne({
     where: { id, clientId },
   });
 };
@@ -182,7 +182,7 @@ export const findSelectionSheetItemByIdAndClient = async (
   id: number,
   clientId: number
 ) => {
-  return await models.SelectionSheetItem.findOne({
+  return await scoped(models.SelectionSheetItem).findOne({
     where: { id, clientId },
   });
 };
@@ -194,7 +194,7 @@ export const deleteSelectionSheetItem = async (
   id: number,
   transaction?: Transaction
 ) => {
-  return await models.SelectionSheetItem.destroy({
+  return await scoped(models.SelectionSheetItem).destroy({
     where: { id },
     transaction,
   });

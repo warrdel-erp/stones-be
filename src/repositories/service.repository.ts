@@ -6,7 +6,7 @@ export const createService = async (payload: any) => {
 };
 
 export const getAllServices = async (clientId: number) => {
-    return await models.Service.findAll({
+    return await scoped(models.Service).findAll({
         include: [
             {
                 association: "serviceCategory",
@@ -19,7 +19,7 @@ export const getAllServices = async (clientId: number) => {
 };
 
 export const getServiceById = async (id: number, clientId: number) => {
-    return await models.Service.findOne({
+    return await scoped(models.Service).findOne({
         where: { id },
         include: [
             { association: "serviceCategory", where: { clientId } },
@@ -29,21 +29,21 @@ export const getServiceById = async (id: number, clientId: number) => {
 };
 
 export const updateService = async (id: number, data: any) => {
-    return await models.Service.update(data, { where: { id } });
+    return await scoped(models.Service).update(data, { where: { id } });
 };
 
 export const deleteService = async (id: number, clientId: number) => {
     // Only allow delete if the service belongs to the client's category
-    const service = await models.Service.findOne({
+    const service = await scoped(models.Service).findOne({
         where: { id },
         include: [{ association: "serviceCategory", where: { clientId } }]
     });
     if (!service) return 0;
-    return await models.Service.destroy({ where: { id } });
+    return await scoped(models.Service).destroy({ where: { id } });
 };
 
 export const getServiceOptions = async (clientId: number, type?: "purchase" | "sale") => {
-    return models.Service.findAll({
+    return scoped(models.Service).findAll({
         attributes: [
             ["name", "label"],
             ["id", "value"],
@@ -69,7 +69,7 @@ export const getServicesByIds = async (serviceIds: number[], clientId: number) =
         return [];
     }
 
-    return models.Service.findAll({
+    return scoped(models.Service).findAll({
         where: { id: serviceIds },
         attributes: ["id", "name", "serviceCategoryId"],
         include: [

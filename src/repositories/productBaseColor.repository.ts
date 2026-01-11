@@ -6,7 +6,7 @@ export const create = async (data: any) => {
 };
 
 export const findAll = async (clientId: number) => {
-    return await models.ProductBaseColor.findAll({
+    return await scoped(models.ProductBaseColor).findAll({
         include: [
             {
                 model: models.User,

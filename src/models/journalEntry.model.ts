@@ -12,6 +12,7 @@ import User from "./user.model";
 import Location from "./location.model";
 import Client from "./client.model";
 import { LEDGER_ACCOUNT_TYPES } from "../constants/coa";
+import { scoped } from "../utils/scoped";
 
 export type JournalEntry = {
   amount: number;
@@ -132,7 +133,7 @@ const JournalEntry = sequelize.define(
 // Hook to calculate balance before creating a new JournalEntry
 JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
   // Get the last entry for this ledgerId, ordered by createdAt DESC
-  const lastEntry = await JournalEntry.findOne({
+  const lastEntry = await scoped(JournalEntry).findOne({
     where: { ledgerId: entry.ledgerId },
     transaction,
     order: [["id", "DESC"]],

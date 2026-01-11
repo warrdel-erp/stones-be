@@ -7,7 +7,7 @@ export async function createTradeService(data: any, transaction?: Transaction) {
 }
 
 export async function findTradeServices(filters: any = {}) {
-    return TradeService.findAll({
+    return scoped(TradeService).findAll({
         where: filters,
         include: [
             {
@@ -23,11 +23,11 @@ export async function findTradeServices(filters: any = {}) {
 }
 
 export async function deleteTradeServiceById(id: number) {
-    return TradeService.destroy({ where: { id } });
+    return scoped(TradeService).destroy({ where: { id } });
 }
 
 export async function updateTradeService(id: number, data: any, transaction?: Transaction) {
-    const [affectedRows] = await TradeService.update(data, {
+    const [affectedRows] = await scoped(TradeService).update(data, {
         where: { id },
         transaction,
     });

@@ -7,7 +7,7 @@ import { scoped } from "../utils/scoped";
 
 // Finds all slabs by SIPL ID and updates their status.
 export const updateSlabStatusBySipl = async (siplId: number, transaction: Transaction): Promise<number> => {
-  const [updatedCount] = await Slab.update(
+  const [updatedCount] = await scoped(Slab).update(
     { status: INVENTORY_ITEM_STATUS.IN_INVENTORY },
     { where: { siplId, status: INVENTORY_ITEM_STATUS.INITIATE }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
@@ -22,7 +22,7 @@ export const setUnitLandedCost = async (
   landedUnitCost: number,
   transaction: Transaction
 ): Promise<number> => {
-  const [updatedCount] = await Slab.update(
+  const [updatedCount] = await scoped(Slab).update(
     { status: INVENTORY_ITEM_STATUS.IN_INVENTORY, landedUnitCost },
     { where: { siplId, productId }, individualHooks: true, transaction } // Only update slabs that are initiated
   );
@@ -36,7 +36,7 @@ export const createSlabs = async (slabData: any, transaction?: Transaction) => {
 };
 
 export const getLastSerialNumber = async (purchaseOrderId: number, siplId: number) => {
-  const existingSlab: any = await Slab.findOne({
+  const existingSlab: any = await scoped(Slab).findOne({
     where: { siplId: siplId, purchaseOrderId: purchaseOrderId },
     order: [["serialNumber", "DESC"]],
     attributes: ["serialNumber"],
@@ -46,7 +46,7 @@ export const getLastSerialNumber = async (purchaseOrderId: number, siplId: numbe
 };
 
 export const getLastSlabNumber = async (productId: number, siplId: number) => {
-  const existingSlab: any = await Slab.findOne({
+  const existingSlab: any = await scoped(Slab).findOne({
     where: { siplId, productId },
     order: [["slabNumber", "DESC"]],
     attributes: ["slabNumber"],
@@ -64,7 +64,7 @@ export const checkSlabNumberExists = async (
   slabNumber: number,
   transaction?: Transaction
 ) => {
-  const existingSlab = await Slab.findOne({
+  const existingSlab = await scoped(Slab).findOne({
     where: { productId, siplId, slabNumber },
     transaction,
     attributes: ["id"],
@@ -75,7 +75,7 @@ export const checkSlabNumberExists = async (
 
 // Create slabs
 export const getSlabByInventoryProductId = async (inventoryProductId: number, transaction?: Transaction) => {
-  return await models.Slab.findOne({ where: { inventoryProductId }, transaction });
+  return await scoped(models.Slab).findOne({ where: { inventoryProductId }, transaction });
 };
 
 // Update the status of a Slab based on inventoryProductId.
@@ -86,7 +86,7 @@ export const updateSlabStatusByInventoryProduct = async (
   additionalObj?: any
 ) => {
   // Find the related slab
-  const slab = await Slab.findOne({
+  const slab = await scoped(Slab).findOne({
     where: { inventoryProductId },
     transaction,
   });
@@ -96,7 +96,7 @@ export const updateSlabStatusByInventoryProduct = async (
   }
 
   // Update the status
-  await Slab.update({ status, ...additionalObj }, { where: { inventoryProductId }, individualHooks: true, transaction });
+  await scoped(Slab).update({ status, ...additionalObj }, { where: { inventoryProductId }, individualHooks: true, transaction });
 
   return slab;
 };
@@ -156,7 +156,7 @@ export const findByIdWithLogs = async (slabId: number) => {
  * Fetch all slabs.
  */
 export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transaction, locationId?: number) => {
-  return await Slab.findAll({
+  return await scoped(Slab).findAll({
     where: filters,
     include: [
       {
@@ -203,7 +203,7 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
 };
 
 export const getTotalAreaBySIPL = async (siplId: number) => {
-  return await models.Slab.findAll({
+  return await scoped(models.Slab).findAll({
     attributes: ["siplId", [sequelize.fn("SUM", sequelize.literal("receivingLength * receivingWidth")), "totalArea"]],
     where: {
       siplId: siplId, // Filter slabs by the given SIPL IDs
@@ -214,7 +214,7 @@ export const getTotalAreaBySIPL = async (siplId: number) => {
 };
 
 export const getInStockSlabsData = async (productId: number) => {
-  const data = await models.Slab.findAll({
+  const data = await scoped(models.Slab).findAll({
     where: {
       productId,
       status: {
@@ -233,7 +233,7 @@ export const getInStockSlabsData = async (productId: number) => {
 
 // Get data
 export const getAllocatedHoldSlabsData = async (productId: number) => {
-  const data = await models.Slab.findAll({
+  const data = await scoped(models.Slab).findAll({
     where: {
       productId,
       [Op.or]: [
@@ -262,7 +262,7 @@ export const getAllocatedHoldSlabsData = async (productId: number) => {
 
 // Get data
 export const getAvailableSlabsData = async (productId: number) => {
-  const data = await models.Slab.findAll({
+  const data = await scoped(models.Slab).findAll({
     where: {
       productId,
       status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
@@ -290,7 +290,7 @@ export const getAvailableSlabsData = async (productId: number) => {
 
 // update slab
 export const updateSlabById = async (slabId: number, updateData: any, transaction?: Transaction) => {
-  return await models.Slab.update(updateData, {
+  return await scoped(models.Slab).update(updateData, {
     where: { id: slabId },
     individualHooks: true,
     transaction,
@@ -298,7 +298,7 @@ export const updateSlabById = async (slabId: number, updateData: any, transactio
 };
 
 export const getOnlyBarcode = async (siplId: number) => {
-  return await models.Slab.findAll({
+  return await scoped(models.Slab).findAll({
     where: {
       siplId
     },
@@ -311,7 +311,7 @@ export const getOnlyBarcode = async (siplId: number) => {
  * Used to check if slabs are fully filled
  */
 export const getSlabsWithInventoryProductBySiplId = async (siplId: number) => {
-  return await models.Slab.findAll({
+  return await scoped(models.Slab).findAll({
     where: { siplId },
     attributes: ['id', 'block', 'lot', 'receivingLength', 'receivingWidth', 'inventoryProductId'],
     include: [

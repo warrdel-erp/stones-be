@@ -5,6 +5,7 @@ import Client from "./client.model";
 import SalesOrder from "./salesOrder.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
+import { scoped } from "../utils/scoped";
 
 const PackagingList = sequelize.define(
   "PackagingList",
@@ -95,7 +96,7 @@ PackagingList.beforeCreate(async (packagingList: any) => {
     throw new Error("Client ID is required to generate clientPlNumber.");
   }
 
-  let lastPLAccordingToClient: any = await PackagingList.findOne({
+  let lastPLAccordingToClient: any = await scoped(PackagingList).findOne({
     where: { clientId: packagingList.clientId },
     order: [["clientPlNumber", "DESC"]],
   });
@@ -110,7 +111,7 @@ PackagingList.beforeCreate(async (packagingList: any) => {
     throw new AppError("salesOrderId is required to generate soPackagingListNumber.", 400);
   }
 
-  const lastPLAccordingToSo: any = await PackagingList.findOne({
+  const lastPLAccordingToSo: any = await scoped(PackagingList).findOne({
     where: { salesOrderId: packagingList.salesOrderId },
     order: [["soPackagingListNumber", "DESC"]],
   });

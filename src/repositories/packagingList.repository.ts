@@ -9,7 +9,7 @@ export const createPackagingList = async (data: any, transaction?: Transaction) 
 
 // Get all LO
 export const getAllPackagingLists = async () => {
-  return await models.PackagingList.findAll({
+  return await scoped(models.PackagingList).findAll({
     include: [{ model: models.LoadingOrder, as: "loadingOrder" }],
   });
 };
@@ -91,7 +91,7 @@ export const getPackagingListByIdSimple = async (id: number, transaction?: Trans
 
 // Get packaging list by LO id
 export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) => {
-  return await models.PackagingList.findAll({
+  return await scoped(models.PackagingList).findAll({
     where: { loadingOrderId },
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
@@ -110,7 +110,7 @@ export const updatePackagingList = async (id: number, data: any, transaction?: T
 
 // Get latest PL number
 export const getPlNumber = async (clientId: number) => {
-  const lastPL: any = await models.PackagingList.findOne({
+  const lastPL: any = await scoped(models.PackagingList).findOne({
     where: { clientId },
     order: [["clientPlNumber", "DESC"]],
     attributes: ["clientPlNumber"],

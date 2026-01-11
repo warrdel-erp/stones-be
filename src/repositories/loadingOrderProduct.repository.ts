@@ -7,7 +7,7 @@ export const findByIdAndLoadingOrderId = async (
   { id, loadingOrderId }: { id: number; loadingOrderId: number },
   transaction?: Transaction
 ) => {
-  return models.LoadingOrderProduct.findOne({ where: { id, loadingOrderId }, transaction });
+  return scoped(models.LoadingOrderProduct).findOne({ where: { id, loadingOrderId }, transaction });
 };
 
 // Create a new LoadingOrderProduct entry.
@@ -17,7 +17,7 @@ export const createLoadingOrderProduct = async (productData: any, transaction?: 
 
 // Update an existing LoadingOrderProduct entry.
 export const updateLoadingOrderProduct = async (id: number, updateData: any, transaction?: Transaction) => {
-  return models.LoadingOrderProduct.update(updateData, {
+  return scoped(models.LoadingOrderProduct).update(updateData, {
     where: { id },
     individualHooks: true,
     transaction,
@@ -26,7 +26,7 @@ export const updateLoadingOrderProduct = async (id: number, updateData: any, tra
 
 // Get all LoadingOrderProducts by loadingOrderId
 export const getLoadingOrderProductsByLoadingOrderId = async (loadingOrderId: number) => {
-  return await models.LoadingOrderProduct.findAll({
+  return await scoped(models.LoadingOrderProduct).findAll({
     where: { loadingOrderId },
     include: [
       {
@@ -42,5 +42,5 @@ export const findByInventoryProductIdAndLoadingOrder = async (
   { inventoryProductId, loadingOrderId }: { inventoryProductId: number; loadingOrderId: number },
   transaction?: Transaction
 ) => {
-  return models.LoadingOrderProduct.findOne({ where: { inventoryProductId, loadingOrderId }, transaction });
+  return scoped(models.LoadingOrderProduct).findOne({ where: { inventoryProductId, loadingOrderId }, transaction });
 };

@@ -5,6 +5,7 @@ import LedgerAccount from "./ledgerAccount.model";
 import Client from "./client.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
+import { scoped } from "../utils/scoped";
 
 const AdvancedDeposit = sequelize.define(
     "AdvancedDeposit",
@@ -97,7 +98,7 @@ AdvancedDeposit.beforeCreate(async (advancedDeposit: any) => {
         throw new AppError('salesOrderId is required', 400)
     }
 
-    const lastAdvancedDepositNumberAsPerSO: any = await AdvancedDeposit.findOne({
+    const lastAdvancedDepositNumberAsPerSO: any = await scoped(AdvancedDeposit).findOne({
         where: { salesOrderId: advancedDeposit.salesOrderId },
         attributes: ['soAdvancedDepositNumber', 'code'],
         order: [['soAdvancedDepositNumber', 'DESC']]

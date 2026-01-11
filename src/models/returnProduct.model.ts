@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Return from "./return.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
 import Client from "./client.model";
+import Location from "./location.model";
 
 const ReturnProduct = sequelize.define(
     "ReturnProduct",
@@ -42,6 +43,16 @@ const ReturnProduct = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "RESTRICT",
         },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Location,
+                key: "id",
+            },
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE",
+        },
     },
     {
         tableName: "return_products",
@@ -58,7 +69,7 @@ const ReturnProduct = sequelize.define(
 // Scope configuration for ReturnProduct model
 (ReturnProduct as any).scopeConfig = {
     client: true,
-    location: false,
+    location: true,
 };
 
 export default ReturnProduct; 

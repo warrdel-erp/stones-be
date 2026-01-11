@@ -46,6 +46,14 @@ const Client = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    defaultLocationId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "locations",
+        key: "id",
+      },
+    },
   },
   {
     tableName: "clients",

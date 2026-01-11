@@ -10,7 +10,7 @@ export const createTermsCondition = async (data: TermsCondition, transaction?: T
 
 // Get terms condition by filter.
 export const getTermsConditionByFilter = async (filter: WhereOptions, transaction?: Transaction) => {
-  return await models.TermsCondition.findOne({ where: filter, transaction });
+  return await scoped(models.TermsCondition).findOne({ where: filter, transaction });
 };
 
 // Get terms condition by ID.
@@ -20,7 +20,7 @@ export const getTermsConditionById = async (id: number) => {
 
 // Update terms condition by ID.
 export const updateTermsCondition = async (id: number, data: Partial<TermsCondition>, transaction?: Transaction) => {
-  return await models.TermsCondition.update(data, { where: { id }, transaction, returning: true });
+  return await scoped(models.TermsCondition).update(data, { where: { id }, transaction, returning: true });
 };
 
 

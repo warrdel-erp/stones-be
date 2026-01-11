@@ -28,7 +28,7 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
     delete whereClause.notInvoicedOnly;
   }
 
-  const { rows: data, count: total } = await models.LoadingOrder.findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.LoadingOrder).findAndCountAll({
     where: {
       ...whereClause,
     },
@@ -78,7 +78,7 @@ export const getAllLoadingOrders = async (page: number, limit: number, clientId:
 
 // Get all LO without pagination
 export const getAllLoadingOrdersWithoutPagination = async (filters: WhereOptions) => {
-  const loadingOrders = await models.LoadingOrder.findAll({
+  const loadingOrders = await scoped(models.LoadingOrder).findAll({
     where: filters,
     include: [
       {
@@ -329,7 +329,7 @@ export const getLoadingOrderByIdSimple = async (id: number, transaction?: Transa
 
 // Get loading order by SO id
 export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
-  return await models.LoadingOrder.findAll({
+  return await scoped(models.LoadingOrder).findAll({
     where: { salesOrderId },
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
@@ -340,13 +340,13 @@ export const getLoadingOrdersBySalesOrderId = async (salesOrderId: number) => {
 
 // Update Loading Order
 export const updateLoadingOrder = async (id: number, data: any, transaction?: Transaction) => {
-  const loadingOrder = await models.LoadingOrder.update(data, { where: { id }, transaction, individualHooks: true });
+  const loadingOrder = await scoped(models.LoadingOrder).update(data, { where: { id }, transaction, individualHooks: true });
   return loadingOrder;
 };
 
 // Get latest SO number
 export const getLoNumber = async (clientId: number) => {
-  const lastLO: any = await models.LoadingOrder.findOne({
+  const lastLO: any = await scoped(models.LoadingOrder).findOne({
     where: { clientId },
     order: [["clientLoNumber", "DESC"]],
     attributes: ["clientLoNumber"],

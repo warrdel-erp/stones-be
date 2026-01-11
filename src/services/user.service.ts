@@ -142,6 +142,22 @@ export const assignLocationToUser = async (userId: number, locationId: number) =
   return result;
 };
 
+/**
+ * Assigns a location to a user after validation.
+ */
+export const removeLocationToUser = async (userId: number, locationId: number) => {
+  if (!userId || !locationId) {
+    throw new Error("User ID and Location ID are required");
+  }
+
+  const result = await userRepository.removeUserLocation(userId, locationId);
+  if (!result) {
+    throw new Error("User or Location not found");
+  }
+
+  return result;
+};
+
 // Authenticate user
 const authenticateUser = async (email: string, password: string) => {
   const user: any = await userRepository.getUserByEmail(email);

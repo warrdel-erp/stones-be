@@ -8,7 +8,7 @@ export const createPayment = async (paymentData: any, transaction: Transaction) 
 
 export const getAllPayments = async (filters: any = {}, page: number, limit: number) => {
   const offset = (page - 1) * limit;
-  const { count, rows } = await models.Payment.findAndCountAll({
+  const { count, rows } = await scoped(models.Payment).findAndCountAll({
     where: filters,
     include: [
       {
@@ -71,16 +71,16 @@ export const getPaymentById = async (id: number) => {
 };
 
 export const updatePaymentStatus = async (id: number, status: string) => {
-  return await models.Payment.update({ status }, { where: { id } });
+  return await scoped(models.Payment).update({ status }, { where: { id } });
 };
 
 export const deletePayment = async (id: number) => {
-  return await models.Payment.destroy({ where: { id } });
+  return await scoped(models.Payment).destroy({ where: { id } });
 };
 
 // Get latest Bill number
 export const getTransactionNumber = async (clientId: number) => {
-  let lastPayment: any = await models.Payment.findOne({
+  let lastPayment: any = await scoped(models.Payment).findOne({
     where: { clientId },
     order: [["clientTransactionNo", "DESC"]],
   });

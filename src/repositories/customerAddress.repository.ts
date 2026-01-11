@@ -22,7 +22,7 @@ export const getAddressesByCustomerId = async (
     whereCondition.addressType = addressType; // Filter by addressType if provided
   }
 
-  return await models.CustomerAddress.findAll({
+  return await scoped(models.CustomerAddress).findAll({
     where: whereCondition,
   });
 };
@@ -38,7 +38,7 @@ export const getCustomerAddressOptions = async (
     whereCondition.addressType = addressType;
   }
 
-  return models.CustomerAddress.findAll({
+  return scoped(models.CustomerAddress).findAll({
     attributes: [
       ["address", "label"],
       ["id", "value"],

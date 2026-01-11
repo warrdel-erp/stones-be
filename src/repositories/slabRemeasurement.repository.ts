@@ -6,7 +6,7 @@ export async function createSlabLog(slabLogData: any, transaction?: any) {
 }
 
 export async function getSlabLogsBySlabId(slabId: number) {
-  return await models.SlabRemeasurement.findAll({
+  return await scoped(models.SlabRemeasurement).findAll({
     where: { slabId },
     order: [["createdAt", "DESC"]],
   });

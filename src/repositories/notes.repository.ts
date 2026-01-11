@@ -12,7 +12,7 @@ export const createNote = async (noteData: any, transaction?: Transaction) => {
 export const getNotes = async (filters: any, page: number, limit: number) => {
   const offset = (page - 1) * limit;
 
-  const { count, rows } = await Notes.findAndCountAll({
+  const { count, rows } = await scoped(Notes).findAndCountAll({
     where: { ...(filters ? filters : {}) },
     offset,
     limit,

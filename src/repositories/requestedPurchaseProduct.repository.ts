@@ -20,17 +20,17 @@ export const findById = async (id: number, transaction?: Transaction) => {
 
 // find product by id
 export const findByIdAndPurchaseOrderId = async (id: number, purchaseOrderId: number, transaction?: Transaction) => {
-  return await models.RequestedPurchaseProduct.findOne({ where: { id, purchaseOrderId }, transaction });
+  return await scoped(models.RequestedPurchaseProduct).findOne({ where: { id, purchaseOrderId }, transaction });
 };
 
 // find product by id
 export const findByFilters = async (filter: WhereOptions) => {
-  return await models.RequestedPurchaseProduct.findAll({ where: filter || {} });
+  return await scoped(models.RequestedPurchaseProduct).findAll({ where: filter || {} });
 };
 
 // Get updated product
 export const updateProduct = async (id: number, data: any) => {
-  return await models.RequestedPurchaseProduct.update(data, { where: { id }, individualHooks: true });
+  return await scoped(models.RequestedPurchaseProduct).update(data, { where: { id }, individualHooks: true });
 };
 
 // Create new product
@@ -40,7 +40,7 @@ export const createProduct = async (data: any) => {
 
 // Delete product by id
 export const deleteProductById = async (id: number) => {
-  return await models.RequestedPurchaseProduct.destroy({ where: { id } });
+  return await scoped(models.RequestedPurchaseProduct).destroy({ where: { id } });
 };
 
 export const getTotalQuantityByPurchaseOrder = async (purchaseOrderId: number) => {
@@ -60,7 +60,7 @@ export const getTotalQuantityByPurchaseOrderAndProduct = async (purchaseOrderId:
 };
 
 export const getTotalQuantityForAllPOs = async () => {
-  const totalQuantities = await models.RequestedPurchaseProduct.findAll({
+  const totalQuantities = await scoped(models.RequestedPurchaseProduct).findAll({
     attributes: ["purchaseOrderId", [sequelize.fn("SUM", sequelize.col("quantity")), "totalQuantity"]],
     group: ["purchaseOrderId"], // Group by PO ID
     raw: true,

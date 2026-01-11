@@ -19,17 +19,17 @@ export const createUser = async (userData: UserAttributes, transaction?: Transac
 
 // Get User by Email
 export const getUserByEmail = async (email: string) => {
-  return await models.User.findOne({ where: { email }, include: [{ model: models.Client, as: "client" }] });
+  return await scoped(models.User).findOne({ where: { email }, include: [{ model: models.Client, as: "client" }] });
 };
 
 // Get User by Id
 export const getUserByUserId = async (userid: string) => {
-  return await models.User.findOne({ where: { userid } });
+  return await scoped(models.User).findOne({ where: { userid } });
 };
 
 // Get User by Phone
 export const getUserByPhone = async (phone: string) => {
-  return await models.User.findOne({ where: { phone } });
+  return await scoped(models.User).findOne({ where: { phone } });
 };
 
 // Adds a location to a user by inserting a record into the user_locations table.
@@ -44,6 +44,25 @@ export const addUserLocation = async (userId: number, locationId: number) => {
   await sequelize.models.user_locations.create({
     userId: userId,
     locationId: locationId,
+  });
+
+  // await User.add; // Sequelize auto-generated method
+  return { userId, locationId };
+};
+// Adds a location to a user by inserting a record into the user_locations table.
+export const removeUserLocation = async (userId: number, locationId: number) => {
+  const user = await models.User.findByPk(userId);
+  const location = await models.Location.findByPk(locationId);
+
+  if (!user || !location) {
+    return null; // Handle in service layer
+  }
+
+  await sequelize.models.user_locations.destroy({
+    where: {
+      userId: userId,
+      locationId: locationId,
+    }
   });
 
   // await User.add; // Sequelize auto-generated method
@@ -64,7 +83,7 @@ export const getAllUsers = async (page: number, limit: number, search?: string) 
     }
     : {};
 
-  const { rows: users, count: total } = await models.User.findAndCountAll({
+  const { rows: users, count: total } = await scoped(models.User).findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -76,7 +95,7 @@ export const getAllUsers = async (page: number, limit: number, search?: string) 
 
 // Update User
 export const updateUser = async (id: number, updateData: any) => {
-  const [updatedRows] = await models.User.update(updateData, { where: { id } });
+  const [updatedRows] = await scoped(models.User).update(updateData, { where: { id } });
 
   if (!updatedRows) return null;
   return await models.User.findByPk(id);
@@ -117,7 +136,7 @@ export const getUserLocations = async (id: number) => {
 
 // update user's default location.
 export const updateUserDefaultLocation = async (userId: number, locationId: number) => {
-  return await models.User.update({ defaultLocationId: locationId }, { where: { id: userId } });
+  return await scoped(models.User).update({ defaultLocationId: locationId }, { where: { id: userId } });
 };
 
 // Check does user have access to given location
@@ -135,7 +154,7 @@ export const doesUserHaveLocation = async (locationId: number, userId: number) =
 
 // Get Users by Client ID
 export const getUsersByClientId = async (clientId: number) => {
-  return await models.User.findAll({
+  return await scoped(models.User).findAll({
     where: { clientId },
     attributes: { exclude: ['password'] },
     include: [

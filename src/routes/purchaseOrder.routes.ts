@@ -5,14 +5,16 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
+router.use(authenticateUser)
+
 // Create new PO
-router.post("/", authenticateUser, poController.createPurchaseOrderController);
+router.post("/", poController.createPurchaseOrderController);
 
 // get all po list
-router.get("/", authenticateUser, poController.getAllPurchaseOrders);
+router.get("/", poController.getAllPurchaseOrders);
 
 // Get new PO number
-router.get("/newPoNumber", authenticateUser, poController.getNewPoNumber);
+router.get("/newPoNumber", poController.getNewPoNumber);
 
 // get one PO detail according to ID
 router.get("/:id", poController.getPurchaseOrderById);
@@ -21,11 +23,7 @@ router.get("/:id", poController.getPurchaseOrderById);
 router.get("/:purchaseOrderId/sipls", poController.getSIPLsByPO);
 
 // Update requested purchase product
-router.put(
-  "/:purchaseOrderId/requestedPurchaseProduct",
-  authenticateUser,
-  requestedPurchaseProductController.upsertRequestedPurchaseProducts
-);
+router.put("/:purchaseOrderId/requestedPurchaseProduct", requestedPurchaseProductController.upsertRequestedPurchaseProducts);
 
 // update po status.
 router.patch("/:id/status", poController.updatePurchaseOrderStatus);

@@ -9,7 +9,7 @@ export const createContainer = async (data: any, transaction?: Transaction) => {
 
 // Get All Containers
 export const getAllContainers = async () => {
-  return await models.Container.findAll();
+  return await scoped(models.Container).findAll();
 };
 
 // Get Container By ID
@@ -19,18 +19,18 @@ export const getContainerById = async (id: number) => {
 
 // Update Container
 export const updateContainer = async (id: number, data: any) => {
-  await models.Container.update(data, { where: { id }, individualHooks: true });
+  await scoped(models.Container).update(data, { where: { id }, individualHooks: true });
   return getContainerById(id);
 };
 
 // Delete Container
 export const deleteContainer = async (id: number) => {
-  return await models.Container.destroy({ where: { id } });
+  return await scoped(models.Container).destroy({ where: { id } });
 };
 
 // Get Containers By SIPL ID
 export const getContainersBySiplId = async (siplId: number) => {
-  return await models.Container.findAll({
+  return await scoped(models.Container).findAll({
     where: { siplId },
     order: [["createdAt", "ASC"]],
   });

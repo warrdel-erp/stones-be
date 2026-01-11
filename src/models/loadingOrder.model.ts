@@ -7,6 +7,7 @@ import CustomerAddress from "./customerAddress.model";
 import * as models from "./index";
 import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
+import { scoped } from "../utils/scoped";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -129,7 +130,7 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
     throw new Error("Client ID is required to generate clientLoNumber.");
   }
 
-  let lastLOAccordingToClient: any = await LoadingOrder.findOne({
+  let lastLOAccordingToClient: any = await scoped(LoadingOrder).findOne({
     where: { clientId: loadingOrder.clientId },
     order: [["clientLoNumber", "DESC"]],
   });
@@ -144,7 +145,7 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
     throw new AppError("salesOrderId is required to generate soLoadingOrderNumber.", 400);
   }
 
-  const lastLoAccordingToSo: any = await LoadingOrder.findOne({
+  const lastLoAccordingToSo: any = await scoped(LoadingOrder).findOne({
     where: { salesOrderId: loadingOrder.salesOrderId },
     order: [["soLoadingOrderNumber", "DESC"]],
   });

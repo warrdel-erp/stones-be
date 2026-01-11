@@ -3,7 +3,7 @@ export default {
     return queryInterface.bulkInsert("locations", [
       {
         id: 1,
-        location: "Atlanta Office",
+        locationName: "Atlanta Office",
         address: "3045 Business Park Drive Suite A, Norcross, GA 30071, United States",
         status: "active",
         contactName: "John Doe",
@@ -17,7 +17,7 @@ export default {
       },
       {
         id: 2,
-        location: "San Francisco HQ",
+        locationName: "San Francisco HQ",
         address: "456 Market St",
         status: "active",
         contactName: "Alice Smith",
@@ -31,7 +31,7 @@ export default {
       },
       {
         id: 3,
-        location: "Chicago Office",
+        locationName: "Chicago Office",
         address: "789 Michigan Avenue, Chicago, IL",
         status: "inactive",
         contactName: "Michael Johnson",

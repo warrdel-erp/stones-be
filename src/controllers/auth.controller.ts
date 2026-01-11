@@ -38,13 +38,30 @@ export const getUserProfile = catchAsync(async (req: AuthRequest, res: Response)
     SuccessResponse(res, 200, "User profile fetched successfully", profile);
 });
 
+export const getMyDetails = catchAsync(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+        throw new AppError("User not authenticated", 401);
+    }
+
+    let details: any = req.user;
+
+    if (details.accountType == 'user') {
+        details = await userService.getUserProfile(req.user.id);
+        details.fullName = details.username
+    } else if (details.accountType == 'client') {
+        details = await clientService.getClientProfileSimple(req.user.id);
+    }
+
+    SuccessResponse(res, 200, "User profile fetched successfully", { ...details, moreDetails: req.user });
+});
+
 export const changePassword = catchAsync(async (req: AuthRequest, res: Response) => {
     if (!req.user || !req.user.accountId) {
         throw new AppError("User not authenticated", 401);
     }
 
     const { oldPassword, newPassword } = req.body;
-    
+
     const result = await accountService.changePassword(
         req.user.accountId,
         oldPassword,

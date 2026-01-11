@@ -28,7 +28,7 @@ export const findByInventoryProductIdAndSalesOrderId = async (
   { inventoryProductId, salesOrderId }: { inventoryProductId: number; salesOrderId: number },
   transaction?: Transaction
 ) => {
-  return models.SalesOrderProduct.findOne({ where: { inventoryProductId, salesOrderId }, transaction });
+  return scoped(models.SalesOrderProduct).findOne({ where: { inventoryProductId, salesOrderId }, transaction });
 };
 
 // Create a new SalesOrderProduct entry.
@@ -38,7 +38,7 @@ export const createSalesOrderProduct = async (productData: any, transaction?: Tr
 
 // Update an existing SalesOrderProduct entry.
 export const updateSalesOrderProduct = async (id: number, updateData: any, transaction?: Transaction) => {
-  return models.SalesOrderProduct.update(updateData, {
+  return scoped(models.SalesOrderProduct).update(updateData, {
     where: { id },
     individualHooks: true,
     transaction,
@@ -47,7 +47,7 @@ export const updateSalesOrderProduct = async (id: number, updateData: any, trans
 
 // Get all SalesOrderProduct by salesOrderId
 export const getSalesOrderProductsBySalesOrderId = async (salesOrderId: number) => {
-  return await models.SalesOrderProduct.findAll({
+  return await scoped(models.SalesOrderProduct).findAll({
     where: { salesOrderId },
     include: [
       {
@@ -60,7 +60,7 @@ export const getSalesOrderProductsBySalesOrderId = async (salesOrderId: number) 
 
 // does all given bills belong to the given vendor
 export const areSOProductsBelongingToSO = async (SOProductIds: number[], salesOrderId: number): Promise<boolean> => {
-  const count = await models.SalesOrderProduct.count({
+  const count = await scoped(models.SalesOrderProduct).count({
     where: {
       id: {
         [Op.in]: SOProductIds, // Get only SOProduct that match the given IDs
@@ -74,12 +74,12 @@ export const areSOProductsBelongingToSO = async (SOProductIds: number[], salesOr
 
 // update hold status of slab
 export const updatePickedStatus = async (id: number, picked: boolean) => {
-  return await models.SalesOrderProduct.update({ picked }, { where: { id } });
+  return await scoped(models.SalesOrderProduct).update({ picked }, { where: { id } });
 };
 
 // Delete a SalesOrderProduct by ID
 export const deleteSalesOrderProduct = async (id: number, transaction?: Transaction) => {
-  return await models.SalesOrderProduct.destroy({
+  return await scoped(models.SalesOrderProduct).destroy({
     where: { id },
     transaction,
   });

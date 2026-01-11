@@ -1,4 +1,3 @@
-import { UNITS_OF_MEASUREMENT } from "../constants";
 import { AppError } from "../helper/appError";
 import * as serviceRepository from "../repositories/service.repository";
 
@@ -63,8 +62,8 @@ export const ensureServicesBelongToCategory = async (
     }
 
     const invalidService = dbServices
-        .map((service) => service.get({ plain: true }) as { name: string; serviceCategory?: { type?: ServiceCategoryType } })
-        .find((service) => service.serviceCategory?.type !== expectedType);
+        .map((service: any) => service.get({ plain: true }) as { name: string; serviceCategory?: { type?: ServiceCategoryType } })
+        .find((service: any) => service.serviceCategory?.type !== expectedType);
 
     if (invalidService) {
         throw new AppError(`Service ${invalidService.name} is not part of a ${expectedType} service category.`, 400);

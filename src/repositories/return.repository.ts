@@ -12,7 +12,7 @@ export const createReturnProducts = async (data: any[], transaction: Transaction
 };
 
 export const getInvoiceWithProducts = async (invoiceId: number, transaction: Transaction) => {
-    return await SalesOrderInvoice.findOne({
+    return await scoped(SalesOrderInvoice).findOne({
         where: { id: invoiceId },
         include: [
             {
@@ -31,14 +31,14 @@ export const getInvoiceWithProducts = async (invoiceId: number, transaction: Tra
 };
 
 export const updateReturn = async (id: number, data: any, transaction: Transaction) => {
-    return await Return.update(data, {
+    return await scoped(Return).update(data, {
         where: { id },
         transaction
     });
 };
 
 export const getReturnWithProducts = async (returnId: number, transaction?: Transaction) => {
-    return await Return.findOne({
+    return await scoped(Return).findOne({
         where: { id: returnId },
         transaction,
         include: [
@@ -86,7 +86,7 @@ export const getReturnWithProducts = async (returnId: number, transaction?: Tran
 };
 
 export const checkExistingActiveReturns = async (salesOrderProductId: number) => {
-    return await ReturnProduct.findOne({
+    return await scoped(ReturnProduct).findOne({
         where: {
             salesOrderProductId
         },
@@ -110,7 +110,7 @@ export const getReturnById = async (returnId: number, transaction?: Transaction)
 
 export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter?: any) => {
     const offset = (page - 1) * limit;
-    return await Return.findAndCountAll({
+    return await scoped(Return).findAndCountAll({
         where: filter,
         include: [
             {
@@ -169,5 +169,5 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
 };
 
 export const deleteReturnProductsByReturnId = async (returnId: number, transaction: Transaction) => {
-    return await ReturnProduct.destroy({ where: { returnId }, transaction });
+    return await scoped(ReturnProduct).destroy({ where: { returnId }, transaction });
 }; 

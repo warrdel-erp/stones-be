@@ -4,6 +4,8 @@ import { PAYEE_TYPE, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_TYPE } from "../con
 import User from "./user.model";
 import Client from "./client.model";
 import LedgerAccount from "./ledgerAccount.model";
+import Location from "./location.model";
+import { scoped } from "../utils/scoped";
 
 const Payment = sequelize.define(
   "Payment",
@@ -91,6 +93,16 @@ const Payment = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     }
   },
   {
@@ -115,7 +127,7 @@ Payment.beforeCreate(async (payment: any) => {
     throw new Error("Client ID is required to generate transaction number");
   }
 
-  const lastSIPLAccordingToPO: any = await Payment.findOne({
+  const lastSIPLAccordingToPO: any = await scoped(Payment).findOne({
     where: { clientId: payment.clientId },
     order: [["clientTransactionNo", "DESC"]],
   });
@@ -130,7 +142,7 @@ Payment.beforeCreate(async (payment: any) => {
       const accountPrefix = ledgerAccount.name.substring(0, 3).toUpperCase();
 
       // Find the last transaction code with this prefix
-      const lastPayment: any = await Payment.findOne({
+      const lastPayment: any = await scoped(Payment).findOne({
         where: {
           clientId: payment.clientId,
           transactionCode: {
@@ -157,7 +169,7 @@ Payment.beforeCreate(async (payment: any) => {
 // Scope configuration for Payment model
 (Payment as any).scopeConfig = {
   client: true,
-  location: false,
+  location: true,
 };
 
 export default Payment;

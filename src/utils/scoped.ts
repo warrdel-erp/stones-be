@@ -7,21 +7,22 @@ export interface ScopeConfig {
   location?: boolean;
 }
 
-export const buildScope = (model: any) => {
+export const buildScope = (model: Model<any, any>) => {
   const where: any = {};
-  const config = model.scopeConfig || {};
+  const config = (model as any).scopeConfig || {};
   const store = requestContext.getStore();
 
   if (config.client) {
     if (!store?.clientId) {
-      throw new AppError('Error in client scope', 400);
+      // console.log((model as any).name)
+      throw new AppError(`Error in client scope ${(model as any).name}`, 400);
     }
     where.clientId = store.clientId;
   }
 
   if (config.location) {
     if (!store?.locationId) {
-      throw new AppError('Error in client scope', 400);
+      throw new AppError('Error in location scope', 400);
     }
     where.locationId = store.locationId;
   }
@@ -65,6 +66,12 @@ export const scoped = (model: any) => {
 
     delete: (options: any = {}) =>
       model.destroy({
+        ...options,
+        where: { ...baseWhere, ...options.where }
+      }),
+
+    count: (options: any = {}) =>
+      model.count({
         ...options,
         where: { ...baseWhere, ...options.where }
       }),

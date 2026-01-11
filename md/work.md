@@ -715,11 +715,6 @@ Email notification.
 
 ---
 
-1. Put locationId and clientId in each Table as needed.
-2. write scopeConfig for each modal.
-3. write common scoping functions.
-4. change all implementation.
-5. check if SlabRemeasurement table used anywhere.
-6. remove loadingOrderProducts.
-7. remove global hooks like "beforeValidate"
-8. return, soProductHistory, payment also lies under location scope
+4. check if SlabRemeasurement table used anywhere.
+5. remove loadingOrderProducts.
+6. add new Locations.

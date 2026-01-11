@@ -13,6 +13,8 @@ router.post("/login", authController.login);
 // User profile route (protected)
 router.get("/userProfile", authenticateUser, authController.getUserProfile);
 
+router.get("/me", authenticateUser, authController.getMyDetails);
+
 // Change password route (protected)
 router.put("/changePassword", authenticateUser, validateRequest(changePasswordSchema), authController.changePassword);
 

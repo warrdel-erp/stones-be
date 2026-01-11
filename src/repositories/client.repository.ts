@@ -2,6 +2,7 @@ import { Op, Transaction, Model } from "sequelize";
 import { Client } from "../models";
 import ClientModel from "../models/client.model";
 import { Location } from "../models";
+import { scoped } from "../utils/scoped";
 
 interface ClientCreateData {
   firstName: string;
@@ -18,11 +19,11 @@ type ClientAttributes = {
 };
 
 export async function findClientByEmail(email: string) {
-  return await Client.findOne({ where: { email } });
+  return await scoped(Client).findOne({ where: { email } });
 }
 
 export async function createClient(clientData: ClientAttributes, transaction?: Transaction) {
-  return await Client.create(clientData as any, { transaction });
+  return await scoped(Client).create(clientData as any, { transaction });
 }
 
 export const checkClientExists = async (clientId: number) => {
@@ -43,7 +44,7 @@ export const getAllClients = async (page: number, limit: number, search?: string
     : {};
 
   // Fetch clients along with the total count
-  const { rows: clients, count: total } = await Client.findAndCountAll({
+  const { rows: clients, count: total } = await scoped(Client).findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -57,7 +58,7 @@ export const getAllClients = async (page: number, limit: number, search?: string
  * Update client details by ID.
  */
 export const updateClient = async (id: number, updateData: any) => {
-  const [updatedRows] = await Client.update(updateData, { where: { id } });
+  const [updatedRows] = await scoped(Client).update(updateData, { where: { id } });
 
   // If update was successful, return the updated client
   return updatedRows ? await Client.findByPk(id) : null;
@@ -92,6 +93,25 @@ export const getClientById = async (clientId: number, options?: any) => {
 };
 
 /**
+ * Get a client by ID
+ */
+export const getClientByIdSimple = async (clientId: number, options?: any) => {
+  return await Client.findByPk(clientId, {
+    include: [
+      {
+        association: 'company'
+      },
+      {
+        association: 'account',
+        attributes: { exclude: ['password'] }
+
+      }
+    ],
+    ...options,
+  });
+};
+
+/**
  * Get all locations associated with a client
  */
 export const getClientLocations = async (clientId: number) => {
@@ -109,4 +129,22 @@ export const getClientLocations = async (clientId: number) => {
   client = client.get({ plain: true })
 
   return client.locations;
+};
+
+/**
+ * Update client's default location.
+ */
+export const updateClientDefaultLocation = async (clientId: number, locationId: number) => {
+  return await scoped(Client).update({ defaultLocationId: locationId }, { where: { id: clientId } });
+};
+
+/**
+ * Check if client has access to given location.
+ */
+export const doesClientHaveLocation = async (locationId: number, clientId: number) => {
+  const location = await Location.findOne({
+    where: { id: locationId, clientId: clientId }
+  });
+
+  return !!location;
 };

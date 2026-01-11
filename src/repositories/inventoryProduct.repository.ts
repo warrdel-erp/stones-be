@@ -55,7 +55,7 @@ export const createInventoryProductsWithCombinedNumbers = async (
 };
 
 const getLastInventoryProductAsPerSipl = (siplId: number, transaction?: Transaction) => {
-  return models.InventoryProduct.findOne({
+  return scoped(models.InventoryProduct).findOne({
     where: { siplId },
     order: [
       [
@@ -98,7 +98,7 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
 
 export const getInventoryProductsBySIPL = async (siplId: number) => {
   // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
-  const inventoryProducts = await models.InventoryProduct.findAll({
+  const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     where: {
       siplId
     },
@@ -120,7 +120,7 @@ export const getInventoryProductsBySIPL = async (siplId: number) => {
             include: [
               {
                 association: "location",
-                attributes: ["location"],
+                attributes: ["locationName"],
               },
             ],
           },
@@ -134,7 +134,7 @@ export const getInventoryProductsBySIPL = async (siplId: number) => {
 
 export const updateInventoryProductsSellingPrice = async (ids: number[], sellingPrice: number, transaction?: Transaction) => {
   // Update multiple inventory products by IDs with new selling price
-  const result = await models.InventoryProduct.update(
+  const result = await scoped(models.InventoryProduct).update(
     { sellingPrice },
     {
       where: {
@@ -158,7 +158,7 @@ export const setInventoryProductLandedUnitCost = async (
   landedUnitCost: number,
   transaction?: Transaction
 ) => {
-  const [updatedCount] = await models.InventoryProduct.update(
+  const [updatedCount] = await scoped(models.InventoryProduct).update(
     { landedUnitCost },
     {
       where: { siplId, productId },
@@ -171,7 +171,7 @@ export const setInventoryProductLandedUnitCost = async (
 
 export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string) => {
   // Find all inventory products where the specified slab field matches
-  const inventoryProducts = await models.InventoryProduct.findAll({
+  const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     include: [
       {
         association: "bin",
@@ -181,7 +181,7 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
             include: [
               {
                 association: "location",
-                attributes: ["location"],
+                attributes: ["locationName"],
               },
             ],
           },
@@ -199,7 +199,7 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
 };
 
 export const getAllocatedInventoryProductsAccordingToCustomer = (customerId: number) => {
-  const data = models.InventoryProduct.findAll({
+  const data = scoped(models.InventoryProduct).findAll({
     where: {
       status: INVENTORY_ITEM_STATUS.ALLOCATED
     },
@@ -227,7 +227,7 @@ export const getAllocatedInventoryProductWithSalesOrderAndCustomer = async (inve
     status: INVENTORY_ITEM_STATUS.ALLOCATED,
   };
 
-  const result = await models.InventoryProduct.findOne({
+  const result = await scoped(models.InventoryProduct).findOne({
     where: whereClause,
     include: [
       {
@@ -276,7 +276,7 @@ export const updateInventoryProductStatusBySipl = async (
   status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
   transaction?: Transaction
 ) => {
-  const [updatedCount] = await models.InventoryProduct.update(
+  const [updatedCount] = await scoped(models.InventoryProduct).update(
     { status },
     {
       where: { siplId },
@@ -294,7 +294,7 @@ export const updateInventoryProductStatusById = async (
   status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
   transaction?: Transaction
 ) => {
-  await models.InventoryProduct.update(
+  await scoped(models.InventoryProduct).update(
     { status },
     {
       where: { id: inventoryProductId },
@@ -310,7 +310,7 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
 
   let { isHold, ...restFilter } = filter;
 
-  return models.InventoryProduct.findAll({
+  return scoped(models.InventoryProduct).findAll({
     where: {
       ...restFilter,
       status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
@@ -342,7 +342,7 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
             include: [
               {
                 association: 'location',
-                attributes: ['location', 'id'],
+                attributes: ['locationName', 'id'],
               }
             ]
 
@@ -354,7 +354,7 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
 }
 
 export const updateInventoryProductCartStatus = async (id: number, isInCart: boolean) => {
-  return await models.InventoryProduct.update({ isInCart }, { where: { id }, individualHooks: true });
+  return await scoped(models.InventoryProduct).update({ isInCart }, { where: { id }, individualHooks: true });
 };
 
 export const findInventoryProductById = async (id: number, transaction?: Transaction) => {
@@ -363,7 +363,7 @@ export const findInventoryProductById = async (id: number, transaction?: Transac
 
 // get last landed cost.
 export const getLastLandedCost = async (productId: number) => {
-  return await models.InventoryProduct.findOne({
+  return await scoped(models.InventoryProduct).findOne({
     where: {
       productId
     },
@@ -374,7 +374,7 @@ export const getLastLandedCost = async (productId: number) => {
 
 // get average landed cost.
 export const getAverageLandedCost = async (productId: number) => {
-  const data = await models.InventoryProduct.findOne({
+  const data = await scoped(models.InventoryProduct).findOne({
     where: {
       productId
     },

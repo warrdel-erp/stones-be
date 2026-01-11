@@ -167,7 +167,7 @@ export const getAllProducts = async (
                       association: "warehouse",
                       include: [
                         {
-                          association: "location", attributes: ["location"]
+                          association: "location", attributes: ["locationName"]
                         }
                       ]
                     }
@@ -196,7 +196,7 @@ export const getAllProducts = async (
                       association: "warehouse",
                       include: [
                         {
-                          association: "location", attributes: ["location"]
+                          association: "location", attributes: ["locationName"]
                         }
                       ]
                     }

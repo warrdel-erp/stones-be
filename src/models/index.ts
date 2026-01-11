@@ -281,8 +281,12 @@ Bill.belongsTo(SIPL, {
 });
 
 // user have one default location ,One location could be default for many users.
-User.belongsTo(Location, { foreignKey: "defaultLocationId" });
+User.belongsTo(Location, { foreignKey: "defaultLocationId", as: "defaultLocation" });
 Location.hasMany(User, { foreignKey: "defaultLocationId" });
+
+// client have one default location ,One location could be default for many clients.
+Client.belongsTo(Location, { foreignKey: "defaultLocationId", as: "defaultLocation" });
+Location.hasMany(Client, { foreignKey: "defaultLocationId" });
 
 // User can have multiple bills
 Bill.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
@@ -422,6 +426,12 @@ Vendor.hasMany(Payment, { foreignKey: "payeeId", as: "payments", constraints: fa
 // One Payment belongs to one user (One user can have multiple payments)
 Payment.belongsTo(Customer, { foreignKey: "payeeId", as: "customer" });
 Customer.hasMany(Payment, { foreignKey: "payeeId", as: "payments" });
+
+Payment.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(Payment, { foreignKey: "locationId", as: "payments" });
+
+PaymentBill.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(PaymentBill, { foreignKey: "locationId", as: "paymentBills" });
 
 Vendor.belongsTo(Location, { foreignKey: "parentLocationId", as: "parentLocation" });
 Location.hasMany(Vendor, { foreignKey: "parentLocationId", as: "vendors" });
@@ -610,6 +620,12 @@ Return.belongsTo(SalesOrderInvoice, {
   as: "soInvoice",
 });
 
+Return.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(Return, { foreignKey: "locationId", as: "returns" });
+
+ReturnProduct.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(ReturnProduct, { foreignKey: "locationId", as: "returnProducts" });
+
 // one truck can have multiple deliveries, one delivery can one truck.
 Delivery.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
 Truck.hasMany(Delivery, { foreignKey: "truckId", as: "deliveries" });
@@ -667,6 +683,9 @@ SalesOrderProduct.hasMany(SoProductSwapHistory, { foreignKey: "salesProductId", 
 
 SoProductSwapHistory.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasMany(SoProductSwapHistory, { foreignKey: "inventoryProductId", as: "swapHistories" });
+
+SoProductSwapHistory.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(SoProductSwapHistory, { foreignKey: "locationId", as: "soProductSwapHistories" });
 
 // InventoryProductHold associations
 InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });

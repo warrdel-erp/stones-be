@@ -7,6 +7,7 @@ import SIPL from "./sipl.model";
 import Client from "./client.model";
 import Location from "./location.model";
 import { PAYMENT_TERMS } from "../constants";
+import { scoped } from "../utils/scoped";
 
 const Bill = sequelize.define(
   "bills",
@@ -127,7 +128,7 @@ Bill.beforeCreate(async (bill: any) => {
   }
 
   // Generate unique key for client.
-  let lastBillAccordingToClientBillNumber: any = await Bill.findOne({
+  let lastBillAccordingToClientBillNumber: any = await scoped(Bill).findOne({
     where: { clientId: bill.clientId },
     order: [["clientBillNumber", "DESC"]],
   });
@@ -144,7 +145,7 @@ Bill.beforeCreate(async (bill: any) => {
       throw new Error("referenceId (SIPL ID) is required for siplBillNumber.");
     }
 
-    let lastSiplBill: any = await Bill.findOne({
+    let lastSiplBill: any = await scoped(Bill).findOne({
       where: {
         referenceType: BILL_REFERENCE_TYPES.SIPL,
         referenceId: bill.referenceId,

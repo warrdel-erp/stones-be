@@ -4,6 +4,7 @@ import User from "./user.model";
 import PurchaseOrder from "./purchaseOrder.model";
 import Client from "./client.model";
 import Location from "./location.model";
+import { scoped } from "../utils/scoped";
 
 const SIPL = sequelize.define(
   "SIPL",
@@ -143,7 +144,7 @@ SIPL.beforeCreate(async (sipl: any) => {
     throw new Error("Client ID and purchaseOrderId is required to generate clientInvoiceNumber and poSiplNumber.");
   }
 
-  const lastSIPLAccordingToClient: any = await SIPL.findOne({
+  const lastSIPLAccordingToClient: any = await scoped(SIPL).findOne({
     where: { clientId: sipl.clientId },
     order: [["clientInvoiceNumber", "DESC"]],
   });

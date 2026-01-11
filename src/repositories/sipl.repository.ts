@@ -11,7 +11,7 @@ export async function createSIPL(siplData: any, transaction?: Transaction) {
 
 // Get latest invoice number
 export const getInvoiceNumber = async () => {
-  let lastSIPL: any = await models.SIPL.findOne({
+  let lastSIPL: any = await scoped(models.SIPL).findOne({
     order: [["id", "DESC"]],
     attributes: ["clientInvoiceNumber", "poSiplNumber"],
   });
@@ -57,12 +57,12 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
           {
             model: models.Location,
             as: "shipmentLocation",
-            attributes: ["location"],
+            attributes: ["locationName"],
           },
           {
             model: models.Location,
             as: "purchaseLocation",
-            attributes: ["location"],
+            attributes: ["locationName"],
           },
         ],
       },
@@ -137,7 +137,7 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
                           {
                             model: models.Location,
                             as: "location",
-                            attributes: ["location"],
+                            attributes: ["locationName"],
                           },
                         ],
                       },
@@ -166,7 +166,7 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
                           {
                             model: models.Location,
                             as: "location",
-                            attributes: ["location"],
+                            attributes: ["locationName"],
                           },
                         ],
                       },
@@ -181,12 +181,12 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
       {
         model: models.Location,
         as: "shipmentLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
       {
         model: models.Location,
         as: "purchaseLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
       {
         association: 'paymentBills',
@@ -208,7 +208,7 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
 export const getAllSIPLs = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
 
-  return await models.SIPL.findAndCountAll({
+  return await scoped(models.SIPL).findAndCountAll({
     where: {
       clientId
     },
@@ -250,7 +250,7 @@ export const getAllSIPLs = async (page: number, limit: number, clientId: number)
 };
 
 export const findSIPLBySlabId = async (slabId: number) => {
-  const sipl = await models.SIPL.findOne({
+  const sipl = await scoped(models.SIPL).findOne({
     include: [
       {
         model: models.Slab,
@@ -265,7 +265,7 @@ export const findSIPLBySlabId = async (slabId: number) => {
 
 // Get SIPL by Product for inventory product
 export const getSIPLByProduct = async (productId: number, locationId: number) => {
-  const SIPLs = await models.SIPL.findAll({
+  const SIPLs = await scoped(models.SIPL).findAll({
     include: [
       {
         association: "inventoryProducts",
@@ -299,7 +299,7 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
                 include: [
                   {
                     association: "location",
-                    attributes: ["location"],
+                    attributes: ["locationName"],
                   },
                 ]
               },
@@ -319,7 +319,7 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
 };
 
 export const getSIPLByVendor = async (supplierId: number) => {
-  return await models.SIPL.findAll({
+  return await scoped(models.SIPL).findAll({
     include: [
       {
         model: models.PurchaseOrder,
@@ -335,7 +335,7 @@ export const getSIPLByVendor = async (supplierId: number) => {
 
 // update SIPL
 export const updateSIPL = async (id: number, data: any, transaction: Transaction) => {
-  await models.SIPL.update(data, {
+  await scoped(models.SIPL).update(data, {
     where: { id },
     transaction,
   });
@@ -343,7 +343,7 @@ export const updateSIPL = async (id: number, data: any, transaction: Transaction
 
 // does all given bills belong to the given vendor
 export const areSIPLsBelongingToVendor = async (supplierId: number, siplIds: number[]): Promise<boolean> => {
-  const count = await models.SIPL.count({
+  const count = await scoped(models.SIPL).count({
     where: {
       id: {
         [Op.in]: siplIds, // Get only sipl that match the given IDs
@@ -367,7 +367,7 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
     throw new AppError("purchaseOrderId is required to generate poSiplNumber.", 400);
   }
 
-  const lastSIPLAccordingToPO: any = await models.SIPL.findOne({
+  const lastSIPLAccordingToPO: any = await scoped(models.SIPL).findOne({
     where: { purchaseOrderId: sipl.purchaseOrderId },
     order: [["poSiplNumber", "DESC"]],
     transaction

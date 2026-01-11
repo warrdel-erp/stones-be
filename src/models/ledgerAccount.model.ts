@@ -3,6 +3,7 @@ import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, LEDGER_ACCOUNT_TYPES } from ".
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import Client from "./client.model";
+import { scoped } from "../utils/scoped";
 
 export type LedgerAccount = {
   name?: string;
@@ -114,7 +115,7 @@ async function assignLedgerAccountCode(ledgerAccount: any, transaction?: Transac
   const { subHeaderId } = ledgerAccount;
 
   // Lock the table to prevent concurrent writes
-  const lastAccount = (await LedgerAccount.findOne({
+  const lastAccount = (await scoped(LedgerAccount).findOne({
     where: { subHeaderId },
     order: [["code", "DESC"]],
     transaction,

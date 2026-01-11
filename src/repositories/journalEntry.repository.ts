@@ -18,7 +18,7 @@ export const createBulk = async (data: JournalEntry[], transaction?: Transaction
 // Fetch find journal entries with filters.
 export const findAll = async (filters: any, clientId: number) => {
 
-  const journalEntries = await models.JournalEntry.findAll({
+  const journalEntries = await scoped(models.JournalEntry).findAll({
     where: filters || {},
     include: [
       {
@@ -42,7 +42,7 @@ export const findAll = async (filters: any, clientId: number) => {
     entry = entry.get({ plain: true });
     switch (entry.subReferenceType) {
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB:
-        entry.subReferenceData = await models.Slab.findOne({
+        entry.subReferenceData = await scoped(models.Slab).findOne({
           where: { id: entry.subReferenceId },
           include: 'inventoryProduct'
         });
@@ -54,23 +54,23 @@ export const findAll = async (filters: any, clientId: number) => {
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL:
-        entry.subReferenceData = await models.Bill.findOne({
+        entry.subReferenceData = await scoped(models.Bill).findOne({
           where: { id: entry.subReferenceId },
 
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.BILL_ITEM:
-        entry.subReferenceData = await models.BillItem.findOne({
+        entry.subReferenceData = await scoped(models.BillItem).findOne({
           where: { id: entry.subReferenceId },
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER:
-        entry.subReferenceData = await models.LoadingOrder.findOne({
+        entry.subReferenceData = await scoped(models.LoadingOrder).findOne({
           where: { id: entry.subReferenceId },
         });
         break;
       case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SIPL_PRODUCT:
-        entry.subReferenceData = await models.SIPLProduct.findOne({
+        entry.subReferenceData = await scoped(models.SIPLProduct).findOne({
           where: { id: entry.subReferenceId },
         });
         break;
@@ -80,12 +80,12 @@ export const findAll = async (filters: any, clientId: number) => {
 
     switch (entry.referenceType) {
       case JOURNAL_ENTRY_REFERENCE_TYPES.SIPL:
-        entry.referenceData = await models.SIPL.findOne({
+        entry.referenceData = await scoped(models.SIPL).findOne({
           where: { id: entry.referenceId },
         });
         break;
       case JOURNAL_ENTRY_REFERENCE_TYPES.BILL:
-        entry.referenceData = await models.Bill.findOne({
+        entry.referenceData = await scoped(models.Bill).findOne({
           where: { id: entry.referenceId },
           include: {
             model: models.SIPL,
@@ -94,12 +94,12 @@ export const findAll = async (filters: any, clientId: number) => {
         });
         break;
       case JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER:
-        entry.referenceData = await models.LoadingOrder.findOne({
+        entry.referenceData = await scoped(models.LoadingOrder).findOne({
           where: { id: entry.referenceId },
         });
         break;
       case JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE:
-        entry.referenceData = await models.SalesOrderInvoice.findOne({
+        entry.referenceData = await scoped(models.SalesOrderInvoice).findOne({
           where: { id: entry.referenceId },
         });
         break;
@@ -115,7 +115,7 @@ export const findAll = async (filters: any, clientId: number) => {
 
 export const getFinalAmountForLedger = async (ledgerId: number) => {
 
-  const result: any = await models.JournalEntry.findOne({
+  const result: any = await scoped(models.JournalEntry).findOne({
     attributes: [
       [
         fn(

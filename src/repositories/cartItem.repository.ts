@@ -63,7 +63,7 @@ export const createCartItem = async (
     transaction?: Transaction
 ) => {
     // Check if cart item already exists for this inventory product
-    const existingCartItem = await CartItem.findOne({
+    const existingCartItem = await scoped(CartItem).findOne({
         where: { inventoryProductId: data.inventoryProductId },
         transaction,
     });
@@ -72,7 +72,7 @@ export const createCartItem = async (
         throw new AppError("This inventory product is already in the cart", 400);
     }
 
-    return await CartItem.create(data, { transaction });
+    return await scoped(CartItem).create(data, { transaction });
 };
 
 /**
@@ -82,7 +82,7 @@ export const findCartItemByInventoryProductId = async (
     inventoryProductId: number,
     transaction?: Transaction
 ) => {
-    return await CartItem.findOne({
+    return await scoped(CartItem).findOne({
         where: { inventoryProductId },
         transaction,
     });
@@ -107,7 +107,7 @@ export const deleteCartItemByIdAndAccountId = async (
     accountId: number,
     transaction?: Transaction
 ) => {
-    const deletedCount = await CartItem.destroy({
+    const deletedCount = await scoped(CartItem).destroy({
         where: {
             id: cartItemId,
             accountId: accountId,
@@ -131,7 +131,7 @@ export const deleteCartItemsByInventoryProductIdsAndAccountId = async (
         return 0;
     }
 
-    const deletedCount = await CartItem.destroy({
+    const deletedCount = await scoped(CartItem).destroy({
         where: {
             inventoryProductId: inventoryProductIds,
             accountId: accountId,
@@ -147,7 +147,7 @@ export const deleteCartItemsByInventoryProductIdsAndAccountId = async (
  * Returns the number of cart items belonging to the user
  */
 export const getCartCountByAccountId = async (accountId: number) => {
-    return await CartItem.count({
+    return await scoped(CartItem).count({
         where: {
             accountId: accountId,
         },

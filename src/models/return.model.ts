@@ -4,6 +4,8 @@ import User from "./user.model";
 import SalesOrderInvoice from "./salesOrderInvoice.model";
 import { AppError } from "../helper/appError";
 import Client from "./client.model";
+import Location from "./location.model";
+import { scoped } from "../utils/scoped";
 
 const RETURN_STATUS = {
     INITIATED: "initiated",
@@ -59,6 +61,16 @@ const Return = sequelize.define(
             onDelete: "RESTRICT",
             onUpdate: "CASCADE",
         },
+        locationId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Location,
+                key: "id",
+            },
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE",
+        },
     },
     {
         tableName: "returns",
@@ -85,7 +97,7 @@ Return.beforeCreate(async (returnRecord: any) => {
     }
 
     // Find the last return for this invoice to get the next return number
-    const lastReturnForInvoice: any = await Return.findOne({
+    const lastReturnForInvoice: any = await scoped(Return).findOne({
         where: { invoiceId: returnRecord.invoiceId },
         order: [["id", "DESC"]],
     });
@@ -102,7 +114,7 @@ Return.beforeCreate(async (returnRecord: any) => {
 // Scope configuration for Return model
 (Return as any).scopeConfig = {
     client: true,
-    location: false,
+    location: true,
 };
 
 export { RETURN_STATUS };

@@ -18,7 +18,7 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
 
   // If notAssignedOnly is true, find trucks that don't have pending deliveries
   if (notAssignedOnly === 'true') {
-    const trucksWithPendingDeliveries = await models.Truck.findAll({
+    const trucksWithPendingDeliveries = await scoped(models.Truck).findAll({
       include: [{
         association: "deliveries",
         where: { status: "pending" },
@@ -36,7 +36,7 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
     };
   }
 
-  return await models.Truck.findAndCountAll({
+  return await scoped(models.Truck).findAndCountAll({
     where: whereClause,
     limit,
     offset,
@@ -49,10 +49,10 @@ export const findById = async (id: number) => {
 };
 
 export const update = async (id: number, data: any) => {
-  await models.Truck.update(data, { where: { id } });
+  await scoped(models.Truck).update(data, { where: { id } });
   return findById(id);
 };
 
 export const remove = async (id: number) => {
-  return models.Truck.destroy({ where: { id } });
+  return scoped(models.Truck).destroy({ where: { id } });
 };

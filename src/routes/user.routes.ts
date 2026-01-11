@@ -12,23 +12,26 @@ router.post("/register", userController.registerUserHandler);
 // Assign Location to user.
 router.put("/assignLocation", authenticateUser, userController.assignLocation);
 
-// Get All Users.
-router.get("/", userController.getAllUsersController);
+// Remove Location from user.
+router.delete("/removeLocation", authenticateUser, userController.removeUserLocation);
 
-// Assign Location to user.
+// Get All Users.
+router.get("/", authenticateUser, userController.getAllUsersController);
+
+// Get Assigned Location to user own.
 router.get("/getLocations", authenticateUser, userController.getUserLocations);
 
-// Set default location.
-router.put("/setDefaultLocation", authenticateUser, userController.setDefaultLocation);
+// get assigned location to user by userId.
+router.get("/:id/locations", authenticateUser, userController.getUserLocations);
 
 // Get All Users for the client of requesting user
 router.get("/clientUsers", authenticateUser, userController.getClientUsers);
 
 // Get user by ID
-router.get("/:id", userController.getUser);
+router.get("/:id", authenticateUser, userController.getUser);
 
 // Update User.
-router.put("/:id", userController.updateUserController);
+router.put("/:id", authenticateUser, userController.updateUserController);
 
 // Create User by Authenticated Account
 router.post("/createUser", authenticateUser, validateRequest(createUserByAccountSchema), userController.createUserByAccountController);

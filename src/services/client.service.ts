@@ -9,6 +9,7 @@ import {
 } from "../constants/coa";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
+import { requestContext } from "../utils/requestContext";
 
 import * as clientRepository from "../repositories/client.repository";
 import * as companyRepository from "../repositories/company.repository";
@@ -61,34 +62,38 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
       accountId: account.getDataValue('id')
     }, transaction);
 
-    // Assign all permissions to the client account
-    const allPermissionValues = Object.values(PERMISSIONS).map(p => p.value);
-    const permissionsToAssign = allPermissionValues.map(permission => ({
-      accountId: account.getDataValue('id'),
-      permission
-    }));
-    await accountPermissionRepository.createAccountPermissions(permissionsToAssign, transaction);
+    return await requestContext.run({ clientId: client.getDataValue('id') }, async () => {
+      // Assign all permissions to the client account
+      const allPermissionValues = Object.values(PERMISSIONS).map(p => p.value);
 
-    // Create company if company data is provided
-    if (company) {
-      await companyRepository.createCompany({
-        ...company,
-        clientId: client.getDataValue('id')
-      }, transaction);
-    }
+      const permissionsToAssign = allPermissionValues.map(permission => ({
+        accountId: account.getDataValue('id'),
+        permission
+      }));
 
-    // Create default ledger accounts for the client within transaction
-    await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+      await accountPermissionRepository.createAccountPermissions(permissionsToAssign, transaction);
 
-    // If everything is successful, commit the transaction
-    await transaction.commit();
+      // Create company if company data is provided
+      if (company) {
+        await companyRepository.createCompany({
+          ...company,
+          clientId: client.getDataValue('id')
+        }, transaction);
+      }
 
-    // Fetch the complete client data with company
-    const completeClient = await clientRepository.getClientById(client.getDataValue('id'), {
-      include: ['company']
+      // Create default ledger accounts for the client within transaction
+      await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+
+      // If everything is successful, commit the transaction
+      await transaction.commit();
+
+      // Fetch the complete client data with company
+      const completeClient = await clientRepository.getClientById(client.getDataValue('id'), {
+        include: ['company']
+      });
+
+      return completeClient;
     });
-
-    return completeClient;
   } catch (error) {
     // If any error occurs, rollback the transaction
     await transaction.rollback();
@@ -113,7 +118,7 @@ export const modifyClient = async (id: number, updateData: any) => {
 };
 
 const createDefaultLedgerAccountsForClient = async (clientId: number, transaction: Transaction) => {
-  const data: LedgerAccount[] = [
+  const data = [
     {
       name: "Freight-In",
       clientId,
@@ -224,6 +229,15 @@ export const getClientProfile = async (clientId: number) => {
   return { ...client, userType: 'client' };
 };
 
+/**
+ * Service to fetch a client's profile by ID.
+ */
+export const getClientProfileSimple = async (clientId: number) => {
+  const client = (await clientRepository.getClientByIdSimple(clientId)).get({ plain: true });
+  if (!client) throw new AppError("Client not found", 404);
+  return { ...client, userType: 'client' };
+};
+
 // Get client locations
 export const getClientLocations = async (clientId: number) => {
   const client = await clientRepository.getClientById(clientId);
@@ -234,4 +248,30 @@ export const getClientLocations = async (clientId: number) => {
   // Get all locations associated with the client
   const locations = await clientRepository.getClientLocations(clientId);
   return locations;
+};
+
+/**
+ * Assigns a default location to a client after validation.
+ */
+export const assignDefaultLocation = async (clientId: number, locationId: number) => {
+  // Check if client exists
+  const client = await clientRepository.checkClientExists(clientId);
+  if (!client) {
+    throw new AppError("Client not found", 404);
+  }
+
+  const clientHaveLocation = await clientRepository.doesClientHaveLocation(locationId, clientId);
+
+  if (!clientHaveLocation) {
+    throw new AppError("Client does not have access to this location", 400);
+  }
+
+  // Update default location
+  const [updated] = await clientRepository.updateClientDefaultLocation(clientId, locationId);
+
+  if (!updated) {
+    throw new AppError("Failed to update default location", 400);
+  }
+
+  return updated;
 };

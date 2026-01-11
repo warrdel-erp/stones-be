@@ -2,12 +2,13 @@ import { Transaction } from "sequelize";
 import * as models from "../models";
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { sumDecimal } from "../helper";
+import { scoped } from "../utils/scoped";
 
 /**
  * Bulk insert payment bills.
  */
 export const createPaymentBills = async (data: any[], transaction?: Transaction) => {
-  return await models.PaymentBill.bulkCreate(data, { transaction });
+  return await scoped(models.PaymentBill).bulkCreate(data, { transaction });
 };
 
 // Get total paid amount of a bill

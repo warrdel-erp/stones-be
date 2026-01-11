@@ -4,18 +4,19 @@ import { Account } from "../models";
 import { Model } from "sequelize";
 import { User } from "../models";
 import { Client } from "../models";
+import { scoped } from "../utils/scoped";
 
 // Create a new account
 export const createAccount = async (accountData: {
     email: string;
     password: string;
 }, transaction?: Transaction) => {
-    return await Account.create(accountData, { transaction });
+    return await scoped(Account).create(accountData, { transaction });
 };
 
 // Get account by email
 export const getAccountByEmail = async (email: string) => {
-    return await Account.findOne({
+    return await scoped(Account).findOne({
         where: { email },
         include: [
             { model: User, as: 'user' },

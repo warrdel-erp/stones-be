@@ -9,11 +9,11 @@ export const createBulkSIPLProducts = async (data: any, transaction: Transaction
 
 // find product by id
 export const findOne = async (filter: WhereOptions) => {
-  return await models.SIPLProduct.findOne({ where: filter });
+  return await scoped(models.SIPLProduct).findOne({ where: filter });
 };
 
 export const findByProductIdAndSiplId = async (siplProductId: number, productId: number, siplId: number) => {
-  const result = await models.SIPLProduct.findOne({
+  const result = await scoped(models.SIPLProduct).findOne({
     where: {
       id: siplProductId,
       siplId,
@@ -40,7 +40,7 @@ export const findByProductIdAndSiplId = async (siplProductId: number, productId:
 
 // Delete product by id
 export const deleteProductById = async (id: number) => {
-  return await models.SIPLProduct.destroy({ where: { id } });
+  return await scoped(models.SIPLProduct).destroy({ where: { id } });
 };
 
 export const getTotalQuantityByPurchaseOrder = async (purchaseOrderId: number) => {
@@ -61,7 +61,7 @@ export const getTotalQuantityByPurchaseOrder = async (purchaseOrderId: number) =
 };
 
 export const getTotalQuantityForAllPO = async () => {
-  const totalQuantity = await models.SIPLProduct.findAll({
+  const totalQuantity = await scoped(models.SIPLProduct).findAll({
     attributes: [
       [sequelize.fn("SUM", sequelize.col("sipl_products.quantity")), "totalQuantity"],
       "sipl.purchaseOrderId",
@@ -108,7 +108,7 @@ export const getTotalSIPLProductAmountBetweenDates = async (
   const to = new Date(toDate);
   to.setHours(23, 59, 59, 999);
 
-  const result = await models.SIPLProduct.findOne({
+  const result = await scoped(models.SIPLProduct).findOne({
     where: {
       createdAt: {
         [Op.between]: [from, to],
@@ -132,7 +132,7 @@ export const getTotalSIPLProductAmountBetweenDates = async (
 };
 
 export const getTotalSIPLProductValueByClient = async (clientId: number) => {
-  const result = await models.SIPLProduct.findOne({
+  const result = await scoped(models.SIPLProduct).findOne({
     include: [
       {
         model: models.SIPL,

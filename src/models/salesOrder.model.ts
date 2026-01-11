@@ -5,6 +5,7 @@ import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { PAYMENT_TERMS, SALES_TAX } from "../constants";
+import { scoped } from "../utils/scoped";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -132,7 +133,7 @@ SalesOrder.beforeCreate(async (salesOrder: any) => {
     throw new Error("Client ID is required to generate clientSONumber.");
   }
 
-  let lastSOAccordingToClient: any = await SalesOrder.findOne({
+  let lastSOAccordingToClient: any = await scoped(SalesOrder).findOne({
     where: { clientId: salesOrder.clientId },
     order: [["clientSoNumber", "DESC"]],
   });

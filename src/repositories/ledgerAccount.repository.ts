@@ -16,7 +16,7 @@ export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction
 };
 
 export const getLedgerAccountByFilter = async (filter: WhereOptions, transaction?: Transaction) => {
-  return await models.LedgerAccount.findOne({ where: filter, transaction });
+  return await scoped(models.LedgerAccount).findOne({ where: filter, transaction });
 };
 
 // Get all ledger accounts.
@@ -25,7 +25,7 @@ export const getLedgerAccounts = async (page: number, limit: number, clientId: n
 
   const whereCondition: any = filters;
 
-  return await models.LedgerAccount.findAndCountAll({
+  return await scoped(models.LedgerAccount).findAndCountAll({
     where: { ...whereCondition, clientId },
     limit,
     offset,
@@ -37,14 +37,14 @@ export const getLedgerAccounts = async (page: number, limit: number, clientId: n
 export const getLedgerAccountsWithoutPagination = async (filters: any) => {
   const whereCondition: any = filters;
 
-  return await models.LedgerAccount.findAll({
+  return await scoped(models.LedgerAccount).findAll({
     where: whereCondition,
     order: [["id", "DESC"]],
   });
 };
 
 export const getLedgerAccountsForFreightItems = async (clientId: number) => {
-  return await models.LedgerAccount.findAll({
+  return await scoped(models.LedgerAccount).findAll({
     where: {
       clientId,
       key: {
@@ -60,11 +60,11 @@ export const getLedgerAccountById = async (id: number) => {
 };
 
 // export const updateLedgerAccount = async (id: number, data: any) => {
-//   return models.LedgerAccount.update(data, { where: { id }, returning: true });
+//   return scoped(models.LedgerAccount).update(data, { where: { id }, returning: true });
 // };
 
 // export const deleteLedgerAccount = async (id: number) => {
-//   return models.LedgerAccount.destroy({ where: { id } });
+//   return scoped(models.LedgerAccount).destroy({ where: { id } });
 // };
 
 export const getLedgerAccountOptions = async (clientId: number, filters: any = {}) => {
@@ -73,7 +73,7 @@ export const getLedgerAccountOptions = async (clientId: number, filters: any = {
     clientId,
   };
 
-  return await models.LedgerAccount.findAll({
+  return await scoped(models.LedgerAccount).findAll({
     attributes: [
       ["name", "label"],
       ["id", "value"],

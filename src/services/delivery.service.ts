@@ -86,14 +86,14 @@ export const approveDeliveryOrders = async (orders: Array<{ id: number, order: n
         }
 
         // Validate that all invoice deliveries belong to the same delivery
-        const deliveryIds = invoiceDeliveries.map(id => id.get('deliveryId') as number);
+        const deliveryIds = invoiceDeliveries.map((id: any) => id.get('deliveryId') as number);
         const uniqueDeliveryIds = [...new Set(deliveryIds)];
 
         if (uniqueDeliveryIds.length > 1) {
             throw new Error("All invoice deliveries must belong to the same delivery. Found multiple delivery IDs: " + uniqueDeliveryIds.join(", "));
         }
 
-        const deliveryId = uniqueDeliveryIds[0];
+        const deliveryId: number = uniqueDeliveryIds[0] as number;
 
         // Update the order of invoice deliveries
         const result = await deliveryRepository.updateInvoiceDeliveryOrders(orders, transaction);

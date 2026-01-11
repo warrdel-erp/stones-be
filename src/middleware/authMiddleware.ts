@@ -56,7 +56,8 @@ const authenticateClientFromToken = async (decoded: any, req: AuthRequest) => {
     firstName: client.firstName,
     lastName: client.lastName,
     accountType: "client",
-    accountId: client.accountId
+    accountId: client.accountId,
+    defaultLocationId: client.defaultLocationId
   };
 
   return true;

@@ -1,6 +1,7 @@
 import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES } from "../constants/coa";
 import { getLedgerAccountsWithoutPagination } from "../repositories/ledgerAccount.repository";
 import JournalEntry from "../models/journalEntry.model";
+import { scoped } from "../utils/scoped";
 
 export const getCoaData = () => {
   return {
@@ -37,7 +38,7 @@ export const getBalanceSheetData = async (clientId: number) => {
 
   // Helper to get last journal entry balance for a ledger
   const getLedgerLastBalance = async (ledgerId: number) => {
-    const lastEntry = await JournalEntry.findOne({
+    const lastEntry = await scoped(JournalEntry).findOne({
       where: { ledgerId },
       order: [["createdAt", "DESC"]],
     });

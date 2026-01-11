@@ -10,7 +10,7 @@ export const createCustomer = async (customerData: any, transaction?: Transactio
 
 // Update Customer
 export const updateCustomerById = async (id: number, data: any) => {
-  const [updatedCount] = await models.Customer.update(data, {
+  const [updatedCount] = await scoped(models.Customer).update(data, {
     where: { id },
   });
 
@@ -25,7 +25,7 @@ export const updateCustomerById = async (id: number, data: any) => {
 export const getAllCustomers = async (page: number, limit: number, clientId: number, search?: string, filter?: any) => {
   const offset = (page - 1) * limit;
 
-  const { rows: customers, count: total } = await models.Customer.findAndCountAll({
+  const { rows: customers, count: total } = await scoped(models.Customer).findAndCountAll({
     where: { ...filter, clientId },
     include: [
       {
@@ -72,7 +72,7 @@ export const getCustomerByIdSimple = async (id: number) => {
 
 // Get customer options for dropdowns/selects
 export const getCustomerOptions = async (clientId: number, status?: string) => {
-  return models.Customer.findAll({
+  return scoped(models.Customer).findAll({
     attributes: [
       ["name", "label"],
       ["id", "value"],
@@ -87,7 +87,7 @@ export const getCustomerOptions = async (clientId: number, status?: string) => {
 
 // Get customer minimal data (less detailed)
 export const getCustomerMinimal = async (id: number, clientId: number) => {
-  const data = await models.Customer.findOne({
+  const data = await scoped(models.Customer).findOne({
     where: { id, clientId },
   });
 

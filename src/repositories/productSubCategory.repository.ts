@@ -6,29 +6,29 @@ export const createProductSubCategory = async (payload: any) => {
 };
 
 export const getAllProductSubCategories = async (clientId: number) => {
-  return await models.ProductSubCategory.findAll({
+  return await scoped(models.ProductSubCategory).findAll({
     where: { clientId }
   });
 };
 
 export const getProductSubCategoryById = async (id: number, clientId: number) => {
-  return await models.ProductSubCategory.findOne({
+  return await scoped(models.ProductSubCategory).findOne({
     where: { id, clientId },
   });
 };
 
 export const updateProductSubCategory = async (id: number, data: any) => {
-  return await models.ProductSubCategory.update(data, { where: { id } });
+  return await scoped(models.ProductSubCategory).update(data, { where: { id } });
 };
 
 // This function deletes a product subcategory by its ID and checks if it belongs to the specified client
 export const deleteProductSubCategory = async (id: number, clientId: number) => {
-  const subCategory = await models.ProductSubCategory.findOne({
+  const subCategory = await scoped(models.ProductSubCategory).findOne({
     where: { id, clientId },
   });
 
   if (subCategory) {
-    return await models.ProductSubCategory.destroy({ where: { id } });
+    return await scoped(models.ProductSubCategory).destroy({ where: { id } });
   }
 
   return 0; // No rows deleted

@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
 import Client from "./client.model";
+import Location from "./location.model";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 const SoProductSwapHistory = sequelize.define(
@@ -63,6 +64,16 @@ const SoProductSwapHistory = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Location,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "so_product_swap_histories",
@@ -73,7 +84,7 @@ const SoProductSwapHistory = sequelize.define(
 // Scope configuration for SoProductSwapHistory model
 (SoProductSwapHistory as any).scopeConfig = {
   client: true,
-  location: false,
+  location: true,
 };
 
 export default SoProductSwapHistory;

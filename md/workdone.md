@@ -829,3 +829,11 @@ sticky navbar.
 ---
 
 1. Disable PurchaseLocation and Shipping location for PO and SIPL.
+2. default location for client
+3. Put location and client scope in each entity as needed.
+4. write common scoping functions.
+5. write scopeConfig for each modal.
+6. change all implementation of core repo function.
+7. add default location to Client.
+8. create client.
+9. assign locations to user.

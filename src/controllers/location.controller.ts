@@ -4,6 +4,14 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import * as locationService from "../services/location.service";
 
+export const createLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+    const payload = { ...req.body, clientId };
+
+    const location = await locationService.createLocation(payload);
+    SuccessResponse(res, 201, "Location created successfully", location);
+});
+
 export const getLocationById = catchAsync(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const clientId = req.user?.clientId;

@@ -51,4 +51,27 @@ export const getAccountById = catchAsync(async (req: AuthRequest, res: Response)
     return SuccessResponse(res, 200, "Account fetched successfully", account);
 });
 
+// Set default location based on account type (user or client)
+export const setDefaultLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+        throw new AppError("User not authenticated", 401);
+    }
+
+    const { locationId } = req.body;
+    if (!locationId) {
+        throw new AppError("Location ID is required", 400);
+    }
+
+    let response;
+    if (req.user.accountType === "user") {
+        response = await userService.assignDefaultLocation(req.user.id, locationId);
+    } else if (req.user.accountType === "client") {
+        response = await clientService.assignDefaultLocation(req.user.clientId, locationId);
+    } else {
+        throw new AppError("Invalid account type", 400);
+    }
+
+    return SuccessResponse(res, 200, "Default location updated successfully", response);
+});
+
 

@@ -7,6 +7,7 @@ import Client from "./client.model";
 import * as models from "./index";
 import { PO_STATUS } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
+import { scoped } from "../utils/scoped";
 
 const PurchaseOrder = sequelize.define(
   "PurchaseOrder",
@@ -127,7 +128,7 @@ PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
     throw new Error("Client ID is required to generate clientPONumber.");
   }
 
-  let lastPOAccordingToClient: any = await PurchaseOrder.findOne({
+  let lastPOAccordingToClient: any = await scoped(PurchaseOrder).findOne({
     where: { clientId: purchaseOrder.clientId },
     order: [["clientPoNumber", "DESC"]],
   });

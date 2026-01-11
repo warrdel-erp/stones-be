@@ -15,8 +15,7 @@ export const registerUserHandler = catchAsync(async (req: Request, res: Response
  * Controller to assign a location to a user.
  */
 export const assignLocation = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { locationId } = req.body;
-  const userId = req.user?.id;
+  const { locationId, userId } = req.body;
 
   if (!userId && !locationId) {
     throw new AppError("Location ID and UserID are required", 400);
@@ -25,6 +24,22 @@ export const assignLocation = catchAsync(async (req: AuthRequest, res: Response)
   const result = await userService.assignLocationToUser(userId!, locationId);
 
   return SuccessResponse(res, 200, "Location assigned to user successfully", result);
+});
+
+/**
+ * Controller to assign a location to a user.
+ */
+export const removeUserLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { locationId } = req.body;
+  const userId = req.user?.id;
+
+  if (!userId && !locationId) {
+    throw new AppError("Location ID and UserID are required", 400);
+  }
+
+  const result = await userService.removeLocationToUser(userId!, locationId);
+
+  return SuccessResponse(res, 200, "Location removed from user successfully", result);
 });
 
 export const login = catchAsync(async (req: Request, res: Response) => {
@@ -76,18 +91,12 @@ export const getUserLocations = catchAsync(async (req: AuthRequest, res: Respons
   return SuccessResponse(res, 200, "User locations fetched successfully", userLocations);
 });
 
-// Set Default location for user
-export const setDefaultLocation = catchAsync(async (req: AuthRequest, res: Response) => {
-  const userId = req.user?.id;
-  const { locationId } = req.body;
+// Get Locations for user
+export const getUserLocationsById = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
 
-  if (!locationId) {
-    throw new AppError("Location ID is required", 400);
-  }
-
-  const response = await userService.assignDefaultLocation(userId!, locationId);
-
-  return SuccessResponse(res, 200, "Default location updated successfully", response);
+  const userLocations = await userService.userLocations(Number(id));
+  return SuccessResponse(res, 200, "User locations fetched successfully", userLocations);
 });
 
 // Fetch user by ID

@@ -10,7 +10,7 @@ export const createSoProductSwapHistory = async (
 };
 
 export const getSwapHistoryBySalesProductId = async (salesProductId: number) => {
-  return await models.SoProductSwapHistory.findAll({
+  return await scoped(models.SoProductSwapHistory).findAll({
     where: { salesProductId },
     include: [
       {

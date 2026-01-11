@@ -9,7 +9,7 @@ export const createCreditDebitNote = async (creditDebitNoteData: any, transactio
 export const getAllCreditDebitNotes = async (filters: any = {}, page: number = 1, limit: number = 10) => {
     const offset = (page - 1) * limit;
 
-    const { count, rows } = await models.CreditDebitNote.findAndCountAll({
+    const { count, rows } = await scoped(models.CreditDebitNote).findAndCountAll({
         where: filters,
         include: [
             {
@@ -39,7 +39,7 @@ export const getCreditDebitNoteById = async (id: number) => {
 };
 
 export const updateCreditDebitNote = async (id: number, updateData: any, transaction?: Transaction) => {
-    const [affectedRows] = await models.CreditDebitNote.update(updateData, {
+    const [affectedRows] = await scoped(models.CreditDebitNote).update(updateData, {
         where: { id },
         transaction,
     });

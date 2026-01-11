@@ -1,7 +1,8 @@
 import { AdvancedDeposit } from "../models"
+import { scoped } from "../utils/scoped"
 
 export const getAdvancedDepositWithoutPagination = (filters: Record<string, string>) => {
-    return AdvancedDeposit.findAll({
+    return scoped(AdvancedDeposit).findAll({
         where: filters,
         include: [
             {

@@ -5,13 +5,13 @@ import { DELIVERY_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
 
 export const findPendingDeliveryByTruck = async (truckId: number) => {
-    return Delivery.findOne({
+    return scoped(Delivery).findOne({
         where: { truckId, status: DELIVERY_STATUS.PENDING }
     });
 };
 
 export const findInvoiceDeliveriesByLoadingOrderIds = async (loadingOrderIds: number[]) => {
-    return InvoiceDelivery.findAll({
+    return scoped(InvoiceDelivery).findAll({
         where: {
             loadingOrderId: { [Op.in]: loadingOrderIds }
         }
@@ -39,7 +39,7 @@ export const createInvoiceDelivery = async (
 };
 
 export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {
-    return Delivery.findAll({
+    return scoped(Delivery).findAll({
         where: { clientId, ...filter },
         order: [["createdAt", "DESC"]],
         include: [
@@ -61,7 +61,7 @@ export const getAllDeliveriesByClientId = async (filter: any, clientId: number) 
 
 export const updateInvoiceDeliveryOrders = async (orders: Array<{ id: number, order: number }>, transaction?: Transaction) => {
     const updates = orders.map(({ id, order }) =>
-        InvoiceDelivery.update({ order }, {
+        scoped(InvoiceDelivery).update({ order }, {
             where: { id },
             transaction
         })
@@ -71,14 +71,14 @@ export const updateInvoiceDeliveryOrders = async (orders: Array<{ id: number, or
 };
 
 export const findInvoiceDeliveriesByIds = async (ids: number[]) => {
-    return InvoiceDelivery.findAll({
+    return scoped(InvoiceDelivery).findAll({
         where: { id: { [Op.in]: ids } },
         attributes: ['id', 'deliveryId']
     });
 };
 
 export const updateDeliveryStatus = async (deliveryIds: number[], status: string, transaction?: Transaction) => {
-    return Delivery.update(
+    return scoped(Delivery).update(
         { status },
         {
             where: { id: { [Op.in]: deliveryIds } },
@@ -92,7 +92,7 @@ export const findDeliveryById = async (deliveryId: number, clientId?: number) =>
     if (clientId) {
         where.clientId = clientId;
     }
-    return Delivery.findOne({
+    return scoped(Delivery).findOne({
         where,
         include: [
             {

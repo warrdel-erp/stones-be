@@ -59,7 +59,7 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
     getInInventoryData = true;
   }
 
-  return await models.PurchaseOrder.findAndCountAll({
+  return await scoped(models.PurchaseOrder).findAndCountAll({
     where: {
       ...otherFilters,
       ...dateRange,
@@ -84,12 +84,12 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
       {
         model: models.Location,
         as: "shipmentLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
       {
         model: models.Location,
         as: "purchaseLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
       {
         model: models.SIPL,
@@ -123,7 +123,7 @@ export const getPaymentPendingPurchaseOrders = async (page: number, limit: numbe
     dateRange.poDate = { [Op.lte]: toDate };
   }
 
-  const pos: any = await models.PurchaseOrder.findAndCountAll({
+  const pos: any = await scoped(models.PurchaseOrder).findAndCountAll({
     where: {
       clientId
     },
@@ -192,7 +192,7 @@ export const getPaymentPendingPurchaseOrders = async (page: number, limit: numbe
 
 // Get PO detail by ID
 export const getPurchaseOrderById = async (id: number) => {
-  let result: any = await models.PurchaseOrder.findOne({
+  let result: any = await scoped(models.PurchaseOrder).findOne({
     include: [
       {
         model: models.Vendor,
@@ -239,12 +239,12 @@ export const getPurchaseOrderById = async (id: number) => {
       {
         model: models.Location,
         as: "shipmentLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
       {
         model: models.Location,
         as: "purchaseLocation",
-        attributes: ["location"],
+        attributes: ["locationName"],
       },
     ],
     where: { id },
@@ -280,7 +280,7 @@ export const getPOWithVendorLedgerAccount = async (id: number, transaction?: Tra
 
 // get SIPLs for a PO.
 export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
-  return await models.SIPL.findAll({
+  return await scoped(models.SIPL).findAll({
     where: { purchaseOrderId },
     raw: true,
     nest: true,
@@ -289,7 +289,7 @@ export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
 
 // Get latest PO number
 export const getPoNumber = async (clientId: number) => {
-  const lastPO: any = await models.PurchaseOrder.findOne({
+  const lastPO: any = await scoped(models.PurchaseOrder).findOne({
     where: { clientId },
     order: [["clientPoNumber", "DESC"]],
     attributes: ["clientPoNumber"],
@@ -299,14 +299,14 @@ export const getPoNumber = async (clientId: number) => {
 };
 
 export async function updatePurchaseOrderStatus(purchaseOrderId: number, status: string, transaction?: any) {
-  return await models.PurchaseOrder.update(
+  return await scoped(models.PurchaseOrder).update(
     { status },
     { where: { id: purchaseOrderId }, transaction, returning: true }
   );
 }
 
 export const countOpenPOByClientId = async (clientId: number) => {
-  return await models.PurchaseOrder.count({
+  return await scoped(models.PurchaseOrder).count({
     where: {
       clientId,
       status: PO_STATUS.OPEN,
@@ -315,7 +315,7 @@ export const countOpenPOByClientId = async (clientId: number) => {
 };
 
 export const countPoInTransit = async (clientId: number) => {
-  return await models.PurchaseOrder.count({
+  return await scoped(models.PurchaseOrder).count({
     include: [
       {
         model: models.SIPL,

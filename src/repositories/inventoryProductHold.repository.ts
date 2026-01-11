@@ -29,7 +29,7 @@ export const findHoldByInventoryProductId = async (
   inventoryProductId: number,
   transaction?: Transaction
 ) => {
-  return await models.InventoryProductHold.findOne({
+  return await scoped(models.InventoryProductHold).findOne({
     where: { inventoryProductId },
     include: [
       {
@@ -74,7 +74,7 @@ export const deleteHoldByInventoryProductId = async (
   inventoryProductId: number,
   transaction?: Transaction
 ) => {
-  return await models.InventoryProductHold.destroy({
+  return await scoped(models.InventoryProductHold).destroy({
     where: { inventoryProductId },
     transaction,
   });

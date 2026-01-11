@@ -24,6 +24,7 @@ import * as loadingOrderRepository from "../repositories/loadingOrder.repository
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as decimal from '../helper/decimal'
 import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 
 export const createJournalEntryForBill = async (
@@ -377,7 +378,7 @@ export async function balanceInventoryVarianceForSIPL(
   transaction: Transaction
 ) {
   // Get all journal entries for this SIPL
-  const journalEntries = await JournalEntryModel.findAll({
+  const journalEntries = await scoped(JournalEntryModel).findAll({
     where: {
       entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
       entryForId: siplId,
