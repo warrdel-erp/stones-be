@@ -202,6 +202,53 @@ export const getAllSlabs = async (filters?: WhereOptions, transaction?: Transact
   });
 };
 
+/**
+ * Fetch all slabs that have a parent (i.e., result of a split).
+ */
+export const getSplitSlabs = async (transaction?: Transaction, locationId?: number) => {
+  return await scoped(Slab).findAll({
+    where: {
+      parentSlabId: { [Op.ne]: null },
+      isBroken: false
+    },
+    include: [
+      {
+        model: models.Product,
+        as: 'product',
+      },
+      {
+        model: models.SIPL,
+        as: "sipl",
+        attributes: ["id"],
+        include: [
+          {
+            model: models.PurchaseOrder,
+            as: "purchaseOrder",
+            attributes: ["id"],
+          },
+        ],
+      },
+      {
+        association: "inventoryProduct",
+        include: [
+          {
+            association: "bin",
+            required: true,
+            include: [
+              {
+                association: "warehouse",
+                where: { ...(locationId ? { locationId } : {}) },
+                required: true,
+              }
+            ]
+          }
+        ]
+      },
+    ],
+    transaction
+  });
+};
+
 export const getTotalAreaBySIPL = async (siplId: number) => {
   return await scoped(models.Slab).findAll({
     attributes: ["siplId", [sequelize.fn("SUM", sequelize.literal("receivingLength * receivingWidth")), "totalArea"]],

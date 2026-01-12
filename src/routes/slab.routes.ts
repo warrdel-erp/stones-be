@@ -21,6 +21,9 @@ router.post("/:slabId/remeasure", authenticateUser, slabController.createSlabLog
 // Split a slab into multiple pieces
 router.post("/:slabId/split", authenticateUser, validateRequest(splitSlabSchema), slabController.splitSlab);
 
+// Get all split slabs
+router.get("/splittedSlabs", authenticateUser, slabController.getSplitSlabs);
+
 // Get all slabs with filter
 router.get("/", authenticateUser, slabController.getAllSlabs);
 

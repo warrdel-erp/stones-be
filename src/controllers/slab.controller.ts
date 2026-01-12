@@ -31,6 +31,13 @@ export const getAllSlabs = catchAsync(async (req: AuthRequest, res: Response) =>
   return SuccessResponse(res, 200, "Slabs fetched successfully", slabs);
 });
 
+// Get all split slabs
+export const getSplitSlabs = catchAsync(async (req: AuthRequest, res: Response) => {
+  const locationId = req.user?.defaultLocationId;
+  const slabs = await slabService.fetchSplitSlabs(undefined, Number(locationId));
+  return SuccessResponse(res, 200, "Split slabs fetched successfully", slabs);
+});
+
 // Update slab
 export const updateSlab = catchAsync(async (req: Request, res: Response) => {
   const { slabId } = req.params;

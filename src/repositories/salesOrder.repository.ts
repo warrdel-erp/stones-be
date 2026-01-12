@@ -62,7 +62,7 @@ export const getAllSalesOrders = async (
       },
       {
         association: "soLocation",
-        attributes: ["id", "location"],
+        attributes: ["id", "locationName"],
       },
       {
         association: "notes",

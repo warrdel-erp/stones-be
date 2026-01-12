@@ -20,6 +20,11 @@ export const fetchAllSlabs = async (filters?: any, transaction?: Transaction, lo
   return await slabRepository.getAllSlabs(filters, transaction, locationId);
 };
 
+// Get only split slabs.
+export const fetchSplitSlabs = async (transaction?: Transaction, locationId?: number) => {
+  return await slabRepository.getSplitSlabs(transaction, locationId);
+};
+
 // Update slab
 export const updateSlab = async (slabId: number, updateData: any) => {
   const sipl = await siplRepository.findSIPLBySlabId(slabId);

@@ -6,6 +6,7 @@ import { CustomUpdateOptions } from "../types/custom";
 import { scoped } from "../utils/scoped";
 import * as genericProductRepository from './genericProduct.repository';
 import * as inventoryProductRepository from './inventoryProduct.repository';
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 export const createProduct = async (productData: any) => {
   return await scoped(models.Product).create(productData);
@@ -20,6 +21,8 @@ export const getAllProductsMinimal = async (
 ) => {
   const offset = (page - 1) * limit;
   const whereClause: any = { ...filter };
+
+  console.log(filter);
 
   if (search) {
     whereClause.name = { [Op.like]: `%${search}%` };

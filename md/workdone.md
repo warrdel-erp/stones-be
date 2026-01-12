@@ -837,3 +837,7 @@ sticky navbar.
 7. add default location to Client.
 8. create client.
 9. assign locations to user.
+10. add new Locations.
+11. Total area difference in split.
+12. add so product is showing slabs other than in_inventory. [!!!]
+13. parent location dropdown Data in create supplier

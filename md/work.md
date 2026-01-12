@@ -701,20 +701,19 @@ Email notification.
 2. Shortest path between delivery addresses. [skip-for-technical-reasons]
 
 3. automate deployment [!!!!!!]
+
 4. Freight bill could be edited (with journal entry).
 5. Test whole project with generic product and combination of slab and generic products. [!]
 6. Profile image
-7. Change location access for user from client.
-8. Show adjustments in separate module in sidebar.
-9. Total area difference in split.
-10. Sorting in table.
-11. Cancel LO, SO
-12. Dr. In Transit -> inventory variance in Journal entry
-13. show generic PRoduct info as well in inventory drawer
-14. add so product is showing slabs other than in_inventory. [!!!]
+7. Show adjustments in separate module in sidebar.
+8. Sorting in table.
+9. Cancel LO, SO
+10. Dr. In Transit -> inventory variance in Journal entry
+11. show generic PRoduct info as well in inventory drawer
 
 ---
 
-4. check if SlabRemeasurement table used anywhere.
-5. remove loadingOrderProducts.
-6. add new Locations.
+1. check if SlabRemeasurement table used anywhere.
+2. remove loadingOrderProducts.
+3. email validation details in register client.
+4. number of users validation for client.

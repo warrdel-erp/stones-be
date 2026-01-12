@@ -15,7 +15,15 @@ export const createProduct = catchAsync(async (req: AuthRequest, res: Response) 
 
 // Get all products
 export const getProducts = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, search, ...filter } = req.query;
+  const { page = 1, limit = 10, search, ...filter } = req.query as any;
+
+  if (filter.isSlabType === 'true') {
+    filter.isSlabType = true;
+  }
+
+  if (filter.isSlabType === 'false') {
+    filter.isSlabType = false;
+  }
 
   const result = await productService.fetchAllProducts(
     Number(page),
@@ -33,7 +41,15 @@ export const getProducts = catchAsync(async (req: Request, res: Response) => {
 
 // Get all products
 export const getProductsWithCompactData = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 100, search, onlyWithSlabs, ...filter } = req.query;
+  const { page = 1, limit = 100, search, onlyWithSlabs, ...filter } = req.query as any;
+
+  if (filter.isSlabType === 'true') {
+    filter.isSlabType = true;
+  }
+
+  if (filter.isSlabType === 'false') {
+    filter.isSlabType = false;
+  }
 
   const result = await productService.fetchAllProductsWithCompactData(
     Number(page),

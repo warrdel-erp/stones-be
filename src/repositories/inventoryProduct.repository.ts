@@ -313,7 +313,10 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
   return scoped(models.InventoryProduct).findAll({
     where: {
       ...restFilter,
-      status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
+      status: {
+        [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
+        ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
+      },
     },
     include: [
       {
