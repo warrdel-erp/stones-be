@@ -22,7 +22,11 @@ router.get("/:productId/tabs/:tab", authenticateUser, productController.getProdu
 // Update product
 router.put("/:id", authenticateUser, productController.updateProductById);
 
+// Get products with empty bin.
+router.get("/emptyBin", authenticateUser, productController.getProductsWithEmptyBinInventory);
+
 // Get Product by id
 router.get("/:id", authenticateUser, productController.getProductById);
+
 
 export default router;

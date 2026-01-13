@@ -27,7 +27,7 @@ const PurchaseOrder = sequelize.define(
     },
     paymentTermId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     paymentTerm: {
       type: DataTypes.VIRTUAL,

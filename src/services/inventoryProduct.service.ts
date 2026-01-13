@@ -262,3 +262,8 @@ export const createBulkHolds = async (
     }
 };
 
+export const getInventoryProductsWithEmptyBin = async (productId?: number) => {
+    return await inventoryProductRepository.getInventoryProductsWithEmptyBin(productId);
+};
+
+

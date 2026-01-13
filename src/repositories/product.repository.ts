@@ -443,3 +443,41 @@ export const getProductOptions = async (clientId: number, status?: string) => {
     order: [["name", "ASC"]],
   });
 };
+// get products in which inventoryProducts's binId is empty.
+export const getProductsWithEmptyBinInventory = async (
+  page: number,
+  limit: number,
+) => {
+  const offset = (page - 1) * limit;
+
+  const productScoped = scoped(models.Product);
+  const { count, rows } = await productScoped.findAndCountAll({
+    include: [
+      {
+        association: "inventoryProducts",
+        where: { binId: null },
+        required: true,
+        attributes: [], // Exclude nested inventory data
+      },
+      {
+        association: "subCategory",
+        attributes: ["id", "name", "isSlabType"]
+      },
+      {
+        association: "group",
+        attributes: ["id", "name"]
+      }
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [["name", "ASC"]],
+  });
+
+  return {
+    products: rows,
+    total: count,
+    page,
+    limit,
+  };
+};

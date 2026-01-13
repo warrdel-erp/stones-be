@@ -175,7 +175,8 @@ export const createDirectSIPLController = catchAsync(async (req: AuthRequest, re
       shipmentLocationId,
       dueDate,
       shipDate,
-      services
+      services,
+      paymentTermId
     };
 
     const sipl = await siplService.createSIPLService(siplData, Number(userLocationId), transaction);

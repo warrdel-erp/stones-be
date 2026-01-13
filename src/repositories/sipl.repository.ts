@@ -290,12 +290,12 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
           },
           {
             association: "bin",
-            required: true,
+            // required: true,
             include: [
               {
                 association: "warehouse",
                 where: { locationId },
-                required: true,
+                // required: true,
                 include: [
                   {
                     association: "location",
@@ -380,5 +380,6 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
   return {
     poSiplNumber,
     invoiceCode: `VI ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
+    paymentTermId: sipl.paymentTermId || purchaseOrder.paymentTermId,
   }
 }

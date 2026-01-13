@@ -133,7 +133,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
       },
       {
         association: "soLocation",
-        attributes: ["id", "location"],
+        attributes: ["id", "locationName"],
       },
       {
         association: "notes",
@@ -217,7 +217,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
       },
       {
         association: "soLocation",
-        attributes: ["id", "location"],
+        attributes: ["id", "locationName"],
       },
       {
         association: "notes",
@@ -429,7 +429,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
                     include: [
                       {
                         association: "location",
-                        attributes: ["id", "location"],
+                        attributes: ["id", "locationName"],
                       }
                     ]
                   }

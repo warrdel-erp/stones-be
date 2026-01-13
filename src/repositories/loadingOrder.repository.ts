@@ -140,7 +140,7 @@ export const getLoadingOrderById = async (id: number) => {
           },
           {
             association: "soLocation",
-            attributes: ["id", "location", 'lat', 'long', 'address'],
+            attributes: ["id", "locationName", 'lat', 'long', 'address'],
           },
         ],
       },
@@ -269,7 +269,7 @@ export const getLoadingOrderAsPerReturn = async (id: number, returnId: number) =
           },
           {
             association: "soLocation",
-            attributes: ["id", "location"],
+            attributes: ["id", "locationName"],
           },
         ],
       },

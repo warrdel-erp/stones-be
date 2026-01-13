@@ -388,4 +388,27 @@ export const getAverageLandedCost = async (productId: number) => {
   return data?.dataValues
 }
 
+export const getInventoryProductsWithEmptyBin = async (productId?: number) => {
+  return await scoped(models.InventoryProduct).findAll({
+    where: {
+      binId: null,
+      ...(productId ? { productId } : {}),
+    },
+    include: [
+      {
+        association: 'slab'
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'product',
+        attributes: ['id', 'name']
+      }
+    ],
+    order: [["createdAt", "DESC"]],
+  });
+};
+
+
 

@@ -42,7 +42,7 @@ export const getPackagingListById = async (id: number) => {
                 },
                 {
                   association: "soLocation",
-                  attributes: ["id", "location"],
+                  attributes: ["id", "locationName"],
                 },
               ],
             },

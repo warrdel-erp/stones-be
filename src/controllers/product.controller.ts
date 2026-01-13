@@ -102,3 +102,20 @@ export const getLandedCost = catchAsync(async (req: Request, res: Response) => {
 
   return SuccessResponse(res, 200, "Product landed costs fetched successfully", product);
 });
+
+// Get products with empty bin inventory
+export const getProductsWithEmptyBinInventory = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10 } = req.query as any;
+
+  const result = await productService.fetchProductsWithEmptyBinInventory(
+    Number(page),
+    Number(limit)
+  );
+
+  SuccessResponse(res, 200, "Products with empty bin retrieved successfully", result.products, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});
+

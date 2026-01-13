@@ -10,6 +10,10 @@ router.get("/specialFilters", authenticateUser, inventoryProductController.getIn
 // Get inventory products according to siplId
 router.get("/", authenticateUser, inventoryProductController.getInventoryProducts);
 
+// Get inventory products with empty bin
+router.get("/emptyBin", authenticateUser, inventoryProductController.getInventoryProductsWithEmptyBin);
+
+
 // Update selling price of inventory products
 router.put("/sellingPrice", authenticateUser, inventoryProductController.updateInventoryProductsSellingPrice);
 

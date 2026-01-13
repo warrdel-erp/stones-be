@@ -185,3 +185,14 @@ export const createBulkHolds = catchAsync(async (req: AuthRequest, res: Response
     return SuccessResponse(res, 200, `Successfully created ${result.successfulCount} hold(s)`, result);
 });
 
+export const getInventoryProductsWithEmptyBin = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { productId } = req.query;
+
+    const data = await inventoryProductService.getInventoryProductsWithEmptyBin(
+        productId ? Number(productId) : undefined
+    );
+
+    return SuccessResponse(res, 200, "Inventory products with empty bin fetched successfully", data);
+});
+
+

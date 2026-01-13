@@ -700,20 +700,24 @@ Email notification.
 1. Service journal entry in PO. [!] [discussion]
 2. Shortest path between delivery addresses. [skip-for-technical-reasons]
 
-3. automate deployment [!!!!!!]
-
-4. Freight bill could be edited (with journal entry).
-5. Test whole project with generic product and combination of slab and generic products. [!]
-6. Profile image
-7. Show adjustments in separate module in sidebar.
-8. Sorting in table.
-9. Cancel LO, SO
-10. Dr. In Transit -> inventory variance in Journal entry
-11. show generic PRoduct info as well in inventory drawer
-
 ---
 
-1. check if SlabRemeasurement table used anywhere.
-2. remove loadingOrderProducts.
-3. email validation details in register client.
-4. number of users validation for client.
+1. Automate deployment [!!!!!!]
+2. Freight bill could be edited (with journal entry).
+3. Test whole project with generic product and combination of slab and generic products. [!]
+4. Profile image
+5. Cancel LO, SO [!!!]
+6. Dr. In Transit -> inventory variance in Journal entry
+7. show generic PRoduct info as well in inventory drawer
+8. Create Location address dropdown.
+9. Designs of master data
+10. Subcategory can be repeated as per different client. [!]
+11. Bin creation.
+12. check if SlabRemeasurement table used anywhere. [internal]
+13. remove loadingOrderProducts. [internal]
+14. email validation details in register client.
+15. number of users validation for client.
+16. Length width validation in slab split
+17. Qty in SO. [!!!]
+18. Create Product from PO, SIPL dropdown. [!!!!]
+19. Assign bin to generic products also.

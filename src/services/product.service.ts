@@ -128,4 +128,8 @@ export const productLandedCosts = async (productId: number) => {
   const averageLandedCost = await inventoryProductRepository.getAverageLandedCost(productId);
   const lastLandedCost = await inventoryProductRepository.getLastLandedCost(productId);
   return { ...averageLandedCost, lastLandedCost: lastLandedCost?.dataValues.landedUnitCost };
-}; 
+};
+
+export const fetchProductsWithEmptyBinInventory = async (page: number, limit: number) => {
+  return await productRepository.getProductsWithEmptyBinInventory(page, limit);
+};

@@ -144,8 +144,9 @@ export const checkSiplSlabsFullyFilled = async (siplId: number) => {
       slabData.block !== null && slabData.block !== undefined &&
       slabData.lot !== null && slabData.lot !== undefined &&
       slabData.receivingLength !== null && slabData.receivingLength !== undefined &&
-      slabData.receivingWidth !== null && slabData.receivingWidth !== undefined &&
-      inventoryProduct?.binId !== null && inventoryProduct?.binId !== undefined;
+      slabData.receivingWidth !== null && slabData.receivingWidth !== undefined
+      // && inventoryProduct?.binId !== null && inventoryProduct?.binId !== undefined
+      ;
 
     if (isFilled) {
       filledCount++;

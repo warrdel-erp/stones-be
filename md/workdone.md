@@ -841,3 +841,15 @@ sticky navbar.
 11. Total area difference in split.
 12. add so product is showing slabs other than in_inventory. [!!!]
 13. parent location dropdown Data in create supplier
+14. Show adjustments in separate module in sidebar.
+
+---
+
+1. Sorting in table. [!!!]
+2. Inventory bundle block. [!!!]
+3. Show Inventory numbers with unit quantity. [!!!]
+4. Notification wrong data[!!!!]
+5. Whole SO Process. [!!!!]
+6. SIPL create/Details locations label.
+7. PO optional fields [!!!]
+8. Bin is optional in slab creation. [!!!]

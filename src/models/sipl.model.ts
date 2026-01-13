@@ -5,6 +5,7 @@ import PurchaseOrder from "./purchaseOrder.model";
 import Client from "./client.model";
 import Location from "./location.model";
 import { scoped } from "../utils/scoped";
+import { PAYMENT_TERMS } from "../constants";
 
 const SIPL = sequelize.define(
   "SIPL",
@@ -58,6 +59,16 @@ const SIPL = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "pending",
+    },
+    paymentTermId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
     },
     createdBy: {
       type: DataTypes.INTEGER,
