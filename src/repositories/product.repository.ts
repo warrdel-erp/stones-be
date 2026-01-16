@@ -455,7 +455,10 @@ export const getProductsWithEmptyBinInventory = async (
     include: [
       {
         association: "inventoryProducts",
-        where: { binId: null },
+        where: {
+          binId: null,
+          status: INVENTORY_ITEM_STATUS.IN_INVENTORY
+        },
         required: true,
         attributes: [], // Exclude nested inventory data
       },

@@ -392,6 +392,7 @@ export const getInventoryProductsWithEmptyBin = async (productId?: number) => {
   return await scoped(models.InventoryProduct).findAll({
     where: {
       binId: null,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
       ...(productId ? { productId } : {}),
     },
     include: [

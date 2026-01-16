@@ -853,3 +853,5 @@ sticky navbar.
 6. SIPL create/Details locations label.
 7. PO optional fields [!!!]
 8. Bin is optional in slab creation. [!!!]
+9. Qty in SO. [!!!]
+10. permission loader page design.

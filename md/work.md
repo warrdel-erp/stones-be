@@ -718,6 +718,6 @@ Email notification.
 14. email validation details in register client.
 15. number of users validation for client.
 16. Length width validation in slab split
-17. Qty in SO. [!!!]
-18. Create Product from PO, SIPL dropdown. [!!!!]
-19. Assign bin to generic products also.
+17. Create Product from PO, SIPL dropdown. [!!!!]
+18. Assign bin to generic products also.
+19. more slabs can not be added after receive inventory.
