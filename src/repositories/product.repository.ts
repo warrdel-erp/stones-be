@@ -6,10 +6,13 @@ import { CustomUpdateOptions } from "../types/custom";
 import { scoped } from "../utils/scoped";
 import * as genericProductRepository from './genericProduct.repository';
 import * as inventoryProductRepository from './inventoryProduct.repository';
-import { CLIENT_RENEG_LIMIT } from "tls";
 
 export const createProduct = async (productData: any) => {
   return await scoped(models.Product).create(productData);
+};
+
+export const bulkCreateProducts = async (productsData: any[]) => {
+  return await scoped(models.Product).bulkCreate(productsData);
 };
 
 // Get all products with minimal data (only subcategory and group)

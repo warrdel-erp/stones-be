@@ -1,0 +1,10 @@
+name,alternativeName,kindId,groupId,subCategoryId,singleUnitPrice,binId,bundlePrice,weight,thickness,baseColorId,originId,status,notes
+"Calacatta Gold","Italian Premium",1,2,3,85.00,1,80.00,160,2.0,1,77,"active","High-end gold veined marble"
+"Emerald Green Granite","Brazil Green",2,2,4,45.00,2,40.00,210,3.0,2,24,"active","Stunning green granite"
+"Blue Pearl Granite","Norway Blue",1,2,4,55.00,1,50.00,205,3.0,4,129,"active","Classic blue pearl"
+"Crema Marfil","Spanish Beige",1,2,3,38.00,3,35.00,155,2.0,4,164,"active","Popular beige marble"
+"Nero Marquina","Black Spanish",1,2,3,42.00,2,38.00,160,2.0,4,164,"active","Black marble with white veins"
+"Travertine Classic","Turkish Cream",2,3,7,30.00,4,28.00,140,1.5,4,180,"active","Classic travertine look"
+"Imperial Red Granite","India Red",1,2,4,35.00,1,32.00,215,3.0,4,77,"active","Deep red granite"
+"Kashmir White Granite","Indian White",2,2,4,38.00,4,34.00,200,3.0,4,77,"active","Light grey/white granite"
+"Statuario Marble","Boutique Marble",1,2,3,120.00,1,110.00,170,2.0,4,83,"active","Top tier white marble"

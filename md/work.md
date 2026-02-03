@@ -8,7 +8,6 @@
 8. check every id that corresponding data exists.
 9. send client id in userLogin
 10. COA (type, head, subhead)
-
     1. ledger opening date
     2. journal (transaction)
     3. payment is different from
@@ -68,22 +67,18 @@
 57. keep everything in SIPL as in PO
 58. add address in customer creation. ✔️
 59. Payment:
-
     1. Vendors according to SIPL for ✔️
     2. Pending bills according to vendor. ✔️
     3. New Transaction no. ✔️
     4. Reference No. Reference date. ✔️
 
 60. Master:
-
     1. Master vendor list ✔️
 
 61. Customer:
-
     1. Address with customer creation. ✔️
 
 62. Sales order:
-
     1. Add slabs with creation of SO.
     2. Slabs list by product. ✔️
 
@@ -712,12 +707,22 @@ Email notification.
 8. Create Location address dropdown.
 9. Designs of master data
 10. Subcategory can be repeated as per different client. [!]
-11. Bin creation.
-12. check if SlabRemeasurement table used anywhere. [internal]
-13. remove loadingOrderProducts. [internal]
-14. email validation details in register client.
-15. number of users validation for client.
-16. Length width validation in slab split
-17. Create Product from PO, SIPL dropdown. [!!!!]
-18. Assign bin to generic products also.
-19. more slabs can not be added after receive inventory.
+11. check if SlabRemeasurement table used anywhere. [internal]
+12. remove loadingOrderProducts. [internal]
+13. email validation details in register client.
+14. number of users validation for client.
+15. Length width validation in slab split
+16. Create Product from PO, SIPL dropdown. [!!!!]
+17. Assign bin to generic products also.
+18. more slabs can not be added after receive inventory.
+19. pagination in truck list in deliveries.
+20. stage of LO in deliveries.
+21. check box design for disabled and non disabled.
+22. separate components of delivery tabs.
+23. put general data fetching in common global store.
+
+---
+
+23. bulk upload of customer, supplier, products.
+24. Bin creation.
+25. disk storage full.

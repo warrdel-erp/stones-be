@@ -211,6 +211,13 @@ const Product = sequelize.define(
     tableName: "products",
     timestamps: true,
     paranoid: true, // Enables soft delete functionality
+    indexes: [
+      {
+        unique: true,
+        fields: ["name", "clientId"],
+        name: "unique_product_name_per_client",
+      },
+    ],
   }
 );
 
