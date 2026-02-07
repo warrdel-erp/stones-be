@@ -1,6 +1,7 @@
 import { INVENTORY_ITEM_STATUS, PRODUCT_KIND, UNITS_OF_MEASUREMENT } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import { AppError } from "../helper/appError";
+import { sequelize } from "../config/database";
 import * as productRepository from "../repositories/product.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
@@ -11,7 +12,6 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import { productSchema } from "../validators/product.validator";
 import * as models from "../models";
-import { scoped } from "../utils/scoped";
 
 // Create a new product.
 export const addProduct = async (productData: any, userId: number, clientId: number) => {
@@ -188,7 +188,7 @@ const validateBulkProductIdsAndUniqueness = async (csvRows: any[], clientId: num
 
   const validateInDb = async (model: any, ids: Set<number>, name: string, attributes: string[] = ['id']) => {
     if (ids.size === 0) return [];
-    const found = await scoped(model).findAll({
+    const found = await model.findAll({
       where: { id: Array.from(ids), clientId },
       attributes
     });
@@ -210,10 +210,10 @@ const validateBulkProductIdsAndUniqueness = async (csvRows: any[], clientId: num
     });
   };
 
-  // 2. Check for duplicate names in database for this client
+  // 2. Check for duplicate names in database for this client (no scoped - explicit clientId)
   const checkDuplicateNamesInDb = async () => {
     if (productNamesInCsv.size === 0) return;
-    const existingProducts = await scoped(models.Product).findAll({
+    const existingProducts = await models.Product.findAll({
       where: {
         name: Array.from(productNamesInCsv),
         clientId
@@ -328,16 +328,17 @@ const prepareBulkProductData = (
 
 /**
  * Entry point for bulk product upload.
+ * Uses models directly (no scoped) and transaction for create operations.
  */
 export const bulkUploadProducts = async (fileBuffer: Buffer, userId: number, clientId: number) => {
   const csvRows: any[] = [];
   let rowNumber = 1;
 
-  // 1. Get default ledger accounts
+  // 1. Get default ledger accounts (no scoped - explicit clientId in filter)
   const [ledgerAccountForFinishedGoods, ledgerAccountForCogs, incomeAccount] = await Promise.all([
-    ledgerAccountRepository.getLedgerAccountByFilter({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS, clientId }),
-    ledgerAccountRepository.getLedgerAccountByFilter({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS, clientId }),
-    ledgerAccountRepository.getLedgerAccountByFilter({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD, clientId }),
+    ledgerAccountRepository.getLedgerAccountByFilterForBulkUpload({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS, clientId }),
+    ledgerAccountRepository.getLedgerAccountByFilterForBulkUpload({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS, clientId }),
+    ledgerAccountRepository.getLedgerAccountByFilterForBulkUpload({ key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD, clientId }),
   ]);
 
   if (!ledgerAccountForFinishedGoods || !ledgerAccountForCogs || !incomeAccount) {
@@ -358,18 +359,21 @@ export const bulkUploadProducts = async (fileBuffer: Buffer, userId: number, cli
     throw new AppError("No products found in the CSV file.", 400);
   }
 
-  // 3. Separate Function: Validate IDs and Name Uniqueness (Existence and Scope)
+  // 3. Validate IDs and Name Uniqueness (no scoped - explicit clientId)
   const { subCategorySlabTypeMap } = await validateBulkProductIdsAndUniqueness(csvRows, clientId);
 
-  // 4. Separate Function: Prepare and Validate row data
+  // 4. Prepare and validate row data
   const products = prepareBulkProductData(csvRows, userId, clientId, {
-    inventoryLinkAccountId: ledgerAccountForFinishedGoods.id,
-    incomeAccountId: incomeAccount.id,
-    costOfGoodsAccountId: ledgerAccountForCogs.id,
+    inventoryLinkAccountId: (ledgerAccountForFinishedGoods as any).id,
+    incomeAccountId: (incomeAccount as any).id,
+    costOfGoodsAccountId: (ledgerAccountForCogs as any).id,
   }, subCategorySlabTypeMap);
 
-  // 5. Bulk Create
-  const createdProducts = await productRepository.bulkCreateProducts(products);
+  // 5. Bulk create within transaction (no scoped - clientId in each row)
+  const result = await sequelize.transaction(async (transaction) => {
+    const createdProducts = await productRepository.bulkCreateProductsForBulkUpload(products, transaction);
+    return { createdProductsCount: createdProducts.length };
+  });
 
-  return { createdProductsCount: createdProducts.length };
+  return result;
 };

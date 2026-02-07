@@ -12,6 +12,11 @@ export const createBulkCustomerAddress = async (data: any, transaction?: Transac
   return await scoped(models.CustomerAddress).bulkCreate(data, { transaction });
 };
 
+// Bulk create addresses for bulk upload - uses models directly with explicit clientId in data (no scoped)
+export const bulkCreateCustomerAddressesForBulkUpload = async (data: any[], transaction?: Transaction) => {
+  return models.CustomerAddress.bulkCreate(data, { transaction, validate: true });
+};
+
 export const getAddressesByCustomerId = async (
   customerId: number,
   addressType?: (typeof CUSTOMER_ADDRESS_TYPES)[keyof typeof CUSTOMER_ADDRESS_TYPES]

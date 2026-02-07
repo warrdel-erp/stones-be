@@ -114,6 +114,22 @@ export const getVendorsForMaster = async (clientId: number) => {
   });
 };
 
+// Find existing vendors by primary phone numbers (for bulk upload validation)
+// Uses models directly with explicit clientId - no scoped (avoids AsyncLocalStorage)
+export const findVendorsByPrimaryPhoneNumbers = async (clientId: number, phoneNumbers: string[]) => {
+  const uniquePhones = [...new Set(phoneNumbers)].filter(Boolean);
+  if (uniquePhones.length === 0) return [];
+  return models.Vendor.findAll({
+    where: { clientId, primaryPhoneNo: uniquePhones },
+    attributes: ["primaryPhoneNo"],
+  });
+};
+
+// Bulk create vendors for bulk upload - uses models directly with explicit clientId in data (no scoped)
+export const bulkCreateVendorsForBulkUpload = async (vendorsData: any[], transaction?: Transaction) => {
+  return models.Vendor.bulkCreate(vendorsData, { transaction, validate: true });
+};
+
 // Get vendor options for dropdowns/selects
 export const getVendorOptions = async (clientId: number, status?: string, type?: string) => {
   return scoped(models.Vendor).findAll({

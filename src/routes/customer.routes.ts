@@ -2,11 +2,15 @@ import { Router } from "express";
 import * as customerController from "../controllers/customer.controller";
 import * as customerAddressController from "../controllers/customerAddress.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import { uploadCSV } from "../middleware/uploadMiddleware";
 
 const router = Router();
 
 // Create a new customer
 router.post("/", authenticateUser, customerController.createCustomerController);
+
+// Bulk upload customers via CSV
+router.post("/bulkUpload", authenticateUser, uploadCSV.single("file"), customerController.bulkUploadCustomers);
 
 // create address for customer
 router.post("/address", authenticateUser, customerAddressController.createCustomerAddress);

@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { SuccessResponse } from "../helper/response";
 import * as customerService from "../services/customer.service";
+import { AppError } from "../helper/appError";
 
 //  Controller to handle create creation.
 export const createCustomerController = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -77,4 +78,18 @@ export const getAdvancedDepositsByCustomerId = catchAsync(async (req: Request, r
   // Call service function to fetch advanced deposits related to the customer ID.
   const data = await customerService.getAdvancedDepositsByCustomerId(Number(customerId));
   return SuccessResponse(res, 200, "Advanced deposits fetched successfully", data);
+});
+
+// Bulk upload customers via CSV
+export const bulkUploadCustomers = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const clientId = req.user?.clientId;
+
+  if (!req.file) {
+    throw new AppError("CSV file is required.", 400);
+  }
+
+  const result = await customerService.bulkUploadCustomers(req.file.buffer, userId!, clientId!);
+
+  SuccessResponse(res, 201, "Customers uploaded successfully", result);
 }); 

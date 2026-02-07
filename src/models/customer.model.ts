@@ -175,6 +175,9 @@ const Customer = sequelize.define(
     tableName: "customers",
     timestamps: true,
     paranoid: true, // Enables soft delete
+    indexes: [
+      { unique: true, fields: ["primaryPhoneNumber", "clientId"], name: "unique_primary_phone_per_client" },
+    ],
   }
 );
 

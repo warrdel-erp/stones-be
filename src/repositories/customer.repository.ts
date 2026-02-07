@@ -8,6 +8,8 @@ export const createCustomer = async (customerData: any, transaction?: Transactio
   return await scoped(models.Customer).create(customerData, { transaction });
 };
 
+
+
 // Update Customer
 export const updateCustomerById = async (id: number, data: any) => {
   const [updatedCount] = await scoped(models.Customer).update(data, {
@@ -92,4 +94,20 @@ export const getCustomerMinimal = async (id: number, clientId: number) => {
   });
 
   return data?.get({ plain: true });
+};
+
+// Find existing customers by primary phone numbers (for bulk upload validation)
+// Uses models directly with explicit clientId - no scoped (avoids AsyncLocalStorage)
+export const findCustomersByPrimaryPhoneNumbers = async (clientId: number, phoneNumbers: string[]) => {
+  const uniquePhones = [...new Set(phoneNumbers)].filter(Boolean);
+  if (uniquePhones.length === 0) return [];
+  return models.Customer.findAll({
+    where: { clientId, primaryPhoneNumber: uniquePhones },
+    attributes: ["primaryPhoneNumber"],
+  });
+};
+
+// Bulk create customers for bulk upload - uses models directly with explicit clientId in data (no scoped)
+export const bulkCreateCustomers = async (customersData: any[], transaction?: Transaction) => {
+  return models.Customer.bulkCreate(customersData, { transaction, validate: true });
 };

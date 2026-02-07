@@ -854,3 +854,4 @@ sticky navbar.
 
 1. stone BE server start.
 2. bulk product upload with data validation, sample data, error handling and reference Data.
+3. bulk upload for customer and vendors.

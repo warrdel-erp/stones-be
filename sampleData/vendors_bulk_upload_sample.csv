@@ -1,0 +1,4 @@
+name,printName,email,primaryPhoneNo,type,contactName,secondaryPhoneNo,landlineNo,accountingEmail,vendorScope,paymentTerms,status,currency,remitAddress,remitSuite,remitCity,remitState,remitZip,remitCountry,shippingAddress,shippingSuite,shippingCity,shippingState,shippingZip,shippingCountry
+Acme Freight Co,Acme Freight,acme@freight.com,555-100561,FREIGHT,John Doe,555-1002,555-1000,accounts@acme.com,1,1,active,USD,123 Main St,Suite 100,Atlanta,GA,30301,USA,123 Main St,Suite 100,Atlanta,GA,30301,USA
+Beta Supplies Inc,Beta Supplies,beta@supplies.com,555-20301,SUPPLIER,Sarah Smith,555-2002,,,2,2,active,USD,456 Oak Ave,,Dallas,TX,75201,USA,456 Oak Ave,,Dallas,TX,75201,USA
+Gamma Logistics,Gamma Log,gamma@logistics.com,555-30301,FREIGHT,Mike Wilson,,,,1,3,inactive,USD,789 Pine Rd,Bldg B,Houston,TX,77001,USA,,,,,,,

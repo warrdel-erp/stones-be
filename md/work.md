@@ -720,6 +720,8 @@ Email notification.
 21. check box design for disabled and non disabled.
 22. separate components of delivery tabs.
 23. put general data fetching in common global store.
+24. show delivery status in loading order list.
+25. cleanup server and automate everything.
 
 ---
 

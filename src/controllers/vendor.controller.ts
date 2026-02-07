@@ -3,6 +3,7 @@ import * as vendorService from "../services/vendor.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { AppError } from "../helper/appError";
 
 //  Controller to handle vendor creation.
 export const createVendorController = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -61,4 +62,18 @@ export const getAllBillsForVendor = catchAsync(async (req: Request, res: Respons
   const bills = await vendorService.getAllBillsForVendor(Number(vendorId));
 
   SuccessResponse(res, 200, "Bills fetched successfully", bills);
+});
+
+// Bulk upload vendors via CSV
+export const bulkUploadVendors = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const clientId = req.user?.clientId;
+
+  if (!req.file) {
+    throw new AppError("CSV file is required.", 400);
+  }
+
+  const result = await vendorService.bulkUploadVendors(req.file.buffer, userId!, clientId!);
+
+  SuccessResponse(res, 201, "Vendors uploaded successfully", result);
 });

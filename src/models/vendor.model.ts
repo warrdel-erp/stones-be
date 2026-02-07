@@ -169,6 +169,9 @@ const Vendor = sequelize.define(
     tableName: "vendors",
     timestamps: true,
     paranoid: true, // Enables soft delete
+    indexes: [
+      { unique: true, fields: ["primaryPhoneNo", "clientId"], name: "unique_vendor_primary_phone_per_client" },
+    ],
   }
 );
 

@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as models from "../models";
 import * as slabRepository from '../repositories/slab.repository';
@@ -13,6 +13,11 @@ export const createProduct = async (productData: any) => {
 
 export const bulkCreateProducts = async (productsData: any[]) => {
   return await scoped(models.Product).bulkCreate(productsData);
+};
+
+// Bulk create products for bulk upload - uses models directly with explicit clientId in data (no scoped)
+export const bulkCreateProductsForBulkUpload = async (productsData: any[], transaction?: Transaction) => {
+  return models.Product.bulkCreate(productsData, { transaction, validate: true });
 };
 
 // Get all products with minimal data (only subcategory and group)
