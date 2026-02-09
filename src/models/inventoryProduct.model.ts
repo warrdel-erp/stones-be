@@ -23,7 +23,7 @@ const InventoryProduct = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onDelete: "RESTRICT",
     },
     siplId: {
       type: DataTypes.INTEGER,
