@@ -855,3 +855,10 @@ sticky navbar.
 1. stone BE server start.
 2. bulk product upload with data validation, sample data, error handling and reference Data.
 3. bulk upload for customer and vendors.
+4. project setup for bhaskar.
+5. key deletion error for server.
+6. bin creation.
+
+---
+
+1. explain stone product to bhaskar.

@@ -722,6 +722,21 @@ Email notification.
 23. put general data fetching in common global store.
 24. show delivery status in loading order list.
 25. cleanup server and automate everything.
+26. Remove edit PO button in PO details page.
+27. cancel SIPL button redirection is wrong.
+28. I can add more then 50 slabs by adding them multiple times.
+29. slabs are editable after receive inventory.
+30. landed cost in product info is wrong.
+31. inventory balance in inventory drawer is wrong.
+32. there is no option for Origin in product.
+33. design of SIPL action in inventory.
+34. editing selling price in add product of SO.
+35. taxable amount should look different as it does not have any role in calcs.
+36. check delivery location in LO.
+37. if product does not have Bin location then in LO it is "undefined".
+38. pagination is not working in LO swap.
+39. Print Invoice in SO is not working correctly.
+40. credit note amount is incorrect. [!!!!!]
 
 ---
 
