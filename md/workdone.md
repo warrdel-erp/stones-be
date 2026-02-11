@@ -862,3 +862,8 @@ sticky navbar.
 ---
 
 1. explain stone product to bhaskar.
+2. change repo of stone projects.
+3. bulk upload of customer, supplier, products.
+4. Create Product from PO, SIPL dropdown. [!!!!]
+
+---

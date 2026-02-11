@@ -704,42 +704,24 @@ Email notification.
 5. Cancel LO, SO [!!!]
 6. Dr. In Transit -> inventory variance in Journal entry
 7. show generic PRoduct info as well in inventory drawer
-8. Create Location address dropdown.
-9. Designs of master data
-10. Subcategory can be repeated as per different client. [!]
-11. check if SlabRemeasurement table used anywhere. [internal]
-12. remove loadingOrderProducts. [internal]
-13. email validation details in register client.
-14. number of users validation for client.
-15. Length width validation in slab split
-16. Create Product from PO, SIPL dropdown. [!!!!]
-17. Assign bin to generic products also.
-18. more slabs can not be added after receive inventory.
-19. pagination in truck list in deliveries.
-20. stage of LO in deliveries.
-21. check box design for disabled and non disabled.
-22. separate components of delivery tabs.
-23. put general data fetching in common global store.
-24. show delivery status in loading order list.
-25. cleanup server and automate everything.
-26. Remove edit PO button in PO details page.
-27. cancel SIPL button redirection is wrong.
-28. I can add more then 50 slabs by adding them multiple times.
-29. slabs are editable after receive inventory.
-30. landed cost in product info is wrong.
-31. inventory balance in inventory drawer is wrong.
-32. there is no option for Origin in product.
-33. design of SIPL action in inventory.
-34. editing selling price in add product of SO.
-35. taxable amount should look different as it does not have any role in calcs.
-36. check delivery location in LO.
-37. if product does not have Bin location then in LO it is "undefined".
-38. pagination is not working in LO swap.
-39. Print Invoice in SO is not working correctly.
-40. credit note amount is incorrect. [!!!!!]
+8. check if SlabRemeasurement table used anywhere. [internal]
+9. remove loadingOrderProducts. [internal]
+10. cleanup server and automate everything.
+11. landed cost in product info is wrong.
+12. inventory balance in inventory drawer is wrong.
+13. there is no option for Origin in product.
+14. design of SIPL action in inventory.
+15. editing selling price in add product of SO.
+16. taxable amount should look different as it does not have any role in calcs.
+17. check delivery location in LO.
+18. if product does not have Bin location then in LO it is "undefined".
+19. pagination is not working in LO swap.
+20. Print Invoice in SO is not working correctly.
+21. credit note amount is incorrect. [!!!!!]
+22. change button design of delivery tabs.
+23. invoice column name is incorrect in return list.
+24. combined slab number as per location?
+25. remove date range from each module.
+26. "Product Attributes (Slab)" fields are not working as expected.
 
 ---
-
-23. bulk upload of customer, supplier, products.
-24. Bin creation.
-25. disk storage full.

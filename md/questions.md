@@ -10,7 +10,6 @@
 9. payment Page UI jatin Doubt.
 10. Update slab when and why. [can-change-before-receive-inventory]
 11. Product tabs:
-
     1. Slabs in inventory for a product []
     2. Slabs in allocated for a product
     3. Hold slabs for a product.
@@ -140,3 +139,8 @@
 8. Slabs can't be added after receive inventory?
 9. if Generic product is added in SIPL and not added receiving info then what will happen.
 10. how to show generic products quantity, because there could be both types of product in single LO.
+
+---
+
+1. should we mark selection sheet for SO or not?
+2. can't we add more then 50 slabs by adding them multiple times.

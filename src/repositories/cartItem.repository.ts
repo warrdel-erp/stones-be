@@ -41,7 +41,7 @@ export const getCartItemsByAccountId = async (accountId: number) => {
                                 include: [
                                     {
                                         association: 'location',
-                                        attributes: ['id', 'location'],
+                                        attributes: ['id', 'locationName'],
                                     }
                                 ]
                             }
