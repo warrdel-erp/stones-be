@@ -2,6 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+
     await queryInterface.createTable("product_sub_categories", {
       id: {
         type: Sequelize.INTEGER,
@@ -11,7 +12,6 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       clientId: {
         type: Sequelize.INTEGER,
@@ -35,6 +35,13 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
+    });
+
+    // Composite unique constraint
+    await queryInterface.addConstraint("product_sub_categories", {
+      fields: ["name", "clientId"],
+      type: "unique",
+      name: "unique_name_clientId_product_sub_categories",
     });
   },
 
