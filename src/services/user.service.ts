@@ -38,6 +38,24 @@ export const registerUser = async (userData: UserRegistrationData) => {
       throw new AppError("Client not found", 404);
     }
 
+    // Check user limit
+    const existingUsersCount = await userRepository.countUsersByClientId(
+      userData.clientId,
+      transaction
+    );
+
+    const limit = client.getDataValue("userCount");
+
+    if (existingUsersCount >= limit) {
+      throw new AppError(
+        `User limit exceeded. Maximum ${limit} users allowed.`,
+        400
+      );
+    }
+
+    console.log("existingUsersCount =", existingUsersCount);
+    console.log("userCount limit =", client.getDataValue("userCount"));
+
     // Check if userid or phone already exists
     const existingUserById = await userRepository.getUserByUserId(userData.userid);
     if (existingUserById) {
@@ -89,6 +107,24 @@ export const createUserByAccount = async (
       throw new AppError("Client not found", 404);
     }
 
+    // Check user limit  (IMPORTANT PART)
+    const existingUsersCount = await userRepository.countUsersByClientId(
+      userData.clientId,
+      transaction
+    );
+
+    const limit = client.getDataValue("userCount");
+
+    if (existingUsersCount >= limit) {
+      throw new AppError(
+        `User limit exceeded. Maximum ${limit} users allowed.`,
+        400
+      );
+    }
+
+    console.log("existingUsersCount =", existingUsersCount);
+    console.log("userCount limit =", limit);
+
     // Check if userid or phone already exists
     const existingUserById = await userRepository.getUserByUserId(userData.userid);
     if (existingUserById) {
@@ -103,23 +139,29 @@ export const createUserByAccount = async (
     // Extract account data
     const { email, password } = userData;
 
-    // Create account for the new user
-    const account = await accountService.createAccount({ email, password }, transaction);
+    // Create account
+    const account = await accountService.createAccount(
+      { email, password },
+      transaction
+    );
 
-    // Create user with account reference and createdById
-    const user = await userRepository.createUser({
-      username: userData.username,
-      userid: userData.userid,
-      phone: userData.phone,
-      clientId: userData.clientId,
-      accountId: account.getDataValue('id'),
-      defaultLocationId: userData.defaultLocationId,
-      createdById: createdByAccountId,
-    } as any, transaction);
+    // Create user
+    const user = await userRepository.createUser(
+      {
+        username: userData.username,
+        userid: userData.userid,
+        phone: userData.phone,
+        clientId: userData.clientId,
+        accountId: account.getDataValue("id"),
+        defaultLocationId: userData.defaultLocationId,
+        createdById: createdByAccountId,
+      } as any,
+      transaction
+    );
 
     await transaction.commit();
-
     return user;
+
   } catch (error) {
     await transaction.rollback();
     throw error;
@@ -326,8 +368,19 @@ export const getUserProfile = async (userId: number) => {
 // Get Users by Client ID
 export const getUsersByClientId = async (clientId: number) => {
   const users = await userRepository.getUsersByClientId(clientId);
-  if (!users) {
-    throw new AppError("No users found for this client", 404);
+  const totalUsers = users.length;
+
+  const client = await clientRepository.checkClientExists(clientId);
+  if (!client) {
+    throw new AppError("Client not found", 404);
   }
-  return users;
+
+  const userLimit = client.getDataValue("userCount");
+
+  return {
+    users,
+    totalUsers,
+    userLimit,
+    remainingUsers: userLimit - totalUsers
+  };
 };
