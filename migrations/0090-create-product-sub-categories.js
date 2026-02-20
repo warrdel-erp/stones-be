@@ -37,13 +37,6 @@ module.exports = {
         allowNull: false,
       },
     });
-
-    // Composite unique constraint
-    await queryInterface.addConstraint("product_sub_categories", {
-      fields: ["name", "clientId"],
-      type: "unique",
-      name: "unique_name_clientId_product_sub_categories",
-    });
   },
 
   down: async (queryInterface, Sequelize) => {
