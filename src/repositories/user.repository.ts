@@ -162,3 +162,14 @@ export const getUsersByClientId = async (clientId: number) => {
     ]
   });
 };
+
+
+export const countUsersByClientId = async (
+  clientId: number,
+  transaction?: any
+) => {
+  return await models.User.count({
+    where: { clientId },
+    transaction,
+  });
+};

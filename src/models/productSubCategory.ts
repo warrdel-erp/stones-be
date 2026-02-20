@@ -34,6 +34,12 @@ const ProductSubCategory = sequelize.define(
   {
     tableName: "product_sub_categories",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["name", "clientId"],
+      },
+    ],
   }
 );
 

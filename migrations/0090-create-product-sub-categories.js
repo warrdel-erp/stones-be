@@ -2,6 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+
     await queryInterface.createTable("product_sub_categories", {
       id: {
         type: Sequelize.INTEGER,
