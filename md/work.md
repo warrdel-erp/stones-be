@@ -725,3 +725,24 @@ Email notification.
 26. "Product Attributes (Slab)" fields are not working as expected.
 
 ---
+
+## Assigned to Bhaskar
+
+1. Create Location address dropdown.
+2. Subcategory can be repeated as per different client. [!]
+3. Designs of master data
+4. design of register client.
+5. number of users validation for client. (client can create users up to the number of users they have during registration)
+6. Length width validation in slab split
+7. Assign bin to generic products also.
+8. more slabs can not be added after receive inventory nor editable.
+9. pagination in truck list in deliveries.
+10. stage of LO in deliveries.
+11. check box design for disabled and non disabled.
+12. separate components of delivery tabs.
+13. put general data fetching in common global store.
+14. show delivery status in loading order list.
+15. Remove edit PO button in PO details page.
+16. cancel SIPL button redirection is wrong.
+17. I can add more then 50 slabs by adding them multiple times.
+18. error message (name already exists) correction in create category.
