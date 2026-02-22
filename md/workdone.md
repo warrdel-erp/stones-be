@@ -867,3 +867,5 @@ sticky navbar.
 4. Create Product from PO, SIPL dropdown. [!!!!]
 
 ---
+
+1. qr code.

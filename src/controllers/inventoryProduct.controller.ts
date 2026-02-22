@@ -195,4 +195,16 @@ export const getInventoryProductsWithEmptyBin = catchAsync(async (req: AuthReque
     return SuccessResponse(res, 200, "Inventory products with empty bin fetched successfully", data);
 });
 
+export const getInventoryProductByQrCode = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { qrCode } = req.params;
+
+    if (!qrCode) {
+        throw new AppError("QR code is required", 400);
+    }
+
+    const data = await inventoryProductService.getInventoryProductByQrCode(qrCode);
+
+    return SuccessResponse(res, 200, "Inventory product details fetched successfully", data);
+});
+
 

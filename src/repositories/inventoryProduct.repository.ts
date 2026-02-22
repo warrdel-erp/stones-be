@@ -413,3 +413,57 @@ export const getInventoryProductsWithEmptyBin = async (productId?: number) => {
 
 
 
+export const getInventoryProductByQrCode = async (qrCode: string, transaction?: Transaction) => {
+  return await scoped(models.InventoryProduct).findOne({
+    where: { qrCode },
+    include: [
+      {
+        association: 'location',
+        attributes: ['locationName']
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'product',
+        attributes: ['id', 'name', 'alternativeName', 'isSlabType']
+      },
+      {
+        association: 'sipl',
+        attributes: ['id', 'invoiceCode']
+      },
+      {
+        association: 'bin',
+        attributes: ['id', 'name'],
+        include: [
+          {
+            association: 'warehouse',
+            attributes: ['id'],
+            include: [
+              {
+                association: 'location',
+                attributes: ['id', 'locationName']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        association: 'slab'
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'hold',
+        include: [
+          {
+            association: 'customer',
+            attributes: ['id', 'name']
+          }
+        ]
+      }
+    ],
+    transaction
+  });
+};

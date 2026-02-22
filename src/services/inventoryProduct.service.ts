@@ -262,8 +262,19 @@ export const createBulkHolds = async (
     }
 };
 
+
 export const getInventoryProductsWithEmptyBin = async (productId?: number) => {
     return await inventoryProductRepository.getInventoryProductsWithEmptyBin(productId);
+};
+
+export const getInventoryProductByQrCode = async (qrCode: string) => {
+    const data = await inventoryProductRepository.getInventoryProductByQrCode(qrCode);
+
+    if (!data) {
+        throw new AppError("Inventory product with this QR code not found", 404);
+    }
+
+    return data;
 };
 
 

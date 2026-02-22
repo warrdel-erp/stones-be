@@ -13,7 +13,6 @@ router.get("/", authenticateUser, inventoryProductController.getInventoryProduct
 // Get inventory products with empty bin
 router.get("/emptyBin", authenticateUser, inventoryProductController.getInventoryProductsWithEmptyBin);
 
-
 // Update selling price of inventory products
 router.put("/sellingPrice", authenticateUser, inventoryProductController.updateInventoryProductsSellingPrice);
 
@@ -37,6 +36,9 @@ router.post("/holds/bulk", authenticateUser, inventoryProductController.createBu
 
 // Unhold an inventory product
 router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdInventoryProduct);
+
+// Get inventory product details by qrCode
+router.get("/qr/:qrCode", authenticateUser, inventoryProductController.getInventoryProductByQrCode);
 
 
 export default router;

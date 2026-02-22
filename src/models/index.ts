@@ -824,6 +824,10 @@ FreightDetail.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(InvoiceDelivery, { foreignKey: "clientId", as: "invoiceDeliveries" });
 InvoiceDelivery.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
+// Location-InventoryProduct relation
+Location.hasMany(InventoryProduct, { foreignKey: "locationId", as: "inventoryProducts" });
+InventoryProduct.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+
 export {
   Client,
   User,

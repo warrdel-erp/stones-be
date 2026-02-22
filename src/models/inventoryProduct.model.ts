@@ -6,6 +6,7 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import Product from "./product.model";
 import Client from "./client.model";
 import Location from "./location.model";
+import { v4 as uuidv4 } from "uuid";
 
 const InventoryProduct = sequelize.define(
   "InventoryProduct",
@@ -86,7 +87,12 @@ const InventoryProduct = sequelize.define(
         key: "id",
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
+    },
+    qrCode: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      unique: true,
     },
   },
   {
@@ -94,6 +100,20 @@ const InventoryProduct = sequelize.define(
     timestamps: true,
   }
 );
+
+InventoryProduct.beforeCreate(async (inventoryProduct: any) => {
+  if (!inventoryProduct.qrCode) {
+    inventoryProduct.qrCode = uuidv4();
+  }
+});
+
+InventoryProduct.beforeBulkCreate(async (inventoryProducts: any[]) => {
+  for (const product of inventoryProducts) {
+    if (!product.qrCode) {
+      product.qrCode = uuidv4();
+    }
+  }
+});
 
 // Scope configuration for InventoryProduct model
 (InventoryProduct as any).scopeConfig = {
