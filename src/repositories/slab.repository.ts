@@ -264,47 +264,83 @@ export const getInStockSlabsData = async (productId: number) => {
   const data = await scoped(models.Slab).findAll({
     where: {
       productId,
-      status: {
-        [Op.or]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.ALLOCATED],
-      },
-    },
-    attributes: [
-      [fn("COUNT", col("id")), "count"],
-      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
-    ],
-    group: ['slabs.id']
-  });
-
-  return data;
-};
-
-// Get data
-export const getAllocatedHoldSlabsData = async (productId: number) => {
-  const data = await scoped(models.Slab).findAll({
-    where: {
-      productId,
-      [Op.or]: [
-        { status: INVENTORY_ITEM_STATUS.ALLOCATED },
-        // inventory product has hold record
-        // Use literal to check if hold exists via subquery
-        literal(`EXISTS (SELECT 1 FROM inventory_product_holds WHERE inventoryProductId = \`inventoryProduct\`.\`id\`)`),
-      ],
     },
     include: [
       {
         association: "inventoryProduct",
-        required: false,
+        required: true,
         attributes: [],
+        where: {
+          status: {
+            [Op.or]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.ALLOCATED],
+          },
+        }
+      }
+    ],
+    attributes: [
+      [fn("COUNT", fn("DISTINCT", col("slabs.id"))), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth / 144")), "area"],
+    ],
+    raw: true,
+  });
+
+  return data[0];
+};
+
+// Get data
+export const getAllocatedSlabsData = async (productId: number) => {
+  const data = await scoped(models.Slab).findAll({
+    where: {
+      productId,
+    },
+    include: [
+      {
+        association: "inventoryProduct",
+        required: true,
+        attributes: [],
+        where: {
+          status: INVENTORY_ITEM_STATUS.ALLOCATED,
+        },
       },
     ],
     attributes: [
       [fn("COUNT", col("slabs.id")), "count"],
-      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
+      [fn("SUM", literal("receivingLength * receivingWidth / 144")), "area"],
     ],
-    group: ['slabs.id']
+    raw: true,
   });
 
-  return data;
+  return data[0];
+};
+
+// Get data
+export const getHoldSlabsData = async (productId: number) => {
+  const data = await scoped(models.Slab).findAll({
+    where: {
+      productId,
+    },
+    include: [
+      {
+        association: "inventoryProduct",
+        required: true,
+        attributes: [],
+        include: [
+          {
+            association: "hold",
+            required: true,
+            attributes: [],
+          },
+        ],
+      },
+    ],
+    attributes: [
+      [fn("COUNT", fn("DISTINCT", col("slabs.id"))), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth / 144")), "area"],
+    ],
+    raw: true,
+  });
+
+  return data[0];
 };
 
 // Get data
@@ -312,27 +348,35 @@ export const getAvailableSlabsData = async (productId: number) => {
   const data = await scoped(models.Slab).findAll({
     where: {
       productId,
-      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
-      // Exclude slabs with holds using subquery
-      [Op.and]: [
-        literal(`NOT EXISTS (SELECT 1 FROM inventory_product_holds WHERE inventoryProductId = \`inventoryProduct\`.\`id\`)`),
-      ],
+      // Need to filter out instances where hold exists
+      // We do this by ensuring the associated hold is null
+      "$inventoryProduct.hold.id$": { [Op.is]: null },
     },
     include: [
       {
         association: "inventoryProduct",
         required: true,
         attributes: [],
+        where: {
+          status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+        },
+        include: [
+          {
+            association: "hold",
+            required: false,
+            attributes: [],
+          },
+        ],
       },
     ],
     attributes: [
-      [fn("COUNT", col("slabs.id")), "count"],
-      [fn("SUM", literal("receivingLength * receivingWidth")), "area"],
+      [fn("COUNT", fn("DISTINCT", col("slabs.id"))), "count"],
+      [fn("SUM", literal("receivingLength * receivingWidth / 144")), "area"],
     ],
-    group: ['slabs.id']
+    raw: true,
   });
 
-  return data;
+  return data[0];
 };
 
 // update slab

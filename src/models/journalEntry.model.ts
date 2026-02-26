@@ -6,6 +6,7 @@ import {
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
+  JOURNAL_ENTRY_SUB_TYPE,
 } from "../constants/tableTypes";
 import LedgerAccount from "./ledgerAccount.model";
 import User from "./user.model";
@@ -26,7 +27,8 @@ export type JournalEntry = {
   entryFor?: (typeof JOURNAL_ENTRY_FOR_TYPES)[keyof typeof JOURNAL_ENTRY_FOR_TYPES];
   entryForId?: number,
   locationId: number,
-  partyLedgerAccountId?: number | null
+  partyLedgerAccountId?: number | null,
+  subType?: (typeof JOURNAL_ENTRY_SUB_TYPE)[keyof typeof JOURNAL_ENTRY_SUB_TYPE];
 };
 
 const JournalEntry = sequelize.define(
@@ -107,6 +109,10 @@ const JournalEntry = sequelize.define(
     entryForId: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    subType: {
+      type: DataTypes.ENUM(...Object.values(JOURNAL_ENTRY_SUB_TYPE)),
+      allowNull: true,
     },
     balance: {
       type: DataTypes.FLOAT,

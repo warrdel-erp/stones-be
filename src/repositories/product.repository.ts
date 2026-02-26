@@ -383,6 +383,8 @@ export const getProductById = async (id: number) => {
         as: "baseColor",
       },
     ],
+    raw: true,
+    nest: true
   });
 };
 

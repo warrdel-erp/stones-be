@@ -169,7 +169,7 @@ export const processPayment = async (paymentData: any, billsData: any[], locatio
     // Step 2: Handle Credit Note Creation (if creditNote exists in paymentData)
     let creditDebitNote = {}
     if (creditDebitNoteAmount > 0) {
-      creditDebitNote = await createCreditNoteForPayment(totalPaymentBillsAmount, paymentData, payment.id, transaction);
+      creditDebitNote = await createCreditNoteForPayment(creditDebitNoteAmount, paymentData, payment.id, transaction);
     }
 
     // Step 3: Prepare Payment Bills

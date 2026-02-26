@@ -868,4 +868,21 @@ sticky navbar.
 
 ---
 
-1. qr code.
+1. Create Location address dropdown.
+2. Designs of master data
+3. register page design changes.
+4. Subcategory can be repeated as per different client. [!]
+5. design of register client.
+6. number of users validation for client. (client can create users up to the number of users they have during registration)
+7. qr code.
+8. some navbar links corrected.
+9. Sidebar toggle.
+10. Logo change.
+
+---
+
+1. Jira setup and task assignments.
+2. title change and Logo is not reflected in all pages.
+3. Dr. In Transit -> inventory variance in Journal entry
+4. credit note amount is incorrect. [!!!!!]
+5. landed cost in product info is wrong. [!!!!]

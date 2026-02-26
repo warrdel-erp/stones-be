@@ -702,47 +702,40 @@ Email notification.
 3. Test whole project with generic product and combination of slab and generic products. [!]
 4. Profile image
 5. Cancel LO, SO [!!!]
-6. Dr. In Transit -> inventory variance in Journal entry
-7. show generic PRoduct info as well in inventory drawer
-8. check if SlabRemeasurement table used anywhere. [internal]
-9. remove loadingOrderProducts. [internal]
-10. cleanup server and automate everything.
-11. landed cost in product info is wrong.
-12. inventory balance in inventory drawer is wrong.
-13. there is no option for Origin in product.
-14. design of SIPL action in inventory.
-15. editing selling price in add product of SO.
-16. taxable amount should look different as it does not have any role in calcs.
-17. check delivery location in LO.
-18. if product does not have Bin location then in LO it is "undefined".
-19. pagination is not working in LO swap.
-20. Print Invoice in SO is not working correctly.
-21. credit note amount is incorrect. [!!!!!]
-22. change button design of delivery tabs.
-23. invoice column name is incorrect in return list.
-24. combined slab number as per location?
-25. remove date range from each module.
-26. "Product Attributes (Slab)" fields are not working as expected.
+6. show generic Product info as well in inventory drawer
+7. check if SlabRemeasurement table used anywhere. [internal]
+8. remove loadingOrderProducts. [internal]
+9. cleanup server and automate everything.
 
----
-
-## Assigned to Bhaskar
-
-1. Create Location address dropdown.
-2. Subcategory can be repeated as per different client. [!]
-3. Designs of master data
-4. design of register client.
-5. number of users validation for client. (client can create users up to the number of users they have during registration)
-6. Length width validation in slab split
-7. Assign bin to generic products also.
-8. more slabs can not be added after receive inventory nor editable.
-9. pagination in truck list in deliveries.
-10. stage of LO in deliveries.
-11. check box design for disabled and non disabled.
-12. separate components of delivery tabs.
-13. put general data fetching in common global store.
-14. show delivery status in loading order list.
-15. Remove edit PO button in PO details page.
-16. cancel SIPL button redirection is wrong.
-17. I can add more then 50 slabs by adding them multiple times.
-18. error message (name already exists) correction in create category.
+10. inventory balance in inventory drawer is wrong.
+11. there is no option for Origin in product.
+12. design of SIPL action in inventory.
+13. editing selling price in add product of SO.
+14. taxable amount should look different as it does not have any role in calcs.
+15. check delivery location in LO.
+16. if product does not have Bin location then in LO it is "undefined".
+17. pagination is not working in LO swap. [!!!]
+18. Print Invoice in SO is not working correctly.
+19. change button design of delivery tabs.
+20. invoice column name is incorrect in return list.
+21. combined slab number as per location? [!!!!]
+22. remove date range from each module.
+23. "Product Attributes (Slab)" fields are not working as expected.
+24. design of register client.
+25. number of users validation for client. (client can create users up to the number of users they have during registration)
+26. Length width validation in slab split
+27. Assign bin to generic products also.
+28. more slabs can not be added after receive inventory nor editable.
+29. pagination in truck list in deliveries.
+30. stage of LO in deliveries.
+31. check box design for disabled and non disabled.
+32. separate components of delivery tabs.
+33. put general data fetching in common global store.
+34. show delivery status in loading order list.
+35. Remove edit PO button in PO details page.
+36. cancel SIPL button redirection is wrong.
+37. I can add more then 50 slabs by adding them multiple times.
+38. error message (name already exists) correction in create category.
+39. create a common component for Map
+40. filters, search in inventory.
+41. Break Down Inventory API.

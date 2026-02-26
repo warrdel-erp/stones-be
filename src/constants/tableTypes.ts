@@ -55,6 +55,10 @@ export const JOURNAL_ENTRY_TYPE = {
   CR: "cr",
 } as const;
 
+export const JOURNAL_ENTRY_SUB_TYPE = {
+  INVENTORY_VARIANCE: "inventory_variance",
+} as const;
+
 export const CUSTOMER_ADDRESS_TYPES = {
   SHIPPING: "SHIPPING",
   REMIT: "REMIT",
