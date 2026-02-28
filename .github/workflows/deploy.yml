@@ -62,14 +62,14 @@ jobs:
             # Run New Container
             sudo docker run \
               --network host \
-              --env-file /home/support/envs/.be.env \
+              --env-file /home/support/envs/.stone.be.env \
               -d \
               --name stone-erp-be \
               --restart unless-stopped \
               ${{ secrets.DOCKERHUB_USERNAME }}/stone-erp-be:latest
 
             # Run Migrations
-            sudo docker exec stone-erp-be npm run migrate:all
+            sudo docker exec stone-erp-be pnpm run migrate:all
 
             # Clean up Old Images
-            sudo docker image prune -a -f
+            # sudo docker image prune -a -f
