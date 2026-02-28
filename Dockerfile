@@ -1,22 +1,25 @@
-FROM node:alpine
+FROM node:22-alpine
+
+# Enable pnpm
+RUN npm install -g pnpm
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy package.json and pnpm-lock.yaml
+COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN npm install
+RUN pnpm install 
 
 # Copy the rest of the application code
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 # Expose the port the app runs on
 EXPOSE 6007
 
 # Start the application from compiled JS
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
 
