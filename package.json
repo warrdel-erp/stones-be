@@ -10,7 +10,7 @@
     "migrate:all": "npx sequelize-cli db:migrate",
     "initialize:db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "build": "tsc",
-    "start": "pm2 start ecosystem.config.js",
+    "start": "node ./dist/index.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
   },
