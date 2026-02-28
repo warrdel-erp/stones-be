@@ -17,3 +17,4 @@ EXPOSE 6007
 
 # Start the application from compiled JS
 CMD ["npm", "start"]
+
