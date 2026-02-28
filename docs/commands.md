@@ -35,36 +35,10 @@ FLUSH PRIVILEGES;
 
 
 sudo certbot --apache -d fe-stonecrm.warrdelstones.com
-```
 
 sudo certbot --apache -d stage.hiveerp.com
 
 ```
-<VirtualHost *:80>
-    ServerName be-stonecrm.warrdelstones.com
-    ServerAlias be-stonecrm.warrdelstones.com
-    DocumentRoot /var/www/html/be-stonecrm.warrdelstones.com
-    ErrorLog /var/log/httpd/be-stonecrm.warrdelstones.com/error.log
-    ProxyPass / http://13.235.224.206:6007/ connectiontimeout=5 timeout=30
-    #CustomLog /var/log/httpd/be-stonecrm.warrdelstones.com/requests.log combined
-    <Directory "/var/www/html/">
-#    Options Includes  FollowSymLinks
-Options -Indexes +FollowSymLinks -MultiViews
-    AllowOverride All
-    # Allow open access:
-    Require all granted
-</Directory>
-#RewriteEngine on
-#RewriteCond %{SERVER_NAME} =www.be-stonecrm.warrdelstones.com [OR]
-#RewriteCond %{SERVER_NAME} =be-stonecrm.warrdelstones.com
-#RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
-RewriteEngine on
-RewriteCond %{SERVER_NAME} =be-stonecrm.warrdelstones.com
-RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
-</VirtualHost>
-```
-
-ALTER TABLE students ROW_FORMAT=DYNAMIC;
 
 ## Stone deployment commands
 

@@ -64,6 +64,8 @@ sudo systemctl reload nginx
 
 ## 7. write CI/CD pipeline files in projects.
 
-## 8. put secrets in github.
+## 8. generate ssh keys for CI/CD.
+
+## 9. put secrets in github.
 
 # **_Test_**
