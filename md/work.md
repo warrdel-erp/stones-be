@@ -739,3 +739,4 @@ Email notification.
 39. create a common component for Map
 40. filters, search in inventory.
 41. Break Down Inventory API.
+42. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]

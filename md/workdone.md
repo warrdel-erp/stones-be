@@ -886,3 +886,10 @@ sticky navbar.
 3. Dr. In Transit -> inventory variance in Journal entry
 4. credit note amount is incorrect. [!!!!!]
 5. landed cost in product info is wrong. [!!!!]
+
+---
+
+1. Stone be deployment.
+2. rate limiter
+3. SSL auto renewal.
+4. code reviewing.
