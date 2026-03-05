@@ -11,11 +11,9 @@ export const buildScope = (model: Model<any, any>) => {
   const where: any = {};
   const config = (model as any).scopeConfig || {};
   const store = requestContext.getStore();
-  
-  console.log(store, (model as any).name)
+
   if (config.client) {
     if (!store?.clientId) {
-      console.log(store?.clientId, (model as any).name)
       throw new AppError(`Error in client scope ${(model as any).name}`, 400);
     }
     where.clientId = store.clientId;

@@ -893,3 +893,11 @@ sticky navbar.
 2. rate limiter
 3. SSL auto renewal.
 4. code reviewing.
+
+---
+
+1. inventory balance in inventory drawer is wrong.
+2. there is no option for Origin in product.
+3. design of SIPL action in inventory.
+4. editing selling price in add product of SO.
+5. remove demo module from sidebar.
