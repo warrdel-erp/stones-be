@@ -886,3 +886,27 @@ sticky navbar.
 3. Dr. In Transit -> inventory variance in Journal entry
 4. credit note amount is incorrect. [!!!!!]
 5. landed cost in product info is wrong. [!!!!]
+
+---
+
+1. Stone be deployment.
+2. rate limiter
+3. SSL auto renewal.
+4. code reviewing.
+
+---
+
+1. inventory balance in inventory drawer is wrong.
+2. there is no option for Origin in product.
+3. design of SIPL action in inventory.
+4. editing selling price in add product of SO.
+5. remove demo module from sidebar.
+6. meeting with ravinder and team.
+7. add location code with location.
+
+---
+
+1. taxable amount should look different as it does not have any role in calcs.
+2. if product does not have Bin location then in LO it is "undefined".
+3. pagination is not working in LO swap. [!!!]
+4. change button design of delivery tabs.

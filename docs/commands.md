@@ -36,6 +36,7 @@ FLUSH PRIVILEGES;
 
 sudo certbot --apache -d fe-stonecrm.warrdelstones.com
 
+
 sudo certbot --apache -d stage.hiveerp.com
 
 ```
@@ -45,28 +46,34 @@ sudo certbot --apache -d stage.hiveerp.com
 1. If not refreshing DB
 
 ```
+
 cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app/
 sudo git pull
 sudo pnpm i
 pnpm run migrate:all
 pm2 restart 1
+
 ```
 
 2. If refreshing DB
 
 ```
+
 sudo mariadb
 drop database stone_erp_v2;
 create database stone_erp_v2;
 exit;
+
 ```
 
 ```
+
 cd /var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app/
 sudo git pull
 sudo pnpm i
 pnpm run initialize:db
 pm2 restart 1
+
 ```
 
 ## Automated Deployment
@@ -115,7 +122,7 @@ cd /var/www/html/bestage.hiveerp.com/university-erp-be/
 sudo git pull
 sudo npm i
 npm run migrate
-pm2 restart 0
+pm2 restart 1
 
 ```
 
