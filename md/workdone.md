@@ -901,3 +901,12 @@ sticky navbar.
 3. design of SIPL action in inventory.
 4. editing selling price in add product of SO.
 5. remove demo module from sidebar.
+6. meeting with ravinder and team.
+7. add location code with location.
+
+---
+
+1. taxable amount should look different as it does not have any role in calcs.
+2. if product does not have Bin location then in LO it is "undefined".
+3. pagination is not working in LO swap. [!!!]
+4. change button design of delivery tabs.

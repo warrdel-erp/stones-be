@@ -14,6 +14,10 @@ const Location = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    locationCode: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
     contactName: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -61,6 +65,12 @@ const Location = sequelize.define(
   {
     tableName: "locations",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["clientId", "locationCode"],
+      },
+    ],
   }
 );
 

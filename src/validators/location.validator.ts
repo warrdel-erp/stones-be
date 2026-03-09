@@ -6,6 +6,12 @@ export const createLocationSchema = z.object({
         invalid_type_error: 'Location name must be a string',
     }).min(1, 'Location name cannot be empty'),
 
+    locationCode: z.string({
+        required_error: 'Location code is required',
+        invalid_type_error: 'Location code must be a string',
+    }).min(1, 'Location code cannot be empty')
+        .max(10, 'Location code must be less than 10 characters'),
+
     contactName: z.string({
         required_error: 'Contact name is required',
         invalid_type_error: 'Contact name must be a string',

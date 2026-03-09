@@ -706,33 +706,28 @@ Email notification.
 7. check if SlabRemeasurement table used anywhere. [internal]
 8. remove loadingOrderProducts. [internal]
 9. cleanup server and automate everything.
+10. Print Invoice in SO is not working correctly.
 
-10. taxable amount should look different as it does not have any role in calcs.
-11. check delivery location in LO.
-12. if product does not have Bin location then in LO it is "undefined".
-13. pagination is not working in LO swap. [!!!]
-14. Print Invoice in SO is not working correctly.
-15. change button design of delivery tabs.
-16. invoice column name is incorrect in return list.
-17. combined slab number as per location? [!!!!]
-18. remove date range from each module.
-19. "Product Attributes (Slab)" fields are not working as expected.
-20. design of register client.
-21. number of users validation for client. (client can create users up to the number of users they have during registration)
-22. Length width validation in slab split
-23. Assign bin to generic products also.
-24. more slabs can not be added after receive inventory nor editable.
-25. pagination in truck list in deliveries.
-26. stage of LO in deliveries.
-27. check box design for disabled and non disabled.
-28. separate components of delivery tabs.
-29. put general data fetching in common global store.
-30. show delivery status in loading order list.
-31. Remove edit PO button in PO details page.
-32. cancel SIPL button redirection is wrong.
-33. I can add more then 50 slabs by adding them multiple times.
-34. error message (name already exists) correction in create category.
-35. create a common component for Map
-36. filters, search in inventory.
-37. Break Down Inventory API.
-38. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]
+11. invoice column name is incorrect in return list.
+12. combined slab number as per location? [!!!!]
+13. remove date range from each module.
+14. "Product Attributes (Slab)" fields are not working as expected.
+15. design of register client.
+16. number of users validation for client. (client can create users up to the number of users they have during registration)
+17. Length width validation in slab split
+18. Assign bin to generic products also.
+19. more slabs can not be added after receive inventory nor editable.
+20. pagination in truck list in deliveries.
+21. stage of LO in deliveries.
+22. check box design for disabled and non disabled.
+23. separate components of delivery tabs.
+24. put general data fetching in common global store.
+25. show delivery status in loading order list.
+26. Remove edit PO button in PO details page.
+27. cancel SIPL button redirection is wrong.
+28. I can add more then 50 slabs by adding them multiple times.
+29. error message (name already exists) correction in create category.
+30. create a common component for Map
+31. filters, search in inventory.
+32. Break Down Inventory API.
+33. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]

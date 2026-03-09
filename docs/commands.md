@@ -122,7 +122,7 @@ cd /var/www/html/bestage.hiveerp.com/university-erp-be/
 sudo git pull
 sudo npm i
 npm run migrate
-pm2 restart 0
+pm2 restart 1
 
 ```
 
