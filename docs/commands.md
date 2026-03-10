@@ -123,6 +123,7 @@ sudo git pull
 sudo npm i
 npm run migrate
 pm2 restart 1
+exit
 
 ```
 
