@@ -204,6 +204,21 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
       throw new AppError("Slab not found", 404);
     }
 
+    const originalArea =
+      (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+    let runningArea = 0;
+
+    for (let i = 0; i < slabsData.length; i++) {
+      const slab = slabsData[i];
+      const area = (slab.receivingLength * slab.receivingWidth) / 144;
+      runningArea += area;
+
+      if (runningArea > originalArea) {
+        throw new AppError(`Total area exceeded at slab number ${slab.slabNumber}`, 400);
+      }
+    }
+
+
     // Validate that the slab belongs to the correct client
     if (clientId && originalSlab.clientId !== clientId) {
       throw new AppError("Slab does not belong to your client", 403);
@@ -214,6 +229,7 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
     if (!inventoryProduct) {
       throw new AppError("Slab does not have an associated inventory product", 400);
     }
+
 
     // Check if the inventory product status is IN_INVENTORY
     if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
