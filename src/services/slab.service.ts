@@ -204,27 +204,52 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
       throw new AppError("Slab not found", 404);
     }
 
-    const originalArea =
-      (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
-    let runningArea = 0;
-
-    for (let i = 0; i < slabsData.length; i++) {
-      const slab = slabsData[i];
-      const area = (slab.receivingLength * slab.receivingWidth) / 144;
-      runningArea += area;
-
-      if (runningArea > originalArea) {
-        throw new AppError(`Total area exceeded at slab number ${slab.slabNumber}`, 400);
-      }
-    }
-
-
     // Validate that the slab belongs to the correct client
     if (clientId && originalSlab.clientId !== clientId) {
       throw new AppError("Slab does not belong to your client", 403);
     }
 
     const inventoryProduct = originalSlab.inventoryProduct;
+
+    // Validate total area of split slabs
+    const originalArea =
+      (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+
+    let runningArea = 0;
+    let currentLength = 0
+    let currentWidth = 0
+
+
+    for (const slab of slabsData) {
+
+      const area = (slab.receivingLength * slab.receivingWidth) / 144;
+
+      runningArea += area;
+
+      currentLength = currentLength + slab.receivingLength
+      if (currentLength > originalSlab.receivingLength) {
+        throw new AppError(
+          `Total slab length cannot exceed ${originalSlab.receivingLength}`,
+          400
+        );
+      }
+
+      currentWidth = currentWidth + slab.receivingLength
+      if (currentWidth > originalSlab.receivingWidth) {
+        throw new AppError(
+          `Total slab width cannot exceed ${originalSlab.receivingWidth}`,
+          400
+        );
+      }
+
+      if (runningArea > originalArea) {
+        throw new AppError(
+          "Total split slab area cannot exceed original slab area",
+          400
+        );
+      }
+
+    }
 
     if (!inventoryProduct) {
       throw new AppError("Slab does not have an associated inventory product", 400);
