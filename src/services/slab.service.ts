@@ -212,44 +212,7 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
     const inventoryProduct = originalSlab.inventoryProduct;
 
     // Validate total area of split slabs
-    const originalArea =
-      (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
-
-    let runningArea = 0;
-    let currentLength = 0
-    let currentWidth = 0
-
-
-    for (const slab of slabsData) {
-
-      const area = (slab.receivingLength * slab.receivingWidth) / 144;
-
-      runningArea += area;
-
-      currentLength = currentLength + slab.receivingLength
-      if (currentLength > originalSlab.receivingLength) {
-        throw new AppError(
-          `Total slab length cannot exceed ${originalSlab.receivingLength}`,
-          400
-        );
-      }
-
-      currentWidth = currentWidth + slab.receivingLength
-      if (currentWidth > originalSlab.receivingWidth) {
-        throw new AppError(
-          `Total slab width cannot exceed ${originalSlab.receivingWidth}`,
-          400
-        );
-      }
-
-      if (runningArea > originalArea) {
-        throw new AppError(
-          "Total split slab area cannot exceed original slab area",
-          400
-        );
-      }
-
-    }
+    validateSplitSlabs(originalSlab, slabsData)
 
     if (!inventoryProduct) {
       throw new AppError("Slab does not have an associated inventory product", 400);
@@ -416,3 +379,47 @@ export const getSlabSplitHistory = async (slabId: number, clientId?: number) => 
 
   return history;
 };
+
+
+function validateSplitSlabs(originalSlab: any, slabsData: Array<{ receivingLength: number; receivingWidth: number }>) {
+
+  const originalArea =
+    (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+
+  let runningArea = 0;
+  let currentLength = 0
+  let currentWidth = 0
+
+  for (const slab of slabsData) {
+
+    const area = (slab.receivingLength * slab.receivingWidth) / 144;
+
+    runningArea += area;
+
+    currentLength = currentLength + slab.receivingLength
+    if (currentLength > originalSlab.receivingLength) {
+      throw new AppError(
+        `Total slab length cannot exceed ${originalSlab.receivingLength}`,
+        400
+      );
+    }
+
+    currentWidth = currentWidth + slab.receivingLength
+
+    if (currentWidth > originalSlab.receivingWidth) {
+      throw new AppError(
+        `Total slab width cannot exceed ${originalSlab.receivingWidth}`,
+        400
+      );
+    }
+
+    if (runningArea > originalArea) {
+      throw new AppError(
+        "Total split slab area cannot exceed original slab area",
+        400
+      );
+    }
+
+  }
+
+}
