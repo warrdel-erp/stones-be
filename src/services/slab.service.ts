@@ -51,15 +51,11 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
       if (!id) {
         throw new AppError("id is mandatory to all slabs to update.", 400);
       }
-      if (!productType) {
-        throw new AppError("Product type is mandatory to all slabs to update.", 400);
-      }
-
 
       // If binId is provided, update the corresponding inventory product
       if (binId !== undefined) {
 
-        if (productType == "slab") {
+        if (productType == "slab" || productType == undefined) {
           const slab: any = await models.Slab.findByPk(id, {
             attributes: ['inventoryProductId'],
             transaction
@@ -113,11 +109,7 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
           affectedRows += updatedInventoryProduct
           affectedRows += (updatedCount);
         }
-
-
       }
-
-
 
     }
 
