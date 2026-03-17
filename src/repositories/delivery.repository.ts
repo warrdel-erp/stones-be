@@ -39,8 +39,13 @@ export const createInvoiceDelivery = async (
 };
 
 export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {
-    return scoped(Delivery).findAll({
-        where: { clientId, ...filter },
+    console.log("filterdata", filter);
+    const filterStatus = { status: filter.filter }
+    const limit = Number(filter.limit)
+    const page = Number(filter.page)
+    const offset = (page - 1) * limit;
+    const { rows: data, count: total } = await scoped(Delivery).findAndCountAll({
+        where: { clientId, ...filterStatus },
         order: [["createdAt", "DESC"]],
         include: [
             {
@@ -55,8 +60,11 @@ export const getAllDeliveriesByClientId = async (filter: any, clientId: number) 
             {
                 association: 'truck'
             }
-        ],
+        ], limit, offset
     });
+    console.log({ rows: data, count: total });
+
+    return { data, paginationData: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 };
 
 export const updateInvoiceDeliveryOrders = async (orders: Array<{ id: number, order: number }>, transaction?: Transaction) => {

@@ -25,6 +25,7 @@ export const getAllDeliveriesByClientId = async (req: AuthRequest, res: Response
     const clientId = Number(req.user?.clientId);
 
     const filters = req.query;
+    console.log("filter", filters);
 
     try {
         const deliveries = await deliveryService.getAllDeliveriesByClientId(filters, clientId);
