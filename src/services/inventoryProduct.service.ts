@@ -4,6 +4,11 @@ import * as inventoryProductHoldRepository from "../repositories/inventoryProduc
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import { getModels } from "sequelize-typescript";
+import * as models from "../models";
+import * as  genericProductRepository from "../repositories/genericProduct.repository"
+import { scoped } from "../utils/scoped";
+import * as slabRepository from "../repositories/slab.repository";
 
 export const getInventoryProductsBySIPLCombinedNumber = async (siplId: number) => {
     // Get inventory products by matching the middle number in combinedNumber using repository
@@ -48,6 +53,91 @@ export const getAllocatedInventoryProductDetails = async (inventoryProductId: nu
 export const getInventoryProducts = (filter: Record<string, string>, locationId: number) => {
     return inventoryProductRepository.getInventoryProducts(filter, locationId)
 }
+
+export const assignbinInventoryProducts = async (slabsData: Array<{ id: number;[key: string]: any }>) => {
+    if (!slabsData || slabsData.length === 0) return 0;
+
+    const transaction = await sequelize.transaction(); // Explicitly start transaction
+    let affectedRows = 0;
+
+    try {
+        for (const slabData of slabsData) {
+            const { id, binId, productType, ...updateFields } = slabData;
+
+            if (!id) {
+                throw new AppError("id is mandatory to all slabs to update.", 400);
+            }
+
+            // If binId is provided, update the corresponding inventory product
+            if (binId !== undefined) {
+
+                if (productType == "slab" || productType == undefined) {
+                    const slab: any = await models.Slab.findByPk(id, {
+                        attributes: ['inventoryProductId'],
+                        transaction
+                    });
+
+                    if (!slab) {
+                        throw new AppError(`Slab with id ${id} not found`, 404);
+                    }
+
+                    if (!slab.inventoryProductId) {
+                        throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
+                    }
+
+                    // Update the inventory product's binId
+                    const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
+                        { binId },
+                        {
+                            where: { id: slab.inventoryProductId },
+                            transaction
+                        }
+                    );
+                    // Update slab fields (excluding binId)
+                    const [updatedCount] = await slabRepository.updateSlabById(id, updateFields, transaction);
+                    affectedRows += updatedInventoryProduct
+                    affectedRows += (updatedCount);
+
+                } else if (productType == "genericProduct") {
+                    const slab: any = await models.GenericProduct.findByPk(id, {
+                        attributes: ['inventoryProductId'],
+                        transaction
+                    });
+
+                    if (!slab) {
+                        throw new AppError(`Slab with id ${id} not found`, 404);
+                    }
+
+                    if (!slab.inventoryProductId) {
+                        throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
+                    }
+
+                    // Update the inventory product's binId
+                    const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
+                        { binId },
+                        {
+                            where: { id: slab.inventoryProductId },
+                            transaction
+                        }
+                    );
+                    // Update slab fields (excluding binId)
+                    const [updatedCount] = await genericProductRepository.updateGenericProductById(id, updateFields, transaction);
+                    affectedRows += updatedInventoryProduct
+                    affectedRows += (updatedCount);
+                }
+            }
+
+        }
+
+        await transaction.commit(); // Commit transaction if everything succeeds
+        return affectedRows;
+    } catch (error) {
+        await transaction.rollback(); // Rollback transaction on error
+        throw error; // Ensure the error is propagated
+    }
+};
+
+
 
 export const updateInventoryProductCartStatus = async (id: number, isInCart: boolean) => {
     await inventoryProductRepository.updateInventoryProductCartStatus(id, isInCart);

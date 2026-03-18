@@ -104,6 +104,24 @@ export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Res
     return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
 });
 
+export const assignbinInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
+
+    const slabsData = req.body;
+
+    if (!Array.isArray(slabsData) || slabsData.length === 0) {
+        throw new AppError("Invalid request. Provide an array of slabs with updates.", 400);
+    }
+
+    const affectedRows = await inventoryProductService.assignbinInventoryProducts(slabsData);
+
+    if (affectedRows === 0) {
+        throw new AppError("No slabs were updated. Check if IDs exist.", 404);
+    }
+
+    return SuccessResponse(res, 200, `${affectedRows} slabs updated successfully.`, affectedRows);
+});
+
+
 export const updateInventoryProductCartStatus = catchAsync(async (req: AuthRequest, res: Response) => {
     const { inventoryProductId } = req.params;
     const { isInCart } = req.body;

@@ -251,7 +251,6 @@ export async function handleCreateGenericProduct(data: any) {
     const product = (await productRepository.getProductByIdSimple(data.productId));
 
     const sellingPrice = product.singleUnitPrice
-    // console.log(sellingPrice, 'sellingPrice')
 
     // Create a new InventoryProduct for each generic Product with combined numbers
     const inventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
