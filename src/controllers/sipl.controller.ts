@@ -214,23 +214,24 @@ export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Respon
     );
   }
 
+  const payload = {
+    ...req.body,
+    binId: req.body.binId ?? null,
+    siplId: Number(siplId),
+    createdById: userId,
+    updatedById: userId,
+    clientId
+  };
+
   if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
     const genericProduct = await siplService.handleCreateGenericProduct({
-      ...req.body,
-      siplId: Number(siplId),
-      createdById: userId,
-      updatedById: userId,
-      clientId
+      ...payload
     });
     return SuccessResponse(res, 201, "Generic product created successfully", genericProduct);
   }
 
   const slabs = await siplService.handleCreateSlabs({
-    ...req.body,
-    siplId: Number(siplId),
-    createdBy: userId,
-    updatedBy: userId,
-    clientId
+    ...payload
   });
 
   SuccessResponse(res, 201, "Slabs created successfully", slabs);
