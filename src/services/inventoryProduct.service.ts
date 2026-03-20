@@ -54,15 +54,15 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId:
     return inventoryProductRepository.getInventoryProducts(filter, locationId)
 }
 
-export const assignbinInventoryProducts = async (slabsData: Array<{ id: number;[key: string]: any }>) => {
-    if (!slabsData || slabsData.length === 0) return 0;
+export const assignbinInventoryProducts = async (inventoryProduct: Array<{ id: number;[key: string]: any }>) => {
+    if (!inventoryProduct || inventoryProduct.length === 0) return 0;
 
     const transaction = await sequelize.transaction(); // Explicitly start transaction
     let affectedRows = 0;
 
     try {
-        for (const slabData of slabsData) {
-            const { id, binId, productType, ...updateFields } = slabData;
+        for (const items of inventoryProduct) {
+            const { id, binId, productType, ...updateFields } = items;
 
             if (!id) {
                 throw new AppError("id is mandatory to all slabs to update.", 400);

@@ -6,6 +6,10 @@ export const inventryProductSchema = z.object({
         invalid_type_error: "ID must be a number",
     }),
 
+    // binId: z.preprocess(
+    //     (val) => val === "" ? null : val,
+    //     z.coerce.number().nullable().optional()
+    // ),
     binId: z.coerce.number({
         required_error: "Bin ID is required",
         invalid_type_error: "Bin ID must be a number",

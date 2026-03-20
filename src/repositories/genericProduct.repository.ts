@@ -121,11 +121,3 @@ export const getAvailableGenericProductData = async (productId: number) => {
     return data;
 };
 
-
-export const updateGenericProductById = async (slabId: number, updateData: any, transaction?: Transaction) => {
-    return await scoped(models.GenericProduct).update(updateData, {
-        where: { id: slabId },
-        individualHooks: true,
-        transaction,
-    });
-};
