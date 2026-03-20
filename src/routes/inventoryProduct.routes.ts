@@ -1,10 +1,12 @@
 import express from "express";
 import * as inventoryProductController from "../controllers/inventoryProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import { validateRequest } from "../middleware/validationMiddleware";
+import { inventryProductArraySchema } from "../validators";
 
 const router = express.Router();
 
-router.put("/assignBin", authenticateUser, inventoryProductController.assignbinInventoryProducts);
+router.put("/assignBin", authenticateUser, validateRequest(inventryProductArraySchema), inventoryProductController.assignbinInventoryProducts);
 
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);

@@ -46,7 +46,7 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
 
   try {
     for (const slabData of slabsData) {
-      const { id, binId, productType, ...updateFields } = slabData;
+      const { id, binId, ...updateFields } = slabData;
 
       if (!id) {
         throw new AppError("id is mandatory to all slabs to update.", 400);
@@ -54,63 +54,34 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
 
       // If binId is provided, update the corresponding inventory product
       if (binId !== undefined) {
+        const slab: any = await models.Slab.findByPk(id, {
+          attributes: ['inventoryProductId'],
+          transaction
+        });
 
-        if (productType == "slab" || productType == undefined) {
-          const slab: any = await models.Slab.findByPk(id, {
-            attributes: ['inventoryProductId'],
-            transaction
-          });
-
-          if (!slab) {
-            throw new AppError(`Slab with id ${id} not found`, 404);
-          }
-
-          if (!slab.inventoryProductId) {
-            throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
-          }
-
-          // Update the inventory product's binId
-          const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
-            { binId },
-            {
-              where: { id: slab.inventoryProductId },
-              transaction
-            }
-          );
-          // Update slab fields (excluding binId)
-          const [updatedCount] = await slabRepository.updateSlabById(id, updateFields, transaction);
-          affectedRows += updatedInventoryProduct
-          affectedRows += (updatedCount);
-
-        } else if (productType == "genericProduct") {
-          const slab: any = await models.GenericProduct.findByPk(id, {
-            attributes: ['inventoryProductId'],
-            transaction
-          });
-
-          if (!slab) {
-            throw new AppError(`Slab with id ${id} not found`, 404);
-          }
-
-          if (!slab.inventoryProductId) {
-            throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
-          }
-
-          // Update the inventory product's binId
-          const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
-            { binId },
-            {
-              where: { id: slab.inventoryProductId },
-              transaction
-            }
-          );
-          // Update slab fields (excluding binId)
-          const [updatedCount] = await genericProductRepository.updateGenericProductById(id, updateFields, transaction);
-          affectedRows += updatedInventoryProduct
-          affectedRows += (updatedCount);
+        if (!slab) {
+          throw new AppError(`Slab with id ${id} not found`, 404);
         }
+
+        if (!slab.inventoryProductId) {
+          throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
+        }
+
+        // Update the inventory product's binId
+        const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
+          { binId },
+          {
+            where: { id: slab.inventoryProductId },
+            transaction
+          }
+        );
+        affectedRows += updatedInventoryProduct
       }
 
+      // Update slab fields (excluding binId)
+      const [updatedCount] = await slabRepository.updateSlabById(id, updateFields, transaction);
+
+      affectedRows += (updatedCount);
     }
 
     await transaction.commit(); // Commit transaction if everything succeeds

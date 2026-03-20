@@ -31,7 +31,7 @@ pnpm run dev
 
 7. **_Comment-out again the uncommented sync models line_**
 
-8. ru
+8. run
 
 ```
 pnpm run seed:all
