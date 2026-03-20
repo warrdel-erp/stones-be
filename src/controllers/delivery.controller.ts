@@ -25,13 +25,7 @@ export const initiateDelivery = async (req: AuthRequest, res: Response) => {
 export const getAllDeliveriesByClientId = async (req: AuthRequest, res: Response) => {
     const clientId = Number(req.user?.clientId);
 
-    const { page, limit, filter, ...queryParams } = req.query;
-
-    const filters: any = { ...queryParams };
-
-    if (filter) {
-        filters.status = filter;
-    }
+    const { page, limit, ...filters } = req.query;
 
     try {
         const { rows, count } = await deliveryService.getAllDeliveriesByClientId(
