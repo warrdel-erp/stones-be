@@ -58,7 +58,6 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
           attributes: ['inventoryProductId'],
           transaction
         });
-
         if (!slab) {
           throw new AppError(`Slab with id ${id} not found`, 404);
         }
@@ -66,7 +65,16 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
         if (!slab.inventoryProductId) {
           throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
         }
+        const inventryProductData: any = await models.InventoryProduct.findByPk(slab.inventoryProductId, { attributes: ['siplId'], transaction })
 
+        const sipl: any = await models.SIPL.findByPk(inventryProductData.dataValues.siplId, {
+          attributes: ['inventoryReceived'],
+          transaction
+        })
+
+        if (sipl.dataValues.inventoryReceived) {
+          throw new AppError(`Slab with this ${id} Slab is already received.`, 404);
+        }
         // Update the inventory product's binId
         const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
           { binId },
