@@ -707,27 +707,25 @@ Email notification.
 8. remove loadingOrderProducts. [internal]
 9. cleanup server and automate everything.
 10. Print Invoice in SO is not working correctly.
-
-11. invoice column name is incorrect in return list.
+11. Side menu items to be open
 12. combined slab number as per location? [!!!!]
+
 13. remove date range from each module.
 14. "Product Attributes (Slab)" fields are not working as expected.
 15. design of register client.
-16. number of users validation for client. (client can create users up to the number of users they have during registration)
-17. Length width validation in slab split
-18. Assign bin to generic products also.
-19. more slabs can not be added after receive inventory nor editable.
-20. pagination in truck list in deliveries.
-21. stage of LO in deliveries.
-22. check box design for disabled and non disabled.
-23. separate components of delivery tabs.
-24. put general data fetching in common global store.
-25. show delivery status in loading order list.
-26. Remove edit PO button in PO details page.
-27. cancel SIPL button redirection is wrong.
-28. I can add more then 50 slabs by adding them multiple times.
-29. error message (name already exists) correction in create category.
-30. create a common component for Map
-31. filters, search in inventory.
-32. Break Down Inventory API.
-33. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]
+16. Length width validation in slab split.
+17. Assign bin to generic products also.
+18. more slabs can not be added after receive inventory nor editable.
+19. pagination in truck list in deliveries.
+20. stage of LO in deliveries.
+21. checkbox design for disabled and non disabled.
+22. separate components of delivery tabs.
+23. put general data fetching in common global store.
+24. show delivery status in loading order list.
+25. Remove edit PO button in PO details page.
+26. cancel SIPL button redirection is wrong.
+27. I can add more then 50 slabs by adding them multiple times. [ask-nimit-sir]
+28. create a common component for Map
+29. filters, search in inventory.
+30. Break Down Inventory API.
+31. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]

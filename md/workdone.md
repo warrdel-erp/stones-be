@@ -910,3 +910,8 @@ sticky navbar.
 2. if product does not have Bin location then in LO it is "undefined".
 3. pagination is not working in LO swap. [!!!]
 4. change button design of delivery tabs.
+
+---
+
+1. invoice column name is incorrect in return list.
+2. number of users validation for client. (client can create users up to the number of users they have during registration)

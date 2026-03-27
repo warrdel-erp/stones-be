@@ -9,6 +9,7 @@ export default {
         contactName: "John Doe",
         contactNumber: "9876543210",
         contactMail: "johndoe@example.com",
+        locationCode: "ATL",
         lat: 33.96229021303256,
         long: -84.20082993409449,
         createdAt: new Date(),
@@ -18,6 +19,7 @@ export default {
       {
         id: 2,
         locationName: "San Francisco HQ",
+        locationCode: "SNF",
         address: "456 Market St",
         status: "active",
         contactName: "Alice Smith",
@@ -32,6 +34,7 @@ export default {
       {
         id: 3,
         locationName: "Chicago Office",
+        locationCode: "CHG",
         address: "789 Michigan Avenue, Chicago, IL",
         status: "inactive",
         contactName: "Michael Johnson",
