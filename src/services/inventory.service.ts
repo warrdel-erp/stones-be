@@ -42,7 +42,7 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
 
       const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
 
-      const holds = product?.inventoryProducts?.map((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.slab?.receivedSqrFt || 0) : 0);
+      const holds = product?.inventoryProducts?.map((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.isSlabType ? e.slab?.receivedSqrFt : 1) : 0);
 
       let totalHoldQuantity = 0;
       let totalHoldQuantityUnit = 0;
