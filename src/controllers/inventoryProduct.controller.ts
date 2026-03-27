@@ -4,7 +4,8 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
 import { AppError } from "../helper/appError";
-
+import { inventryProductInput } from "../validators";
+import { inventryProductArraySchema } from "../validators";
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
 
@@ -103,6 +104,23 @@ export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Res
 
     return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
 });
+
+
+export const assignbinInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
+
+    const inventoryProduct = req.body;
+
+    const affectedRows = await inventoryProductService.assignbinInventoryProducts(inventoryProduct);
+    console.log(affectedRows);
+
+    if (affectedRows === 0) {
+        throw new AppError("No Inventory Products were updated. Check if IDs exist.", 404);
+    }
+
+    return SuccessResponse(res, 200, `${affectedRows} Inventory Products updated successfully.`, affectedRows);
+}
+);
+
 
 export const updateInventoryProductCartStatus = catchAsync(async (req: AuthRequest, res: Response) => {
     const { inventoryProductId } = req.params;

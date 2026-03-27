@@ -21,7 +21,7 @@ export const splitSlabSchema = z.object({
     invalid_type_error: "slabs must be an array",
   })
     .min(2, "At least 2 pieces are required to split a slab"),
-});
+})
 
 export type SplitSlabInput = z.infer<typeof splitSlabSchema>;
 

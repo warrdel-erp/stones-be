@@ -21,18 +21,33 @@ export const initiateDelivery = async (req: AuthRequest, res: Response) => {
     }
 };
 
+
 export const getAllDeliveriesByClientId = async (req: AuthRequest, res: Response) => {
     const clientId = Number(req.user?.clientId);
 
-    const filters = req.query;
+    const { page, limit, ...filters } = req.query;
 
     try {
-        const deliveries = await deliveryService.getAllDeliveriesByClientId(filters, clientId);
-        SuccessResponse(res, 200, "Deliveries fetched successfully", deliveries);
+        const { rows, count } = await deliveryService.getAllDeliveriesByClientId(
+            Number(page),
+            Number(limit),
+            clientId,
+            filters
+        );
+
+        SuccessResponse(res, 200, "Deliveries fetched successfully", {
+            data: rows,
+            paginationData: { page: Number(page), limit: Number(limit), total: count, totalPages: Math.ceil(count / Number(limit)) }
+        });
+
     } catch (err: any) {
-        res.status(400).json({ success: false, message: err.message || "Failed to fetch deliveries" });
+        res.status(400).json({
+            success: false,
+            message: err.message || "Failed to fetch deliveries"
+        });
     }
 };
+
 
 export const approveDeliveryOrders = async (req: AuthRequest, res: Response): Promise<void> => {
     const { invoiceDeliveries }: DeliveryOrderApprovalInput = req.body;

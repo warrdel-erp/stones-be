@@ -38,9 +38,12 @@ export const createInvoiceDelivery = async (
     return scoped(InvoiceDelivery).create(data, { transaction });
 };
 
-export const getAllDeliveriesByClientId = async (filter: any, clientId: number) => {
-    return scoped(Delivery).findAll({
-        where: { clientId, ...filter },
+export const getAllDeliveriesByClientId = async (page: number, limit: number, clientId: number, filters?: any) => {
+
+    const offset = (page - 1) * limit;
+
+    return await scoped(Delivery).findAndCountAll({
+        where: { clientId, ...filters },
         order: [["createdAt", "DESC"]],
         include: [
             {
@@ -50,12 +53,11 @@ export const getAllDeliveriesByClientId = async (filter: any, clientId: number) 
                         association: "loadingOrder"
                     }
                 ],
-                // order: [['order', 'asc']]
             },
             {
                 association: 'truck'
             }
-        ],
+        ], limit, offset
     });
 };
 
