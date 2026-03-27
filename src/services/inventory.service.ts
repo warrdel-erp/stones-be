@@ -32,7 +32,7 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
       let totalAvailableQuantityUnit = 0;
 
       if (product.isSlabType) {
-        const available = product?.inventoryProducts.map((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab.receivedSqrFt : 0);
+        const available = product?.inventoryProducts.map((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item?.slab?.receivedSqrFt : 0);
         totalAvailableQuantity = decimal.decimalSum(available);
         totalAvailableQuantityUnit = available.length;
       } else {
@@ -42,9 +42,15 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number
 
       const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
 
-      const holds = product?.inventoryProducts?.map((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? e.slab.receivedSqrFt : 0);
-      let totalHoldQuantity = (decimal.decimalSum(holds));
-      let totalHoldQuantityUnit = holds.filter(Boolean).length
+      const holds = product?.inventoryProducts?.map((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.slab?.receivedSqrFt || 0) : 0);
+
+      let totalHoldQuantity = 0;
+      let totalHoldQuantityUnit = 0;
+
+      if (holds) {
+        totalHoldQuantity = (decimal.decimalSum(holds));
+        totalHoldQuantityUnit = holds.filter(Boolean).length
+      }
 
       // Total units
       product.totalUnits = product?.inventoryProducts?.find((e: any) => e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY)?.length;
@@ -102,7 +108,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
         const totalQuantity = decimal.decimalSum(
           inventoryProducts.map((item: any) =>
             item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab.receivedSqrFt || 0
+              ? item.slab?.receivedSqrFt || 0
               : 0
           )
         );
@@ -120,7 +126,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
         totalAvailableQuantity = decimal.decimalSum(
           locationInventoryProducts.map((item: any) =>
             item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab.receivedSqrFt || 0
+              ? item.slab?.receivedSqrFt || 0
               : 0
           )
         );
@@ -135,7 +141,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
       const totalHoldQuantity = decimal.decimalSum(
         locationInventoryProducts.map((item: any) =>
           item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && item.hold && item.slab
-            ? item.slab.receivedSqrFt || 0
+            ? item.slab?.receivedSqrFt || 0
             : 0
         )
       );
@@ -199,7 +205,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
         const totalQuantity = decimal.decimalSum(
           inventoryProducts.map((item: any) =>
             item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab.receivedSqrFt || 0
+              ? item.slab?.receivedSqrFt || 0
               : 0
           )
         );
@@ -217,7 +223,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
         totalAvailableQuantity = decimal.decimalSum(
           locationInventoryProducts.map((item: any) =>
             item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab.receivedSqrFt || 0
+              ? item.slab?.receivedSqrFt || 0
               : 0
           )
         );
@@ -232,7 +238,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
       const totalHoldQuantity = decimal.decimalSum(
         locationInventoryProducts.map((item: any) =>
           item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && item.hold && item.slab
-            ? item.slab.receivedSqrFt || 0
+            ? item.slab?.receivedSqrFt || 0
             : 0
         )
       );
