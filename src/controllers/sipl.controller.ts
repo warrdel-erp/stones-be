@@ -253,11 +253,17 @@ export const getSIPLById = catchAsync(async (req: Request, res: Response) => {
 
 // Get all SIPLs
 export const getAllSIPLs = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, supplierId, inventoryReceived } = req.query;
 
   const clientId = req.user?.clientId
 
-  const sipls = await siplService.getAllSIPLs(Number(page), Number(limit), Number(clientId));
+  const sipls = await siplService.getAllSIPLs(
+    Number(page),
+    Number(limit),
+    Number(clientId),
+    supplierId ? Number(supplierId) : undefined,
+    inventoryReceived !== undefined ? inventoryReceived === "true" : undefined
+  );
   SuccessResponse(res, 200, "SIPLs fetched successfully", sipls.data, {
     page: sipls.page,
     limit: sipls.limit,
@@ -298,6 +304,25 @@ export const getSIPLBySlabIdSimple = catchAsync(async (req: Request, res: Respon
   const sipl = await siplService.getSIPLByIdSimple(Number(id));
 
   SuccessResponse(res, 200, "SIPL fetched successfully", sipl);
+});
+
+// Get all overdue SIPLs of a vendor
+export const getOverdueSIPLsByVendorController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { vendorId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+  const clientId = req.user?.clientId;
+
+  if (!vendorId) {
+    throw new AppError("Vendor ID is required.", 400);
+  }
+
+  const sipls = await siplService.getOverdueSIPLsByVendor(Number(vendorId), Number(clientId), Number(page), Number(limit));
+
+  SuccessResponse(res, 200, "Overdue SIPLs fetched successfully", sipls.data, {
+    total: sipls.total,
+    page: sipls.page,
+    limit: sipls.limit,
+  });
 });
 
 // Get all containers of a SIPL

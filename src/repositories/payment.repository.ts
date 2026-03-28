@@ -29,6 +29,10 @@ export const getAllPayments = async (filters: any = {}, page: number, limit: num
           }
         ]
       },
+      {
+        model: models.CreditDebitNote,
+        as: "creditDebitNote",
+      },
     ],
     order: [["createdAt", "DESC"]],
     limit,
@@ -65,6 +69,9 @@ export const getPaymentById = async (id: number) => {
             association: 'advancedDeposit'
           },
         ]
+      },
+      {
+        association: 'creditDebitNote'
       }
     ]
   });
