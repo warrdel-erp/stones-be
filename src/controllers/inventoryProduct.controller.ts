@@ -4,8 +4,8 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
 import { AppError } from "../helper/appError";
-import { inventryProductInput } from "../validators";
-import { inventryProductArraySchema } from "../validators";
+import { inventoryProductInput } from "../validators";
+import { inventoryProductArraySchema } from "../validators";
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
 
@@ -103,6 +103,26 @@ export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Res
     const data = await inventoryProductService.getInventoryProducts(filter as Record<string, string>, Number(locationId));
 
     return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
+});
+
+export const getInventoryProductsPaginated = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { page = 1, limit = 10, ...filter } = req.query;
+
+    const locationId = req.user?.defaultLocationId;
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const result = await inventoryProductService.getInventoryProductsPaginated(
+        filter,
+        Number(locationId),
+        Number(limit),
+        offset
+    );
+
+    return SuccessResponse(res, 200, "Inventory products fetched successfully", result.data, {
+        total: result.total,
+        page: Number(page),
+        limit: Number(limit),
+    });
 });
 
 

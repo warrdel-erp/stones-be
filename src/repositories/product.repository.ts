@@ -361,6 +361,7 @@ export const getProductById = async (id: number) => {
     include: [
       { model: models.ProductGroup, as: "group" },
       { model: models.ProductFinish, as: "finish" },
+      { association: "inventoryProducts" },
       { model: models.Slab, as: "slabs" },
       {
         model: models.ProductSubCategory,
@@ -383,8 +384,8 @@ export const getProductById = async (id: number) => {
         as: "baseColor",
       },
     ],
-    raw: true,
-    nest: true
+    // raw: true,
+    // nest: true
   });
 };
 

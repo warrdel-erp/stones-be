@@ -54,6 +54,10 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId:
     return inventoryProductRepository.getInventoryProducts(filter, locationId)
 }
 
+export const getInventoryProductsPaginated = (filter: Record<string, any>, locationId: number, limit: number, offset: number) => {
+    return inventoryProductRepository.getInventoryProductsPaginated(filter, locationId, limit, offset)
+}
+
 export const assignbinInventoryProducts = async (inventoryProduct: Array<{ id: number;[key: string]: any }>) => {
     if (!inventoryProduct || inventoryProduct.length === 0) return 0;
 

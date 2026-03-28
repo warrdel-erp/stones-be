@@ -2,11 +2,11 @@ import express from "express";
 import * as inventoryProductController from "../controllers/inventoryProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
-import { inventryProductArraySchema } from "../validators";
+import { inventoryProductArraySchema } from "../validators";
 
 const router = express.Router();
 
-router.put("/assignBin", authenticateUser, validateRequest(inventryProductArraySchema), inventoryProductController.assignbinInventoryProducts);
+router.put("/assignBin", authenticateUser, validateRequest(inventoryProductArraySchema), inventoryProductController.assignbinInventoryProducts);
 
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
@@ -14,6 +14,8 @@ router.get("/specialFilters", authenticateUser, inventoryProductController.getIn
 // Get inventory products according to siplId
 router.get("/", authenticateUser, inventoryProductController.getInventoryProducts);
 
+// Get inventory products according to siplId with pagination
+router.get("/paginated", authenticateUser, inventoryProductController.getInventoryProductsPaginated);
 
 // Get inventory products with empty bin
 router.get("/emptyBin", authenticateUser, inventoryProductController.getInventoryProductsWithEmptyBin);

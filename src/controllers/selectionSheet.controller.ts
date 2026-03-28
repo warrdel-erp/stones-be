@@ -52,16 +52,25 @@ export const getSelectionSheetById = catchAsync(async (req: AuthRequest, res: Re
 export const getAllSelectionSheets = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
     const accountId = req.user?.accountId;
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const { page = 1, limit = 10, productId } = req.query;
 
     if (!clientId || !accountId) {
         throw new AppError("Missing client or account information", 401);
     }
 
-    const result = await selectionSheetService.getAllSelectionSheets(clientId, accountId, page, limit);
+    const result = await selectionSheetService.getAllSelectionSheets(
+        clientId,
+        accountId,
+        Number(page),
+        Number(limit),
+        productId ? Number(productId) : undefined
+    );
 
-    return SuccessResponse(res, 200, "Selection sheets fetched successfully", result);
+    return SuccessResponse(res, 200, "Selection sheets fetched successfully", result.data, {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+    });
 });
 
 /**

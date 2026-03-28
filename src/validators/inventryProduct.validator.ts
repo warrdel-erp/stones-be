@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const inventryProductSchema = z.object({
+export const inventoryProductSchema = z.object({
     id: z.number({
         required_error: "Inventory product ID is required",
         invalid_type_error: "ID must be a number",
@@ -12,8 +12,8 @@ export const inventryProductSchema = z.object({
     })
 });
 
-export const inventryProductArraySchema = z
-    .array(inventryProductSchema)
+export const inventoryProductArraySchema = z
+    .array(inventoryProductSchema)
     .min(1, "At least one inventory product is required");
 
-export type inventryProductInput = z.infer<typeof inventryProductSchema>;
+export type inventoryProductInput = z.infer<typeof inventoryProductSchema>;

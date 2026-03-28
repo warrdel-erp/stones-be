@@ -321,7 +321,7 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
     include: [
       {
         association: 'hold',
-        required: !!Boolean(isHold),
+        required: isHold === 'true',
       },
       {
         association: 'slab'
@@ -354,6 +354,59 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
       }
     ]
   })
+}
+
+export const getInventoryProductsPaginated = async (filter: Record<string, any>, locationId?: number, limit: number = 10, offset: number = 0) => {
+  let { isHold, ...restFilter } = filter;
+
+  const { count, rows } = await scoped(models.InventoryProduct).findAndCountAll({
+    where: {
+      ...restFilter,
+      status: {
+        [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
+        ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
+      },
+    },
+    include: [
+      {
+        association: 'hold',
+        required: isHold === 'true',
+      },
+      {
+        association: 'slab'
+      },
+      {
+        association: 'genericProduct'
+      },
+      {
+        association: 'product',
+        attributes: ['id', 'name']
+      },
+      {
+        association: 'bin',
+        attributes: ['id', 'name'],
+      },
+      {
+        association: 'salesOrderProducts',
+        required: false,
+        attributes: ['id'],
+        include: [
+          {
+            association: 'salesOrder',
+            where: { status: SALES_ORDER_STATUS.OPEN },
+            attributes: ['id', 'clientSoNumber', 'status'],
+            required: false
+          }
+        ]
+      }
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [['createdAt', 'DESC']]
+  });
+
+  return { total: count, data: rows };
 }
 
 export const updateInventoryProductCartStatus = async (id: number, isInCart: boolean) => {

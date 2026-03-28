@@ -18,6 +18,7 @@ import { WhereOptions } from "sequelize";
 import { PAYMENT_TERMS, SCOP } from "../constants";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import _ from "lodash";
+import * as vendorContactRepository from "../repositories/vendorContact.repository";
 
 // Service function to create a vendor.
 export const registerVendor = async (vendorData: any, clientId: number) => {
@@ -29,6 +30,15 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
 
     // Create vendor
     const newVendor: any = await vendorRepository.createVendor({ ...vendorData, clientId }, transaction);
+
+    // Create primary contact in vendor_contacts table
+    await vendorContactRepository.createVendorContact({
+      vendorId: newVendor.id,
+      phone: vendorData.primaryPhoneNo,
+      email: vendorData.email,
+      isPrimary: true,
+      clientId
+    }, transaction);
 
     // Create Ledger Account data
     const ledgerAccountData: LedgerAccount = {
@@ -42,10 +52,10 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
 
     const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
 
-    transaction.commit();
+    await transaction.commit();
     return { vendor: newVendor, ledgerAccount };
   } catch (error) {
-    transaction.rollback();
+    await transaction.rollback();
     throw error;
   }
 };
@@ -339,3 +349,4 @@ export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clie
 
   return result;
 };
+

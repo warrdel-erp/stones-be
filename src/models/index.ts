@@ -55,6 +55,7 @@ import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
+import VendorContact from "./vendorContact.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -828,6 +829,14 @@ InvoiceDelivery.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Location.hasMany(InventoryProduct, { foreignKey: "locationId", as: "inventoryProducts" });
 InventoryProduct.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 
+// CLIENT - VendorContact RELATION (one Client has multiple VendorContacts)
+Client.hasMany(VendorContact, { foreignKey: "clientId", as: "vendorContacts" });
+VendorContact.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// VENDOR - VendorContact RELATION (one Vendor has multiple VendorContacts)
+Vendor.hasMany(VendorContact, { foreignKey: "vendorId", as: "contacts" });
+VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
+
 export {
   Client,
   User,
@@ -884,5 +893,6 @@ export {
   SelectionSheet,
   SelectionSheetItem,
   AccountPermission,
-  TermsCondition
+  TermsCondition,
+  VendorContact
 };
