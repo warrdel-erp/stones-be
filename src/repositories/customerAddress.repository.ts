@@ -64,3 +64,17 @@ export const getCustomerAddressById = async (id: number) => {
     ],
   });
 };
+
+export const updateCustomerAddress = async (id: number, data: any, transaction?: Transaction) => {
+  return await scoped(models.CustomerAddress).update(data, {
+    where: { id },
+    transaction,
+  });
+};
+
+export const deleteCustomerAddress = async (id: number, transaction?: Transaction) => {
+  return await scoped(models.CustomerAddress).destroy({
+    where: { id },
+    transaction,
+  });
+};

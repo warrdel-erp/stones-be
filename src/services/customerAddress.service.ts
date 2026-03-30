@@ -37,3 +37,19 @@ export const getCustomerAddressById = async (id: number, clientId?: number) => {
 
   return address.get({ plain: true });
 };
+
+export const updateCustomerAddress = async (id: number, data: any, transaction?: Transaction) => {
+  const address = await getCustomerAddressById(id);
+  if (!address) {
+    throw new AppError("Customer address not found", 404);
+  }
+  return await customerAddressRepository.updateCustomerAddress(id, data, transaction);
+};
+
+export const deleteCustomerAddress = async (id: number, transaction?: Transaction) => {
+  const address = await getCustomerAddressById(id);
+  if (!address) {
+    throw new AppError("Customer address not found", 404);
+  }
+  return await customerAddressRepository.deleteCustomerAddress(id, transaction);
+};

@@ -3,6 +3,9 @@ import { AppError } from "../helper/appError";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as salesOrderInvoiceRepository from "../repositories/soInvoice.repository";
 import * as loadingOrderService from '../services/loadingOrder.service';
+import * as paymentBillRepository from "../repositories/paymentBills.repository";
+import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_TERMS } from "../constants";
 
 export const fetchTotalAmountFromLastNDays = async (fromDate: string, toDate: string, clientId: number) => {
   return await salesOrderInvoiceRepository.getTotalAmountFromLastNDays(fromDate, toDate, clientId);
@@ -97,4 +100,44 @@ export const getSalesOrderProductsWithoutReturns = async (soInvoiceId: number) =
 
   const products = await salesOrderInvoiceRepository.getSalesOrderProductsWithoutReturns(soInvoiceId);
   return products;
+};
+
+export const getOverdueInvoices = async (clientId: number) => {
+  const invoices = await salesOrderInvoiceRepository.getOverdueInvoicesRaw(clientId);
+
+  const overdueUnpaidInvoices = [];
+  const today = new Date();
+
+  for (const invoice of invoices) {
+    const plainInvoice = invoice.get({ plain: true });
+
+    // Dynamic Due Date Calculation: Lo Date + payment terms
+    let dueDate = new Date(plainInvoice.loadingOrder.loDate);
+    const paymentTermId = plainInvoice.loadingOrder.paymentTermId || plainInvoice.loadingOrder.salesOrder?.paymentTermId;
+
+    if (paymentTermId) {
+      const term = PAYMENT_TERMS.find(t => t.id === paymentTermId);
+      if (term && term.value !== "COD") {
+        dueDate.setDate(dueDate.getDate() + parseInt(term.value));
+      }
+    }
+
+    if (dueDate < today) {
+      const paidAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
+        plainInvoice.id,
+        PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE
+      );
+
+      if (paidAmount < plainInvoice.finalAmount) {
+        overdueUnpaidInvoices.push({
+          ...plainInvoice,
+          dueDate,
+          paidAmount,
+          balanceAmount: Number((plainInvoice.finalAmount - paidAmount).toFixed(2)),
+        });
+      }
+    }
+  }
+
+  return overdueUnpaidInvoices;
 };

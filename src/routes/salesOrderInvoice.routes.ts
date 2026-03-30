@@ -13,6 +13,9 @@ router.get("/", authenticateUser, soInvoiceController.getAllSoInvoiceList);
 // assign truck to SO invoice.
 router.put("/:id/assignTruck", authenticateUser, soInvoiceController.assignTruck);
 
+// get overdue invoices.
+router.get("/overdue", authenticateUser, soInvoiceController.getOverdueInvoices);
+
 // get SO invoice by Id.
 router.get("/:id", authenticateUser, soInvoiceController.getInvoiceById);
 

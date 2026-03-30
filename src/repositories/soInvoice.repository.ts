@@ -353,3 +353,30 @@ export const findSoInvoiceWithAssociations = async (soInvoiceId: number, transac
     transaction
   });
 };
+
+export const getOverdueInvoicesRaw = async (clientId: number, transaction?: Transaction) => {
+  return await scoped(models.SalesOrderInvoice).findAll({
+    where: {
+      clientId,
+    },
+    include: [
+      {
+        model: models.Customer,
+        as: "customer",
+        attributes: ["id", "name"],
+      },
+      {
+        model: models.LoadingOrder,
+        as: "loadingOrder",
+        include: [
+          {
+            model: models.SalesOrder,
+            as: "salesOrder",
+            attributes: ["id", "paymentTermId"],
+          }
+        ]
+      }
+    ],
+    transaction,
+  });
+};
