@@ -60,6 +60,7 @@ export const updateSlab = catchAsync(async (req: Request, res: Response) => {
 // Bulk update slabs
 export const bulkUpdateSlabs = catchAsync(async (req: Request, res: Response) => {
   const slabsData = req.body;
+  console.log("slab", slabsData);
 
   if (!Array.isArray(slabsData) || slabsData.length === 0) {
     throw new AppError("Invalid request. Provide an array of slabs with updates.", 400);

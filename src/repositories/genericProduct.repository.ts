@@ -120,3 +120,4 @@ export const getAvailableGenericProductData = async (productId: number) => {
 
     return data;
 };
+

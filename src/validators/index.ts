@@ -10,3 +10,4 @@ export * from './user.validator';
 export * from './auth.validator';
 export * from './slab.validator';
 export * from './location.validator';
+export * from './inventryProduct.validator';

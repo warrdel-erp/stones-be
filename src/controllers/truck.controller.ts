@@ -13,7 +13,8 @@ export const createTruckController = catchAsync(async (req: AuthRequest, res: Re
 
 export const getAllTrucksController = catchAsync(async (req: Request, res: Response) => {
   // Support notAssignedOnly query param to filter trucks with no pending deliveries
-  const { page = 1, limit = 10, notAssignedOnly, ...filter } = req.query;
+
+  const { page, limit, notAssignedOnly, ...filter } = req.query;
   const filters = { ...filter };
   if (notAssignedOnly !== undefined) {
     // Always store as string to avoid type errors

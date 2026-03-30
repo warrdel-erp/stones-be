@@ -70,3 +70,11 @@ export const getSalesOrderProductsWithoutReturns = catchAsync(async (req: AuthRe
 
     SuccessResponse(res, 200, "Sales order products without returns fetched successfully", products);
 });
+
+export const getOverdueInvoices = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    const result = await salesOrderInvoiceService.getOverdueInvoices(Number(clientId));
+
+    SuccessResponse(res, 200, "Overdue invoices fetched successfully", result);
+});

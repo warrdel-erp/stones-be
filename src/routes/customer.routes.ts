@@ -3,6 +3,8 @@ import * as customerController from "../controllers/customer.controller";
 import * as customerAddressController from "../controllers/customerAddress.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { uploadCSV } from "../middleware/uploadMiddleware";
+import { validateRequest } from "../middleware/validationMiddleware";
+import * as customerAddressValidator from "../validators/customerAddress.validator";
 
 const router = Router();
 
@@ -13,13 +15,19 @@ router.post("/", authenticateUser, customerController.createCustomerController);
 router.post("/bulkUpload", authenticateUser, uploadCSV.single("file"), customerController.bulkUploadCustomers);
 
 // create address for customer
-router.post("/address", authenticateUser, customerAddressController.createCustomerAddress);
+router.post("/address", authenticateUser, validateRequest(customerAddressValidator.customerAddressSchema), customerAddressController.createCustomerAddress);
 
 // Get customer address by id
 router.get("/address/:id", authenticateUser, customerAddressController.getCustomerAddressById);
 
 // Get all addresses of customer
 router.get("/:customerId/addresses", authenticateUser, customerAddressController.getAddressesByCustomerId);
+
+// Update customer address
+router.put("/address/:id", authenticateUser, validateRequest(customerAddressValidator.updateCustomerAddressSchema), customerAddressController.updateCustomerAddress);
+
+// Delete customer address
+router.delete("/address/:id", authenticateUser, customerAddressController.deleteCustomerAddress);
 
 // Update customer.
 router.put("/:id", authenticateUser, customerController.updateCustomerController);

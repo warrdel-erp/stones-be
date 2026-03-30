@@ -1,14 +1,21 @@
 import express from "express";
 import * as inventoryProductController from "../controllers/inventoryProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import { validateRequest } from "../middleware/validationMiddleware";
+import { inventoryProductArraySchema } from "../validators";
 
 const router = express.Router();
+
+router.put("/assignBin", authenticateUser, validateRequest(inventoryProductArraySchema), inventoryProductController.assignbinInventoryProducts);
 
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);
 
 // Get inventory products according to siplId
 router.get("/", authenticateUser, inventoryProductController.getInventoryProducts);
+
+// Get inventory products according to siplId with pagination
+router.get("/paginated", authenticateUser, inventoryProductController.getInventoryProductsPaginated);
 
 // Get inventory products with empty bin
 router.get("/emptyBin", authenticateUser, inventoryProductController.getInventoryProductsWithEmptyBin);
@@ -39,6 +46,8 @@ router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdIn
 
 // Get inventory product details by qrCode
 router.get("/qr/:qrCode", authenticateUser, inventoryProductController.getInventoryProductByQrCode);
+
+
 
 
 export default router;

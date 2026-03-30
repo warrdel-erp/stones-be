@@ -33,3 +33,15 @@ export const getCustomerAddressById = catchAsync(async (req: AuthRequest, res: R
 
   SuccessResponse(res, 200, "Customer address retrieved successfully", address);
 });
+
+export const updateCustomerAddress = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const address = await customerAddressService.updateCustomerAddress(Number(id), req.body);
+  SuccessResponse(res, 200, "Customer address updated successfully", address);
+});
+
+export const deleteCustomerAddress = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const address = await customerAddressService.deleteCustomerAddress(Number(id));
+  SuccessResponse(res, 200, "Customer address deleted successfully", address);
+});

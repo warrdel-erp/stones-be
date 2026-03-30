@@ -40,6 +40,9 @@ router.post("/:siplId/addSlab", authenticateUser, siplController.createSlabHandl
 // get all SIPLs
 router.get("/", authenticateUser, siplController.getAllSIPLs);
 
+// get overdue SIPLs by vendor
+router.get("/overdue/vendor/:vendorId", authenticateUser, siplController.getOverdueSIPLsByVendorController);
+
 // get SIPL by ID
 router.get("/:id", authenticateUser, siplController.getSIPLById);
 

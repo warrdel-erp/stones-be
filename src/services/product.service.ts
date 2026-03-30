@@ -111,6 +111,8 @@ export const fetchProductById = async (id: number) => {
     throw new AppError("Product not found", 404);
   }
 
+  product = product.get({ plain: true });
+
   product.inventoryBalance = await getInventoryBalance(id);
 
   return product;

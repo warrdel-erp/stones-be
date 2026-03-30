@@ -31,10 +31,14 @@ export const getAllVendors = async (page: number, limit: number, filter?: WhereO
       {
         model: models.Location,
         as: "parentLocation"
+      },
+      {
+        association: "contacts"
       }
     ],
     limit,
     offset,
+    distinct: true,
     order: [["createdAt", "DESC"]], // Sort by latest vendors
   });
 
@@ -56,6 +60,9 @@ export const findVendorById = async (id: number) => {
       },
       {
         association: "ledgerAccount"
+      },
+      {
+        association: "contacts"
       }
     ],
   });

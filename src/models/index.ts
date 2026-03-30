@@ -55,6 +55,8 @@ import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
+import VendorContact from "./vendorContact.model";
+import WiringInstruction from "./wiringInstruction.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -677,6 +679,18 @@ AdvancedDeposit.hasOne(Payment, { foreignKey: 'paymentForId', as: 'payment' })
 CreditDebitNote.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(CreditDebitNote, { foreignKey: "clientId", as: "creditDebitNotes" });
 
+Payment.hasOne(CreditDebitNote, {
+  foreignKey: "referenceId",
+  constraints: false,
+  scope: { referenceType: "payment" },
+  as: "creditDebitNote",
+});
+CreditDebitNote.belongsTo(Payment, {
+  foreignKey: "referenceId",
+  constraints: false,
+  as: "payment",
+});
+
 // SoProductSwapHistory associations
 SoProductSwapHistory.belongsTo(SalesOrderProduct, { foreignKey: "salesProductId", as: "salesOrderProduct" });
 SalesOrderProduct.hasMany(SoProductSwapHistory, { foreignKey: "salesProductId", as: "swapHistories" });
@@ -784,6 +798,18 @@ Notes.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(PaymentBill, { foreignKey: "clientId", as: "paymentBills" });
 PaymentBill.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
+// Vendor-WiringInstruction relation (one 'Vendor' has multiple 'WiringInstructions')
+Vendor.hasMany(WiringInstruction, { foreignKey: "vendorId", as: "wiringInstructions" });
+WiringInstruction.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
+
+// Account-WiringInstruction relation (createdBy/updatedBy)
+WiringInstruction.belongsTo(Account, { foreignKey: "createdBy", as: "creator" });
+WiringInstruction.belongsTo(Account, { foreignKey: "updatedBy", as: "updater" });
+
+// Client-WiringInstruction relation
+Client.hasMany(WiringInstruction, { foreignKey: "clientId", as: "wiringInstructions" });
+WiringInstruction.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
 // Client-RequestedPurchaseProduct relation
 Client.hasMany(RequestedPurchaseProduct, { foreignKey: "clientId", as: "requestedPurchaseProducts" });
 RequestedPurchaseProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
@@ -827,6 +853,14 @@ InvoiceDelivery.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 // Location-InventoryProduct relation
 Location.hasMany(InventoryProduct, { foreignKey: "locationId", as: "inventoryProducts" });
 InventoryProduct.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+
+// CLIENT - VendorContact RELATION (one Client has multiple VendorContacts)
+Client.hasMany(VendorContact, { foreignKey: "clientId", as: "vendorContacts" });
+VendorContact.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// VENDOR - VendorContact RELATION (one Vendor has multiple VendorContacts)
+Vendor.hasMany(VendorContact, { foreignKey: "vendorId", as: "contacts" });
+VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
 export {
   Client,
@@ -884,5 +918,7 @@ export {
   SelectionSheet,
   SelectionSheetItem,
   AccountPermission,
-  TermsCondition
+  TermsCondition,
+  VendorContact,
+  WiringInstruction,
 };

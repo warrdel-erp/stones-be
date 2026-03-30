@@ -4,7 +4,8 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
 import { AppError } from "../helper/appError";
-
+import { inventoryProductInput } from "../validators";
+import { inventoryProductArraySchema } from "../validators";
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
 
@@ -103,6 +104,43 @@ export const getInventoryProducts = catchAsync(async (req: AuthRequest, res: Res
 
     return SuccessResponse(res, 200, "Inventory products fetched successfully", data);
 });
+
+export const getInventoryProductsPaginated = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { page = 1, limit = 10, ...filter } = req.query;
+
+    const locationId = req.user?.defaultLocationId;
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const result = await inventoryProductService.getInventoryProductsPaginated(
+        filter,
+        Number(locationId),
+        Number(limit),
+        offset
+    );
+
+    return SuccessResponse(res, 200, "Inventory products fetched successfully", result.data, {
+        total: result.total,
+        page: Number(page),
+        limit: Number(limit),
+    });
+});
+
+
+export const assignbinInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
+
+    const inventoryProduct = req.body;
+
+    const affectedRows = await inventoryProductService.assignbinInventoryProducts(inventoryProduct);
+    console.log(affectedRows);
+
+    if (affectedRows === 0) {
+        throw new AppError("No Inventory Products were updated. Check if IDs exist.", 404);
+    }
+
+    return SuccessResponse(res, 200, `${affectedRows} Inventory Products updated successfully.`, affectedRows);
+}
+);
+
 
 export const updateInventoryProductCartStatus = catchAsync(async (req: AuthRequest, res: Response) => {
     const { inventoryProductId } = req.params;

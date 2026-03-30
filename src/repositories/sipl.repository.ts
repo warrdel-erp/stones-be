@@ -30,6 +30,8 @@ export const findSIPLByIdSimple = async (id: number) => {
   return await models.SIPL.findByPk(id);
 };
 
+
+
 // Get SIPL by ID
 export const findSIPLById = async (id: number, transaction?: Transaction) => {
   return await models.SIPL.findByPk(id, {
@@ -205,17 +207,28 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
 };
 
 // Get all SIPLs
-export const getAllSIPLs = async (page: number, limit: number, clientId: number) => {
+export const getAllSIPLs = async (
+  page: number,
+  limit: number,
+  clientId: number,
+  supplierId?: number,
+  inventoryReceived?: boolean
+) => {
   const offset = (page - 1) * limit;
 
+  const where: any = { clientId };
+  if (inventoryReceived !== undefined) {
+    where.inventoryReceived = inventoryReceived;
+  }
+
   return await scoped(models.SIPL).findAndCountAll({
-    where: {
-      clientId
-    },
+    where,
     include: [
       {
         model: models.PurchaseOrder,
         as: "purchaseOrder",
+        where: supplierId ? { supplierId } : undefined,
+        required: !!supplierId,
         include: [
           {
             model: models.Vendor,
@@ -245,6 +258,7 @@ export const getAllSIPLs = async (page: number, limit: number, clientId: number)
     ],
     limit,
     offset,
+    distinct: true,
     order: [["createdAt", "DESC"]],
   });
 };
@@ -316,6 +330,33 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
     order: [["createdAt", "DESC"]],
   });
   return SIPLs;
+};
+export const getOverdueSIPLsByVendor = async (supplierId: number, clientId: number, page: number, limit: number) => {
+  const offset = (page - 1) * limit;
+
+  return await scoped(models.SIPL).findAndCountAll({
+    where: {
+      clientId,
+      dueDate: {
+        [Op.lt]: new Date(),
+      },
+      status: {
+        [Op.ne]: 'paid',
+      }
+    },
+    include: [
+      {
+        model: models.PurchaseOrder,
+        as: "purchaseOrder",
+        where: { supplierId },
+        required: true,
+      },
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [["dueDate", "ASC"]],
+  });
 };
 
 export const getSIPLByVendor = async (supplierId: number) => {

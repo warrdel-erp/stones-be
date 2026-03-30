@@ -117,7 +117,7 @@ const LoadingOrder = sequelize.define(
 LoadingOrder.beforeUpdate(async (loadingOrder) => {
   const loadingOrderExisting = await LoadingOrder.findByPk(loadingOrder.dataValues.id);
 
-  if (loadingOrderExisting?.dataValues.invoiced) {
+  if (loadingOrderExisting?.dataValues.stage == LOADING_ORDER_STAGES.INVOICED) {
     throw new AppError("Cannot update Loading Order as it is already invoiced.", 400);
   }
 });

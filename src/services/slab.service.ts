@@ -10,6 +10,7 @@ import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId } from "../helper";
 import { scoped } from "../utils/scoped";
+import * as  genericProductRepository from "../repositories/genericProduct.repository"
 
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
@@ -57,7 +58,6 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
           attributes: ['inventoryProductId'],
           transaction
         });
-
         if (!slab) {
           throw new AppError(`Slab with id ${id} not found`, 404);
         }
@@ -65,7 +65,16 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
         if (!slab.inventoryProductId) {
           throw new AppError(`Slab with id ${id} does not have an associated inventory product`, 400);
         }
+        const inventryProductData: any = await models.InventoryProduct.findByPk(slab.inventoryProductId, { attributes: ['siplId'], transaction })
 
+        const sipl: any = await models.SIPL.findByPk(inventryProductData.dataValues.siplId, {
+          attributes: ['inventoryReceived'],
+          transaction
+        })
+
+        if (sipl.dataValues.inventoryReceived) {
+          throw new AppError(`Slab with this ${id} Slab is already received.`, 404);
+        }
         // Update the inventory product's binId
         const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(
           { binId },
@@ -211,9 +220,13 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
 
     const inventoryProduct = originalSlab.inventoryProduct;
 
+    // Validate total area of split slabs
+    validateSplitSlabs(originalSlab, slabsData)
+
     if (!inventoryProduct) {
       throw new AppError("Slab does not have an associated inventory product", 400);
     }
+
 
     // Check if the inventory product status is IN_INVENTORY
     if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
@@ -375,3 +388,47 @@ export const getSlabSplitHistory = async (slabId: number, clientId?: number) => 
 
   return history;
 };
+
+
+function validateSplitSlabs(originalSlab: any, slabsData: Array<{ receivingLength: number; receivingWidth: number }>) {
+
+  const originalArea =
+    (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+
+  let runningArea = 0;
+  let currentLength = 0
+  let currentWidth = 0
+
+  for (const slab of slabsData) {
+
+    const area = (slab.receivingLength * slab.receivingWidth) / 144;
+
+    runningArea += area;
+
+    currentLength = currentLength + slab.receivingLength
+    if (currentLength > originalSlab.receivingLength) {
+      throw new AppError(
+        `Total slab length cannot exceed ${originalSlab.receivingLength}`,
+        400
+      );
+    }
+
+    currentWidth = currentWidth + slab.receivingLength
+
+    if (currentWidth > originalSlab.receivingWidth) {
+      throw new AppError(
+        `Total slab width cannot exceed ${originalSlab.receivingWidth}`,
+        400
+      );
+    }
+
+    if (runningArea > originalArea) {
+      throw new AppError(
+        "Total split slab area cannot exceed original slab area",
+        400
+      );
+    }
+
+  }
+
+}

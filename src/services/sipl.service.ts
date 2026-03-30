@@ -251,7 +251,6 @@ export async function handleCreateGenericProduct(data: any) {
     const product = (await productRepository.getProductByIdSimple(data.productId));
 
     const sellingPrice = product.singleUnitPrice
-    // console.log(sellingPrice, 'sellingPrice')
 
     // Create a new InventoryProduct for each generic Product with combined numbers
     const inventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
@@ -360,8 +359,14 @@ export const getSIPLByIdSimple = async (id: number) => {
 }
 
 // Get all SIPLs
-export const getAllSIPLs = async (page: number, limit: number, clientId: number) => {
-  let { rows, count }: any = await siplRepository.getAllSIPLs(page, limit, clientId);
+export const getAllSIPLs = async (
+  page: number,
+  limit: number,
+  clientId: number,
+  supplierId?: number,
+  inventoryReceived?: boolean
+) => {
+  let { rows, count }: any = await siplRepository.getAllSIPLs(page, limit, clientId, supplierId, inventoryReceived);
 
   rows = await Promise.all(rows.map(async (sipl: any) => {
     sipl = sipl.get({ plain: true });
@@ -538,6 +543,26 @@ export const getSIPLByVendor = async (vendorId: number) => {
   );
 
   return sipls;
+};
+
+export const getOverdueSIPLsByVendor = async (vendorId: number, clientId: number, page: number, limit: number) => {
+  let { rows, count }: any = await siplRepository.getOverdueSIPLsByVendor(vendorId, clientId, page, limit);
+
+  rows = await Promise.all(
+    rows.map(async (sipl: any) => {
+      sipl = sipl.get({ plain: true });
+      const calculations = await getSiplCalculations(sipl.id);
+
+      return { ...sipl, totalAmount: calculations.totalAmount };
+    })
+  );
+
+  return {
+    total: count,
+    page,
+    limit,
+    data: rows,
+  };
 };
 
 // Get all barcode of an SIPL

@@ -99,7 +99,8 @@ export const getAllSelectionSheets = async (
   clientId: number,
   accountId: number,
   page: number,
-  limit: number
+  limit: number,
+  productId?: number
 ) => {
   const offset = (page - 1) * limit;
 
@@ -126,9 +127,12 @@ export const getAllSelectionSheets = async (
       {
         association: "items",
         attributes: ["id", "inventoryProductId"],
+        required: !!productId,
         include: [
           {
             association: "inventoryProduct",
+            required: !!productId,
+            where: productId ? { productId } : {},
             include: [
               {
                 association: "slab",
@@ -144,6 +148,7 @@ export const getAllSelectionSheets = async (
     limit,
     offset,
     distinct: true,
+    subQuery: false,
     order: [["createdAt", "DESC"]],
   });
 

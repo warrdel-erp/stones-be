@@ -50,3 +50,9 @@ export const updateCreditDebitNote = async (id: number, updateData: any, transac
 
     return await getCreditDebitNoteById(id);
 };
+
+export const getCreditDebitNoteByReference = async (referenceId: number, referenceType: string) => {
+    return await scoped(models.CreditDebitNote).findOne({
+        where: { referenceId, referenceType }
+    });
+};
