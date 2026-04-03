@@ -39,6 +39,7 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
 
     // Get inventory data
     data = await inventoryRepository.fetchProductsWithSlabsByLocationGroupedBySipl(
+      req,
       Number(page),
       Number(limit),
       Number(locationId)

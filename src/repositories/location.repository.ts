@@ -1,9 +1,10 @@
 import * as models from "../models";
+import { Transaction } from "sequelize";
 import { scoped } from "../utils/scoped";
 
 // Create a new location
-export const createLocation = async (locationData: any) => {
-  return await scoped(models.Location).create(locationData);
+export const createLocation = async (locationData: any, transaction?: Transaction) => {
+  return await scoped(models.Location).create(locationData, { transaction });
 };
 
 // Get location options for dropdowns/selects

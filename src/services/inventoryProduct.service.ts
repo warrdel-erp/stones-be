@@ -9,10 +9,11 @@ import * as models from "../models";
 import * as  genericProductRepository from "../repositories/genericProduct.repository"
 import { scoped } from "../utils/scoped";
 import * as slabRepository from "../repositories/slab.repository";
+import { AuthRequest } from "../middleware/authMiddleware";
 
-export const getInventoryProductsBySIPLCombinedNumber = async (siplId: number) => {
+export const getInventoryProductsBySIPLCombinedNumber = async (req: AuthRequest, siplId: number) => {
     // Get inventory products by matching the middle number in combinedNumber using repository
-    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySIPL(siplId);
+    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySIPL(req, siplId);
 
     return inventoryProducts;
 };
