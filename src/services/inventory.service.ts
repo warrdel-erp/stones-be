@@ -5,15 +5,16 @@ import * as siplRepository from "../repositories/sipl.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as decimal from '../helper/decimal'
+import { AuthRequest } from "../middleware/authMiddleware";
 
-export const fetchProductsWithSlabsByLocationGroupedBySipl = async (page: number, limit: number, locationId: number) => {
+export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthRequest, page: number, limit: number, locationId: number) => {
   const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
 
   // Map data accordingly product -> sipl -> slab
   let finalData = await Promise.all(
     data.products.map(async (product: any) => {
 
-      product.sipls = await siplRepository.getSIPLByProduct(product.id, locationId);
+      product.sipls = await siplRepository.getSIPLByProduct(req, product.id, locationId);
 
       if (!product.sipls.length) {
         return undefined;

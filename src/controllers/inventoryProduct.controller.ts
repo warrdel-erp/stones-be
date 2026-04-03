@@ -6,6 +6,7 @@ import * as inventoryProductService from "../services/inventoryProduct.service";
 import { AppError } from "../helper/appError";
 import { inventoryProductInput } from "../validators";
 import { inventoryProductArraySchema } from "../validators";
+
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block } = req.query;
 
@@ -32,7 +33,7 @@ export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: A
         data = await inventoryProductService.getInventoryProductsBySlabField("block", block as string);
     } else {
         // Get inventory products by SIPL combined number only
-        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(Number(siplId));
+        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId));
     }
 
     if (!data.length) {

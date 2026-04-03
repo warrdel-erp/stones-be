@@ -3,6 +3,7 @@ import * as models from "../models";
 import { AppError } from "../helper/appError";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { scoped } from "../utils/scoped";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
@@ -278,7 +279,7 @@ export const findSIPLBySlabId = async (slabId: number) => {
 };
 
 // Get SIPL by Product for inventory product
-export const getSIPLByProduct = async (productId: number, locationId: number) => {
+export const getSIPLByProduct = async (req: AuthRequest, productId: number, locationId: number) => {
   const SIPLs = await scoped(models.SIPL).findAll({
     include: [
       {
@@ -294,7 +295,12 @@ export const getSIPLByProduct = async (productId: number, locationId: number) =>
             attributes: ['id']
           },
           {
-            association: "cartItem"
+            association: "cartItem",
+            where: {
+              accountId: req.user?.accountId
+
+            },
+            required: false
           },
           {
             association: "genericProduct",

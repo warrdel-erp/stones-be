@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -96,7 +97,7 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
   return newCombinedNumber;
 };
 
-export const getInventoryProductsBySIPL = async (siplId: number) => {
+export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number) => {
   // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     where: {
@@ -105,6 +106,13 @@ export const getInventoryProductsBySIPL = async (siplId: number) => {
     include: [
       {
         association: 'slab'
+      },
+      {
+        association: 'cartItem',
+        where: {
+          accountId: req.user?.accountId
+        },
+        required: false
       },
       {
         association: 'genericProduct'
