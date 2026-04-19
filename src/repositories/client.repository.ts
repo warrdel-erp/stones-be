@@ -1,8 +1,63 @@
 import { Op, Transaction, Model } from "sequelize";
-import { Client } from "../models";
-import ClientModel from "../models/client.model";
-import { Location } from "../models";
+import {
+  Client,
+  Location,
+  User,
+  Account,
+  Notes,
+  FreightDetail,
+  Product,
+  RequestedPurchaseProduct,
+  SIPL,
+  SIPLProduct,
+  Slab,
+  Warehouse,
+  Bill,
+  InventoryProduct,
+  LedgerAccount,
+  JournalEntry,
+  Customer,
+  CustomerAddress,
+  LoadingOrder,
+  PackagingList,
+  SalesOrder,
+  SalesOrderProduct,
+  ProductSubCategory,
+  Payment,
+  SlabRemeasurement,
+  BillItem,
+  Container,
+  PaymentBill,
+  SalesOrderInvoice,
+  Truck,
+  ProductGroup,
+  ProductBaseColor,
+  ProductFinish,
+  AdvancedDeposit,
+  AdvancedDepositSettlement,
+  Return,
+  ReturnProduct,
+  Delivery,
+  InvoiceDelivery,
+  ServiceCategory,
+  Service,
+  TradeService,
+  GenericProduct,
+  CreditDebitNote,
+  CartItem,
+  SoProductSwapHistory,
+  InventoryProductHold,
+  SelectionSheet,
+  SelectionSheetItem,
+  VendorContact,
+  WiringInstruction,
+  TermsCondition,
+  Vendor,
+  PurchaseOrder,
+  Bin,
+} from "../models";
 import { scoped } from "../utils/scoped";
+import { sequelize } from "../config/database";
 
 interface ClientCreateData {
   firstName: string;
@@ -139,8 +194,84 @@ export const updateClientDefaultLocation = async (clientId: number, locationId: 
 };
 
 /**
- * Check if client has access to given location.
+ * Delete a client by ID.
  */
+export const deleteClientById = async (clientId: number, transaction?: Transaction) => {
+  const client = await Client.findByPk(clientId);
+  if (!client) return false;
+  await client.destroy({ transaction });
+  return true;
+};
+
+/**
+ * Deletes all data belonging to a client in dependency-safe order.
+ */
+export const deleteAllClientData = async (clientId: number, t: Transaction) => {
+  const cachedIds = await cacheDeletionIds(clientId, t);
+  
+  await deleteStandardModels(clientId, t);
+  await deleteComplexAssociations(cachedIds, t);
+};
+
+/**
+ * 1. Cache IDs needed for complex cleanups before deleting parent records
+ */
+async function cacheDeletionIds(clientId: number, t: Transaction) {
+  const [userAccountIds] = await Promise.all([
+    User.findAll({ where: { clientId }, attributes: ['accountId'], transaction: t }).then(res => res.map((i: any) => i.accountId).filter(Boolean))
+  ]);
+
+  return { userAccountIds };
+}
+
+/**
+ * 2. Standard Models: Simplified deletion by clientId in dependency order
+ */
+async function deleteStandardModels(clientId: number, t: Transaction) {
+  const models = [
+    // Leaves
+    SlabRemeasurement, SoProductSwapHistory, InventoryProductHold, ReturnProduct,
+    TradeService, SelectionSheetItem, PaymentBill, BillItem, CartItem,
+    Notes, JournalEntry, CreditDebitNote, VendorContact, WiringInstruction,
+    GenericProduct, FreightDetail, InvoiceDelivery, Container, AdvancedDepositSettlement,
+    // Mid-level
+    SelectionSheet, Return, SalesOrderProduct, AdvancedDeposit, Payment,
+    SalesOrderInvoice, PackagingList,
+    // Entities & Orders
+    Delivery, LoadingOrder, SalesOrder, Slab, InventoryProduct,
+    SIPLProduct, RequestedPurchaseProduct, SIPL, PurchaseOrder,
+    Bill, CustomerAddress, Customer, Product, ProductSubCategory, ProductGroup,
+    ProductBaseColor, ProductFinish, Vendor, Service, ServiceCategory,
+    User, LedgerAccount, Bin, Warehouse, Location, TermsCondition, Truck
+  ];
+
+  for (const model of models) {
+    await model.destroy({ 
+      where: { clientId }, 
+      transaction: t,
+      force: true // Ensure paranoid (soft-delete) models are permanently removed
+    });
+  }
+}
+
+/**
+ * 3. Custom Cleanup Tasks: For complex logic
+ */
+async function deleteComplexAssociations(ids: any, t: Transaction) {
+  const { userAccountIds } = ids;
+
+  // Cleanup User Accounts
+  if (userAccountIds.length) {
+    await Account.destroy({ 
+      where: { id: userAccountIds }, 
+      transaction: t,
+      force: true 
+    });
+  }
+}
+
+
+
 export const doesClientHaveLocation = async (locationId: number, clientId: number) => {
   const location = await Location.findOne({
     where: { id: locationId, clientId: clientId }

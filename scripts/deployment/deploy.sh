@@ -16,7 +16,7 @@ SERVER_USER="support"
 SERVER_HOST="13.235.224.206"
 SERVER_PORT="44084"
 APP_DIR="/var/www/html/be-stonecrm.warrdelstones.com/stone-crm-be-app"
-PM2_PROCESS_ID="1"
+PM2_PROCESS_ID="0"
 
 echo "📡 Connecting to server: $SERVER_USER@$SERVER_HOST:$SERVER_PORT"
 echo ""

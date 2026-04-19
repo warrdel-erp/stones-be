@@ -2,11 +2,18 @@ import { AppError } from "../helper/appError";
 import * as locationRepository from "../repositories/location.repository";
 import * as warehouseRepository from "../repositories/warehouse.repository";
 import { sequelize } from "../config/database";
+import { requestContext } from "../utils/requestContext";
 
 export const createLocation = async (data: any) => {
   const transaction = await sequelize.transaction();
   try {
     const location = await locationRepository.createLocation(data, transaction);
+
+    // Set locationId in context for subsequent operations (like warehouse creation)
+    const store = requestContext.getStore();
+    if (store) {
+      store.locationId = location.id;
+    }
 
     // Create warehouse for this location
     await warehouseRepository.createWarehouse({

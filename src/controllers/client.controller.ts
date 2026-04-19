@@ -45,3 +45,17 @@ export const updateClient = catchAsync(async (req, res) => {
 
   return SuccessResponse(res, 200, "Vendor updated successfully", updatedClient);
 });
+
+/**
+ * Public controller to permanently delete a client's account.
+ * Expects { email, password } in the request body.
+ * The client must provide valid credentials to confirm the deletion.
+ * Input is validated upstream by Zod middleware.
+ */
+export const deleteClientAccountHandler = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  await clientService.deleteClientAccount(email, password);
+
+  return SuccessResponse(res, 200, "Account deleted successfully", null);
+});

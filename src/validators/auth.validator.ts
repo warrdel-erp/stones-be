@@ -16,3 +16,15 @@ export const changePasswordSchema = z.object({
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
+export const deleteClientAccountSchema = z.object({
+    email: z.string({
+        required_error: "Email is required",
+        invalid_type_error: "Email must be a string",
+    }).email("Please provide a valid email address"),
+    password: z.string({
+        required_error: "Password is required",
+        invalid_type_error: "Password must be a string",
+    }).min(1, "Password is required"),
+});
+
+export type DeleteClientAccountInput = z.infer<typeof deleteClientAccountSchema>;
