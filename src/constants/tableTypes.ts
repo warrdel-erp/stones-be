@@ -161,6 +161,11 @@ export const CUSTOMER_STATUS = {
   INACTIVE: "inactive",
 } as const;
 
+export const CUSTOMER_TYPE = {
+  CUSTOMER: "customer",
+  FABRICATOR: "fabricator",
+} as const;
+
 export const DELIVERY_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",

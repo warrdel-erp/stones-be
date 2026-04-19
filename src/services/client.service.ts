@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { AppError } from "../helper/appError";
 import { LedgerAccount } from "../models/ledgerAccount.model";
 import {
@@ -7,6 +6,7 @@ import {
   FREIGHT_BILL_ACCOUNT_KEYS,
   LEDGER_ACCOUNT_TYPES,
 } from "../constants/coa";
+import bcrypt from "bcryptjs";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { requestContext } from "../utils/requestContext";
@@ -14,8 +14,9 @@ import { requestContext } from "../utils/requestContext";
 import * as clientRepository from "../repositories/client.repository";
 import * as companyRepository from "../repositories/company.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as userRepository from '../repositories/user.repository'
+import * as userRepository from '../repositories/user.repository';
 import * as accountService from "./account.service";
+import * as accountRepository from "../repositories/account.repository";
 import * as accountPermissionRepository from "../repositories/accountPermission.repository";
 import { PERMISSIONS } from "../constants/permissions";
 
@@ -274,4 +275,39 @@ export const assignDefaultLocation = async (clientId: number, locationId: number
   }
 
   return updated;
+};
+
+/**
+ * Permanently deletes a client's account.
+ * Reuses accountService.authenticateAccount (same as login) to verify credentials,
+ * avoiding duplication of bcrypt + account-lookup logic.
+ */
+export const deleteClientAccount = async (email: string, password: string) => {
+  // Authenticate using the same method as login — handles email lookup + bcrypt verify
+  const authResult = await accountService.authenticateAccount(email, password);
+  if (!authResult) {
+    throw new AppError("Invalid email or password", 404);
+  }
+
+  const { user } = authResult;
+
+  // Only client accounts may request self-deletion via this endpoint
+  if (user.accountType !== "client") {
+    throw new AppError("This endpoint is only available for client accounts", 403);
+  }
+
+  const { clientId, accountId } = user;
+
+  const transaction = await sequelize.transaction();
+  try {
+    // Wipe all tables that reference this client (leaf-first order)
+    await clientRepository.deleteAllClientData(clientId, transaction);
+    // Delete the Client row, then the Account
+    await clientRepository.deleteClientById(clientId, transaction);
+    await accountRepository.deleteAccount(accountId, transaction);
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };

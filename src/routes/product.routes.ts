@@ -32,5 +32,4 @@ router.get("/emptyBin", authenticateUser, productController.getProductsWithEmpty
 // Get Product by id
 router.get("/:id", authenticateUser, productController.getProductById);
 
-
 export default router;

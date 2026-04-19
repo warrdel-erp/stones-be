@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import User from "./user.model";
 import { SALES_TAX, SCOP, PAYMENT_TERMS } from "../constants";
-import { CUSTOMER_STATUS } from "../constants/tableTypes";
+import { CUSTOMER_STATUS, CUSTOMER_TYPE } from "../constants/tableTypes";
 import Client from "./client.model";
 
 const Customer = sequelize.define(
@@ -18,8 +18,9 @@ const Customer = sequelize.define(
       allowNull: false,
     },
     type: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.ENUM(...Object.values(CUSTOMER_TYPE)),
+      allowNull: false,
+      defaultValue: CUSTOMER_TYPE.CUSTOMER,
     },
     contactName: {
       type: DataTypes.STRING,
