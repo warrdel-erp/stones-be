@@ -61,6 +61,7 @@ import permissionRoutes from "./routes/permission.routes";
 import termsConditionRoutes from "./routes/termsCondition.routes";
 import vendorContactRoutes from "./routes/vendorContact.routes";
 import wiringInstructionRoutes from "./routes/wiringInstruction.routes";
+import fabricatorRoutes from "./routes/fabricator.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -125,6 +126,7 @@ app.use("/api/permission", permissionRoutes);
 app.use("/api/termsCondition", termsConditionRoutes);
 app.use("/api/vendorContact", vendorContactRoutes);
 app.use("/api/wiringInstruction", wiringInstructionRoutes);
+app.use("/api/fabricator", fabricatorRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);
