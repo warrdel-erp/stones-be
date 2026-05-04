@@ -1,27 +1,28 @@
-import csv from "csv-parser";
-import { Readable } from "stream";
+import * as XLSX from "xlsx";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import * as externalTransactionRepo from "../repositories/externalCustomerTransaction.repository";
 import * as customerRepo from "../repositories/customer.repository";
 import { AppError } from "../helper/appError";
+import _ from "lodash";
 
 export const bulkUploadExternalTransactions = async (fileBuffer: Buffer, clientId: number) => {
-  const csvRows: any[] = [];
+  let csvRows: any[] = [];
   let rowNumber = 1;
 
-  // 1. Parse CSV
-  await new Promise((resolve, reject) => {
-    const stream = Readable.from(fileBuffer);
-    stream
-      .pipe(csv())
-      .on("data", (data) => csvRows.push({ ...data, _rowNumber: ++rowNumber }))
-      .on("end", resolve)
-      .on("error", reject);
-  });
+  // 1. Parse File (CSV or Excel)
+  try {
+    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+    csvRows = data.map((row: any) => ({ ...row, _rowNumber: ++rowNumber }));
+  } catch (error: any) {
+    throw new AppError(`Failed to parse file: ${error.message}`, 400);
+  }
 
   if (csvRows.length === 0) {
-    throw new AppError("No data found in the CSV file.", 400);
+    throw new AppError("No data found in the file.", 400);
   }
 
   // 2. Extract unique customer codes
@@ -32,18 +33,19 @@ export const bulkUploadExternalTransactions = async (fileBuffer: Buffer, clientI
   const customerMap = new Map(customers.map((c: any) => [c.customerCode, c.id]));
 
   // 4. Prepare data for insertion
-  const transactionsToCreate = csvRows.map((row) => {
+  let skippedCount = 0;
+  const transactionsToCreate: any[] = [];
+
+  csvRows.forEach((row) => {
     const code = row["Customer Code"] || row["customerCode"];
     const customerId = customerMap.get(code);
 
     if (!customerId) {
-       // Optional: you might want to skip or throw error if customer not found
-       // For now, let's skip or throw based on preference. User said "recognized by customerCode".
-       // I'll throw error to be safe.
-       throw new AppError(`Customer with code ${code} not found in database.`, 400);
+      skippedCount++;
+      return;
     }
 
-    return {
+    transactionsToCreate.push({
       customerId,
       customerCode: code,
       trxType: row["Trx. Type"] || row["trxType"],
@@ -53,9 +55,6 @@ export const bulkUploadExternalTransactions = async (fileBuffer: Buffer, clientI
       location: row["Location"] || row["location"],
       custPoNo: row["Cust. PO#"] || row["custPoNo"],
       jobName: row["Job Name"] || row["jobName"],
-      // salesRepId: ... (Sales Rep is also likely a name in Excel, would need lookup if it's an ID)
-      // For now, mapping name to salesRep if the model supported it, but it's an ID.
-      // I'll leave salesRepId as null unless we have a mapping.
       terms: row["Terms"] || row["terms"],
       invoiceDate: row["Invoice Dt."] ? new Date(row["Invoice Dt."]) : null,
       daysPastInvoiceDate: parseInt(row["Days Past InvoiceDt"] || row["daysPastInvoiceDate"]) || 0,
@@ -68,13 +67,41 @@ export const bulkUploadExternalTransactions = async (fileBuffer: Buffer, clientI
       balanceDue: parseFloat(row["Balance Due"] || row["balanceDue"]) || 0,
       internalNotes: row["Internal Notes"] || row["internalNotes"],
       clientId,
-    };
+    });
   });
+
+  if (transactionsToCreate.length === 0) {
+    return { createdCount: 0, skippedCount, message: "No valid rows found to upload." };
+  }
 
   // 5. Bulk create in transaction
   const result = await sequelize.transaction(async (transaction: Transaction) => {
     return await externalTransactionRepo.bulkCreateExternalTransactions(transactionsToCreate, transaction);
   });
 
-  return { createdCount: result.length };
+  return { createdCount: result.length, skippedCount };
+};
+
+export const fetchAllExternalTransactions = async (
+  page: number,
+  limit: number,
+  clientId: number,
+  search?: string,
+  filters?: any
+) => {
+  const offset = (page - 1) * limit;
+  const { transactions, total } = await externalTransactionRepo.findAllExternalTransactions(
+    offset,
+    limit,
+    clientId,
+    search,
+    filters
+  );
+
+  return {
+    transactions,
+    total,
+    page,
+    limit,
+  };
 };
