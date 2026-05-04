@@ -19,3 +19,26 @@ export const bulkUploadTransactions = catchAsync(async (req: AuthRequest, res: R
 
   SuccessResponse(res, 201, "Transactions uploaded successfully", result);
 });
+
+export const getAllTransactionsController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { page = 1, limit = 10, search, ...filters } = req.query;
+  const clientId = req.user?.clientId;
+
+  if (!clientId) {
+    throw new AppError("Client ID not found in user token", 401);
+  }
+
+  const result = await externalTransactionService.fetchAllExternalTransactions(
+    Number(page),
+    Number(limit),
+    Number(clientId),
+    search ? String(search) : undefined,
+    filters
+  );
+
+  return SuccessResponse(res, 200, "Transactions retrieved successfully", result.transactions, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});

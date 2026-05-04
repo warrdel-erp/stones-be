@@ -8,4 +8,7 @@ const router = express.Router();
 // Bulk upload transactions via CSV
 router.post("/bulkUpload", authenticateUser, uploadCSV.single("file"), externalTransactionController.bulkUploadTransactions);
 
+// Get all transactions with pagination and search
+router.get("/", authenticateUser, externalTransactionController.getAllTransactionsController);
+
 export default router;
