@@ -45,7 +45,7 @@ pnpm run migrate:all
 
 echo ""
 echo "🔄 Restarting PM2 process..."
-pm2 restart 1
+pm2 restart $PM2_PROCESS_ID
 
 echo ""
 echo "✅ Deployment completed successfully!"

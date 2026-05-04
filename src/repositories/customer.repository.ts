@@ -8,8 +8,6 @@ export const createCustomer = async (customerData: any, transaction?: Transactio
   return await scoped(models.Customer).create(customerData, { transaction });
 };
 
-
-
 // Update Customer
 export const updateCustomerById = async (id: number, data: any) => {
   const [updatedCount] = await scoped(models.Customer).update(data, {
@@ -73,7 +71,7 @@ export const getCustomerByIdSimple = async (id: number) => {
 };
 
 // Get customer options for dropdowns/selects
-export const getCustomerOptions = async (clientId: number, status?: string) => {
+export const getCustomerOptions = async (clientId: number, status?: string, filters: any = {}) => {
   return scoped(models.Customer).findAll({
     attributes: [
       ["name", "label"],
@@ -82,6 +80,7 @@ export const getCustomerOptions = async (clientId: number, status?: string) => {
     where: {
       clientId,
       ...(status ? { status } : {}),
+      ...filters
     },
     order: [["name", "ASC"]],
   });
@@ -107,7 +106,17 @@ export const findCustomersByPrimaryPhoneNumbers = async (clientId: number, phone
   });
 };
 
+// Find existing customers by customer codes
+export const findCustomersByCodes = async (clientId: number, customerCodes: string[]) => {
+  const uniqueCodes = [...new Set(customerCodes)].filter(Boolean);
+  if (uniqueCodes.length === 0) return [];
+  return models.Customer.findAll({
+    where: { clientId, customerCode: uniqueCodes },
+    attributes: ["id", "customerCode"],
+  });
+};
+
 // Bulk create customers for bulk upload - uses models directly with explicit clientId in data (no scoped)
 export const bulkCreateCustomers = async (customersData: any[], transaction?: Transaction) => {
-  return models.Customer.bulkCreate(customersData, { transaction, validate: true });
+  return models.Customer.bulkCreate(customersData, { transaction, validate: true, individualHooks: true });
 };

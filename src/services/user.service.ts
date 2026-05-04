@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import * as accountService from "./account.service";
 import { sequelize } from "../config/database";
 import * as clientRepository from "../repositories/client.repository";
+import * as locationRepository from "../repositories/location.repository";
 
 type UserRegistrationData = {
   username: string;
@@ -351,9 +352,14 @@ export const fetchUserById = async (userId: number) => {
 };
 
 // Check if user has access to given location.
-export const checkUserLocationAccess = async (locationId: number, userId: number) => {
-  const userHasLocation = await userRepository.doesUserHaveLocation(Number(locationId), userId!);
-  if (!userHasLocation) throw new AppError("User does not have access to given location", 400);
+export const checkUserLocationAccess = async (locationId: number, user: any) => {
+  if (user.accountType === "client") {
+    const location = await locationRepository.getLocationById(locationId, user.clientId);
+    if (!location) throw new AppError("Location does not belong to this client", 400);
+  } else {
+    const userHasLocation = await userRepository.doesUserHaveLocation(Number(locationId), user.id);
+    if (!userHasLocation) throw new AppError("User does not have access to given location", 400);
+  }
 };
 
 // Get user profile

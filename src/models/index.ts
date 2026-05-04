@@ -57,6 +57,8 @@ import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
+import CustomerTransaction from "./customerTransaction.model";
+
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -798,6 +800,17 @@ Notes.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(PaymentBill, { foreignKey: "clientId", as: "paymentBills" });
 PaymentBill.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
+// CustomerTransaction associations
+CustomerTransaction.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(CustomerTransaction, { foreignKey: "customerId", as: "transactions" });
+
+CustomerTransaction.belongsTo(User, { foreignKey: "salesRepId", as: "salesRep" });
+User.hasMany(CustomerTransaction, { foreignKey: "salesRepId", as: "customerTransactions" });
+
+CustomerTransaction.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(CustomerTransaction, { foreignKey: "clientId", as: "customerTransactions" });
+
+
 // Vendor-WiringInstruction relation (one 'Vendor' has multiple 'WiringInstructions')
 Vendor.hasMany(WiringInstruction, { foreignKey: "vendorId", as: "wiringInstructions" });
 WiringInstruction.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
@@ -921,4 +934,5 @@ export {
   TermsCondition,
   VendorContact,
   WiringInstruction,
+  CustomerTransaction,
 };

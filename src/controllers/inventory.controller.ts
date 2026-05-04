@@ -8,14 +8,13 @@ import { checkUserLocationAccess } from "../services/user.service";
 export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, categorization } = req.query;
   const { locationId } = req.params;
-  const userId = req.user?.id;
 
   if (!locationId) {
     return res.status(400).json({ error: "Location ID is required" });
   }
 
   // Check if user has access to this location.
-  await checkUserLocationAccess(Number(locationId), userId!);
+  await checkUserLocationAccess(Number(locationId), req.user!);
 
   let data: any = {};
 

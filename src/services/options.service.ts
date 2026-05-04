@@ -45,13 +45,13 @@ export const getCustomerInvoiceOptions = async (customerId: number) => {
     return invoices;
 };
 
-export const getCustomerOptions = async (clientId: number, activeOnly: boolean = true) => {
+export const getCustomerOptions = async (clientId: number, activeOnly: boolean = true, filters: any = {}) => {
     if (!clientId) {
         throw new AppError("Client context missing.", 400);
     }
 
     const status = activeOnly ? CUSTOMER_STATUS.ACTIVE : undefined;
-    const customers = await customerRepository.getCustomerOptions(clientId, status);
+    const customers = await customerRepository.getCustomerOptions(clientId, status, filters);
 
     return customers;
 };

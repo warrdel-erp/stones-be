@@ -28,9 +28,10 @@ export const getCustomerInvoiceOptions = catchAsync(async (req: AuthRequest, res
 
 export const getCustomerOptions = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
-    const activeOnly = req.query.activeOnly !== "false"; // Default to true, but allow false
+    const { activeOnly, ...filters } = req.query;
+    const isActiveOnly = activeOnly !== "false"; // Default to true, but allow false
 
-    const data = await optionsService.getCustomerOptions(Number(clientId), activeOnly);
+    const data = await optionsService.getCustomerOptions(Number(clientId), isActiveOnly, filters);
 
     SuccessResponse(res, 200, "Customer options fetched successfully.", data);
 });
