@@ -17,6 +17,10 @@ const Customer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    customerCode: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     type: {
       type: DataTypes.ENUM(...Object.values(CUSTOMER_TYPE)),
       allowNull: false,
@@ -39,6 +43,10 @@ const Customer = sequelize.define(
       allowNull: true,
     },
     landlineNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    fax: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -88,6 +96,10 @@ const Customer = sequelize.define(
       allowNull: true,
     },
     internalNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    deliveryNotes: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
@@ -178,9 +190,36 @@ const Customer = sequelize.define(
     paranoid: true, // Enables soft delete
     indexes: [
       { unique: true, fields: ["primaryPhoneNumber", "clientId"], name: "unique_primary_phone_per_client" },
+      { unique: true, fields: ["customerCode", "clientId"], name: "unique_customer_code_per_client" },
     ],
   }
 );
+
+// 🔹 Hook: Auto-Increment customerCode based on clientId
+Customer.beforeValidate(async (customer: any) => {
+  if (!customer.clientId) {
+    throw new Error("Client ID is required to generate customerCode.");
+  }
+
+  // If customerCode is empty, auto-generate it
+  if (!customer.customerCode) {
+    // Use Sequelize functions to get the max numeric customerCode
+    const maxCodeResult: any = await Customer.findOne({
+      attributes: [[sequelize.fn("MAX", sequelize.cast(sequelize.col("customerCode"), "UNSIGNED")), "maxCode"]],
+      where: {
+        clientId: customer.clientId,
+      },
+      raw: true,
+    });
+
+    let nextCode = 1;
+    if (maxCodeResult && maxCodeResult.maxCode) {
+      nextCode = parseInt(maxCodeResult.maxCode) + 1;
+    }
+
+    customer.customerCode = String(nextCode);
+  }
+});
 
 // Scope configuration for Customer model
 (Customer as any).scopeConfig = {

@@ -15,10 +15,9 @@ import * as advancedDepositRepository from "../repositories/advancedDeposit.repo
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
 import _ from "lodash";
+import * as XLSX from "xlsx";
 import { sumDecimal } from "../helper";
 import { decimalSubtract } from "../helper/decimal";
-import csv from "csv-parser";
-import { Readable } from "stream";
 import { customerBulkUploadSchema } from "../validators/customer.validator";
 
 // Service function to create a customer.
@@ -188,6 +187,24 @@ export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
 /**
  * Validates referenced IDs and primaryPhoneNumber uniqueness in CSV data.
  */
+/**
+ * Helper to map sales tax string/ID to its database ID.
+ */
+const mapSalesTaxToId = (data: any) => {
+  let salesTaxId = data.salesTaxId ? Number(data.salesTaxId) : null;
+  const salesTaxStr = data.salesTax || data.SalesTax;
+  if (salesTaxStr && typeof salesTaxStr === "string") {
+    const code = salesTaxStr.split(" - ")[0].trim();
+    const taxMatch = SALES_TAX.find((t) => t.code === code);
+    if (taxMatch) {
+      salesTaxId = taxMatch.id;
+    } else {
+      return { id: null, error: `Invalid sales tax code "${code}" derived from "${salesTaxStr}"` };
+    }
+  }
+  return { id: salesTaxId, error: null };
+};
+
 const validateBulkCustomerIds = async (csvRows: any[], clientId: number) => {
   const uniqueIds = {
     salesTaxIds: new Set<number>(),
@@ -195,18 +212,29 @@ const validateBulkCustomerIds = async (csvRows: any[], clientId: number) => {
     scopeIds: new Set<number>(),
     countryIds: new Set<number>(),
   };
-  const primaryPhoneNumbersInCsv = new Set<string>();
-  const duplicatePhonesInCsv = new Set<string>();
+  const phoneToRowNumbers = new Map<string, number[]>();
+  const codeToRowNumbers = new Map<string, number[]>();
 
   csvRows.forEach((row) => {
-    const phone = (row.primaryPhoneNumber || row.PrimaryPhoneNumber || "").trim();
+    const phone = (row.primaryPhoneNumber || row.PrimaryPhoneNumber || "").toString().trim();
     if (phone) {
-      if (primaryPhoneNumbersInCsv.has(phone)) {
-        duplicatePhonesInCsv.add(phone);
+      if (!phoneToRowNumbers.has(phone)) {
+        phoneToRowNumbers.set(phone, []);
       }
-      primaryPhoneNumbersInCsv.add(phone);
+      phoneToRowNumbers.get(phone)!.push(row._rowNumber);
     }
-    if (row.salesTaxId) uniqueIds.salesTaxIds.add(Number(row.salesTaxId));
+
+    const code = (row.customerCode || row.CustomerCode);
+    if (code) {
+      if (!codeToRowNumbers.has(code)) {
+        codeToRowNumbers.set(code, []);
+      }
+      codeToRowNumbers.get(code)!.push(row._rowNumber);
+    }
+
+    const { id: sTaxId } = mapSalesTaxToId(row);
+    if (sTaxId) uniqueIds.salesTaxIds.add(sTaxId);
+
     if (row.paymentTermId) uniqueIds.paymentTermIds.add(Number(row.paymentTermId));
     if (row.scopeId) uniqueIds.scopeIds.add(Number(row.scopeId));
     if (row.shippingCountryId) uniqueIds.countryIds.add(Number(row.shippingCountryId));
@@ -214,13 +242,34 @@ const validateBulkCustomerIds = async (csvRows: any[], clientId: number) => {
   });
 
   const errors: string[] = [];
-  duplicatePhonesInCsv.forEach((phone) => {
-    errors.push(`Duplicate primaryPhoneNumber found in CSV: "${phone}"`);
+
+  // Report duplicates within the CSV
+  phoneToRowNumbers.forEach((rows, phone) => {
+    if (rows.length > 1) {
+      errors.push(`Duplicate primaryPhoneNumber "${phone}" found in CSV rows: ${rows.join(", ")}`);
+    }
   });
 
-  const existingCustomers = await customerRepository.findCustomersByPrimaryPhoneNumbers(clientId, Array.from(primaryPhoneNumbersInCsv));
-  existingCustomers.forEach((c: any) => {
-    errors.push(`primaryPhoneNumber already exists in database: "${c.primaryPhoneNumber}"`);
+  codeToRowNumbers.forEach((rows, code) => {
+    if (rows.length > 1) {
+      errors.push(`Duplicate customerCode "${code}" found in CSV rows: ${rows.join(", ")}`);
+    }
+  });
+
+  const [existingCustomersByPhone, existingCustomersByCode] = await Promise.all([
+    customerRepository.findCustomersByPrimaryPhoneNumbers(clientId, Array.from(phoneToRowNumbers.keys())),
+    customerRepository.findCustomersByCodes(clientId, Array.from(codeToRowNumbers.keys())),
+  ]);
+
+  // Report database duplicates
+  existingCustomersByPhone.forEach((c: any) => {
+    const rows = phoneToRowNumbers.get(c.primaryPhoneNumber);
+    errors.push(`primaryPhoneNumber "${c.primaryPhoneNumber}" already exists in database (found in CSV row(s): ${rows?.join(", ")})`);
+  });
+
+  existingCustomersByCode.forEach((c: any) => {
+    const rows = codeToRowNumbers.get(c.customerCode);
+    errors.push(`customerCode "${c.customerCode}" already exists in database (found in CSV row(s): ${rows?.join(", ")})`);
   });
 
   if (errors.length > 0) {
@@ -253,52 +302,63 @@ const prepareBulkCustomerData = (csvRows: any[], userId: number) => {
     const rowNum = data._rowNumber;
 
     const inputData = {
-      name: (data.name || data.Name || "").trim(),
-      email: (data.email || data.Email || "").trim(),
-      contactName: data.contactName || data.ContactName || null,
-      printName: data.printName || data.PrintName || null,
-      primaryPhoneNumber: (data.primaryPhoneNumber || data.PrimaryPhoneNumber || "").trim(),
-      secondaryPhoneNumber: data.secondaryPhoneNumber || data.SecondaryPhoneNumber || null,
-      landlineNumber: data.landlineNumber || data.LandlineNumber || null,
-      type: data.type || data.Type || null,
-      priceLevel: data.priceLevel || data.PriceLevel || null,
-      taxExempt: data.taxExempt === "true" || data.taxExempt === "1",
-      salesTaxId: data.salesTaxId ? Number(data.salesTaxId) : null,
-      paymentTermId: data.paymentTermId ? Number(data.paymentTermId) : null,
-      internalNotes: data.internalNotes || data.InternalNotes || null,
-      status: (data.status || "active") as "active" | "inactive",
-      scopeId: data.scopeId ? Number(data.scopeId) : null,
+      name: (data.name || data.Name || "").toString().trim(),
+      email: (data.email || data.Email || "").toString().trim(),
+      contactName: (data.contactName || data.ContactName || "").toString().trim() || null,
+      printName: (data.printName || data.PrintName || "").toString().trim() || null,
+      primaryPhoneNumber: (data.primaryPhoneNumber || data.PrimaryPhoneNumber || "").toString().trim(),
+      secondaryPhoneNumber: (data.secondaryPhoneNumber || data.SecondaryPhoneNumber || "").toString().trim() || null,
+      landlineNumber: (data.landlineNumber || data.LandlineNumber || "").toString().trim() || null,
+      fax: (data.fax || data.Fax || "").toString().trim() || null,
+      accEmail: (data.accEmail || data.AccEmail || "").toString().trim() || null,
+      type: (data.type || data.Type || "").toString().trim() || null,
+      priceLevel: (data.priceLevel || data.PriceLevel || "").toString().trim() || null,
+      taxExempt: data.taxExempt === "true" || data.taxExempt === "1" || data.TaxExempt === "true" || data.TaxExempt === "1",
+      salesTax: (data.salesTax || data.SalesTax || data.salesTaxId || data.SalesTaxId || "").toString().trim() || null,
+      paymentTermId: data.paymentTermId ? Number(data.paymentTermId) : (data.PaymentTermId ? Number(data.PaymentTermId) : null),
+      customerCode: (data.customerCode || data.CustomerCode || "").toString().trim() || null,
+      internalNotes: (data.internalNotes || data.InternalNotes || "").toString().trim() || null,
+      deliveryNotes: (data.deliveryNotes || data.DeliveryNotes || "").toString().trim() || null,
+      status: ((data.status || data.Status || "active").toString().trim().toLowerCase() || "active") as "active" | "inactive",
+      scopeId: data.scopeId ? Number(data.scopeId) : (data.ScopeId ? Number(data.ScopeId) : null),
       // Shipping address
-      shippingAddress: data.shippingAddress || null,
-      shippingAddressLine: data.shippingAddressLine || null,
-      shippingUnit: data.shippingUnit || null,
-      shippingLat: data.shippingLat ? parseFloat(data.shippingLat) : null,
-      shippingLong: data.shippingLong ? parseFloat(data.shippingLong) : null,
-      shippingContactName: data.shippingContactName || null,
-      shippingContactEmail: data.shippingContactEmail || null,
-      shippingContactNumber: data.shippingContactNumber || null,
-      shippingCountryId: data.shippingCountryId ? Number(data.shippingCountryId) : null,
+      shippingAddress: data.shippingAddress || data.ShippingAddress || null,
+      shippingAddressLine: data.shippingAddressLine || data.ShippingAddressLine || null,
+      shippingLat: data.shippingLat ? parseFloat(data.shippingLat) : (data.ShippingLat ? parseFloat(data.ShippingLat) : null),
+      shippingLong: data.shippingLong ? parseFloat(data.shippingLong) : (data.ShippingLong ? parseFloat(data.ShippingLong) : null),
+      shippingContactName: data.shippingContactName || data.ShippingContactName || null,
+      shippingContactEmail: data.shippingContactEmail || data.ShippingContactEmail || null,
+      shippingContactNumber: data.shippingContactNumber || data.ShippingContactNumber || null,
+      shippingCountryId: data.shippingCountryId ? Number(data.shippingCountryId) : (data.ShippingCountryId ? Number(data.ShippingCountryId) : null),
       // Remit address
-      remitAddress: data.remitAddress || null,
-      remitAddressLine: data.remitAddressLine || null,
-      remitUnit: data.remitUnit || null,
-      remitLat: data.remitLat ? parseFloat(data.remitLat) : null,
-      remitLong: data.remitLong ? parseFloat(data.remitLong) : null,
-      remitContactName: data.remitContactName || null,
-      remitContactEmail: data.remitContactEmail || null,
-      remitContactNumber: data.remitContactNumber || null,
-      remitCountryId: data.remitCountryId ? Number(data.remitCountryId) : null,
+      remitAddress: data.remitAddress || data.RemitAddress || null,
+      remitAddressLine: data.remitAddressLine || data.RemitAddressLine || null,
+      remitLat: data.remitLat ? parseFloat(data.remitLat) : (data.RemitLat ? parseFloat(data.RemitLat) : null),
+      remitLong: data.remitLong ? parseFloat(data.remitLong) : (data.RemitLong ? parseFloat(data.RemitLong) : null),
+      remitContactName: data.remitContactName || data.RemitContactName || null,
+      remitContactEmail: data.remitContactEmail || data.RemitContactEmail || null,
+      remitContactNumber: data.remitContactNumber || data.RemitContactNumber || null,
+      remitCountryId: data.remitCountryId ? Number(data.remitCountryId) : (data.RemitCountryId ? Number(data.RemitCountryId) : null),
     };
 
     const validation = customerBulkUploadSchema.safeParse(inputData);
 
     if (!validation.success) {
       const rowErrors = validation.error.errors
-        .map((err) => `${err.path.join(".")}: ${err.message}`)
+        .map((err) => {
+          const val = _.get(inputData, err.path);
+          return `${err.path.join(".")}${val ? ` (value: "${val}")` : ""}: ${err.message}`;
+        })
         .join(", ");
       errors.push(`Row ${rowNum}: ${rowErrors}`);
     } else {
-      customers.push({ ...validation.data, _rowNumber: rowNum });
+      const { id: sTaxId, error: taxError } = mapSalesTaxToId({ salesTax: validation.data.salesTax });
+      if (taxError) {
+        errors.push(`Row ${rowNum}: ${taxError}`);
+      } else {
+        const { salesTax, ...rest } = validation.data;
+        customers.push({ ...rest, salesTaxId: sTaxId, _rowNumber: rowNum });
+      }
     }
   });
 
@@ -312,19 +372,71 @@ const prepareBulkCustomerData = (csvRows: any[], userId: number) => {
 /**
  * Bulk upload customers via CSV.
  */
+const ALLOWED_HEADERS = [
+  "name", "Name",
+  "email", "Email",
+  "contactName", "ContactName",
+  "printName", "PrintName",
+  "primaryPhoneNumber", "PrimaryPhoneNumber",
+  "secondaryPhoneNumber", "SecondaryPhoneNumber",
+  "landlineNumber", "LandlineNumber",
+  "fax", "Fax",
+  "accEmail", "AccEmail",
+  "type", "Type",
+  "priceLevel", "PriceLevel",
+  "taxExempt", "TaxExempt",
+  "salesTax", "SalesTax",
+  "salesTaxId", "SalesTaxId",
+  "paymentTermId", "PaymentTermId",
+  "customerCode", "CustomerCode",
+  "internalNotes", "InternalNotes",
+  "deliveryNotes", "DeliveryNotes",
+  "status", "Status",
+  "scopeId", "ScopeId",
+  "shippingAddress", "ShippingAddress",
+  "shippingAddressLine", "ShippingAddressLine",
+  "shippingLat", "ShippingLat",
+  "shippingLong", "ShippingLong",
+  "shippingContactName", "ShippingContactName",
+  "shippingContactEmail", "ShippingContactEmail",
+  "shippingContactNumber", "ShippingContactNumber",
+  "shippingCountryId", "ShippingCountryId",
+  "remitAddress", "RemitAddress",
+  "remitAddressLine", "RemitAddressLine",
+  "remitLat", "RemitLat",
+  "remitLong", "RemitLong",
+  "remitContactName", "RemitContactName",
+  "remitContactEmail", "RemitContactEmail",
+  "remitContactNumber", "RemitContactNumber",
+  "remitCountryId", "RemitCountryId",
+];
+
 export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, clientId: number) => {
-  const csvRows: any[] = [];
+  let csvRows: any[] = [];
   let rowNumber = 1;
 
-  // 1. Parse CSV
-  await new Promise((resolve, reject) => {
-    const stream = Readable.from(fileBuffer);
-    stream
-      .pipe(csv())
-      .on("data", (data) => csvRows.push({ ...data, _rowNumber: ++rowNumber }))
-      .on("end", resolve)
-      .on("error", reject);
-  });
+  // 1. Parse File (CSV or Excel)
+  try {
+    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Get headers
+    const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
+    if (headers) {
+      const unrecognized = headers.filter((h: string) => h && !ALLOWED_HEADERS.includes(h));
+      if (unrecognized.length > 0) {
+        throw new AppError(`Unrecognized column(s) in file: ${unrecognized.join(", ")}`, 400);
+      }
+    }
+
+    // Convert to JSON
+    const data = XLSX.utils.sheet_to_json(worksheet);
+    csvRows = data.map((row: any) => ({ ...row, _rowNumber: ++rowNumber }));
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(`Failed to parse file: ${error.message}`, 400);
+  }
 
   if (csvRows.length === 0) {
     throw new AppError("No customers found in the CSV file.", 400);
@@ -379,7 +491,6 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       addresses.push({
         address: String(shippingAddress).trim(),
         addressLine: shippingAddressLine || null,
-        unit: shippingUnit || null,
         lat: shippingLat || null,
         long: shippingLong || null,
         contactName: shippingContactName || null,
@@ -396,7 +507,6 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       addresses.push({
         address: String(remitAddress).trim(),
         addressLine: remitAddressLine || null,
-        unit: remitUnit || null,
         lat: remitLat || null,
         long: remitLong || null,
         contactName: remitContactName || null,

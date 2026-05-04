@@ -14,14 +14,10 @@ const CustomerAddress = sequelize.define(
     },
     address: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     addressLine: {
       type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    unit: {
-      type: DataTypes.STRING,
       allowNull: true,
     },
     contactName: {

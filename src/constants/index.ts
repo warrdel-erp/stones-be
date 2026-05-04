@@ -145,3 +145,15 @@ export const SALES_TAX = [
   { id: 43, code: "MSCG", label: "Georgia State, Muscogee County", value: 9, stateTax: 4 },
   { id: 44, code: "ALMO", label: "Alabama State, Montgomery County", value: 10, stateTax: 4 },
 ];
+
+
+
+
+
+
+
+
+
+
+
+
