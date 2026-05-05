@@ -52,7 +52,6 @@ const InventoryProduct = sequelize.define(
     combinedNumber: {
       type: DataTypes.STRING,
       allowNull: true,
-      // unique: true
     },
     productId: {
       type: DataTypes.INTEGER,
