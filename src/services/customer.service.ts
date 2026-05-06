@@ -411,6 +411,8 @@ const ALLOWED_HEADERS = [
   "remitCountryId", "RemitCountryId",
 ];
 
+const REQUIRED_HEADERS = ["name", "email", "primaryPhoneNumber", "customerCode"];
+
 export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, clientId: number) => {
   let csvRows: any[] = [];
   let rowNumber = 1;
@@ -427,6 +429,14 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       const unrecognized = headers.filter((h: string) => h && !ALLOWED_HEADERS.includes(h));
       if (unrecognized.length > 0) {
         throw new AppError(`Unrecognized column(s) in file: ${unrecognized.join(", ")}`, 400);
+      }
+
+      const missing = REQUIRED_HEADERS.filter((rh) => {
+        const capitalized = rh.charAt(0).toUpperCase() + rh.slice(1);
+        return !headers.includes(rh) && !headers.includes(capitalized);
+      });
+      if (missing.length > 0) {
+        throw new AppError(`Required column(s) missing: ${missing.join(", ")}`, 400);
       }
     }
 

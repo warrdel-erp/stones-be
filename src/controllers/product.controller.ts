@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as productService from "../services/product.service";
+import * as productBulkUploadService from "../services/productBulkUpload.service";
 import { AppError } from "../helper/appError";
 
 // Create a new product
@@ -129,7 +130,7 @@ export const bulkUploadProducts = catchAsync(async (req: AuthRequest, res: Respo
     throw new AppError("CSV file is required.", 400);
   }
 
-  const result = await productService.bulkUploadProducts(req.file.buffer, userId!, clientId!);
+  const result = await productBulkUploadService.bulkUploadProducts(req.file.buffer, userId!, clientId!);
 
   SuccessResponse(res, 201, "Products uploaded successfully", result);
 });
