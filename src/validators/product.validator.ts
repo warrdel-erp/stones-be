@@ -4,13 +4,9 @@ export const productSchema = z.object({
     name: z.string({
         required_error: "Product name is required",
     }).min(1, "Product name cannot be empty"),
-    alternativeName: z.string({
-        required_error: "Alternative name is required",
-    }).min(1, "Alternative name cannot be empty"),
+    alternativeName: z.string().optional().nullable(),
     baseColorId: z.number().int().optional().nullable(),
-    groupId: z.number({
-        required_error: "Category (groupId) is required",
-    }).int(),
+    groupId: z.number().int().optional().nullable(),
     subCategoryId: z.number({
         required_error: "Subcategory (subCategoryId) is required",
     }).int(),
@@ -26,15 +22,11 @@ export const productSchema = z.object({
     specialInstruction: z.string().optional().nullable(),
     disclaimer: z.string().optional().nullable(),
     isSlabType: z.boolean().default(false),
-    singleUnitPrice: z.number({
-        required_error: "Single unit price is required",
-    }),
+    singleUnitPrice: z.number().optional().nullable(),
     bundlePrice: z.number().optional().nullable(),
     reorderQuantity: z.number().optional().nullable(),
     safetyQuantity: z.number().optional().nullable(),
-    binId: z.number({
-        required_error: "Bin ID is required",
-    }).int(),
+    binId: z.number().int().optional().nullable(),
     status: z.enum(["active", "inactive"]).default("active"),
 });
 
