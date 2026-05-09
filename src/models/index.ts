@@ -58,6 +58,7 @@ import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
 import CustomerTransaction from "./customerTransaction.model";
+import InventoryProductMetaData from "./inventoryProductMetaData.model";
 
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -311,6 +312,14 @@ InventoryProduct.belongsTo(Product, { foreignKey: "productId", as: 'product' });
 // One sipl can have multiple inventory products.
 SIPL.hasMany(InventoryProduct, { foreignKey: "siplId", as: "inventoryProducts" });
 InventoryProduct.belongsTo(SIPL, { foreignKey: "siplId", as: 'sipl' });
+
+// InventoryProduct-InventoryProductMetaData relation
+InventoryProduct.hasOne(InventoryProductMetaData, { foreignKey: "inventoryProductId", as: "metaData" });
+InventoryProductMetaData.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// Client-InventoryProductMetaData relation
+Client.hasMany(InventoryProductMetaData, { foreignKey: "clientId", as: "inventoryProductMetaData" });
+InventoryProductMetaData.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // One to One relation.
 Slab.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
@@ -935,4 +944,5 @@ export {
   VendorContact,
   WiringInstruction,
   CustomerTransaction,
+  InventoryProductMetaData,
 };

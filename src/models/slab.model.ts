@@ -114,7 +114,7 @@ const Slab = sequelize.define(
     },
     siplId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: SIPL,
         key: "id",
@@ -134,7 +134,7 @@ const Slab = sequelize.define(
     },
     purchaseOrderId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: PurchaseOrder,
         key: "id",
@@ -144,7 +144,7 @@ const Slab = sequelize.define(
     },
     siplProductId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: SIPLProduct,
         key: "id",
