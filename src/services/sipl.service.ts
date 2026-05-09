@@ -53,25 +53,27 @@ export const receiveInventory = async (siplId: number, receivedDate: string, cli
     await siplRepository.updateSIPL(siplId, { inventoryReceived: true, receivedDate }, transaction);
     const calculations = await siplService.getSiplCalculations(siplId, transaction);
 
-    // Set landed unit cost for each product in inventory products
+    // Set landed unit cost and FOB cost for each product in inventory products
     await Promise.all(
       calculations.dataAccordingToProduct.map(
         async (productCalc: any) => {
-          // Update landed unit cost in inventory products (not in slabs or generic products)
-          return await inventoryProductRepository.setInventoryProductLandedUnitCost(
+          // Update landed unit cost and FOB cost in inventory products (not in slabs or generic products)
+          return await inventoryProductRepository.setInventoryProductLandedUnitCostAndFOBcost(
             siplId,
             productCalc.product.id,
             productCalc.landedUnitCost,
+            productCalc.unitCost,
             transaction
           );
         }
       )
     );
 
-    // Update all related inventory products to IN_INVENTORY
+    // Update all related inventory products to IN_INVENTORY and set receivedDate
     await inventoryProductRepository.updateInventoryProductStatusBySipl(
       siplId,
       INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      receivedDate,
       transaction
     );
 

@@ -3,6 +3,7 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
+import { bulkUploadInventoryProducts as bulkUploadInventoryProductsService } from "../services/inventoryProductBulkUpload.service";
 import { AppError } from "../helper/appError";
 import { inventoryProductInput } from "../validators";
 import { inventoryProductArraySchema } from "../validators";
@@ -247,3 +248,20 @@ export const getInventoryProductByQrCode = catchAsync(async (req: AuthRequest, r
 });
 
 
+export const bulkUploadInventoryProducts = catchAsync(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+        throw new AppError("No file uploaded.", 400);
+    }
+
+    const userId = req.user?.id;
+    const clientId = req.user?.clientId;
+    const accountId = req.user?.accountId;
+
+    if (!userId || !clientId || !accountId) {
+        throw new AppError("User not authenticated or client ID missing.", 401);
+    }
+
+    const result = await bulkUploadInventoryProductsService(req.file.buffer, Number(userId), Number(clientId), Number(accountId));
+
+    return SuccessResponse(res, 200, "Inventory products uploaded successfully.", result);
+});

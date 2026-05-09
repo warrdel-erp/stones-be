@@ -28,7 +28,7 @@ const InventoryProduct = sequelize.define(
     },
     siplId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: SIPL,
         key: "id",
@@ -92,6 +92,22 @@ const InventoryProduct = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       unique: true,
+    },
+    receivedDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    FOBcost: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    secondaryStatus: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    note: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {

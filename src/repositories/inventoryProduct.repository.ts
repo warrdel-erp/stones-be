@@ -17,7 +17,9 @@ export const createInventoryProductsWithCombinedNumbers = async (
   clientId: number,
   transaction: Transaction,
   status?: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
-  landedUnitCost?: number
+  landedUnitCost?: number,
+  receivedDate?: Date | string,
+  FOBcost?: number
 ) => {
   const sipl: any = await models.SIPL.findByPk(siplId, {
     attributes: ["invoiceCode"],
@@ -50,6 +52,8 @@ export const createInventoryProductsWithCombinedNumbers = async (
     clientId,
     ...(status && { status }),
     ...(landedUnitCost !== undefined && landedUnitCost !== null && { landedUnitCost }),
+    ...(receivedDate && { receivedDate }),
+    ...(FOBcost !== undefined && FOBcost !== null && { FOBcost }),
   }));
 
   return await scoped(models.InventoryProduct).bulkCreate(inventoryProductsData, { transaction });
@@ -160,14 +164,15 @@ export const updateInventoryProductsSellingPrice = async (ids: number[], selling
 /**
  * Set landed unit cost for inventory products by siplId and productId
  */
-export const setInventoryProductLandedUnitCost = async (
+export const setInventoryProductLandedUnitCostAndFOBcost = async (
   siplId: number,
   productId: number,
   landedUnitCost: number,
+  FOBcost: number,
   transaction?: Transaction
 ) => {
   const [updatedCount] = await scoped(models.InventoryProduct).update(
-    { landedUnitCost },
+    { landedUnitCost, FOBcost },
     {
       where: { siplId, productId },
       transaction
@@ -282,10 +287,11 @@ export const getAllocatedInventoryProductWithSalesOrderAndCustomer = async (inve
 export const updateInventoryProductStatusBySipl = async (
   siplId: number,
   status: (typeof INVENTORY_ITEM_STATUS)[keyof typeof INVENTORY_ITEM_STATUS],
+  receivedDate?: Date | string,
   transaction?: Transaction
 ) => {
   const [updatedCount] = await scoped(models.InventoryProduct).update(
-    { status },
+    { status, ...(receivedDate && { receivedDate }) },
     {
       where: { siplId },
       individualHooks: true,

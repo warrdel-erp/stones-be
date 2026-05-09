@@ -2,11 +2,14 @@ import express from "express";
 import * as inventoryProductController from "../controllers/inventoryProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
+import { uploadCSV } from "../middleware/uploadMiddleware";
 import { inventoryProductArraySchema } from "../validators";
 
 const router = express.Router();
 
 router.put("/assignBin", authenticateUser, validateRequest(inventoryProductArraySchema), inventoryProductController.assignbinInventoryProducts);
+
+router.post("/bulkUpload", authenticateUser, uploadCSV.single("file"), inventoryProductController.bulkUploadInventoryProducts);
 
 // Get inventory products according to siplId
 router.get("/specialFilters", authenticateUser, inventoryProductController.getInventoryProductsBySIPLCombinedNumber);

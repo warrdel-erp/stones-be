@@ -273,7 +273,9 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
       originalSlab.clientId,
       transaction,
       INVENTORY_ITEM_STATUS.IN_INVENTORY,
-      inventoryProduct.landedUnitCost
+      inventoryProduct.landedUnitCost,
+      inventoryProduct.receivedDate,
+      inventoryProduct.FOBcost
     );
 
     // Get the last serial number for the SIPL
