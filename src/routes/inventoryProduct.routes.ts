@@ -50,7 +50,4 @@ router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdIn
 // Get inventory product details by qrCode
 router.get("/qr/:qrCode", authenticateUser, inventoryProductController.getInventoryProductByQrCode);
 
-
-
-
 export default router;
