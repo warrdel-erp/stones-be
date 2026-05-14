@@ -8,8 +8,9 @@ import { AuthRequest } from "../middleware/authMiddleware";
 export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
   const accountId = req.user?.accountId;
+  const locationId = req.user?.defaultLocationId
 
-  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, accountId, clientId });
+  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, accountId, clientId, locationId });
   SuccessResponse(res, 201, "Sales Order created successfully", salesOrder);
 });
 
