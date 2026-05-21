@@ -73,7 +73,7 @@ const SalesOrder = sequelize.define(
     },
     shippingAddressId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: CustomerAddress,
         key: "id",

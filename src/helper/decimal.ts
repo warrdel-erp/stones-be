@@ -17,8 +17,8 @@ export const decimalSubtract = (a: number, b: number): number => {
 /**
  * Multiply two numbers with 2 decimal places
  */
-export const decimalMultiply = (a: number, b: number): number => {
-    return new Decimal(a).times(b).toDP(2).toNumber();
+export const decimalMultiply = (...args: number[]): number => {
+    return args.reduce((acc, arg) => new Decimal(acc).times(arg).toDP(2).toNumber(), 1);
 };
 
 /**
@@ -41,6 +41,13 @@ export const decimalSum = (numbers: number[]): number => {
  */
 export const decimalCompare = (a: number, b: number): number => {
     return new Decimal(a).comparedTo(b);
+};
+
+/**
+ * Check if two numbers are equal
+ */
+export const decimalEquals = (a: number, b: number): boolean => {
+    return decimalCompare(a, b) === 0;
 };
 
 /**

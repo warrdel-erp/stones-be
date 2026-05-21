@@ -6,6 +6,7 @@ import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { SplitSlabInput } from "../validators";
+import * as siplService from "../services/sipl.service";
 
 // 🔹 Get SlabLogs by SlabId
 export const getSlabWithLogs = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -84,6 +85,8 @@ export const checkSiplSlabsFullyFilled = catchAsync(async (req: Request, res: Re
   }
 
   const result = await slabService.checkSiplSlabsFullyFilled(Number(siplId));
+
+  await siplService.checkSIPLDataIsFilledCorrectly(Number(siplId));
 
   return SuccessResponse(res, 200, result.message, result);
 });

@@ -4,10 +4,13 @@ import * as loadingOrderController from "../controllers/loadingOrder.controller"
 import * as salesOrderProductController from "../controllers/salesOrderProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 
+import { validateRequest } from "../middleware/validationMiddleware";
+import { createSalesOrderSchema } from "../validators/salesOrder.validator";
+
 const router = Router();
 
 // Create a new SO
-router.post("/", authenticateUser, salesOrderController.createSalesOrder);
+router.post("/", authenticateUser, validateRequest(createSalesOrderSchema), salesOrderController.createSalesOrder);
 
 // Get All SO
 router.get("/", authenticateUser, salesOrderController.getAllSalesOrders);

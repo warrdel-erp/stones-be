@@ -21,8 +21,13 @@ import * as productRepository from "../repositories/product.repository";
 import * as tradeServiceService from "../services/tradeService.service";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import _ from "lodash";
-import Decimal from "decimal.js";
-import { decimalDivide } from "../helper/decimal";
+import * as decimal from "../helper/decimal";
+import {
+  decimalAdd,
+  decimalDivide,
+  decimalGreaterThan,
+  decimalMultiply,
+} from "../helper/decimal";
 
 // Processes the inventory reception by updating slab and generic product statuses.
 export const receiveInventory = async (siplId: number, receivedDate: string, clientId: number, locationId: number): Promise<number> => {
@@ -177,6 +182,50 @@ export const addContainer = async (containerData: Object, siplId: number, client
   );
 
   return container;
+};
+
+type PackagingQuantityPayload = {
+  quantity: number;
+  packageLength?: number;
+  packageWidth?: number;
+};
+
+export const validatePackagingQuantityNotExceedsSiplProduct = async (
+  siplProduct: any,
+  payload: PackagingQuantityPayload
+) => {
+  const maxQuantity = Number(siplProduct.quantity);
+  const productName = siplProduct.requestedPurchaseProduct?.product?.name ?? "product";
+  const isSlabType = siplProduct.requestedPurchaseProduct?.product?.isSlabType;
+
+  let existingPackagingQuantity = 0;
+  let newPackagingQuantity = 0;
+
+  if (!isSlabType) {
+    existingPackagingQuantity = await genericProductRepository.countBySiplProductId(siplProduct.id);
+    newPackagingQuantity = Number(payload.quantity);
+  } else {
+    const slabs = await slabRepository.findBySiplProductId(siplProduct.id);
+    existingPackagingQuantity = sumDecimal(slabs, "packagedSqrFt");
+
+    const { packageLength, packageWidth, quantity } = payload;
+    if (!packageLength || !packageWidth || !quantity) {
+      throw new AppError("packageLength, packageWidth, and quantity are required for slab products.", 400);
+    }
+
+    const areaPerSlab = decimalDivide(decimalMultiply(packageLength, packageWidth), 144);
+    newPackagingQuantity = decimalMultiply(areaPerSlab, quantity);
+  }
+
+  const totalPackagingQuantity = decimalAdd(existingPackagingQuantity, newPackagingQuantity);
+
+  if (decimalGreaterThan(totalPackagingQuantity, maxQuantity)) {
+    throw new AppError(
+      `Total packaging quantity (${totalPackagingQuantity}) cannot exceed the SIPL product quantity (${maxQuantity}) for "${productName}".`,
+      400
+    );
+  }
+
 };
 
 // Create slabs for SIPL
@@ -439,21 +488,16 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
       )
   );
 
-  // // Total quantity of generic product.
-  // totalReceivingQuantity = siplData.siplProducts.reduce(
-  //   (total: number, siplProduct: any) => total + siplProduct.genericProducts.length,
-  //   0
-  // );
-
   // Unit bill price as per total area of all product's slab.
-  const unitBillPrice = Number((totalBillsCharges / totalReceivingQuantity)) || 0;
-  const unitServicePrice = new Decimal(totalTradeServicesAmount).div(totalReceivingQuantity).toDecimalPlaces(2).toNumber() || 0;
+
+  // change unit bill price calcs using decimal as well.
+  const unitBillPrice = decimalDivide(totalBillsCharges, totalQuantity);
+  const unitServicePrice = decimalDivide(totalTradeServicesAmount, totalQuantity);
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
     // total received area as per product.
     let totalReceivedQuantity = sumDecimal(siplProduct.slabs, "receivedSqrFt");
-
 
     if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
       totalReceivedQuantity = siplProduct.genericProducts.length;
@@ -465,7 +509,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
 
-    const unitCost = Number((totalSIPLProductPrice / totalReceivedQuantity));
+    const unitCost = siplProduct.unitPrice;
 
     // Total unit charge is self unit charge + bill charge per unit area.
     const landedUnitCost = unitCost + unitBillPrice + unitServicePrice;
@@ -581,3 +625,34 @@ export const getNewCombinedSlabNumberService = async (siplId: number) => {
 export const getSIPLContainers = async (siplId: number) => {
   return await containerRepository.getContainersBySiplId(siplId);
 };
+
+export const checkSIPLDataIsFilledCorrectly = async (siplId: number) => {
+  const siplRes = await siplRepository.findSIPLById(siplId);
+
+  const sipl = siplRes?.get({ plain: true });
+
+  let isCorrect = true;
+
+  sipl.siplProducts.forEach((sp: any) => {
+
+    if (!sp.requestedPurchaseProduct.product.isSlabType) {
+      const totalGenericQuantity = sp.genericProducts.length;
+
+      if (!decimal.decimalEquals(totalGenericQuantity, sp.quantity)) {
+        isCorrect = false;
+        throw new AppError(`Total generic quantity of product ${sp.requestedPurchaseProduct.product.name} does not match the Billed quantity.`, 400)
+      }
+      return;
+    }
+
+    const totalPackagingArea = decimal.decimalSum(sp.slabs.map((slab: any) => slab.packagedSqrFt ?? []))
+
+    if (!decimal.decimalEquals(totalPackagingArea, sp.quantity)) {
+      isCorrect = false;
+      throw new AppError(`Packaging area of product "${sp.requestedPurchaseProduct.product.name}" does not match the Billed quantity.`, 400)
+    }
+
+  })
+
+  return { isCorrect }
+}

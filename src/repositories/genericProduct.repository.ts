@@ -61,6 +61,10 @@ export const getGenericProductByInventoryProductId = async (inventoryProductId: 
     return await scoped(models.GenericProduct).findOne({ where: { inventoryProductId }, transaction });
 };
 
+export const countBySiplProductId = async (siplProductId: number) => {
+    return await scoped(models.GenericProduct).count({ where: { siplProductId } });
+};
+
 // Get all generic products
 export const getAllGenericProducts = async (filters?: any, transaction?: Transaction, locationId?: number) => {
     return await scoped(models.GenericProduct).findAll({

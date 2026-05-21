@@ -23,9 +23,12 @@ export const bulkUploadInventoryProducts = async (fileBuffer: Buffer, userId: nu
       include: [{ association: "warehouse", attributes: ["id"] }],
       transaction,
     });
+
     if (!defaultLocation)
       throw new AppError("No location found for this client. Please configure a location first.", 400);
+
     const defaultLocationId = defaultLocation.id;
+
     const defaultWarehouseId: number | null = defaultLocation.warehouse?.id ?? null;
     if (!defaultWarehouseId)
       throw new AppError("No warehouse linked to the default location. Please configure a warehouse first.", 400);
@@ -79,7 +82,7 @@ const ALLOWED_HEADERS = [
 const REQUIRED_HEADERS = ["Product"];
 
 const parseInventoryFile = (fileBuffer: Buffer) => {
-  const workbook = XLSX.read(fileBuffer, { type: "buffer", cellDates: true });
+  const workbook = XLSX.read(fileBuffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
@@ -94,7 +97,7 @@ const parseInventoryFile = (fileBuffer: Buffer) => {
       throw new AppError(`Missing required column(s): ${missing.join(", ")}`, 400);
   }
 
-  const data = XLSX.utils.sheet_to_json(worksheet);
+  const data = XLSX.utils.sheet_to_json(worksheet, { raw: true });
   if (data.length === 0) throw new AppError("No inventory products found in file.", 400);
 
   let rowNumber = 1;
@@ -110,19 +113,19 @@ const extractRawColumns = (rawRows: any[]) => {
     _rowNumber: raw._rowNumber,
     // --- raw values pulled straight from the sheet ---
     productName: (raw["Product"] ?? "").toString().trim(),
-    serialRaw: raw["Serial#"]?.toString().trim() ?? null,
+    serialRaw: raw["Serial#"] ?? null,
     barcode: raw["BarcodeID"]?.toString().trim() ?? null,
     block: raw["BLOCK"]?.toString().trim() ?? null,
     lot: raw["LOT"]?.toString().trim() ?? null,
-    slabNumRaw: raw["Slab Num"]?.toString().trim() ?? null,
+    slabNumRaw: raw["Slab Num"] ?? null,
     binName: raw["Bin"]?.toString().trim() ?? null,
     dimensionsRaw: raw["Dimensions"]?.toString().trim() ?? null,
     supplierName: raw["Supplier"]?.toString().trim() ?? null,
-    fobCostRaw: raw["Unit FOB Cost"]?.toString().trim() ?? null,
-    landedCostRaw: raw["Unit Landed Cost"]?.toString().trim() ?? null,
+    fobCostRaw: raw["Unit FOB Cost"] ?? null,
+    landedCostRaw: raw["Unit Landed Cost"] ?? null,
     slabStatusRaw: raw["Slab Status"]?.toString().trim() ?? null,
     notes: raw["Notes"]?.toString().trim() ?? null,
-    receivedDateRaw: raw["Received Date"]?.toString().trim() ?? null,
+    receivedDateRaw: raw["Received Date"] ?? null,
     // --- resolved / computed (filled by column handlers) ---
     productId: null as number | null,
     isSlabType: null as boolean | null,
@@ -213,11 +216,8 @@ const processProductColumn = async (
   });
 };
 
-
 // ── Serial# ───────────────────────────────────────────────────────────────────
-// Transforms "3262-26" → "3262-1-26" and writes to combinedNumber
-// ── Serial# ───────────────────────────────────────────────────────────────────
-// 1. Transforms "3262-26" → "3262-1-26" and writes to combinedNumber
+// 1. Validates format (must be "digits-digits", e.g., "12-1")
 // 2. Checks intra-file uniqueness (no two rows in the upload share the same serial)
 // 3. Checks DB uniqueness (serial must not already exist in inventory_products)
 const processSerialColumn = async (
@@ -226,15 +226,37 @@ const processSerialColumn = async (
   errors: string[],
   transaction: any
 ) => {
-  // Step 1: Transform every row's serialRaw → combinedNumber
+  const serialRegex = /^[A-Za-z0-9]+-\d+$/;
+
+  // Step 1: Validate format and assign raw serial to combinedNumber
   rows.forEach((row) => {
     let serial = row.serialRaw;
-    if (!serial) return; // optional column — skip blank rows
+    if (serial === null || serial === undefined || serial === "") return;
 
-    const parts = serial.split("-");
-    if (parts.length === 2) {
-      serial = `${parts[0]}-1-${parts[1]}`;
+    // Handle Excel auto-converted dates (which come as numbers when raw: true)
+    if (typeof serial === "number") {
+      try {
+        const date = XLSX.SSF.parse_date_code(serial);
+        // Heuristic: 
+        // 1. If year is far in the future (like 3246), it was likely "3246-2" (Year-Month)
+        // 2. Otherwise, it was likely "12-1" (Month-Day)
+        if (date.y > 2100) {
+          serial = `${date.y}-${date.m}`;
+        } else {
+          serial = `${date.m}-${date.d}`;
+        }
+      } catch (e) {
+        serial = String(serial);
+      }
     }
+
+    if (typeof serial !== "string" || !serialRegex.test(serial)) {
+      errors.push(
+        `Row ${row._rowNumber}: Serial# "${serial}" is in invalid format. Expected format: "3246B-10" or "45-34".`
+      );
+      return;
+    }
+
     row.combinedNumber = serial;
   });
 
@@ -359,15 +381,21 @@ const processBinColumn = async (
   });
 };
 
-
-
 // ── Unit FOB Cost ─────────────────────────────────────────────────────────────
 // Strips currency symbols and parses to float
 const processFOBCostColumn = (row: any, errors: string[]) => {
-  if (!row.fobCostRaw) return;
-  const parsed = parseFloat(row.fobCostRaw.replace(/[^0-9.]/g, ""));
+  const raw = row.fobCostRaw;
+  if (raw === null || raw === undefined || raw === "") return;
+
+  let parsed: number;
+  if (typeof raw === "number") {
+    parsed = raw;
+  } else {
+    parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+  }
+
   if (isNaN(parsed)) {
-    errors.push(`Row ${row._rowNumber}: "Unit FOB Cost" is not a valid number. Got "${row.fobCostRaw}".`);
+    errors.push(`Row ${row._rowNumber}: "Unit FOB Cost" is not a valid number. Got "${raw}".`);
     return;
   }
   row.FOBcost = parsed;
@@ -376,12 +404,18 @@ const processFOBCostColumn = (row: any, errors: string[]) => {
 // ── Unit Landed Cost ──────────────────────────────────────────────────────────
 // Strips currency symbols and parses to float
 const processLandedCostColumn = (row: any, errors: string[]) => {
-  if (!row.landedCostRaw) return;
-  const parsed = parseFloat(row.landedCostRaw.replace(/[^0-9.]/g, ""));
+  const raw = row.landedCostRaw;
+  if (raw === null || raw === undefined || raw === "") return;
+
+  let parsed: number;
+  if (typeof raw === "number") {
+    parsed = raw;
+  } else {
+    parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+  }
+
   if (isNaN(parsed)) {
-    errors.push(
-      `Row ${row._rowNumber}: "Unit Landed Cost" is not a valid number. Got "${row.landedCostRaw}".`
-    );
+    errors.push(`Row ${row._rowNumber}: "Unit Landed Cost" is not a valid number. Got "${raw}".`);
     return;
   }
   row.landedUnitCost = parsed;
@@ -389,13 +423,6 @@ const processLandedCostColumn = (row: any, errors: string[]) => {
 
 // ── Slab Status ───────────────────────────────────────────────────────────────
 // Defaults to IN_INVENTORY if not provided; validates against known statuses
-// ── Slab Status ───────────────────────────────────────────────────────────────
-// Defaults to IN_INVENTORY if not provided.
-// ── Slab Status ───────────────────────────────────────────────────────────────
-// Only two accepted inputs:
-//   blank / empty  → defaults to IN_INVENTORY
-//   "ONHOLD"       → status stays IN_INVENTORY, but a hold record is created (Wave 4)
-// Any other value is rejected.
 const processSlabStatusColumn = (row: any, errors: string[]) => {
   const raw = (row.slabStatusRaw || "").toString().trim().toUpperCase();
 
@@ -428,9 +455,9 @@ const processSlabStatusColumn = (row: any, errors: string[]) => {
 // Parses date strings (e.g., "08/21/2024") or Date objects from XLSX
 const processReceivedDateColumn = (row: any, errors: string[]) => {
   let raw = row.receivedDateRaw;
-  if (!raw) return;
+  if (raw === null || raw === undefined || raw === "") return;
 
-  // If XLSX.read with cellDates: true already gave us a Date object
+  // 1. If it's already a Date object
   if (raw instanceof Date) {
     if (isNaN(raw.getTime())) {
       errors.push(`Row ${row._rowNumber}: "Received Date" is an invalid date object.`);
@@ -440,19 +467,25 @@ const processReceivedDateColumn = (row: any, errors: string[]) => {
     return;
   }
 
-  // Otherwise, try to parse the string
+  // 2. If it's a number (Excel serial)
+  if (typeof raw === "number") {
+    if (raw > 30000) {
+      // 25569 is the number of days between 1899-12-30 and 1970-01-01
+      const date = new Date((raw - 25569) * 86400 * 1000);
+      if (isNaN(date.getTime())) {
+        errors.push(`Row ${row._rowNumber}: "Received Date" serial "${raw}" is invalid.`);
+      } else {
+        row.receivedDate = date;
+      }
+    } else {
+      errors.push(`Row ${row._rowNumber}: "Received Date" number "${raw}" is not a valid Excel date.`);
+    }
+    return;
+  }
+
+  // 3. Otherwise, try to parse the string
   const d = new Date(raw);
   if (isNaN(d.getTime())) {
-    // If it's a number (Excel serial), XLSX might have missed it or it was cast to string
-    const serial = parseFloat(raw);
-    if (!isNaN(serial) && serial > 30000) { // Simple heuristic for Excel serials
-      // Convert Excel serial to JS Date
-      // 25569 is the number of days between 1899-12-30 and 1970-01-01
-      const date = new Date((serial - 25569) * 86400 * 1000);
-      row.receivedDate = date;
-      return;
-    }
-
     errors.push(
       `Row ${row._rowNumber}: "Received Date" "${raw}" is not a valid date. Expected format: MM/DD/YYYY.`
     );
