@@ -187,3 +187,22 @@ export const CREDIT_DEBIT_NOTE_TYPES = {
   CREDIT: "credit",
   DEBIT: "debit",
 } as const;
+
+export const FILE_UPLOAD_STATUS = {
+  PENDING: "pending",
+  ACTIVE: "active",
+  FAILED: "failed",
+} as const;
+
+export const FILE_UPLOAD_ENTITY_TYPE = {
+  CUSTOMER: "customer",
+  VENDOR: "vendor",
+  PRODUCT: "product",
+  SALES_ORDER: "salesOrder",
+  PURCHASE_ORDER: "purchaseOrder",
+  SIPL: "sipl",
+  INVENTORY_PRODUCT: "inventoryProduct",
+  LOADING_ORDER: "loadingOrder",
+  PAYMENT: "payment",
+  BILL: "bill",
+} as const;

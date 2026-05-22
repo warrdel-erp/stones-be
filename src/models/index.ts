@@ -59,7 +59,7 @@ import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
 import CustomerTransaction from "./customerTransaction.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
-
+import FileUpload from "./fileUpload.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -884,6 +884,13 @@ VendorContact.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Vendor.hasMany(VendorContact, { foreignKey: "vendorId", as: "contacts" });
 VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
+// FileUpload associations
+Client.hasMany(FileUpload, { foreignKey: "clientId", as: "fileUploads" });
+FileUpload.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+Account.hasMany(FileUpload, { foreignKey: "uploadedById", as: "uploadedFiles" });
+FileUpload.belongsTo(Account, { foreignKey: "uploadedById", as: "uploadedBy" });
+
 export {
   Client,
   User,
@@ -945,4 +952,5 @@ export {
   WiringInstruction,
   CustomerTransaction,
   InventoryProductMetaData,
+  FileUpload,
 };

@@ -119,7 +119,7 @@ use production_univeristy_db;
 ```
 
 cd /var/www/html/bestage.hiveerp.com/university-erp-be/
-sudo git pull
+sudo git pull --no-rebase
 sudo npm i
 npm run migrate
 pm2 restart 1

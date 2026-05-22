@@ -63,7 +63,7 @@ import vendorContactRoutes from "./routes/vendorContact.routes";
 import wiringInstructionRoutes from "./routes/wiringInstruction.routes";
 import fabricatorRoutes from "./routes/fabricator.routes";
 import externalCustomerTransactionRoutes from "./routes/externalCustomerTransaction.routes";
-
+import fileUploadRoutes from "./routes/fileUpload.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -130,7 +130,7 @@ app.use("/api/vendorContact", vendorContactRoutes);
 app.use("/api/wiringInstruction", wiringInstructionRoutes);
 app.use("/api/fabricator", fabricatorRoutes);
 app.use("/api/externalCustomerTransaction", externalCustomerTransactionRoutes);
-
+app.use("/api/fileUpload", fileUploadRoutes);
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);
