@@ -17,6 +17,11 @@ export const generateUploadUrlSchema = z.object({
     .int("size must be an integer.")
     .positive("size must be a positive number."),
 
+  isTemp: z
+    .boolean()
+    .optional()
+    .default(false),
+
   entityType: z
     .enum(Object.values(FILE_UPLOAD_ENTITY_TYPE) as [string, ...string[]], {
       errorMap: () => ({

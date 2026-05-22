@@ -14,4 +14,4 @@ export const s3Client = new S3Client({
 
 export const S3_BUCKET = process.env.AWS_S3_BUCKET || "";
 
-export const SIGNED_URL_EXPIRES_IN = 15 * 60; // 15 minutes in seconds
+export const SIGNED_URL_EXPIRES_IN = parseInt(process.env.S3_SIGNED_URL_EXPIRES_IN || "900", 10); // seconds, default 15 min

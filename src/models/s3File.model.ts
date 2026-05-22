@@ -4,8 +4,8 @@ import { FILE_UPLOAD_ENTITY_TYPE, FILE_UPLOAD_STATUS } from "../constants/tableT
 import Client from "./client.model";
 import Account from "./Account.model";
 
-const FileUpload = sequelize.define(
-  "FileUpload",
+const S3File = sequelize.define(
+  "S3File",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -60,6 +60,12 @@ const FileUpload = sequelize.define(
       type: DataTypes.BIGINT,
       allowNull: false,
     },
+    isTemp: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      comment: "If true, the file is considered temporary and may be cleaned up later",
+    },
     status: {
       type: DataTypes.ENUM(...Object.values(FILE_UPLOAD_STATUS)),
       allowNull: false,
@@ -79,12 +85,22 @@ const FileUpload = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    url: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const bucket = this.get("s3Bucket");
+        const key = this.get("s3Key");
+        if (!bucket || !key) return null;
+        const region = process.env.AWS_REGION || "us-east-1";
+        return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+      },
+    },
   },
   {
-    tableName: "file_uploads",
+    tableName: "s3_files",
     timestamps: true,
     paranoid: true,
   }
 );
 
-export default FileUpload;
+export default S3File;

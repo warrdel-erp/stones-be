@@ -63,7 +63,7 @@ import vendorContactRoutes from "./routes/vendorContact.routes";
 import wiringInstructionRoutes from "./routes/wiringInstruction.routes";
 import fabricatorRoutes from "./routes/fabricator.routes";
 import externalCustomerTransactionRoutes from "./routes/externalCustomerTransaction.routes";
-import fileUploadRoutes from "./routes/fileUpload.routes";
+import fileUploadRoutes from "./routes/s3File.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;

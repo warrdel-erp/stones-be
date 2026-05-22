@@ -59,7 +59,7 @@ import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
 import CustomerTransaction from "./customerTransaction.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
-import FileUpload from "./fileUpload.model";
+import S3File from "./s3File.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -884,12 +884,16 @@ VendorContact.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Vendor.hasMany(VendorContact, { foreignKey: "vendorId", as: "contacts" });
 VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
-// FileUpload associations
-Client.hasMany(FileUpload, { foreignKey: "clientId", as: "fileUploads" });
-FileUpload.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+// S3File associations
+Client.hasMany(S3File, { foreignKey: "clientId", as: "s3Files" });
+S3File.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
-Account.hasMany(FileUpload, { foreignKey: "uploadedById", as: "uploadedFiles" });
-FileUpload.belongsTo(Account, { foreignKey: "uploadedById", as: "uploadedBy" });
+Account.hasMany(S3File, { foreignKey: "uploadedById", as: "uploadedS3Files" });
+S3File.belongsTo(Account, { foreignKey: "uploadedById", as: "uploadedBy" });
+
+// Customer-S3File association (customer profile/logo image)
+Customer.belongsTo(S3File, { foreignKey: "imageFileId", as: "image" });
+S3File.hasMany(Customer, { foreignKey: "imageFileId", as: "customers" });
 
 export {
   Client,
@@ -952,5 +956,5 @@ export {
   WiringInstruction,
   CustomerTransaction,
   InventoryProductMetaData,
-  FileUpload,
+  S3File,
 };

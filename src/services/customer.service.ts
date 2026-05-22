@@ -11,6 +11,7 @@ import * as customerAddressService from "../services/customerAddress.service";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import * as advancedDepositRepository from "../repositories/advancedDeposit.repository";
+import * as s3FileRepository from "../repositories/s3File.repository";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -48,6 +49,11 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
     // Create Ledger Account data
     const ledgerAccount = await createLedgerAccountForCustomer(clientId, newCustomer, transaction);
 
+    // If an S3 file was attached, mark it permanent (isTemp → false) within the same transaction
+    if (customerData.imageFileId) {
+      await s3FileRepository.markS3FilePermanent(customerData.imageFileId, transaction);
+    }
+
     transaction.commit();
     return { customer: newCustomer, addresses: newAddresses, ledgerAccount };
   } catch (error) {
@@ -60,6 +66,11 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
 export const updateCustomer = async (id: number, data: any) => {
   const updatedCustomer = await customerRepository.updateCustomerById(id, data);
   if (!updatedCustomer) throw new AppError("Customer not found or update failed", 400);
+
+  // If a new S3 file was attached, mark it permanent (isTemp → false)
+  if (data.imageFileId) {
+    await s3FileRepository.markS3FilePermanent(data.imageFileId);
+  }
 
   return updatedCustomer;
 };

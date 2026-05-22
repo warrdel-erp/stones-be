@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("file_uploads", {
+    await queryInterface.createTable("s3_files", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -74,6 +74,12 @@ module.exports = {
         allowNull: false,
         comment: "File size in bytes",
       },
+      isTemp: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        comment: "If true, the file is considered temporary and may be cleaned up later",
+      },
       status: {
         type: Sequelize.ENUM("pending", "active", "failed"),
         allowNull: false,
@@ -103,16 +109,20 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("file_uploads", ["clientId"], {
-      name: "idx_file_uploads_clientId",
+    await queryInterface.addIndex("s3_files", ["clientId"], {
+      name: "idx_s3_files_clientId",
     });
 
-    await queryInterface.addIndex("file_uploads", ["entityType", "entityId"], {
-      name: "idx_file_uploads_entity",
+    await queryInterface.addIndex("s3_files", ["entityType", "entityId"], {
+      name: "idx_s3_files_entity",
+    });
+
+    await queryInterface.addIndex("s3_files", ["isTemp"], {
+      name: "idx_s3_files_isTemp",
     });
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("file_uploads");
+    await queryInterface.dropTable("s3_files");
   },
 };
