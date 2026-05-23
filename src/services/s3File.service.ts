@@ -38,7 +38,7 @@ export const generateUploadUrl = async (
     mimeType: string;
     size: number;
     isTemp?: boolean;
-    entityType?: string | null;
+    entityType: string;
     entityId?: number | null;
     companyId?: number | null;
   },

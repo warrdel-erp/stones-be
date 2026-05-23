@@ -27,9 +27,7 @@ export const generateUploadUrlSchema = z.object({
       errorMap: () => ({
         message: `entityType must be one of: ${Object.values(FILE_UPLOAD_ENTITY_TYPE).join(", ")}`,
       }),
-    })
-    .optional()
-    .nullable(),
+    }),
 
   entityId: z.number().int().positive().optional().nullable(),
 

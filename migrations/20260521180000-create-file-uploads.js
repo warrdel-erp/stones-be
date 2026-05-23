@@ -38,7 +38,7 @@ module.exports = {
           "payment",
           "bill"
         ),
-        allowNull: true,
+        allowNull: false,
         comment: "The entity this file is associated with",
       },
       entityId: {

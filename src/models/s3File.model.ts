@@ -28,7 +28,7 @@ const S3File = sequelize.define(
     },
     entityType: {
       type: DataTypes.ENUM(...Object.values(FILE_UPLOAD_ENTITY_TYPE)),
-      allowNull: true,
+      allowNull: false,
     },
     entityId: {
       type: DataTypes.INTEGER,
