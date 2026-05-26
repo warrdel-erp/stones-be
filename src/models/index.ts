@@ -60,6 +60,7 @@ import WiringInstruction from "./wiringInstruction.model";
 import CustomerTransaction from "./customerTransaction.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
 import S3File from "./s3File.model";
+import InventoryProductImage from "./inventoryProductImage.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -316,6 +317,11 @@ InventoryProduct.belongsTo(SIPL, { foreignKey: "siplId", as: 'sipl' });
 // InventoryProduct-InventoryProductMetaData relation
 InventoryProduct.hasOne(InventoryProductMetaData, { foreignKey: "inventoryProductId", as: "metaData" });
 InventoryProductMetaData.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// InventoryProduct-InventoryProductImage relation
+InventoryProduct.hasMany(InventoryProductImage, { foreignKey: "inventoryProductId", as: "images" });
+InventoryProductImage.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
 
 // Client-InventoryProductMetaData relation
 Client.hasMany(InventoryProductMetaData, { foreignKey: "clientId", as: "inventoryProductMetaData" });

@@ -45,7 +45,6 @@ export const getAllCustomers = async (page: number, limit: number, clientId: num
     offset,
     order: [["createdAt", "DESC"]], // Sort by latest customers
   });
-
   return { customers, total, page, limit };
 };
 

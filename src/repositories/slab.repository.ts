@@ -158,7 +158,9 @@ export const findByIdWithLogs = async (slabId: number) => {
       },
     ],
   });
-  return slab?.get({ plain: true });
+  const slabPlain = slab?.get({ plain: true });
+
+  return slabPlain;
 };
 
 /**

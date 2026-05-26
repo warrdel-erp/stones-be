@@ -1,15 +1,15 @@
-import { Where } from "sequelize/types/utils";
+import { sequelize } from "../config/database";
+import { INVENTORY_ITEM_STATUS } from "../constants";
+import { AppError } from "../helper/appError";
+import { AuthRequest } from "../middleware/authMiddleware";
+import * as models from "../models";
+import InventoryProductImage from "../models/inventoryProductImage.model";
+import S3File from "../models/s3File.model";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as inventoryProductHoldRepository from "../repositories/inventoryProductHold.repository";
-import { sequelize } from "../config/database";
-import { AppError } from "../helper/appError";
-import { INVENTORY_ITEM_STATUS } from "../constants";
-import { getModels } from "sequelize-typescript";
-import * as models from "../models";
-import * as  genericProductRepository from "../repositories/genericProduct.repository"
 import { scoped } from "../utils/scoped";
-import * as slabRepository from "../repositories/slab.repository";
-import { AuthRequest } from "../middleware/authMiddleware";
+import * as s3FileService from "./s3File.service";
+import { generateSignedGetUrl } from "./s3File.service";
 
 export const getInventoryProductsBySIPLCombinedNumber = async (req: AuthRequest, siplId: number) => {
     // Get inventory products by matching the middle number in combinedNumber using repository
@@ -336,3 +336,61 @@ export const getInventoryProductByQrCode = async (qrCode: string) => {
 };
 
 
+export const addInventoryProductImage = async (inventoryProductId: number, s3FileId: number) => {
+    // Verify inventory product exists
+    const inventoryProduct = await inventoryProductRepository.findInventoryProductById(inventoryProductId);
+    if (!inventoryProduct) {
+        throw new AppError("Inventory product not found", 404);
+    }
+
+    const image = await InventoryProductImage.create({
+        inventoryProductId,
+        s3FileId
+    });
+
+    return image;
+};
+
+export const deleteInventoryProductImage = async (imageId: number) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const imageLink = await InventoryProductImage.findByPk(imageId, { transaction });
+        
+        if (!imageLink) {
+            throw new AppError("Image not found", 404);
+        }
+        
+        const s3FileId = (imageLink as any).s3FileId;
+
+        await imageLink.destroy({ transaction });
+        
+        if (s3FileId) {
+            await s3FileService.deleteS3File(s3FileId, transaction);
+        }
+        
+        await transaction.commit();
+        return { message: "Image deleted successfully" };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
+export const getInventoryProductImages = async (inventoryProductId: number) => {
+    const images = await InventoryProductImage.findAll({
+        where: { inventoryProductId },
+        include: [{ model: S3File, as: 's3File' }]
+    });
+
+    const plainImages = images.map(img => img.get({ plain: true }));
+
+    await Promise.all(
+        plainImages.map(async (img: any) => {
+            if (img.s3File?.s3Bucket && img.s3File?.s3Key) {
+                img.s3File.url = await generateSignedGetUrl(img.s3File.s3Bucket, img.s3File.s3Key);
+            }
+        })
+    );
+
+    return plainImages;
+};

@@ -12,6 +12,7 @@ import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import * as advancedDepositRepository from "../repositories/advancedDeposit.repository";
 import * as s3FileRepository from "../repositories/s3File.repository";
+import { generateSignedGetUrl } from "../services/s3File.service";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -79,20 +80,23 @@ export const updateCustomer = async (id: number, data: any) => {
 export const fetchAllCustomers = async (page: number, limit: number, clientId: number, search?: string, filter?: any) => {
   let { customers, ...pagination } = await customerRepository.getAllCustomers(page, limit, clientId, search, filter);
 
-  customers = customers.map((customer: any) => {
-    customer.get({ plain: true });
+  customers = await Promise.all(customers.map(async (customer: any) => {
+    customer = customer.get({ plain: true });
     customer.salesTax = SALES_TAX.find((e) => e.id == customer.salesTax);
     customer.scope = SCOP.find((e) => e.id == customer.scope)?.value;
 
-    customer.addresses = customer.addresses.map((address: any) => {
-      address = address.get({ plain: true });
+    customer.addresses = customer.addresses?.map((address: any) => {
+      address = address.countryId ? address : address; // Just in case it's plain
       address.country = COUNTRIES.find((e) => e.id == address.countryId);
+      return address;
+    }) || [];
 
-      return address
-    })
+    if (customer.image?.s3Bucket && customer.image?.s3Key) {
+      customer.image.url = await generateSignedGetUrl(customer.image.s3Bucket, customer.image.s3Key);
+    }
 
     return customer;
-  });
+  }));
 
   return { customers, ...pagination };
 };
@@ -114,7 +118,12 @@ async function createLedgerAccountForCustomer(clientId: number, newCustomer: any
 // Get customer by id
 export const fetchCustomerById = async (id: number) => {
   const customer = await customerRepository.getCustomerById(id);
-  return customer
+  
+  if (customer?.image?.s3Bucket && customer?.image?.s3Key) {
+    customer.image.url = await generateSignedGetUrl(customer.image.s3Bucket, customer.image.s3Key);
+  }
+
+  return customer;
 };
 
 // Get customer minimal data (less detailed)

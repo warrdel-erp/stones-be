@@ -1,10 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
-import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, S3_BUCKET, SIGNED_URL_EXPIRES_IN } from "../config/s3";
 import { AppError } from "../helper/appError";
-import { FILE_UPLOAD_STATUS } from "../constants/tableTypes";
+import { FILE_UPLOAD_STATUS, FILE_UPLOAD_ENTITY_TYPE } from "../constants/tableTypes";
 import * as s3FileRepo from "../repositories/s3File.repository";
+import InventoryProductImage from "../models/inventoryProductImage.model";
+import { Transaction } from "sequelize";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -179,6 +181,29 @@ export const confirmUpload = async (fileId: number, clientId: number) => {
 
   // Mark as active
   const updated = await s3FileRepo.updateS3FileStatus(fileId, FILE_UPLOAD_STATUS.ACTIVE);
+  
+  // Custom business logic for linking files to specific entities upon confirmation
+  const s3FileRecord = updated as any; // Cast to access properties since it returns the object array typically or object
+  
+  if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.INVENTORY_PRODUCT && s3FileRecord.entityId) {
+    try {
+      await InventoryProductImage.findOrCreate({
+        where: {
+          inventoryProductId: s3FileRecord.entityId,
+          s3FileId: fileId
+        },
+        defaults: {
+          inventoryProductId: s3FileRecord.entityId,
+          s3FileId: fileId
+        }
+      });
+      // Mark file as permanent since it's now linked to an inventory product
+      await s3FileRepo.markS3FilePermanent(fileId);
+    } catch (error) {
+      console.error("Failed to link inventory product image upon S3 confirmation:", error);
+    }
+  }
+
   return updated;
 };
 
@@ -196,7 +221,19 @@ export const getS3FileById = async (fileId: number, clientId: number) => {
     throw new AppError("Access denied.", 403);
   }
 
-  return s3File;
+  const plain = s3File.get({ plain: true }) as any;
+  if (plain.s3Bucket && plain.s3Key) {
+    plain.url = await generateSignedGetUrl(plain.s3Bucket, plain.s3Key);
+  }
+  return plain;
+};
+
+/**
+ * Generates a signed GET URL for downloading/viewing a file from S3
+ */
+export const generateSignedGetUrl = async (bucket: string, key: string): Promise<string> => {
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+  return getSignedUrl(s3Client, command, { expiresIn: SIGNED_URL_EXPIRES_IN });
 };
 
 /**
@@ -207,4 +244,20 @@ export const listS3Files = async (
   filters: { entityType?: string; entityId?: number; status?: string } = {}
 ) => {
   return s3FileRepo.findAllS3Files(clientId, filters);
+};
+
+/**
+ * Deletes an S3File record and its corresponding object in S3.
+ */
+export const deleteS3File = async (fileId: number, transaction?: Transaction) => {
+  const s3File = await s3FileRepo.findS3FileById(fileId);
+  if (!s3File) return;
+
+  const plain = s3File.get({ plain: true }) as any;
+  if (plain.s3Bucket && plain.s3Key) {
+    const command = new DeleteObjectCommand({ Bucket: plain.s3Bucket, Key: plain.s3Key });
+    await s3Client.send(command);
+  }
+
+  await s3File.destroy({ transaction });
 };
