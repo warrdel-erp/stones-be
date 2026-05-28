@@ -6,6 +6,7 @@ import { AppError } from "../helper/appError";
 import { FILE_UPLOAD_STATUS, FILE_UPLOAD_ENTITY_TYPE } from "../constants/tableTypes";
 import * as s3FileRepo from "../repositories/s3File.repository";
 import InventoryProductImage from "../models/inventoryProductImage.model";
+import ProductImage from "../models/productImage.model";
 import { Transaction } from "sequelize";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -201,6 +202,25 @@ export const confirmUpload = async (fileId: number, clientId: number) => {
       await s3FileRepo.markS3FilePermanent(fileId);
     } catch (error) {
       console.error("Failed to link inventory product image upon S3 confirmation:", error);
+    }
+  }
+
+  if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.PRODUCT && s3FileRecord.entityId) {
+    try {
+      await ProductImage.findOrCreate({
+        where: {
+          productId: s3FileRecord.entityId,
+          s3FileId: fileId
+        },
+        defaults: {
+          productId: s3FileRecord.entityId,
+          s3FileId: fileId
+        }
+      });
+      // Mark file as permanent since it's now linked to a product
+      await s3FileRepo.markS3FilePermanent(fileId);
+    } catch (error) {
+      console.error("Failed to link product image upon S3 confirmation:", error);
     }
   }
 

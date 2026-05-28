@@ -32,4 +32,13 @@ router.get("/emptyBin", authenticateUser, productController.getProductsWithEmpty
 // Get Product by id
 router.get("/:id", authenticateUser, productController.getProductById);
 
+// Add an image to product
+router.post("/:id/images", authenticateUser, productController.addProductImage);
+
+// Delete an image from product
+router.delete("/images/:imageId", authenticateUser, productController.deleteProductImage);
+
+// Get images of product
+router.get("/:id/images", authenticateUser, productController.getProductImages);
+
 export default router;

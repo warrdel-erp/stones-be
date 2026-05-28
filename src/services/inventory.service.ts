@@ -262,4 +262,88 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
   return { products: finalData, total: data.total };
 };
 
+/**
+ * Level 1 — Products only (no SIPLs/bundles/blocks/inventoryProducts).
+ * Returns products with aggregate counts so the table renders fast.
+ */
+export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, isSlabType?: boolean) => {
+  const filter = isSlabType ? { isSlabType: true } : undefined;
+  const data: any = await productRepository.getAllProducts(page, limit, undefined, filter, true);
 
+  const finalData = data.products.map((product: any) => {
+    let totalAvailableQuantity = 0;
+    let totalAvailableQuantityUnit = 0;
+
+    if (product.isSlabType) {
+      const available = product?.inventoryProducts.map((item: any) =>
+        item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item?.slab?.receivedSqrFt : 0
+      );
+      totalAvailableQuantity = decimal.decimalSum(available);
+      totalAvailableQuantityUnit = available.length;
+    } else {
+      totalAvailableQuantity = product?.inventoryProducts?.length;
+      totalAvailableQuantityUnit = product?.inventoryProducts?.length;
+    }
+
+    const holds = product?.inventoryProducts?.map((e: any) =>
+      e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.isSlabType ? e.slab?.receivedSqrFt : 1) : 0
+    );
+
+    let totalHoldQuantity = 0;
+    let totalHoldQuantityUnit = 0;
+
+    if (holds) {
+      totalHoldQuantity = decimal.decimalSum(holds);
+      totalHoldQuantityUnit = holds.filter(Boolean).length;
+    }
+
+    delete product.inventoryProducts;
+
+    return {
+      ...product,
+      totalAvailableQuantity,
+      totalAvailableQuantityUnit,
+      totalHoldQuantity,
+      totalHoldQuantityUnit,
+    };
+  });
+
+  return { products: finalData, total: data.total };
+};
+
+export const fetchBlocksByProductAndLocation = async (productId: number, locationId: number) => {
+  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block');
+  return blocks.map((b: any) => ({
+    ...b,
+    totalArea: Number(b.totalArea) || 0,
+    inventoryProducts: [] // empty array to satisfy frontend shape and trigger lazy load
+  }));
+};
+
+export const fetchBundlesByProductAndLocation = async (productId: number, locationId: number) => {
+  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot');
+  return bundles.map((b: any) => ({
+    ...b,
+    totalArea: Number(b.totalArea) || 0,
+    inventoryProducts: [] // empty array to satisfy frontend shape and trigger lazy load
+  }));
+};
+
+export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number) => {
+  const sipls = await siplRepository.getSIPLByProduct(req, productId, locationId);
+  if (!sipls.length) return [];
+
+  const result = await Promise.all(
+    sipls.map(async (sipl: any) => {
+      const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id);
+      const plain = sipl.get({ plain: true });
+      // inventoryProducts array intentionally empty — loaded lazily at level 3
+      return {
+        ...plain,
+        totalArea: totalArea[0]?.totalArea,
+        inventoryProducts: [],
+      };
+    })
+  );
+  return result;
+};

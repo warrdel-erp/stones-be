@@ -11,6 +11,8 @@ import _ from "lodash";
 import * as XLSX from "xlsx";
 import { productSchema } from "../validators/product.validator";
 import * as models from "../models";
+import * as s3FileService from "./s3File.service";
+import { generateSignedGetUrl } from "./s3File.service";
 
 // Create a new product.
 export const addProduct = async (productData: any, userId: number, clientId: number) => {
@@ -114,6 +116,9 @@ export const fetchProductById = async (id: number) => {
 
   product.inventoryBalance = await getInventoryBalance(id);
 
+  // Fetch product images and sign them
+  product.images = await getProductImages(id);
+
   return product;
 };
 
@@ -140,6 +145,64 @@ export const productLandedCosts = async (productId: number) => {
 
 export const fetchProductsWithEmptyBinInventory = async (page: number, limit: number) => {
   return await productRepository.getProductsWithEmptyBinInventory(page, limit);
+};
+
+export const addProductImage = async (productId: number, s3FileId: number) => {
+  const product = await productRepository.getProductByIdSimple(productId);
+  if (!product) {
+    throw new AppError("Product not found", 404);
+  }
+
+  const image = await models.ProductImage.create({
+    productId,
+    s3FileId,
+  });
+
+  return image;
+};
+
+export const deleteProductImage = async (imageId: number) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const imageLink = await models.ProductImage.findByPk(imageId, { transaction });
+
+    if (!imageLink) {
+      throw new AppError("Image not found", 404);
+    }
+
+    const s3FileId = (imageLink as any).s3FileId;
+
+    await imageLink.destroy({ transaction });
+
+    if (s3FileId) {
+      await s3FileService.deleteS3File(s3FileId, transaction);
+    }
+
+    await transaction.commit();
+    return { message: "Image deleted successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+export const getProductImages = async (productId: number) => {
+  const images = await models.ProductImage.findAll({
+    where: { productId },
+    include: [{ model: models.S3File, as: 's3File' }],
+  });
+
+  const plainImages = images.map((img) => img.get({ plain: true }));
+
+  await Promise.all(
+    plainImages.map(async (img: any) => {
+      if (img.s3File?.s3Bucket && img.s3File?.s3Key) {
+        img.s3File.url = await generateSignedGetUrl(img.s3File.s3Bucket, img.s3File.s3Key);
+      }
+    })
+  );
+
+  return plainImages;
 };
 
 

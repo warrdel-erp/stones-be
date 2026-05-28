@@ -135,3 +135,33 @@ export const bulkUploadProducts = catchAsync(async (req: AuthRequest, res: Respo
   SuccessResponse(res, 201, "Products uploaded successfully", result);
 });
 
+export const addProductImage = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { s3FileId } = req.body;
+
+  if (!s3FileId) {
+    throw new AppError("s3FileId is required", 400);
+  }
+
+  const result = await productService.addProductImage(Number(id), Number(s3FileId));
+
+  return SuccessResponse(res, 200, "Image added successfully", result);
+});
+
+export const deleteProductImage = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { imageId } = req.params;
+
+  const result = await productService.deleteProductImage(Number(imageId));
+
+  return SuccessResponse(res, 200, "Image deleted successfully", result);
+});
+
+export const getProductImages = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+
+  const result = await productService.getProductImages(Number(id));
+
+  return SuccessResponse(res, 200, "Images fetched successfully", result);
+});
+
+

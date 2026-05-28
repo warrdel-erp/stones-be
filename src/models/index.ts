@@ -61,6 +61,7 @@ import CustomerTransaction from "./customerTransaction.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
 import S3File from "./s3File.model";
 import InventoryProductImage from "./inventoryProductImage.model";
+import ProductImage from "./productImage.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -322,6 +323,11 @@ InventoryProductMetaData.belongsTo(InventoryProduct, { foreignKey: "inventoryPro
 InventoryProduct.hasMany(InventoryProductImage, { foreignKey: "inventoryProductId", as: "images" });
 InventoryProductImage.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
+
+// Product-ProductImage relation
+Product.hasMany(ProductImage, { foreignKey: "productId", as: "images" });
+ProductImage.belongsTo(Product, { foreignKey: "productId", as: "product" });
+ProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
 
 // Client-InventoryProductMetaData relation
 Client.hasMany(InventoryProductMetaData, { foreignKey: "clientId", as: "inventoryProductMetaData" });
@@ -963,4 +969,5 @@ export {
   CustomerTransaction,
   InventoryProductMetaData,
   S3File,
+  ProductImage,
 };

@@ -144,6 +144,48 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
   return inventoryProducts;
 };
 
+export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot') => {
+  const groupField = groupBy === 'block' ? 'slab.block' : 'slab.lot';
+  const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
+  
+  return await scoped(models.InventoryProduct).findAll({
+    where: { 
+      productId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY
+    },
+    include: [
+      {
+        association: 'slab',
+        attributes: [],
+        required: true,
+      },
+      {
+        association: 'hold',
+        attributes: [],
+        required: false
+      },
+      {
+        association: 'bin',
+        attributes: [],
+        required: true,
+        include: [{
+          association: 'warehouse',
+          attributes: [],
+          where: { locationId },
+          required: true
+        }]
+      }
+    ],
+    attributes: [
+      [col(groupField), groupAlias],
+      [fn('COUNT', col('InventoryProduct.id')), 'unitCount'],
+      [fn('SUM', sequelize.literal('CASE WHEN `hold`.`id` IS NULL THEN (`slab`.`receivingLength` * `slab`.`receivingWidth` / 144) ELSE 0 END')), 'totalArea']
+    ],
+    group: [groupField],
+    raw: true,
+  });
+};
+
 export const updateInventoryProductsSellingPrice = async (ids: number[], sellingPrice: number, transaction?: Transaction) => {
   // Update multiple inventory products by IDs with new selling price
   const result = await scoped(models.InventoryProduct).update(

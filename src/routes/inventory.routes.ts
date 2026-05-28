@@ -5,5 +5,11 @@ import { authenticateUser } from "../middleware/authMiddleware";
 const router = express.Router();
 
 router.get("/location/:locationId", authenticateUser, inventoryController.getProductsByLocation);
+// New lazy-load routes
+router.get("/products", authenticateUser, inventoryController.getProductsOnly);
+router.get("/products/:productId/blocks", authenticateUser, inventoryController.getBlocksByProduct);
+router.get("/products/:productId/bundles", authenticateUser, inventoryController.getBundlesByProduct);
+router.get("/products/:productId/sipls", authenticateUser, inventoryController.getSiplsByProduct);
 
 export default router;
+
