@@ -14,9 +14,11 @@ import * as inventoryProductRepository from "../repositories/inventoryProduct.re
 import { getTotalLoadingOrderAmount, getTotalPlAmount } from "./loadingOrder.service";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
 import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
-import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import { getPercentageValue } from "../helper";
+import * as activityService from "../services/activity.service";
+import { requestContext } from "../utils/requestContext";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as tradeServiceService from '../services/tradeService.service';
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
@@ -99,6 +101,15 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
         }));
 
         await returnRepository.createReturnProducts(returnProducts, transaction);
+
+        await activityService.logActivity({
+          clientId: clientId || requestContext.getStore()?.clientId || 0,
+          activityType: ACTIVITY_TYPE.RETURN_INITIATION,
+          referenceId: returnRecord.id,
+          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+          title: "Return Initiated",
+          description: `Return initiated for Sales Invoice #${invoiceId}.`,
+        }, transaction);
 
         await transaction.commit();
         return returnRecord;
@@ -353,6 +364,16 @@ export const confirmReturn = async (returnId: number, locationId: number, client
             transaction
         );
 
+        await activityService.logActivity({
+          clientId,
+          activityType: ACTIVITY_TYPE.RETURN_CONFIRMATION,
+          referenceId: returnId,
+          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+          title: "Return Confirmed",
+          description: `Return #${returnId} has been confirmed.`,
+          locationId
+        }, transaction);
+
         if (shouldCommit) {
             await transaction.commit();
         }
@@ -387,6 +408,15 @@ export const cancelReturn = async (returnId: number) => {
             { status: RETURN_STATUS.CANCELLED },
             transaction
         );
+
+        await activityService.logActivity({
+          clientId: requestContext.getStore()?.clientId || returnRecord.clientId || 0,
+          activityType: ACTIVITY_TYPE.RETURN_REJECTION,
+          referenceId: returnId,
+          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+          title: "Return Cancelled",
+          description: `Return #${returnId} has been cancelled/rejected.`,
+        }, transaction);
 
         await transaction.commit();
         return returnRecord;

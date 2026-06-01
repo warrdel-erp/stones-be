@@ -78,6 +78,15 @@ export const getSlabByInventoryProductId = async (inventoryProductId: number, tr
   return await scoped(models.Slab).findOne({ where: { inventoryProductId }, transaction });
 };
 
+export const findBySiplProductId = async (siplProductId: number) => {
+  const slabs = await scoped(models.Slab).findAll({
+    where: { siplProductId },
+    attributes: ["packageLength", "packageWidth"],
+  });
+
+  return slabs.map((slab: any) => slab.get({ plain: true }));
+};
+
 // Update the status of a Slab based on inventoryProductId.
 export const updateSlabStatusByInventoryProduct = async (
   inventoryProductId: number,
@@ -149,7 +158,9 @@ export const findByIdWithLogs = async (slabId: number) => {
       },
     ],
   });
-  return slab?.get({ plain: true });
+  const slabPlain = slab?.get({ plain: true });
+
+  return slabPlain;
 };
 
 /**

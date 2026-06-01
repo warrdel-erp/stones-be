@@ -50,4 +50,13 @@ router.delete("/:id/hold", authenticateUser, inventoryProductController.unholdIn
 // Get inventory product details by qrCode
 router.get("/qr/:qrCode", authenticateUser, inventoryProductController.getInventoryProductByQrCode);
 
+// Add an image to inventory product
+router.post("/:id/images", authenticateUser, inventoryProductController.addInventoryProductImage);
+
+// Delete an image from inventory product
+router.delete("/images/:imageId", authenticateUser, inventoryProductController.deleteInventoryProductImage);
+
+// Get images of inventory product
+router.get("/:id/images", authenticateUser, inventoryProductController.getInventoryProductImages);
+
 export default router;

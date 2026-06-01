@@ -214,7 +214,10 @@ export const createSlabHandler = catchAsync(async (req: AuthRequest, res: Respon
     );
   }
 
+  await siplService.validatePackagingQuantityNotExceedsSiplProduct(siplProduct, req.body);
+
   if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
+
     const genericProduct = await siplService.handleCreateGenericProduct({
       ...req.body,
       siplId: Number(siplId),

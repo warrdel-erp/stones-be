@@ -1,7 +1,9 @@
 import { sequelize } from "../config/database";
 import * as deliveryRepository from "../repositories/delivery.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
-import { DELIVERY_STATUS } from "../constants/tableTypes";
+import { DELIVERY_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
+import * as activityService from "../services/activity.service";
+import { requestContext } from "../utils/requestContext";
 
 export const initiateDelivery = async (truckId: number, loadingOrderIds: number[], clientId: number) => {
     // 1. Check if truck already has a pending delivery
@@ -60,6 +62,16 @@ export const initiateDelivery = async (truckId: number, loadingOrderIds: number[
 
             invoiceDeliveries.push(invoiceDelivery);
         }
+
+        await activityService.logActivity({
+          clientId,
+          activityType: ACTIVITY_TYPE.DELIVERY_INITIATION,
+          referenceId: delivery.get('id') as number,
+          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+          title: "Delivery Initiated",
+          description: `Delivery initiated for Truck #${truckId}.`,
+        }, transaction);
+
         return { delivery, invoiceDeliveries };
     });
 };
@@ -100,6 +112,15 @@ export const approveDeliveryOrders = async (orders: Array<{ id: number, order: n
 
         // Update delivery status to APPROVED for the single delivery
         await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.APPROVED, transaction);
+
+        await activityService.logActivity({
+          clientId: requestContext.getStore()?.clientId || 0,
+          activityType: ACTIVITY_TYPE.DELIVERY_APPROVAL,
+          referenceId: deliveryId,
+          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+          title: "Delivery Approved",
+          description: `Delivery #${deliveryId} has been approved.`,
+        }, transaction);
 
         return result;
     });
@@ -154,6 +175,15 @@ export const rejectDelivery = async (deliveryId: number, clientId: number) => {
 
         // Update delivery status to REJECTED
         const rejectedDelivery = await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.REJECTED, transaction);
+
+        await activityService.logActivity({
+          clientId,
+          activityType: ACTIVITY_TYPE.DELIVERY_REJECTION,
+          referenceId: deliveryId,
+          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+          title: "Delivery Rejected",
+          description: `Delivery #${deliveryId} has been rejected.`,
+        }, transaction);
 
         return rejectedDelivery;
     });

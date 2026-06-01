@@ -183,6 +183,11 @@ const Customer = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    imageFileId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Reference to the s3_files record for this customer's image",
+    },
   },
   {
     tableName: "customers",

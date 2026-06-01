@@ -36,12 +36,15 @@ export const getAllCustomers = async (page: number, limit: number, clientId: num
         model: models.User,
         as: "primarySalesPerson",
       },
+      {
+        association: 'image',
+        attributes: ['id', 'url', 's3Bucket', 's3Key']
+      }
     ],
     limit,
     offset,
     order: [["createdAt", "DESC"]], // Sort by latest customers
   });
-
   return { customers, total, page, limit };
 };
 
@@ -55,7 +58,10 @@ export const getCustomerById = async (id: number) => {
       {
         association: "ledgerAccount",
         where: { referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER }
-
+      },
+      {
+        association: 'image',
+        attributes: ['id', 'url', 's3Bucket', 's3Key']
       }
     ],
   });

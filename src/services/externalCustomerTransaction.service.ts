@@ -26,18 +26,24 @@ export const bulkUploadExternalTransactions = async (fileBuffer: Buffer, clientI
   }
 
   // 2. Extract unique customer codes
-  const customerCodes = csvRows.map(row => row["Customer Code"] || row["customerCode"]).filter(Boolean);
+  const customerCodes = csvRows
+    .map((row) => {
+      const code = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
+      return code !== undefined && code !== null ? String(code).trim() : "";
+    })
+    .filter(Boolean);
   
   // 3. Find customers by codes
   const customers = await customerRepo.findCustomersByCodes(clientId, customerCodes);
-  const customerMap = new Map(customers.map((c: any) => [c.customerCode, c.id]));
+  const customerMap = new Map(customers.map((c: any) => [String(c.customerCode).trim(), c.id]));
 
   // 4. Prepare data for insertion
   let skippedCount = 0;
   const transactionsToCreate: any[] = [];
 
   csvRows.forEach((row) => {
-    const code = row["Customer Code"] || row["customerCode"];
+    const rawCode = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
+    const code = rawCode !== undefined && rawCode !== null ? String(rawCode).trim() : "";
     const customerId = customerMap.get(code);
 
     if (!customerId) {

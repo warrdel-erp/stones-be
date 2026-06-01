@@ -9,6 +9,8 @@ import * as purchaseOrderService from "../services/purchaseOrder.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as paymentService from "../services/payment.service";
 import * as billService from "../services/bill.service";
+import * as dashboardService from "../services/dashboard.service";
+import * as activityService from "../services/activity.service";
 
 // Get total amount of sales invoices from last N days
 export const getTotalAmountFromLastNDays = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -112,7 +114,55 @@ export const getTotalAndPaidVendorAmount = catchAsync(async (req: AuthRequest, r
 export const getTotalSlabMetricByCategory = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
 
-    // const data = await productCategoryService.getTotalSlabMetricByCategory(Number(clientId));
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
 
-    // return SuccessResponse(res, 200, "Total slab metric by category fetched successfully.", data);
+    const data = await dashboardService.getTotalSlabMetricByCategory(Number(clientId));
+
+    return SuccessResponse(res, 200, "Total slab and generic metrics by category fetched successfully.", data);
+});
+
+// Get Estimated Revenue
+export const getEstimatedRevenue = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
+
+    const data = await dashboardService.getEstimatedRevenue(Number(clientId));
+
+    return SuccessResponse(res, 200, "Estimated revenue fetched successfully.", data);
+});
+
+// Get recent transactions (payments/receipts)
+export const getRecentTransactions = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
+
+    const result = await paymentService.getPayments({ clientId }, 1, 5);
+
+    return SuccessResponse(res, 200, "Recent transactions fetched successfully.", result.payments);
+});
+
+// Get dashboard activities
+export const getDashboardActivities = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
+
+    const { page, limit } = req.query;
+    const result = await activityService.getActivitiesList(
+        Number(clientId),
+        page ? Number(page) : 1,
+        limit ? Number(limit) : 20
+    );
+
+    return SuccessResponse(res, 200, "Dashboard activities fetched successfully.", result);
 });

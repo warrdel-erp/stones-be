@@ -59,7 +59,10 @@ import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
 import CustomerTransaction from "./customerTransaction.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
-
+import S3File from "./s3File.model";
+import InventoryProductImage from "./inventoryProductImage.model";
+import ProductImage from "./productImage.model";
+import Activity from "./activity.model";
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -316,6 +319,16 @@ InventoryProduct.belongsTo(SIPL, { foreignKey: "siplId", as: 'sipl' });
 // InventoryProduct-InventoryProductMetaData relation
 InventoryProduct.hasOne(InventoryProductMetaData, { foreignKey: "inventoryProductId", as: "metaData" });
 InventoryProductMetaData.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// InventoryProduct-InventoryProductImage relation
+InventoryProduct.hasMany(InventoryProductImage, { foreignKey: "inventoryProductId", as: "images" });
+InventoryProductImage.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
+
+// Product-ProductImage relation
+Product.hasMany(ProductImage, { foreignKey: "productId", as: "images" });
+ProductImage.belongsTo(Product, { foreignKey: "productId", as: "product" });
+ProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
 
 // Client-InventoryProductMetaData relation
 Client.hasMany(InventoryProductMetaData, { foreignKey: "clientId", as: "inventoryProductMetaData" });
@@ -884,6 +897,27 @@ VendorContact.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Vendor.hasMany(VendorContact, { foreignKey: "vendorId", as: "contacts" });
 VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 
+// S3File associations
+Client.hasMany(S3File, { foreignKey: "clientId", as: "s3Files" });
+S3File.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+Account.hasMany(S3File, { foreignKey: "uploadedById", as: "uploadedS3Files" });
+S3File.belongsTo(Account, { foreignKey: "uploadedById", as: "uploadedBy" });
+
+// Customer-S3File association (customer profile/logo image)
+Customer.belongsTo(S3File, { foreignKey: "imageFileId", as: "image" });
+S3File.hasMany(Customer, { foreignKey: "imageFileId", as: "customers" });
+
+// Activity associations
+Client.hasMany(Activity, { foreignKey: "clientId", as: "activities" });
+Activity.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+Account.hasMany(Activity, { foreignKey: "accountId", as: "activities" });
+Activity.belongsTo(Account, { foreignKey: "accountId", as: "account" });
+
+Location.hasMany(Activity, { foreignKey: "locationId", as: "activities" });
+Activity.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+
 export {
   Client,
   User,
@@ -945,4 +979,7 @@ export {
   WiringInstruction,
   CustomerTransaction,
   InventoryProductMetaData,
+  S3File,
+  ProductImage,
+  Activity,
 };

@@ -32,7 +32,10 @@ import {
   NOTES_REFERENCE_TYPES,
   NOTES_TYPE,
   SALE_ORDER_PRODUCT_STAGES,
+  ACTIVITY_TYPE,
+  ACTIVITY_REFERENCE_TYPE,
 } from "../constants/tableTypes";
+import * as activityService from "../services/activity.service";
 import { getPercentageValue, removeDuplicatesWithUnitPrice, sumDecimal } from "../helper";
 import { Return } from "../models";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
@@ -704,6 +707,19 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     // Create journal entries for trade services
     await createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder, locationId, transaction);
+
+    await activityService.logActivity(
+      {
+        clientId: clientId,
+        activityType: ACTIVITY_TYPE.SALES_INVOICE_CREATION,
+        referenceId: invoice.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_INVOICE,
+        title: "Sales Invoice Created",
+        description: `Sales Invoice #${invoice.invoiceCode || invoice.id} was created for Loading Order #${loadingOrder.clientLoNumber}.`,
+        locationId,
+      },
+      transaction
+    );
 
     transaction.commit();
     return { loadingOrder, invoice };
