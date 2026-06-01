@@ -576,3 +576,35 @@ export const getInventoryProductByQrCode = async (qrCode: string, transaction?: 
     transaction
   });
 };
+
+export const getInStockProductsWithSubCategory = async (clientId: number) => {
+  return await scoped(models.InventoryProduct).findAll({
+    where: {
+      clientId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY
+    },
+    include: [
+      {
+        model: models.Product,
+        as: "product",
+        attributes: [],
+        required: false,
+        include: [
+          {
+            model: models.ProductSubCategory,
+            as: "subCategory",
+            attributes: [],
+            required: false
+          }
+        ]
+      }
+    ],
+    attributes: [
+      "isSlabType",
+      [sequelize.col("product->subCategory.name"), "categoryName"],
+      [sequelize.fn("COUNT", sequelize.col("InventoryProduct.id")), "count"]
+    ],
+    group: ["InventoryProduct.isSlabType", "product->subCategory.name"],
+    raw: true
+  });
+};

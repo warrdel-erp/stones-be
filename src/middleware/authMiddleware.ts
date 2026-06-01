@@ -87,6 +87,7 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
       {
         clientId: req.user?.clientId,
         locationId: req.user?.defaultLocationId,
+        accountId: req.user?.accountId,
       },
       () => {
         next();
@@ -102,6 +103,7 @@ export const authenticateUser = catchAsync(async (req: AuthRequest, res: Respons
       {
         clientId: req.user?.clientId,
         locationId: req.user?.defaultLocationId,
+        accountId: req.user?.accountId,
       },
       () => {
         next();

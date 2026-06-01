@@ -2,7 +2,8 @@ import _ from "lodash";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { SALES_TAX } from "../constants";
-import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
+import * as activityService from "../services/activity.service";
 import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import * as customerRepository from "../repositories/customer.repository";
 import * as notesRepository from "../repositories/notes.repository";
@@ -62,6 +63,19 @@ export const createSalesOrder = async (data: any) => {
         transaction
       );
     }
+
+    await activityService.logActivity(
+      {
+        clientId: salesOrder.clientId,
+        activityType: ACTIVITY_TYPE.SALES_ORDER_CREATION,
+        referenceId: salesOrder.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_ORDER,
+        title: "Sales Order Created",
+        description: `Sales Order #${salesOrder.clientSoNumber} was created successfully.`,
+        locationId: salesOrder.locationId,
+      },
+      transaction
+    );
 
     await transaction.commit();
     return { salesOrder, salesOrderProducts, internalNote, printableNote };

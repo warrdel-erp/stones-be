@@ -28,4 +28,13 @@ router.get("/totalVendorsAmounts", authenticateUser, dashboardController.getTota
 // Get category wise quantity.
 router.get("/categoryWiseQuantity", authenticateUser, dashboardController.getTotalSlabMetricByCategory);
 
+// Get estimated revenue.
+router.get("/estimatedRevenue", authenticateUser, dashboardController.getEstimatedRevenue);
+
+// Get recent transactions
+router.get("/recentTransactions", authenticateUser, dashboardController.getRecentTransactions);
+
+// Get dashboard activities
+router.get("/activities", authenticateUser, dashboardController.getDashboardActivities);
+
 export default router;

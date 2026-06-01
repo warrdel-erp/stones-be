@@ -206,3 +206,21 @@ export const FILE_UPLOAD_ENTITY_TYPE = {
   PAYMENT: "payment",
   BILL: "bill",
 } as const;
+
+export const ACTIVITY_TYPE = {
+  SALES_ORDER_CREATION: "sales_order_creation",
+  SALES_INVOICE_CREATION: "sales_invoice_creation",
+  DELIVERY_INITIATION: "delivery_initiation",
+  DELIVERY_APPROVAL: "delivery_approval",
+  DELIVERY_REJECTION: "delivery_rejection",
+  RETURN_INITIATION: "return_initiation",
+  RETURN_CONFIRMATION: "return_confirmation",
+  RETURN_REJECTION: "return_rejection",
+} as const;
+
+export const ACTIVITY_REFERENCE_TYPE = {
+  SALES_ORDER: "sales_order",
+  SALES_INVOICE: "sales_invoice",
+  DELIVERY: "delivery",
+  RETURN: "return",
+} as const;

@@ -2,6 +2,7 @@ import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import * as decimals from "../helper/decimal";
 import { scoped } from "../utils/scoped";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 
 export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
@@ -191,3 +192,25 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
 
   return calcs;
 }
+
+export const getInvoicedProductsForRevenue = async (clientId: number) => {
+  return await scoped(models.SalesOrderProduct).findAll({
+    where: {
+      clientId,
+      stage: SALE_ORDER_PRODUCT_STAGES.INVOICED
+    },
+    include: [
+      {
+        model: models.InventoryProduct,
+        as: "inventoryProduct",
+        include: [
+          {
+            model: models.Slab,
+            as: "slab",
+            attributes: ["id", "receivingLength", "receivingWidth", "receivedSqrFt"]
+          }
+        ]
+      }
+    ]
+  });
+};
