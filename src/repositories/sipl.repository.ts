@@ -55,17 +55,27 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
           {
             model: models.Vendor,
             as: "supplier",
-            attributes: ["name"],
+            attributes: [
+              "name", 
+              "remitAddress", 
+              "remitSuite", 
+              "remitCity", 
+              "remitState", 
+              "remitZip", 
+              "remitCountry", 
+              "primaryPhoneNo", 
+              "email"
+            ],
           },
           {
             model: models.Location,
             as: "shipmentLocation",
-            attributes: ["locationName"],
+            attributes: ["locationName", "contactName", "contactNumber", "contactMail", "address", "addressLine"],
           },
           {
             model: models.Location,
             as: "purchaseLocation",
-            attributes: ["locationName"],
+            attributes: ["locationName", "contactName", "contactNumber", "contactMail", "address", "addressLine"],
           },
         ],
       },
@@ -184,12 +194,12 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
       {
         model: models.Location,
         as: "shipmentLocation",
-        attributes: ["locationName"],
+        attributes: ["locationName", "contactName", "contactNumber", "contactMail", "address", "addressLine"],
       },
       {
         model: models.Location,
         as: "purchaseLocation",
-        attributes: ["locationName"],
+        attributes: ["locationName", "contactName", "contactNumber", "contactMail", "address", "addressLine"],
       },
       {
         association: 'paymentBills',

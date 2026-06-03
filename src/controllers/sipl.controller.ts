@@ -70,6 +70,14 @@ export const getAllBarcode = catchAsync(async (req: Request, res: Response) => {
   SuccessResponse(res, 201, "Barcode fetched successfully", container);
 });
 
+// Get all QR codes
+export const getAllQrCodes = catchAsync(async (req: Request, res: Response) => {
+  const { siplId } = req.params;
+
+  const qrCodes = await siplService.getAllQrCodes(Number(siplId));
+  SuccessResponse(res, 201, "QR codes fetched successfully", qrCodes);
+});
+
 /**
  * create Direct SIPL meaning (first create PO)
  * 1. create PO

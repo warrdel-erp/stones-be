@@ -920,3 +920,7 @@ sticky navbar.
 
 1. Packaging / Receiving number in SIPL.
 2. Paginated data of Products in add Products.
+3. Loading Order / Packaging List swap.
+4. Contact name location change in create customer.
+5. SIPL invoice.
+6. inventory top cards.

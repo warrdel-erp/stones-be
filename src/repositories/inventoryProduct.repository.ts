@@ -597,3 +597,15 @@ export const getInStockProductsWithSubCategory = async (clientId: number) => {
     raw: true
   });
 };
+
+/**
+ * Get all QR codes for inventory products in a SIPL
+ */
+export const getQrCodesBySiplId = async (siplId: number) => {
+  return await scoped(models.InventoryProduct).findAll({
+    where: {
+      siplId
+    },
+    attributes: ["id", "qrCode", "combinedNumber"],
+  });
+};

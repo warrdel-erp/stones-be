@@ -4,8 +4,8 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
+router.get("/stats", authenticateUser, inventoryController.getInventoryStats);
 router.get("/location/:locationId", authenticateUser, inventoryController.getProductsByLocation);
-// New lazy-load routes
 router.get("/products", authenticateUser, inventoryController.getProductsOnly);
 router.get("/products/:productId/blocks", authenticateUser, inventoryController.getBlocksByProduct);
 router.get("/products/:productId/bundles", authenticateUser, inventoryController.getBundlesByProduct);

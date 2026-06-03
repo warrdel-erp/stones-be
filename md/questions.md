@@ -144,3 +144,11 @@
 
 1. should we mark selection sheet for SO or not?
 2. can't we add more then 50 slabs by adding them multiple times.
+
+---
+
+1. what is `1) show accounts 2) logs 3) Void SIPL` in SIPL details page.
+
+2. in SIPL why would we show because SIPL itself is BILL and we should do it in supplier detail page.
+   1. Supplier bills
+   2. Other Bills (freight, other vendors will be here).

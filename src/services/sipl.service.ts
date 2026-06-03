@@ -616,6 +616,10 @@ export const getAllBarcode: any = async (siplId: number) => {
   return await slabRepository.getOnlyBarcode(siplId);
 };
 
+export const getAllQrCodes: any = async (siplId: number) => {
+  return await inventoryProductRepository.getQrCodesBySiplId(siplId);
+};
+
 // Get new combined slab number
 export const getNewCombinedSlabNumberService = async (siplId: number) => {
   return await inventoryProductRepository.getNewCombinedNumber(siplId);
