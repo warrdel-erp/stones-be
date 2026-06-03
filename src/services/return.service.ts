@@ -11,7 +11,7 @@ import * as genericProductRepository from "../repositories/genericProduct.reposi
 import { Transaction } from "sequelize";
 import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
-import { getTotalLoadingOrderAmount, getTotalPlAmount } from "./loadingOrder.service";
+import { getTotalPackagingListAmount, getTotalPlAmount } from "./packagingList.service";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
 import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
 import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
@@ -25,7 +25,7 @@ import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as journalEntryServices from '../services/journalEntry.service'
 
 interface InvoiceWithProducts {
-    loadingOrder: {
+    packagingList: {
         salesOrderProducts: Array<{
             id: number;
         }>;
@@ -55,8 +55,8 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
             }
         }
 
-        // Get all sales order product IDs from the invoice's loading order
-        const validSalesOrderProductIds = invoiceData.loadingOrder.salesOrderProducts.map(
+        // Get all sales order product IDs from the invoice's packaging list
+        const validSalesOrderProductIds = invoiceData.packagingList.salesOrderProducts.map(
             (sop) => sop.id
         );
 
@@ -122,7 +122,7 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
 export const getReturnById = async (returnId: number, transaction?: Transaction) => {
     const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId, transaction))?.get({ plain: true });
 
-    const salesTax = returnRecord.soInvoice.loadingOrder.salesOrder.tax;
+    const salesTax = returnRecord.soInvoice.packagingList.salesOrder.tax;
 
     if (!salesTax) {
         throw new AppError('Error in getting tax value', 400);
@@ -160,7 +160,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
 
         // Ledger Account for Customer
         const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            referenceId: returnRecord.soInvoice.loadingOrder.salesOrder.customerId,
+            referenceId: returnRecord.soInvoice.packagingList.salesOrder.customerId,
             referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
         });
 
@@ -188,7 +188,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccountForGoodsSold.id,
             },
             transaction
@@ -210,7 +210,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -228,7 +228,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
             clientId,
         });
 
-        const customerTax = returnRecord.soInvoice.loadingOrder.salesOrder.tax;
+        const customerTax = returnRecord.soInvoice.packagingList.salesOrder.tax;
 
         // #3
         // Journal Entry for state tax.
@@ -246,7 +246,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -271,7 +271,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -325,7 +325,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                        locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                         partyLedgerAccountId: ledgerAccountForCogs.id,
                     },
                     transaction
@@ -349,7 +349,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.loadingOrder.salesOrder.locationId,
+                        locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
                         partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
                     },
                     transaction
@@ -488,8 +488,8 @@ async function validateProductsBelongsToGivenInvoice(returnRecord: any, transact
         }
     }
 
-    // Get all sales order product IDs from the invoice's loading order
-    const validSalesOrderProductIds = invoiceData.loadingOrder.salesOrderProducts.map(
+    // Get all sales order product IDs from the invoice's packaging list
+    const validSalesOrderProductIds = invoiceData.packagingList.salesOrderProducts.map(
         (sop) => sop.id
     );
 

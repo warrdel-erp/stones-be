@@ -20,7 +20,7 @@ import * as siplService from "./sipl.service";
 import { AppError } from "../helper/appError";
 import * as tradeServiceRepository from "../repositories/tradeService.repository";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
-import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as decimal from '../helper/decimal'
 import * as models from "../models";
@@ -508,10 +508,10 @@ async function createJournalEntryForSoInvoiceForPaymentInvoice(bill: any, ledger
     amount: bill.amount,
     ledgerId: ledgerAccount.id,
     type: JOURNAL_ENTRY_TYPE.CR,
-    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE,
     referenceId: bill.id,
     processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
-    entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.PACKAGING_LIST,
     entryForId: bill.referenceId,
     locationId,
     partyLedgerAccountId: paymentAccountId
@@ -522,10 +522,10 @@ async function createJournalEntryForSoInvoiceForPaymentInvoice(bill: any, ledger
     amount: bill.amount,
     ledgerId: paymentAccountId,
     type: JOURNAL_ENTRY_TYPE.DR,
-    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE,
     referenceId: bill.id,
     processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICE_PAYMENT,
-    entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.PACKAGING_LIST,
     entryForId: bill.referenceId,
     locationId,
     partyLedgerAccountId: ledgerAccount.id
@@ -598,21 +598,21 @@ async function createJournalEntryForBillForPaymentBill(bill: any, ledgerAccount:
   await journalEntryRepository.create(journalEntry2, transaction);
 }
 
-export async function createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder: any, locationId: number, transaction: Transaction) {
-  // Find all trade services for this loading order
+export async function createJournalEntriesForTradeServicesOfPackagingList(packagingList: any, locationId: number, transaction: Transaction) {
+  // Find all trade services for this packaging list
   const tradeServices = await tradeServiceRepository.findTradeServices({
-    referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
-    referenceId: loadingOrder.id
+    referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST,
+    referenceId: packagingList.id
   });
 
   if (!tradeServices.length) return;
 
-  // Get loading order for customerId and locationId
-  if (!loadingOrder) throw new AppError("Loading Order not found", 404);
+  // Get packaging list for customerId and locationId
+  if (!packagingList) throw new AppError("Packaging List not found", 404);
 
   // Get customer ledger account
   const customerLedgerAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
-    referenceId: loadingOrder.salesOrder?.customerId,
+    referenceId: packagingList.salesOrder?.customerId,
     referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
   }, transaction);
 
@@ -633,10 +633,10 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
       ledgerId: service.ledgerAccountId,
       type: JOURNAL_ENTRY_TYPE.CR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
-      referenceId: loadingOrder.id,
-      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-      entryForId: loadingOrder.id,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST,
+      referenceId: packagingList.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.PACKAGING_LIST,
+      entryForId: packagingList.id,
       locationId: locationId,
       partyLedgerAccountId: customerLedgerAccountObj.id
     }, transaction);
@@ -646,10 +646,10 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
       ledgerId: customerLedgerAccountObj.id,
       type: JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
-      referenceId: loadingOrder.id,
-      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
-      entryForId: loadingOrder.id,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST,
+      referenceId: packagingList.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.PACKAGING_LIST,
+      entryForId: packagingList.id,
       locationId: locationId,
       partyLedgerAccountId: service.ledgerAccountId
     }, transaction);
@@ -657,14 +657,14 @@ export async function createJournalEntriesForTradeServicesOfLoadingOrder(loading
   }
 }
 export async function createJournalEntriesForTradeServicesOfReturns(returnData: any, locationId: number, transaction: Transaction) {
-  // Get loading order for customerId and locationId
+  // Get packaging list for customerId and locationId
   if (!returnData) throw new AppError("RO not found", 404);
 
   if (!returnData?.soInvoice?.customerId) {
     throw new AppError('customer Id is required for services journal entry', 400)
   }
 
-  // Find all trade services for this loading order
+  // Find all trade services for this packaging list
   const tradeServices = await tradeServiceRepository.findTradeServices({
     referenceType: TRADE_SERVICE_REFERENCE_TYPES.RETURN,
     referenceId: returnData.id
@@ -733,7 +733,7 @@ export async function createJournalEntriesForTradeServicesOfReturns(returnData: 
 }
 
 export async function createJournalEntriesForTradeServicesOfSIPL(sipl: any, locationId: number, transaction: Transaction) {
-  // Find all trade services for this loading order
+  // Find all trade services for this packaging list
   const tradeServices = await tradeServiceRepository.findTradeServices({
     referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL,
     referenceId: sipl.id

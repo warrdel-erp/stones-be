@@ -18,8 +18,8 @@ import {
   JournalEntry,
   Customer,
   CustomerAddress,
-  LoadingOrder,
   PackagingList,
+  LoadingOrder,
   SalesOrder,
   SalesOrderProduct,
   ProductSubCategory,
@@ -236,9 +236,9 @@ async function deleteStandardModels(clientId: number, t: Transaction) {
     GenericProduct, FreightDetail, InvoiceDelivery, Container, AdvancedDepositSettlement,
     // Mid-level
     SelectionSheet, Return, SalesOrderProduct, AdvancedDeposit, Payment,
-    SalesOrderInvoice, PackagingList,
+    SalesOrderInvoice, LoadingOrder,
     // Entities & Orders
-    Delivery, LoadingOrder, SalesOrder, Slab, InventoryProduct,
+    Delivery, PackagingList, SalesOrder, Slab, InventoryProduct,
     SIPLProduct, RequestedPurchaseProduct, SIPL, PurchaseOrder,
     Bill, CustomerAddress, Customer, Product, ProductSubCategory, ProductGroup,
     ProductBaseColor, ProductFinish, Vendor, Service, ServiceCategory,

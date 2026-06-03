@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Customer from "./customer.model";
-import LoadingOrder from "./loadingOrder.model";
+import PackagingList from "./packagingList.model";
 import Client from "./client.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
@@ -11,7 +11,7 @@ import { scoped } from "../utils/scoped";
 
 export type SoInvoice = {
   customerId: number;
-  loadingOrderId: number;
+  packagingListId: number;
   clientId: number;
   amount: number;
   salesOrderId: number;
@@ -89,10 +89,10 @@ const SalesOrderInvoice = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    loadingOrderId: {
+    packagingListId: {
       type: DataTypes.INTEGER,
       references: {
-        model: LoadingOrder,
+        model: PackagingList,
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -176,5 +176,3 @@ SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
 };
 
 export default SalesOrderInvoice;
-
-

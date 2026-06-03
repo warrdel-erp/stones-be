@@ -388,12 +388,12 @@ export const getSIPLById = async (id: number) => {
     })
   );
 
-  const totalPaidSiplAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
+  const totalPaidSiloAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
     sipl.id,
     PAYMENT_BILL_REFERENCE_TYPES.SIPL
   );
 
-  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiplAmount };
+  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiloAmount };
 };
 
 // Get SIPL by ID

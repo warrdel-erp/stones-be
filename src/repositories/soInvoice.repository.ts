@@ -1,7 +1,7 @@
 import { Op, Transaction, WhereOptions, col, fn } from "sequelize";
 import * as models from "../models";
 import CustomerAddress from "../models/customerAddress.model";
-import LoadingOrder from "../models/loadingOrder.model";
+import PackagingList from "../models/packagingList.model";
 import Location from "../models/location.model";
 import { RETURN_STATUS } from "../models/return.model";
 import SalesOrder from "../models/salesOrder.model";
@@ -78,16 +78,16 @@ export const getAllInvoicesList = async (
         ]
       },
       {
-        model: models.LoadingOrder,
-        as: "loadingOrder",
+        model: models.PackagingList,
+        as: "packagingList",
         include: [
           {
             association: "salesOrder",
             include: ['soLocation', 'shippingAddress']
           },
           {
-            model: models.PackagingList,
-            as: "packagingList",
+            model: models.LoadingOrder,
+            as: "loadingOrder",
           },
           {
             model: models.SalesOrderProduct,
@@ -117,8 +117,8 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
         attributes: ["id", "name"],
       },
       {
-        model: models.LoadingOrder,
-        as: "loadingOrder",
+        model: models.PackagingList,
+        as: "packagingList",
       },
       {
         association: 'advancedDepositSettlements',
@@ -199,7 +199,7 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
         ],
       },
       {
-        association: "loadingOrder",
+        association: "packagingList",
         include: [
           {
             association: 'tradeServices',
@@ -230,7 +230,7 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
             ],
           },
           {
-            association: "packagingList"
+            association: "loadingOrder"
           },
           {
             association: "shippingAddress",
@@ -269,12 +269,12 @@ export const getSalesOrderProductsWithoutReturns = async (
   const allProducts = await scoped(models.SalesOrderProduct).findAll({
     where: {
       ...filter,
-      '$loadingOrder.salesOrderInvoice.id$': soInvoiceId
+      '$packagingList.salesOrderInvoice.id$': soInvoiceId
     },
     include: [
       {
-        model: models.LoadingOrder,
-        as: 'loadingOrder',
+        model: models.PackagingList,
+        as: 'packagingList',
         include: [
           {
             model: models.SalesOrderInvoice,
@@ -282,7 +282,7 @@ export const getSalesOrderProductsWithoutReturns = async (
             attributes: ['id']
           },
           {
-            association: "packagingList"
+            association: "loadingOrder"
           }
         ]
       },
@@ -339,8 +339,8 @@ export const getSalesOrderProductsWithoutReturns = async (
 export const findSoInvoiceWithAssociations = async (soInvoiceId: number, transaction?: any) => {
   return await models.SalesOrderInvoice.findByPk(soInvoiceId, {
     include: [{
-      model: LoadingOrder,
-      as: "loadingOrder",
+      model: PackagingList,
+      as: "packagingList",
       include: [{
         model: SalesOrder,
         as: "salesOrder",
@@ -354,11 +354,13 @@ export const findSoInvoiceWithAssociations = async (soInvoiceId: number, transac
   });
 };
 
-export const getOverdueInvoicesRaw = async (clientId: number, transaction?: Transaction) => {
+export const getOverdueInvoicesRaw = async (clientId: number, customerId?: number, transaction?: Transaction) => {
+  const where: any = {};
+  if (customerId) {
+    where.customerId = customerId;
+  }
   return await scoped(models.SalesOrderInvoice).findAll({
-    where: {
-      clientId,
-    },
+    where,
     include: [
       {
         model: models.Customer,
@@ -366,8 +368,8 @@ export const getOverdueInvoicesRaw = async (clientId: number, transaction?: Tran
         attributes: ["id", "name"],
       },
       {
-        model: models.LoadingOrder,
-        as: "loadingOrder",
+        model: models.PackagingList,
+        as: "packagingList",
         include: [
           {
             model: models.SalesOrder,

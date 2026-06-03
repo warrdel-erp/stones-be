@@ -9,7 +9,7 @@ const NOTES_TYPE = {
 const NOTES_REFERENCE_TYPES = {
   SALES_ORDER: "sales_order",
   PURCHASE_ORDER: "purchase_order",
-  LOADING_ORDER: "loading_order",
+  PACKAGING_LIST: "packaging_list",
 };
 
 module.exports = {

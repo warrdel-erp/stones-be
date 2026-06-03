@@ -2,7 +2,7 @@ import _ from "lodash";
 import { AppError } from "../helper/appError";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as salesOrderInvoiceRepository from "../repositories/soInvoice.repository";
-import * as loadingOrderService from '../services/loadingOrder.service';
+import * as packagingListService from '../services/packagingList.service';
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
@@ -32,9 +32,9 @@ export const getInvoiceById = async (id: number) => {
     throw new AppError("Invoice does not exists.", 400);
   }
 
-  soInvoice.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(soInvoice.loadingOrder.salesOrderProducts);
+  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(soInvoice.packagingList.salesOrderProducts);
 
-  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(soInvoice.loadingOrder.salesOrderProducts)
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(soInvoice.packagingList.salesOrderProducts)
 
   return {
     ...soInvoice,
@@ -49,12 +49,12 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
     invoice = invoice.get({ plain: true });
 
     invoice.totalQuantity = _.sumBy(
-      invoice.loadingOrder.salesOrderProducts,
+      invoice.packagingList.salesOrderProducts,
       (item: any) => item.isSlabType ? item.finalSqrFt : 1
     );
 
-    invoice.totalSlabs = invoice.loadingOrder.salesOrderProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
-    invoice.totalGenericProducts = invoice.loadingOrder.salesOrderProducts.length - invoice.totalSlabs;
+    invoice.totalSlabs = invoice.packagingList.salesOrderProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
+    invoice.totalGenericProducts = invoice.packagingList.salesOrderProducts.length - invoice.totalSlabs;
 
     return { ...invoice };
   });
@@ -68,19 +68,19 @@ export const getAllSoInvoiceListWithTruckOnly = async (clientId: number, filter:
   data.rows = data.rows.map((invoice: any) => {
     invoice = invoice.get({ plain: true });
 
-    if (invoice.loadingOrder.packagingList) {
+    if (invoice.packagingList.loadingOrder) {
       invoice.totalQuantity = _.sumBy(
-        invoice.loadingOrder.salesOrderProducts,
-        (item: any) => item.plRemeasureLength * item.plRemeasureWidth
+        invoice.packagingList.salesOrderProducts,
+        (item: any) => item.loRemeasureLength * item.loRemeasureWidth
       );
     } else {
       invoice.totalQuantity = _.sumBy(
-        invoice.loadingOrder.salesOrderProducts,
-        (item: any) => item.loRemeasureLength * item.loRemeasureWidth
+        invoice.packagingList.salesOrderProducts,
+        (item: any) => item.plRemeasureLength * item.plRemeasureWidth
       );
     }
 
-    invoice.totalSlabs = invoice.loadingOrder.salesOrderProducts.length;
+    invoice.totalSlabs = invoice.packagingList.salesOrderProducts.length;
 
     return { ...invoice };
   });
@@ -102,8 +102,8 @@ export const getSalesOrderProductsWithoutReturns = async (soInvoiceId: number) =
   return products;
 };
 
-export const getOverdueInvoices = async (clientId: number) => {
-  const invoices = await salesOrderInvoiceRepository.getOverdueInvoicesRaw(clientId);
+export const getOverdueInvoices = async (clientId: number, customerId?: number) => {
+  const invoices = await salesOrderInvoiceRepository.getOverdueInvoicesRaw(clientId, customerId);
 
   const overdueUnpaidInvoices = [];
   const today = new Date();
@@ -112,8 +112,8 @@ export const getOverdueInvoices = async (clientId: number) => {
     const plainInvoice = invoice.get({ plain: true });
 
     // Dynamic Due Date Calculation: Lo Date + payment terms
-    let dueDate = new Date(plainInvoice.loadingOrder.loDate);
-    const paymentTermId = plainInvoice.loadingOrder.paymentTermId || plainInvoice.loadingOrder.salesOrder?.paymentTermId;
+    let dueDate = new Date(plainInvoice.packagingList.plDate);
+    const paymentTermId = plainInvoice.packagingList.paymentTermId || plainInvoice.packagingList.salesOrder?.paymentTermId;
 
     if (paymentTermId) {
       const term = PAYMENT_TERMS.find(t => t.id === paymentTermId);

@@ -1,10 +1,12 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import LoadingOrder from "./loadingOrder.model";
-import Client from "./client.model";
 import SalesOrder from "./salesOrder.model";
-import * as models from "./index";
 import { AppError } from "../helper/appError";
+import Client from "./client.model";
+import CustomerAddress from "./customerAddress.model";
+import * as models from "./index";
+import { DELIVERY_TYPES, PACKAGING_LIST_STAGES } from "../constants/tableTypes";
+import { PAYMENT_TERMS } from "../constants";
 import { scoped } from "../utils/scoped";
 
 const PackagingList = sequelize.define(
@@ -16,29 +18,48 @@ const PackagingList = sequelize.define(
       primaryKey: true,
     },
     code: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+    },
+    clientPlNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    plDate: {
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
     soPackagingListNumber: {
       type: DataTypes.INTEGER,
     },
-    clientPlNumber: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Auto-Incremented and not null is handled in hook
+    expDeliveryDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: "active",
+    paymentTermId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    deliveryNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    deliveryType: {
+      type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
       allowNull: false,
     },
-    loadingOrderId: {
+    stage: {
+      type: DataTypes.ENUM(...Object.values(PACKAGING_LIST_STAGES)),
+      defaultValue: PACKAGING_LIST_STAGES.INITIATED,
+      allowNull: false,
+    },
+    shippingAddressId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: LoadingOrder,
+        model: CustomerAddress,
         key: "id",
       },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     salesOrderId: {
       type: DataTypes.INTEGER,
@@ -69,15 +90,17 @@ const PackagingList = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    paymentTerm: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
+      },
+    },
   },
   {
     tableName: "packaging_lists",
     timestamps: true,
     indexes: [
-      {
-        unique: true,
-        fields: ["loadingOrderId"], // Ensures database enforces uniqueness
-      },
       {
         unique: true,
         fields: ["clientId", "clientPlNumber"],
@@ -90,7 +113,16 @@ const PackagingList = sequelize.define(
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
+// Hook to prevent updates if invoiced = true
+PackagingList.beforeUpdate(async (packagingList) => {
+  const packagingListExisting = await PackagingList.findByPk(packagingList.dataValues.id);
+
+  if (packagingListExisting?.dataValues.stage === PACKAGING_LIST_STAGES.INVOICED) {
+    throw new AppError("Cannot update Packaging List as it is already invoiced.", 400);
+  }
+});
+
+// Hook: Auto-Increment clientPlNumber based on clientId
 PackagingList.beforeCreate(async (packagingList: any) => {
   if (!packagingList.clientId) {
     throw new Error("Client ID is required to generate clientPlNumber.");
@@ -105,25 +137,21 @@ PackagingList.beforeCreate(async (packagingList: any) => {
 
   packagingList.clientPlNumber = !!lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
 
-  //  Generate soPackagingListNumber
-
   if (!packagingList.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soPackagingListNumber.", 400);
   }
 
-  const lastPLAccordingToSo: any = await scoped(PackagingList).findOne({
+  const lastPlAccordingToSo: any = await scoped(PackagingList).findOne({
     where: { salesOrderId: packagingList.salesOrderId },
     order: [["soPackagingListNumber", "DESC"]],
   });
 
-  const salesOrder: any = await SalesOrder.findByPk(packagingList.salesOrderId)
+  const salesOrder: any = await SalesOrder.findByPk(packagingList.salesOrderId);
 
-  packagingList.soPackagingListNumber = lastPLAccordingToSo ? lastPLAccordingToSo.soPackagingListNumber + 1 : 1;
+  packagingList.soPackagingListNumber = lastPlAccordingToSo ? lastPlAccordingToSo.soPackagingListNumber + 1 : 1;
   packagingList.code = `PL ${salesOrder.clientSoNumber}-${packagingList.soPackagingListNumber}`;
-
 });
 
-// Scope configuration for PackagingList model
 (PackagingList as any).scopeConfig = {
   client: true,
   location: true,

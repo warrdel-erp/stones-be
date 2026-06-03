@@ -3,12 +3,12 @@ import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 export const createTradeServiceSchema = z.object({
     referenceType: z.enum([
-        TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+        TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST,
         TRADE_SERVICE_REFERENCE_TYPES.SIPL,
         TRADE_SERVICE_REFERENCE_TYPES.RETURN,
     ], {
         required_error: "Reference type is required",
-        invalid_type_error: "Reference type must be loadingOrder, sipl, or return",
+        invalid_type_error: "Reference type must be packagingList, sipl, or return",
     }),
     referenceId: z.number({
         required_error: "Reference ID is required",

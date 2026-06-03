@@ -915,3 +915,8 @@ sticky navbar.
 
 1. invoice column name is incorrect in return list.
 2. number of users validation for client. (client can create users up to the number of users they have during registration)
+
+---
+
+1. Packaging / Receiving number in SIPL.
+2. Paginated data of Products in add Products.

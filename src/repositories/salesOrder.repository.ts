@@ -28,10 +28,10 @@ export const getAllSalesOrders = async (
           // Count the number of associated Loading Orders
           sequelize.literal(`(
             SELECT COUNT(*)
-            FROM loading_orders AS lo
+            FROM packaging_lists AS lo
             WHERE lo.salesOrderId = SalesOrder.id
           )`),
-          "loadingOrderCount",
+          "packagingListCount",
         ],
       ],
     },
@@ -45,7 +45,7 @@ export const getAllSalesOrders = async (
         attributes: ["id", "code"],
         include: [
           {
-            association: "packagingList",
+            association: "loadingOrder",
             attributes: ["id", "code"],
           }
         ]
@@ -93,7 +93,7 @@ export const getAllSalesOrders = async (
 };
 
 // Get all sales order
-export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number) => {
+export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
     where: {
@@ -105,10 +105,10 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
           // Count the number of associated Loading Orders
           sequelize.literal(`(
             SELECT COUNT(*)
-            FROM loading_orders AS lo
+            FROM packaging_lists AS lo
             WHERE lo.salesOrderId = SalesOrder.id
           )`),
-          "loadingOrderCount",
+          "packagingListCount",
         ],
       ],
     },
@@ -165,7 +165,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
 };
 
 // Get all sales order
-export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number) => {
+export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number) => {
   const offset = (page - 1) * limit;
   const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
     where: {
@@ -174,8 +174,8 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
         [Op.in]: sequelize.literal(`(
           SELECT DISTINCT so.id 
           FROM sales_orders so
-          INNER JOIN loading_orders lo ON lo.salesOrderId = so.id
-          INNER JOIN packaging_lists pl ON pl.loadingOrderId = lo.id
+          INNER JOIN packaging_lists lo ON lo.salesOrderId = so.id
+          INNER JOIN loading_orders pl ON pl.loadingOrderId = lo.id
           WHERE so.clientId = ${clientId}
         )`),
       },
@@ -185,10 +185,10 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
         [
           sequelize.literal(`(
             SELECT COUNT(*)
-            FROM loading_orders AS lo
+            FROM packaging_lists AS lo
             WHERE lo.salesOrderId = SalesOrder.id
           )`),
-          "loadingOrderCount",
+          "packagingListCount",
         ],
       ],
     },
@@ -201,7 +201,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
         association: "loadingOrders",
         include: [
           {
-            association: "packagingList",
+            association: "loadingOrder",
           },
         ],
       },
@@ -357,11 +357,11 @@ export const getSalesOrderById = async (id: number) => {
             ],
           },
           {
-            association: "loadingOrder",
+            association: "packagingList",
             attributes: ["id", "code"],
             include: [
               {
-                association: "packagingList",
+                association: "loadingOrder",
                 attributes: ["id", "code"],
               }
             ]
@@ -370,10 +370,10 @@ export const getSalesOrderById = async (id: number) => {
       },
       {
         association: 'loadingOrders',
-        attributes: ['id', 'code', 'loDate', 'stage'],
+        attributes: ['id', 'code', 'plDate', 'stage'],
         include: [
           {
-            association: 'packagingList',
+            association: 'loadingOrder',
             attributes: ['id', 'code'],
           },
           {
@@ -445,11 +445,11 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
             ],
           },
           {
-            association: "loadingOrder",
+            association: "packagingList",
             attributes: ["id", "code"],
             include: [
               {
-                association: "packagingList",
+                association: "loadingOrder",
                 attributes: ["id", "code"],
               }
             ]
@@ -458,10 +458,10 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
       },
       {
         association: 'loadingOrders',
-        attributes: ['id', 'code', 'loDate', 'stage'],
+        attributes: ['id', 'code', 'plDate', 'stage'],
         include: [
           {
-            association: 'packagingList',
+            association: 'loadingOrder',
             attributes: ['id', 'code'],
           },
           {

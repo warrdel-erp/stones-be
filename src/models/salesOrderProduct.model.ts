@@ -1,14 +1,13 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
-import PackagingList from "./packagingList.model";
 import LoadingOrder from "./loadingOrder.model";
+import PackagingList from "./packagingList.model";
 import SalesOrder from "./salesOrder.model";
 import Client from "./client.model";
 import * as models from "./index";
 import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { convertSqrInchToFt, getPercentageValue } from "../helper";
-// import Decimal from "decimal.js";
 
 import * as decimals from '../helper/decimal'
 
@@ -63,7 +62,7 @@ const SalesOrderProduct = sequelize.define(
       allowNull: true,
     },
     stage: {
-      type: DataTypes.ENUM(...Object.values(SALE_ORDER_PRODUCT_STAGES)), // Sales Order, Loading Order, Packaging List
+      type: DataTypes.ENUM(...Object.values(SALE_ORDER_PRODUCT_STAGES)), // Sales Order, Loading Order, Packaging List, Invoiced
       allowNull: false,
       defaultValue: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER,
     },
@@ -87,16 +86,6 @@ const SalesOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    loadingOrderId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: LoadingOrder,
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
-    },
     packagingListId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -107,22 +96,32 @@ const SalesOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
-    plSqrFt: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        const length = Number(this.get("plRemeasureLength")) || 0;
-        const width = Number(this.get("plRemeasureWidth")) || 0;
-
-        const area = decimals.decimalMultiply(length, width);
-
-        return convertSqrInchToFt(area);
-      }
+    loadingOrderId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: LoadingOrder,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     loSqrFt: {
       type: DataTypes.VIRTUAL,
       get() {
         const length = Number(this.get("loRemeasureLength")) || 0;
         const width = Number(this.get("loRemeasureWidth")) || 0;
+
+        const area = decimals.decimalMultiply(length, width);
+
+        return convertSqrInchToFt(area);
+      }
+    },
+    plSqrFt: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const length = Number(this.get("plRemeasureLength")) || 0;
+        const width = Number(this.get("plRemeasureWidth")) || 0;
 
         const area = decimals.decimalMultiply(length, width);
 
@@ -166,19 +165,19 @@ const SalesOrderProduct = sequelize.define(
         return Number(this.get("unitPrice")) || 0;
       },
     },
-    plTaxAmount: {
+    loTaxAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        const amount = Number(this.get("plAmount")) || 0;
+        const amount = Number(this.get("loAmount")) || 0;
         const percentage = Number(this.get("taxPercentage")) || 0;
         const multiplied = decimals.decimalMultiply(amount, percentage);
         return decimals.decimalDivide(multiplied, 100);
       },
     },
-    loTaxAmount: {
+    plTaxAmount: {
       type: DataTypes.VIRTUAL,
       get() {
-        const amount = Number(this.get("loAmount")) || 0;
+        const amount = Number(this.get("plAmount")) || 0;
         const percentage = Number(this.get("taxPercentage")) || 0;
         const multiplied = decimals.decimalMultiply(amount, percentage);
         return decimals.decimalDivide(multiplied, 100);
@@ -233,7 +232,6 @@ const SalesOrderProduct = sequelize.define(
 };
 
 export default SalesOrderProduct;
-
 
 // hook to prevent update salesOrderId and inventoryProductId
 SalesOrderProduct.beforeUpdate((product: any) => {

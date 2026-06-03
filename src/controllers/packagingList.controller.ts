@@ -1,35 +1,34 @@
 import { Request, Response } from "express";
 import * as packagingListService from "../services/packagingList.service";
-import * as loadingOrderService from "../services/loadingOrder.service";
 import catchAsync from "../helper/asyncCatch";
-import * as packagingListRepository from "../repositories/packagingList.repository";
 import { SuccessResponse } from "../helper/response";
-import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
 
-// Create new PL
+// Create new LO
 export const createPackagingList = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { loadingOrderId } = req.body;
   const clientId = req.user?.clientId;
 
-  // Check if loading order is invoiced then can't create packaging list.
-  await loadingOrderService.checkIfLoadingOrderInvoiced(loadingOrderId, "create packaging list");
-
-  // Create packaging list.
   const packagingList = await packagingListService.createPackagingList({ ...req.body, clientId });
-
   SuccessResponse(res, 201, "Packaging List created successfully", packagingList);
 });
 
-// Get all PL
-export const getAllPackagingLists = catchAsync(async (_req: Request, res: Response) => {
-  const packagingLists = await packagingListService.getAllPackagingLists();
-  SuccessResponse(res, 200, "Packaging Lists retrieved successfully", packagingLists);
+// Get all LO
+export const getAllPackagingLists = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { page = 1, limit = 10, ...filters } = req.query;
+  const clientId = req.user?.clientId;
+
+  const result = await packagingListService.getAllPackagingLists(Number(page), Number(limit), Number(clientId), filters);
+
+  SuccessResponse(res, 200, "Loading Orders retrieved successfully", result.data, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
 });
 
-// Get Packaging List by Id
+// Get packaging list by Id
 export const getPackagingListById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id, } = req.params;
 
   const packagingList = await packagingListService.getPackagingListById(Number(id));
 
@@ -40,31 +39,48 @@ export const getPackagingListById = catchAsync(async (req: Request, res: Respons
   SuccessResponse(res, 200, "Packaging List retrieved successfully", packagingList);
 });
 
-// Get loading order by SO id
+// Get packaging list by Id
+export const getPackagingListAsPerReturn = catchAsync(async (req: Request, res: Response) => {
+  const { returnId } = req.params;
+
+  const packagingList = await packagingListService.getPackagingListAsPerReturn(Number(returnId));
+
+  if (!packagingList) {
+    return SuccessResponse(res, 404, "Packaging List not found", null);
+  }
+
+  SuccessResponse(res, 200, "Packaging List retrieved successfully", packagingList);
+});
+
+// Get packaging list by Id
+export const getPackagingListOnlyAsPerReturn = catchAsync(async (req: Request, res: Response) => {
+  const { returnId } = req.params;
+
+  const packagingList = await packagingListService.getPackagingListOnlyAsPerReturn(Number(returnId));
+
+  if (!packagingList) {
+    return SuccessResponse(res, 404, "Packaging List not found", null);
+  }
+
+  SuccessResponse(res, 200, "Packaging List retrieved successfully", packagingList);
+});
+
+// Get packaging list by SO id
 export const getPackagingListsBySalesOrderId = catchAsync(async (req: Request, res: Response) => {
   const { salesOrderId } = req.params;
-  const packagingLists = await packagingListService.getPackagingListsBySalesOrderId(Number(salesOrderId));
+  const loadingOrders = await packagingListService.getPackagingListsBySalesOrderId(Number(salesOrderId));
 
-  SuccessResponse(res, 200, "Packaging Lists retrieved successfully", packagingLists);
+  SuccessResponse(res, 200, "Loading Orders retrieved successfully", loadingOrders);
 });
 
 // Update Packaging List
 export const updatePackagingList = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  // Get packaging list by given id
-  const packagingList = (await packagingListRepository.getPackagingListByIdSimple(Number(id)))?.get({
-    plain: true,
-  });
+  // Remove stage key if present because it should not change stage key. it should only be changed by it's specific API.
+  const { stage, ...data } = req.body;
 
-  if (!packagingList) {
-    throw new AppError("Invalid Id", 400);
-  }
-
-  // Check if loading order is invoiced then can't create packaging list.
-  await loadingOrderService.checkIfLoadingOrderInvoiced(packagingList.loadingOrderId, "update packaging list");
-
-  const updatedPackagingList = await packagingListService.updatePackagingList(Number(id), req.body);
+  const updatedPackagingList = await packagingListService.updatePackagingList(Number(id), data);
 
   if (!updatedPackagingList) {
     return SuccessResponse(res, 404, "Packaging List not found", null);
@@ -73,10 +89,21 @@ export const updatePackagingList = catchAsync(async (req: Request, res: Response
   SuccessResponse(res, 200, "Packaging List updated successfully", updatedPackagingList);
 });
 
-// Get new PL number
-export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+// Update Packaging List
+export const invoicePackagingList = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
+
+  const updatedPackagingList = await packagingListService.invoicePackagingList(Number(id), clientId!, Number(locationId));
+
+  SuccessResponse(res, 200, "Packaging List updated successfully", updatedPackagingList);
+});
+
+// Get new SO number
+export const getNewLoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
 
-  const data = await packagingListService.getPLNumber(clientId!);
+  const data = await packagingListService.getLONumber(clientId!);
   SuccessResponse(res, 200, "New PL number fetched successfully.", data);
 });

@@ -49,7 +49,7 @@ const Vendor = sequelize.define(
     },
     primaryPhoneNo: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     secondaryPhoneNo: {
       type: DataTypes.STRING,
@@ -61,7 +61,7 @@ const Vendor = sequelize.define(
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       validate: { isEmail: true },
     },
     accountingEmail: {

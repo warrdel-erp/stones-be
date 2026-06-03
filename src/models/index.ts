@@ -9,11 +9,11 @@ import CustomerAddress from "./customerAddress.model";
 import FreightDetail from "./freightDetail";
 import InventoryProduct from "./inventoryProduct.model";
 import LedgerAccount from "./ledgerAccount.model";
-import LoadingOrder from "./loadingOrder.model";
-import LoadingOrderProduct from "./loadingOrderProduct.model";
+import PackagingList from "./packagingList.model";
 import Location from "./location.model";
 import Notes from "./note.model";
-import PackagingList from "./packagingList.model";
+import LoadingOrder from "./loadingOrder.model";
+import PackagingListProduct from "./packagingListProduct.model";
 import Payment from "./payment.model";
 import PaymentBill from "./paymentBills.model";
 import Product from "./product.model";
@@ -122,13 +122,13 @@ PurchaseOrder.belongsTo(Location, {
   foreignKey: "shipmentLocationId",
 });
 
-// SIPL-Location (one 'SIPL' have one 'location')
+// SILO-Location (one 'SIPL' have one 'location')
 SIPL.belongsTo(Location, {
   as: "purchaseLocation",
   foreignKey: "locationId",
 });
 
-// SIPL-ShipmentLocation (one 'SIPL' have one 'shipmentLocation')
+// SILO-ShipmentLocation (one 'SIPL' have one 'shipmentLocation')
 SIPL.belongsTo(Location, {
   as: "shipmentLocation",
   foreignKey: "shipmentLocationId",
@@ -190,7 +190,7 @@ Notes.belongsTo(Bill, {
 SIPL.belongsTo(PurchaseOrder, { foreignKey: "purchaseOrderId", as: "purchaseOrder" });
 PurchaseOrder.hasMany(SIPL, { foreignKey: "purchaseOrderId", as: "sipls" });
 
-// SIPL-User (SIPL have one 'User' as createdBy) (SIPL have one 'User' as updatedBy)
+// SILO-User (SIPL have one 'User' as createdBy) (SIPL have one 'User' as updatedBy)
 SIPL.belongsTo(User, { foreignKey: "createdBy" });
 SIPL.belongsTo(User, { foreignKey: "updatedBy" });
 
@@ -231,7 +231,7 @@ User.hasMany(Product, { foreignKey: "createdBy" });
 Product.belongsTo(User, { foreignKey: "updatedBy" });
 User.hasMany(Product, { foreignKey: "updatedBy" });
 
-// SIPL-SIPLProduct (one 'SIPLProduct' can have belongs to one 'SIPL') (one 'SIPL' have multiple 'SIPLProduct')
+// SILO-SIPLProduct (one 'SIPLProduct' can have belongs to one 'SIPL') (one 'SIPL' have multiple 'SIPLProduct')
 SIPL.hasMany(SIPLProduct, { foreignKey: "siplId", as: "siplProducts" });
 SIPLProduct.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
 
@@ -402,9 +402,9 @@ Notes.belongsTo(SalesOrder, {
 SalesOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
 CustomerAddress.hasMany(SalesOrder, { foreignKey: "shippingAddressId" });
 
-// Loading Order can have one shipping address (Customer Address can used in many Loading Orders)
-LoadingOrder.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
-CustomerAddress.hasMany(LoadingOrder, { foreignKey: "shippingAddressId" });
+// Packaging List can have one shipping address (Customer Address can be used in many Packaging Lists)
+PackagingList.belongsTo(CustomerAddress, { foreignKey: "shippingAddressId", as: "shippingAddress" });
+CustomerAddress.hasMany(PackagingList, { foreignKey: "shippingAddressId" });
 
 SalesOrder.belongsTo(Location, { foreignKey: "locationId", as: "soLocation" });
 Location.hasMany(SalesOrder, { foreignKey: "locationId", as: "salesOrders" });
@@ -413,21 +413,22 @@ Location.hasMany(SalesOrder, { foreignKey: "locationId", as: "salesOrders" });
 CustomerAddress.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
 Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" });
 
-// One SO can have multiple Loading Orders (one Loading Order belongs to just one SO)
-SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "loadingOrders" });
-LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+// One SO can have multiple Packaging Lists (one Loading Order belongs to just one SO)
+SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "packagingLists" });
+SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "loadingOrders" });
+PackagingList.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 
-// Loading order have many LoadingOrderSlab
-LoadingOrder.hasMany(LoadingOrderProduct, { foreignKey: "loadingOrderId", as: "loadingOrderProducts" });
-LoadingOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+// Packaging List have many PackagingListProduct
+PackagingList.hasMany(PackagingListProduct, { foreignKey: "packagingListId", as: "packagingListProducts" });
+PackagingListProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 
-// Inventory product can have multiple LoadingOrderSlab because maybe one is canceled
-InventoryProduct.hasMany(LoadingOrderProduct, { foreignKey: "inventoryProductId", as: "loadingOrderProducts" });
-LoadingOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+// Inventory product can have multiple PackagingListProduct because maybe one is canceled
+InventoryProduct.hasMany(PackagingListProduct, { foreignKey: "inventoryProductId", as: "packagingListProducts" });
+PackagingListProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 
-// One LoadingOrder have one Packaging list.
-LoadingOrder.hasOne(PackagingList, { foreignKey: "loadingOrderId", as: "packagingList" });
-PackagingList.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+// One PackagingList has one LoadingOrder.
+PackagingList.hasOne(LoadingOrder, { foreignKey: "packagingListId", as: "loadingOrder" });
+LoadingOrder.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 
 // SalesOrder have many SalesOrderProduct (one SalesOrderProduct belongs to one Sales Order)
 SalesOrderProduct.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
@@ -520,17 +521,17 @@ SalesOrderInvoice.hasMany(AdvancedDepositSettlement, { foreignKey: "soInvoiceId"
 AdvancedDepositSettlement.belongsTo(AdvancedDeposit, { foreignKey: "advancedDepositId", as: "advancedDeposit" });
 AdvancedDeposit.hasMany(AdvancedDepositSettlement, { foreignKey: "advancedDepositId", as: "settlements" });
 
-// Loading order belongs to one SalesOrderProduct (one SalesOrderProduct can have one loadingOrderProduct)
-LoadingOrderProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
-SalesOrderProduct.hasOne(LoadingOrderProduct, { foreignKey: "salesOrderProductId", as: "loadingOrderProduct" });
-
-// SalesOrderProduct belongs to one LoadingOrder (one LoadingOrder can have many SalesOrderProduct)
-SalesOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
-LoadingOrder.hasMany(SalesOrderProduct, { foreignKey: "loadingOrderId", as: "salesOrderProducts" });
+// Packaging list belongs to one SalesOrderProduct (one SalesOrderProduct can have one packagingListProduct)
+PackagingListProduct.belongsTo(SalesOrderProduct, { foreignKey: "salesOrderProductId", as: "salesOrderProduct" });
+SalesOrderProduct.hasOne(PackagingListProduct, { foreignKey: "salesOrderProductId", as: "packagingListProduct" });
 
 // SalesOrderProduct belongs to one PackagingList (one PackagingList can have many SalesOrderProduct)
 SalesOrderProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 PackagingList.hasMany(SalesOrderProduct, { foreignKey: "packagingListId", as: "salesOrderProducts" });
+
+// SalesOrderProduct belongs to one LoadingOrder (one LoadingOrder can have many SalesOrderProduct)
+SalesOrderProduct.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+LoadingOrder.hasMany(SalesOrderProduct, { foreignKey: "loadingOrderId", as: "salesOrderProducts" });
 
 // SalesOrderInvoice belongs to one Customer (one Customer can have many SalesOrderInvoice)
 SalesOrderInvoice.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
@@ -540,9 +541,9 @@ Customer.hasMany(SalesOrderInvoice, { foreignKey: "customerId", as: "salesOrderI
 SalesOrderInvoice.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 SalesOrder.hasMany(SalesOrderInvoice, { foreignKey: "salesOrderId", as: "salesOrderInvoices" });
 
-// SalesOrderInvoice belongs to one loadingOrder (one LoadingOrder can have one SalesOrderInvoice)
-SalesOrderInvoice.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
-LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "salesOrderInvoice" });
+// SalesOrderInvoice belongs to one PackagingList (one PackagingList can have one SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
+PackagingList.hasOne(SalesOrderInvoice, { foreignKey: "packagingListId", as: "salesOrderInvoice" });
 
 // SalesOrderInvoice belongs to one Client (one Client can have many SalesOrderInvoice)
 SalesOrderInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
@@ -656,9 +657,9 @@ Location.hasMany(ReturnProduct, { foreignKey: "locationId", as: "returnProducts"
 Delivery.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
 Truck.hasMany(Delivery, { foreignKey: "truckId", as: "deliveries" });
 
-// one loading order can have multiple invoice deliveries, one invoice delivery belongs to one loading order
-InvoiceDelivery.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
-LoadingOrder.hasMany(InvoiceDelivery, { foreignKey: "loadingOrderId", as: "invoiceDeliveries" });
+// one packaging list can have multiple invoice deliveries, one invoice delivery belongs to one packaging list
+InvoiceDelivery.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
+PackagingList.hasMany(InvoiceDelivery, { foreignKey: "packagingListId", as: "invoiceDeliveries" });
 
 // one delivery can have multiple invoice deliveries, one invoice delivery belongs to one delivery
 InvoiceDelivery.belongsTo(Delivery, { foreignKey: "deliveryId", as: "delivery" });
@@ -756,8 +757,8 @@ InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId",
 SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
 
-LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } })
-TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
+PackagingList.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } })
+TradeService.belongsTo(PackagingList, { foreignKey: "referenceId", as: "packagingList", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } });
 
 SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } })
 TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
@@ -810,9 +811,9 @@ InventoryProductHold.belongsTo(Client, { foreignKey: "clientId", as: "client" })
 Client.hasMany(JournalEntry, { foreignKey: "clientId", as: "journalEntries" });
 JournalEntry.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
-// Client-LoadingOrderProduct relation
-Client.hasMany(LoadingOrderProduct, { foreignKey: "clientId", as: "loadingOrderProducts" });
-LoadingOrderProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+// Client-PackagingListProduct relation
+Client.hasMany(PackagingListProduct, { foreignKey: "clientId", as: "packagingListProducts" });
+PackagingListProduct.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // Client-Notes relation
 Client.hasMany(Notes, { foreignKey: "clientId", as: "notes" });
@@ -940,9 +941,9 @@ export {
   JournalEntry,
   Customer,
   CustomerAddress,
-  LoadingOrder,
-  LoadingOrderProduct,
   PackagingList,
+  LoadingOrder,
+  PackagingListProduct,
   SalesOrder,
   SalesOrderProduct,
   Payment,

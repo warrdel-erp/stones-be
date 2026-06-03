@@ -13,8 +13,8 @@ export const LEDGER_ACCOUNT_REFERENCE_TYPES = {
 export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   SIPL: "SIPL",
   BILL: "BILL",
-  LOADING_ORDER: "LOADING_ORDER",
-  LOADING_ORDER_INVOICE: "LOADING_ORDER_INVOICE",
+  PACKAGING_LIST: "PACKAGING_LIST",
+  PACKAGING_LIST_INVOICE: "PACKAGING_LIST_INVOICE",
   SALES_ORDER: "SALES_ORDER",
   RETURN: "RETURN",
   ADVANCE_DEPOSIT: "ADVANCE_DEPOSIT",
@@ -22,7 +22,7 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
 
 export const JOURNAL_ENTRY_FOR_TYPES = {
   SIPL: "SIPL",
-  LOADING_ORDER: "LOADING_ORDER",
+  PACKAGING_LIST: "PACKAGING_LIST",
   RETURN: "RETURN"
 } as const;
 
@@ -32,7 +32,7 @@ export const JOURNAL_ENTRY_SUB_REFERENCE_TYPES = {
   SLAB: "slab",
   BILL_ITEM: "bill_item",
   BILL: "bill",
-  LOADING_ORDER: "loading_order",
+  PACKAGING_LIST: "packaging_list",
   TRADE_SERVICE: "trade_service",
 } as const;
 
@@ -115,9 +115,9 @@ export const DELIVERY_TYPES = {
   DELIVERY: "delivery",
 } as const;
 
-export const LOADING_ORDER_STAGES = {
+export const PACKAGING_LIST_STAGES = {
   INITIATED: "initiated",
-  PACKAGING_LIST: "packagingList",
+  LOADING_ORDER: "loadingOrder",
   INVOICED: "invoiced",
 } as const;
 
@@ -147,7 +147,7 @@ export const NOTES_TYPE = {
 export const NOTES_REFERENCE_TYPES = {
   SALES_ORDER: "sales_order",
   PURCHASE_ORDER: "purchase_order",
-  LOADING_ORDER: "loading_order",
+  PACKAGING_LIST: "packaging_list",
 } as const;
 
 export const VEHICLE_TYPE = {
@@ -202,7 +202,7 @@ export const FILE_UPLOAD_ENTITY_TYPE = {
   PURCHASE_ORDER: "purchaseOrder",
   SIPL: "sipl",
   INVENTORY_PRODUCT: "inventoryProduct",
-  LOADING_ORDER: "loadingOrder",
+  PACKAGING_LIST: "packagingList",
   PAYMENT: "payment",
   BILL: "bill",
 } as const;

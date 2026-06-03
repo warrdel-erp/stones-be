@@ -14,6 +14,7 @@ export const customerAddressSchema = z.object({
     required_error: "addressType is required",
   }),
   customerId: z.number({ required_error: "customerId is required" }).int(),
+  isPrimary: z.boolean().optional().default(false),
 });
 
 export const updateCustomerAddressSchema = customerAddressSchema.partial().omit({

@@ -38,6 +38,9 @@ router.get("/", authenticateUser, customerController.getAllCustomersController);
 // get customer invoices.
 router.get("/:customerId/invoices", authenticateUser, customerController.getInvoicesByCustomerId);
 
+// get customer AR invoices (standard + external merged & paginated)
+router.get("/:customerId/ar", authenticateUser, customerController.getCustomerARInvoices);
+
 // get customer advanced deposits.
 router.get("/:customerId/advancedDeposits", authenticateUser, customerController.getAdvancedDepositsByCustomerId);
 

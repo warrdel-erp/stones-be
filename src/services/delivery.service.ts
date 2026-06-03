@@ -1,22 +1,22 @@
 import { sequelize } from "../config/database";
 import * as deliveryRepository from "../repositories/delivery.repository";
-import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
 import { DELIVERY_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
 import * as activityService from "../services/activity.service";
 import { requestContext } from "../utils/requestContext";
 
-export const initiateDelivery = async (truckId: number, loadingOrderIds: number[], clientId: number) => {
+export const initiateDelivery = async (truckId: number, packagingListIds: number[], clientId: number) => {
     // 1. Check if truck already has a pending delivery
     const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);
     if (existingPendingDelivery) {
         throw new Error("This truck already has a pending delivery. Please complete or cancel the existing delivery before initiating a new one.");
     }
 
-    // 2. Check if any loadingOrder already has an InvoiceDelivery
-    const existingInvoiceDeliveries = await deliveryRepository.findInvoiceDeliveriesByLoadingOrderIds(loadingOrderIds);
+    // 2. Check if any packagingList already has an InvoiceDelivery
+    const existingInvoiceDeliveries = await deliveryRepository.findInvoiceDeliveriesByPackagingListIds(packagingListIds);
     if (existingInvoiceDeliveries?.length > 0) {
-        const usedIds = existingInvoiceDeliveries.map((d: any) => d.loadingOrderId).join(", ");
-        throw new Error(`The following Loading Orders already have a delivery assigned: [${usedIds}]. Please remove them from your request.`);
+        const usedIds = existingInvoiceDeliveries.map((d: any) => d.packagingListId).join(", ");
+        throw new Error(`The following Packaging Lists already have a delivery assigned: [${usedIds}]. Please remove them from your request.`);
     }
 
     const fromLocation = [0, 0];
@@ -25,28 +25,28 @@ export const initiateDelivery = async (truckId: number, loadingOrderIds: number[
         // 3. Create Delivery
         const delivery = await deliveryRepository.createDelivery(truckId, clientId, transaction);
         const invoiceDeliveries = [];
-        for (const loadingOrderId of loadingOrderIds) {
-            // Fetch loadingOrder with nested salesOrder
-            const loadingOrder: any = await loadingOrderRepository.getLoadingOrderById(loadingOrderId);
+        for (const packagingListId of packagingListIds) {
+            // Fetch packagingList with nested salesOrder
+            const packagingList: any = await packagingListRepository.getPackagingListById(packagingListId);
 
-            if (!loadingOrder) {
-                throw new Error(`Loading Order with id ${loadingOrderId} not found`);
+            if (!packagingList) {
+                throw new Error(`Packaging List with id ${packagingListId} not found`);
             }
 
-            const shippingAddress = loadingOrder?.shippingAddress;
-            const soLocation = loadingOrder?.salesOrder?.soLocation;
+            const shippingAddress = packagingList?.shippingAddress;
+            const soLocation = packagingList?.salesOrder?.soLocation;
 
-            // ASSUMPTION: In one delivery, all loadingOrders have the same start location
+            // ASSUMPTION: In one delivery, all packaging lists have the same start location
             if (fromLocation[0] === 0 && fromLocation[1] === 0) {
                 fromLocation[0] = soLocation.lat;
                 fromLocation[1] = soLocation.long;
             }
 
             if (fromLocation[0] !== soLocation.lat && fromLocation[1] !== soLocation.long) {
-                throw new Error(`The Loading Orders have different locations. Please ensure all Loading Orders have the same start location.`);
+                throw new Error(`The Packaging Lists have different locations. Please ensure all Packaging Lists have the same start location.`);
             }
 
-            if (!shippingAddress || !soLocation) throw new Error(`shippingAddress or soLocation missing for loadingOrder ${loadingOrderId}`);
+            if (!shippingAddress || !soLocation) throw new Error(`shippingAddress or soLocation missing for packagingList ${packagingListId}`);
 
             const invoiceDelivery = await deliveryRepository.createInvoiceDelivery({
                 toLat: shippingAddress.lat,
@@ -56,7 +56,7 @@ export const initiateDelivery = async (truckId: number, loadingOrderIds: number[
                 fromAddress: soLocation.address,
                 fromLat: soLocation.lat,
                 fromLng: soLocation.long,
-                loadingOrderId,
+                packagingListId,
                 deliveryId: delivery.get('id') as number
             }, transaction);
 
@@ -64,12 +64,12 @@ export const initiateDelivery = async (truckId: number, loadingOrderIds: number[
         }
 
         await activityService.logActivity({
-          clientId,
-          activityType: ACTIVITY_TYPE.DELIVERY_INITIATION,
-          referenceId: delivery.get('id') as number,
-          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
-          title: "Delivery Initiated",
-          description: `Delivery initiated for Truck #${truckId}.`,
+            clientId,
+            activityType: ACTIVITY_TYPE.DELIVERY_INITIATION,
+            referenceId: delivery.get('id') as number,
+            referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+            title: "Delivery Initiated",
+            description: `Delivery initiated for Truck #${truckId}.`,
         }, transaction);
 
         return { delivery, invoiceDeliveries };
@@ -114,12 +114,12 @@ export const approveDeliveryOrders = async (orders: Array<{ id: number, order: n
         await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.APPROVED, transaction);
 
         await activityService.logActivity({
-          clientId: requestContext.getStore()?.clientId || 0,
-          activityType: ACTIVITY_TYPE.DELIVERY_APPROVAL,
-          referenceId: deliveryId,
-          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
-          title: "Delivery Approved",
-          description: `Delivery #${deliveryId} has been approved.`,
+            clientId: requestContext.getStore()?.clientId || 0,
+            activityType: ACTIVITY_TYPE.DELIVERY_APPROVAL,
+            referenceId: deliveryId,
+            referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+            title: "Delivery Approved",
+            description: `Delivery #${deliveryId} has been approved.`,
         }, transaction);
 
         return result;
@@ -177,12 +177,12 @@ export const rejectDelivery = async (deliveryId: number, clientId: number) => {
         const rejectedDelivery = await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.REJECTED, transaction);
 
         await activityService.logActivity({
-          clientId,
-          activityType: ACTIVITY_TYPE.DELIVERY_REJECTION,
-          referenceId: deliveryId,
-          referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
-          title: "Delivery Rejected",
-          description: `Delivery #${deliveryId} has been rejected.`,
+            clientId,
+            activityType: ACTIVITY_TYPE.DELIVERY_REJECTION,
+            referenceId: deliveryId,
+            referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+            title: "Delivery Rejected",
+            description: `Delivery #${deliveryId} has been rejected.`,
         }, transaction);
 
         return rejectedDelivery;

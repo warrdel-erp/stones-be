@@ -1,12 +1,12 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
-import LoadingOrder from "./loadingOrder.model";
+import PackagingList from "./packagingList.model";
 import SalesOrderProduct from "./salesOrderProduct.model";
 import Client from "./client.model";
 
-const LoadingOrderProduct = sequelize.define(
-  "LoadingOrderProduct",
+const PackagingListProduct = sequelize.define(
+  "PackagingListProduct",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -48,11 +48,11 @@ const LoadingOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    loadingOrderId: {
+    packagingListId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: LoadingOrder,
+        model: PackagingList,
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -79,12 +79,12 @@ const LoadingOrderProduct = sequelize.define(
     },
   },
   {
-    tableName: "loading_order_products",
+    tableName: "packaging_list_products",
     timestamps: true,
     indexes: [
       {
         unique: true,
-        fields: ["loadingOrderId", "inventoryProductId"], // Composite unique constraint
+        fields: ["packagingListId", "inventoryProductId"], // Composite unique constraint
       },
       {
         unique: true,
@@ -95,19 +95,19 @@ const LoadingOrderProduct = sequelize.define(
 );
 
 // Hook to prevent updating inventoryProductId and salesOrderId by removing them from update payload
-LoadingOrderProduct.beforeUpdate((product: any) => {
+PackagingListProduct.beforeUpdate((product: any) => {
   // only can change inventoryProductId if it is swapping.
   if (!product.dataValues.isSwapping) {
     delete product.dataValues.inventoryProductId;
   }
   delete product.dataValues.salesOrderProductId;
-  delete product.dataValues.loadingOrderId;
+  delete product.dataValues.packagingListId;
 });
 
-// Scope configuration for LoadingOrderProduct model
-(LoadingOrderProduct as any).scopeConfig = {
+// Scope configuration for PackagingListProduct model
+(PackagingListProduct as any).scopeConfig = {
   client: true,
   location: false,
 };
 
-export default LoadingOrderProduct;
+export default PackagingListProduct;

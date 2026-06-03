@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import LoadingOrder from "./loadingOrder.model";
+import PackagingList from "./packagingList.model";
 import Delivery from "./Delivery.model";
 import Client from "./client.model";
 import Location from "./location.model";
@@ -42,11 +42,11 @@ const InvoiceDelivery = sequelize.define(
             allowNull: true,
             defaultValue: 0,
         },
-        loadingOrderId: {
+        packagingListId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: LoadingOrder,
+                model: PackagingList,
                 key: "id",
             },
             onDelete: "CASCADE",
@@ -85,4 +85,4 @@ const InvoiceDelivery = sequelize.define(
     location: false,
 };
 
-export default InvoiceDelivery; 
+export default InvoiceDelivery;

@@ -64,8 +64,8 @@ export const findAll = async (filters: any, clientId: number) => {
           where: { id: entry.subReferenceId },
         });
         break;
-      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.LOADING_ORDER:
-        entry.subReferenceData = await scoped(models.LoadingOrder).findOne({
+      case JOURNAL_ENTRY_SUB_REFERENCE_TYPES.PACKAGING_LIST:
+        entry.subReferenceData = await scoped(models.PackagingList).findOne({
           where: { id: entry.subReferenceId },
         });
         break;
@@ -93,12 +93,12 @@ export const findAll = async (filters: any, clientId: number) => {
           }
         });
         break;
-      case JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER:
-        entry.referenceData = await scoped(models.LoadingOrder).findOne({
+      case JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST:
+        entry.referenceData = await scoped(models.PackagingList).findOne({
           where: { id: entry.referenceId },
         });
         break;
-      case JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE:
+      case JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE:
         entry.referenceData = await scoped(models.SalesOrderInvoice).findOne({
           where: { id: entry.referenceId },
         });

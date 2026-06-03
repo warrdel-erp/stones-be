@@ -11,7 +11,7 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as cartItemService from "../services/cartItem.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
-import * as loadingOrderService from "../services/loadingOrder.service";
+import * as packagingListService from "../services/packagingList.service";
 
 
 export const createSalesOrder = async (data: any) => {
@@ -93,10 +93,10 @@ export const getAllSalesOrders = async (
   filter: { [key: string]: string }
 ) => {
   let data: any;
-  if (filter.tab == "LOADING_ORDER") {
-    data = await salesOrderRepository.getAllSalesOrdersOnlyWithLoadingOrder(page, limit, clientId);
-  } else if (filter.tab == "PACKAGING_LIST") {
+  if (filter.tab == "PACKAGING_LIST") {
     data = await salesOrderRepository.getAllSalesOrdersOnlyWithPackagingList(page, limit, clientId);
+  } else if (filter.tab == "LOADING_ORDER") {
+    data = await salesOrderRepository.getAllSalesOrdersOnlyWithLoadingOrder(page, limit, clientId);
   } else if (filter.tab == "OPEN") {
     data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { status: SALES_ORDER_STATUS.OPEN });
   } else if (filter.tab == "CLOSED") {
@@ -128,15 +128,15 @@ export const getSalesOrderById = async (id: number) => {
   // Calculations for sales order products.
   salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
 
-  // Calculations for LoadingOrder
-  salesOrder.loadingOrders = salesOrder.loadingOrders.map((loadingOrder: any) => {
-    loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
-    delete loadingOrder.salesOrderProducts;
-    return loadingOrder;
+  // Calculations for PackagingList
+  salesOrder.loadingOrders = salesOrder.loadingOrders.map((packagingList: any) => {
+    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+    delete packagingList.salesOrderProducts;
+    return packagingList;
   });
 
   // Group Products by productId and unit price.
-  salesOrder.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+  salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
@@ -150,7 +150,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
 
   if (!!salesOrder?.salesOrderProducts) {
     // Group Products by productId and unit price.
-    salesOrder.products = loadingOrderService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
 
     // delete salesOrder.salesOrderProducts because it is in products;
     delete salesOrder.salesOrderProducts;

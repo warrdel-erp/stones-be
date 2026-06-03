@@ -5,16 +5,17 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { DeliveryOrderApprovalInput } from "../validators";
 
 export const initiateDelivery = async (req: AuthRequest, res: Response) => {
-    const { truckId, loadingOrderIds } = req.body;
+    const { truckId, packagingListIds, loadingOrderIds } = req.body;
     const clientId = Number(req.user?.clientId);
+    const packagingIds = packagingListIds?.length ? packagingListIds : loadingOrderIds;
 
-    if (!loadingOrderIds?.length) {
-        ErrorResponse(res, 400, "Loading order ids are required", {});
+    if (!packagingIds?.length) {
+        ErrorResponse(res, 400, "Packaging list ids are required", {});
         return
     }
 
     try {
-        const result = await deliveryService.initiateDelivery(truckId, loadingOrderIds, clientId);
+        const result = await deliveryService.initiateDelivery(truckId, packagingIds, clientId);
         SuccessResponse(res, 201, "Delivery initiated successfully", result);
     } catch (err: any) {
         res.status(400).json({ success: false, message: err.message || "Failed to initiate delivery" });
