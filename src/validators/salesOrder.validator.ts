@@ -18,7 +18,7 @@ export const createSalesOrderSchema = z.object({
   products: z.array(
     z.object({
       inventoryProductId: z.number().int(),
-      unitPrice: z.number().positive(),
+      unitPrice: z.coerce.number().positive(),
       taxApplied: z.boolean().optional(),
     })
   ).min(1, "At least one product is required"),

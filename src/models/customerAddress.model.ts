@@ -61,10 +61,18 @@ const CustomerAddress = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    isPrimary: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "customer_addresses",
     timestamps: true,
+    defaultScope: {
+      order: [["isPrimary", "DESC"], ["createdAt", "DESC"]],
+    },
   }
 );
 

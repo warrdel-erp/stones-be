@@ -1,46 +1,23 @@
 import { Router } from "express";
 import * as loadingOrderController from "../controllers/loadingOrder.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
-import * as loadingOrderProductController from "../controllers/loadingOrderProduct.controller";
 
 const router = Router();
 
-// Create new LO.
+// Create new LO
 router.post("/", authenticateUser, loadingOrderController.createLoadingOrder);
 
-// Get all LO.
+// Get all PL
 router.get("/", authenticateUser, loadingOrderController.getAllLoadingOrders);
 
-// Update Loading Order.
+// Get new SO number.
+router.get("/newLoNumber", authenticateUser, loadingOrderController.getNewPlNumber);
+
+// Update Loading Order
 router.put("/:id", authenticateUser, loadingOrderController.updateLoadingOrder);
 
-// Update requested loading order product.
-router.put(
-  "/:loadingOrderId/loadingOrderProduct",
-  authenticateUser,
-  loadingOrderProductController.upsertLoadingOrderProducts
-);
-
-// Update requested loading order product.
-router.get(
-  "/:loadingOrderId/loadingOrderProduct",
-  authenticateUser,
-  loadingOrderProductController.getLoadingOrderProducts
-);
-
-// Get new SO number.
-router.get("/newLoNumber", authenticateUser, loadingOrderController.getNewLoNumber);
-
-// Create invoice.
-router.put("/:id/createInvoice", authenticateUser, loadingOrderController.invoiceLoadingOrder);
-
-// Get loading order by Id
+// Get Loading Order by Id
 router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById);
 
-// This API gives data of loading order with soProduct that are only in given return or 
-router.get("/accordingToReturnConfirmation/:returnId", authenticateUser, loadingOrderController.getLoadingOrderAsPerReturn);
-
-// This API gives data of loading order with soProduct that are only in given return or 
-router.get("/withSoProductAsPerReturn/:returnId", authenticateUser, loadingOrderController.getLoadingOrderOnlyAsPerReturn);
 
 export default router;

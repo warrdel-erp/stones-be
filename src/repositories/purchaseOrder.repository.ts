@@ -219,6 +219,18 @@ export const getPurchaseOrderById = async (id: number) => {
             model: models.Container,
             as: "containers",
           },
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProducts",
+            attributes: ["id", "status"],
+            include: [
+              {
+                model: models.Slab,
+                as: "slab",
+                attributes: ["id", "packageLength", "packageWidth", "receivingLength", "receivingWidth"]
+              }
+            ]
+          }
         ],
       },
       {

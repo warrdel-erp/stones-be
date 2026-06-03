@@ -6,6 +6,7 @@ import * as slabRepository from "../repositories/slab.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as decimal from '../helper/decimal'
 import { AuthRequest } from "../middleware/authMiddleware";
+import * as models from "../models";
 
 export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthRequest, page: number, limit: number, locationId: number) => {
   const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
@@ -346,4 +347,168 @@ export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId
     })
   );
   return result;
+};
+
+export const getInventoryStats = async (locationId: number) => {
+  const sequelize = models.InventoryProduct.sequelize;
+  if (!sequelize) {
+    throw new Error("Sequelize instance not found");
+  }
+
+  // 1. Total Products (distinct count of productId)
+  const totalProducts = await models.InventoryProduct.count({
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+    },
+    distinct: true,
+    col: "productId",
+  });
+
+  // 2. Total Slabs (count of items with isSlabType: true)
+  const totalSlabs = await models.InventoryProduct.count({
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: true,
+    },
+  });
+
+  // 3. Total Quantity Available (hold is null)
+  // Slab items: sum of area
+  const slabQuantityResult = await models.InventoryProduct.findAll({
+    attributes: [
+      [
+        sequelize.fn(
+          "SUM",
+          sequelize.literal("`slab`.`receivingLength` * `slab`.`receivingWidth` / 144")
+        ),
+        "totalQuantity",
+      ],
+    ],
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: true,
+      "$hold.id$": null,
+    },
+    include: [
+      { association: "slab", required: true, attributes: [] },
+      { association: "hold", required: false, attributes: [] },
+    ],
+    raw: true,
+  });
+  const slabQuantity = slabQuantityResult[0] ? (slabQuantityResult[0] as any).totalQuantity : 0;
+
+  // Generic items: count
+  const genericQuantity = await models.InventoryProduct.count({
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: false,
+      "$hold.id$": null,
+    },
+    include: [
+      { association: "hold", required: false, attributes: [] },
+    ],
+  });
+
+  const totalQuantityAvailable = (Number(slabQuantity) || 0) + genericQuantity;
+
+  // 4. Reserved (hold is not null)
+  // Slab items: sum of area on hold
+  const slabReservedResult = await models.InventoryProduct.findAll({
+    attributes: [
+      [
+        sequelize.fn(
+          "SUM",
+          sequelize.literal("`slab`.`receivingLength` * `slab`.`receivingWidth` / 144")
+        ),
+        "totalReserved",
+      ],
+    ],
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: true,
+    },
+    include: [
+      { association: "slab", required: true, attributes: [] },
+      { association: "hold", required: true, attributes: [] },
+    ],
+    raw: true,
+  });
+  const slabReserved = slabReservedResult[0] ? (slabReservedResult[0] as any).totalReserved : 0;
+
+  // Generic items: count on hold
+  const genericReserved = await models.InventoryProduct.count({
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: false,
+    },
+    include: [
+      { association: "hold", required: true, attributes: [] },
+    ],
+  });
+
+  const totalReservedQuantity = (Number(slabReserved) || 0) + genericReserved;
+
+  // 5. Total Value
+  // Slab items: sum of cost * area
+  const slabValueResult = await models.InventoryProduct.findAll({
+    attributes: [
+      [
+        sequelize.fn(
+          "SUM",
+          sequelize.literal(
+            "COALESCE(`InventoryProduct`.`landedUnitCost`, `InventoryProduct`.`FOBcost`, 0) * `slab`.`receivingLength` * `slab`.`receivingWidth` / 144"
+          )
+        ),
+        "totalValue",
+      ],
+    ],
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: true,
+    },
+    include: [
+      { association: "slab", required: true, attributes: [] },
+    ],
+    raw: true,
+  });
+  const slabValue = slabValueResult[0] ? (slabValueResult[0] as any).totalValue : 0;
+
+  // Generic items: sum of cost
+  const genericValueResult = await models.InventoryProduct.findAll({
+    attributes: [
+      [
+        sequelize.fn(
+          "SUM",
+          sequelize.literal(
+            "COALESCE(`InventoryProduct`.`landedUnitCost`, `InventoryProduct`.`FOBcost`, 0)"
+          )
+        ),
+        "totalValue",
+      ],
+    ],
+    where: {
+      locationId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      isSlabType: false,
+    },
+    raw: true,
+  });
+  const genericValue = genericValueResult[0] ? (genericValueResult[0] as any).totalValue : 0;
+
+  const totalValue = (Number(slabValue) || 0) + (Number(genericValue) || 0);
+
+  return {
+    totalProducts,
+    totalSlabs,
+    totalQuantityAvailable: Number(totalQuantityAvailable.toFixed(2)),
+    totalValue: Number(totalValue.toFixed(2)),
+    totalReservedQuantity: Number(totalReservedQuantity.toFixed(2)),
+  };
 };

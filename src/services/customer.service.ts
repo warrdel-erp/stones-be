@@ -13,6 +13,8 @@ import * as paymentBillRepository from "../repositories/paymentBills.repository"
 import * as advancedDepositRepository from "../repositories/advancedDeposit.repository";
 import * as s3FileRepository from "../repositories/s3File.repository";
 import { generateSignedGetUrl } from "../services/s3File.service";
+import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
+import CustomerTransaction from "../models/customerTransaction.model";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -154,14 +156,14 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
 
       return {
         id: soInvoice.id,
-        dueDate: soInvoice.loadingOrder.expDeliveryDate,
+        dueDate: soInvoice.packagingList.expDeliveryDate,
         amount: soInvoice.finalAmount,
         paidAmount,
         dueAmount: decimalSubtract(soInvoice.finalAmount, paidAmount),
         creationDate: soInvoice.createdAt,
         code: soInvoice.invoiceCode,
-        loNumber: soInvoice.loadingOrder.clientLoNumber,
-        loDate: soInvoice.loadingOrder.loDate,
+        loNumber: soInvoice.packagingList.clientPlNumber,
+        plDate: soInvoice.packagingList.plDate,
         settledWithAdvancedDeposits,
         type: "invoice"
       };
@@ -528,6 +530,7 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
         contactNumber: shippingContactNumber || null,
         countryId: shippingCountryId || null,
         addressType: CUSTOMER_ADDRESS_TYPES.SHIPPING,
+        isPrimary: true,
         clientId,
       });
     }
@@ -544,6 +547,7 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
         contactNumber: remitContactNumber || null,
         countryId: remitCountryId || null,
         addressType: CUSTOMER_ADDRESS_TYPES.REMIT,
+        isPrimary: true,
         clientId,
       });
     }
@@ -599,4 +603,70 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
   });
 
   return result;
+};
+
+// Get merged standard + external AR invoices paginated
+export const getCustomerARInvoices = async (
+  customerId: number,
+  clientId: number,
+  page: number,
+  limit: number
+) => {
+  // 1. Fetch standard overdue invoices
+  const standardOverdue = await salesOrderInvoiceService.getOverdueInvoices(clientId, customerId);
+
+  // 2. Fetch external invoices/transactions
+  const externalTransactions: any[] = await CustomerTransaction.findAll({
+    where: { clientId, customerId },
+    raw: true,
+  });
+
+  // 3. Format/Normalize both sets into a unified structure
+  const unifiedInvoices: any[] = [];
+
+  // Map standard invoices
+  for (const inv of standardOverdue) {
+    unifiedInvoices.push({
+      id: `std_${inv.id}`,
+      invoiceNo: inv.invoiceCode || "--",
+      invoiceDate: inv.createdAt, // Invoice Date
+      dueDate: inv.dueDate,
+      totalAmount: inv.finalAmount,
+      paidAmount: inv.paidAmount,
+      balanceAmount: inv.balanceAmount,
+      isExternal: false,
+    });
+  }
+
+  // Map external transactions
+  for (const inv of externalTransactions) {
+    unifiedInvoices.push({
+      id: `ext_${inv.id}`,
+      invoiceNo: inv.invoiceNo || "--",
+      invoiceDate: inv.invoiceDate,
+      dueDate: inv.dueDate,
+      totalAmount: inv.balanceDue, // external transactions only track outstanding balance
+      paidAmount: 0,
+      balanceAmount: inv.balanceDue,
+      isExternal: true,
+    });
+  }
+
+  // 4. Sort unified list by invoiceDate DESC (newest first)
+  unifiedInvoices.sort((a, b) => {
+    const dateA = a.invoiceDate ? new Date(a.invoiceDate).getTime() : 0;
+    const dateB = b.invoiceDate ? new Date(b.invoiceDate).getTime() : 0;
+    return dateB - dateA;
+  });
+
+  // 5. Paginate/slice the merged array
+  const offset = (page - 1) * limit;
+  const paginatedRows = unifiedInvoices.slice(offset, offset + limit);
+
+  return {
+    rows: paginatedRows,
+    total: unifiedInvoices.length,
+    page,
+    limit,
+  };
 };

@@ -729,3 +729,22 @@ Email notification.
 29. filters, search in inventory.
 30. Break Down Inventory API.
 31. Apply monitoring on server. [Sentry] [Prometheus,Grafana] [opentelemetry]
+
+---
+
+1. Bulk Upload of Vendors. ✅
+2. For customer AR tabs should show data from external. ✅
+3. Customer table data. Detail page. ✅
+4. Primary addresses in customer. ✅
+5. Bulk upload data.
+6. App screen Home Screen changes.
+7. Product images avatar.
+8. Parent ledgers.
+9. dashboard.
+
+---
+
+1. What’s app
+2. Dashboard.
+3. Mobile app.
+4. Delivery.

@@ -6,7 +6,7 @@ import Decimal from "decimal.js";
 import * as decimal from '../helper/decimal'
 
 export const TRADE_SERVICE_REFERENCE_TYPES = {
-    LOADING_ORDER: "loadingOrder",
+    PACKAGING_LIST: "packagingList",
     SIPL: "sipl",
     RETURN: "return",
 } as const;

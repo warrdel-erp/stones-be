@@ -8,7 +8,6 @@ module.exports = {
         {
           id: 1,
           address: "3045 Business Park Drive Suite A, Norcross, GA 30071, United States",
-          unit: null,
           contactName: "Customer-1",
           contactEmail: "jkgoyal85@gmail.com",
           contactNumber: "09119136857",
@@ -23,7 +22,6 @@ module.exports = {
         {
           id: 2,
           address: "123 Main Street, Atlanta, GA 30309, United States",
-          unit: null,
           contactName: "Customer-1",
           contactEmail: "jkgoyal85@gmail.com",
           contactNumber: "09119136857",
@@ -38,7 +36,6 @@ module.exports = {
         {
           id: 3,
           address: "456 Commerce Boulevard, Dallas, TX 75201, United States",
-          unit: null,
           contactName: "John ken",
           contactEmail: "johnken@gmail.com",
           contactNumber: "9672321345",
@@ -53,7 +50,6 @@ module.exports = {
         {
           id: 4,
           address: "789 Stone Avenue, Houston, TX 77002, United States",
-          unit: null,
           contactName: "John Doe",
           contactEmail: "nimits226@gmail.com",
           contactNumber: "09672247772",
@@ -68,7 +64,6 @@ module.exports = {
         {
           id: 5,
           address: "321 Marble Drive, Chicago, IL 60601, United States",
-          unit: null,
           contactName: "Sarah Johnson",
           contactEmail: "sarah@marbleworks.com",
           contactNumber: "555-0123",
@@ -83,7 +78,6 @@ module.exports = {
         {
           id: 6,
           address: "654 Granite Street, Phoenix, AZ 85001, United States",
-          unit: null,
           contactName: "Michael Chen",
           contactEmail: "michael@granitesolutions.com",
           contactNumber: "555-0234",
@@ -98,7 +92,6 @@ module.exports = {
         {
           id: 7,
           address: "987 Crafters Way, Los Angeles, CA 90001, United States",
-          unit: null,
           contactName: "Emily Rodriguez",
           contactEmail: "emily@stonecrafters.com",
           contactNumber: "555-0345",
@@ -113,7 +106,6 @@ module.exports = {
         {
           id: 8,
           address: "789 Warehouse Road, Fort Worth, TX 76102, United States",
-          unit: null,
           contactName: "John ken",
           contactEmail: "johnken@gmail.com",
           contactNumber: "9672321345",
@@ -128,7 +120,6 @@ module.exports = {
         {
           id: 9,
           address: "321 Victory Lane, Austin, TX 78701, United States",
-          unit: null,
           contactName: "John Doe",
           contactEmail: "nimits226@gmail.com",
           contactNumber: "09672247772",
@@ -143,7 +134,6 @@ module.exports = {
         {
           id: 10,
           address: "555 Industrial Park, Milwaukee, WI 53202, United States",
-          unit: null,
           contactName: "Sarah Johnson",
           contactEmail: "sarah@marbleworks.com",
           contactNumber: "555-0123",
@@ -158,7 +148,6 @@ module.exports = {
         {
           id: 11,
           address: "888 Distribution Center, Tucson, AZ 85701, United States",
-          unit: null,
           contactName: "Michael Chen",
           contactEmail: "michael@granitesolutions.com",
           contactNumber: "555-0234",
@@ -173,7 +162,6 @@ module.exports = {
         {
           id: 12,
           address: "111 Manufacturing Street, San Diego, CA 92101, United States",
-          unit: null,
           contactName: "Emily Rodriguez",
           contactEmail: "emily@stonecrafters.com",
           contactNumber: "555-0345",
@@ -186,7 +174,7 @@ module.exports = {
           updatedAt: new Date(),
         },
       ],
-      {}
+      {},
     );
   },
 

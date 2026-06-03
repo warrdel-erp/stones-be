@@ -1,6 +1,8 @@
 import { AppError } from "../helper/appError";
 import csv from "csv-parser";
+import * as models from "../models";
 import { Readable } from "stream";
+import * as XLSX from "xlsx";
 import { vendorBulkUploadSchema } from "../validators/vendor.validator";
 import * as vendorRepository from "../repositories/vendor.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
@@ -24,8 +26,8 @@ import * as vendorContactRepository from "../repositories/vendorContact.reposito
 export const registerVendor = async (vendorData: any, clientId: number) => {
   const transaction = await sequelize.transaction();
   try {
-    if (!vendorData.name || !vendorData.email) {
-      throw new Error("Name, and Email are required fields.");
+    if (!vendorData.name) {
+      throw new Error("Name is a required field.");
     }
 
     // Create vendor
@@ -177,86 +179,136 @@ export const getAllBillsForVendor = async (vendorId: number) => {
   return finalData;
 };
 
+const ALLOWED_VENDOR_HEADERS = [
+  "name", "Name",
+  "printName", "PrintName",
+  "email", "Email",
+  "primaryPhoneNo", "PrimaryPhoneNo",
+  "type", "Type",
+  "contactName", "ContactName",
+  "secondaryPhoneNo", "SecondaryPhoneNo",
+  "landlineNo", "LandlineNo",
+  "accountingEmail", "AccountingEmail",
+  "vendorScope", "VendorScope",
+  "paymentTerms", "PaymentTerms", "Payment Terms", "payment_terms",
+  "status", "Status",
+  "currency", "Currency",
+  "remitAddress", "RemitAddress",
+  "remitSuite", "RemitSuite",
+  "remitCity", "RemitCity",
+  "remitState", "RemitState",
+  "remitZip", "RemitZip",
+  "remitCountry", "RemitCountry",
+  "shippingAddress", "ShippingAddress",
+  "shippingSuite", "ShippingSuite",
+  "shippingCity", "ShippingCity",
+  "shippingState", "ShippingState",
+  "shippingZip", "ShippingZip",
+  "shippingCountry", "ShippingCountry",
+  "internalNotes", "InternalNotes", "Internal Notes", "internal_notes",
+];
+
+const REQUIRED_VENDOR_HEADERS = [
+  "name",
+  "type",
+];
+
 /**
- * Validates referenced IDs and primaryPhoneNo uniqueness in CSV data.
+ * Maps payment terms string or number to valid paymentTerms constants ID.
  */
-const validateBulkVendorIds = async (csvRows: any[], clientId: number) => {
-  const phoneToRowNumbers = new Map<string, number[]>();
-  const paymentTermIds = new Set<number>();
-  const paymentTermIdToRows = new Map<number, number[]>();
+const parsePaymentTerms = (term: any): number | null => {
+  if (term === null || term === undefined) return null;
+  const termStr = String(term).trim().toLowerCase();
+  if (!termStr) return null;
 
-  csvRows.forEach((row) => {
-    const rowNum = row._rowNumber;
-    const phone = (row.primaryPhoneNo || row.PrimaryPhoneNo || "").trim();
-    if (phone) {
-      const rows = phoneToRowNumbers.get(phone) || [];
-      rows.push(rowNum);
-      phoneToRowNumbers.set(phone, rows);
-    }
-    if (row.paymentTerms) {
-      const id = Number(row.paymentTerms);
-      const rows = paymentTermIdToRows.get(id) || [];
-      rows.push(rowNum);
-      paymentTermIdToRows.set(id, rows);
-      paymentTermIds.add(id);
-    }
-  });
-
-  const errors: string[] = [];
-
-  // Duplicate primaryPhoneNo in CSV
-  phoneToRowNumbers.forEach((rows, phone) => {
-    if (rows.length > 1) {
-      errors.push(`Row ${rows.join(", ")}: Duplicate primaryPhoneNo found in CSV: "${phone}"`);
-    }
-  });
-
-  // primaryPhoneNo already exists in database
-  const allPhones = Array.from(phoneToRowNumbers.keys());
-  const existingVendors = await vendorRepository.findVendorsByPrimaryPhoneNumbers(clientId, allPhones);
-  existingVendors.forEach((v: any) => {
-    const rows = phoneToRowNumbers.get(v.primaryPhoneNo) || [];
-    errors.push(`Row ${rows.join(", ")}: primaryPhoneNo already exists in database: "${v.primaryPhoneNo}"`);
-  });
-
-  // Validate paymentTerms
-  const validPaymentTermIds = new Set(PAYMENT_TERMS.map((p) => p.id));
-  paymentTermIds.forEach((id) => {
-    if (!validPaymentTermIds.has(id)) {
-      const rows = paymentTermIdToRows.get(id) || [];
-      errors.push(`Row ${rows.join(", ")}: Invalid paymentTerms ID: ${id}`);
-    }
-  });
-
-  if (errors.length > 0) {
-    throw new AppError(`Bulk validation failed:\n${errors.join("\n")}`, 400);
+  // 1. Check if it matches ID directly (1 to 6)
+  const idNum = Number(termStr);
+  if (!isNaN(idNum) && Number.isInteger(idNum) && idNum >= 1 && idNum <= 6) {
+    return idNum;
   }
+
+  // 2. Handle COD
+  if (termStr === "cod") {
+    return 6;
+  }
+
+  // 3. Extract number from string, e.g. "30 days" -> "30", "120 DAYS" -> "120"
+  const matchDigits = termStr.match(/^(\d+)\s*(days?|day)?$/);
+  if (matchDigits) {
+    const days = matchDigits[1];
+    const found = PAYMENT_TERMS.find((p) => p.value === days);
+    if (found) {
+      return found.id;
+    }
+  }
+
+  // Fallback: search for just the digits anywhere or the exact value in PAYMENT_TERMS
+  const onlyDigits = termStr.replace(/\D/g, "");
+  if (onlyDigits) {
+    const found = PAYMENT_TERMS.find((p) => p.value === onlyDigits);
+    if (found) {
+      return found.id;
+    }
+  }
+
+  const foundByValue = PAYMENT_TERMS.find(
+    (p) => p.value.toLowerCase() === termStr
+  );
+  if (foundByValue) {
+    return foundByValue.id;
+  }
+
+  return null;
 };
 
 /**
- * Parses and validates CSV rows for bulk vendor upload.
+ * Maps vendor scope string or numeric ID to scope ID.
  */
-const prepareBulkVendorData = (csvRows: any[], userId: number) => {
-  const vendors: any[] = [];
-  const errors: string[] = [];
+const parseVendorScope = (scope: any): string | null => {
+  if (scope === null || scope === undefined) return null;
+  const scopeStr = String(scope).trim().toLowerCase();
+  if (!scopeStr) return null;
 
-  csvRows.forEach((data) => {
-    const rowNum = data._rowNumber;
+  if (scopeStr === "1" || scopeStr === "national") {
+    return "1";
+  }
+  if (scopeStr === "2" || scopeStr === "international") {
+    return "2";
+  }
+  return scopeStr;
+};
 
-    const inputData = {
+/**
+ * Normalizes CSV rows to match vendor model structure and clean raw values.
+ */
+const normalizeVendorRows = (csvRows: any[]) => {
+  return csvRows.map((data) => {
+    const rawTerms = data.paymentTerms || data.PaymentTerms || data["Payment Terms"] || data.payment_terms;
+    let paymentTerms: number | null = null;
+    if (rawTerms !== undefined && rawTerms !== null && String(rawTerms).trim() !== "") {
+      const parsed = parsePaymentTerms(rawTerms);
+      paymentTerms = parsed !== null ? parsed : NaN;
+    }
+
+    const rawScope = data.vendorScope || data.VendorScope || null;
+    const vendorScope = rawScope ? parseVendorScope(rawScope) : null;
+
+    return {
+      _rowNumber: data._rowNumber,
       name: (data.name || data.Name || "").trim(),
-      printName: (data.printName || data.PrintName || data.name || data.Name || "").trim(),
-      email: (data.email || data.Email || "").trim(),
-      primaryPhoneNo: (data.primaryPhoneNo || data.PrimaryPhoneNo || "").trim(),
+      printName: (data.printName || data.PrintName || data.name || data.Name || "").trim() || null,
+      email: data.email || data.Email ? String(data.email || data.Email).trim() : null,
+      primaryPhoneNo: data.primaryPhoneNo || data.PrimaryPhoneNo ? String(data.primaryPhoneNo || data.PrimaryPhoneNo).trim() : null,
       type: (data.type || data.Type || "").trim().toUpperCase() || null,
       contactName: data.contactName || data.ContactName || null,
       secondaryPhoneNo: data.secondaryPhoneNo || data.SecondaryPhoneNo || null,
       landlineNo: data.landlineNo || data.LandlineNo || null,
       accountingEmail: data.accountingEmail || data.AccountingEmail || null,
-      vendorScope: data.vendorScope || data.VendorScope || null,
-      paymentTerms: data.paymentTerms ? Number(data.paymentTerms) : null,
-      status: (data.status || "active") as "active" | "inactive",
-      currency: data.currency || "USD",
+      vendorScope,
+      paymentTerms,
+      internalNotes: data.internalNotes || data.InternalNotes || data["Internal Notes"] || data.internal_notes || null,
+      status: (data.status || data.Status || "active").toString().toLowerCase() as "active" | "inactive",
+      currency: data.currency || data.Currency || "USD",
       remitAddress: data.remitAddress || data.RemitAddress || null,
       remitSuite: data.remitSuite || data.RemitSuite || null,
       remitCity: data.remitCity || data.RemitCity || null,
@@ -270,24 +322,143 @@ const prepareBulkVendorData = (csvRows: any[], userId: number) => {
       shippingZip: data.shippingZip || data.ShippingZip || null,
       shippingCountry: data.shippingCountry || data.ShippingCountry || null,
     };
+  });
+};
 
-    const validation = vendorBulkUploadSchema.safeParse(inputData);
+/**
+ * Stage 3: Cross-Row Column & Database validation.
+ */
+const validateVendorColumns = async (
+  preparedRows: any[],
+  clientId: number,
+  errors: string[]
+) => {
+  const nameToRowNumbers = new Map<string, number[]>();
+  const phoneToRowNumbers = new Map<string, number[]>();
+  const emailToRowNumbers = new Map<string, number[]>();
+  const paymentTermIdToRows = new Map<number, number[]>();
+  const paymentTermIds = new Set<number>();
+  const vendorScopeToRows = new Map<string, number[]>();
+  const vendorScopes = new Set<string>();
 
+  preparedRows.forEach((row) => {
+    const rowNum = row._rowNumber;
+
+    const name = (row.name || "").trim().toLowerCase();
+    if (name) {
+      const rows = nameToRowNumbers.get(name) || [];
+      rows.push(rowNum);
+      nameToRowNumbers.set(name, rows);
+    }
+
+    const phone = (row.primaryPhoneNo || "").trim();
+    if (phone) {
+      const rows = phoneToRowNumbers.get(phone) || [];
+      rows.push(rowNum);
+      phoneToRowNumbers.set(phone, rows);
+    }
+
+    const email = (row.email || "").trim().toLowerCase();
+    if (email) {
+      const rows = emailToRowNumbers.get(email) || [];
+      rows.push(rowNum);
+      emailToRowNumbers.set(email, rows);
+    }
+
+    if (row.paymentTerms !== null && row.paymentTerms !== undefined) {
+      const id = row.paymentTerms;
+      const rows = paymentTermIdToRows.get(id) || [];
+      rows.push(rowNum);
+      paymentTermIdToRows.set(id, rows);
+      paymentTermIds.add(id);
+    }
+
+    if (row.vendorScope) {
+      const scope = row.vendorScope;
+      const rows = vendorScopeToRows.get(scope) || [];
+      rows.push(rowNum);
+      vendorScopeToRows.set(scope, rows);
+      vendorScopes.add(scope);
+    }
+  });
+
+  // 1. Duplicate checks within CSV
+  nameToRowNumbers.forEach((rows, name) => {
+    if (rows.length > 1) {
+      errors.push(`Row ${rows.join(", ")}: Duplicate vendor name found in CSV: "${name}"`);
+    }
+  });
+
+  phoneToRowNumbers.forEach((rows, phone) => {
+    if (rows.length > 1) {
+      errors.push(`Row ${rows.join(", ")}: Duplicate primaryPhoneNo found in CSV: "${phone}"`);
+    }
+  });
+
+  emailToRowNumbers.forEach((rows, email) => {
+    if (rows.length > 1) {
+      errors.push(`Row ${rows.join(", ")}: Duplicate email found in CSV: "${email}"`);
+    }
+  });
+
+  // 2. Database existence checks
+  const allNames = Array.from(nameToRowNumbers.keys());
+  if (allNames.length > 0) {
+    const existingVendorsByName = await models.Vendor.findAll({
+      where: { clientId, name: allNames },
+      attributes: ["name"],
+    });
+    existingVendorsByName.forEach((v: any) => {
+      const rows = nameToRowNumbers.get(v.name.toLowerCase()) || [];
+      errors.push(`Row ${rows.join(", ")}: Vendor name already exists in database: "${v.name}"`);
+    });
+  }
+
+  const allPhones = Array.from(phoneToRowNumbers.keys());
+  if (allPhones.length > 0) {
+    const existingVendorsByPhone = await vendorRepository.findVendorsByPrimaryPhoneNumbers(clientId, allPhones);
+    existingVendorsByPhone.forEach((v: any) => {
+      const rows = phoneToRowNumbers.get(v.primaryPhoneNo) || [];
+      errors.push(`Row ${rows.join(", ")}: primaryPhoneNo already exists in database: "${v.primaryPhoneNo}"`);
+    });
+  }
+
+  // 3. Enums validations (paymentTerms & vendorScope)
+  const validPaymentTermIds = new Set(PAYMENT_TERMS.map((p) => p.id));
+  paymentTermIds.forEach((id) => {
+    if (isNaN(id) || !validPaymentTermIds.has(id)) {
+      const rows = paymentTermIdToRows.get(id) || [];
+      errors.push(`Row ${rows.join(", ")}: Invalid paymentTerms: ${id}`);
+    }
+  });
+
+  const validScopes = new Set(SCOP.map((s) => String(s.id)));
+  vendorScopes.forEach((scope) => {
+    if (!validScopes.has(scope)) {
+      const rows = vendorScopeToRows.get(scope) || [];
+      errors.push(`Row ${rows.join(", ")}: Invalid vendorScope: "${scope}". Expected "National" or "International".`);
+    }
+  });
+};
+
+/**
+ * Stage 4: Row-wise schema validation using Zod.
+ */
+const validateRowsSchema = (preparedRows: any[], errors: string[]) => {
+  const validatedData: any[] = [];
+  preparedRows.forEach((row) => {
+    const { _rowNumber, ...rest } = row;
+    const validation = vendorBulkUploadSchema.safeParse(rest);
     if (!validation.success) {
       const rowErrors = validation.error.errors
         .map((err) => `${err.path.join(".")}: ${err.message}`)
         .join(", ");
-      errors.push(`Row ${rowNum}: ${rowErrors}`);
+      errors.push(`Row ${_rowNumber}: ${rowErrors}`);
     } else {
-      vendors.push({ ...validation.data, _rowNumber: rowNum });
+      validatedData.push({ ...validation.data, _rowNumber });
     }
   });
-
-  if (errors.length > 0) {
-    throw new AppError(`Validation failed for some rows: \n${errors.join("\n")}`, 400);
-  }
-
-  return vendors;
+  return validatedData;
 };
 
 /**
@@ -296,36 +467,82 @@ const prepareBulkVendorData = (csvRows: any[], userId: number) => {
 export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clientId: number) => {
   const csvRows: any[] = [];
   let rowNumber = 1;
+  let headers: string[] = [];
 
-  // 1. Parse CSV
-  await new Promise((resolve, reject) => {
-    const stream = Readable.from(fileBuffer);
-    stream
-      .pipe(csv())
-      .on("data", (data) => csvRows.push({ ...data, _rowNumber: ++rowNumber }))
-      .on("end", resolve)
-      .on("error", reject);
-  });
+  // 1. Parse File (CSV or Excel)
+  try {
+    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
 
-  if (csvRows.length === 0) {
-    throw new AppError("No vendors found in the CSV file.", 400);
+    // Get headers
+    headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
+    if (headers) {
+      const unrecognized = headers.filter((h: string) => h && !ALLOWED_VENDOR_HEADERS.includes(h));
+      if (unrecognized.length > 0) {
+        throw new AppError(`Unrecognized column(s): ${unrecognized.join(", ")}`, 400);
+      }
+
+      const missing = REQUIRED_VENDOR_HEADERS.filter((rh) => {
+        const cap = rh.charAt(0).toUpperCase() + rh.slice(1);
+        return !headers.includes(rh) && !headers.includes(cap);
+      });
+      if (missing.length > 0) {
+        throw new AppError(`Missing required column(s): ${missing.join(", ")}`, 400);
+      }
+    }
+
+    // Convert to JSON
+    const data = XLSX.utils.sheet_to_json(worksheet);
+    csvRows.push(...data.map((row: any) => ({ ...row, _rowNumber: ++rowNumber })));
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(`Failed to parse file: ${error.message}`, 400);
   }
 
-  // 2. Validate referenced IDs and primaryPhoneNo uniqueness
-  await validateBulkVendorIds(csvRows, clientId);
+  // 2. Normalize raw CSV rows
+  const preparedRows = normalizeVendorRows(csvRows);
 
-  // 3. Prepare and validate row data
-  const vendorsData = prepareBulkVendorData(csvRows, userId);
+  // 3. Cross-row column and database validation
+  const errors: string[] = [];
+  await validateVendorColumns(preparedRows, clientId, errors);
 
-  // 4. Prepare vendors (remove _rowNumber)
+  if (errors.length > 0) {
+    throw new AppError(`Validation failed:\n${errors.join("\n")}`, 400);
+  }
+
+  // 4. Validate rows schema with Zod
+  const vendorsData = validateRowsSchema(preparedRows, errors);
+
+  if (errors.length > 0) {
+    throw new AppError(`Validation failed:\n${errors.join("\n")}`, 400);
+  }
+
+  // 5. Prepare vendors (remove _rowNumber)
   const vendorsToCreate = vendorsData.map(({ _rowNumber, ...vendor }) => ({
     ...vendor,
     createdBy: userId,
     clientId,
   }));
 
-  // 5. Bulk create within transaction (no scoped - clientId in each row)
+  // 6. Bulk create within transaction
   const result = await sequelize.transaction(async (transaction) => {
+    // Create Note records first and assign internalNotesId to each vendor data object
+    for (const vendor of vendorsToCreate as any[]) {
+      if (vendor.internalNotes && String(vendor.internalNotes).trim()) {
+        const note = await models.Notes.create({
+          description: String(vendor.internalNotes).trim(),
+          type: "internal",
+          referenceType: "purchase_order",
+          referenceId: 0,
+          clientId,
+        }, { transaction });
+        vendor.internalNotesId = (note as any).id;
+      }
+      // Remove internalNotes since it is not a direct column on the Vendor model
+      delete vendor.internalNotes;
+    }
+
     const createdVendors: any[] = await vendorRepository.bulkCreateVendorsForBulkUpload(vendorsToCreate, transaction);
 
     const subHeaderId = COA_SUB_HEADERS.find((e) => e.key == "trade_payables")?.id;

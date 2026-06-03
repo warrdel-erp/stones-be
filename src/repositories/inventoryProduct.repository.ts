@@ -147,11 +147,11 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
 export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot') => {
   const groupField = groupBy === 'block' ? 'slab.block' : 'slab.lot';
   const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
-  
+
   return await scoped(models.InventoryProduct).findAll({
-    where: { 
+    where: {
       productId,
-      status: INVENTORY_ITEM_STATUS.IN_INVENTORY
+      // status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
     },
     include: [
       {
@@ -164,17 +164,6 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
         attributes: [],
         required: false
       },
-      {
-        association: 'bin',
-        attributes: [],
-        required: true,
-        include: [{
-          association: 'warehouse',
-          attributes: [],
-          where: { locationId },
-          required: true
-        }]
-      }
     ],
     attributes: [
       [col(groupField), groupAlias],
@@ -606,5 +595,17 @@ export const getInStockProductsWithSubCategory = async (clientId: number) => {
     ],
     group: ["InventoryProduct.isSlabType", "product->subCategory.name"],
     raw: true
+  });
+};
+
+/**
+ * Get all QR codes for inventory products in a SIPL
+ */
+export const getQrCodesBySiplId = async (siplId: number) => {
+  return await scoped(models.InventoryProduct).findAll({
+    where: {
+      siplId
+    },
+    attributes: ["id", "qrCode", "combinedNumber"],
   });
 };

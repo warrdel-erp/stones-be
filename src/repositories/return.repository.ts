@@ -1,5 +1,5 @@
 import { Op, Transaction } from "sequelize";
-import { LoadingOrder, Return, ReturnProduct, SalesOrderInvoice, SalesOrderProduct } from "../models";
+import { PackagingList, Return, ReturnProduct, SalesOrderInvoice, SalesOrderProduct } from "../models";
 import { RETURN_STATUS } from "../models/return.model";
 import { scoped } from "../utils/scoped";
 
@@ -16,8 +16,8 @@ export const getInvoiceWithProducts = async (invoiceId: number, transaction: Tra
         where: { id: invoiceId },
         include: [
             {
-                model: LoadingOrder,
-                as: "loadingOrder",
+                model: PackagingList,
+                as: "packagingList",
                 include: [
                     {
                         model: SalesOrderProduct,
@@ -64,10 +64,10 @@ export const getReturnWithProducts = async (returnId: number, transaction?: Tran
                 association: 'soInvoice',
                 include: [
                     {
-                        association: 'loadingOrder',
+                        association: 'packagingList',
                         include: [
                             {
-                                association: 'packagingList'
+                                association: 'loadingOrder'
                             },
                             {
                                 association: 'salesOrder',
@@ -118,11 +118,11 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
                 where: { clientId },
                 include: [
                     {
-                        association: 'loadingOrder',
+                        association: 'packagingList',
                         attributes: ['id', 'code'],
                         include: [
                             {
-                                association: 'packagingList',
+                                association: 'loadingOrder',
                                 attributes: ['id', 'code'],
                             }
                         ]

@@ -141,7 +141,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
     );
 
     // Calculate total quantity in SIPL for this PO
-    purchaseOrder.totalSiplAmount = purchaseOrder.requestedPurchaseProducts.reduce(
+    purchaseOrder.totalSiloAmount = purchaseOrder.requestedPurchaseProducts.reduce(
       (total: number, requestedPurchaseProduct: any) =>
         total +
         requestedPurchaseProduct.siplProducts.reduce(
@@ -214,6 +214,32 @@ export const getPurchaseOrderById = async (id: number) => {
         (total: number, siplProduct: any) => total + siplProduct.quantity * Number(siplProduct.unitPrice),
         0
       );
+
+      let filledPackagingCount = 0;
+      let filledReceivingCount = 0;
+      const statusCounts: { [key: string]: number } = {};
+
+      if (sipl.inventoryProducts) {
+        for (const ip of sipl.inventoryProducts) {
+          const status = ip.status || "UNKNOWN";
+          statusCounts[status] = (statusCounts[status] || 0) + 1;
+          const slab = ip.slab;
+          if (slab) {
+            const hasPackaging = slab.packageLength !== null && slab.packageLength !== undefined && slab.packageWidth !== null && slab.packageWidth !== undefined;
+            const hasReceiving = slab.receivingLength !== null && slab.receivingLength !== undefined && slab.receivingWidth !== null && slab.receivingWidth !== undefined;
+            if (hasPackaging) filledPackagingCount++;
+            if (hasReceiving) filledReceivingCount++;
+          }
+        }
+      }
+
+      sipl.inventoryProductsCount = sipl.inventoryProducts?.length || 0;
+      sipl.filledPackagingCount = filledPackagingCount;
+      sipl.filledReceivingCount = filledReceivingCount;
+      sipl.statusCounts = statusCounts;
+
+      // Delete raw inventoryProducts array to optimize payload
+      delete sipl.inventoryProducts;
 
       return {
         ...sipl,

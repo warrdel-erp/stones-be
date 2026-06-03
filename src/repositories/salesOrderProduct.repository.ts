@@ -8,7 +8,7 @@ export const findByIdSimple = async (id: number, transaction?: Transaction) => {
   return (await models.SalesOrderProduct.findByPk(id, { transaction }))?.get({ plain: true });
 };
 
-// Find so product with salesOrder, loadingOrder
+// Find so product with salesOrder, packagingList
 export const getSOproductWithSOAndLO = async (soProductId: number) => {
   return (await models.SalesOrderProduct.findByPk(soProductId, {
     include: [
@@ -17,8 +17,8 @@ export const getSOproductWithSOAndLO = async (soProductId: number) => {
         as: "salesOrder",
       },
       {
-        model: models.LoadingOrder,
-        as: "loadingOrder",
+        model: models.PackagingList,
+        as: "packagingList",
       }
     ],
   }))?.get({ plain: true });
@@ -97,28 +97,28 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
     receiving: {
       total: 0, // subTotal + tax
     },
-    loadingOrder: {
-      subTotal: 0, // total of each "loAmount"
-      taxable: 0, // total of each "loAmount" with taxApplied = true
-      tax: 0, // loTaxAmount
-      total: 0, // subTotal + tax
-    },
     packagingList: {
       subTotal: 0, // total of each "plAmount"
       taxable: 0, // total of each "plAmount" with taxApplied = true
       tax: 0, // plTaxAmount
       total: 0, // subTotal + tax
     },
+    loadingOrder: {
+      subTotal: 0, // total of each "loAmount"
+      taxable: 0, // total of each "loAmount" with taxApplied = true
+      tax: 0, // loTaxAmount
+      total: 0, // subTotal + tax
+    },
     final: {
-      subTotal: 0, // total of each "plAmount"
-      taxable: 0, // total of each "plAmount" with taxApplied = true
-      tax: 0, // plTaxAmount
+      subTotal: 0, // total of each "loAmount"
+      taxable: 0, // total of each "loAmount" with taxApplied = true
+      tax: 0, // loTaxAmount
       total: 0, // subTotal + tax
     },
     quantities: {
       receiving: 0,
-      loadingOrder: 0,
       packagingList: 0,
+      loadingOrder: 0,
       final: 0,
     }
   }
@@ -137,54 +137,54 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
     // Calculate for receiving ------
     calcs.receiving.total = decimals.decimalAdd(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct.landedUnitCost) || 0);
 
-    // Calculate for loading order
-    calcs.loadingOrder.subTotal = decimals.decimalAdd(calcs.loadingOrder.subTotal, Number(salesOrderProduct.loAmount) || 0);
-    if (salesOrderProduct.taxApplied) {
-      calcs.loadingOrder.taxable = decimals.decimalAdd(calcs.loadingOrder.taxable, Number(salesOrderProduct.loAmount) || 0);
-    }
-
-    calcs.loadingOrder.tax = decimals.decimalAdd(calcs.loadingOrder.tax, Number(salesOrderProduct.loTaxAmount) || 0);
-
     // Calculate for packaging list
     calcs.packagingList.subTotal = decimals.decimalAdd(calcs.packagingList.subTotal, Number(salesOrderProduct.plAmount) || 0);
     if (salesOrderProduct.taxApplied) {
       calcs.packagingList.taxable = decimals.decimalAdd(calcs.packagingList.taxable, Number(salesOrderProduct.plAmount) || 0);
     }
 
+    calcs.packagingList.tax = decimals.decimalAdd(calcs.packagingList.tax, Number(salesOrderProduct.plTaxAmount) || 0);
+
+    // Calculate for loading order
+    calcs.loadingOrder.subTotal = decimals.decimalAdd(calcs.loadingOrder.subTotal, Number(salesOrderProduct.loAmount) || 0);
+    if (salesOrderProduct.taxApplied) {
+      calcs.loadingOrder.taxable = decimals.decimalAdd(calcs.loadingOrder.taxable, Number(salesOrderProduct.loAmount) || 0);
+    }
+
     if (salesOrderProduct.isSlabType) {
       calcs.quantities.receiving = decimals.decimalAdd(calcs.quantities.receiving, Number(salesOrderProduct.receivingAreaSqFt) || 0);
 
-      calcs.quantities.loadingOrder = decimals.decimalAdd(calcs.quantities.loadingOrder, salesOrderProduct.loSqrFt);
-
       calcs.quantities.packagingList = decimals.decimalAdd(calcs.quantities.packagingList, salesOrderProduct.plSqrFt);
+
+      calcs.quantities.loadingOrder = decimals.decimalAdd(calcs.quantities.loadingOrder, salesOrderProduct.loSqrFt);
     } else {
       calcs.quantities.receiving = decimals.decimalAdd(calcs.quantities.receiving, 1);
-
-      // if plAmount exists that means it is in packaging list
-      if (salesOrderProduct.plAmount) {
-        calcs.quantities.packagingList = decimals.decimalAdd(calcs.quantities.packagingList, 1);
-      }
 
       // if loAmount exists that means it is in loading order
       if (salesOrderProduct.loAmount) {
         calcs.quantities.loadingOrder = decimals.decimalAdd(calcs.quantities.loadingOrder, 1);
       }
 
+      // if plAmount exists that means it is in packaging list
+      if (salesOrderProduct.plAmount) {
+        calcs.quantities.packagingList = decimals.decimalAdd(calcs.quantities.packagingList, 1);
+      }
+
     }
 
-    calcs.packagingList.tax = decimals.decimalAdd(calcs.packagingList.tax, Number(salesOrderProduct.plTaxAmount) || 0);
+    calcs.loadingOrder.tax = decimals.decimalAdd(calcs.loadingOrder.tax, Number(salesOrderProduct.loTaxAmount) || 0);
   }
 
   calcs.soReceiving.total = decimals.decimalAdd(calcs.soReceiving.subTotal, calcs.soReceiving.tax);
-  calcs.loadingOrder.total = decimals.decimalAdd(calcs.loadingOrder.subTotal, calcs.loadingOrder.tax);
   calcs.packagingList.total = decimals.decimalAdd(calcs.packagingList.subTotal, calcs.packagingList.tax);
+  calcs.loadingOrder.total = decimals.decimalAdd(calcs.loadingOrder.subTotal, calcs.loadingOrder.tax);
 
-  if (calcs.packagingList.total) {
-    calcs.final = calcs.packagingList;
-    calcs.quantities.final = calcs.quantities.packagingList
-  } else if (calcs.loadingOrder.total) {
+  if (calcs.loadingOrder.total) {
     calcs.final = calcs.loadingOrder;
     calcs.quantities.final = calcs.quantities.loadingOrder
+  } else if (calcs.packagingList.total) {
+    calcs.final = calcs.packagingList;
+    calcs.quantities.final = calcs.quantities.packagingList
   } else {
     calcs.final.total = calcs.receiving.total;
     calcs.quantities.final = calcs.quantities.receiving

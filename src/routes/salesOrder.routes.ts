@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as salesOrderController from "../controllers/salesOrder.controller";
-import * as loadingOrderController from "../controllers/loadingOrder.controller";
+import * as packagingListController from "../controllers/packagingList.controller";
 import * as salesOrderProductController from "../controllers/salesOrderProduct.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 
@@ -15,8 +15,8 @@ router.post("/", authenticateUser, validateRequest(createSalesOrderSchema), sale
 // Get All SO
 router.get("/", authenticateUser, salesOrderController.getAllSalesOrders);
 
-// Get loading order by SO id
-router.get("/:salesOrderId/loadingOrder", authenticateUser, loadingOrderController.getLoadingOrdersBySalesOrderId);
+// Get packaging list by SO id
+router.get("/:salesOrderId/loadingOrder", authenticateUser, packagingListController.getPackagingListsBySalesOrderId);
 
 // Update requested sales order product
 router.put("/salesOrderProducts/bulk", authenticateUser, salesOrderProductController.updateSalesOrderProducts);

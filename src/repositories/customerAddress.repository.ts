@@ -49,7 +49,10 @@ export const getCustomerAddressOptions = async (
       ["id", "value"],
     ],
     where: whereCondition,
-    order: [["address", "ASC"]],
+    order: [
+      ["isPrimary", "DESC"],
+      ["address", "ASC"],
+    ],
   });
 };
 
@@ -77,4 +80,24 @@ export const deleteCustomerAddress = async (id: number, transaction?: Transactio
     where: { id },
     transaction,
   });
+};
+
+export const clearPrimaryStatus = async (
+  customerId: number,
+  addressType: string,
+  excludeAddressId?: number,
+  transaction?: Transaction
+) => {
+  const { Op } = require("sequelize");
+  const where: any = {
+    customerId,
+    addressType,
+  };
+  if (excludeAddressId) {
+    where.id = { [Op.ne]: excludeAddressId };
+  }
+  return await scoped(models.CustomerAddress).update(
+    { isPrimary: false },
+    { where, transaction }
+  );
 };

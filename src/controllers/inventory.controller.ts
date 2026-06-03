@@ -118,3 +118,14 @@ export const getSiplsByProduct = catchAsync(async (req: AuthRequest, res: Respon
   SuccessResponse(res, 200, "SIPLs fetched successfully", sipls);
 });
 
+export const getInventoryStats = catchAsync(async (req: AuthRequest, res: Response) => {
+  const locationId = req.user?.defaultLocationId;
+
+  if (!locationId) {
+    return res.status(400).json({ error: "User has no default location" });
+  }
+
+  const stats = await inventoryRepository.getInventoryStats(Number(locationId));
+  SuccessResponse(res, 200, "Inventory stats fetched successfully", stats);
+});
+

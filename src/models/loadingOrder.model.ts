@@ -1,12 +1,10 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import SalesOrder from "./salesOrder.model";
-import { AppError } from "../helper/appError";
 import Client from "./client.model";
-import CustomerAddress from "./customerAddress.model";
+import SalesOrder from "./salesOrder.model";
+import PackagingList from "./packagingList.model";
 import * as models from "./index";
-import { DELIVERY_TYPES, LOADING_ORDER_STAGES } from "../constants/tableTypes";
-import { PAYMENT_TERMS } from "../constants";
+import { AppError } from "../helper/appError";
 import { scoped } from "../utils/scoped";
 
 const LoadingOrder = sequelize.define(
@@ -18,48 +16,29 @@ const LoadingOrder = sequelize.define(
       primaryKey: true,
     },
     code: {
-      type: DataTypes.STRING
-    },
-    clientLoNumber: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Auto-Incremented and not null is handled in hook
-    },
-    loDate: {
-      type: DataTypes.DATEONLY,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
+      type: DataTypes.STRING,
     },
     soLoadingOrderNumber: {
       type: DataTypes.INTEGER,
     },
-    expDeliveryDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    paymentTermId: {
+    clientLoNumber: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    deliveryNotes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    deliveryType: {
-      type: DataTypes.ENUM(...Object.values(DELIVERY_TYPES)),
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "active",
       allowNull: false,
     },
-    stage: {
-      type: DataTypes.ENUM(...Object.values(LOADING_ORDER_STAGES)),
-      defaultValue: LOADING_ORDER_STAGES.INITIATED,
-      allowNull: false,
-    },
-    shippingAddressId: {
+    packagingListId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: CustomerAddress,
+        model: PackagingList,
         key: "id",
       },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     salesOrderId: {
       type: DataTypes.INTEGER,
@@ -90,17 +69,15 @@ const LoadingOrder = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
-    paymentTerm: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        return PAYMENT_TERMS.find((e) => e.id === this.get("paymentTermId"));
-      },
-    }
   },
   {
     tableName: "loading_orders",
     timestamps: true,
     indexes: [
+      {
+        unique: true,
+        fields: ["packagingListId"],
+      },
       {
         unique: true,
         fields: ["clientId", "clientLoNumber"],
@@ -113,19 +90,7 @@ const LoadingOrder = sequelize.define(
   }
 );
 
-// Hook to prevent updates if invoiced = true
-LoadingOrder.beforeUpdate(async (loadingOrder) => {
-  const loadingOrderExisting = await LoadingOrder.findByPk(loadingOrder.dataValues.id);
-
-  if (loadingOrderExisting?.dataValues.stage == LOADING_ORDER_STAGES.INVOICED) {
-    throw new AppError("Cannot update Loading Order as it is already invoiced.", 400);
-  }
-});
-
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
 LoadingOrder.beforeCreate(async (loadingOrder: any) => {
-
-  //  Generate clientLoNumber
   if (!loadingOrder.clientId) {
     throw new Error("Client ID is required to generate clientLoNumber.");
   }
@@ -139,25 +104,21 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
 
   loadingOrder.clientLoNumber = !!lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
 
-  //  Generate soLoadingOrderNumber
-
   if (!loadingOrder.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soLoadingOrderNumber.", 400);
   }
 
-  const lastLoAccordingToSo: any = await scoped(LoadingOrder).findOne({
+  const lastLOAccordingToSo: any = await scoped(LoadingOrder).findOne({
     where: { salesOrderId: loadingOrder.salesOrderId },
     order: [["soLoadingOrderNumber", "DESC"]],
   });
 
-  const salesOrder: any = await SalesOrder.findByPk(loadingOrder.salesOrderId)
+  const salesOrder: any = await SalesOrder.findByPk(loadingOrder.salesOrderId);
 
-  loadingOrder.soLoadingOrderNumber = lastLoAccordingToSo ? lastLoAccordingToSo.soLoadingOrderNumber + 1 : 1;
+  loadingOrder.soLoadingOrderNumber = lastLOAccordingToSo ? lastLOAccordingToSo.soLoadingOrderNumber + 1 : 1;
   loadingOrder.code = `LO ${salesOrder.clientSoNumber}-${loadingOrder.soLoadingOrderNumber}`;
-
 });
 
-// Scope configuration for LoadingOrder model
 (LoadingOrder as any).scopeConfig = {
   client: true,
   location: true,

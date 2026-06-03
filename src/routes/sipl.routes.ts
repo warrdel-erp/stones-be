@@ -28,6 +28,9 @@ router.get("/:id/containers", authenticateUser, siplController.getSIPLContainers
 // Get all barcode
 router.get("/:siplId/barcode", authenticateUser, siplController.getAllBarcode);
 
+// Get all QR codes
+router.get("/:siplId/qrcodes", authenticateUser, siplController.getAllQrCodes);
+
 // Get new combined slab number
 router.get('/:siplId/newCombinedSlabNumber', authenticateUser, siplController.getNewCombinedSlabNumberController);
 

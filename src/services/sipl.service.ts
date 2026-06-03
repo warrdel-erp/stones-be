@@ -388,12 +388,12 @@ export const getSIPLById = async (id: number) => {
     })
   );
 
-  const totalPaidSiplAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
+  const totalPaidSiloAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
     sipl.id,
     PAYMENT_BILL_REFERENCE_TYPES.SIPL
   );
 
-  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiplAmount };
+  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiloAmount };
 };
 
 // Get SIPL by ID
@@ -614,6 +614,10 @@ export const getOverdueSIPLsByVendor = async (vendorId: number, clientId: number
 // Get all barcode of an SIPL
 export const getAllBarcode: any = async (siplId: number) => {
   return await slabRepository.getOnlyBarcode(siplId);
+};
+
+export const getAllQrCodes: any = async (siplId: number) => {
+  return await inventoryProductRepository.getQrCodesBySiplId(siplId);
 };
 
 // Get new combined slab number

@@ -1,5 +1,7 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
+import { DELIVERY_STATUS, PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { RETURN_STATUS } from "../models/return.model";
 import { scoped } from "../utils/scoped";
 
 // Create new LO
@@ -8,80 +10,316 @@ export const createPackagingList = async (data: any, transaction?: Transaction) 
 };
 
 // Get all LO
-export const getAllPackagingLists = async () => {
-  return await scoped(models.PackagingList).findAll({
-    include: [{ model: models.LoadingOrder, as: "loadingOrder" }],
+export const getAllPackagingLists = async (page: number, limit: number, clientId: number, filters?: any) => {
+  const offset = (page - 1) * limit;
+
+  const whereClause: any = { ...filters };
+
+  // Add clientId filter if provided
+  if (clientId) {
+    whereClause.clientId = clientId;
+  }
+
+  if (filters.notInvoicedOnly === "true") {
+    whereClause.stage = {
+      [Op.ne]: [PACKAGING_LIST_STAGES.INVOICED],
+    };
+
+    delete whereClause.notInvoicedOnly;
+  }
+
+  const { rows: data, count: total } = await scoped(models.PackagingList).findAndCountAll({
+    where: {
+      ...whereClause,
+    },
+    include: [
+      {
+        model: models.SalesOrder,
+        as: "salesOrder",
+        include: [
+          { model: models.Customer, as: "customer" },
+          { model: models.Location, as: "soLocation" },
+        ],
+      },
+      { model: models.LoadingOrder, as: "loadingOrder" },
+      {
+        association: "salesOrderProducts",
+        include: [
+          {
+            association: 'inventoryProduct'
+          }
+        ]
+      },
+      { association: 'shippingAddress' },
+      {
+        association: 'invoiceDeliveries',
+        required: false,
+        separate: true,
+        include: [
+          {
+            association: 'delivery',
+            where: {
+              status: {
+                [Op.notIn]: [DELIVERY_STATUS.REJECTED]
+              }
+            },
+            required: true
+          }
+        ]
+      }
+    ],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
   });
+
+  return { data, total, page, limit };
+};
+
+// Get all PL without pagination
+export const getAllPackagingListsWithoutPagination = async (filters: WhereOptions) => {
+  const loadingOrders = await scoped(models.PackagingList).findAll({
+    where: filters,
+    include: [
+      {
+        association: "salesOrder",
+        include: [
+          {
+            association: 'customer'
+          }
+        ]
+      },
+      {
+        association: "salesOrderProducts"
+      },
+      {
+        association: "loadingOrder"
+      },
+      {
+        association: "salesOrderInvoice"
+      },
+    ],
+  });
+
+  return loadingOrders;
 };
 
 // Get packaging list by Id
 export const getPackagingListById = async (id: number) => {
-  return (
-    await models.PackagingList.findByPk(id, {
-      include: [
-        {
-          association: "loadingOrder",
-          include: [
-            {
-              association: "shippingAddress",
-            },
-            {
-              association: "salesOrder",
-              include: [
-                {
-                  association: "customer",
-                  attributes: ["id", "name", "salesTax"],
-                  include: [
-                    {
-                      association: "addresses",
-                    },
-                  ],
-                },
-                {
-                  association: "shippingAddress",
-                },
-                {
-                  association: "soLocation",
-                  attributes: ["id", "locationName"],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          association: "salesOrderProducts",
-          required: false,
-          include: [
-            {
-              association: "inventoryProduct",
+  const packagingList = await models.PackagingList.findByPk(id, {
+    include: [
+      {
+        association: "salesOrder",
+        include: [
+          {
+            association: "customer",
+            include: [
+              {
+                association: "addresses"
+              }
+            ],
+          },
+          {
+            association: "shippingAddress",
+          },
+          {
+            association: "salesOrderProducts",
+            attributes: ["id", "unitPrice"],
+            include: [
+              {
+                association: "inventoryProduct",
+                attributes: ["id", "landedUnitCost"],
+                include: [
+                  {
+                    association: "product",
+                    attributes: ["id", "isSlabType"],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: "soLocation",
+            attributes: ["id", "locationName", 'lat', 'long', 'address'],
+          },
+        ],
+      },
+      {
+        association: "salesOrderProducts",
+        required: false,
+        include: [
+          {
+            association: "inventoryProduct",
 
-              include: [
-                {
-                  association: "product",
-                },
-                {
-                  association: "bin",
-                  attributes: ["id", "name"],
-                },
-                {
-                  association: "slab",
+            include: [
+              {
+                association: "product",
+                attributes: ["id", 'name', "isSlabType"],
+              },
+              {
+                association: "bin",
+                attributes: ["id", "name"],
+              },
+              {
+                association: "slab",
+              },
+              {
+                association: "genericProduct",
+                include: [
+                  {
+                    association: "product",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: 'returnProducts',
+            attributes: ['id'],
+            include: [
+              {
+                association: 'return',
+                attributes: ['id', 'status'],
+                required: true,
+                where: {
+                  status: {
+                    [Op.in]: [RETURN_STATUS.COMPLETE, RETURN_STATUS.INITIATED]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            association: 'swapHistories',
+            attributes: ['id']
+          }
+        ],
+      },
+      {
+        association: "loadingOrder",
+        include: [
+          {
+            association: "salesOrderProducts"
+          }
+        ],
+      },
+      {
+        association: "shippingAddress",
+      },
+      {
+        association: "salesOrderInvoice",
+      },
+      {
+        association: 'tradeServices',
+        // attributes: ['id', 'total'],
+        include: [
+          {
+            association: 'service',
+            attributes: ['id', 'name', 'ledgerAccountId'],
+          }
+        ]
+      }
+    ],
+  });
 
-                },
-                {
-                  association: "genericProduct",
-                },
+  return packagingList?.get({ plain: true });
+};
 
-              ],
-            },
-            {
-              association: "swapHistories",
-              attributes: ['id']
-            },
-          ],
-        },
-      ],
-    })
-  )?.get({ plain: true });
+// Get packaging list by Id
+export const getPackagingListAsPerReturn = async (id: number, returnId: number) => {
+  const packagingList = await models.PackagingList.findByPk(id, {
+    include: [
+      {
+        association: "salesOrder",
+        include: [
+          {
+            association: "customer",
+            include: [
+              {
+                association: "addresses"
+              }
+            ],
+          },
+          {
+            association: "shippingAddress",
+          },
+          {
+            association: "salesOrderProducts",
+            attributes: ["id", "unitPrice"],
+            include: [
+              {
+                association: "inventoryProduct",
+                attributes: ["id", "landedUnitCost", 'productId'],
+
+                include: [
+                  {
+                    association: "product",
+                    attributes: ["id",],
+                  },
+                  {
+                    association: "slab",
+                    attributes: ["id", "receivingLength", "receivingWidth"]
+                  },
+                  {
+                    association: "genericProduct",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            association: "soLocation",
+            attributes: ["id", "locationName"],
+          },
+        ],
+      },
+      {
+        association: "salesOrderProducts",
+        include: [
+          {
+            association: "inventoryProduct",
+            include: [
+              {
+                association: "product",
+              },
+              {
+                association: "bin",
+                attributes: ["id", "name"],
+              },
+              {
+                association: "slab",
+              },
+              {
+                association: "genericProduct",
+              },
+            ],
+          },
+          {
+            association: 'returnProducts',
+            attributes: ['id', 'returnId'],
+            where: { returnId },
+            required: true
+          }
+        ],
+      },
+      {
+        association: "loadingOrder",
+        include: [
+          {
+            association: "salesOrderProducts"
+          }
+        ],
+      },
+      {
+        association: "shippingAddress",
+      },
+      {
+        association: "salesOrderInvoice",
+      },
+    ],
+  });
+
+  return packagingList?.get({ plain: true });
 };
 
 // Get packaging list by Id
@@ -89,32 +327,30 @@ export const getPackagingListByIdSimple = async (id: number, transaction?: Trans
   return await models.PackagingList.findByPk(id, { transaction });
 };
 
-// Get packaging list by LO id
-export const getPackagingListsBySalesOrderId = async (loadingOrderId: number) => {
+// Get packaging list by SO id
+export const getPackagingListsBySalesOrderId = async (salesOrderId: number) => {
   return await scoped(models.PackagingList).findAll({
-    where: { loadingOrderId },
+    where: { salesOrderId },
     include: [
       { model: models.SalesOrder, as: "salesOrder" },
+      { model: models.PackagingListProduct, as: "packagingListProducts" },
     ],
   });
 };
 
-// Update Loading Order
+// Update Packaging List
 export const updatePackagingList = async (id: number, data: any, transaction?: Transaction) => {
-  const packagingList = await models.PackagingList.findByPk(id, { transaction });
-  if (!packagingList) return null;
-
-  await packagingList.update(data);
+  const packagingList = await scoped(models.PackagingList).update(data, { where: { id }, transaction, individualHooks: true });
   return packagingList;
 };
 
-// Get latest PL number
-export const getPlNumber = async (clientId: number) => {
-  const lastPL: any = await scoped(models.PackagingList).findOne({
+// Get latest SO number
+export const getLoNumber = async (clientId: number) => {
+  const lastLO: any = await scoped(models.PackagingList).findOne({
     where: { clientId },
     order: [["clientPlNumber", "DESC"]],
     attributes: ["clientPlNumber"],
   });
 
-  return { clientPlNumber: lastPL ? lastPL?.clientPlNumber + 1 : 1 };
+  return { clientPlNumber: lastLO ? lastLO?.clientPlNumber + 1 : 1 };
 };

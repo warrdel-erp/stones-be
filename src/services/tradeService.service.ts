@@ -2,8 +2,8 @@ import { UNITS_OF_MEASUREMENT } from "../constants";
 import * as tradeServiceRepository from "../repositories/tradeService.repository";
 import { AppError } from "../helper/appError";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
-import { LOADING_ORDER_STAGES } from "../constants/tableTypes";
-import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import { PACKAGING_LIST_STAGES } from "../constants/tableTypes";
+import * as packagingListRepository from "../repositories/packagingList.repository";
 import { Transaction } from "sequelize";
 import { ensureServicesBelongToCategory } from "../services/service.service";
 import { sumDecimal } from "../helper";
@@ -11,16 +11,16 @@ import * as returnRepository from "../repositories/return.repository";
 import { RETURN_STATUS } from "../models/return.model";
 
 export async function createTradeService(data: any, transaction?: Transaction) {
-    if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
-        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(data.referenceId, transaction);
+    if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST) {
+        const packagingListInstance = await packagingListRepository.getPackagingListByIdSimple(data.referenceId, transaction);
 
-        const loadingOrder = loadingOrderInstance?.get({ plain: true });
+        const packagingList = packagingListInstance?.get({ plain: true });
 
-        if (!loadingOrder) {
-            throw new AppError("Loading Order not found", 404);
+        if (!packagingList) {
+            throw new AppError("Packaging List not found", 404);
         }
-        if (loadingOrder.stage === LOADING_ORDER_STAGES.INVOICED) {
-            throw new AppError("Cannot create Trade Service for an invoiced Loading Order", 400);
+        if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
+            throw new AppError("Cannot create Trade Service for an invoiced Packaging List", 400);
         }
     }
 
@@ -67,15 +67,15 @@ export async function updateTradeService(id: number, data: any, transaction?: Tr
     const referenceId = existingData.referenceId;
 
     // Validate based on reference type (similar to create)
-    if (referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
-        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(referenceId, transaction);
-        const loadingOrder = loadingOrderInstance?.get({ plain: true });
+    if (referenceType === TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST) {
+        const packagingListInstance = await packagingListRepository.getPackagingListByIdSimple(referenceId, transaction);
+        const packagingList = packagingListInstance?.get({ plain: true });
 
-        if (!loadingOrder) {
-            throw new AppError("Loading Order not found", 404);
+        if (!packagingList) {
+            throw new AppError("Packaging List not found", 404);
         }
-        if (loadingOrder.stage === LOADING_ORDER_STAGES.INVOICED) {
-            throw new AppError("Cannot update Trade Service for an invoiced Loading Order", 400);
+        if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
+            throw new AppError("Cannot update Trade Service for an invoiced Packaging List", 400);
         }
     }
 

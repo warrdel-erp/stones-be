@@ -93,3 +93,27 @@ export const bulkUploadCustomers = catchAsync(async (req: AuthRequest, res: Resp
 
   SuccessResponse(res, 201, "Customers uploaded successfully", result);
 }); 
+
+// Get merged standard and external AR invoices for a customer (paginated)
+export const getCustomerARInvoices = catchAsync(async (req: AuthRequest, res: Response) => {
+  const customerId = parseInt(req.params.customerId);
+  const clientId = req.user?.clientId;
+  const { page = 1, limit = 10 } = req.query;
+
+  if (!clientId) {
+    throw new AppError("Client ID not found in user token", 401);
+  }
+
+  const result = await customerService.getCustomerARInvoices(
+    Number(customerId),
+    Number(clientId),
+    Number(page),
+    Number(limit)
+  );
+
+  return SuccessResponse(res, 200, "Customer AR invoices retrieved successfully", result.rows, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});
