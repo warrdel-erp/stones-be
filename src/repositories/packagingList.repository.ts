@@ -3,6 +3,7 @@ import * as models from "../models";
 import { DELIVERY_STATUS, PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import { RETURN_STATUS } from "../models/return.model";
 import { scoped } from "../utils/scoped";
+import { sequelize } from "../config/database";
 
 // Create new LO
 export const createPackagingList = async (data: any, transaction?: Transaction) => {
@@ -28,7 +29,30 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
     delete whereClause.notInvoicedOnly;
   }
 
+  if (filters.deliveryStatus) {
+    if (filters.deliveryStatus === 'pending') {
+      whereClause.id = {
+        [Op.notIn]: sequelize.literal(`(
+          SELECT packagingListId FROM invoice_deliveries id
+          JOIN deliveries d ON id.deliveryId = d.id
+          WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+        )`)
+      };
+    } else if (filters.deliveryStatus === 'assigned') {
+      whereClause.id = {
+        [Op.in]: sequelize.literal(`(
+          SELECT packagingListId FROM invoice_deliveries id
+          JOIN deliveries d ON id.deliveryId = d.id
+          WHERE d.status IN ('pending', 'approved', 'started')
+        )`)
+      };
+    }
+    delete whereClause.deliveryStatus;
+  }
+
+
   const { rows: data, count: total } = await scoped(models.PackagingList).findAndCountAll({
+    distinct: true,
     where: {
       ...whereClause,
     },
@@ -46,7 +70,11 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
         association: "salesOrderProducts",
         include: [
           {
-            association: 'inventoryProduct'
+            association: 'inventoryProduct',
+            include: [
+              { association: 'product' },
+              { association: 'slab' }
+            ]
           }
         ]
       },

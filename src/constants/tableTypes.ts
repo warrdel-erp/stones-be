@@ -1,5 +1,17 @@
 import { SIPL } from "../models";
 
+export const USER_ROLES = {
+  ADMIN: "admin",
+  DRIVER: "driver",
+} as const;
+
+export const TRUCK_STATUS = {
+  AVAILABLE: "available",
+  IN_APPROVED_DELIVERY: "in_approved_delivery",
+  ON_DELIVERY: "on_delivery",
+  MAINTENANCE: "maintenance",
+} as const;
+
 export const VENDOR_TYPES = {
   FREIGHT: "FREIGHT",
   SUPPLIER: "SUPPLIER",
@@ -169,6 +181,7 @@ export const CUSTOMER_TYPE = {
 export const DELIVERY_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
+  STARTED: "started",
   REJECTED: "rejected",
   COMPLETED: "completed",
 } as const;

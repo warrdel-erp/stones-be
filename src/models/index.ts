@@ -553,6 +553,10 @@ Client.hasMany(SalesOrderInvoice, { foreignKey: "clientId", as: "salesOrderInvoi
 Truck.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(Truck, { foreignKey: "clientId", as: "trucks" });
 
+// Truck belongs to one User (driver), one User (driver) can drive at most one Truck
+Truck.belongsTo(User, { foreignKey: "driverUserId", as: "driver" });
+User.hasOne(Truck, { foreignKey: "driverUserId", as: "assignedTruck" });
+
 JournalEntry.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 User.hasMany(JournalEntry, { foreignKey: "createdBy", as: "journalEntries" });
 

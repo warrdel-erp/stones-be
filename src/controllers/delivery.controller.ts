@@ -93,4 +93,21 @@ export const rejectDelivery = async (req: AuthRequest, res: Response): Promise<v
     } catch (err: any) {
         res.status(400).json({ success: false, message: err.message || "Failed to reject delivery" });
     }
+};
+
+export const startDelivery = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { deliveryId } = req.params;
+    const clientId = Number(req.user?.clientId);
+
+    if (!deliveryId || isNaN(Number(deliveryId))) {
+        ErrorResponse(res, 400, "Valid delivery ID is required", {});
+        return;
+    }
+
+    try {
+        const result = await deliveryService.startDeliveryManager(Number(deliveryId), clientId);
+        SuccessResponse(res, 200, "Delivery started successfully", result);
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message || "Failed to start delivery" });
+    }
 }; 

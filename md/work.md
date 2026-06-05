@@ -748,3 +748,12 @@ Email notification.
 2. Dashboard.
 3. Mobile app.
 4. Delivery.
+
+---
+
+1. Packing pending -> receiving Pending -> received.
+2. In packaging number of slabs will be exact as in SIPL.
+3. Asset value -> packaging \* unit landed cost . Bulk (direct).
+4. In adjustment create serial number as 1-1-1-1-1-1-1
+5. Search in inventory by product name
+6. Pagination number per page change option.

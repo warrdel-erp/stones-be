@@ -1,5 +1,6 @@
 import Delivery from "../models/Delivery.model";
 import InvoiceDelivery from "../models/InvoiceDelivery.model";
+import Truck from "../models/truck.model";
 import { Op, Transaction } from "sequelize";
 import { DELIVERY_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
@@ -10,11 +11,23 @@ export const findPendingDeliveryByTruck = async (truckId: number) => {
     });
 };
 
-export const findInvoiceDeliveriesByPackagingListIds = async (packagingListIds: number[]) => {
+export const checkTruckIsOccupied = async (truckId: number) => {
+    return scoped(Delivery).findOne({
+        where: { truckId, status: { [Op.in]: [DELIVERY_STATUS.APPROVED, DELIVERY_STATUS.STARTED, DELIVERY_STATUS.PENDING] } }
+    });
+};
+
+export const findExistingInvoiceDeliveriesByPackagingListIds = async (packagingListIds: number[]) => {
     return scoped(InvoiceDelivery).findAll({
         where: {
             packagingListId: { [Op.in]: packagingListIds }
-        }
+        },
+        include: [
+            {
+                association: "delivery",
+                where: { status: { [Op.ne]: DELIVERY_STATUS.REJECTED } }
+            }
+        ]
     });
 };
 
@@ -50,12 +63,14 @@ export const getAllDeliveriesByClientId = async (page: number, limit: number, cl
                 association: "invoiceDeliveries",
                 include: [
                     {
-                        association: "packagingList"
+                        association: "packagingList",
+                        include: [{ association: "salesOrderProducts" }]
                     }
                 ],
             },
             {
-                association: 'truck'
+                association: 'truck',
+                include: [{ association: 'driver', attributes: ['id', 'username', 'userid', 'role'] }]
             }
         ], limit, offset
     });
@@ -101,13 +116,41 @@ export const findDeliveryById = async (deliveryId: number, clientId?: number) =>
                 association: "invoiceDeliveries",
                 include: [
                     {
-                        association: "packagingList"
+                        association: "packagingList",
+                        include: [{ association: "salesOrderProducts" }]
                     }
                 ]
             },
             {
-                association: 'truck'
+                association: 'truck',
+                include: [{ association: 'driver', attributes: ['id', 'username', 'userid', 'role'] }]
             }
         ],
     });
-}; 
+};
+
+export const getDeliveriesForDriver = async (driverUserId: number, statuses?: string[]) => {
+    const targetStatuses = statuses || [DELIVERY_STATUS.APPROVED, DELIVERY_STATUS.STARTED, DELIVERY_STATUS.COMPLETED];
+    return scoped(Delivery).findAll({
+        include: [
+            {
+                model: Truck,
+                as: "truck",
+                where: { driverUserId },
+                required: true,
+                include: [{ association: 'driver', attributes: ['id', 'username', 'userid', 'role'] }] as any
+            },
+            {
+                association: "invoiceDeliveries",
+                include: [{ 
+                    association: "packagingList",
+                    include: [{ association: "salesOrderProducts" }]
+                }],
+            },
+        ],
+        where: {
+            status: { [Op.in]: targetStatuses }
+        },
+        order: [["createdAt", "DESC"]],
+    });
+};
