@@ -17,6 +17,7 @@ export interface AuthRequest extends Request {
     lastName?: string;
     accountType: "user" | "client";
     accountId: number;
+    role?: string;
   };
 }
 
@@ -36,7 +37,8 @@ const authenticateUserFromToken = async (decoded: any, req: AuthRequest) => {
     defaultLocationId: user.defaultLocationId,
     clientId: user.clientId,
     accountType: "user",
-    accountId: user.accountId
+    accountId: user.accountId,
+    role: user.role,
   };
 
   return true;

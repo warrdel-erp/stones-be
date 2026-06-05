@@ -130,7 +130,7 @@ export const createUserByAccountController = catchAsync(async (req: AuthRequest,
     throw new AppError("User not authenticated", 401);
   }
 
-  const { username, userid, email, password, phone, defaultLocationId } = req.body;
+  const { username, userid, email, password, phone, defaultLocationId, role } = req.body;
 
   const user = await userService.createUserByAccount(
     {
@@ -141,9 +141,20 @@ export const createUserByAccountController = catchAsync(async (req: AuthRequest,
       phone,
       clientId,
       defaultLocationId,
+      role,
     },
     accountId
   );
 
   return SuccessResponse(res, 201, "User created successfully", user);
+});
+
+// Get only driver users for the client (for truck assignment dropdown)
+export const getDriversController = catchAsync(async (req: AuthRequest, res: Response) => {
+  if (!req.user) {
+    throw new AppError("User not authenticated", 401);
+  }
+
+  const drivers = await userService.getDriversByClientId(req.user.clientId);
+  return SuccessResponse(res, 200, "Drivers retrieved successfully", drivers);
 });

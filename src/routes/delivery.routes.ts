@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { initiateDelivery, getAllDeliveriesByClientId, approveDeliveryOrders, completeDelivery, rejectDelivery } from "../controllers/delivery.controller";
+import { initiateDelivery, getAllDeliveriesByClientId, approveDeliveryOrders, completeDelivery, rejectDelivery, startDelivery } from "../controllers/delivery.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
 import { deliveryOrderApprovalSchema } from "../validators";
@@ -15,5 +15,7 @@ router.post("/approve", authenticateUser, validateRequest(deliveryOrderApprovalS
 router.put("/:deliveryId/complete", authenticateUser, completeDelivery);
 
 router.put("/:deliveryId/reject", authenticateUser, rejectDelivery);
+
+router.put("/:deliveryId/start", authenticateUser, startDelivery);
 
 export default router; 

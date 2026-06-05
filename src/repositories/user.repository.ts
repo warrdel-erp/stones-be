@@ -173,3 +173,44 @@ export const countUsersByClientId = async (
     transaction,
   });
 };
+
+// Get Users by Client ID filtered by role (e.g. for driver dropdown in truck form)
+export const getUsersByClientIdAndRole = async (clientId: number, role: string) => {
+  return await scoped(models.User).findAll({
+    where: { clientId, role },
+    attributes: ['id', 'username', 'userid', 'role'],
+    include: [
+      { model: models.Account, attributes: ['email'], as: "account" },
+    ]
+  });
+};
+
+export const getAvailableDriversByClientId = async (clientId: number) => {
+  const assignedTrucks = await scoped(models.Truck).findAll({
+    where: { 
+      clientId, 
+      driverUserId: { [Op.ne]: null } 
+    },
+    attributes: ['driverUserId'],
+    raw: true
+  });
+  
+  const assignedDriverIds = assignedTrucks.map((t: any) => t.driverUserId).filter(Boolean);
+  
+  const whereClause: any = { 
+    clientId, 
+    role: "driver"
+  };
+  
+  if (assignedDriverIds.length > 0) {
+    whereClause.id = { [Op.notIn]: assignedDriverIds };
+  }
+
+  return await scoped(models.User).findAll({
+    where: whereClause,
+    attributes: ['id', 'username', 'userid', 'role'],
+    include: [
+      { model: models.Account, attributes: ['email'], as: "account" },
+    ]
+  });
+};

@@ -22,10 +22,13 @@ router.get("/", authenticateUser, userController.getAllUsersController);
 router.get("/getLocations", authenticateUser, userController.getUserLocations);
 
 // get assigned location to user by userId.
-router.get("/:id/locations", authenticateUser, userController.getUserLocations);
+router.get("/:id/locations", authenticateUser, userController.getUserLocationsById);
 
 // Get All Users for the client of requesting user
 router.get("/clientUsers", authenticateUser, userController.getClientUsers);
+
+// Get only driver users for truck assignment
+router.get("/drivers", authenticateUser, userController.getDriversController);
 
 // Get user by ID
 router.get("/:id", authenticateUser, userController.getUser);

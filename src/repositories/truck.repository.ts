@@ -1,9 +1,62 @@
 import * as models from "../models";
 import { Op } from "sequelize";
 import { scoped } from "../utils/scoped";
+import { DELIVERY_STATUS } from "../constants/tableTypes";
+
+const driverInclude = {
+  association: "driver",
+  attributes: ["id", "username", "userid", "role"],
+  include: [{ association: "account", attributes: ["email"] }],
+};
+
+const deliveryInclude = {
+  association: "deliveries",
+  required: false,
+  where: {
+    status: {
+      [Op.in]: ["pending", "approved", "started"]
+    }
+  },
+  include: [
+    {
+      association: "invoiceDeliveries",
+      include: [
+        {
+          association: "packagingList",
+          include: [
+            {
+              association: "salesOrder",
+              include: [
+                { association: "customer", as: "customer" }
+              ]
+            },
+            {
+              association: "salesOrderProducts",
+              include: [
+                {
+                  association: "inventoryProduct"
+                }
+              ]
+            },
+            {
+              association: "shippingAddress"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+export const findByRegistrationNumber = async (registrationNumber: string) => {
+  return scoped(models.Truck).findOne({
+    where: { registrationNumber },
+  });
+};
 
 export const create = async (data: any) => {
-  return scoped(models.Truck).create(data);
+  const truck = await scoped(models.Truck).create(data);
+  return findById(truck.get("id") as number);
 };
 
 export const findAll = async (page: number, limit: number, filters?: { [key: string]: any }) => {
@@ -21,7 +74,7 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
     const trucksWithPendingDeliveries = await scoped(models.Truck).findAll({
       include: [{
         association: "deliveries",
-        where: { status: "pending" },
+        where: { status: { [Op.notIn]: [DELIVERY_STATUS.REJECTED, DELIVERY_STATUS.COMPLETED] } },
         attributes: [],
       }],
       attributes: ['id'],
@@ -41,11 +94,26 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
     limit,
     offset,
     order: [["createdAt", "DESC"]],
+    include: [driverInclude, deliveryInclude],
   });
 };
 
 export const findById = async (id: number) => {
-  return models.Truck.findByPk(id);
+  return scoped(models.Truck).findOne({
+    where: { id },
+    include: [driverInclude, deliveryInclude],
+  });
+};
+
+export const findByIdSimple = async (id: number) => {
+  return scoped(models.Truck).findByPk(id);
+};
+
+export const findByDriverUserId = async (driverUserId: number) => {
+  return scoped(models.Truck).findOne({
+    where: { driverUserId },
+    include: [driverInclude],
+  });
 };
 
 export const update = async (id: number, data: any) => {

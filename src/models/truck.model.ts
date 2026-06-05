@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { Client, SalesOrderInvoice } from ".";
-import { VEHICLE_TYPE } from "../constants/tableTypes";
+import { VEHICLE_TYPE, TRUCK_STATUS } from "../constants/tableTypes";
 
 const Truck = sequelize.define(
   "Truck",
@@ -39,6 +39,15 @@ const Truck = sequelize.define(
       },
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
+    },
+    driverUserId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM(...Object.values(TRUCK_STATUS)),
+      allowNull: false,
+      defaultValue: TRUCK_STATUS.AVAILABLE,
     },
   },
   {

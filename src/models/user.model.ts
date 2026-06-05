@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Client from "./client.model";
 import Location from "./location.model";
 import Account from "./Account.model";
+import { USER_ROLES } from "../constants/tableTypes";
 
 // Define User Model
 const User = sequelize.define(
@@ -68,6 +69,11 @@ const User = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    role: {
+      type: DataTypes.ENUM(...Object.values(USER_ROLES)),
+      allowNull: false,
+      defaultValue: USER_ROLES.ADMIN,
     },
   },
   {

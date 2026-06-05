@@ -48,6 +48,7 @@ import accountRoutes from "./routes/account.routes";
 import advancedDepositRoutes from "./routes/advancedDeposit.routes";
 import returnRoutes from "./routes/return.routes";
 import deliveryRoutes from "./routes/delivery.routes";
+import driverDeliveryRoutes from "./routes/driverDelivery.routes";
 import serviceRoutes from "./routes/service.routes";
 import serviceCategoryRoutes from "./routes/serviceCategory.routes";
 import tradeServiceRoutes from "./routes/tradeService.routes";
@@ -77,6 +78,8 @@ app.use(express.json());
 app.use(urlencoded({ extended: true }));
 
 // Routes
+
+// Client Users
 app.use("/api/auth", authRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/client", clientRoute);
@@ -131,6 +134,10 @@ app.use("/api/wiringInstruction", wiringInstructionRoutes);
 app.use("/api/fabricator", fabricatorRoutes);
 app.use("/api/externalCustomerTransaction", externalCustomerTransactionRoutes);
 app.use("/api/fileUpload", fileUploadRoutes);
+
+// Driver
+app.use("/api/driver/delivery", driverDeliveryRoutes);
+
 
 // Global error handler - must be placed after all routes
 app.use(errorHandler);

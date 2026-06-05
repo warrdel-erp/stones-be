@@ -1,19 +1,26 @@
 import { sequelize } from "../config/database";
 import * as deliveryRepository from "../repositories/delivery.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
-import { DELIVERY_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
+import * as truckRepository from "../repositories/truck.repository";
+import { DELIVERY_STATUS, TRUCK_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
 import * as activityService from "../services/activity.service";
 import { requestContext } from "../utils/requestContext";
+import { AppError } from "../helper/appError";
 
 export const initiateDelivery = async (truckId: number, packagingListIds: number[], clientId: number) => {
-    // 1. Check if truck already has a pending delivery
-    const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);
-    if (existingPendingDelivery) {
-        throw new Error("This truck already has a pending delivery. Please complete or cancel the existing delivery before initiating a new one.");
+
+    const truckData = await truckRepository.findByIdSimple(truckId);
+
+    if (truckData?.status !== TRUCK_STATUS.AVAILABLE) {
+        throw new AppError(`Truck is not available.`, 400);
     }
 
+    // 1. Check if truck already has a pending delivery
+    const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);
+
+
     // 2. Check if any packagingList already has an InvoiceDelivery
-    const existingInvoiceDeliveries = await deliveryRepository.findInvoiceDeliveriesByPackagingListIds(packagingListIds);
+    const existingInvoiceDeliveries = await deliveryRepository.findExistingInvoiceDeliveriesByPackagingListIds(packagingListIds);
     if (existingInvoiceDeliveries?.length > 0) {
         const usedIds = existingInvoiceDeliveries.map((d: any) => d.packagingListId).join(", ");
         throw new Error(`The following Packaging Lists already have a delivery assigned: [${usedIds}]. Please remove them from your request.`);
@@ -22,8 +29,23 @@ export const initiateDelivery = async (truckId: number, packagingListIds: number
     const fromLocation = [0, 0];
 
     return await sequelize.transaction(async (transaction) => {
-        // 3. Create Delivery
-        const delivery = await deliveryRepository.createDelivery(truckId, clientId, transaction);
+        // 3. Create or Get Delivery
+        let delivery = existingPendingDelivery;
+        if (delivery) {
+            // Load fromLocation from existing invoice deliveries of this delivery
+            const existingDeliveryDetails = await deliveryRepository.findDeliveryById(delivery.get('id') as number);
+            const firstPL = existingDeliveryDetails?.invoiceDeliveries?.[0]?.packagingList;
+            if (firstPL) {
+                const plDetails = await packagingListRepository.getPackagingListById(firstPL.id);
+                if (plDetails?.salesOrder?.soLocation) {
+                    fromLocation[0] = plDetails.salesOrder.soLocation.lat;
+                    fromLocation[1] = plDetails.salesOrder.soLocation.long;
+                }
+            }
+        } else {
+            delivery = await deliveryRepository.createDelivery(truckId, clientId, transaction);
+        }
+
         const invoiceDeliveries = [];
         for (const packagingListId of packagingListIds) {
             // Fetch packagingList with nested salesOrder
@@ -113,6 +135,11 @@ export const approveDeliveryOrders = async (orders: Array<{ id: number, order: n
         // Update delivery status to APPROVED for the single delivery
         await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.APPROVED, transaction);
 
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId);
+        if (delivery && delivery.get('truckId')) {
+            await truckRepository.update(delivery.get('truckId') as number, { status: TRUCK_STATUS.IN_APPROVED_DELIVERY });
+        }
+
         await activityService.logActivity({
             clientId: requestContext.getStore()?.clientId || 0,
             activityType: ACTIVITY_TYPE.DELIVERY_APPROVAL,
@@ -142,13 +169,18 @@ export const completeDelivery = async (deliveryId: number, clientId: number) => 
             throw new Error("Delivery is already completed.");
         }
 
-        // Check if delivery is approved before completing
-        if (deliveryData.status !== DELIVERY_STATUS.APPROVED) {
-            throw new Error(`Cannot complete delivery. Delivery must be approved first. Current status: ${deliveryData.status}`);
+        // Check if delivery is started before completing
+        if (deliveryData.status !== DELIVERY_STATUS.STARTED) {
+            throw new Error(`Cannot complete delivery. Delivery must be started first. Current status: ${deliveryData.status}`);
         }
 
         // Update delivery status to COMPLETED
         const completedDelivery = await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.COMPLETED, transaction);
+
+        // Update truck status to AVAILABLE
+        if (deliveryData.truckId) {
+            await truckRepository.update(deliveryData.truckId, { status: TRUCK_STATUS.AVAILABLE });
+        }
 
         // Fetch updated delivery with associations
         // const completedDelivery = await deliveryRepository.findDeliveryById(deliveryId, clientId);
@@ -187,4 +219,103 @@ export const rejectDelivery = async (deliveryId: number, clientId: number) => {
 
         return rejectedDelivery;
     });
-}; 
+};
+
+export const getDeliveriesForDriver = async (driverUserId: number, statuses?: string[]) => {
+    return deliveryRepository.getDeliveriesForDriver(driverUserId, statuses);
+};
+
+export const startDelivery = async (deliveryId: number, driverUserId: number) => {
+    return await sequelize.transaction(async (transaction) => {
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId);
+
+        if (!delivery) {
+            throw new Error(`Delivery with id ${deliveryId} not found.`);
+        }
+
+        const deliveryData = delivery.get({ plain: true }) as any;
+
+        // Verify driver is assigned to this delivery's truck
+        if (deliveryData.truck?.driverUserId !== driverUserId) {
+            throw new Error("You are not the assigned driver for this delivery.");
+        }
+
+        if (deliveryData.status !== DELIVERY_STATUS.APPROVED) {
+            throw new Error(`Delivery must be approved before it can be started. Current status: ${deliveryData.status}`);
+        }
+
+        // Update delivery status to STARTED
+        await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.STARTED, transaction);
+
+        // Update truck status to ON_DELIVERY
+        if (deliveryData.truckId) {
+            await truckRepository.update(deliveryData.truckId, { status: TRUCK_STATUS.ON_DELIVERY });
+        }
+
+        return deliveryRepository.findDeliveryById(deliveryId);
+    });
+};
+
+export const driverCompleteDelivery = async (deliveryId: number, driverUserId: number) => {
+    return await sequelize.transaction(async (transaction) => {
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId);
+
+        if (!delivery) {
+            throw new Error(`Delivery with id ${deliveryId} not found.`);
+        }
+
+        const deliveryData = delivery.get({ plain: true }) as any;
+
+        // Verify driver is assigned to this delivery's truck
+        if (deliveryData.truck?.driverUserId !== driverUserId) {
+            throw new Error("You are not the assigned driver for this delivery.");
+        }
+
+        if (deliveryData.status !== DELIVERY_STATUS.STARTED) {
+            throw new Error(`Delivery must be started before it can be completed. Current status: ${deliveryData.status}`);
+        }
+
+        // Update delivery status to COMPLETED
+        await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.COMPLETED, transaction);
+
+        // Update truck status back to AVAILABLE
+        await truckRepository.update(deliveryData.truckId, { status: TRUCK_STATUS.AVAILABLE });
+
+        return deliveryRepository.findDeliveryById(deliveryId);
+    });
+};
+
+export const startDeliveryManager = async (deliveryId: number, clientId: number) => {
+    return await sequelize.transaction(async (transaction) => {
+        const delivery = await deliveryRepository.findDeliveryById(deliveryId, clientId);
+
+        if (!delivery) {
+            throw new AppError(`Delivery with id ${deliveryId} not found or does not belong to your client.`, 404);
+        }
+
+        const deliveryData = delivery.get({ plain: true }) as any;
+
+        if (deliveryData.status !== DELIVERY_STATUS.APPROVED) {
+            throw new AppError(`Delivery must be approved before it can be started. Current status: ${deliveryData.status}`, 400);
+        }
+
+        // Update delivery status to STARTED
+        await deliveryRepository.updateDeliveryStatus([deliveryId], DELIVERY_STATUS.STARTED, transaction);
+
+        // Update truck status to ON_DELIVERY
+        if (deliveryData.truckId) {
+            await truckRepository.update(deliveryData.truckId, { status: TRUCK_STATUS.ON_DELIVERY });
+        }
+
+        await activityService.logActivity({
+            clientId,
+            activityType: ACTIVITY_TYPE.DELIVERY_INITIATION,
+            referenceId: deliveryId,
+            referenceType: ACTIVITY_REFERENCE_TYPE.DELIVERY,
+            title: "Delivery Dispatched",
+            description: `Delivery #${deliveryId} has been dispatched by manager.`,
+        }, transaction);
+
+        return deliveryRepository.findDeliveryById(deliveryId);
+    });
+};

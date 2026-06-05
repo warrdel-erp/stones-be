@@ -57,7 +57,7 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
 });
 
 export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 200, isSlabType } = req.query;
+  const { page = 1, limit = 200, isSlabType, search } = req.query;
   const locationId = req.user?.defaultLocationId;
 
   if (!locationId) {
@@ -68,7 +68,8 @@ export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response
     Number(page),
     Number(limit),
     Number(locationId),
-    isSlabType === 'true'
+    isSlabType === 'true',
+    search ? String(search) : undefined
   );
 
   if (!data.products.length) {

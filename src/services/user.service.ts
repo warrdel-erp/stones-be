@@ -25,6 +25,7 @@ type CreateUserByAccountData = {
   phone: string;
   clientId: number;
   defaultLocationId?: number;
+  role?: string;
 };
 
 // Register User
@@ -156,6 +157,7 @@ export const createUserByAccount = async (
         accountId: account.getDataValue("id"),
         defaultLocationId: userData.defaultLocationId,
         createdById: createdByAccountId,
+        role: userData.role || "admin",
       } as any,
       transaction
     );
@@ -219,6 +221,7 @@ const authenticateUser = async (email: string, password: string) => {
       userid: user.userid,
       email: user.email,
       clientId: user.client?.id,
+      role: user.role,
       accountType: "user"
     },
     process.env.JWT_SECRET
@@ -231,6 +234,7 @@ const authenticateUser = async (email: string, password: string) => {
       username: user.username,
       email: user.email,
       clientId: user.client?.id,
+      role: user.role,
       accountType: "user"
     }
   };
@@ -389,4 +393,9 @@ export const getUsersByClientId = async (clientId: number) => {
     userLimit,
     remainingUsers: userLimit - totalUsers
   };
+};
+
+// Get only driver users for a client (used in truck creation form)
+export const getDriversByClientId = async (clientId: number) => {
+  return userRepository.getAvailableDriversByClientId(clientId);
 };
