@@ -788,3 +788,38 @@ export async function createJournalEntriesForTradeServicesOfSIPL(sipl: any, loca
 
   }
 } 
+
+export async function reverseJournalEntriesForSIPL(siplId: number, transaction: Transaction, locationId: number) {
+  // Find all journal entries related to the SIPL creation
+  const entries: any[] = await scoped(JournalEntryModel).findAll({
+    where: {
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.CREATE_SIPL,
+    },
+    transaction,
+  });
+
+  for (const entry of entries) {
+    const plainEntry = entry.get ? entry.get({ plain: true }) : entry;
+    
+    // Reverse the type (DR <-> CR)
+    const reversedType = plainEntry.type === JOURNAL_ENTRY_TYPE.DR ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
+
+    // Create the reversed entry
+    await journalEntryRepository.create({
+      amount: plainEntry.amount,
+      ledgerId: plainEntry.ledgerId,
+      type: reversedType,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.CANCEL_SIPL,
+      subReferenceId: plainEntry.subReferenceId,
+      subReferenceType: plainEntry.subReferenceType,
+      referenceId: plainEntry.referenceId,
+      referenceType: plainEntry.referenceType,
+      entryFor: plainEntry.entryFor,
+      entryForId: plainEntry.entryForId,
+      locationId: plainEntry.locationId,
+      partyLedgerAccountId: plainEntry.partyLedgerAccountId,
+    }, transaction);
+  }
+}

@@ -118,3 +118,14 @@ export const getPlNumber = async (clientId: number) => {
 
   return { clientLoNumber: lastPL ? lastPL?.clientLoNumber + 1 : 1 };
 };
+
+export const updateLoadingOrderByPackagingListId = async (
+  packagingListId: number,
+  data: any,
+  transaction?: Transaction
+) => {
+  return await scoped(models.LoadingOrder).update(data, {
+    where: { packagingListId },
+    transaction
+  });
+};

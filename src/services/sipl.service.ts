@@ -1,7 +1,7 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
-import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, SIPL_STATUS } from "../constants/tableTypes";
 
 import * as containerRepository from "../repositories/container.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
@@ -15,7 +15,7 @@ import * as siplService from "../services/sipl.service";
 import * as slabService from "../services/slab.service";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import { PAYMENT_TERMS, INVENTORY_ITEM_STATUS } from "../constants";
-import { randomId, sumDecimal } from "../helper";
+import { randomId, sumDecimal, isSIPLLocked } from "../helper";
 import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as productRepository from "../repositories/product.repository";
 import * as tradeServiceService from "../services/tradeService.service";
@@ -34,6 +34,14 @@ export const receiveInventory = async (siplId: number, receivedDate: string, cli
   const transaction = await sequelize.transaction();
 
   try {
+    const sipl = await siplRepository.findSIPLByIdSimple(siplId);
+    if (!sipl) {
+      throw new AppError("SIPL not found.", 404);
+    }
+    if (isSIPLLocked(sipl)) {
+      throw new AppError("Cannot receive inventory. The SIPL is locked (received or canceled).", 400);
+    }
+
     // Check if all slabs are fully filled before receiving inventory
     const slabsCheck = await slabService.checkSiplSlabsFullyFilled(siplId);
 
@@ -660,3 +668,45 @@ export const checkSIPLDataIsFilledCorrectly = async (siplId: number) => {
 
   return { isCorrect }
 }
+
+export const cancelSIPLService = async (siplId: number, locationId: number, clientId: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const sipl = await siplRepository.findSIPLById(siplId, transaction);
+
+    if (!sipl) {
+      throw new AppError("SIPL not found", 404);
+    }
+
+    const siplData = sipl.get({ plain: true });
+
+    if (siplData.inventoryReceived) {
+      throw new AppError("Cannot cancel an SIPL that has already been received.", 400);
+    }
+
+    if (siplData.status === 'canceled') {
+      throw new AppError("SIPL is already canceled.", 400);
+    }
+
+    // 1. Update SIPL status to 'canceled'
+    await siplRepository.updateSIPL(siplId, { status: SIPL_STATUS.CANCELED }, transaction);
+
+    // 2. Update all inventory products for this SIPL to 'CANCELED'
+    await inventoryProductRepository.updateInventoryProductStatusBySipl(
+      siplId,
+      INVENTORY_ITEM_STATUS.CANCELED,
+      null as any,
+      transaction
+    );
+
+    // 3. Reverse journal entries
+    await journalEntryService.reverseJournalEntriesForSIPL(siplId, transaction, locationId);
+
+    await transaction.commit();
+    return { success: true, message: "SIPL canceled successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};

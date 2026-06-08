@@ -3,8 +3,9 @@ import { AppError } from "../helper/appError";
 import * as notesRepository from "../repositories/notes.repository";
 
 import _ from "lodash";
-import { Transaction, WhereOptions } from "sequelize";
+import { Transaction, WhereOptions, Op } from "sequelize";
 import { sequelize } from "../config/database";
+import * as models from "../models";
 
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
@@ -13,6 +14,7 @@ import * as packagingListRepository from "../repositories/packagingList.reposito
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
+import * as deliveryRepository from "../repositories/delivery.repository";
 import * as packagingListService from "../services/packagingList.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
@@ -55,7 +57,7 @@ export const createPackagingList = async (data: any) => {
     packagingList = packagingList.get({ plain: true });
 
     // Create trade services for packaging list if it exists
-    // --------------------
+    // -------------------- 
     if (Array.isArray(data.services) && data.services.length) {
       await tradeServiceService.createMultipleTradeServices(
         data.services,
@@ -771,3 +773,101 @@ function packagingListWithTotalAmount(loadingOrders: any) {
     return packagingList;
   });
 }
+
+// Helper to validate packaging list state for cancellation
+const validatePackagingListForCancel = (packagingList: any) => {
+  if (!packagingList) {
+    throw new AppError("Packaging List not found", 404);
+  }
+
+  if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
+    throw new AppError("Cannot cancel an invoiced Packaging List.", 400);
+  }
+
+  if (packagingList.stage === PACKAGING_LIST_STAGES.CANCELED) {
+    throw new AppError("Packaging List is already canceled.", 400);
+  }
+};
+
+// Helper to check and validate active deliveries
+const validateNoActiveDeliveries = async (packagingListId: number) => {
+  const activeDeliveries = await deliveryRepository.findExistingInvoiceDeliveriesByPackagingListIds([packagingListId]);
+  if (activeDeliveries && activeDeliveries.length > 0) {
+    throw new AppError("Cannot cancel Packaging List because active deliveries are present.", 400);
+  }
+};
+
+// Helper to update all packaging list related records to canceled
+const performPackagingListCancelUpdates = async (id: number, transaction: Transaction) => {
+  // Update Packaging List stage
+  await packagingListRepository.updatePackagingList(id, { stage: PACKAGING_LIST_STAGES.CANCELED }, transaction);
+
+  // Get associated sales order products
+  const salesOrderProducts = await salesOrderProductRepository.getSalesOrderProductsByPackagingListId(id, transaction);
+
+  // Update Sales Order Products stage and picked status
+  await salesOrderProductRepository.updateSalesOrderProductsByPackagingListId(
+    id,
+    { stage: SALE_ORDER_PRODUCT_STAGES.CANCELED, picked: false },
+    transaction
+  );
+
+  // Update Inventory Products status back to IN_INVENTORY
+  const inventoryProductIds = salesOrderProducts.map((sop: any) => sop.inventoryProductId).filter(Boolean);
+  if (inventoryProductIds.length > 0) {
+    await inventoryProductRepository.updateInventoryProductStatusesByIds(
+      inventoryProductIds,
+      INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      transaction
+    );
+  }
+
+  // Update Loading Order status to canceled
+  await loadingOrderRepository.updateLoadingOrderByPackagingListId(
+    id,
+    { status: "canceled" },
+    transaction
+  );
+};
+
+// Cancel Packaging List
+// Cancel Packaging List
+export const cancelPackagingList = async (id: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    // 1. Fetch simple packaging list
+    const packagingList: any = await packagingListRepository.getPackagingListByIdSimple(id, transaction);
+    
+    // 2. State validation
+    validatePackagingListForCancel(packagingList);
+
+    // 3. Active deliveries check
+    await validateNoActiveDeliveries(id);
+
+    // 4. Update stages, statuses and revert allocations
+    await performPackagingListCancelUpdates(id, transaction);
+
+    const { clientId, locationId } = packagingList;
+
+    // 5. Log activity
+    await activityService.logActivity(
+      {
+        clientId,
+        activityType: ACTIVITY_TYPE.PACKAGING_LIST_CANCELLATION,
+        referenceId: id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.PACKAGING_LIST,
+        title: "Packaging List Canceled",
+        description: `Packaging List #${packagingList.clientPlNumber || packagingList.id} was canceled.`,
+        locationId,
+      },
+      transaction
+    );
+
+    await transaction.commit();
+    return { success: true, message: "Packaging List canceled successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};

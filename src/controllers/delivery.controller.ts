@@ -110,4 +110,16 @@ export const startDelivery = async (req: AuthRequest, res: Response): Promise<vo
     } catch (err: any) {
         res.status(400).json({ success: false, message: err.message || "Failed to start delivery" });
     }
+};
+
+export const getDeliveryStats = async (req: AuthRequest, res: Response) => {
+    try {
+        const stats = await deliveryService.getDeliveryStats();
+        SuccessResponse(res, 200, "Delivery statistics fetched successfully", stats);
+    } catch (err: any) {
+        res.status(400).json({
+            success: false,
+            message: err.message || "Failed to fetch delivery statistics"
+        });
+    }
 }; 

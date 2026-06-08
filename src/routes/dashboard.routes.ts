@@ -37,4 +37,7 @@ router.get("/recentTransactions", authenticateUser, dashboardController.getRecen
 // Get dashboard activities
 router.get("/activities", authenticateUser, dashboardController.getDashboardActivities);
 
+// Get monthly profit statistics
+router.get("/monthlyProfitStats", authenticateUser, dashboardController.getMonthlyProfitStats);
+
 export default router;

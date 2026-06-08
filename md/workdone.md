@@ -928,5 +928,21 @@ sticky navbar.
 ---
 
 1. Packing pending status in SIPL list
-2. Delivery new FLOW and UI.
+2. Delivery new FLOW and UI. with driver login
 3. items per page control.
+
+---
+
+1. SIPL canceling
+2. PL canceling.
+3. filter of canceled and sold in inventory page
+4. Button styling.
+5. from PO to SIPL creation if SIPL is already created for given product then don't show that.
+
+---
+
+1. Complete Dashboard.
+2. Dashboard -> activities page.
+3. client registration
+
+---

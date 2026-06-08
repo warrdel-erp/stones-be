@@ -8,7 +8,7 @@ import * as productRepository from "../repositories/product.repository";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
-import { randomId } from "../helper";
+import { randomId, isSIPLLocked } from "../helper";
 import { scoped } from "../utils/scoped";
 import * as  genericProductRepository from "../repositories/genericProduct.repository"
 
@@ -30,8 +30,8 @@ export const fetchSplitSlabs = async (transaction?: Transaction, locationId?: nu
 export const updateSlab = async (slabId: number, updateData: any) => {
   const sipl = await siplRepository.findSIPLBySlabId(slabId);
 
-  if (sipl.inventoryReceived) {
-    throw new AppError("Slab cannot be updated as inventory is received", 400);
+  if (isSIPLLocked(sipl)) {
+    throw new AppError("Slab cannot be updated as the SIPL is locked (received or canceled)", 400);
   }
 
   return await slabRepository.updateSlabById(slabId, updateData);
@@ -68,12 +68,12 @@ export const bulkUpdateSlabs = async (slabsData: Array<{ id: number;[key: string
         const inventryProductData: any = await models.InventoryProduct.findByPk(slab.inventoryProductId, { attributes: ['siplId'], transaction })
 
         const sipl: any = await models.SIPL.findByPk(inventryProductData.dataValues.siplId, {
-          attributes: ['inventoryReceived'],
+          attributes: ['inventoryReceived', 'status'],
           transaction
         })
 
-        if (sipl.dataValues.inventoryReceived) {
-          throw new AppError(`Slab with this ${id} Slab is already received.`, 404);
+        if (isSIPLLocked(sipl)) {
+          throw new AppError(`Slab with this ${id} Slab is already received or canceled.`, 400);
         }
         // Update the inventory product's binId
         const [updatedInventoryProduct] = await scoped(models.InventoryProduct).update(

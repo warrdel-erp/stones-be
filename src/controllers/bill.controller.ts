@@ -5,6 +5,7 @@ import * as billService from "../services/bill.service";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import * as siplRepository from "../repositories/sipl.repository";
+import { isSIPLLocked } from "../helper";
 import { AppError } from "../helper/appError";
 
 export const createBill = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -15,8 +16,8 @@ export const createBill = catchAsync(async (req: AuthRequest, res: Response) => 
   // check if SIPL if received in inventory or not.
   if (req.body.referenceType === BILL_REFERENCE_TYPES.SIPL) {
     const sipl = await siplRepository.findSIPLByIdSimple(req.body.referenceId);
-    if (sipl?.get("inventoryReceived")) {
-      throw new AppError("Can't create a bill for a received inventory SIPL", 400);
+    if (isSIPLLocked(sipl)) {
+      throw new AppError("Can't create a bill for a locked SIPL (received or canceled)", 400);
     }
   }
 

@@ -9,7 +9,8 @@ import { inventoryProductInput } from "../validators";
 import { inventoryProductArraySchema } from "../validators";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { siplId, bundle, block } = req.query;
+    const { siplId, bundle, block, showSoldCanceled } = req.query;
+    const excludeSoldCanceled = showSoldCanceled !== "true";
 
     // Count how many filters are provided
     const filtersProvided = [siplId, bundle, block].filter(Boolean).length;
@@ -28,13 +29,13 @@ export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: A
 
     if (bundle) {
         // Get inventory products by lot filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField("lot", bundle as string);
+        data = await inventoryProductService.getInventoryProductsBySlabField("lot", bundle as string, excludeSoldCanceled);
     } else if (block) {
         // Get inventory products by block filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField("block", block as string);
+        data = await inventoryProductService.getInventoryProductsBySlabField("block", block as string, excludeSoldCanceled);
     } else {
         // Get inventory products by SIPL combined number only
-        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId));
+        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId), excludeSoldCanceled);
     }
 
     if (!data.length) {

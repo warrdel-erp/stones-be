@@ -6,6 +6,7 @@ import Client from "./client.model";
 import Location from "./location.model";
 import { scoped } from "../utils/scoped";
 import { PAYMENT_TERMS } from "../constants";
+import { SIPL_STATUS } from "../constants/tableTypes";
 
 const SIPL = sequelize.define(
   "SIPL",
@@ -56,9 +57,9 @@ const SIPL = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(SIPL_STATUS)),
       allowNull: false,
-      defaultValue: "pending",
+      defaultValue: SIPL_STATUS.PENDING,
     },
     paymentTermId: {
       type: DataTypes.INTEGER,

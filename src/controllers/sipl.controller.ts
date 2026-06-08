@@ -348,3 +348,21 @@ export const getSIPLContainers = catchAsync(async (req: Request, res: Response) 
 
   SuccessResponse(res, 200, "Containers fetched successfully", containers);
 });
+
+// Cancel SIPL
+export const cancelSIPLController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
+
+  if (!id) {
+    throw new AppError("SIPL ID is required.", 400);
+  }
+
+  if (!clientId || !locationId) {
+    throw new AppError("Client ID and Location ID are required.", 400);
+  }
+
+  const result = await siplService.cancelSIPLService(Number(id), Number(locationId), Number(clientId));
+  SuccessResponse(res, 200, result.message, result);
+}); 

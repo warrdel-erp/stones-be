@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { initiateDelivery, getAllDeliveriesByClientId, approveDeliveryOrders, completeDelivery, rejectDelivery, startDelivery } from "../controllers/delivery.controller";
+import { initiateDelivery, getAllDeliveriesByClientId, approveDeliveryOrders, completeDelivery, rejectDelivery, startDelivery, getDeliveryStats } from "../controllers/delivery.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
 import { deliveryOrderApprovalSchema } from "../validators";
@@ -7,6 +7,8 @@ import { deliveryOrderApprovalSchema } from "../validators";
 const router = Router();
 
 router.post("/initiate", authenticateUser, initiateDelivery);
+
+router.get("/statistics", authenticateUser, getDeliveryStats);
 
 router.get("/", authenticateUser, getAllDeliveriesByClientId);
 

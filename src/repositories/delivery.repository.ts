@@ -4,6 +4,7 @@ import Truck from "../models/truck.model";
 import { Op, Transaction } from "sequelize";
 import { DELIVERY_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
+import { sequelize } from "../config/database";
 
 export const findPendingDeliveryByTruck = async (truckId: number) => {
     return scoped(Delivery).findOne({
@@ -153,4 +154,15 @@ export const getDeliveriesForDriver = async (driverUserId: number, statuses?: st
         },
         order: [["createdAt", "DESC"]],
     });
+};
+
+export const getDeliveryStats = async () => {
+    return scoped(Delivery).findAll({
+        attributes: [
+            "status",
+            [sequelize.fn("COUNT", sequelize.col("id")), "count"]
+        ],
+        group: ["status"],
+        raw: true
+    }) as unknown as Promise<Array<{ status: string; count: string | number }>>;
 };

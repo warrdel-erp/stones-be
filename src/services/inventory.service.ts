@@ -33,13 +33,17 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthReq
       let totalAvailableQuantity = 0;
       let totalAvailableQuantityUnit = 0;
 
+      const availableItems = (product?.inventoryProducts || []).filter((item: any) =>
+        item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
+      );
+
       if (product.isSlabType) {
-        const available = product?.inventoryProducts.map((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item?.slab?.receivedSqrFt : 0);
+        const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
         totalAvailableQuantity = decimal.decimalSum(available);
-        totalAvailableQuantityUnit = available.length;
+        totalAvailableQuantityUnit = availableItems.length;
       } else {
-        totalAvailableQuantity = product?.inventoryProducts?.length;
-        totalAvailableQuantityUnit = product?.inventoryProducts?.length;
+        totalAvailableQuantity = availableItems.length;
+        totalAvailableQuantityUnit = availableItems.length;
       }
 
       const totalSlabsCount = _.flatMap(product.sipls, 'inventoryProducts').length;
@@ -124,18 +128,19 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
 
       // Calculate totalAvailableQuantity
       let totalAvailableQuantity = 0;
+      let totalAvailableQuantityUnit = 0;
+
+      const availableItems = (locationInventoryProducts || []).filter((item: any) =>
+        item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
+      );
+
       if (product.isSlabType) {
-        totalAvailableQuantity = decimal.decimalSum(
-          locationInventoryProducts.map((item: any) =>
-            item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab?.receivedSqrFt || 0
-              : 0
-          )
-        );
+        const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
+        totalAvailableQuantity = decimal.decimalSum(available);
+        totalAvailableQuantityUnit = availableItems.length;
       } else {
-        totalAvailableQuantity = locationInventoryProducts.filter(
-          (item: any) => item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
-        ).length;
+        totalAvailableQuantity = availableItems.length;
+        totalAvailableQuantityUnit = availableItems.length;
       }
 
       const totalSlabsCount = locationInventoryProducts.length;
@@ -153,6 +158,7 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
       return {
         ...product,
         totalAvailableQuantity,
+        totalAvailableQuantityUnit,
         totalSlabsCount,
         totalHoldQuantity,
         blocks
@@ -221,18 +227,19 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
       // Calculate totalAvailableQuantity
       let totalAvailableQuantity = 0;
+      let totalAvailableQuantityUnit = 0;
+
+      const availableItems = (locationInventoryProducts || []).filter((item: any) =>
+        item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
+      );
+
       if (product.isSlabType) {
-        totalAvailableQuantity = decimal.decimalSum(
-          locationInventoryProducts.map((item: any) =>
-            item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold && item.slab
-              ? item.slab?.receivedSqrFt || 0
-              : 0
-          )
-        );
+        const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
+        totalAvailableQuantity = decimal.decimalSum(available);
+        totalAvailableQuantityUnit = availableItems.length;
       } else {
-        totalAvailableQuantity = locationInventoryProducts.filter(
-          (item: any) => item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
-        ).length;
+        totalAvailableQuantity = availableItems.length;
+        totalAvailableQuantityUnit = availableItems.length;
       }
 
       const totalSlabsCount = locationInventoryProducts.length;
@@ -250,6 +257,7 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
       return {
         ...product,
         totalAvailableQuantity,
+        totalAvailableQuantityUnit,
         totalSlabsCount,
         totalHoldQuantity,
         bundles
@@ -275,15 +283,17 @@ export const fetchProductsOnlyByLocation = async (page: number, limit: number, l
     let totalAvailableQuantity = 0;
     let totalAvailableQuantityUnit = 0;
 
+    const availableItems = (product?.inventoryProducts || []).filter((item: any) =>
+      item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
+    );
+
     if (product.isSlabType) {
-      const available = product?.inventoryProducts.map((item: any) =>
-        item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item?.slab?.receivedSqrFt : 0
-      );
+      const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
       totalAvailableQuantity = decimal.decimalSum(available);
-      totalAvailableQuantityUnit = available.length;
+      totalAvailableQuantityUnit = availableItems.length;
     } else {
-      totalAvailableQuantity = product?.inventoryProducts?.length;
-      totalAvailableQuantityUnit = product?.inventoryProducts?.length;
+      totalAvailableQuantity = availableItems.length;
+      totalAvailableQuantityUnit = availableItems.length;
     }
 
     const holds = product?.inventoryProducts?.map((e: any) =>
@@ -312,8 +322,8 @@ export const fetchProductsOnlyByLocation = async (page: number, limit: number, l
   return { products: finalData, total: data.total };
 };
 
-export const fetchBlocksByProductAndLocation = async (productId: number, locationId: number) => {
-  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block');
+export const fetchBlocksByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block', excludeSoldCanceled);
   return blocks.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,
@@ -321,8 +331,8 @@ export const fetchBlocksByProductAndLocation = async (productId: number, locatio
   }));
 };
 
-export const fetchBundlesByProductAndLocation = async (productId: number, locationId: number) => {
-  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot');
+export const fetchBundlesByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot', excludeSoldCanceled);
   return bundles.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,
@@ -330,13 +340,13 @@ export const fetchBundlesByProductAndLocation = async (productId: number, locati
   }));
 };
 
-export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number) => {
-  const sipls = await siplRepository.getSIPLByProduct(req, productId, locationId);
+export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const sipls = await siplRepository.getSIPLByProduct(req, productId, locationId, excludeSoldCanceled);
   if (!sipls.length) return [];
 
   const result = await Promise.all(
     sipls.map(async (sipl: any) => {
-      const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id);
+      const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id, excludeSoldCanceled);
       const plain = sipl.get({ plain: true });
       // inventoryProducts array intentionally empty — loaded lazily at level 3
       return {

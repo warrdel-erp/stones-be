@@ -1,5 +1,13 @@
 import Decimal from "decimal.js";
 import { decimalDivide } from "./decimal";
+import { SIPL_STATUS } from "../constants/tableTypes";
+
+export const isSIPLLocked = (sipl: any): boolean => {
+  if (!sipl) return false;
+  const status = typeof sipl.get === "function" ? sipl.get("status") : sipl.status;
+  const inventoryReceived = typeof sipl.get === "function" ? sipl.get("inventoryReceived") : sipl.inventoryReceived;
+  return status === SIPL_STATUS.CANCELED || !!inventoryReceived;
+};
 
 export const removeDuplicates = (array: any[]) =>
   array.filter((item, index, self) => index === self.findIndex((obj) => obj.id === item.id));
