@@ -757,3 +757,11 @@ Email notification.
 4. In adjustment create serial number as 1-1-1-1-1-1-1
 5. Search in inventory by product name
 6. Pagination number per page change option.
+
+---
+
+1. r_salesinvoice. [optional]
+2. AR, AP searching.
+3. create account.
+4. Dashboard.
+5. ledger account bulk upload with parent child feature.

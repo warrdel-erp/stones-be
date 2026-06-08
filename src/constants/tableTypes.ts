@@ -60,6 +60,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   ADVANCE_DEPOSIT: "advance_deposit",
   SLAB_SPLIT: "slab_split",
   CUSTOM: "custom",
+  CANCEL_SIPL: "cancel_sipl",
 } as const;
 
 export const JOURNAL_ENTRY_TYPE = {
@@ -115,6 +116,11 @@ export const PO_STATUS = {
   CANCELED: "canceled",
 };
 
+export const SIPL_STATUS = {
+  PENDING: "pending",
+  CANCELED: "canceled",
+} as const;
+
 export const PAYMENT_BILL_REFERENCE_TYPES = {
   SIPL: "sipl",
   BILL: "bill",
@@ -131,6 +137,7 @@ export const PACKAGING_LIST_STAGES = {
   INITIATED: "initiated",
   LOADING_ORDER: "loadingOrder",
   INVOICED: "invoiced",
+  CANCELED: "canceled",
 } as const;
 
 export const SALE_ORDER_PRODUCT_STAGES = {
@@ -139,6 +146,7 @@ export const SALE_ORDER_PRODUCT_STAGES = {
   PACKAGING_LIST: "packagingList",
   INVOICED: "invoiced",
   CLOSED: "closed",
+  CANCELED: "canceled",
 } as const;
 
 export const SALES_ORDER_STATUS = {
@@ -184,6 +192,7 @@ export const DELIVERY_STATUS = {
   STARTED: "started",
   REJECTED: "rejected",
   COMPLETED: "completed",
+  CANCELED: "canceled",
 } as const;
 
 export const CREDIT_NOTE_REFERENCE_TYPES = {
@@ -229,6 +238,7 @@ export const ACTIVITY_TYPE = {
   RETURN_INITIATION: "return_initiation",
   RETURN_CONFIRMATION: "return_confirmation",
   RETURN_REJECTION: "return_rejection",
+  PACKAGING_LIST_CANCELLATION: "packaging_list_cancellation",
 } as const;
 
 export const ACTIVITY_REFERENCE_TYPE = {
@@ -236,4 +246,5 @@ export const ACTIVITY_REFERENCE_TYPE = {
   SALES_INVOICE: "sales_invoice",
   DELIVERY: "delivery",
   RETURN: "return",
+  PACKAGING_LIST: "packaging_list",
 } as const;

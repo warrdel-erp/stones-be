@@ -7,6 +7,9 @@ const router = Router();
 // Receive all slabs in an SIPL in inventory.
 router.put("/:id/receiveInventory", authenticateUser, siplController.receiveInventoryController);
 
+// Cancel an SIPL
+router.put("/:id/cancel", authenticateUser, siplController.cancelSIPLController);
+
 // Create SIPL against PO.
 router.post("/createSipl", authenticateUser, siplController.createSIPLController);
 

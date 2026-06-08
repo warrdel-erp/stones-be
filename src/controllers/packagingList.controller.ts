@@ -107,3 +107,12 @@ export const getNewLoNumber = catchAsync(async (req: AuthRequest, res: Response)
   const data = await packagingListService.getLONumber(clientId!);
   SuccessResponse(res, 200, "New PL number fetched successfully.", data);
 });
+
+// Cancel Packaging List
+export const cancelPackagingList = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await packagingListService.cancelPackagingList(Number(id));
+
+  SuccessResponse(res, 200, "Packaging List canceled successfully", result);
+});

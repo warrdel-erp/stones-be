@@ -34,6 +34,9 @@ router.get("/newPlNumber", authenticateUser, packagingListController.getNewLoNum
 // Create invoice.
 router.put("/:id/createInvoice", authenticateUser, packagingListController.invoicePackagingList);
 
+// Cancel packaging list.
+router.put("/:id/cancel", authenticateUser, packagingListController.cancelPackagingList);
+
 // Get packaging list by Id
 router.get("/:id", authenticateUser, packagingListController.getPackagingListById);
 

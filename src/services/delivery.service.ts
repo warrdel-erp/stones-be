@@ -319,3 +319,25 @@ export const startDeliveryManager = async (deliveryId: number, clientId: number)
         return deliveryRepository.findDeliveryById(deliveryId);
     });
 };
+
+export const getDeliveryStats = async () => {
+    const rawStats = await deliveryRepository.getDeliveryStats();
+    
+    // Normalize into complete statuses object with defaults to 0
+    const stats: Record<string, number> = {
+        pending: 0,
+        approved: 0,
+        started: 0,
+        canceled: 0,
+        rejected: 0,
+        completed: 0
+    };
+
+    rawStats.forEach((item) => {
+        if (item.status && stats[item.status] !== undefined) {
+            stats[item.status] = Number(item.count || 0);
+        }
+    });
+
+    return stats;
+};

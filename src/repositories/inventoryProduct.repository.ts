@@ -101,12 +101,17 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
   return newCombinedNumber;
 };
 
-export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number) => {
+export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number, excludeSoldCanceled = false) => {
   // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
+  const where: any = { siplId };
+  if (excludeSoldCanceled) {
+    where.status = {
+      [Op.notIn]: ['SOLD', 'CANCELED']
+    };
+  }
+
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
-    where: {
-      siplId
-    },
+    where,
     include: [
       {
         association: 'slab'
@@ -144,15 +149,23 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
   return inventoryProducts;
 };
 
-export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot') => {
+export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot', excludeSoldCanceled = false) => {
   const groupField = groupBy === 'block' ? 'slab.block' : 'slab.lot';
   const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
 
+  const where: any = {
+    productId,
+    locationId,
+  };
+
+  if (excludeSoldCanceled) {
+    where.status = {
+      [Op.notIn]: ['SOLD', 'CANCELED']
+    };
+  }
+
   return await scoped(models.InventoryProduct).findAll({
-    where: {
-      productId,
-      // status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
-    },
+    where,
     include: [
       {
         association: 'slab',
@@ -213,9 +226,17 @@ export const setInventoryProductLandedUnitCostAndFOBcost = async (
   return updatedCount;
 };
 
-export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string) => {
+export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
   // Find all inventory products where the specified slab field matches
+  const where: any = {};
+  if (excludeSoldCanceled) {
+    where.status = {
+      [Op.notIn]: ['SOLD', 'CANCELED']
+    };
+  }
+
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
+    where,
     include: [
       {
         association: "bin",
@@ -608,4 +629,19 @@ export const getQrCodesBySiplId = async (siplId: number) => {
     },
     attributes: ["id", "qrCode", "combinedNumber"],
   });
+};
+
+export const updateInventoryProductStatusesByIds = async (
+  ids: number[],
+  status: string,
+  transaction?: Transaction
+) => {
+  return await scoped(models.InventoryProduct).update(
+    { status },
+    {
+      where: { id: { [Op.in]: ids } },
+      individualHooks: true,
+      transaction
+    }
+  );
 };

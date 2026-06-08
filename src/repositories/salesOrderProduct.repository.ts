@@ -194,7 +194,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
 }
 
 export const getInvoicedProductsForRevenue = async (clientId: number) => {
-  return await scoped(models.SalesOrderProduct).findAll({
+  return await scoped(models.SalesOrderProduct.unscoped()).findAll({
     where: {
       clientId,
       stage: SALE_ORDER_PRODUCT_STAGES.INVOICED
@@ -212,5 +212,23 @@ export const getInvoicedProductsForRevenue = async (clientId: number) => {
         ]
       }
     ]
+  });
+};
+
+export const getSalesOrderProductsByPackagingListId = async (packagingListId: number, transaction?: Transaction) => {
+  return await scoped(models.SalesOrderProduct).findAll({
+    where: { packagingListId },
+    transaction
+  });
+};
+
+export const updateSalesOrderProductsByPackagingListId = async (
+  packagingListId: number,
+  updateData: any,
+  transaction?: Transaction
+) => {
+  return await scoped(models.SalesOrderProduct).update(updateData, {
+    where: { packagingListId },
+    transaction
   });
 };

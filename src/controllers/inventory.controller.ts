@@ -85,37 +85,43 @@ export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response
 
 export const getBlocksByProduct = catchAsync(async (req: AuthRequest, res: Response) => {
   const { productId } = req.params;
+  const { showSoldCanceled } = req.query;
+  const excludeSoldCanceled = showSoldCanceled !== "true";
   const locationId = req.user?.defaultLocationId;
 
   if (!productId || !locationId) {
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(Number(productId), Number(locationId));
+  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Blocks fetched successfully", blocks);
 });
 
 export const getBundlesByProduct = catchAsync(async (req: AuthRequest, res: Response) => {
   const { productId } = req.params;
+  const { showSoldCanceled } = req.query;
+  const excludeSoldCanceled = showSoldCanceled !== "true";
   const locationId = req.user?.defaultLocationId;
 
   if (!productId || !locationId) {
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(Number(productId), Number(locationId));
+  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Bundles fetched successfully", bundles);
 });
 
 export const getSiplsByProduct = catchAsync(async (req: AuthRequest, res: Response) => {
   const { productId } = req.params;
+  const { showSoldCanceled } = req.query;
+  const excludeSoldCanceled = showSoldCanceled !== "true";
   const locationId = req.user?.defaultLocationId;
 
   if (!productId || !locationId) {
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const sipls = await inventoryRepository.fetchSiplsByProductAndLocation(req, Number(productId), Number(locationId));
+  const sipls = await inventoryRepository.fetchSiplsByProductAndLocation(req, Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "SIPLs fetched successfully", sipls);
 });
 

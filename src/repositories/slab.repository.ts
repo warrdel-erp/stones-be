@@ -260,12 +260,29 @@ export const getSplitSlabs = async (transaction?: Transaction, locationId?: numb
   });
 };
 
-export const getTotalAreaBySIPL = async (siplId: number) => {
+export const getTotalAreaBySIPL = async (siplId: number, excludeSoldCanceled = false) => {
+  const where: any = {
+    siplId: siplId,
+  };
+
+  const include: any[] = [];
+  if (excludeSoldCanceled) {
+    include.push({
+      association: 'inventoryProduct',
+      required: true,
+      where: {
+        status: {
+          [Op.notIn]: ['SOLD', 'CANCELED']
+        }
+      },
+      attributes: []
+    });
+  }
+
   return await scoped(models.Slab).findAll({
     attributes: ["siplId", [sequelize.fn("SUM", sequelize.literal("receivingLength * receivingWidth")), "totalArea"]],
-    where: {
-      siplId: siplId, // Filter slabs by the given SIPL IDs
-    },
+    where,
+    include,
     group: ["siplId"],
     raw: true,
   });

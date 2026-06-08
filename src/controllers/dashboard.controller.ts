@@ -166,3 +166,16 @@ export const getDashboardActivities = catchAsync(async (req: AuthRequest, res: R
 
     return SuccessResponse(res, 200, "Dashboard activities fetched successfully.", result);
 });
+
+// Get Monthly Profit Stats
+export const getMonthlyProfitStats = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
+
+    const data = await dashboardService.getMonthlyProfitStats(Number(clientId));
+
+    return SuccessResponse(res, 200, "Monthly profit stats fetched successfully.", data);
+});

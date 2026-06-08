@@ -4,6 +4,7 @@ export const INVENTORY_ITEM_STATUS = {
   ALLOCATED: "ALLOCATED",
   SOLD: "SOLD",
   BROKEN: "BROKEN",
+  CANCELED: "CANCELED",
 } as const;
 
 export const PRODUCT_COLORS = {

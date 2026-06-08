@@ -289,15 +289,26 @@ export const findSIPLBySlabId = async (slabId: number) => {
 };
 
 // Get SIPL by Product for inventory product
-export const getSIPLByProduct = async (req: AuthRequest, productId: number, locationId: number) => {
+export const getSIPLByProduct = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const inventoryProductsWhere: any = {
+    productId,
+    status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
+  };
+
+  if (excludeSoldCanceled) {
+    inventoryProductsWhere.status = {
+      [Op.and]: [
+        { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
+        { [Op.notIn]: ['SOLD', 'CANCELED'] }
+      ]
+    };
+  }
+
   const SIPLs = await scoped(models.SIPL).findAll({
     include: [
       {
         association: "inventoryProducts",
-        where: {
-          productId,
-          status: { [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN },
-        },
+        where: inventoryProductsWhere,
         required: true,
         include: [
           {

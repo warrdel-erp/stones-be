@@ -113,12 +113,15 @@ const PackagingList = sequelize.define(
   }
 );
 
-// Hook to prevent updates if invoiced = true
+// Hook to prevent updates if invoiced = true or if it is already canceled
 PackagingList.beforeUpdate(async (packagingList) => {
   const packagingListExisting = await PackagingList.findByPk(packagingList.dataValues.id);
 
   if (packagingListExisting?.dataValues.stage === PACKAGING_LIST_STAGES.INVOICED) {
     throw new AppError("Cannot update Packaging List as it is already invoiced.", 400);
+  }
+  if (packagingListExisting?.dataValues.stage === PACKAGING_LIST_STAGES.CANCELED) {
+    throw new AppError("Cannot update a canceled Packaging List.", 400);
   }
 });
 

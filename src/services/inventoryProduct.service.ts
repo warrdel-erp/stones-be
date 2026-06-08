@@ -11,9 +11,9 @@ import { scoped } from "../utils/scoped";
 import * as s3FileService from "./s3File.service";
 import { generateSignedGetUrl } from "./s3File.service";
 
-export const getInventoryProductsBySIPLCombinedNumber = async (req: AuthRequest, siplId: number) => {
+export const getInventoryProductsBySIPLCombinedNumber = async (req: AuthRequest, siplId: number, excludeSoldCanceled = false) => {
     // Get inventory products by matching the middle number in combinedNumber using repository
-    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySIPL(req, siplId);
+    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySIPL(req, siplId, excludeSoldCanceled);
 
     return inventoryProducts;
 };
@@ -25,9 +25,9 @@ export const updateInventoryProductsSellingPrice = async (ids: number[], selling
     return result;
 };
 
-export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string) => {
+export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
     // Get inventory products by slab field filter using repository
-    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySlabField(fieldName, fieldValue);
+    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySlabField(fieldName, fieldValue, excludeSoldCanceled);
 
     return inventoryProducts;
 };
