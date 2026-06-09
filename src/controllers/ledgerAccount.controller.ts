@@ -3,6 +3,8 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as ledgerAccountService from "../services/ledgerAccount.service";
+import * as ledgerAccountBulkUploadService from "../services/ledgerAccountBulkUpload.service";
+import { AppError } from "../helper/appError";
 
 // Create ledger account.
 export const createLedgerAccount = catchAsync(async (req, res) => {
@@ -65,3 +67,16 @@ export const getDefaultLedgerAccountsForProduct = catchAsync(async (req: AuthReq
 //   await ledgerAccountService.deleteLedgerAccount(Number(id));
 //   return SuccessResponse(res, 200, "Ledger Account deleted successfully", null);
 // });
+
+// Bulk upload ledger accounts.
+export const bulkUploadLedgerAccounts = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const clientId = req.user?.clientId;
+
+  if (!req.file) {
+    throw new AppError("File is required.", 400);
+  }
+
+  const result = await ledgerAccountBulkUploadService.bulkUploadLedgerAccounts(req.file.buffer, userId!, clientId!);
+  return SuccessResponse(res, 200, "Ledger accounts uploaded successfully", result);
+});

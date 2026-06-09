@@ -373,12 +373,27 @@ export const updatePackagingList = async (id: number, data: any, transaction?: T
 };
 
 // Get latest SO number
-export const getLoNumber = async (clientId: number) => {
-  const lastLO: any = await scoped(models.PackagingList).findOne({
+export const getPlNumber = async (clientId: number, salesOrderId?: number) => {
+  const lastPLByClient: any = await scoped(models.PackagingList).findOne({
     where: { clientId },
     order: [["clientPlNumber", "DESC"]],
     attributes: ["clientPlNumber"],
   });
 
-  return { clientPlNumber: lastLO ? lastLO?.clientPlNumber + 1 : 1 };
+  const clientPlNumber = lastPLByClient ? lastPLByClient.clientPlNumber + 1 : 1;
+
+  if (salesOrderId) {
+    const lastPLBySo: any = await scoped(models.PackagingList).findOne({
+      where: { salesOrderId },
+      order: [["soPackagingListNumber", "DESC"]],
+      attributes: ["soPackagingListNumber"],
+    });
+
+    return {
+      clientPlNumber,
+      soPackagingListNumber: lastPLBySo ? lastPLBySo.soPackagingListNumber + 1 : 1,
+    };
+  }
+
+  return { clientPlNumber };
 };

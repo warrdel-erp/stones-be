@@ -15,6 +15,7 @@ export type LedgerAccount = {
   subHeaderId: number;
   referenceId?: number;
   referenceType?: (typeof LEDGER_ACCOUNT_REFERENCE_TYPES)[keyof typeof LEDGER_ACCOUNT_REFERENCE_TYPES];
+  parentId?: number | null;
 };
 
 const LedgerAccount = sequelize.define(
@@ -63,6 +64,16 @@ const LedgerAccount = sequelize.define(
       type: DataTypes.ENUM(...Object.values(LEDGER_ACCOUNT_REFERENCE_TYPES)),
       allowNull: true, // Null for general accounts, required if referenceId exists
     },
+    parentId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "ledger_accounts",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -107,6 +118,17 @@ const LedgerAccount = sequelize.define(
   }
 );
 
+LedgerAccount.beforeSave(async (ledgerAccount: any, options: any) => {
+  if (ledgerAccount.parentId) {
+    // Check if parent has a parent (cannot have multiple levels)
+    const parent = await LedgerAccount.findByPk(ledgerAccount.parentId, { transaction: options.transaction });
+    if (parent && parent.getDataValue("parentId")) {
+      throw new Error("A child ledger cannot have a parent which is also a child.");
+    }
+
+  }
+});
+
 LedgerAccount.beforeCreate(async (ledgerAccount: any, options: CreateOptions<any>) => {
   await assignLedgerAccountCode(ledgerAccount, options.transaction);
 });
@@ -127,7 +149,7 @@ async function assignLedgerAccountCode(ledgerAccount: any, transaction?: Transac
     ledgerAccount.code = lastAccount.code + 1;
   } else {
     // If this is the first account under the subHeader, use the subHeader's code
-    const subHeader = COA_SUB_HEADERS.find((header) => header.id === subHeaderId);
+    const subHeader = COA_SUB_HEADERS.find((header) => header.id == subHeaderId);
     if (subHeader) {
       ledgerAccount.code = subHeader.code + 1;
     } else {

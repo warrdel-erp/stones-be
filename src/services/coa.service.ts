@@ -40,9 +40,24 @@ export const getBalanceSheetData = async (clientId: number) => {
   const getLedgerLastBalance = async (ledgerId: number) => {
     const lastEntry = await scoped(JournalEntry).findOne({
       where: { ledgerId },
-      order: [["createdAt", "DESC"]],
+      order: [["id", "DESC"]], // ordering by ID is safer than createdAt since multiple entries can have same createdAt
     });
     return lastEntry ? Number(lastEntry.get("balance")) : 0;
+  };
+
+  const getLedgerBalanceForBalanceSheet = async (ledgerId: number): Promise<number> => {
+    const children = await getLedgerAccountsWithoutPagination({
+      parentId: ledgerId,
+      clientId: clientId
+    });
+    if (children && children.length > 0) {
+      let total = 0;
+      for (const child of children) {
+        total += await getLedgerLastBalance(child.id);
+      }
+      return total;
+    }
+    return await getLedgerLastBalance(ledgerId);
   };
 
   // Create a new structure with ledger accounts and balances
@@ -52,7 +67,7 @@ export const getBalanceSheetData = async (clientId: number) => {
       let headerBalance = 0;
 
       const subHeadersWithLedgerAccounts = await Promise.all(header.subHeaders.map(async (subHeader) => {
-        // Fetch ledger accounts for this subheader and client
+        // Fetch ledger accounts for this subheader and client (will default to only parent/independent accounts)
         const ledgerAccounts = await getLedgerAccountsWithoutPagination({
           subHeaderId: subHeader.id,
           clientId: clientId
@@ -60,7 +75,7 @@ export const getBalanceSheetData = async (clientId: number) => {
         // For each ledger, get last journal entry balance
         const ledgerAccountsWithBalance = await Promise.all(ledgerAccounts.map(async (ledger: any) => {
           const ledgerPlain = ledger.get ? ledger.get({ plain: true }) : ledger;
-          const balance = await getLedgerLastBalance(ledger.id);
+          const balance = await getLedgerBalanceForBalanceSheet(ledger.id);
           return { ...ledgerPlain, balance };
         }));
 

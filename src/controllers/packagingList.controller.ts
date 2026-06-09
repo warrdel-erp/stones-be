@@ -101,10 +101,11 @@ export const invoicePackagingList = catchAsync(async (req: AuthRequest, res: Res
 });
 
 // Get new SO number
-export const getNewLoNumber = catchAsync(async (req: AuthRequest, res: Response) => {
+export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
+  const salesOrderId = req.query.salesOrderId ? Number(req.query.salesOrderId) : undefined;
 
-  const data = await packagingListService.getLONumber(clientId!);
+  const data = await packagingListService.getPLNumber(clientId!, salesOrderId);
   SuccessResponse(res, 200, "New PL number fetched successfully.", data);
 });
 

@@ -6,6 +6,25 @@ export const createLedgerAccount = async (data: any) => {
   return await ledgerAccountRepository.createLedgerAccount(data);
 };
 
+const getBalanceForLedgerGeneral = async (ledgerId: number): Promise<number> => {
+  const children = await ledgerAccountRepository.getLedgerAccountsWithoutPagination({ parentId: ledgerId });
+  if (children && children.length > 0) {
+    let total = 0;
+    for (const child of children) {
+      const childPlain = child.get({ plain: true });
+      const finalJournalAmount = await journalEntriesRepository.getFinalAmountForLedger(childPlain.id);
+      total += Number(childPlain.openingBalance) + finalJournalAmount;
+    }
+    return total;
+  }
+
+  const ledger = await ledgerAccountRepository.getLedgerAccountById(ledgerId);
+  if (!ledger) return 0;
+  const ledgerPlain = ledger.get({ plain: true });
+  const finalJournalAmount = await journalEntriesRepository.getFinalAmountForLedger(ledgerId);
+  return Number(ledgerPlain.openingBalance) + finalJournalAmount;
+};
+
 export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, filters: any) => {
   let data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, clientId, filters);
 
@@ -16,9 +35,12 @@ export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, 
     e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
     e.parentType = COA_TYPES.find((k) => k.id == e.header.parent_id);
 
-    const finalJournalAmount = await journalEntriesRepository.getFinalAmountForLedger(e.id);
+    const children = await ledgerAccountRepository.getLedgerAccountsWithoutPagination({ parentId: e.id });
+    const isParent = children && children.length > 0;
 
-    return { ...e, finalAmount: Number(e.openingBalance) + finalJournalAmount };
+    const finalAmount = await getBalanceForLedgerGeneral(e.id);
+
+    return { ...e, finalAmount, isParent };
   }));
 
   return data;
@@ -27,15 +49,22 @@ export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, 
 export const getLedgerAccountsWithoutPagination = async (filters: any) => {
   let data: any = await ledgerAccountRepository.getLedgerAccountsWithoutPagination(filters);
 
-  data = data.map((e: any) => {
+  data = await Promise.all(data.map(async (e: any) => {
     e = e.get({ plain: true });
 
     e.subHeader = COA_SUB_HEADERS.find((k) => k.id == e.subHeaderId);
     e.header = COA_HEADERS.find((k) => k.id == e.subHeader.parent_id);
     e.type = COA_TYPES.find((k) => k.id == e.header.parent_id);
 
+    const children = await ledgerAccountRepository.getLedgerAccountsWithoutPagination({ parentId: e.id });
+    const isParent = children && children.length > 0;
+
+    const finalAmount = await getBalanceForLedgerGeneral(e.id);
+    e.finalAmount = finalAmount;
+    e.isParent = isParent;
+
     return e;
-  });
+  }));
 
   return data;
 };
@@ -50,7 +79,22 @@ export const getLedgerAccountById = async (id: number) => {
   data.header = COA_HEADERS.find((k) => k.id == data.subHeader.parent_id);
   data.parentType = COA_TYPES.find((k) => k.id == data.header.parent_id);
 
-  return data
+  data.finalAmount = await getBalanceForLedgerGeneral(id);
+
+  // Fetch children
+  const childAccounts = await ledgerAccountRepository.getLedgerAccountsWithoutPagination({ parentId: id });
+  data.children = await Promise.all(childAccounts.map(async (child: any) => {
+    const childPlain = child.get({ plain: true });
+    const finalJournalAmount = await journalEntriesRepository.getFinalAmountForLedger(childPlain.id);
+    childPlain.finalAmount = Number(childPlain.openingBalance) + finalJournalAmount;
+
+    childPlain.subHeader = COA_SUB_HEADERS.find((k) => k.id == childPlain.subHeaderId);
+    childPlain.header = COA_HEADERS.find((k) => k.id == childPlain.subHeader.parent_id);
+    childPlain.parentType = COA_TYPES.find((k) => k.id == childPlain.header.parent_id);
+    return childPlain;
+  }));
+
+  return data;
 };
 
 export const getLedgerAccountsForFreightItems = async (clientId: number) => {

@@ -1,6 +1,7 @@
 import express from "express";
 import * as ledgerAccountController from "../controllers/ledgerAccount.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
+import { uploadCSV } from "../middleware/uploadMiddleware";
 
 const router = express.Router();
 
@@ -21,6 +22,9 @@ router.get("/defaultLedgerAccountsForProduct", authenticateUser, ledgerAccountCo
 
 // Get ledger account by ID.
 router.get("/:id", authenticateUser, ledgerAccountController.getLedgerAccountById);
+
+// Bulk upload ledger accounts.
+router.post("/bulkUpload", authenticateUser, uploadCSV.single("file"), ledgerAccountController.bulkUploadLedgerAccounts);
 
 // router.put("/:id", ledgerAccountController.updateLedgerAccount);
 // router.delete("/:id", ledgerAccountController.deleteLedgerAccount);

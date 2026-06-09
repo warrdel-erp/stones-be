@@ -101,6 +101,6 @@ export const updateLoadingOrder = async (id: number, data: any) => {
 };
 
 // Get new LO number
-export const getPLNumber = async (clientId: number) => {
-  return await loadingOrderRepository.getPlNumber(clientId);
+export const getPLNumber = async (clientId: number, salesOrderId?: number) => {
+  return await loadingOrderRepository.getPlNumber(clientId, salesOrderId);
 };
