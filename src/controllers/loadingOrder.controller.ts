@@ -76,7 +76,8 @@ export const updateLoadingOrder = catchAsync(async (req: Request, res: Response)
 // Get new LO number
 export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
+  const salesOrderId = req.query.salesOrderId ? Number(req.query.salesOrderId) : undefined;
 
-  const data = await loadingOrderService.getPLNumber(clientId!);
+  const data = await loadingOrderService.getPLNumber(clientId!, salesOrderId);
   SuccessResponse(res, 200, "New LO number fetched successfully.", data);
 });

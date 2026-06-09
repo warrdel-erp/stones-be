@@ -210,7 +210,25 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
       openingBalance: 0,
       openingDate: new Date(),
     },
-  ] as const;
+    {
+      name: "Account Receivable",
+      clientId,
+      key: "account_receivable",
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Account Payables",
+      clientId,
+      key: "account_payables",
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "trade_payables")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+  ];
 
   const createdAccounts: any[] = [];
   for (const account of data) {

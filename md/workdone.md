@@ -946,3 +946,11 @@ sticky navbar.
 3. client registration
 
 ---
+
+1. Parent child ledger.
+2. Bulk upload of Ledgers.
+
+---
+
+1. due amount error.
+2. Wrong PL and LO number in creation forms.

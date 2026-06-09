@@ -104,6 +104,24 @@ export const fetchAllCustomers = async (page: number, limit: number, clientId: n
 };
 
 async function createLedgerAccountForCustomer(clientId: number, newCustomer: any, transaction: Transaction) {
+  let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: "account_receivable",
+    clientId,
+  }, transaction);
+
+  if (!parentLedger) {
+    const subHeaderId = COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!;
+    parentLedger = await ledgerAccountRepository.createLedgerAccount({
+      name: "Account Receivable",
+      key: "account_receivable",
+      subHeaderId,
+      clientId,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    }, transaction);
+  }
+
   const ledgerAccountData: LedgerAccount = {
     name: newCustomer.name,
     subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!,
@@ -111,6 +129,7 @@ async function createLedgerAccountForCustomer(clientId: number, newCustomer: any
     type: LEDGER_ACCOUNT_TYPES.DEBIT,
     referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
     referenceId: newCustomer.id,
+    parentId: parentLedger.id,
   };
 
   const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
@@ -587,6 +606,23 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       throw new AppError("Ledger account sub-header not found.", 500);
     }
 
+    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: "account_receivable",
+      clientId,
+    }, transaction);
+
+    if (!parentLedger) {
+      parentLedger = await ledgerAccountRepository.createLedgerAccount({
+        name: "Account Receivable",
+        key: "account_receivable",
+        subHeaderId,
+        clientId,
+        type: LEDGER_ACCOUNT_TYPES.DEBIT,
+        openingBalance: 0,
+        openingDate: new Date(),
+      }, transaction);
+    }
+
     const ledgerAccountsToCreate: any[] = createdCustomers.map((customer: any) => ({
       name: customer.name,
       subHeaderId,
@@ -594,6 +630,7 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
       referenceId: customer.id,
+      parentId: parentLedger.id,
     }));
 
     // 9. Bulk create ledger accounts

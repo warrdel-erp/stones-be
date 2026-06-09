@@ -138,6 +138,16 @@ const JournalEntry = sequelize.define(
 
 // Hook to calculate balance before creating a new JournalEntry
 JournalEntry.beforeCreate(async (entry: any, { transaction }) => {
+  // Check if ledger account is a parent ledger (i.e. has any children)
+  const hasChildren = await LedgerAccount.findOne({
+    where: { parentId: entry.ledgerId },
+    transaction,
+  });
+
+  if (hasChildren) {
+    throw new Error("A parent ledger cannot have direct journal entries.");
+  }
+
   // Get the last entry for this ledgerId, ordered by createdAt DESC
   const lastEntry = await scoped(JournalEntry).findOne({
     where: { ledgerId: entry.ledgerId },

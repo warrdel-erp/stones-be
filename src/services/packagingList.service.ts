@@ -753,8 +753,8 @@ export const checkIfPackagingListInvoiced = async (packagingListId: number, oper
 };
 
 // Get new PL number
-export const getLONumber = async (clientId: number) => {
-  return await packagingListRepository.getLoNumber(clientId);
+export const getPLNumber = async (clientId: number, salesOrderId?: number) => {
+  return await packagingListRepository.getPlNumber(clientId, salesOrderId);
 };
 
 function packagingListWithTotalAmount(loadingOrders: any) {
@@ -838,7 +838,7 @@ export const cancelPackagingList = async (id: number) => {
   try {
     // 1. Fetch simple packaging list
     const packagingList: any = await packagingListRepository.getPackagingListByIdSimple(id, transaction);
-    
+
     // 2. State validation
     validatePackagingListForCancel(packagingList);
 

@@ -1264,6 +1264,15 @@ export const COA_SUB_HEADERS = [
     code: 733000,
     type: null
   },
+  {
+    id: 109,
+    number: "1.5.8",
+    name: "Vehicle",
+    key: "vehicle",
+    parent_id: 5,
+    code: 158000,
+    type: "Dr"
+  },
 ] as const;
 
 export const LEDGER_ACCOUNT_TYPES = {

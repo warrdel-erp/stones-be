@@ -17,9 +17,23 @@ export const createBulk = async (data: JournalEntry[], transaction?: Transaction
 
 // Fetch find journal entries with filters.
 export const findAll = async (filters: any, clientId: number) => {
+  const { Op } = require("sequelize");
+  const whereCondition: any = { ...filters };
+
+  if (whereCondition.ledgerId) {
+    if (typeof whereCondition.ledgerId === "string" && whereCondition.ledgerId.includes(",")) {
+      whereCondition.ledgerId = {
+        [Op.in]: whereCondition.ledgerId.split(",").map(Number),
+      };
+    } else if (Array.isArray(whereCondition.ledgerId)) {
+      whereCondition.ledgerId = {
+        [Op.in]: whereCondition.ledgerId.map(Number),
+      };
+    }
+  }
 
   const journalEntries = await scoped(models.JournalEntry).findAll({
-    where: filters || {},
+    where: whereCondition,
     include: [
       {
         model: models.LedgerAccount,

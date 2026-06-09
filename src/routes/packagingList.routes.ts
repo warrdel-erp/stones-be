@@ -29,7 +29,7 @@ router.get(
 );
 
 // Get new SO number.
-router.get("/newPlNumber", authenticateUser, packagingListController.getNewLoNumber);
+router.get("/newPlNumber", authenticateUser, packagingListController.getNewPlNumber);
 
 // Create invoice.
 router.put("/:id/createInvoice", authenticateUser, packagingListController.invoicePackagingList);

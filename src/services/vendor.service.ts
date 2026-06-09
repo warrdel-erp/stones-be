@@ -43,6 +43,24 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
     }, transaction);
 
     // Create Ledger Account data
+    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: "account_payables",
+      clientId,
+    }, transaction);
+
+    if (!parentLedger) {
+      const subHeaderId = COA_SUB_HEADERS.find((e) => e.key == "trade_payables")?.id!;
+      parentLedger = await ledgerAccountRepository.createLedgerAccount({
+        name: "Account Payables",
+        key: "account_payables",
+        subHeaderId,
+        clientId,
+        type: LEDGER_ACCOUNT_TYPES.CREDIT,
+        openingBalance: 0,
+        openingDate: new Date(),
+      }, transaction);
+    }
+
     const ledgerAccountData: LedgerAccount = {
       name: newVendor.name,
       clientId,
@@ -50,6 +68,7 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,
       referenceId: newVendor.id,
+      parentId: parentLedger.id,
     };
 
     const ledgerAccount = await ledgerAccountRepository.createLedgerAccount(ledgerAccountData, transaction);
@@ -550,6 +569,23 @@ export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clie
       throw new AppError("Ledger account sub-header not found.", 500);
     }
 
+    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+      key: "account_payables",
+      clientId,
+    }, transaction);
+
+    if (!parentLedger) {
+      parentLedger = await ledgerAccountRepository.createLedgerAccount({
+        name: "Account Payables",
+        key: "account_payables",
+        subHeaderId,
+        clientId,
+        type: LEDGER_ACCOUNT_TYPES.CREDIT,
+        openingBalance: 0,
+        openingDate: new Date(),
+      }, transaction);
+    }
+
     const ledgerAccountsToCreate = createdVendors.map((vendor: any) => ({
       name: vendor.name,
       subHeaderId,
@@ -557,6 +593,7 @@ export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clie
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
       referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,
       referenceId: vendor.id,
+      parentId: parentLedger.id,
     }));
 
     await ledgerAccountRepository.bulkCreateLedgerAccountsForBulkUpload(ledgerAccountsToCreate, transaction);

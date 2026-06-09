@@ -33,7 +33,16 @@ export const getLedgerAccountByFilterForBulkUpload = async (filter: WhereOptions
 export const getLedgerAccounts = async (page: number, limit: number, clientId: number, filters: any) => {
   const offset = (page - 1) * limit;
 
-  const whereCondition: any = filters;
+  const whereCondition: any = { ...filters };
+  if (whereCondition.parentId === undefined) {
+    if (!whereCondition.key && !whereCondition.id) {
+      whereCondition.parentId = null;
+    }
+  } else if (whereCondition.parentId === 'any') {
+    delete whereCondition.parentId;
+  } else if (whereCondition.parentId === 'null') {
+    whereCondition.parentId = null;
+  }
 
   return await scoped(models.LedgerAccount).findAndCountAll({
     where: { ...whereCondition, clientId },
@@ -45,7 +54,16 @@ export const getLedgerAccounts = async (page: number, limit: number, clientId: n
 
 // Get all ledger accounts.
 export const getLedgerAccountsWithoutPagination = async (filters: any) => {
-  const whereCondition: any = filters;
+  const whereCondition: any = { ...filters };
+  if (whereCondition.parentId === undefined) {
+    if (!whereCondition.key && !whereCondition.id) {
+      whereCondition.parentId = null;
+    }
+  } else if (whereCondition.parentId === 'any') {
+    delete whereCondition.parentId;
+  } else if (whereCondition.parentId === 'null') {
+    whereCondition.parentId = null;
+  }
 
   return await scoped(models.LedgerAccount).findAll({
     where: whereCondition,
@@ -82,6 +100,25 @@ export const getLedgerAccountOptions = async (clientId: number, filters: any = {
     ...filters,
     clientId,
   };
+
+  if (whereCondition.excludeParents === "true") {
+    delete whereCondition.excludeParents;
+    const parentLedgers = await models.LedgerAccount.findAll({
+      attributes: ["parentId"],
+      where: {
+        parentId: { [Op.ne]: null },
+        clientId,
+      },
+      raw: true,
+    });
+    const parentIds = [...new Set(parentLedgers.map((p: any) => p.parentId).filter(Boolean))];
+    whereCondition.id = { [Op.notIn]: parentIds };
+  }
+
+  if (whereCondition.onlyParents === "true") {
+    delete whereCondition.onlyParents;
+    whereCondition.parentId = null;
+  }
 
   return await scoped(models.LedgerAccount).findAll({
     attributes: [

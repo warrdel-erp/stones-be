@@ -342,6 +342,9 @@ InventoryProduct.hasOne(Slab, { foreignKey: "inventoryProductId" });
 LedgerAccount.hasMany(JournalEntry, { foreignKey: "ledgerId", as: "transactions" });
 JournalEntry.belongsTo(LedgerAccount, { foreignKey: "ledgerId", as: "ledgerAccount" });
 
+LedgerAccount.belongsTo(LedgerAccount, { as: "parent", foreignKey: "parentId" });
+LedgerAccount.hasMany(LedgerAccount, { as: "children", foreignKey: "parentId" });
+
 SIPL.hasMany(JournalEntry, { foreignKey: "referenceId", as: "journalEntries", constraints: false });
 JournalEntry.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false });
 
