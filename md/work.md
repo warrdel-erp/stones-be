@@ -765,3 +765,7 @@ Email notification.
 3. create account.
 4. Dashboard.
 5. ledger account bulk upload with parent child feature.
+
+---
+
+1. client is unable to remove user location.

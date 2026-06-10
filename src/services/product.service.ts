@@ -63,23 +63,35 @@ export const fetchAllProductsWithCompactData = async (
 ) => {
   let products = await productRepository.getAllProductsWithCompactData(page, limit, search, filter, onlyWithSlabs);
 
-  products.products = products.products.map((product: any) => {
+  products.products = await Promise.all(
+    products.products.map(async (product: any) => {
+      product = product.get({ plain: true });
 
-    product = product.get({ plain: true });
+      const totalAvailableQuantity = (
+        _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
+        / 144
+      ).toFixed(2);
 
-    const totalAvailableQuantity = (
-      _.sumBy(product?.inventoryProducts, (item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold ? item.slab?.receivingLength * item.slab?.receivingWidth : 0)
-      / 144
-    ).toFixed(2)
+      const totalAvailableUnits = product?.inventoryProducts?.filter((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold).length;
 
-    const totalAvailableUnits = product?.inventoryProducts?.filter((item: any) => item.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold).length;
+      if (product.images && product.images.length > 0) {
+        const primaryImg = product.images[0];
+        if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+          primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+        }
+        product.primaryImage = primaryImg;
+      } else {
+        product.primaryImage = null;
+      }
+      delete product.images;
 
-    return {
-      ...product,
-      totalAvailableQuantity,
-      totalAvailableUnits,
-    }
-  });
+      return {
+        ...product,
+        totalAvailableQuantity,
+        totalAvailableUnits,
+      };
+    })
+  );
 
   return products;
 };
@@ -153,26 +165,34 @@ export const addProductImage = async (productId: number, s3FileId: number) => {
     throw new AppError("Product not found", 404);
   }
 
-  const image = await models.ProductImage.create({
-    productId,
-    s3FileId,
-  });
+  const count = await productRepository.getProductImageCount(productId);
+  const isPrimary = count === 0;
 
+  const image = await productRepository.createProductImage(productId, s3FileId, isPrimary);
   return image;
 };
 
 export const deleteProductImage = async (imageId: number) => {
   const transaction = await sequelize.transaction();
   try {
-    const imageLink = await models.ProductImage.findByPk(imageId, { transaction });
+    const imageLink = await productRepository.findProductImageById(imageId, transaction);
 
     if (!imageLink) {
       throw new AppError("Image not found", 404);
     }
 
     const s3FileId = (imageLink as any).s3FileId;
+    const wasPrimary = (imageLink as any).isPrimary;
+    const productId = (imageLink as any).productId;
 
-    await imageLink.destroy({ transaction });
+    await productRepository.deleteProductImage(imageId, transaction);
+
+    if (wasPrimary) {
+      const nextImage = await productRepository.getAnotherProductImage(productId, imageId, transaction);
+      if (nextImage) {
+        await productRepository.setProductImagePrimary((nextImage as any).id, transaction);
+      }
+    }
 
     if (s3FileId) {
       await s3FileService.deleteS3File(s3FileId, transaction);
@@ -187,10 +207,7 @@ export const deleteProductImage = async (imageId: number) => {
 };
 
 export const getProductImages = async (productId: number) => {
-  const images = await models.ProductImage.findAll({
-    where: { productId },
-    include: [{ model: models.S3File, as: 's3File' }],
-  });
+  const images = await productRepository.getProductImagesByProductId(productId);
 
   const plainImages = images.map((img) => img.get({ plain: true }));
 
@@ -203,6 +220,23 @@ export const getProductImages = async (productId: number) => {
   );
 
   return plainImages;
+};
+
+export const setPrimaryProductImage = async (productId: number, imageId: number) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const image = await productRepository.findProductImageById(imageId, transaction);
+    if (!image || (image as any).productId !== productId) {
+      throw new AppError("Image not found for this product", 404);
+    }
+    await productRepository.clearProductPrimaryImages(productId, transaction);
+    await productRepository.setProductImagePrimary(imageId, transaction);
+    await transaction.commit();
+    return { message: "Primary image set successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 

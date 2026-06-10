@@ -334,6 +334,18 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
 
     const createdSlabs = await slabRepository.createSlabs(newSlabs, transaction);
 
+    // Update assetValue for each new split inventory product
+    for (let i = 0; i < newInventoryProducts.length; i++) {
+      const invProd = newInventoryProducts[i];
+      const slabData = slabsData[i];
+      const area = (slabData.receivingLength * slabData.receivingWidth) / 144;
+      const assetValue = area * (inventoryProduct.landedUnitCost || 0);
+      await scoped(models.InventoryProduct).update(
+        { assetValue },
+        { where: { id: invProd.id }, transaction }
+      );
+    }
+
     // Create journal entries for slab split (CR for original, DR for new slabs)
     await journalEntryService.createJournalEntriesForSlabSplit(
       originalSlab,

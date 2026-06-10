@@ -25,6 +25,11 @@ const ProductImage = sequelize.define(
       allowNull: false,
       comment: "Reference to the s3_files record for this image",
     },
+    isPrimary: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "product_images",

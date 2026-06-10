@@ -7,6 +7,7 @@ import * as inventoryProductRepository from "../repositories/inventoryProduct.re
 import * as decimal from '../helper/decimal'
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as models from "../models";
+import { generateSignedGetUrl } from "./s3File.service";
 
 export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthRequest, page: number, limit: number, locationId: number) => {
   const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
@@ -279,45 +280,57 @@ export const fetchProductsOnlyByLocation = async (page: number, limit: number, l
   const filter = isSlabType ? { isSlabType: true } : undefined;
   const data: any = await productRepository.getAllProducts(page, limit, search, filter, true);
 
-  const finalData = data.products.map((product: any) => {
-    let totalAvailableQuantity = 0;
-    let totalAvailableQuantityUnit = 0;
+  const finalData = await Promise.all(
+    data.products.map(async (product: any) => {
+      let totalAvailableQuantity = 0;
+      let totalAvailableQuantityUnit = 0;
 
-    const availableItems = (product?.inventoryProducts || []).filter((item: any) =>
-      item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
-    );
+      const availableItems = (product?.inventoryProducts || []).filter((item: any) =>
+        item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY && !item.hold
+      );
 
-    if (product.isSlabType) {
-      const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
-      totalAvailableQuantity = decimal.decimalSum(available);
-      totalAvailableQuantityUnit = availableItems.length;
-    } else {
-      totalAvailableQuantity = availableItems.length;
-      totalAvailableQuantityUnit = availableItems.length;
-    }
+      if (product.isSlabType) {
+        const available = availableItems.map((item: any) => item?.slab?.receivedSqrFt || 0);
+        totalAvailableQuantity = decimal.decimalSum(available);
+        totalAvailableQuantityUnit = availableItems.length;
+      } else {
+        totalAvailableQuantity = availableItems.length;
+        totalAvailableQuantityUnit = availableItems.length;
+      }
 
-    const holds = product?.inventoryProducts?.map((e: any) =>
-      e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.isSlabType ? e.slab?.receivedSqrFt : 1) : 0
-    );
+      const holds = product?.inventoryProducts?.map((e: any) =>
+        e.status == INVENTORY_ITEM_STATUS.IN_INVENTORY && e.hold ? (e.isSlabType ? e.slab?.receivedSqrFt : 1) : 0
+      );
 
-    let totalHoldQuantity = 0;
-    let totalHoldQuantityUnit = 0;
+      let totalHoldQuantity = 0;
+      let totalHoldQuantityUnit = 0;
 
-    if (holds) {
-      totalHoldQuantity = decimal.decimalSum(holds);
-      totalHoldQuantityUnit = holds.filter(Boolean).length;
-    }
+      if (holds) {
+        totalHoldQuantity = decimal.decimalSum(holds);
+        totalHoldQuantityUnit = holds.filter(Boolean).length;
+      }
 
-    delete product.inventoryProducts;
+      if (product.images && product.images.length > 0) {
+        const primaryImg = product.images[0];
+        if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+          primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+        }
+        product.primaryImage = primaryImg;
+      } else {
+        product.primaryImage = null;
+      }
+      delete product.images;
+      delete product.inventoryProducts;
 
-    return {
-      ...product,
-      totalAvailableQuantity,
-      totalAvailableQuantityUnit,
-      totalHoldQuantity,
-      totalHoldQuantityUnit,
-    };
-  });
+      return {
+        ...product,
+        totalAvailableQuantity,
+        totalAvailableQuantityUnit,
+        totalHoldQuantity,
+        totalHoldQuantityUnit,
+      };
+    })
+  );
 
   return { products: finalData, total: data.total };
 };

@@ -295,3 +295,11 @@ export const getInventoryProductImages = catchAsync(async (req: AuthRequest, res
 
     return SuccessResponse(res, 200, "Images fetched successfully", result);
 });
+
+export const setPrimaryImage = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id, imageId } = req.params;
+
+    const result = await inventoryProductService.setPrimaryInventoryProductImage(Number(id), Number(imageId));
+
+    return SuccessResponse(res, 200, "Primary image updated successfully", result);
+});

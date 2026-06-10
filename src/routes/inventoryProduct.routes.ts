@@ -59,4 +59,7 @@ router.delete("/images/:imageId", authenticateUser, inventoryProductController.d
 // Get images of inventory product
 router.get("/:id/images", authenticateUser, inventoryProductController.getInventoryProductImages);
 
+// Set primary image of inventory product
+router.put("/:id/images/:imageId/primary", authenticateUser, inventoryProductController.setPrimaryImage);
+
 export default router;

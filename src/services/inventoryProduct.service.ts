@@ -15,7 +15,24 @@ export const getInventoryProductsBySIPLCombinedNumber = async (req: AuthRequest,
     // Get inventory products by matching the middle number in combinedNumber using repository
     const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySIPL(req, siplId, excludeSoldCanceled);
 
-    return inventoryProducts;
+    const plainProducts = inventoryProducts.map((ip: any) => ip.get({ plain: true }));
+
+    await Promise.all(
+        plainProducts.map(async (ip: any) => {
+            if (ip.images && ip.images.length > 0) {
+                const primaryImg = ip.images[0];
+                if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+                    primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+                }
+                ip.primaryImage = primaryImg;
+            } else {
+                ip.primaryImage = null;
+            }
+            delete ip.images;
+        })
+    );
+
+    return plainProducts;
 };
 
 export const updateInventoryProductsSellingPrice = async (ids: number[], sellingPrice: number) => {
@@ -29,7 +46,24 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
     // Get inventory products by slab field filter using repository
     const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySlabField(fieldName, fieldValue, excludeSoldCanceled);
 
-    return inventoryProducts;
+    const plainProducts = inventoryProducts.map((ip: any) => ip.get({ plain: true }));
+
+    await Promise.all(
+        plainProducts.map(async (ip: any) => {
+            if (ip.images && ip.images.length > 0) {
+                const primaryImg = ip.images[0];
+                if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+                    primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+                }
+                ip.primaryImage = primaryImg;
+            } else {
+                ip.primaryImage = null;
+            }
+            delete ip.images;
+        })
+    );
+
+    return plainProducts;
 };
 
 export const getAllocatedInventoryProductsAccordingToCustomer = async (customerId: number) => {
@@ -343,27 +377,35 @@ export const addInventoryProductImage = async (inventoryProductId: number, s3Fil
         throw new AppError("Inventory product not found", 404);
     }
 
-    const image = await InventoryProductImage.create({
-        inventoryProductId,
-        s3FileId
-    });
+    const count = await inventoryProductRepository.getInventoryProductImageCount(inventoryProductId);
+    const isPrimary = count === 0;
 
+    const image = await inventoryProductRepository.createInventoryProductImage(inventoryProductId, s3FileId, isPrimary);
     return image;
 };
 
 export const deleteInventoryProductImage = async (imageId: number) => {
     const transaction = await sequelize.transaction();
     try {
-        const imageLink = await InventoryProductImage.findByPk(imageId, { transaction });
+        const imageLink = await inventoryProductRepository.findInventoryProductImageById(imageId, transaction);
         
         if (!imageLink) {
             throw new AppError("Image not found", 404);
         }
         
         const s3FileId = (imageLink as any).s3FileId;
+        const wasPrimary = (imageLink as any).isPrimary;
+        const inventoryProductId = (imageLink as any).inventoryProductId;
 
-        await imageLink.destroy({ transaction });
+        await inventoryProductRepository.deleteInventoryProductImage(imageId, transaction);
         
+        if (wasPrimary) {
+            const nextImage = await inventoryProductRepository.getAnotherInventoryProductImage(inventoryProductId, imageId, transaction);
+            if (nextImage) {
+                await inventoryProductRepository.setInventoryProductImagePrimary((nextImage as any).id, transaction);
+            }
+        }
+
         if (s3FileId) {
             await s3FileService.deleteS3File(s3FileId, transaction);
         }
@@ -377,12 +419,9 @@ export const deleteInventoryProductImage = async (imageId: number) => {
 };
 
 export const getInventoryProductImages = async (inventoryProductId: number) => {
-    const images = await InventoryProductImage.findAll({
-        where: { inventoryProductId },
-        include: [{ model: S3File, as: 's3File' }]
-    });
+    const images = await inventoryProductRepository.getInventoryProductImagesByInventoryProductId(inventoryProductId);
 
-    const plainImages = images.map(img => img.get({ plain: true }));
+    const plainImages = images.map((img: any) => img.get({ plain: true }));
 
     await Promise.all(
         plainImages.map(async (img: any) => {
@@ -393,4 +432,21 @@ export const getInventoryProductImages = async (inventoryProductId: number) => {
     );
 
     return plainImages;
+};
+
+export const setPrimaryInventoryProductImage = async (inventoryProductId: number, imageId: number) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const image = await inventoryProductRepository.findInventoryProductImageById(imageId, transaction);
+        if (!image || (image as any).inventoryProductId !== inventoryProductId) {
+            throw new AppError("Image not found for this inventory product", 404);
+        }
+        await inventoryProductRepository.clearInventoryProductPrimaryImages(inventoryProductId, transaction);
+        await inventoryProductRepository.setInventoryProductImagePrimary(imageId, transaction);
+        await transaction.commit();
+        return { message: "Primary image set successfully" };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
 };
