@@ -143,7 +143,6 @@ InventoryProduct.beforeBulkCreate(async (inventoryProducts: any[]) => {
 export default InventoryProduct;
 
 InventoryProduct.beforeUpdate((inventoryProduct) => {
-  delete inventoryProduct.dataValues.id;
   delete inventoryProduct.dataValues.combinedNumber;
   delete inventoryProduct.dataValues.siplId;
   delete inventoryProduct.dataValues.productId;
