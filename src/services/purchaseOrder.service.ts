@@ -155,6 +155,17 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
       return paymentBillsRepository.getTotalPaidAmountOfBill(sipl.id, PAYMENT_BILL_REFERENCE_TYPES.SIPL);
     })))
 
+    // Sum all freight bill items across all SIPLs for this PO
+    purchaseOrder.totalFreightBills = purchaseOrder.sipls.reduce((sum: number, sipl: any) => {
+      const siplBillsTotal = (sipl.bills || []).reduce((billSum: number, bill: any) => {
+        const billItemsTotal = (bill.billItems || []).reduce((itemSum: number, item: any) => {
+          return decimal.decimalAdd(itemSum, Number(item.amount || 0));
+        }, 0);
+        return decimal.decimalAdd(billSum, billItemsTotal);
+      }, 0);
+      return decimal.decimalAdd(sum, siplBillsTotal);
+    }, 0);
+
     return {
       ...purchaseOrder,
     };
