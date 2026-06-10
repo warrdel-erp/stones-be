@@ -364,12 +364,13 @@ export const getSIPLById = async (id: number) => {
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
 
     const totalReceivedQuantity = sumDecimal(siplProduct.slabs, "receivedSqrFt")
-    const itemUnitCost = totalReceivedQuantity ? decimalDivide(siplProduct.totalCost, totalReceivedQuantity) : 0;
+    const totalPackagingQuantity = sumDecimal(siplProduct.slabs, "packagedSqrFt")
+    const itemUnitCost = totalPackagingQuantity ? decimalDivide(siplProduct.totalCost, totalPackagingQuantity) : 0;
 
     return {
       ...siplProduct,
       totalReceivedQuantity,
-      totalPackagingQuantity: sumDecimal(siplProduct.slabs, "packagedSqrFt"),
+      totalPackagingQuantity,
       itemUnitCost
     };
   });
@@ -520,7 +521,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     const unitCost = siplProduct.unitPrice;
 
     // Total unit charge is self unit charge + bill charge per unit area.
-    const landedUnitCost = unitCost + unitBillPrice + unitServicePrice;
+    const landedUnitCost = decimal.decimalSum([Number(unitCost), Number(unitBillPrice), Number(unitServicePrice)]);
 
     let data: object = {}
 

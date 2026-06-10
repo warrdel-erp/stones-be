@@ -1,7 +1,6 @@
 import { col, fn, literal, Op, Sequelize, Transaction, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { PO_STATUS } from "../constants/tableTypes";
-import { get } from "lodash";
 import { scoped } from "../utils/scoped";
 
 /**
@@ -98,6 +97,21 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
           ...(getInInventoryData ? { inventoryReceived: false } : {})
         },
         required: getInInventoryData,
+        include: [
+          {
+            model: models.Bill,
+            as: "bills",
+            required: false,
+            include: [
+              {
+                model: models.BillItem,
+                as: "billItems",
+                attributes: ["amount"],
+                required: false,
+              },
+            ],
+          },
+        ],
       },
 
     ],

@@ -219,11 +219,12 @@ export const createJournalEntryForReceiveInventory = async (
     // Create journal entry for freight bill item.
     for (const bill of siplData.bills) {
       for (const billItem of bill.billItems) {
-        // Unit freight item cost (amount / total received area of all products in sipl).
-        const unitFreightItemCost = decimal.decimalDivide(billItem.amount, calculations.totalReceivingQuantity);
+        // Unit freight item cost based on total packaging area — consistent with DR side
+        // which uses packagedSqrFt × landedUnitCost (landedUnitCost already includes freight).
+        const unitFreightItemCost = decimal.decimalDivide(billItem.amount, calculations.totalPackagingArea);
 
         await journalEntryRepository.create({
-          amount: decimal.decimalMultiply(unitFreightItemCost, productCalc.totalReceivedArea),
+          amount: decimal.decimalMultiply(unitFreightItemCost, productCalc.totalPackagingArea),
           ledgerId: billItem.ledgerAccountId,
           type: JOURNAL_ENTRY_TYPE.CR,
           processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
@@ -251,7 +252,7 @@ export const createJournalEntryForReceiveInventory = async (
     for (let slab of slabs) {
       slab = slab.get ? (slab.get({ plain: true }) as any) : (slab as any);
       const slabAny: any = slab;
-      const amount = decimal.decimalMultiply(slabAny.receivedSqrFt, productCalc.landedUnitCost);
+      const amount = decimal.decimalMultiply(slabAny.packagedSqrFt, productCalc.landedUnitCost);
 
       await journalEntryRepository.create({
         amount,
@@ -787,7 +788,7 @@ export async function createJournalEntriesForTradeServicesOfSIPL(sipl: any, loca
     }, transaction);
 
   }
-} 
+}
 
 export async function reverseJournalEntriesForSIPL(siplId: number, transaction: Transaction, locationId: number) {
   // Find all journal entries related to the SIPL creation
@@ -802,7 +803,7 @@ export async function reverseJournalEntriesForSIPL(siplId: number, transaction: 
 
   for (const entry of entries) {
     const plainEntry = entry.get ? entry.get({ plain: true }) : entry;
-    
+
     // Reverse the type (DR <-> CR)
     const reversedType = plainEntry.type === JOURNAL_ENTRY_TYPE.DR ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
 
