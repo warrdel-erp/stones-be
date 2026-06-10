@@ -954,3 +954,9 @@ sticky navbar.
 
 1. due amount error.
 2. Wrong PL and LO number in creation forms.
+
+---
+
+1. Asset value.
+2. Product and InventoryProduct's Primary Image and Avatar.
+3. in cart and selection sheet validate fields for SO.

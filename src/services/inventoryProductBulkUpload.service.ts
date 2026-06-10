@@ -77,6 +77,8 @@ const ALLOWED_HEADERS = [
   "Notes",
   "Remnant",
   "Received Date",
+  "Asset Value",
+  "assetValue",
 ];
 
 const REQUIRED_HEADERS = ["Product"];
@@ -126,6 +128,7 @@ const extractRawColumns = (rawRows: any[]) => {
     slabStatusRaw: raw["Slab Status"]?.toString().trim() ?? null,
     notes: raw["Notes"]?.toString().trim() ?? null,
     receivedDateRaw: raw["Received Date"] ?? null,
+    assetValueRaw: raw["Asset Value"] ?? raw["assetValue"] ?? null,
     // --- resolved / computed (filled by column handlers) ---
     productId: null as number | null,
     isSlabType: null as boolean | null,
@@ -139,6 +142,7 @@ const extractRawColumns = (rawRows: any[]) => {
     landedUnitCost: null as number | null,
     slabStatus: null as string | null,
     receivedDate: null as Date | null,
+    assetValue: null as number | null,
   }));
 };
 
@@ -173,6 +177,7 @@ const processAllColumns = async (
     processSlabNumColumn(row, errors);       // col: "Slab Num"         → slabNumber
     processSlabStatusColumn(row, errors);    // col: "Slab Status"      → slabStatus (defaults to IN_INVENTORY)
     processReceivedDateColumn(row, errors);  // col: "Received Date"    → receivedDate
+    processAssetValueColumn(row, errors);    // col: "Asset Value"      → assetValue
   });
 };
 
@@ -494,6 +499,40 @@ const processReceivedDateColumn = (row: any, errors: string[]) => {
   row.receivedDate = d;
 };
 
+// ── Asset Value ─────────────────────────────────────────────────────────────
+const processAssetValueColumn = (row: any, errors: string[]) => {
+  const raw = row.assetValueRaw;
+  if (raw === null || raw === undefined || raw === "") {
+    const unitCost = row.landedUnitCost || 0;
+    if (row.isSlabType) {
+      const length = row.receivingLength || 0;
+      const width = row.receivingWidth || 0;
+      if (!length || !width || length <= 0 || width <= 0) {
+        errors.push(`Row ${row._rowNumber}: "Dimensions" is missing or invalid for slab product.`);
+        return;
+      }
+      const packagingArea = (length * width) / 144;
+      row.assetValue = packagingArea * unitCost;
+    } else {
+      row.assetValue = unitCost;
+    }
+    return;
+  }
+
+  let parsed: number;
+  if (typeof raw === "number") {
+    parsed = raw;
+  } else {
+    parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+  }
+
+  if (isNaN(parsed)) {
+    errors.push(`Row ${row._rowNumber}: "Asset Value" is not a valid number. Got "${raw}".`);
+    return;
+  }
+  row.assetValue = parsed;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Stage 4: Attach runtime values
 // ─────────────────────────────────────────────────────────────────────────────
@@ -537,6 +576,7 @@ const executeBulkInventory = async (rows: any[], transaction: any) => {
     isSlabType: row.isSlabType,
     combinedNumber: row.combinedNumber,
     locationId: row.locationId,
+    assetValue: row.assetValue,
   }));
 
   const createdInventoryProducts: any[] = await models.InventoryProduct.bulkCreate(
@@ -577,6 +617,8 @@ const executeBulkInventory = async (rows: any[], transaction: any) => {
           block: row.block,
           lot: row.lot,
           slabNumber: row.slabNumber,
+          packageLength: row.receivingLength,
+          packageWidth: row.receivingWidth,
           receivingLength: row.receivingLength,
           receivingWidth: row.receivingWidth,
           notes: row.notes,

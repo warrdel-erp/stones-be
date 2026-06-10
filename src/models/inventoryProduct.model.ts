@@ -109,6 +109,10 @@ const InventoryProduct = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    assetValue: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
   },
   {
     tableName: "inventory_products",

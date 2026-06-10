@@ -989,5 +989,6 @@ export {
   InventoryProductMetaData,
   S3File,
   ProductImage,
+  InventoryProductImage,
   Activity,
 };

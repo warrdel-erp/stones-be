@@ -143,6 +143,12 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
           },
         ],
       },
+      {
+        association: 'images',
+        required: false,
+        where: { isPrimary: true },
+        include: [{ association: "s3File" }]
+      },
     ],
   });
 
@@ -208,6 +214,54 @@ export const updateInventoryProductsSellingPrice = async (ids: number[], selling
 /**
  * Set landed unit cost for inventory products by siplId and productId
  */
+const updateInventoryProductsAssetValue = async (
+  siplId: number,
+  productId: number,
+  landedUnitCost: number,
+  transaction?: Transaction
+) => {
+  const product = await models.Product.findByPk(productId, {
+    attributes: ["isSlabType"],
+    transaction
+  });
+
+  if (product) {
+    if ((product as any).isSlabType) {
+      const inventoryProducts = await scoped(models.InventoryProduct).findAll({
+        where: { siplId, productId },
+        include: [{ association: "slab" }],
+        transaction
+      });
+
+      for (const ip of inventoryProducts) {
+        const slab = (ip as any).slab;
+        const landedCost = Number((ip as any).landedUnitCost) || 0;
+        let assetValue = 0;
+        if (slab) {
+          const length = Number(slab.packageLength);
+          const width = Number(slab.packageWidth);
+          if (!length || !width || length <= 0 || width <= 0) {
+            throw new Error(`Slab with InventoryProduct ID ${ip.id} is missing packaging dimensions (packageLength/packageWidth).`);
+          }
+          const area = (length * width) / 144;
+          assetValue = area * landedCost;
+        } else {
+          throw new Error(`InventoryProduct ID ${ip.id} is a slab product but has no associated slab record.`);
+        }
+        await ip.update({ assetValue }, { transaction });
+      }
+    } else {
+      await scoped(models.InventoryProduct).update(
+        { assetValue: landedUnitCost },
+        {
+          where: { siplId, productId },
+          transaction
+        }
+      );
+    }
+  }
+};
+
 export const setInventoryProductLandedUnitCostAndFOBcost = async (
   siplId: number,
   productId: number,
@@ -222,6 +276,8 @@ export const setInventoryProductLandedUnitCostAndFOBcost = async (
       transaction
     }
   );
+
+  await updateInventoryProductsAssetValue(siplId, productId, landedUnitCost, transaction);
 
   return updatedCount;
 };
@@ -256,6 +312,12 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
         association: "slab",
         where: { [fieldName]: fieldValue },
         required: true,
+      },
+      {
+        association: 'images',
+        required: false,
+        where: { isPrimary: true },
+        include: [{ association: "s3File" }]
       },
     ],
   });
@@ -644,4 +706,61 @@ export const updateInventoryProductStatusesByIds = async (
       transaction
     }
   );
+};
+
+export const getInventoryProductImageCount = async (inventoryProductId: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.count({
+    where: { inventoryProductId },
+    transaction
+  });
+};
+
+export const createInventoryProductImage = async (inventoryProductId: number, s3FileId: number, isPrimary: boolean, transaction?: Transaction) => {
+  return await models.InventoryProductImage.create({
+    inventoryProductId,
+    s3FileId,
+    isPrimary
+  }, { transaction });
+};
+
+export const findInventoryProductImageById = async (id: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.findByPk(id, { transaction });
+};
+
+export const getAnotherInventoryProductImage = async (inventoryProductId: number, excludeImageId: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.findOne({
+    where: {
+      inventoryProductId,
+      id: { [Op.ne]: excludeImageId }
+    },
+    transaction
+  });
+};
+
+export const deleteInventoryProductImage = async (id: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.destroy({
+    where: { id },
+    transaction
+  });
+};
+
+export const clearInventoryProductPrimaryImages = async (inventoryProductId: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.update(
+    { isPrimary: false },
+    { where: { inventoryProductId }, transaction }
+  );
+};
+
+export const setInventoryProductImagePrimary = async (id: number, transaction?: Transaction) => {
+  return await models.InventoryProductImage.update(
+    { isPrimary: true },
+    { where: { id }, transaction }
+  );
+};
+
+export const getInventoryProductImagesByInventoryProductId = async (inventoryProductId: number) => {
+  return await models.InventoryProductImage.findAll({
+    where: { inventoryProductId },
+    include: [{ association: "s3File" }],
+  });
 };

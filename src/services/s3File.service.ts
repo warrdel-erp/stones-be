@@ -5,8 +5,8 @@ import { s3Client, S3_BUCKET, SIGNED_URL_EXPIRES_IN } from "../config/s3";
 import { AppError } from "../helper/appError";
 import { FILE_UPLOAD_STATUS, FILE_UPLOAD_ENTITY_TYPE } from "../constants/tableTypes";
 import * as s3FileRepo from "../repositories/s3File.repository";
-import InventoryProductImage from "../models/inventoryProductImage.model";
-import ProductImage from "../models/productImage.model";
+import * as productRepository from "../repositories/product.repository";
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -182,22 +182,19 @@ export const confirmUpload = async (fileId: number, clientId: number) => {
 
   // Mark as active
   const updated = await s3FileRepo.updateS3FileStatus(fileId, FILE_UPLOAD_STATUS.ACTIVE);
-  
-  // Custom business logic for linking files to specific entities upon confirmation
-  const s3FileRecord = updated as any; // Cast to access properties since it returns the object array typically or object
+  const s3FileRecord = updated as any;
   
   if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.INVENTORY_PRODUCT && s3FileRecord.entityId) {
     try {
-      await InventoryProductImage.findOrCreate({
-        where: {
-          inventoryProductId: s3FileRecord.entityId,
-          s3FileId: fileId
-        },
-        defaults: {
-          inventoryProductId: s3FileRecord.entityId,
-          s3FileId: fileId
-        }
-      });
+      const inventoryProductId = s3FileRecord.entityId;
+      const images = await inventoryProductRepository.getInventoryProductImagesByInventoryProductId(inventoryProductId);
+      const exists = images.some((img: any) => img.s3FileId === fileId);
+
+      if (!exists) {
+        const count = images.length;
+        const isPrimary = count === 0;
+        await inventoryProductRepository.createInventoryProductImage(inventoryProductId, fileId, isPrimary);
+      }
       // Mark file as permanent since it's now linked to an inventory product
       await s3FileRepo.markS3FilePermanent(fileId);
     } catch (error) {
@@ -207,16 +204,15 @@ export const confirmUpload = async (fileId: number, clientId: number) => {
 
   if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.PRODUCT && s3FileRecord.entityId) {
     try {
-      await ProductImage.findOrCreate({
-        where: {
-          productId: s3FileRecord.entityId,
-          s3FileId: fileId
-        },
-        defaults: {
-          productId: s3FileRecord.entityId,
-          s3FileId: fileId
-        }
-      });
+      const productId = s3FileRecord.entityId;
+      const images = await productRepository.getProductImagesByProductId(productId);
+      const exists = images.some((img: any) => img.s3FileId === fileId);
+
+      if (!exists) {
+        const count = images.length;
+        const isPrimary = count === 0;
+        await productRepository.createProductImage(productId, fileId, isPrimary);
+      }
       // Mark file as permanent since it's now linked to a product
       await s3FileRepo.markS3FilePermanent(fileId);
     } catch (error) {

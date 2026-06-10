@@ -137,6 +137,12 @@ export const getAllProducts = async (
           association: "group",
           attributes: ["id", "name"],
         },
+        {
+          association: "images",
+          required: false,
+          where: { isPrimary: true },
+          include: [{ association: "s3File" }]
+        },
       ],
       limit,
       offset,
@@ -229,6 +235,12 @@ export const getAllProducts = async (
           association: "baseColor",
           attributes: ["id", "name"],
         },
+        {
+          association: "images",
+          required: false,
+          where: { isPrimary: true },
+          include: [{ association: "s3File" }]
+        },
       ],
       limit,
       offset,
@@ -288,6 +300,12 @@ export const getAllProductsWithCompactData = async (
               attributes: ['id', 'receivingLength', 'receivingWidth'],
             }
           ]
+        },
+        {
+          association: "images",
+          required: false,
+          where: { isPrimary: true },
+          include: [{ association: "s3File" }]
         }
       ],
       limit,
@@ -314,6 +332,12 @@ export const getAllProductsWithCompactData = async (
         {
           association: "baseColor",
           attributes: ["id", "name"],
+        },
+        {
+          association: "images",
+          required: false,
+          where: { isPrimary: true },
+          include: [{ association: "s3File" }]
         },
       ],
       limit,
@@ -454,6 +478,7 @@ export const getProductOptions = async (clientId: number, status?: string) => {
     order: [["name", "ASC"]],
   });
 };
+
 // get products in which inventoryProducts's binId is empty.
 export const getProductsWithEmptyBinInventory = async (
   page: number,
@@ -494,4 +519,61 @@ export const getProductsWithEmptyBinInventory = async (
     page,
     limit,
   };
+};
+
+export const getProductImageCount = async (productId: number, transaction?: Transaction) => {
+  return await models.ProductImage.count({
+    where: { productId },
+    transaction
+  });
+};
+
+export const createProductImage = async (productId: number, s3FileId: number, isPrimary: boolean, transaction?: Transaction) => {
+  return await models.ProductImage.create({
+    productId,
+    s3FileId,
+    isPrimary
+  }, { transaction });
+};
+
+export const findProductImageById = async (id: number, transaction?: Transaction) => {
+  return await models.ProductImage.findByPk(id, { transaction });
+};
+
+export const getAnotherProductImage = async (productId: number, excludeImageId: number, transaction?: Transaction) => {
+  return await models.ProductImage.findOne({
+    where: {
+      productId,
+      id: { [Op.ne]: excludeImageId }
+    },
+    transaction
+  });
+};
+
+export const deleteProductImage = async (id: number, transaction?: Transaction) => {
+  return await models.ProductImage.destroy({
+    where: { id },
+    transaction
+  });
+};
+
+export const clearProductPrimaryImages = async (productId: number, transaction?: Transaction) => {
+  return await models.ProductImage.update(
+    { isPrimary: false },
+    { where: { productId }, transaction }
+  );
+};
+
+export const setProductImagePrimary = async (id: number, transaction?: Transaction) => {
+  return await models.ProductImage.update(
+    { isPrimary: true },
+    { where: { id }, transaction }
+  );
+};
+
+export const getProductImagesByProductId = async (productId: number) => {
+  return await models.ProductImage.findAll({
+    where: { productId },
+    include: [{ association: "s3File" }],
+  });
 };

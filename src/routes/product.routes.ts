@@ -41,4 +41,7 @@ router.delete("/images/:imageId", authenticateUser, productController.deleteProd
 // Get images of product
 router.get("/:id/images", authenticateUser, productController.getProductImages);
 
+// Set primary image of product
+router.put("/:id/images/:imageId/primary", authenticateUser, productController.setPrimaryImage);
+
 export default router;
