@@ -46,6 +46,7 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
   const data: any = await salesOrderInvoiceRepository.getAllInvoicesList(clientId, filter, page, limit);
 
   data.rows = data.rows.map((invoice: any) => {
+    const finalAmount = invoice.finalAmount;
     invoice = invoice.get({ plain: true });
 
     invoice.totalQuantity = _.sumBy(
@@ -55,6 +56,7 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
 
     invoice.totalSlabs = invoice.packagingList.salesOrderProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
     invoice.totalGenericProducts = invoice.packagingList.salesOrderProducts.length - invoice.totalSlabs;
+    invoice.finalAmount = finalAmount;
 
     return { ...invoice };
   });
@@ -66,6 +68,7 @@ export const getAllSoInvoiceListWithTruckOnly = async (clientId: number, filter:
   const data: any = await salesOrderInvoiceRepository.getAllInvoicesList(clientId, filter, page, limit, true);
 
   data.rows = data.rows.map((invoice: any) => {
+    const finalAmount = invoice.finalAmount;
     invoice = invoice.get({ plain: true });
 
     if (invoice.packagingList.loadingOrder) {
@@ -81,6 +84,7 @@ export const getAllSoInvoiceListWithTruckOnly = async (clientId: number, filter:
     }
 
     invoice.totalSlabs = invoice.packagingList.salesOrderProducts.length;
+    invoice.finalAmount = finalAmount;
 
     return { ...invoice };
   });

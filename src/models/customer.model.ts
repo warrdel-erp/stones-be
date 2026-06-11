@@ -201,7 +201,17 @@ const Customer = sequelize.define(
 );
 
 // 🔹 Hook: Auto-Increment customerCode based on clientId
-Customer.beforeValidate(async (customer: any) => {
+Customer.beforeValidate(async (customer: any, options: any) => {
+  // If it's a bulk update, do not generate customerCode because it's an existing record
+  if (options && options.type === "BULKUPDATE") {
+    return;
+  }
+  
+  // Only generate customerCode for new records
+  if (!customer.isNewRecord) {
+    return;
+  }
+
   if (!customer.clientId) {
     throw new Error("Client ID is required to generate customerCode.");
   }

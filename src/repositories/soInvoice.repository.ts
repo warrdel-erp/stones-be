@@ -26,19 +26,28 @@ export const getAllInvoicesList = async (
   truckOnly?: boolean,
   transaction?: Transaction
 ) => {
-  const offset = (page - 1) * limit;
+  const offset = (Number(page) - 1) * Number(limit);
+  const { search, ...otherFilters } = filter;
 
   if (truckOnly) {
-    filter.truckId = {
+    otherFilters.truckId = {
       [Op.ne]: null
     }
   }
 
+  const whereClause: any = {
+    ...otherFilters,
+    clientId,
+  };
+
+  if (search) {
+    whereClause.invoiceCode = {
+      [Op.like]: `%${search}%`
+    };
+  }
+
   return await scoped(models.SalesOrderInvoice).findAndCountAll({
-    where: {
-      ...filter,
-      clientId,
-    },
+    where: whereClause,
     include: [
       {
         model: models.Customer,
@@ -97,8 +106,8 @@ export const getAllInvoicesList = async (
       },
     ],
     transaction,
-    limit,
-    offset,
+    limit: Number(limit),
+    offset: Number(offset),
     order: [["createdAt", "DESC"]],
     distinct: true
   });

@@ -178,16 +178,11 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
         attributes: [],
         required: true,
       },
-      {
-        association: 'hold',
-        attributes: [],
-        required: false
-      },
     ],
     attributes: [
       [col(groupField), groupAlias],
       [fn('COUNT', col('InventoryProduct.id')), 'unitCount'],
-      [fn('SUM', sequelize.literal('CASE WHEN `hold`.`id` IS NULL THEN (`slab`.`receivingLength` * `slab`.`receivingWidth` / 144) ELSE 0 END')), 'totalArea']
+      [fn('SUM', sequelize.literal('`slab`.`packageLength` * `slab`.`packageWidth`')), 'totalArea']
     ],
     group: [groupField],
     raw: true,
@@ -282,7 +277,7 @@ export const setInventoryProductLandedUnitCostAndFOBcost = async (
   return updatedCount;
 };
 
-export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
+export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
   // Find all inventory products where the specified slab field matches
   const where: any = {};
   if (excludeSoldCanceled) {
@@ -312,6 +307,16 @@ export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block"
         association: "slab",
         where: { [fieldName]: fieldValue },
         required: true,
+      },
+      {
+        association: 'cartItem',
+        where: {
+          accountId: req.user?.accountId
+        },
+        required: false
+      },
+      {
+        association: 'hold'
       },
       {
         association: 'images',

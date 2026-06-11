@@ -42,9 +42,9 @@ export const updateInventoryProductsSellingPrice = async (ids: number[], selling
     return result;
 };
 
-export const getInventoryProductsBySlabField = async (fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
+export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
     // Get inventory products by slab field filter using repository
-    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySlabField(fieldName, fieldValue, excludeSoldCanceled);
+    const inventoryProducts = await inventoryProductRepository.getInventoryProductsBySlabField(req, fieldName, fieldValue, excludeSoldCanceled);
 
     const plainProducts = inventoryProducts.map((ip: any) => ip.get({ plain: true }));
 

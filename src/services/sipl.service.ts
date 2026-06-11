@@ -424,9 +424,10 @@ export const getAllSIPLs = async (
   limit: number,
   clientId: number,
   supplierId?: number,
-  inventoryReceived?: boolean
+  inventoryReceived?: boolean,
+  search?: string
 ) => {
-  let { rows, count }: any = await siplRepository.getAllSIPLs(page, limit, clientId, supplierId, inventoryReceived);
+  let { rows, count }: any = await siplRepository.getAllSIPLs(page, limit, clientId, supplierId, inventoryReceived, search);
 
   rows = await Promise.all(rows.map(async (sipl: any) => {
     sipl = sipl.get({ plain: true });

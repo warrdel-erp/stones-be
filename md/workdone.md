@@ -960,3 +960,11 @@ sticky navbar.
 1. Asset value.
 2. Product and InventoryProduct's Primary Image and Avatar.
 3. in cart and selection sheet validate fields for SO.
+
+---
+
+1. SO invoice amount.
+2. App Design changes. [big-but-incomplete]
+3. So invoice page design change and pagination error resolved.
+4. Product, Supplier, Customer, Fabricator, Vendor, Trucks Edit feature. [large-one]
+5. quantity error in per block and bundle in inventory page.
