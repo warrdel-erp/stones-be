@@ -297,30 +297,13 @@ export const createJournalEntriesForSlabSplit = async (
     clientId,
   });
 
-  // Get locationId from inventory product's bin -> warehouse -> location
+  // Get locationId from inventory product
   const inventoryProductWithLocation: any = await models.InventoryProduct.findByPk(originalInventoryProduct.id, {
-    include: [
-      {
-        association: "bin",
-        required: true,
-        include: [
-          {
-            association: "warehouse",
-            required: true,
-            include: [
-              {
-                association: "location",
-                attributes: ["id"],
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    attributes: ["locationId"],
     transaction,
   });
 
-  const locationId = inventoryProductWithLocation?.bin?.warehouse?.location?.id;
+  const locationId = inventoryProductWithLocation?.locationId;
 
   if (!locationId) {
     throw new AppError("Location not found for inventory product", 400);
@@ -338,10 +321,10 @@ export const createJournalEntriesForSlabSplit = async (
     processType: JOURNAL_ENTRY_PROCESS_TYPE.SLAB_SPLIT,
     subReferenceId: originalSlab.id,
     subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-    referenceId: siplId,
-    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-    entryForId: siplId,
+    referenceId: siplId || undefined,
+    referenceType: siplId ? JOURNAL_ENTRY_REFERENCE_TYPES.SIPL : undefined,
+    entryFor: siplId ? JOURNAL_ENTRY_FOR_TYPES.SIPL : undefined,
+    entryForId: siplId || undefined,
     locationId,
   }, transaction);
 
@@ -359,10 +342,10 @@ export const createJournalEntriesForSlabSplit = async (
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SLAB_SPLIT,
       subReferenceId: slabData.id,
       subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-      referenceId: siplId,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-      entryForId: siplId,
+      referenceId: siplId || undefined,
+      referenceType: siplId ? JOURNAL_ENTRY_REFERENCE_TYPES.SIPL : undefined,
+      entryFor: siplId ? JOURNAL_ENTRY_FOR_TYPES.SIPL : undefined,
+      entryForId: siplId || undefined,
       locationId,
     }, transaction);
   }

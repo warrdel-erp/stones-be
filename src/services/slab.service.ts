@@ -11,6 +11,12 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId, isSIPLLocked } from "../helper";
 import { scoped } from "../utils/scoped";
 import * as  genericProductRepository from "../repositories/genericProduct.repository"
+import {
+  decimalAdd,
+  decimalDivide,
+  decimalGreaterThan,
+  decimalMultiply,
+} from "../helper/decimal";
 
 export async function getSlabLogsBySlabIdService(slabId: number) {
   return await slabRepository.findByIdWithLogs(slabId);
@@ -188,7 +194,7 @@ export const checkSiplSlabsFullyFilled = async (siplId: number) => {
  * @param userId - ID of the user performing the split
  * @param clientId - ID of the client (for authorization check)
  */
-export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLength: number; receivingWidth: number; slabNumber: number }>, userId?: number, clientId?: number) => {
+export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLength: number; receivingWidth: number; slabNumber?: number }>, userId?: number, clientId?: number) => {
   const pieces = slabsData.length;
 
   const transaction = await sequelize.transaction();
@@ -252,78 +258,62 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
       { where: { id: inventoryProduct.id }, transaction }
     );
 
-    // Get the SIPL to get purchaseOrderId
+    // Get the SIPL to get purchaseOrderId if available
     const sipl = originalSlab.sipl;
-    if (!sipl) {
-      throw new AppError("Slab does not have an associated SIPL", 400);
-    }
+    const purchaseOrderId = sipl ? sipl.purchaseOrderId : null;
+    const siplId = originalSlab.siplId || null;
 
     // Get selling price from product
     const product: any = await productRepository.getProductByIdSimple(originalSlab.productId);
     const sellingPrice = product?.singleUnitPrice;
 
+    // Construct base combined number hierarchically
+    const baseCombinedNumber = inventoryProduct.combinedNumber || "";
+
     // Create new InventoryProducts for the split pieces with IN_INVENTORY status and landedUnitCost
-    const newInventoryProducts: any = await inventoryProductRepository.createInventoryProductsWithCombinedNumbers(
-      inventoryProduct.binId,
-      pieces,
-      originalSlab.siplId,
-      true, // isSlabType = true for slabs
+    const newInventoryProductsData = Array.from({ length: pieces }, (_, index) => ({
+      binId: inventoryProduct.binId,
+      combinedNumber: `${baseCombinedNumber}-${index + 1}`,
+      isSlabType: true,
       sellingPrice,
-      originalSlab.productId,
-      originalSlab.clientId,
-      transaction,
-      INVENTORY_ITEM_STATUS.IN_INVENTORY,
-      inventoryProduct.landedUnitCost,
-      inventoryProduct.receivedDate,
-      inventoryProduct.FOBcost
+      siplId,
+      productId: originalSlab.productId,
+      clientId: originalSlab.clientId,
+      status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      landedUnitCost: inventoryProduct.landedUnitCost,
+      receivedDate: inventoryProduct.receivedDate,
+      FOBcost: inventoryProduct.FOBcost,
+    }));
+
+    const newInventoryProducts = await scoped(models.InventoryProduct).bulkCreate(
+      newInventoryProductsData,
+      { transaction }
     );
 
     // Get the last serial number for the SIPL
-    const lastSerialNumber = await slabRepository.getLastSerialNumber(sipl.purchaseOrderId, originalSlab.siplId);
+    const lastSerialNumber = await slabRepository.getLastSerialNumber(purchaseOrderId, siplId);
 
-    // Validate that all slabNumbers are unique and don't already exist
-    const slabNumbers = slabsData.map((slab) => slab.slabNumber);
-    const uniqueSlabNumbers = new Set(slabNumbers);
-
-    if (slabNumbers.length !== uniqueSlabNumbers.size) {
-      throw new AppError("Duplicate slabNumbers found. Each piece must have a unique slabNumber", 400);
-    }
-
-    // Check if any of the provided slabNumbers already exist
-    for (const slabData of slabsData) {
-      const exists = await slabRepository.checkSlabNumberExists(
-        originalSlab.productId,
-        originalSlab.siplId,
-        slabData.slabNumber,
-        transaction
-      );
-
-      if (exists) {
-        throw new AppError(
-          `Slab with productId ${originalSlab.productId}, siplId ${originalSlab.siplId}, and slabNumber ${slabData.slabNumber} already exists`,
-          400
-        );
-      }
-    }
+    // Automatically get the last slab number to increment sequentially
+    const lastSlabNumber = await slabRepository.getLastSlabNumber(originalSlab.productId, siplId);
 
     // Create new slabs for each piece
-    const newSlabs = newInventoryProducts.map((inventoryProduct: any, index: number) => ({
+    const newSlabs = newInventoryProducts.map((invProd: any, index: number) => ({
       serialNumber: lastSerialNumber + index + 1,
-      slabNumber: slabsData[index].slabNumber,
+      slabNumber: lastSlabNumber + index + 1,
       barcode: randomId().toUpperCase(),
       entryUnit: originalSlab.entryUnit,
-      packageLength: null, // Packaging data is null for split slabs
-      packageWidth: null, // Packaging data is null for split slabs
+      packageLength: slabsData[index].receivingLength, // Packaging data should go into package length & width
+      packageWidth: slabsData[index].receivingWidth,
       receivingLength: slabsData[index].receivingLength,
       receivingWidth: slabsData[index].receivingWidth,
       block: originalSlab.block,
       lot: originalSlab.lot,
       notes: originalSlab.notes,
       status: originalSlab.status,
-      inventoryProductId: inventoryProduct.id,
-      purchaseOrderId: sipl.purchaseOrderId,
-      siplId: originalSlab.siplId,
-      siplProductId: originalSlab.siplProductId,
+      inventoryProductId: invProd.id,
+      purchaseOrderId,
+      siplId,
+      siplProductId: originalSlab.siplProductId || null,
       productId: originalSlab.productId,
       clientId: originalSlab.clientId,
       parentSlabId: slabId,
@@ -334,12 +324,20 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
 
     const createdSlabs = await slabRepository.createSlabs(newSlabs, transaction);
 
-    // Update assetValue for each new split inventory product
+    // Update assetValue for each new split inventory product proportionally
+    const originalArea = decimalDivide(decimalMultiply(originalSlab.receivingLength, originalSlab.receivingWidth), 144);
+    const originalAssetValue = Number(inventoryProduct.assetValue) || 0;
+
     for (let i = 0; i < newInventoryProducts.length; i++) {
       const invProd = newInventoryProducts[i];
       const slabData = slabsData[i];
-      const area = (slabData.receivingLength * slabData.receivingWidth) / 144;
-      const assetValue = area * (inventoryProduct.landedUnitCost || 0);
+      const area = decimalDivide(decimalMultiply(slabData.receivingLength, slabData.receivingWidth), 144);
+      
+      let assetValue = 0;
+      if (originalArea > 0) {
+        assetValue = decimalDivide(decimalMultiply(area, originalAssetValue), originalArea);
+      }
+
       await scoped(models.InventoryProduct).update(
         { assetValue },
         { where: { id: invProd.id }, transaction }
@@ -406,37 +404,42 @@ export const getSlabSplitHistory = async (slabId: number, clientId?: number) => 
 
 function validateSplitSlabs(originalSlab: any, slabsData: Array<{ receivingLength: number; receivingWidth: number }>) {
 
-  const originalArea =
-    (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
+  const originalArea = decimalDivide(
+    decimalMultiply(originalSlab.receivingLength, originalSlab.receivingWidth),
+    144
+  );
 
   let runningArea = 0;
-  let currentLength = 0
-  let currentWidth = 0
+  let currentLength = 0;
+  let currentWidth = 0;
 
   for (const slab of slabsData) {
 
-    const area = (slab.receivingLength * slab.receivingWidth) / 144;
+    const area = decimalDivide(
+      decimalMultiply(slab.receivingLength, slab.receivingWidth),
+      144
+    );
 
-    runningArea += area;
+    runningArea = decimalAdd(runningArea, area);
 
-    currentLength = currentLength + slab.receivingLength
-    if (currentLength > originalSlab.receivingLength) {
+    currentLength = decimalAdd(currentLength, slab.receivingLength);
+    if (decimalGreaterThan(currentLength, originalSlab.receivingLength)) {
       throw new AppError(
         `Total slab length cannot exceed ${originalSlab.receivingLength}`,
         400
       );
     }
 
-    currentWidth = currentWidth + slab.receivingLength
+    currentWidth = decimalAdd(currentWidth, slab.receivingWidth);
 
-    if (currentWidth > originalSlab.receivingWidth) {
+    if (decimalGreaterThan(currentWidth, originalSlab.receivingWidth)) {
       throw new AppError(
         `Total slab width cannot exceed ${originalSlab.receivingWidth}`,
         400
       );
     }
 
-    if (runningArea > originalArea) {
+    if (decimalGreaterThan(runningArea, originalArea)) {
       throw new AppError(
         "Total split slab area cannot exceed original slab area",
         400

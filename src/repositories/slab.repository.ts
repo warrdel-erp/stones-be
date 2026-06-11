@@ -241,15 +241,16 @@ export const getSplitSlabs = async (transaction?: Transaction, locationId?: numb
       },
       {
         association: "inventoryProduct",
+        where: { ...(locationId ? { locationId } : {}) },
+        required: true,
         include: [
           {
             association: "bin",
-            required: true,
+            required: false,
             include: [
               {
                 association: "warehouse",
-                where: { ...(locationId ? { locationId } : {}) },
-                required: true,
+                required: false,
               }
             ]
           }
