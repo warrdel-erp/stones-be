@@ -163,8 +163,8 @@ const processAllColumns = async (
   errors: string[],
   transaction: any
 ) => {
+  await processProductColumn(rows, clientId, errors, transaction);                    // col: "Product"  → productId, isSlabType
   await Promise.all([
-    processProductColumn(rows, clientId, errors, transaction),                        // col: "Product"  → productId, isSlabType
     processBinColumn(rows, clientId, locationId, warehouseId, errors, transaction),   // col: "Bin"      → binId (auto-creates with warehouseId)
     processSerialColumn(rows, clientId, errors, transaction),                         // col: "Serial#"  → combinedNumber (transforms + uniqueness checks)
   ]);
@@ -231,7 +231,7 @@ const processSerialColumn = async (
   errors: string[],
   transaction: any
 ) => {
-  const serialRegex = /^[A-Za-z0-9]+-\d+$/;
+  const serialRegex = /^[A-Za-z0-9]+(-\d+)+$/;
 
   // Step 1: Validate format and assign raw serial to combinedNumber
   rows.forEach((row) => {
@@ -252,6 +252,16 @@ const processSerialColumn = async (
         }
       } catch (e) {
         serial = String(serial);
+      }
+    }
+
+    if (typeof serial === "string") {
+      serial = serial.trim();
+      if (row.isSlabType) {
+        const parts = serial.split("-");
+        if (parts.length === 2) {
+          serial = `${parts[0]}-1-${parts[1]}`;
+        }
       }
     }
 

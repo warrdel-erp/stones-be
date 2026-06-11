@@ -264,7 +264,7 @@ export const getSIPLById = catchAsync(async (req: Request, res: Response) => {
 
 // Get all SIPLs
 export const getAllSIPLs = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10, supplierId, inventoryReceived } = req.query;
+  const { page = 1, limit = 10, supplierId, inventoryReceived, search } = req.query;
 
   const clientId = req.user?.clientId
 
@@ -273,7 +273,8 @@ export const getAllSIPLs = catchAsync(async (req: AuthRequest, res: Response) =>
     Number(limit),
     Number(clientId),
     supplierId ? Number(supplierId) : undefined,
-    inventoryReceived !== undefined ? inventoryReceived === "true" : undefined
+    inventoryReceived !== undefined ? inventoryReceived === "true" : undefined,
+    search ? String(search) : undefined
   );
   SuccessResponse(res, 200, "SIPLs fetched successfully", sipls.data, {
     page: sipls.page,

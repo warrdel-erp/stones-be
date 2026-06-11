@@ -10,9 +10,8 @@ const slabPieceSchema = z.object({
     invalid_type_error: "receivingWidth must be a number",
   }).positive("receivingWidth must be greater than 0"),
   slabNumber: z.number({
-    required_error: "slabNumber is required",
     invalid_type_error: "slabNumber must be a number",
-  }).int("slabNumber must be an integer").positive("slabNumber must be positive"),
+  }).int("slabNumber must be an integer").positive("slabNumber must be positive").optional(),
 });
 
 export const splitSlabSchema = z.object({

@@ -29,10 +29,10 @@ export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: A
 
     if (bundle) {
         // Get inventory products by lot filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField("lot", bundle as string, excludeSoldCanceled);
+        data = await inventoryProductService.getInventoryProductsBySlabField(req, "lot", bundle as string, excludeSoldCanceled);
     } else if (block) {
         // Get inventory products by block filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField("block", block as string, excludeSoldCanceled);
+        data = await inventoryProductService.getInventoryProductsBySlabField(req, "block", block as string, excludeSoldCanceled);
     } else {
         // Get inventory products by SIPL combined number only
         data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId), excludeSoldCanceled);

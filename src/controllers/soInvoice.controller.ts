@@ -11,11 +11,11 @@ export const getAllSoInvoiceList = catchAsync(async (req: AuthRequest, res: Resp
 
     const clientId = req.user?.clientId;
 
-    const result = await salesOrderInvoiceService.getAllSoInvoiceList(Number(clientId), filter, page, limit);
+    const result = await salesOrderInvoiceService.getAllSoInvoiceList(Number(clientId), filter, Number(page), Number(limit));
 
     SuccessResponse(res, 200, "All So Invoice List fetched successfully", result.rows, {
-        limit,
-        page,
+        limit: Number(limit),
+        page: Number(page),
         total: result.count
     });
 });
@@ -26,11 +26,11 @@ export const getAllSoInvoiceListWithTruckOnly = catchAsync(async (req: AuthReque
 
     const clientId = req.user?.clientId;
 
-    const result = await salesOrderInvoiceService.getAllSoInvoiceListWithTruckOnly(Number(clientId), filter, page, limit);
+    const result = await salesOrderInvoiceService.getAllSoInvoiceListWithTruckOnly(Number(clientId), filter, Number(page), Number(limit));
 
     SuccessResponse(res, 200, "All So Invoice List fetched successfully", result.rows, {
-        limit,
-        page,
+        limit: Number(limit),
+        page: Number(page),
         total: result.count
     });
 });

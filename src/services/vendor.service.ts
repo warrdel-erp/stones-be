@@ -21,6 +21,49 @@ import { PAYMENT_TERMS, SCOP } from "../constants";
 import * as paymentBillRepository from "../repositories/paymentBills.repository";
 import _ from "lodash";
 import * as vendorContactRepository from "../repositories/vendorContact.repository";
+import { COUNTRIES } from "../constants/countries";
+
+export const parseCountryToId = (country: any): string | null => {
+  if (country === null || country === undefined) return null;
+  const countryStr = String(country).trim();
+  if (!countryStr) return null;
+
+  // If it's already a number or a string that is a number
+  const idNum = Number(countryStr);
+  if (!isNaN(idNum) && Number.isInteger(idNum)) {
+    const found = COUNTRIES.find((c) => c.id === idNum);
+    return found ? String(found.id) : null;
+  }
+
+  // Otherwise, match by name (case-insensitive)
+  const lowerStr = countryStr.toLowerCase();
+
+  // Custom aliases/mappings for common inputs
+  if (
+    lowerStr === "usa" ||
+    lowerStr === "us" ||
+    lowerStr === "united states" ||
+    lowerStr === "united states of america" ||
+    lowerStr === "u.s.a."
+  ) {
+    return "186";
+  }
+  if (lowerStr === "uk" || lowerStr === "united kingdom") {
+    return "185";
+  }
+  if (lowerStr === "india") {
+    return "77";
+  }
+
+  const foundByName = COUNTRIES.find(
+    (c) => c.name.toLowerCase() === lowerStr
+  );
+  if (foundByName) {
+    return String(foundByName.id);
+  }
+
+  return null;
+};
 
 // Service function to create a vendor.
 export const registerVendor = async (vendorData: any, clientId: number) => {
@@ -28,6 +71,14 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
   try {
     if (!vendorData.name) {
       throw new Error("Name is a required field.");
+    }
+
+    // Format country fields
+    if (vendorData.remitCountry !== undefined) {
+      vendorData.remitCountry = vendorData.remitCountry ? String(vendorData.remitCountry) : null;
+    }
+    if (vendorData.shippingCountry !== undefined) {
+      vendorData.shippingCountry = vendorData.shippingCountry ? String(vendorData.shippingCountry) : null;
     }
 
     // Create vendor
@@ -83,6 +134,15 @@ export const registerVendor = async (vendorData: any, clientId: number) => {
 
 // Update vendor
 export const updateVendor = async (id: number, data: any) => {
+  // Format country fields if provided
+  if (data.remitCountry !== undefined) {
+    data.remitCountry = data.remitCountry ? String(data.remitCountry) : null;
+  }
+
+  if (data.shippingCountry !== undefined) {
+    data.shippingCountry = data.shippingCountry ? String(data.shippingCountry) : null;
+  }
+
   const updatedVendor = await vendorRepository.updateVendorById(id, data);
   if (!updatedVendor) throw new AppError("Vendor not found or update failed", 400);
 
@@ -312,6 +372,20 @@ const normalizeVendorRows = (csvRows: any[]) => {
     const rawScope = data.vendorScope || data.VendorScope || null;
     const vendorScope = rawScope ? parseVendorScope(rawScope) : null;
 
+    const rawRemit = data.remitCountry || data.RemitCountry || null;
+    let remitCountry: string | null = null;
+    if (rawRemit !== undefined && rawRemit !== null && String(rawRemit).trim() !== "") {
+      const parsed = parseCountryToId(rawRemit);
+      remitCountry = parsed !== null ? parsed : "INVALID";
+    }
+
+    const rawShipping = data.shippingCountry || data.ShippingCountry || null;
+    let shippingCountry: string | null = null;
+    if (rawShipping !== undefined && rawShipping !== null && String(rawShipping).trim() !== "") {
+      const parsed = parseCountryToId(rawShipping);
+      shippingCountry = parsed !== null ? parsed : "INVALID";
+    }
+
     return {
       _rowNumber: data._rowNumber,
       name: (data.name || data.Name || "").trim(),
@@ -333,13 +407,13 @@ const normalizeVendorRows = (csvRows: any[]) => {
       remitCity: data.remitCity || data.RemitCity || null,
       remitState: data.remitState || data.RemitState || null,
       remitZip: data.remitZip || data.RemitZip || null,
-      remitCountry: data.remitCountry || data.RemitCountry || null,
+      remitCountry,
       shippingAddress: data.shippingAddress || data.ShippingAddress || null,
       shippingSuite: data.shippingSuite || data.ShippingSuite || null,
       shippingCity: data.shippingCity || data.ShippingCity || null,
       shippingState: data.shippingState || data.ShippingState || null,
       shippingZip: data.shippingZip || data.ShippingZip || null,
-      shippingCountry: data.shippingCountry || data.ShippingCountry || null,
+      shippingCountry,
     };
   });
 };
@@ -456,6 +530,17 @@ const validateVendorColumns = async (
     if (!validScopes.has(scope)) {
       const rows = vendorScopeToRows.get(scope) || [];
       errors.push(`Row ${rows.join(", ")}: Invalid vendorScope: "${scope}". Expected "National" or "International".`);
+    }
+  });
+
+  // 4. Country validation
+  preparedRows.forEach((row) => {
+    const rowNum = row._rowNumber;
+    if (row.remitCountry === "INVALID") {
+      errors.push(`Row ${rowNum}: Invalid remitCountry.`);
+    }
+    if (row.shippingCountry === "INVALID") {
+      errors.push(`Row ${rowNum}: Invalid shippingCountry.`);
     }
   });
 };

@@ -223,13 +223,19 @@ export const getAllSIPLs = async (
   limit: number,
   clientId: number,
   supplierId?: number,
-  inventoryReceived?: boolean
+  inventoryReceived?: boolean,
+  search?: string
 ) => {
-  const offset = (page - 1) * limit;
+  const offset = (Number(page) - 1) * Number(limit);
 
   const where: any = { clientId };
   if (inventoryReceived !== undefined) {
     where.inventoryReceived = inventoryReceived;
+  }
+  if (search) {
+    where.invoiceCode = {
+      [Op.like]: `%${search}%`
+    };
   }
 
   return await scoped(models.SIPL).findAndCountAll({
@@ -267,8 +273,8 @@ export const getAllSIPLs = async (
         ]
       }
     ],
-    limit,
-    offset,
+    limit: Number(limit),
+    offset: Number(offset),
     distinct: true,
     order: [["createdAt", "DESC"]],
   });
