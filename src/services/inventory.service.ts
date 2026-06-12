@@ -361,11 +361,13 @@ export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId
     sipls.map(async (sipl: any) => {
       const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id, excludeSoldCanceled);
       const plain = sipl.get({ plain: true });
+      const unitCount = plain.inventoryProducts?.length || 0;
       // inventoryProducts array intentionally empty — loaded lazily at level 3
       return {
         ...plain,
         totalArea: totalArea[0]?.totalArea,
         inventoryProducts: [],
+        unitCount,
       };
     })
   );

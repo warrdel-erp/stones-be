@@ -968,3 +968,11 @@ sticky navbar.
 3. So invoice page design change and pagination error resolved.
 4. Product, Supplier, Customer, Fabricator, Vendor, Trucks Edit feature. [large-one]
 5. quantity error in per block and bundle in inventory page.
+6. split slab serial No should be created in new nested pattern and also bulk uploaded slabs can be split.
+
+---
+
+1. Loading Order error.
+2. cancel PO.
+3. Add more products into PO. and more products can be added in SIPL only through PO.
+4. App work. [still pending].

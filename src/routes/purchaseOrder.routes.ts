@@ -28,4 +28,10 @@ router.put("/:purchaseOrderId/requestedPurchaseProduct", requestedPurchaseProduc
 // update po status.
 router.patch("/:id/status", poController.updatePurchaseOrderStatus);
 
+// Cancel Purchase Order
+router.put("/:id/cancel", poController.cancelPurchaseOrderController);
+
+// Add Requested Product
+router.post("/:id/requested-product", poController.addRequestedProductController);
+
 export default router;

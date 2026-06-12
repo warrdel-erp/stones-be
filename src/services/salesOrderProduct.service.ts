@@ -25,6 +25,12 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
     for (const product of products) {
       const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
 
+      // Validate unitPrice is greater than 0
+      const priceNum = Number(product.unitPrice);
+      if (product.unitPrice === undefined || product.unitPrice === null || isNaN(priceNum) || priceNum <= 0) {
+        throw new AppError("Selling price must be greater than 0", 400);
+      }
+
       // can't add to SO if it is in hold (check inventoryProduct hold)
       const hold = await inventoryProductHoldRepository.findHoldByInventoryProductId(product.inventoryProductId, transaction);
       if (hold) {

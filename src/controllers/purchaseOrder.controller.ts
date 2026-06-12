@@ -98,3 +98,52 @@ export const updatePurchaseOrderStatus = catchAsync(async (req: Request, res: Re
   const updatedPurchaseOrder = await poService.updatePurchaseOrderStatusService(purchaseOrderId, status);
   SuccessResponse(res, 200, "PurchaseOrder status updated successfully", updatedPurchaseOrder);
 });
+
+// Cancel a Purchase Order
+export const cancelPurchaseOrderController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const purchaseOrderId = parseInt(req.params.id);
+  const locationId = req.user?.defaultLocationId;
+  const clientId = req.user?.clientId;
+
+  if (!purchaseOrderId) {
+    throw new AppError("Purchase Order ID is required", 400);
+  }
+
+  if (!locationId || !clientId) {
+    throw new AppError("locationId and clientId are required", 400);
+  }
+
+  const result = await poService.cancelPurchaseOrderService(purchaseOrderId, Number(locationId), Number(clientId));
+  SuccessResponse(res, 200, "Purchase Order canceled successfully", result);
+});
+
+// Add requested product to an existing PO
+export const addRequestedProductController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const purchaseOrderId = parseInt(req.params.id);
+  const { productId, quantity, unitPrice, noOfSlabs, description, supplierNote } = req.body;
+
+  if (!purchaseOrderId) {
+    throw new AppError("Purchase Order ID is required", 400);
+  }
+  if (!productId) {
+    throw new AppError("Product ID is required", 400);
+  }
+  if (quantity === undefined || quantity === null) {
+    throw new AppError("Quantity is required", 400);
+  }
+  if (unitPrice === undefined || unitPrice === null) {
+    throw new AppError("Unit price is required", 400);
+  }
+
+  const newProduct = await poService.addRequestedProductToPOService(purchaseOrderId, {
+    productId: Number(productId),
+    quantity: Number(quantity),
+    unitPrice: Number(unitPrice),
+    noOfSlabs: noOfSlabs ? Number(noOfSlabs) : null,
+    description: description || "",
+    supplierNote: supplierNote || null,
+  });
+
+  return SuccessResponse(res, 201, "Product added to Purchase Order successfully.", newProduct);
+});
+

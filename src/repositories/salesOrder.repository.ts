@@ -174,8 +174,8 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
         [Op.in]: sequelize.literal(`(
           SELECT DISTINCT so.id 
           FROM sales_orders so
-          INNER JOIN packaging_lists lo ON lo.salesOrderId = so.id
-          INNER JOIN loading_orders pl ON pl.loadingOrderId = lo.id
+          INNER JOIN packaging_lists pl ON pl.salesOrderId = so.id
+          INNER JOIN loading_orders lo ON lo.packagingListId = pl.id
           WHERE so.clientId = ${clientId}
         )`),
       },
