@@ -115,6 +115,23 @@ export const cleanCustomerName = (name: string): string => {
     .trim();
 };
 
+const sanitizeDbString = (val: any): string | null => {
+  if (val === undefined || val === null) return null;
+  let str = String(val);
+
+  str = str
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u00A0/g, " ")
+    .replace(/\ufeff/g, "")
+    .replace(/\uFFFD/g, "");
+
+  str = str.replace(/[^\u0000-\u00FF]/g, "");
+
+  return str.trim() || null;
+};
+
 const extractCustomerNames = (csvRows: any[]): Map<string, string> => {
   const customerNamesMap = new Map<string, string>(); // lowercase -> original casing
   csvRows.forEach((row) => {
@@ -268,40 +285,40 @@ const validateAndBuildInvoices = (
         customerId,
         clientId,
         invoiceType: isSpecialItem ? normalizedItem : "sale",
-        item: itemStr || null,
-        soldAs: row["Sold As"] || row["soldAs"] || null,
-        sku: row["SKU"] || row["sku"] || null,
-        itemType: row["Item Type"] || row["itemType"] || null,
-        lineType: row["Line Type"] || row["lineType"] || null,
-        category: row["Category"] || row["category"] || null,
-        subCategory: row["Sub Category"] || row["subCategory"] || null,
-        group: row["Group"] || row["group"] || null,
-        priceRange: row["Price Range"] || row["priceRange"] || null,
-        seriesName: row["Series Name"] || row["seriesName"] || null,
-        kind: row["Kind"] || row["kind"] || null,
-        transactionNo: row["Transaction#"] || row["transactionNo"] || null,
-        invoiceNo: row["Invoice#"] || row["invoiceNo"] || null,
+        item: sanitizeDbString(itemStr),
+        soldAs: sanitizeDbString(row["Sold As"] || row["soldAs"]),
+        sku: sanitizeDbString(row["SKU"] || row["sku"]),
+        itemType: sanitizeDbString(row["Item Type"] || row["itemType"]),
+        lineType: sanitizeDbString(row["Line Type"] || row["lineType"]),
+        category: sanitizeDbString(row["Category"] || row["category"]),
+        subCategory: sanitizeDbString(row["Sub Category"] || row["subCategory"]),
+        group: sanitizeDbString(row["Group"] || row["group"]),
+        priceRange: sanitizeDbString(row["Price Range"] || row["priceRange"]),
+        seriesName: sanitizeDbString(row["Series Name"] || row["seriesName"]),
+        kind: sanitizeDbString(row["Kind"] || row["kind"]),
+        transactionNo: sanitizeDbString(row["Transaction#"] || row["transactionNo"]),
+        invoiceNo: sanitizeDbString(row["Invoice#"] || row["invoiceNo"]),
         invoiceDate: parseExcelDate(row["Date"] || row["date"]),
-        jobName: row["Job Name"] || row["jobName"] || null,
-        location: row["Location"] || row["location"] || null,
-        salesPerson1: row["Sales Person1"] || row["salesPerson1"] || null,
-        salesPerson2: row["Sales Person2"] || row["salesPerson2"] || null,
-        projManager: row["Proj. Manager"] || row["projManager"] || null,
-        acctType: row["Acct. Type"] || row["acctType"] || null,
-        acctName: row["Acct. Name"] || row["acctName"] || null,
-        customer: customerStr || null,
-        code: row["Code"] || row["code"] || null,
-        customerZone: row["Customer Zone"] || row["customerZone"] || null,
-        shipToPartyName: row["Ship To Party Name"] || row["shipToPartyName"] || null,
-        shipToCity: row["Ship To City"] || row["shipToCity"] || null,
-        shipToState: row["Ship To State"] || row["shipToState"] || null,
-        shipToZip: row["Ship To Zip"] || row["shipToZip"] || null,
-        custType: row["Cust.Type"] || row["custType"] || null,
-        associates: row["Associates"] || row["associates"] || null,
-        deliveryType: row["Delivery Type"] || row["deliveryType"] || null,
-        slabs: row["Slabs"] !== undefined ? String(row["Slabs"]) : null,
+        jobName: sanitizeDbString(row["Job Name"] || row["jobName"]),
+        location: sanitizeDbString(row["Location"] || row["location"]),
+        salesPerson1: sanitizeDbString(row["Sales Person1"] || row["salesPerson1"]),
+        salesPerson2: sanitizeDbString(row["Sales Person2"] || row["salesPerson2"]),
+        projManager: sanitizeDbString(row["Proj. Manager"] || row["projManager"]),
+        acctType: sanitizeDbString(row["Acct. Type"] || row["acctType"]),
+        acctName: sanitizeDbString(row["Acct. Name"] || row["acctName"]),
+        customer: sanitizeDbString(customerStr),
+        code: sanitizeDbString(row["Code"] || row["code"]),
+        customerZone: sanitizeDbString(row["Customer Zone"] || row["customerZone"]),
+        shipToPartyName: sanitizeDbString(row["Ship To Party Name"] || row["shipToPartyName"]),
+        shipToCity: sanitizeDbString(row["Ship To City"] || row["shipToCity"]),
+        shipToState: sanitizeDbString(row["Ship To State"] || row["shipToState"]),
+        shipToZip: sanitizeDbString(row["Ship To Zip"] || row["shipToZip"]),
+        custType: sanitizeDbString(row["Cust.Type"] || row["custType"]),
+        associates: sanitizeDbString(row["Associates"] || row["associates"]),
+        deliveryType: sanitizeDbString(row["Delivery Type"] || row["deliveryType"]),
+        slabs: row["Slabs"] !== undefined ? sanitizeDbString(String(row["Slabs"])) : null,
         invQty: parseFloat(row["Inv. Qty"] || row["invQty"]) || 0,
-        uom: row["UOM"] || row["uom"] || null,
+        uom: sanitizeDbString(row["UOM"] || row["uom"]),
         saleTotal: parseFloat(row["Sale Total"] || row["saleTotal"]) || 0,
         totalCost: parseFloat(row["Total Cost"] || row["totalCost"]) || 0,
         margin: parseFloat(row["Margin"] || row["margin"]) || 0,
