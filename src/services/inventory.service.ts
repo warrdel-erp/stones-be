@@ -487,7 +487,7 @@ export const getInventoryStats = async (locationId: number) => {
         sequelize.fn(
           "SUM",
           sequelize.literal(
-            "COALESCE(`InventoryProduct`.`landedUnitCost`, `InventoryProduct`.`FOBcost`, 0) * `slab`.`receivingLength` * `slab`.`receivingWidth` / 144"
+            "COALESCE(`InventoryProduct`.`assetValue`, 0)"
           )
         ),
         "totalValue",
@@ -512,7 +512,7 @@ export const getInventoryStats = async (locationId: number) => {
         sequelize.fn(
           "SUM",
           sequelize.literal(
-            "COALESCE(`InventoryProduct`.`landedUnitCost`, `InventoryProduct`.`FOBcost`, 0)"
+            "COALESCE(`InventoryProduct`.`assetValue`, 0)"
           )
         ),
         "totalValue",

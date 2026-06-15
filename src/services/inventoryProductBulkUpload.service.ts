@@ -94,6 +94,11 @@ const parseInventoryFile = (fileBuffer: Buffer) => {
     if (unrecognized.length > 0)
       throw new AppError(`Unrecognized column(s): ${unrecognized.join(", ")}`, 400);
 
+    const hasAssetValue = headers.includes("Asset Value") || headers.includes("assetValue");
+    if (!hasAssetValue) {
+      throw new AppError(`Missing required column: "Asset Value"`, 400);
+    }
+
     const missing = REQUIRED_HEADERS.filter((rh) => !headers.includes(rh));
     if (missing.length > 0)
       throw new AppError(`Missing required column(s): ${missing.join(", ")}`, 400);
@@ -513,19 +518,7 @@ const processReceivedDateColumn = (row: any, errors: string[]) => {
 const processAssetValueColumn = (row: any, errors: string[]) => {
   const raw = row.assetValueRaw;
   if (raw === null || raw === undefined || raw === "") {
-    const unitCost = row.landedUnitCost || 0;
-    if (row.isSlabType) {
-      const length = row.receivingLength || 0;
-      const width = row.receivingWidth || 0;
-      if (!length || !width || length <= 0 || width <= 0) {
-        errors.push(`Row ${row._rowNumber}: "Dimensions" is missing or invalid for slab product.`);
-        return;
-      }
-      const packagingArea = (length * width) / 144;
-      row.assetValue = packagingArea * unitCost;
-    } else {
-      row.assetValue = unitCost;
-    }
+    errors.push(`Row ${row._rowNumber}: "Asset Value" is required.`);
     return;
   }
 

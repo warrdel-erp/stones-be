@@ -14,7 +14,7 @@ import * as advancedDepositRepository from "../repositories/advancedDeposit.repo
 import * as s3FileRepository from "../repositories/s3File.repository";
 import { generateSignedGetUrl } from "../services/s3File.service";
 import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
-import CustomerTransaction from "../models/customerTransaction.model";
+import CustomerExternalAgedInvoice from "../models/customerExternalAgedInvoice.model";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -606,13 +606,13 @@ export const bulkUploadCustomers = async (fileBuffer: Buffer, userId: number, cl
       throw new AppError("Ledger account sub-header not found.", 500);
     }
 
-    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilterForBulkUpload({
       key: "account_receivable",
       clientId,
     }, transaction);
 
     if (!parentLedger) {
-      parentLedger = await ledgerAccountRepository.createLedgerAccount({
+      parentLedger = await ledgerAccountRepository.createLedgerAccountForBulkUpload({
         name: "Account Receivable",
         key: "account_receivable",
         subHeaderId,
@@ -653,7 +653,7 @@ export const getCustomerARInvoices = async (
   const standardOverdue = await salesOrderInvoiceService.getOverdueInvoices(clientId, customerId);
 
   // 2. Fetch external invoices/transactions
-  const externalTransactions: any[] = await CustomerTransaction.findAll({
+  const externalTransactions: any[] = await CustomerExternalAgedInvoice.findAll({
     where: { clientId, customerId },
     raw: true,
   });

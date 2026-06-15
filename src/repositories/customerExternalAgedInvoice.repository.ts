@@ -1,11 +1,11 @@
-import CustomerTransaction from "../models/customerTransaction.model";
+import CustomerExternalAgedInvoice from "../models/customerExternalAgedInvoice.model";
 import { Transaction } from "sequelize";
 
-export const bulkCreateExternalTransactions = async (data: any[], transaction?: Transaction) => {
-  return await CustomerTransaction.bulkCreate(data, { transaction, validate: true });
+export const bulkCreateCustomerExternalAgedInvoices = async (data: any[], transaction?: Transaction) => {
+  return await CustomerExternalAgedInvoice.bulkCreate(data, { transaction, validate: true });
 };
 
-export const findAllExternalTransactions = async (
+export const findAllCustomerExternalAgedInvoices = async (
   offset: number,
   limit: number,
   clientId: number,
@@ -24,7 +24,7 @@ export const findAllExternalTransactions = async (
     ];
   }
 
-  const { rows, count } = await CustomerTransaction.findAndCountAll({
+  const { rows, count } = await CustomerExternalAgedInvoice.findAndCountAll({
     where,
     offset,
     limit,

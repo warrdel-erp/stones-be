@@ -135,7 +135,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[]) => {
     calcs.soReceiving.tax = decimals.decimalAdd(calcs.soReceiving.tax, Number(salesOrderProduct.taxAmount) || 0);
 
     // Calculate for receiving ------
-    calcs.receiving.total = decimals.decimalAdd(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct.landedUnitCost) || 0);
+    calcs.receiving.total = decimals.decimalAdd(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct.assetValue) || 0);
 
     // Calculate for packaging list
     calcs.packagingList.subTotal = decimals.decimalAdd(calcs.packagingList.subTotal, Number(salesOrderProduct.plAmount) || 0);

@@ -252,7 +252,7 @@ export const createJournalEntryForReceiveInventory = async (
     for (let slab of slabs) {
       slab = slab.get ? (slab.get({ plain: true }) as any) : (slab as any);
       const slabAny: any = slab;
-      const amount = decimal.decimalMultiply(slabAny.packagedSqrFt, productCalc.landedUnitCost);
+      const amount = slabAny.inventoryProduct?.assetValue || decimal.decimalMultiply(slabAny.packagedSqrFt, productCalc.landedUnitCost);
 
       await journalEntryRepository.create({
         amount,
@@ -310,8 +310,7 @@ export const createJournalEntriesForSlabSplit = async (
   }
 
   // Calculate amount for original slab (receivedSqrFt * landedUnitCost)
-  const originalSlabReceivedSqrFt = (originalSlab.receivingLength * originalSlab.receivingWidth) / 144;
-  const originalAmount = decimal.decimalMultiply(originalSlabReceivedSqrFt, originalInventoryProduct.landedUnitCost);
+  const originalAmount = originalInventoryProduct.assetValue;
 
   // Create CR entry for the original (broken) slab
   await journalEntryRepository.create({
@@ -332,8 +331,8 @@ export const createJournalEntriesForSlabSplit = async (
   for (const newSlab of newSlabs) {
     // Convert to plain object if it's a Sequelize instance
     const slabData = newSlab.get ? newSlab.get({ plain: true }) : newSlab;
-    const newSlabReceivedSqrFt = (slabData.receivingLength * slabData.receivingWidth) / 144;
-    const newAmount = decimal.decimalMultiply(newSlabReceivedSqrFt, originalInventoryProduct.landedUnitCost);
+    const inventoryProduct = newSlab.inventoryProduct || slabData.inventoryProduct;
+    const newAmount = inventoryProduct ? inventoryProduct.assetValue : decimal.decimalMultiply((slabData.receivingLength * slabData.receivingWidth) / 144, originalInventoryProduct.landedUnitCost);
 
     await journalEntryRepository.create({
       amount: newAmount,

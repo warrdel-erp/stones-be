@@ -976,3 +976,8 @@ sticky navbar.
 2. cancel PO.
 3. Add more products into PO. and more products can be added in SIPL only through PO.
 4. App work. [still pending].
+
+---
+
+1. Calculations with Asset value.
+2. R_sales invoices upload and show in external invoices. (with resolving previous error , and new customer creation if needed through invoice creation)

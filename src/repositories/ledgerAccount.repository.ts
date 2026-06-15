@@ -15,6 +15,11 @@ export const createBulkLedgerAccount = async (data: LedgerAccount[], transaction
   return accounts;
 };
 
+// Create ledger account for bulk upload - uses models directly with explicit clientId (no scoped)
+export const createLedgerAccountForBulkUpload = async (data: LedgerAccount, transaction?: Transaction): Promise<any> => {
+  return await models.LedgerAccount.create(data, { transaction });
+};
+
 // Bulk create ledger accounts for bulk upload - uses models directly with explicit clientId in data (no scoped)
 export const bulkCreateLedgerAccountsForBulkUpload = async (data: LedgerAccount[], transaction?: Transaction) => {
   return models.LedgerAccount.bulkCreate(data, { transaction, validate: true });
@@ -25,7 +30,7 @@ export const getLedgerAccountByFilter = async (filter: WhereOptions, transaction
 };
 
 // Get ledger account for bulk upload - uses models directly with explicit clientId in filter (no scoped)
-export const getLedgerAccountByFilterForBulkUpload = async (filter: WhereOptions, transaction?: Transaction) => {
+export const getLedgerAccountByFilterForBulkUpload = async (filter: WhereOptions, transaction?: Transaction): Promise<any> => {
   return models.LedgerAccount.findOne({ where: filter, transaction });
 };
 

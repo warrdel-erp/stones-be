@@ -5,8 +5,8 @@ import Location from "./location.model";
 import User from "./user.model";
 import Client from "./client.model";
 
-const CustomerTransaction = sequelize.define(
-  "ExternalCustomerTransaction",
+const CustomerExternalAgedInvoice = sequelize.define(
+  "CustomerExternalAgedInvoice",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -120,15 +120,15 @@ const CustomerTransaction = sequelize.define(
     },
   },
   {
-    tableName: "external_customer_transactions",
+    tableName: "customer_external_aged_invoices",
     timestamps: true,
     paranoid: true,
   }
 );
 
-(CustomerTransaction as any).scopeConfig = {
+(CustomerExternalAgedInvoice as any).scopeConfig = {
   client: true,
   location: true,
 };
 
-export default CustomerTransaction;
+export default CustomerExternalAgedInvoice;
