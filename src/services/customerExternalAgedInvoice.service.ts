@@ -1,10 +1,12 @@
 import * as XLSX from "xlsx";
-import { Transaction } from "sequelize";
+import { Transaction, Op } from "sequelize";
 import { sequelize } from "../config/database";
 import * as agedInvoiceRepo from "../repositories/customerExternalAgedInvoice.repository";
 import * as customerRepo from "../repositories/customer.repository";
 import { AppError } from "../helper/appError";
 import _ from "lodash";
+import * as models from "../models";
+import { createMissingCustomersAndLedgers, cleanCustomerName } from "./customerExternalInvoice.service";
 
 const parseExcelDate = (val: any) => {
   if (!val) return null;
@@ -21,6 +23,7 @@ const parseExcelDate = (val: any) => {
 
 const ALLOWED_HEADERS = [
   "Customer Code", "customerCode",
+  "Customer", "customer", "Customer Name", "customerName",
   "Trx. Type", "trxType",
   "Cust. Type", "custType",
   "Transaction#", "transactionNo",
@@ -41,7 +44,7 @@ const ALLOWED_HEADERS = [
   "Internal Notes", "internalNotes"
 ];
 
-export const bulkUploadCustomerExternalAgedInvoices = async (fileBuffer: Buffer, clientId: number) => {
+export const bulkUploadCustomerExternalAgedInvoices = async (fileBuffer: Buffer, clientId: number, userId: number) => {
   let csvRows: any[] = [];
   let rowNumber = 1;
 
@@ -54,9 +57,9 @@ export const bulkUploadCustomerExternalAgedInvoices = async (fileBuffer: Buffer,
     // Validate headers
     const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
     if (headers) {
-      const hasCustomerCode = headers.includes("Customer Code") || headers.includes("customerCode");
+      const hasCustomerCode = headers.includes("Customer Code") || headers.includes("customerCode") || headers.includes("Customer") || headers.includes("customer");
       if (!hasCustomerCode) {
-        throw new AppError("Missing required column: Customer Code", 400);
+        throw new AppError("Missing required column: Customer Code or Customer", 400);
       }
 
       // Check for unrecognized headers but DO NOT throw error (unlike bulk product upload)
@@ -77,78 +80,144 @@ export const bulkUploadCustomerExternalAgedInvoices = async (fileBuffer: Buffer,
     throw new AppError("No data found in the file.", 400);
   }
 
-  // 2. Extract unique customer codes
-  const customerCodes = csvRows
-    .map((row) => {
-      const code = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
-      return code !== undefined && code !== null ? String(code).trim() : "";
-    })
-    .filter(Boolean);
-  
-  // 3. Find customers by codes
-  const customers = await customerRepo.findCustomersByCodes(clientId, customerCodes);
-  const customerMap = new Map(customers.map((c: any) => [String(c.customerCode).trim(), c.id]));
+  // 2. Extract unique customer codes and names
+  const codes = new Set<string>();
+  const names = new Set<string>();
 
-  // 4. Prepare data for insertion
+  csvRows.forEach((row) => {
+    const codeVal = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
+    if (codeVal !== undefined && codeVal !== null) {
+      codes.add(String(codeVal).trim());
+    }
+
+    const nameVal = row["Customer"] !== undefined ? row["Customer"] : (row["customer"] !== undefined ? row["customer"] : (row["Customer Name"] !== undefined ? row["Customer Name"] : row["customerName"]));
+    if (nameVal !== undefined && nameVal !== null) {
+      names.add(cleanCustomerName(String(nameVal)));
+    }
+  });
+
+  const searchCodes = Array.from(codes).filter(Boolean);
+  const searchNames = Array.from(names).filter(Boolean);
+
+  // 3. Find existing customers in system by name or code
+  const existingCustomers = await models.Customer.findAll({
+    where: {
+      clientId,
+      [Op.or]: [
+        { customerCode: [...searchCodes, ...searchNames] },
+        { name: [...searchCodes, ...searchNames] }
+      ]
+    }
+  });
+
+  const customerMap = new Map<string, number>();
+  existingCustomers.forEach((c: any) => {
+    if (c.customerCode) {
+      customerMap.set(String(c.customerCode).trim().toLowerCase(), c.id);
+    }
+    if (c.name) {
+      customerMap.set(cleanCustomerName(c.name).toLowerCase(), c.id);
+    }
+  });
+
+  // 4. Find missing Customer Names
+  const missingCustomerNamesMap = new Map<string, string>(); // lowercase -> original casing
+  csvRows.forEach((row) => {
+    const codeVal = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
+    const code = codeVal !== undefined && codeVal !== null ? String(codeVal).trim() : "";
+    const nameVal = row["Customer"] !== undefined ? row["Customer"] : (row["customer"] !== undefined ? row["customer"] : (row["Customer Name"] !== undefined ? row["Customer Name"] : row["customerName"]));
+    const name = nameVal !== undefined && nameVal !== null ? cleanCustomerName(String(nameVal)) : "";
+
+    let customerId = null;
+    if (code) {
+      customerId = customerMap.get(code.toLowerCase());
+    }
+    if (!customerId && name) {
+      customerId = customerMap.get(name.toLowerCase());
+    }
+
+    if (!customerId) {
+      const resolvedName = name || code;
+      if (resolvedName) {
+        missingCustomerNamesMap.set(resolvedName.toLowerCase(), resolvedName);
+      }
+    }
+  });
+
+  const missingCustomerNames = Array.from(missingCustomerNamesMap.values());
+
   const errors: string[] = [];
   const transactionsToCreate: any[] = [];
 
-  csvRows.forEach((row) => {
-    const rawCode = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
-    const code = rawCode !== undefined && rawCode !== null ? String(rawCode).trim() : "";
-
-    if (!code) {
-      // Skip row if customer code does not exist in the row (e.g. blank rows)
-      return;
-    }
-
-    const customerId = customerMap.get(code);
-
-    if (!customerId) {
-      errors.push(`Row ${row._rowNumber}: Customer with code "${code}" does not exist in the system.`);
-      return;
-    }
-    const rawInvoiceDate = row["Invoice Dt."] || row["Invoice Date"] || row["invoiceDt"] || row["invoiceDate"];
-    const parsedInvoiceDate = parseExcelDate(rawInvoiceDate);
-
-    const rawDueDate = row["Due Dt."] || row["Due Date"] || row["dueDt"] || row["dueDate"];
-    const parsedDueDate = parseExcelDate(rawDueDate);
-
-    transactionsToCreate.push({
-      customerId,
-      customerCode: code,
-      trxType: row["Trx. Type"] || row["trxType"],
-      custType: row["Cust. Type"] || row["custType"],
-      transactionNo: row["Transaction#"] || row["transactionNo"],
-      invoiceNo: row["Invoice#"] || row["invoiceNo"],
-      location: row["Location"] || row["location"],
-      custPoNo: row["Cust. PO#"] || row["custPoNo"],
-      jobName: row["Job Name"] || row["jobName"],
-      terms: row["Terms"] || row["terms"],
-      invoiceDate: parsedInvoiceDate,
-      daysPastInvoiceDate: null,
-      dueDate: parsedDueDate,
-      daysPastDue: null,
-      aging0To30: parseFloat(row["0 - 30"] || row["aging0To30"]) || 0,
-      aging31To45: parseFloat(row["31 - 45"] || row["aging31To45"]) || 0,
-      aging46To60: parseFloat(row["46 - 60"] || row["aging46To60"]) || 0,
-      agingOver60: parseFloat(row["Over 60"] || row["agingOver60"]) || 0,
-      balanceDue: parseFloat(row["Balance Due"] || row["balanceDue"]) || 0,
-      internalNotes: row["Internal Notes"] || row["internalNotes"],
-      clientId,
-    });
-  });
-
-  if (errors.length > 0) {
-    throw new AppError(`Validation failed:\n${errors.join("\n")}`, 400);
-  }
-
-  if (transactionsToCreate.length === 0) {
-    return { createdCount: 0, message: "No valid rows found to upload." };
-  }
-
-  // 5. Bulk create in transaction
+  // 5. Run in transaction
   const result = await sequelize.transaction(async (transaction: Transaction) => {
+    // 5a. Auto-create missing customers (and ledger accounts)
+    await createMissingCustomersAndLedgers(missingCustomerNames, clientId, userId, customerMap, transaction);
+
+    // 5b. Prepare transactions to create
+    csvRows.forEach((row) => {
+      const codeVal = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
+      const code = codeVal !== undefined && codeVal !== null ? String(codeVal).trim() : "";
+      const nameVal = row["Customer"] !== undefined ? row["Customer"] : (row["customer"] !== undefined ? row["customer"] : (row["Customer Name"] !== undefined ? row["Customer Name"] : row["customerName"]));
+      const name = nameVal !== undefined && nameVal !== null ? cleanCustomerName(String(nameVal)) : "";
+
+      if (!code && !name) {
+        // Skip row if no customer code or name exists in the row
+        return;
+      }
+
+      let customerId = null;
+      if (code) {
+        customerId = customerMap.get(code.toLowerCase());
+      }
+      if (!customerId && name) {
+        customerId = customerMap.get(name.toLowerCase());
+      }
+
+      if (!customerId) {
+        errors.push(`Row ${row._rowNumber}: Customer "${name || code}" could not be resolved or created.`);
+        return;
+      }
+
+      const rawInvoiceDate = row["Invoice Dt."] || row["Invoice Date"] || row["invoiceDt"] || row["invoiceDate"];
+      const parsedInvoiceDate = parseExcelDate(rawInvoiceDate);
+
+      const rawDueDate = row["Due Dt."] || row["Due Date"] || row["dueDt"] || row["dueDate"];
+      const parsedDueDate = parseExcelDate(rawDueDate);
+
+      transactionsToCreate.push({
+        customerId,
+        customerCode: code || null,
+        trxType: row["Trx. Type"] || row["trxType"] || null,
+        custType: row["Cust. Type"] || row["custType"] || null,
+        transactionNo: row["Transaction#"] || row["transactionNo"] || null,
+        invoiceNo: row["Invoice#"] || row["invoiceNo"] || null,
+        location: row["Location"] || row["location"] || null,
+        custPoNo: row["Cust. PO#"] || row["custPoNo"] || null,
+        jobName: row["Job Name"] || row["jobName"] || null,
+        terms: row["Terms"] || row["terms"] || null,
+        invoiceDate: parsedInvoiceDate,
+        daysPastInvoiceDate: null,
+        dueDate: parsedDueDate,
+        daysPastDue: null,
+        aging0To30: parseFloat(row["0 - 30"] || row["aging0To30"]) || 0,
+        aging31To45: parseFloat(row["31 - 45"] || row["aging31To45"]) || 0,
+        aging46To60: parseFloat(row["46 - 60"] || row["aging46To60"]) || 0,
+        agingOver60: parseFloat(row["Over 60"] || row["agingOver60"]) || 0,
+        balanceDue: parseFloat(row["Balance Due"] || row["balanceDue"]) || 0,
+        internalNotes: row["Internal Notes"] || row["internalNotes"] || null,
+        clientId,
+      });
+    });
+
+    if (errors.length > 0) {
+      throw new AppError(`Validation failed:\n${errors.join("\n")}`, 400);
+    }
+
+    if (transactionsToCreate.length === 0) {
+      return [];
+    }
+
     return await agedInvoiceRepo.bulkCreateCustomerExternalAgedInvoices(transactionsToCreate, transaction);
   });
 

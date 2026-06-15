@@ -107,7 +107,7 @@ const parseExcelFile = (fileBuffer: Buffer): any[] => {
   }
 };
 
-const cleanCustomerName = (name: string): string => {
+export const cleanCustomerName = (name: string): string => {
   if (!name) return "";
   return name
     .replace(/[\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\ufeff]/g, " ")
@@ -146,7 +146,7 @@ const queryProductsAndCustomers = async (clientId: number, uniqueCustomerNames: 
   return { products, customers };
 };
 
-const createMissingCustomersAndLedgers = async (
+export const createMissingCustomersAndLedgers = async (
   missingCustomerNames: string[],
   clientId: number,
   userId: number,

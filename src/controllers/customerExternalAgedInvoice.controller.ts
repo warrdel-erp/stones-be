@@ -15,7 +15,12 @@ export const bulkUploadAgedInvoices = catchAsync(async (req: AuthRequest, res: R
     throw new AppError("Client ID not found in user token", 401);
   }
 
-  const result = await agedInvoiceService.bulkUploadCustomerExternalAgedInvoices(req.file.buffer, clientId);
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new AppError("User ID not found in user token", 401);
+  }
+
+  const result = await agedInvoiceService.bulkUploadCustomerExternalAgedInvoices(req.file.buffer, clientId, userId);
 
   SuccessResponse(res, 201, "Aged invoices uploaded successfully", result);
 });

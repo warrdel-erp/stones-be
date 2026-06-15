@@ -981,3 +981,9 @@ sticky navbar.
 
 1. Calculations with Asset value.
 2. R_sales invoices upload and show in external invoices. (with resolving previous error , and new customer creation if needed through invoice creation)
+
+---
+
+1. Aged invoices date issue. (it was quite complicated as excel read date from 1988 and code from 1970).
+2. auto generation of customer also in aged invoices.
+3. constraint on customer name to be unique per client.
