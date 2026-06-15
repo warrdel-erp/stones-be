@@ -171,8 +171,36 @@ export const fetchAllCustomerExternalAgedInvoices = async (
     filters
   );
 
+  const transactionsWithCalculatedDays = transactions.map((trx: any) => {
+    const data = trx.toJSON ? trx.toJSON() : trx;
+    const today = new Date();
+    const todayDateOnly = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+
+    if (data.dueDate) {
+      const parsedDueDate = new Date(data.dueDate);
+      const dueDateOnly = new Date(Date.UTC(parsedDueDate.getFullYear(), parsedDueDate.getMonth(), parsedDueDate.getDate()));
+      const diffTime = todayDateOnly.getTime() - dueDateOnly.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      data.daysPastDue = diffDays > 0 ? diffDays : 0;
+    } else {
+      data.daysPastDue = null;
+    }
+
+    if (data.invoiceDate) {
+      const parsedInvoiceDate = new Date(data.invoiceDate);
+      const invoiceDateOnly = new Date(Date.UTC(parsedInvoiceDate.getFullYear(), parsedInvoiceDate.getMonth(), parsedInvoiceDate.getDate()));
+      const diffTime = todayDateOnly.getTime() - invoiceDateOnly.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      data.daysPastInvoiceDate = diffDays > 0 ? diffDays : 0;
+    } else {
+      data.daysPastInvoiceDate = null;
+    }
+
+    return data;
+  });
+
   return {
-    transactions,
+    transactions: transactionsWithCalculatedDays,
     total,
     page,
     limit,

@@ -107,12 +107,20 @@ const parseExcelFile = (fileBuffer: Buffer): any[] => {
   }
 };
 
+const cleanCustomerName = (name: string): string => {
+  if (!name) return "";
+  return name
+    .replace(/[\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\ufeff]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
 const extractCustomerNames = (csvRows: any[]): Map<string, string> => {
   const customerNamesMap = new Map<string, string>(); // lowercase -> original casing
   csvRows.forEach((row) => {
     const customerVal = row["Customer"] !== undefined ? row["Customer"] : row["customer"];
     if (customerVal !== undefined && customerVal !== null) {
-      const nameStr = String(customerVal).trim();
+      const nameStr = cleanCustomerName(String(customerVal));
       if (nameStr) {
         customerNamesMap.set(nameStr.toLowerCase(), nameStr);
       }
@@ -212,7 +220,7 @@ const createMissingCustomersAndLedgers = async (
 
   // Add the new customers to our customerMap so they can be referenced
   createdCustomers.forEach((customer: any) => {
-    customerMap.set(String(customer.name).trim().toLowerCase(), customer.id);
+    customerMap.set(cleanCustomerName(customer.name).toLowerCase(), customer.id);
   });
 };
 
@@ -239,7 +247,7 @@ const validateAndBuildInvoices = (
       normalizedItem === "fabrication & installation" ||
       normalizedItem === "finance charge";
     const productId = isSpecialItem ? null : (normalizedItem ? productMap.get(normalizedItem) : undefined);
-    const customerId = customerMap.get(customerStr.toLowerCase());
+    const customerId = customerMap.get(cleanCustomerName(customerStr).toLowerCase());
 
     if (!isSpecialItem && !productId && itemStr) {
       errors.push(`Row ${row._rowNumber}: Product "${itemStr}" does not exist in the system.`);
@@ -335,7 +343,7 @@ export const bulkUploadCustomerExternalInvoices = async (fileBuffer: Buffer, cli
 
   // 5. Map existing Customers
   const customerMap = new Map<string, number>(
-    customers.map((c: any) => [String(c.name).trim().toLowerCase(), c.id])
+    customers.map((c: any) => [cleanCustomerName(c.name).toLowerCase(), c.id])
   );
 
   // 6. Find missing Customer Names
