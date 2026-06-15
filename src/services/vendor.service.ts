@@ -654,13 +654,13 @@ export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clie
       throw new AppError("Ledger account sub-header not found.", 500);
     }
 
-    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilter({
+    let parentLedger = await ledgerAccountRepository.getLedgerAccountByFilterForBulkUpload({
       key: "account_payables",
       clientId,
     }, transaction);
 
     if (!parentLedger) {
-      parentLedger = await ledgerAccountRepository.createLedgerAccount({
+      parentLedger = await ledgerAccountRepository.createLedgerAccountForBulkUpload({
         name: "Account Payables",
         key: "account_payables",
         subHeaderId,

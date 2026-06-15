@@ -652,9 +652,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       if (salesOrderProduct?.inventoryProduct?.isSlabType) {
         await journalEntryRepository.create(
           {
-            amount:
-              salesOrderProduct.receivingAreaSqFt *
-              salesOrderProduct.inventoryProduct.landedUnitCost,
+            amount: salesOrderProduct.inventoryProduct.assetValue,
             ledgerId: ledgerAccountForFinishedGoods.id,
             type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -676,9 +674,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
 
         await journalEntryRepository.create(
           {
-            amount:
-              salesOrderProduct.receivingAreaSqFt *
-              salesOrderProduct.inventoryProduct.landedUnitCost,
+            amount: salesOrderProduct.inventoryProduct.assetValue,
             ledgerId: ledgerAccountForCogs.id,
             type: JOURNAL_ENTRY_TYPE.DR,
 

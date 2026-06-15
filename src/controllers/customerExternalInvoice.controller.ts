@@ -3,11 +3,11 @@ import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
-import * as externalTransactionService from "../services/externalCustomerTransaction.service";
+import * as invoiceService from "../services/customerExternalInvoice.service";
 
-export const bulkUploadTransactions = catchAsync(async (req: AuthRequest, res: Response) => {
+export const bulkUploadInvoices = catchAsync(async (req: AuthRequest, res: Response) => {
   if (!req.file) {
-    throw new AppError("Please upload a CSV file", 400);
+    throw new AppError("Please upload a CSV or Excel file", 400);
   }
 
   const clientId = req.user?.clientId;
@@ -15,12 +15,17 @@ export const bulkUploadTransactions = catchAsync(async (req: AuthRequest, res: R
     throw new AppError("Client ID not found in user token", 401);
   }
 
-  const result = await externalTransactionService.bulkUploadExternalTransactions(req.file.buffer, clientId);
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new AppError("User ID not found in user token", 401);
+  }
 
-  SuccessResponse(res, 201, "Transactions uploaded successfully", result);
+  const result = await invoiceService.bulkUploadCustomerExternalInvoices(req.file.buffer, clientId, userId);
+
+  SuccessResponse(res, 201, "Invoices uploaded successfully", result);
 });
 
-export const getAllTransactionsController = catchAsync(async (req: AuthRequest, res: Response) => {
+export const getAllInvoicesController = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, search, ...filters } = req.query;
   const clientId = req.user?.clientId;
 
@@ -28,7 +33,7 @@ export const getAllTransactionsController = catchAsync(async (req: AuthRequest, 
     throw new AppError("Client ID not found in user token", 401);
   }
 
-  const result = await externalTransactionService.fetchAllExternalTransactions(
+  const result = await invoiceService.fetchAllCustomerExternalInvoices(
     Number(page),
     Number(limit),
     Number(clientId),
@@ -36,7 +41,7 @@ export const getAllTransactionsController = catchAsync(async (req: AuthRequest, 
     filters
   );
 
-  return SuccessResponse(res, 200, "Transactions retrieved successfully", result.transactions, {
+  return SuccessResponse(res, 200, "Invoices retrieved successfully", result.transactions, {
     total: result.total,
     page: result.page,
     limit: result.limit,

@@ -671,8 +671,12 @@ export const checkSIPLDataIsFilledCorrectly = async (siplId: number) => {
   return { isCorrect }
 }
 
-export const cancelSIPLService = async (siplId: number, locationId: number, clientId: number) => {
-  const transaction = await sequelize.transaction();
+export const cancelSIPLService = async (siplId: number, locationId: number, clientId: number, transaction?: Transaction) => {
+  const shouldCommitTransaction = !transaction;
+
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
 
   try {
     const sipl = await siplRepository.findSIPLById(siplId, transaction);
@@ -705,10 +709,14 @@ export const cancelSIPLService = async (siplId: number, locationId: number, clie
     // 3. Reverse journal entries
     await journalEntryService.reverseJournalEntriesForSIPL(siplId, transaction, locationId);
 
-    await transaction.commit();
+    if (shouldCommitTransaction) {
+      await transaction.commit();
+    }
     return { success: true, message: "SIPL canceled successfully" };
   } catch (error) {
-    await transaction.rollback();
+    if (shouldCommitTransaction) {
+      await transaction.rollback();
+    }
     throw error;
   }
 };

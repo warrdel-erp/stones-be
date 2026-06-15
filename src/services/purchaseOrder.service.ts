@@ -6,9 +6,11 @@ import * as siplProductRepository from "../repositories/siplProducts.repository"
 import { Transaction } from "sequelize";
 import { SCOP } from "../constants";
 import * as paymentBillsRepository from '../repositories/paymentBills.repository'
-import { PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, PO_STATUS, SIPL_STATUS } from "../constants/tableTypes";
 import _ from "lodash";
-import * as decimal from '../helper/decimal'
+import * as decimal from '../helper/decimal';
+import * as siplService from "./sipl.service";
+import { AppError } from "../helper/appError";
 
 /**
  * Service to create a Purchase Order along with internal and printable notes.
@@ -84,6 +86,20 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
 export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10, clientId: number, filter?: { [k: string]: string }) => {
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
+
+  if (filter && filter.status) {
+    const statusMap: { [key: string]: string } = {
+      'OPEN': 'open',
+      'CANCELLED': 'canceled',
+      'CANCELED': 'canceled',
+      'CLOSE': 'closed',
+      'CLOSED': 'closed',
+    };
+    const mappedStatus = statusMap[filter.status.toUpperCase()];
+    if (mappedStatus) {
+      filter.status = mappedStatus;
+    }
+  }
 
   let { rows, count }: { rows: any[]; count: any } = { rows: [], count: 0 }
 
@@ -297,4 +313,71 @@ export const getOpenPOCountByClient = async (clientId: number) => {
 export const getPoInTransit = async (clientId: number) => {
   const count = await poRepository.countPoInTransit(clientId);
   return { count };
+};
+
+// Cancel Purchase Order
+export const cancelPurchaseOrderService = async (purchaseOrderId: number, locationId: number, clientId: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const purchaseOrder = await poRepository.getPurchaseOrderById(purchaseOrderId);
+    if (!purchaseOrder) {
+      throw new AppError("Purchase Order not found", 404);
+    }
+
+    if (purchaseOrder.status === PO_STATUS.CANCELED) {
+      throw new AppError("Purchase Order is already canceled.", 400);
+    }
+
+    // Check if any SIPL has been received
+    const hasReceivedSIPL = purchaseOrder.sipls?.some((sipl: any) => sipl.inventoryReceived);
+    if (hasReceivedSIPL) {
+      throw new AppError("Cannot cancel Purchase Order because one or more of its SIPLs have already been received.", 400);
+    }
+
+    // Cancel all associated SIPLs that are not already canceled
+    if (purchaseOrder.sipls && purchaseOrder.sipls.length > 0) {
+      for (const sipl of purchaseOrder.sipls) {
+        if (sipl.status !== SIPL_STATUS.CANCELED) {
+          await siplService.cancelSIPLService(sipl.id, locationId, clientId, transaction);
+        }
+      }
+    }
+
+    // Update PO status to canceled
+    await poRepository.updatePurchaseOrderStatus(purchaseOrderId, PO_STATUS.CANCELED, transaction);
+
+    await transaction.commit();
+    return { success: true, message: "Purchase Order canceled successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+// Add product to an existing Purchase Order
+export const addRequestedProductToPOService = async (purchaseOrderId: number, productData: any) => {
+  const purchaseOrder = await poRepository.getPurchaseOrderById(purchaseOrderId);
+  if (!purchaseOrder) {
+    throw new AppError("Purchase Order not found", 404);
+  }
+
+  if (purchaseOrder.status === PO_STATUS.CANCELED) {
+    throw new AppError("Cannot add products to a canceled Purchase Order", 400);
+  }
+
+  // Create the requested product
+  const newProduct = await requestedPurchaseProductRepository.createProduct({
+    productId: productData.productId,
+    quantity: productData.quantity,
+    unitPrice: productData.unitPrice,
+    noOfSlabs: productData.noOfSlabs || null,
+    description: productData.description || "",
+    supplierNote: productData.supplierNote || null,
+    purchaseOrderId,
+    clientId: purchaseOrder.clientId,
+    locationId: purchaseOrder.locationId,
+  });
+
+  return newProduct;
 };

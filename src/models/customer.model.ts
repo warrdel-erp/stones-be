@@ -196,6 +196,7 @@ const Customer = sequelize.define(
     indexes: [
       { unique: true, fields: ["primaryPhoneNumber", "clientId"], name: "unique_primary_phone_per_client" },
       { unique: true, fields: ["customerCode", "clientId"], name: "unique_customer_code_per_client" },
+      { unique: true, fields: ["name", "clientId"], name: "unique_customer_name_per_client" },
     ],
   }
 );

@@ -60,18 +60,7 @@ export const getEstimatedRevenue = async (clientId: number) => {
 
         const inventoryProduct = (sop as any).inventoryProduct;
         if (inventoryProduct) {
-            const landedUnitCost = Number(inventoryProduct.landedUnitCost) || 0;
-            const isSlab = (sop as any).isSlabType || (inventoryProduct as any).isSlabType || false;
-
-            if (isSlab) {
-                const slab = (inventoryProduct as any).slab;
-                if (slab) {
-                    const area = Number(slab.receivedSqrFt);
-                    landedCost = decimals.decimalMultiply(landedUnitCost, area);
-                }
-            } else {
-                landedCost = landedUnitCost;
-            }
+            landedCost = Number(inventoryProduct.assetValue) || 0;
         }
 
         totalSoldAmount = decimals.decimalAdd(totalSoldAmount, amount);
@@ -165,18 +154,7 @@ export const getMonthlyProfitStats = async (clientId: number) => {
 
         const inventoryProduct = (sop as any).inventoryProduct;
         if (inventoryProduct) {
-            const landedUnitCost = Number(inventoryProduct.landedUnitCost) || 0;
-            const isSlab = (sop as any).isSlabType || (inventoryProduct as any).isSlabType || false;
-
-            if (isSlab) {
-                const slab = (inventoryProduct as any).slab;
-                if (slab) {
-                    const area = Number(slab.receivedSqrFt);
-                    landedCost = decimals.decimalMultiply(landedUnitCost, area);
-                }
-            } else {
-                landedCost = landedUnitCost;
-            }
+            landedCost = Number(inventoryProduct.assetValue) || 0;
         }
 
         const profit = decimals.decimalSubtract(amount, landedCost);

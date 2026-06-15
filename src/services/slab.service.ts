@@ -338,10 +338,20 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
         assetValue = decimalDivide(decimalMultiply(area, originalAssetValue), originalArea);
       }
 
+      invProd.assetValue = assetValue;
+      if (invProd.dataValues) {
+        invProd.dataValues.assetValue = assetValue;
+      }
+
       await scoped(models.InventoryProduct).update(
         { assetValue },
         { where: { id: invProd.id }, transaction }
       );
+
+      createdSlabs[i].inventoryProduct = invProd;
+      if (createdSlabs[i].dataValues) {
+        createdSlabs[i].dataValues.inventoryProduct = invProd;
+      }
     }
 
     // Create journal entries for slab split (CR for original, DR for new slabs)

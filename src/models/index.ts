@@ -57,7 +57,8 @@ import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
-import CustomerTransaction from "./customerTransaction.model";
+import CustomerExternalAgedInvoice from "./customerExternalAgedInvoice.model";
+import CustomerExternalInvoice from "./customerExternalInvoice.model";
 import InventoryProductMetaData from "./inventoryProductMetaData.model";
 import S3File from "./s3File.model";
 import InventoryProductImage from "./inventoryProductImage.model";
@@ -830,15 +831,25 @@ Notes.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(PaymentBill, { foreignKey: "clientId", as: "paymentBills" });
 PaymentBill.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
-// CustomerTransaction associations
-CustomerTransaction.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
-Customer.hasMany(CustomerTransaction, { foreignKey: "customerId", as: "transactions" });
+// CustomerExternalAgedInvoice associations
+CustomerExternalAgedInvoice.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(CustomerExternalAgedInvoice, { foreignKey: "customerId", as: "externalAgedInvoices" });
 
-CustomerTransaction.belongsTo(User, { foreignKey: "salesRepId", as: "salesRep" });
-User.hasMany(CustomerTransaction, { foreignKey: "salesRepId", as: "customerTransactions" });
+CustomerExternalAgedInvoice.belongsTo(User, { foreignKey: "salesRepId", as: "salesRep" });
+User.hasMany(CustomerExternalAgedInvoice, { foreignKey: "salesRepId", as: "customerExternalAgedInvoices" });
 
-CustomerTransaction.belongsTo(Client, { foreignKey: "clientId", as: "client" });
-Client.hasMany(CustomerTransaction, { foreignKey: "clientId", as: "customerTransactions" });
+CustomerExternalAgedInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(CustomerExternalAgedInvoice, { foreignKey: "clientId", as: "customerExternalAgedInvoices" });
+
+// CustomerExternalInvoice associations
+CustomerExternalInvoice.belongsTo(Product, { foreignKey: "productId", as: "product" });
+Product.hasMany(CustomerExternalInvoice, { foreignKey: "productId", as: "externalInvoices" });
+
+CustomerExternalInvoice.belongsTo(Customer, { foreignKey: "customerId", as: "customerRef" });
+Customer.hasMany(CustomerExternalInvoice, { foreignKey: "customerId", as: "externalInvoices" });
+
+CustomerExternalInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(CustomerExternalInvoice, { foreignKey: "clientId", as: "customerExternalInvoices" });
 
 
 // Vendor-WiringInstruction relation (one 'Vendor' has multiple 'WiringInstructions')
@@ -985,7 +996,8 @@ export {
   TermsCondition,
   VendorContact,
   WiringInstruction,
-  CustomerTransaction,
+  CustomerExternalAgedInvoice,
+  CustomerExternalInvoice,
   InventoryProductMetaData,
   S3File,
   ProductImage,
