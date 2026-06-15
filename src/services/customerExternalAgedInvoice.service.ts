@@ -96,10 +96,16 @@ export const bulkUploadCustomerExternalAgedInvoices = async (fileBuffer: Buffer,
   csvRows.forEach((row) => {
     const rawCode = row["Customer Code"] !== undefined ? row["Customer Code"] : row["customerCode"];
     const code = rawCode !== undefined && rawCode !== null ? String(rawCode).trim() : "";
+
+    if (!code) {
+      // Skip row if customer code does not exist in the row (e.g. blank rows)
+      return;
+    }
+
     const customerId = customerMap.get(code);
 
     if (!customerId) {
-      // Skip row if customer does not exist in the system
+      errors.push(`Row ${row._rowNumber}: Customer with code "${code}" does not exist in the system.`);
       return;
     }
     const rawInvoiceDate = row["Invoice Dt."] || row["Invoice Date"] || row["invoiceDt"] || row["invoiceDate"];
