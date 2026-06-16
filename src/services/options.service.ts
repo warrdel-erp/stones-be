@@ -7,6 +7,7 @@ import * as vendorRepository from "../repositories/vendor.repository";
 import * as customerAddressRepository from "../repositories/customerAddress.repository";
 import * as locationRepository from "../repositories/location.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as productSubCategoryRepository from "../repositories/productSubCategory.repository";
 import { CUSTOMER_STATUS, CUSTOMER_ADDRESS_TYPES, VENDOR_TYPES } from "../constants/tableTypes";
 
 type ServiceOptionFilters = {
@@ -114,5 +115,19 @@ export const getLedgerAccountOptions = async (clientId: number, filters: any = {
     const ledgerAccounts = await ledgerAccountRepository.getLedgerAccountOptions(clientId, filters);
 
     return ledgerAccounts;
+};
+
+export const getProductSubCategoryOptions = async (clientId: number) => {
+    if (!clientId) {
+        throw new AppError("Client context missing.", 400);
+    }
+
+    const subCategories = await productSubCategoryRepository.getAllProductSubCategories(clientId);
+
+    return subCategories.map((sub: any) => ({
+        id: sub.id,
+        label: sub.name,
+        value: sub.name,
+    }));
 };
 

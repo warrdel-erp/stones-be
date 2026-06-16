@@ -84,3 +84,11 @@ export const getLedgerAccountOptions = catchAsync(async (req: AuthRequest, res: 
 
     SuccessResponse(res, 200, "Ledger account options fetched successfully.", data);
 });
+
+export const getProductSubCategoryOptions = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    const data = await optionsService.getProductSubCategoryOptions(Number(clientId));
+
+    SuccessResponse(res, 200, "Product subcategory options fetched successfully.", data);
+});
