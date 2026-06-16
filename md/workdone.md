@@ -987,3 +987,10 @@ sticky navbar.
 1. Aged invoices date issue. (it was quite complicated as excel read date from 1988 and code from 1970).
 2. auto generation of customer also in aged invoices.
 3. constraint on customer name to be unique per client.
+
+---
+
+1. App inventory page design.
+2. category, subcategory filter in app inventory.
+3. 20 items per page.
+4. balance sheet as per new parent child relation and new design.

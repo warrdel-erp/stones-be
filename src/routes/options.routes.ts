@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middleware/authMiddleware";
-import { getServiceOptions, getCustomerInvoiceOptions, getCustomerOptions, getProductOptions, getVendorOptions, getCustomerAddressOptions, getLocationOptions, getLedgerAccountOptions } from "../controllers/options.controller";
+import { getServiceOptions, getCustomerInvoiceOptions, getCustomerOptions, getProductOptions, getVendorOptions, getCustomerAddressOptions, getLocationOptions, getLedgerAccountOptions, getProductSubCategoryOptions } from "../controllers/options.controller";
 
 const router = Router();
 
@@ -17,6 +17,8 @@ router.get("/vendors", getVendorOptions);
 router.get("/locations", getLocationOptions);
 
 router.get("/ledgerAccounts", getLedgerAccountOptions);
+
+router.get("/subcategories", getProductSubCategoryOptions);
 
 router.get("/customer/:customerId/invoices", getCustomerInvoiceOptions);
 

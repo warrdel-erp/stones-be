@@ -9,8 +9,23 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import * as models from "../models";
 import { generateSignedGetUrl } from "./s3File.service";
 
-export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthRequest, page: number, limit: number, locationId: number) => {
-  const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
+export const fetchProductsWithSlabsByLocationGroupedBySipl = async (
+  req: AuthRequest,
+  page: number,
+  limit: number,
+  locationId: number,
+  isSlabType?: boolean,
+  search?: string,
+  subCategory?: string
+) => {
+  const filter: any = {};
+  if (isSlabType !== undefined) {
+    filter.isSlabType = isSlabType;
+  }
+  if (subCategory !== undefined) {
+    filter["$subCategory.name$"] = subCategory;
+  }
+  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
 
   // Map data accordingly product -> sipl -> slab
   let finalData = await Promise.all(
@@ -64,6 +79,17 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthReq
 
       delete product.inventoryProducts;
 
+      if (product.images && product.images.length > 0) {
+        const primaryImg = product.images[0];
+        if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+          primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+        }
+        product.primaryImage = primaryImg;
+      } else {
+        product.primaryImage = null;
+      }
+      delete product.images;
+
       return { ...product, totalAvailableQuantity, totalAvailableQuantityUnit, totalSlabsCount, totalHoldQuantity, totalHoldQuantityUnit };
     })
   );
@@ -74,8 +100,22 @@ export const fetchProductsWithSlabsByLocationGroupedBySipl = async (req: AuthReq
   return { products: finalData, total: data.total };
 };
 
-export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: number, limit: number, locationId: number) => {
-  const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
+export const fetchProductsWithSlabsByLocationGroupedByBlock = async (
+  page: number,
+  limit: number,
+  locationId: number,
+  isSlabType?: boolean,
+  search?: string,
+  subCategory?: string
+) => {
+  const filter: any = {};
+  if (isSlabType !== undefined) {
+    filter.isSlabType = isSlabType;
+  }
+  if (subCategory !== undefined) {
+    filter["$subCategory.name$"] = subCategory;
+  }
+  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
 
   // Map data accordingly product -> block -> slab
   let finalData = await Promise.all(
@@ -156,6 +196,17 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
 
       delete product.inventoryProducts;
 
+      if (product.images && product.images.length > 0) {
+        const primaryImg = product.images[0];
+        if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+          primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+        }
+        product.primaryImage = primaryImg;
+      } else {
+        product.primaryImage = null;
+      }
+      delete product.images;
+
       return {
         ...product,
         totalAvailableQuantity,
@@ -173,8 +224,22 @@ export const fetchProductsWithSlabsByLocationGroupedByBlock = async (page: numbe
   return { products: finalData, total: data.total };
 };
 
-export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number, limit: number, locationId: number) => {
-  const data: any = await productRepository.getAllProducts(page, limit, undefined, undefined, true);
+export const fetchProductsWithSlabsByLocationGroupedByLot = async (
+  page: number,
+  limit: number,
+  locationId: number,
+  isSlabType?: boolean,
+  search?: string,
+  subCategory?: string
+) => {
+  const filter: any = {};
+  if (isSlabType !== undefined) {
+    filter.isSlabType = isSlabType;
+  }
+  if (subCategory !== undefined) {
+    filter["$subCategory.name$"] = subCategory;
+  }
+  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
 
   // Map data accordingly product -> lot (bundle) -> slab
   let finalData = await Promise.all(
@@ -255,6 +320,17 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
 
       delete product.inventoryProducts;
 
+      if (product.images && product.images.length > 0) {
+        const primaryImg = product.images[0];
+        if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+          primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+        }
+        product.primaryImage = primaryImg;
+      } else {
+        product.primaryImage = null;
+      }
+      delete product.images;
+
       return {
         ...product,
         totalAvailableQuantity,
@@ -276,9 +352,15 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (page: number,
  * Level 1 — Products only (no SIPLs/bundles/blocks/inventoryProducts).
  * Returns products with aggregate counts so the table renders fast.
  */
-export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, isSlabType?: boolean, search?: string) => {
-  const filter = isSlabType ? { isSlabType: true } : undefined;
-  const data: any = await productRepository.getAllProducts(page, limit, search, filter, true);
+export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, isSlabType?: boolean, search?: string, subCategory?: string) => {
+  const filter: any = {};
+  if (isSlabType !== undefined) {
+    filter.isSlabType = isSlabType;
+  }
+  if (subCategory !== undefined) {
+    filter["$subCategory.name$"] = subCategory;
+  }
+  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
 
   const finalData = await Promise.all(
     data.products.map(async (product: any) => {

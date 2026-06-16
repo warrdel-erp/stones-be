@@ -6,7 +6,7 @@ import * as inventoryRepository from "../services/inventory.service";
 import { checkUserLocationAccess } from "../services/user.service";
 
 export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10, categorization } = req.query;
+  const { page = 1, limit = 10, categorization, isSlabType, search, subCategory } = req.query;
   const { locationId } = req.params;
 
   if (!locationId) {
@@ -16,6 +16,13 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
   // Check if user has access to this location.
   await checkUserLocationAccess(Number(locationId), req.user!);
 
+  let isSlab: boolean | undefined = undefined;
+  if (isSlabType === 'true') isSlab = true;
+  else if (isSlabType === 'false') isSlab = false;
+
+  const searchStr = search ? String(search) : undefined;
+  const subCategoryStr = subCategory ? String(subCategory) : undefined;
+
   let data: any = {};
 
   if (categorization === "BLOCK") {
@@ -23,7 +30,10 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     data = await inventoryRepository.fetchProductsWithSlabsByLocationGroupedByBlock(
       Number(page),
       Number(limit),
-      Number(locationId)
+      Number(locationId),
+      isSlab,
+      searchStr,
+      subCategoryStr
     );
 
   } else if (categorization === "BUNDLE") {
@@ -31,7 +41,10 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
     data = await inventoryRepository.fetchProductsWithSlabsByLocationGroupedByLot(
       Number(page),
       Number(limit),
-      Number(locationId)
+      Number(locationId),
+      isSlab,
+      searchStr,
+      subCategoryStr
     );
 
   } else {
@@ -41,7 +54,10 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
       req,
       Number(page),
       Number(limit),
-      Number(locationId)
+      Number(locationId),
+      isSlab,
+      searchStr,
+      subCategoryStr
     );
   }
 
@@ -57,19 +73,24 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
 });
 
 export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 200, isSlabType, search } = req.query;
+  const { page = 1, limit = 200, isSlabType, search, subCategory } = req.query;
   const locationId = req.user?.defaultLocationId;
 
   if (!locationId) {
     return res.status(400).json({ error: "User has no default location" });
   }
 
+  let isSlab: boolean | undefined = undefined;
+  if (isSlabType === 'true') isSlab = true;
+  else if (isSlabType === 'false') isSlab = false;
+
   const data = await inventoryRepository.fetchProductsOnlyByLocation(
     Number(page),
     Number(limit),
     Number(locationId),
-    isSlabType === 'true',
-    search ? String(search) : undefined
+    isSlab,
+    search ? String(search) : undefined,
+    subCategory ? String(subCategory) : undefined
   );
 
   if (!data.products.length) {

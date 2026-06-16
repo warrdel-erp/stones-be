@@ -45,21 +45,6 @@ export const getBalanceSheetData = async (clientId: number) => {
     return lastEntry ? Number(lastEntry.get("balance")) : 0;
   };
 
-  const getLedgerBalanceForBalanceSheet = async (ledgerId: number): Promise<number> => {
-    const children = await getLedgerAccountsWithoutPagination({
-      parentId: ledgerId,
-      clientId: clientId
-    });
-    if (children && children.length > 0) {
-      let total = 0;
-      for (const child of children) {
-        total += await getLedgerLastBalance(child.id);
-      }
-      return total;
-    }
-    return await getLedgerLastBalance(ledgerId);
-  };
-
   // Create a new structure with ledger accounts and balances
   const data = await Promise.all(nestedData.map(async (type) => {
     let typeBalance = 0;
@@ -67,19 +52,44 @@ export const getBalanceSheetData = async (clientId: number) => {
       let headerBalance = 0;
 
       const subHeadersWithLedgerAccounts = await Promise.all(header.subHeaders.map(async (subHeader) => {
-        // Fetch ledger accounts for this subheader and client (will default to only parent/independent accounts)
+        // Fetch root-level ledger accounts for this subheader and client (parentId is null)
         const ledgerAccounts = await getLedgerAccountsWithoutPagination({
           subHeaderId: subHeader.id,
+          parentId: null,
           clientId: clientId
         });
-        // For each ledger, get last journal entry balance
+
+        // For each root ledger, get its children, balances, and nest them
         const ledgerAccountsWithBalance = await Promise.all(ledgerAccounts.map(async (ledger: any) => {
           const ledgerPlain = ledger.get ? ledger.get({ plain: true }) : ledger;
-          const balance = await getLedgerBalanceForBalanceSheet(ledger.id);
-          return { ...ledgerPlain, balance };
+          
+          // Fetch children
+          const children = await getLedgerAccountsWithoutPagination({
+            parentId: ledger.id,
+            clientId: clientId
+          });
+
+          // Calculate children balances
+          const childrenWithBalance = await Promise.all(children.map(async (child: any) => {
+            const childPlain = child.get ? child.get({ plain: true }) : child;
+            const balance = await getLedgerLastBalance(child.id);
+            return { ...childPlain, balance };
+          }));
+
+          const childrenSum = childrenWithBalance.reduce((sum, c) => sum + (c.balance || 0), 0);
+          const parentOwnBalance = await getLedgerLastBalance(ledger.id);
+
+          // Compute correct total balance for this ledger account (parent + children)
+          const balance = parentOwnBalance + childrenSum;
+
+          return {
+            ...ledgerPlain,
+            balance,
+            children: childrenWithBalance
+          };
         }));
 
-        // Sum all ledger balances for this subHeader
+        // Sum all parent ledger balances for this subHeader (which already include their children)
         const subHeaderBalance = ledgerAccountsWithBalance.reduce((sum, l) => sum + (Number(l.balance) || 0), 0);
         headerBalance += subHeaderBalance;
         return {
