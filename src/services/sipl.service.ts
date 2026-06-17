@@ -1,7 +1,8 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
-import { PAYMENT_BILL_REFERENCE_TYPES, SIPL_STATUS } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, SIPL_STATUS, CREDIT_NOTE_REFERENCE_TYPES } from "../constants/tableTypes";
+import * as models from "../models";
 
 import * as containerRepository from "../repositories/container.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
@@ -402,6 +403,15 @@ export const getSIPLById = async (id: number) => {
     PAYMENT_BILL_REFERENCE_TYPES.SIPL
   );
 
+  const creditNotes = await models.CreditDebitNote.findAll({
+    where: {
+      referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+      referenceId: id
+    }
+  });
+
+  sipl.creditNotes = creditNotes.map((cn: any) => cn.get({ plain: true }));
+
   return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiloAmount };
 };
 
@@ -498,11 +508,20 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
       )
   );
 
-  // Unit bill price as per total area of all product's slab.
+  // Fetch credit notes
+  const creditNotes = await models.CreditDebitNote.findAll({
+    where: {
+      referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+      referenceId: siplId,
+    },
+    transaction,
+  });
+  const totalCreditNotesAmount = sumDecimal(creditNotes.map((cn: any) => cn.get({ plain: true })), "amount");
 
   // change unit bill price calcs using decimal as well.
   const unitBillPrice = decimalDivide(totalBillsCharges, totalQuantity);
   const unitServicePrice = decimalDivide(totalTradeServicesAmount, totalQuantity);
+  const unitCreditNotePrice = totalQuantity > 0 ? decimalDivide(totalCreditNotesAmount, totalQuantity) : 0;
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
@@ -522,7 +541,8 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     const unitCost = siplProduct.unitPrice;
 
     // Total unit charge is self unit charge + bill charge per unit area.
-    const landedUnitCost = decimal.decimalSum([Number(unitCost), Number(unitBillPrice), Number(unitServicePrice)]);
+    let landedUnitCost = decimal.decimalSum([Number(unitCost), Number(unitBillPrice), Number(unitServicePrice)]);
+    landedUnitCost = Number(decimal.decimalSubtract(landedUnitCost, Number(unitCreditNotePrice)));
 
     let data: object = {}
 

@@ -14,6 +14,7 @@ import {
   BILL_REFERENCE_TYPES,
   LEDGER_ACCOUNT_REFERENCE_TYPES,
   PAYMENT_BILL_REFERENCE_TYPES,
+  CREDIT_NOTE_REFERENCE_TYPES,
 } from "../constants/tableTypes";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
@@ -232,6 +233,14 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         PAYMENT_BILL_REFERENCE_TYPES.SIPL
       );
 
+      const creditNotes: any[] = await models.CreditDebitNote.findAll({
+        where: {
+          referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+          referenceId: sipl.id,
+        }
+      });
+      const creditNoteAmount = _.sumBy(creditNotes, (cn: any) => parseFloat(cn.amount)) || 0;
+
       return {
         id: sipl.id,
         type: "sipl",
@@ -243,6 +252,7 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         invoiceAmount: sipl.totalAmount,
         transaction: sipl.clientInvoiceNumber,
         paidAmount,
+        creditNoteAmount,
       };
     })
   );

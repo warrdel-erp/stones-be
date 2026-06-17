@@ -2,12 +2,12 @@ import { Router } from "express";
 import * as clientController from "../controllers/client.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
-import { deleteClientAccountSchema } from "../validators/auth.validator";
+import { deleteClientAccountSchema, registerClientSchema } from "../validators";
 
 const router = Router();
 
 // Route to register a new client
-router.post("/register", clientController.registerClientHandler);
+router.post("/register", validateRequest(registerClientSchema), clientController.registerClientHandler);
 
 // Get all clients with pagination and optional search filtering
 router.get("/", clientController.getClients);

@@ -61,6 +61,7 @@ export const JOURNAL_ENTRY_PROCESS_TYPE = {
   SLAB_SPLIT: "slab_split",
   CUSTOM: "custom",
   CANCEL_SIPL: "cancel_sipl",
+  SIPL_CREDIT_NOTE: "sipl_credit_note",
 } as const;
 
 export const JOURNAL_ENTRY_TYPE = {
@@ -197,6 +198,7 @@ export const DELIVERY_STATUS = {
 
 export const CREDIT_NOTE_REFERENCE_TYPES = {
   PAYMENT: "payment",
+  SIPL: "sipl",
 } as const;
 
 export const CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES = {

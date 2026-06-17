@@ -87,6 +87,12 @@ const assertVendorPayments = async (billsData: any[]) => {
     if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
       const siplCalc = await siplService.getSiplCalculations(referenceId);
       totalDocumentAmount = Number(siplCalc.totalAmount || 0);
+
+      const existingCreditNotes: any[] = await models.CreditDebitNote.findAll({
+        where: { referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL, referenceId: referenceId }
+      });
+      const existingCreditAmount = _.sumBy(existingCreditNotes, (cn: any) => parseFloat(cn.amount)) || 0;
+      totalDocumentAmount = decimalSubtract(totalDocumentAmount, existingCreditAmount);
     } else if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
       const billRecord: any = await billRepository.getBillByPk(referenceId);
       if (!billRecord) {

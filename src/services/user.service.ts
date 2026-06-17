@@ -179,9 +179,17 @@ export const assignLocationToUser = async (userId: number, locationId: number) =
     throw new Error("User ID and Location ID are required");
   }
 
+  // Get user's existing assigned locations
+  const existingLocations = await userRepository.getUserLocations(userId);
+
   const result = await userRepository.addUserLocation(userId, locationId);
   if (!result) {
     throw new Error("User or Location not found");
+  }
+
+  // If this is the user's first assigned location, make it their default
+  if (!existingLocations || existingLocations.length === 0) {
+    await userRepository.updateUserDefaultLocation(userId, locationId);
   }
 
   return result;

@@ -15,18 +15,34 @@ import * as clientRepository from "../repositories/client.repository";
 import * as companyRepository from "../repositories/company.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as userRepository from '../repositories/user.repository';
+import * as locationRepository from "../repositories/location.repository";
+import * as warehouseRepository from "../repositories/warehouse.repository";
 import * as accountService from "./account.service";
 import * as accountRepository from "../repositories/account.repository";
 import * as accountPermissionRepository from "../repositories/accountPermission.repository";
 import { PERMISSIONS } from "../constants/permissions";
 
 type ClientRegistrationData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phone: string;
-  company?: {
+  primary: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    phone: string;
+    userCount: number;
+  };
+  location: {
+    locationName: string;
+    locationCode: string;
+    contactName: string;
+    contactNumber: string;
+    contactMail: string;
+    address: string;
+    addressLine?: string;
+    lat: number;
+    long: number;
+  };
+  company: {
     companyName: string;
     companyAddress: string;
     city: string;
@@ -47,8 +63,9 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
   const transaction = await sequelize.transaction();
 
   try {
-    // Extract account data and company data
-    const { email, password, company, ...clientDetails } = clientData;
+    // Extract account data and company/location data
+    const { primary, location, company } = clientData;
+    const { email, password, ...clientDetails } = primary;
 
     if (!(email && password)) {
       throw new AppError("Email and password are required", 400);
@@ -74,13 +91,32 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
 
       await accountPermissionRepository.createAccountPermissions(permissionsToAssign, transaction);
 
-      // Create company if company data is provided
-      if (company) {
-        await companyRepository.createCompany({
-          ...company,
-          clientId: client.getDataValue('id')
-        }, transaction);
+      // Create company
+      await companyRepository.createCompany({
+        ...company,
+        clientId: client.getDataValue('id')
+      }, transaction);
+
+      // Create location
+      const createdLocation = await locationRepository.createLocation({
+        ...location,
+        clientId: client.getDataValue('id')
+      }, transaction);
+
+      // Set locationId in context for subsequent operations (like warehouse creation)
+      const store = requestContext.getStore();
+      if (store) {
+        store.locationId = createdLocation.getDataValue('id');
       }
+
+      // Create default warehouse for this location
+      await warehouseRepository.createWarehouse({
+        locationId: createdLocation.getDataValue('id'),
+        clientId: client.getDataValue('id')
+      }, transaction);
+
+      // Update client defaultLocationId
+      await client.update({ defaultLocationId: createdLocation.getDataValue('id') }, { transaction });
 
       // Create default ledger accounts for the client within transaction
       await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
@@ -88,9 +124,9 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
       // If everything is successful, commit the transaction
       await transaction.commit();
 
-      // Fetch the complete client data with company
+      // Fetch the complete client data with company and locations
       const completeClient = await clientRepository.getClientById(client.getDataValue('id'), {
-        include: ['company']
+        include: ['company', 'locations']
       });
 
       return completeClient;
@@ -329,3 +365,7 @@ export const deleteClientAccount = async (email: string, password: string) => {
     throw error;
   }
 };
+
+
+
+
