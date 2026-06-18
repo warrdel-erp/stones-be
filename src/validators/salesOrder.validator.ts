@@ -7,6 +7,7 @@ export const createSalesOrderSchema = z.object({
     required_error: "Delivery Type is required",
   }),
   shippingAddressId: z.number({ required_error: "Delivery Location is required" }).int(),
+  holdId: z.number().int().optional().nullable(),
   soDate: z.string().optional(),
   customerPo: z.string().optional().nullable(),
   customerPoDate: z.string().optional().nullable(),

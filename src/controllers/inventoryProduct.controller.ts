@@ -1,12 +1,10 @@
 import { Response } from "express";
+import { AppError } from "../helper/appError";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryProductService from "../services/inventoryProduct.service";
 import { bulkUploadInventoryProducts as bulkUploadInventoryProductsService } from "../services/inventoryProductBulkUpload.service";
-import { AppError } from "../helper/appError";
-import { inventoryProductInput } from "../validators";
-import { inventoryProductArraySchema } from "../validators";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
     const { siplId, bundle, block, showSoldCanceled } = req.query;
@@ -158,73 +156,7 @@ export const updateInventoryProductCartStatus = catchAsync(async (req: AuthReque
     return SuccessResponse(res, 200, "Inventory Product Cart status Updated successfully", result);
 });
 
-/**
- * Hold an inventory product
- */
-export const holdInventoryProduct = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-    const data = req.body;
-    const accountId = req.user?.accountId;
 
-    if (!accountId) {
-        return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    const result = await inventoryProductService.holdInventoryProduct(Number(id), data, Number(accountId));
-
-    return SuccessResponse(res, 200, "Inventory product placed on hold successfully", result);
-});
-
-/**
- * Unhold an inventory product
- */
-export const unholdInventoryProduct = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-
-    const result = await inventoryProductService.unholdInventoryProduct(Number(id));
-
-    return SuccessResponse(res, 200, "Hold removed successfully", result);
-});
-
-/**
- * Get hold details by hold ID
- */
-export const getHoldById = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { holdId } = req.params;
-
-    const result = await inventoryProductService.getHoldById(Number(holdId));
-
-    return SuccessResponse(res, 200, "Hold details fetched successfully", result);
-});
-
-/**
- * Create multiple holds on inventory products with a given customerId
- */
-export const createBulkHolds = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { inventoryProductIds, customerId, note } = req.body;
-    const accountId = req.user?.accountId;
-
-    if (!accountId) {
-        return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    if (!inventoryProductIds || !Array.isArray(inventoryProductIds) || inventoryProductIds.length === 0) {
-        return res.status(400).json({ error: "inventoryProductIds array is required and must not be empty" });
-    }
-
-    if (!customerId) {
-        return res.status(400).json({ error: "customerId is required" });
-    }
-
-    const result = await inventoryProductService.createBulkHolds(
-        inventoryProductIds.map((id: any) => Number(id)),
-        Number(customerId),
-        { note },
-        Number(accountId)
-    );
-
-    return SuccessResponse(res, 200, `Successfully created ${result.successfulCount} hold(s)`, result);
-});
 
 export const getInventoryProductsWithEmptyBin = catchAsync(async (req: AuthRequest, res: Response) => {
     const { productId } = req.query;
@@ -290,7 +222,7 @@ export const deleteInventoryProductImage = catchAsync(async (req: AuthRequest, r
 
 export const getInventoryProductImages = catchAsync(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
-    
+
     const result = await inventoryProductService.getInventoryProductImages(Number(id));
 
     return SuccessResponse(res, 200, "Images fetched successfully", result);

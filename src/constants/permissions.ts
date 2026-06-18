@@ -20,6 +20,9 @@ export const PERMISSIONS = {
     SELECTION_SHEET: {
         value: "perm_5z2a6b4c",
     },
+    HOLDS: {
+        value: "perm_8h2l9d4s",
+    },
     DELIVERIES: {
         value: "perm_0d8e1f3g",
     },

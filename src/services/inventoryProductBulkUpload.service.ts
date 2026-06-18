@@ -649,20 +649,7 @@ const executeBulkInventory = async (rows: any[], transaction: any) => {
       : Promise.resolve(),
   ]);
 
-  // ── Wave 4: Holds (for rows flagged ONHOLD) ──────────────────────────────────
-  const onHoldRows = rowsWithIds.filter((r) => r.isOnHold);
-  if (onHoldRows.length > 0) {
-    await models.InventoryProductHold.bulkCreate(
-      onHoldRows.map((row) => ({
-        inventoryProductId: row.inventoryProductId,
-        note: row.notes ?? null,
-        createdById: row.accountId, // References Account(id)
-        clientId: row.clientId,
-        locationId: row.locationId,
-      })),
-      { transaction }
-    );
-  }
+
 
   return createdInventoryProducts.length;
 };

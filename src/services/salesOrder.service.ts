@@ -2,7 +2,7 @@ import _ from "lodash";
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { SALES_TAX } from "../constants";
-import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE, HOLD_STAGES } from "../constants/tableTypes";
 import * as activityService from "../services/activity.service";
 import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
 import * as customerRepository from "../repositories/customer.repository";
@@ -12,6 +12,8 @@ import * as salesOrderProductRepository from "../repositories/salesOrderProduct.
 import * as cartItemService from "../services/cartItem.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as packagingListService from "../services/packagingList.service";
+import * as holdRepository from "../repositories/hold.repository";
+import { AppError } from "../helper/appError";
 
 
 export const createSalesOrder = async (data: any) => {
@@ -23,11 +25,30 @@ export const createSalesOrder = async (data: any) => {
       data.taxId = customer?.salesTaxId;
     }
 
+    if (data.holdId) {
+      const hold = await holdRepository.getHoldById(data.holdId);
+      if (!hold) {
+        throw new AppError("Hold not found", 404);
+      }
+      if (hold.stage === HOLD_STAGES.SO_CREATED) {
+        throw new AppError("A Sales Order has already been created from this Hold.", 400);
+      }
+    }
+
     // If cart item exists for any inventory product then first delete it before creating new sales order with account validation
     await validateAndDeleteCartItemForInventoryProductId(data, transaction);
 
     // Create sales order
     const salesOrder: any = await salesOrderRepository.createSalesOrder(data, transaction);
+
+    // Update hold stage to soCreated if holdId is specified
+    if (data.holdId) {
+      await holdRepository.updateHold(
+        data.holdId,
+        { stage: HOLD_STAGES.SO_CREATED },
+        transaction
+      );
+    }
 
     // Create sales order products
     const salesOrderProducts = await salesOrderProductService.createSalesOrderProducts(

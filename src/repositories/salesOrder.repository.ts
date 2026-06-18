@@ -335,6 +335,7 @@ export const getSalesOrderById = async (id: number) => {
       { association: "shippingAddress" },
       { association: "notes" },
       { association: "soLocation" },
+      { association: "hold", attributes: ["id", "clientHoldNumber"] },
       {
         association: "salesOrderProducts",
         include: [

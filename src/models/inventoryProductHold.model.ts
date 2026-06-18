@@ -1,10 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import InventoryProduct from "./inventoryProduct.model";
-import Account from "./Account.model";
-import Customer from "./customer.model";
 import Client from "./client.model";
-import Location from "./location.model";
+import Hold from "./hold.model";
 
 const InventoryProductHold = sequelize.define(
   "InventoryProductHold",
@@ -13,6 +11,16 @@ const InventoryProductHold = sequelize.define(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    holdId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Hold,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     inventoryProductId: {
       type: DataTypes.INTEGER,
@@ -25,30 +33,6 @@ const InventoryProductHold = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    note: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    createdById: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: Account,
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
-    },
-    customerId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Customer,
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
-    },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -58,16 +42,6 @@ const InventoryProductHold = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: Location,
-        key: "id",
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     },
   },
   {
@@ -79,7 +53,7 @@ const InventoryProductHold = sequelize.define(
 // Scope configuration for InventoryProductHold model
 (InventoryProductHold as any).scopeConfig = {
   client: true,
-  location: true,
+  location: false,
 };
 
 export default InventoryProductHold;

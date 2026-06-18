@@ -51,6 +51,7 @@ import GenericProduct from "./genericProduct.model";
 import CreditDebitNote from "./creditDebitNote.model";
 import SoProductSwapHistory from "./soProductSwapHistory.model";
 import InventoryProductHold from "./inventoryProductHold.model";
+import Hold from "./hold.model";
 import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import AccountPermission from "./AccountPermission.model";
@@ -734,15 +735,32 @@ InventoryProduct.hasMany(SoProductSwapHistory, { foreignKey: "inventoryProductId
 SoProductSwapHistory.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 Location.hasMany(SoProductSwapHistory, { foreignKey: "locationId", as: "soProductSwapHistories" });
 
+// Hold associations
+Hold.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Account.hasMany(Hold, { foreignKey: "createdById", as: "holds" });
+
+Hold.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Customer.hasMany(Hold, { foreignKey: "customerId", as: "holds" });
+
+Hold.belongsTo(Customer, { foreignKey: "fabricatorId", as: "fabricator" });
+Customer.hasMany(Hold, { foreignKey: "fabricatorId", as: "fabricatorHolds" });
+
+Hold.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(Hold, { foreignKey: "clientId", as: "holds" });
+
+Hold.belongsTo(Location, { foreignKey: "locationId", as: "location" });
+Location.hasMany(Hold, { foreignKey: "locationId", as: "holds" });
+
+Hold.hasMany(InventoryProductHold, { foreignKey: "holdId", as: "items" });
+InventoryProductHold.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
+
+// Hold-SalesOrder association
+Hold.hasOne(SalesOrder, { foreignKey: "holdId", as: "salesOrder" });
+SalesOrder.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
+
 // InventoryProductHold associations
 InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
-InventoryProduct.hasOne(InventoryProductHold, { foreignKey: "inventoryProductId", as: "hold" });
-
-InventoryProductHold.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
-Account.hasMany(InventoryProductHold, { foreignKey: "createdById", as: "inventoryProductHolds" });
-
-InventoryProductHold.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
-Customer.hasMany(InventoryProductHold, { foreignKey: "customerId", as: "inventoryProductHolds" });
+InventoryProduct.hasOne(InventoryProductHold, { foreignKey: "inventoryProductId", as: "holdItem" });
 
 // SelectionSheet associations
 SelectionSheet.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
@@ -990,6 +1008,7 @@ export {
   CartItem,
   SoProductSwapHistory,
   InventoryProductHold,
+  Hold,
   SelectionSheet,
   SelectionSheetItem,
   AccountPermission,

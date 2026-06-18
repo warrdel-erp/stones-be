@@ -127,7 +127,8 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
         association: 'genericProduct'
       },
       {
-        association: 'hold'
+        association: 'holdItem',
+        include: [{ association: 'hold' }]
       },
       {
         association: "bin",
@@ -316,7 +317,8 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
         required: false
       },
       {
-        association: 'hold'
+        association: 'holdItem',
+        include: [{ association: 'hold' }]
       },
       {
         association: 'images',
@@ -453,8 +455,9 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
     },
     include: [
       {
-        association: 'hold',
+        association: 'holdItem',
         required: isHold === 'true',
+        include: [{ association: 'hold' }]
       },
       {
         association: 'slab'
@@ -502,8 +505,9 @@ export const getInventoryProductsPaginated = async (filter: Record<string, any>,
     },
     include: [
       {
-        association: 'hold',
+        association: 'holdItem',
         required: isHold === 'true',
+        include: [{ association: 'hold' }]
       },
       {
         association: 'slab'
@@ -641,11 +645,16 @@ export const getInventoryProductByQrCode = async (qrCode: string, transaction?: 
         association: 'genericProduct'
       },
       {
-        association: 'hold',
+        association: 'holdItem',
         include: [
           {
-            association: 'customer',
-            attributes: ['id', 'name']
+            association: 'hold',
+            include: [
+              {
+                association: 'customer',
+                attributes: ['id', 'name']
+              }
+            ]
           }
         ]
       }
