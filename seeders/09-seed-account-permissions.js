@@ -10,6 +10,7 @@ module.exports = {
       "perm_4r8s5t2u", // PRODUCTS
       "perm_7v9w3x1y", // RETURNS
       "perm_5z2a6b4c", // SELECTION_SHEET
+      "perm_8h2l9d4s", // HOLDS
       "perm_0d8e1f3g", // DELIVERIES
       "perm_6h5i9j2k", // SALES
       "perm_3l7m4n8p", // PURCHASE

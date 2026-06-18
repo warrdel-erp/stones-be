@@ -141,6 +141,11 @@ export const PACKAGING_LIST_STAGES = {
   CANCELED: "canceled",
 } as const;
 
+export const HOLD_STAGES = {
+  INITIATED: "initiated",
+  SO_CREATED: "soCreated",
+} as const;
+
 export const SALE_ORDER_PRODUCT_STAGES = {
   SALES_ORDER: "saleOrder",
   LOADING_ORDER: "loadingOrder",

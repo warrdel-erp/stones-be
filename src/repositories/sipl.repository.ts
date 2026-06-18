@@ -318,7 +318,7 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
         required: true,
         include: [
           {
-            association: 'hold',
+            association: 'holdItem',
             attributes: ['id']
           },
           {

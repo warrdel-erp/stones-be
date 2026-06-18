@@ -98,6 +98,16 @@ const SalesOrder = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    holdId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: models.Hold,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
     taxId: {
       type: DataTypes.INTEGER,
       allowNull: true,

@@ -3,37 +3,40 @@ import * as models from "../models";
 import { scoped } from "../utils/scoped";
 
 /**
- * Create a new selection sheet with items
+ * Create a new hold with items
  */
-export const createSelectionSheet = async (
+export const createHold = async (
   data: {
+    description?: string;
+    fabricatorId?: number;
     createdById: number;
     customerId: number;
     clientId: number;
+    locationId: number;
   },
   transaction?: Transaction
 ) => {
-  return await scoped(models.SelectionSheet).create(data, { transaction });
+  return await scoped(models.Hold).create(data, { transaction });
 };
 
 /**
- * Create selection sheet items
+ * Create hold items
  */
-export const createSelectionSheetItems = async (
+export const createHoldItems = async (
   items: Array<{
-    selectionSheetId: number;
+    holdId: number;
     inventoryProductId: number;
     clientId: number;
   }>,
   transaction?: Transaction
 ) => {
-  return await scoped(models.SelectionSheetItem).bulkCreate(items, { transaction });
+  return await scoped(models.InventoryProductHold).bulkCreate(items, { transaction });
 };
 
 /**
- * Get selection sheet by ID with all details
+ * Get hold by ID with all details
  */
-export const getSelectionSheetById = async (id: number) => {
+export const getHoldById = async (id: number) => {
   const productScoped = scoped(models.Product);
   const products = (await productScoped.findAll({
     attributes: ['id', 'name'],
@@ -43,16 +46,12 @@ export const getSelectionSheetById = async (id: number) => {
         required: true,
         include: [
           {
-            association: 'selectionSheetItems',
-            attributes: ['id', 'selectionSheetId'],
+            association: 'holdItem',
+            attributes: ['id', 'holdId'],
             required: true,
             where: {
-              selectionSheetId: id
+              holdId: id
             },
-          },
-          {
-            association: 'holdItem',
-            attributes: ['id']
           },
           {
             association: "slab",
@@ -65,7 +64,7 @@ export const getSelectionSheetById = async (id: number) => {
     ],
   }));
 
-  const selectionSheet = (await models.SelectionSheet.findByPk(id, {
+  const hold = (await models.Hold.findByPk(id, {
     include: [
       {
         association: "createdBy",
@@ -75,27 +74,33 @@ export const getSelectionSheetById = async (id: number) => {
         include: [
           {
             association: "user",
-
           },
         ],
       },
       {
         association: "customer",
       },
+      {
+        association: "fabricator",
+      },
+      {
+        association: "salesOrder",
+        attributes: ["id", "clientSoNumber"],
+      },
     ],
   }))?.get({ plain: true });
 
-  selectionSheet.products = products;
+  if (hold) {
+    hold.products = products;
+  }
 
-  return selectionSheet
+  return hold;
 };
 
-
-
 /**
- * Get all selection sheets for a client filtered by account
+ * Get all holds for a client filtered by account
  */
-export const getAllSelectionSheets = async (
+export const getAllHolds = async (
   clientId: number,
   accountId: number,
   page: number,
@@ -104,7 +109,7 @@ export const getAllSelectionSheets = async (
 ) => {
   const offset = (page - 1) * limit;
 
-  const { rows: data, count: total } = await scoped(models.SelectionSheet).findAndCountAll({
+  const { rows: data, count: total } = await scoped(models.Hold).findAndCountAll({
     where: {
       clientId,
       createdById: accountId
@@ -122,6 +127,10 @@ export const getAllSelectionSheets = async (
       },
       {
         association: "customer",
+        attributes: ["id", "name", "primaryPhoneNumber"],
+      },
+      {
+        association: "fabricator",
         attributes: ["id", "name", "primaryPhoneNumber"],
       },
       {
@@ -156,52 +165,83 @@ export const getAllSelectionSheets = async (
 };
 
 /**
- * Delete selection sheet by ID
+ * Delete hold by ID
  */
-export const deleteSelectionSheet = async (
+export const deleteHold = async (
   id: number,
   transaction?: Transaction
 ) => {
-  return await scoped(models.SelectionSheet).destroy({
+  return await scoped(models.Hold).destroy({
     where: { id },
     transaction,
   });
 };
 
 /**
- * Check if selection sheet exists and belongs to client
+ * Check if hold exists and belongs to client
  */
-export const findSelectionSheetByIdAndClient = async (
+export const findHoldByIdAndClient = async (
   id: number,
   clientId: number
 ) => {
-  return await scoped(models.SelectionSheet).findOne({
+  return await scoped(models.Hold).findOne({
     where: { id, clientId },
   });
 };
 
 /**
- * Find selection sheet item by ID and client
+ * Find hold item by ID and client
  */
-export const findSelectionSheetItemByIdAndClient = async (
+export const findHoldItemByIdAndClient = async (
   id: number,
   clientId: number
 ) => {
-  return await scoped(models.SelectionSheetItem).findOne({
+  return await scoped(models.InventoryProductHold).findOne({
     where: { id, clientId },
   });
 };
 
 /**
- * Delete selection sheet item by ID
+ * Delete hold item by ID
  */
-export const deleteSelectionSheetItem = async (
+export const deleteHoldItem = async (
   id: number,
   transaction?: Transaction
 ) => {
-  return await scoped(models.SelectionSheetItem).destroy({
+  return await scoped(models.InventoryProductHold).destroy({
     where: { id },
     transaction,
   });
 };
 
+/**
+ * Find hold item by inventory product ID
+ */
+export const findHoldByInventoryProductId = async (
+  inventoryProductId: number,
+  transaction?: Transaction
+) => {
+  return await scoped(models.InventoryProductHold).findOne({
+    where: { inventoryProductId },
+    transaction,
+  });
+};
+
+/**
+ * Update hold by ID
+ */
+export const updateHold = async (
+  id: number,
+  data: Partial<{
+    description: string;
+    fabricatorId: number;
+    customerId: number;
+    stage: string;
+  }>,
+  transaction?: Transaction
+) => {
+  return await scoped(models.Hold).update(data, {
+    where: { id },
+    transaction,
+  });
+};

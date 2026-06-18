@@ -122,7 +122,7 @@ export const getAllProducts = async (
           association: "inventoryProducts",
           include: [
             {
-              association: 'hold',
+              association: 'holdItem',
               attributes: ['id']
             },
             {
@@ -292,7 +292,7 @@ export const getAllProductsWithCompactData = async (
           attributes: ['id', 'status', 'isSlabType'],
           include: [
             {
-              association: 'hold',
+              association: 'holdItem',
               attributes: ['id']
             },
             {
