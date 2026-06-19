@@ -19,4 +19,6 @@ router.delete("/:id", authenticateUser, holdController.deleteHold);
 // Delete hold item
 router.delete("/items/:itemId", authenticateUser, holdController.deleteHoldItem);
 
+router.put("/items/:itemId", authenticateUser, holdController.updateHoldItem);
+
 export default router;

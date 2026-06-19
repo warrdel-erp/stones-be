@@ -3,6 +3,7 @@ import * as salesOrderService from "../services/salesOrder.service";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { AppError } from "../helper/appError";
 
 // Create new SO
 export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -70,3 +71,17 @@ export const getPaidAmountForSO = catchAsync(async (req: AuthRequest, res: Respo
 
   return SuccessResponse(res, 200, 'Total paid amount fetched successfully for given SO.', data)
 })
+
+// Update sales order tax
+export const updateSalesOrderTax = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { taxId } = req.body;
+  const clientId = req.user?.clientId;
+
+  if (!taxId) {
+    throw new AppError("taxId is required", 400);
+  }
+
+  const salesOrder = await salesOrderService.updateSalesOrderTax(Number(id), Number(taxId), Number(clientId!));
+  SuccessResponse(res, 200, "Sales Order tax updated successfully", salesOrder);
+});

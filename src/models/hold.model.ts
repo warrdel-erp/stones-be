@@ -5,6 +5,7 @@ import Customer from "./customer.model";
 import Client from "./client.model";
 import Location from "./location.model";
 import { HOLD_STAGES } from "../constants/tableTypes";
+import { v4 as uuidv4 } from "uuid";
 
 const Hold = sequelize.define(
     "Hold",
@@ -77,6 +78,11 @@ const Hold = sequelize.define(
             defaultValue: HOLD_STAGES.INITIATED,
             allowNull: false,
         },
+        barcode: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
     },
     {
         tableName: "holds",
@@ -103,6 +109,9 @@ Hold.beforeCreate(async (hold: any) => {
     lastHoldAccordingToClient = lastHoldAccordingToClient?.get({ plain: true });
 
     hold.clientHoldNumber = !!lastHoldAccordingToClient ? lastHoldAccordingToClient.clientHoldNumber + 1 : 1;
+    
+    // Generate unique barcode for Hold
+    hold.barcode = "hold/" + uuidv4();
 });
 
 // Scope configuration for Hold model

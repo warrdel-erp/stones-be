@@ -110,3 +110,20 @@ export const deleteHoldItem = catchAsync(async (req: AuthRequest, res: Response)
 
     return SuccessResponse(res, 200, "Hold item deleted successfully", result);
 });
+
+/**
+ * Update hold item
+ */
+export const updateHoldItem = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { itemId } = req.params;
+    const clientId = req.user?.clientId;
+    const { unitPrice } = req.body;
+
+    if (!clientId) {
+        throw new AppError("Missing client information", 401);
+    }
+
+    const result = await holdService.updateHoldItem(Number(itemId), clientId, { unitPrice: Number(unitPrice) });
+
+    return SuccessResponse(res, 200, "Hold item updated successfully", result);
+});

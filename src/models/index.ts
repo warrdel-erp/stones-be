@@ -725,6 +725,7 @@ CreditDebitNote.belongsTo(Payment, {
   as: "payment",
 });
 
+
 // SoProductSwapHistory associations
 SoProductSwapHistory.belongsTo(SalesOrderProduct, { foreignKey: "salesProductId", as: "salesOrderProduct" });
 SalesOrderProduct.hasMany(SoProductSwapHistory, { foreignKey: "salesProductId", as: "swapHistories" });
