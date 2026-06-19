@@ -24,6 +24,15 @@ export const createCreditDebitNoteSchema = z.object({
     referenceId: z.number({
         invalid_type_error: 'Reference ID must be a number',
     }).int('Reference ID must be an integer').positive('Reference ID must be positive').optional(),
+
+    creditNoteNumber: z.string().optional(),
+    creditNoteDate: z.string().optional(),
+    reasonType: z.string().optional(),
+    remarks: z.string().optional(),
+    claimReferenceNumber: z.string().optional(),
+    inventoryImpactType: z.string().optional(),
+    inventoryAdjustmentValue: z.number().optional(),
+    selectedSlabIds: z.array(z.number()).optional(),
 });
 
 export const updateCreditDebitNoteSchema = z.object({

@@ -14,6 +14,7 @@ import * as salesOrderProductService from "../services/salesOrderProduct.service
 import * as packagingListService from "../services/packagingList.service";
 import * as holdRepository from "../repositories/hold.repository";
 import { AppError } from "../helper/appError";
+import * as models from "../models";
 
 
 export const createSalesOrder = async (data: any) => {
@@ -251,3 +252,68 @@ export const getOpenSOCountByClient = async (clientId: number) => {
 export const getPaidAmountForSO = (id: number) => {
   return salesOrderRepository.getTotalPaidAmountForSO(id);
 }
+
+export const updateSalesOrderTax = async (id: number, taxId: number, clientId: number) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(id, transaction);
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+    if (salesOrder.clientId !== clientId) {
+      throw new AppError("Unauthorized access to this Sales Order", 403);
+    }
+
+    // Check if there are any invoices
+    const invoiceCount = await models.SalesOrderInvoice.count({
+      where: { salesOrderId: id },
+      transaction,
+    });
+    if (invoiceCount > 0) {
+      throw new AppError("Tax can be changed only before the first invoice has been created for this Sales Order.", 400);
+    }
+
+    // Find the new tax percentage
+    const taxMatch = SALES_TAX.find((t) => t.id === taxId);
+    if (!taxMatch) {
+      throw new AppError("Invalid Tax ID selected", 400);
+    }
+
+    // Update SalesOrder taxId
+    await salesOrder.update({ taxId }, { transaction });
+
+    // Update taxPercentage on all SalesOrderProducts where taxApplied is true
+    await models.SalesOrderProduct.update(
+      { taxPercentage: taxMatch.value },
+      {
+        where: {
+          salesOrderId: id,
+          taxApplied: true,
+        },
+        transaction,
+      }
+    );
+
+    await activityService.logActivity(
+      {
+        clientId: salesOrder.clientId,
+        activityType: ACTIVITY_TYPE.SALES_ORDER_CREATION,
+        referenceId: salesOrder.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_ORDER,
+        title: "Sales Order Tax Updated",
+        description: `Sales Order #${salesOrder.clientSoNumber} tax was updated to ${taxMatch.label} (${taxMatch.value}%).`,
+        locationId: salesOrder.locationId,
+      },
+      transaction
+    );
+
+    await transaction.commit();
+    
+    // Fetch and return the updated sales order with associations
+    const updatedSalesOrder = await getSalesOrderById(id);
+    return updatedSalesOrder;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};

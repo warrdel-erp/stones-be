@@ -994,3 +994,11 @@ sticky navbar.
 2. category, subcategory filter in app inventory.
 3. 20 items per page.
 4. balance sheet as per new parent child relation and new design.
+5. Holds Separate module.
+
+---
+
+1. holds customer, fabricator letters.
+2. holds product pricing.
+3. SIPL credit note form.
+4. SO tax change

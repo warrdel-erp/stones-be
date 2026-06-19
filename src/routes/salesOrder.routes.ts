@@ -30,6 +30,9 @@ router.get("/paidAmount/:id", authenticateUser, salesOrderController.getPaidAmou
 // Get SO by Id for Create LO
 router.get("/:id/forCreateLO", authenticateUser, salesOrderController.getSalesOrderByIdForCreateLO);
 
+// Update Sales Order Tax
+router.put("/:id/tax", authenticateUser, salesOrderController.updateSalesOrderTax);
+
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);
 

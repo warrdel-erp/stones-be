@@ -43,6 +43,11 @@ const InventoryProductHold = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    unitPrice: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0.00,
+    },
   },
   {
     tableName: "inventory_product_holds",

@@ -830,7 +830,7 @@ export async function createJournalEntriesForSiplCreditNote(creditNote: any, sip
     entryForId: siplData.id,
   } as any, transaction);
 
-  if (cogsAmount > 0) {
+  if (cogsAmount !== 0) {
     const cogsLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
       clientId,
@@ -841,9 +841,9 @@ export async function createJournalEntriesForSiplCreditNote(creditNote: any, sip
     const cogsLedgerObj = cogsLedgerAccount.get ? cogsLedgerAccount.get({ plain: true }) : cogsLedgerAccount;
 
     await journalEntryRepository.create({
-      amount: cogsAmount,
+      amount: Math.abs(cogsAmount),
       ledgerId: cogsLedgerObj.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
+      type: cogsAmount > 0 ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
       referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
       referenceId: siplData.id,

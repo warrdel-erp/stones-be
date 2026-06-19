@@ -47,7 +47,7 @@ export const getHoldById = async (id: number) => {
         include: [
           {
             association: 'holdItem',
-            attributes: ['id', 'holdId'],
+            attributes: ['id', 'holdId', 'unitPrice'],
             required: true,
             where: {
               holdId: id
@@ -58,6 +58,19 @@ export const getHoldById = async (id: number) => {
           },
           {
             association: 'genericProduct'
+          },
+          {
+            association: "bin",
+            include: [
+              {
+                association: "warehouse",
+                include: [
+                  {
+                    association: "location",
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -79,13 +92,40 @@ export const getHoldById = async (id: number) => {
       },
       {
         association: "customer",
+        include: [
+          {
+            association: "billingAddress",
+          },
+          {
+            association: "primarySalesPerson",
+          },
+        ],
       },
       {
         association: "fabricator",
+        include: [
+          {
+            association: "billingAddress",
+          },
+        ],
       },
       {
         association: "salesOrder",
-        attributes: ["id", "clientSoNumber"],
+        attributes: ["id", "clientSoNumber", "taxId"],
+        include: [
+          {
+            association: "salesOrderProducts",
+            attributes: ["id", "inventoryProductId", "unitPrice", "taxApplied"],
+          }
+        ]
+      },
+      {
+        association: "client",
+        include: [
+          {
+            association: "company",
+          },
+        ],
       },
     ],
   }))?.get({ plain: true });
@@ -209,6 +249,22 @@ export const deleteHoldItem = async (
   transaction?: Transaction
 ) => {
   return await scoped(models.InventoryProductHold).destroy({
+    where: { id },
+    transaction,
+  });
+};
+
+/**
+ * Update hold item by ID
+ */
+export const updateHoldItem = async (
+  id: number,
+  data: Partial<{
+    unitPrice: number;
+  }>,
+  transaction?: Transaction
+) => {
+  return await scoped(models.InventoryProductHold).update(data, {
     where: { id },
     transaction,
   });

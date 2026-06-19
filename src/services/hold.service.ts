@@ -177,3 +177,33 @@ export const deleteHoldItem = async (id: number, clientId: number) => {
 
   return { message: "Hold item deleted successfully" };
 };
+
+/**
+ * Update hold item
+ */
+export const updateHoldItem = async (
+  id: number,
+  clientId: number,
+  data: { unitPrice: number }
+) => {
+  // Validate hold item exists and belongs to client
+  const item = await holdRepository.findHoldItemByIdAndClient(id, clientId);
+
+  if (!item) {
+    throw new AppError("Hold item not found", 404);
+  }
+
+  // Fetch the hold to check its stage
+  const hold = await holdRepository.findHoldByIdAndClient(item.holdId, clientId);
+  if (hold && (hold as any).stage === HOLD_STAGES.SO_CREATED) {
+    throw new AppError("Hold items cannot be updated after a Sales Order has been created from the Hold", 400);
+  }
+
+  const [updatedCount] = await holdRepository.updateHoldItem(id, { unitPrice: data.unitPrice });
+
+  if (updatedCount === 0) {
+    throw new AppError("Failed to update hold item", 500);
+  }
+
+  return { message: "Hold item updated successfully" };
+};
