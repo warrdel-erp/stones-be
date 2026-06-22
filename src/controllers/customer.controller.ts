@@ -36,7 +36,13 @@ export const getAllCustomersController = catchAsync(async (req: AuthRequest, res
 
   const clientId = Number(req.user?.clientId)
 
-  const result = await customerService.fetchAllCustomers(Number(page), Number(limit), clientId, String(search), filter);
+  const result = await customerService.fetchAllCustomers(
+    Number(page),
+    Number(limit),
+    clientId,
+    search ? String(search) : undefined,
+    filter
+  );
 
   return SuccessResponse(res, 200, "Customers retrieved successfully", result.customers, {
     total: result.total,
