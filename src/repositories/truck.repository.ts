@@ -63,7 +63,7 @@ export const findAll = async (page: number, limit: number, filters?: { [key: str
   const offset = (page - 1) * limit;
 
   // Build where clause dynamically if filters are provided
-  const whereClause = { ...filters };
+  const whereClause: any = { ...filters };
 
   // Remove search from whereClause and apply Op.or if present
   const search = whereClause.search;

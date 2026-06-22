@@ -10,6 +10,7 @@ import { PAYMENT_BILL_REFERENCE_TYPES, PO_STATUS, SIPL_STATUS } from "../constan
 import _ from "lodash";
 import * as decimal from '../helper/decimal';
 import * as siplService from "./sipl.service";
+import * as models from "../models";
 import { AppError } from "../helper/appError";
 
 /**
@@ -40,6 +41,16 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     let requestedPurchaseProduct;
     // Create SIPL Products (if provided)
     if (poData.products?.length) {
+      for (const product of poData.products) {
+        const prod = await models.Product.findByPk(product.productId, { transaction }) as any;
+        if (!prod) {
+          throw new AppError(`Product with ID ${product.productId} not found`, 404);
+        }
+        if (prod.isSlabType && (product.noOfSlabs === undefined || product.noOfSlabs === null || product.noOfSlabs <= 0)) {
+          throw new AppError(`Number of slabs is required for slab product "${prod.name}"`, 400);
+        }
+      }
+
       requestedPurchaseProduct = await poRepository.createRequestedPurchaseProducts(
         poData.products,
         newPO.id,
@@ -364,6 +375,14 @@ export const addRequestedProductToPOService = async (purchaseOrderId: number, pr
 
   if (purchaseOrder.status === PO_STATUS.CANCELED) {
     throw new AppError("Cannot add products to a canceled Purchase Order", 400);
+  }
+
+  const prod = await models.Product.findByPk(productData.productId) as any;
+  if (!prod) {
+    throw new AppError("Product not found", 404);
+  }
+  if (prod.isSlabType && (productData.noOfSlabs === undefined || productData.noOfSlabs === null || productData.noOfSlabs <= 0)) {
+    throw new AppError(`Number of slabs is required for slab product "${prod.name}"`, 400);
   }
 
   // Create the requested product

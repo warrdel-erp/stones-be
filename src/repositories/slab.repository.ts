@@ -81,7 +81,6 @@ export const getSlabByInventoryProductId = async (inventoryProductId: number, tr
 export const findBySiplProductId = async (siplProductId: number) => {
   const slabs = await scoped(models.Slab).findAll({
     where: { siplProductId },
-    attributes: ["packageLength", "packageWidth"],
   });
 
   return slabs.map((slab: any) => slab.get({ plain: true }));
