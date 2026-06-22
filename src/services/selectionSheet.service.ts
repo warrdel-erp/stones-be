@@ -108,9 +108,10 @@ export const getAllSelectionSheets = async (
     accountId: number,
     page: number = 1,
     limit: number = 10,
-    productId?: number
+    productId?: number,
+    search?: string
 ) => {
-    return await selectionSheetRepository.getAllSelectionSheets(clientId, accountId, page, limit, productId);
+    return await selectionSheetRepository.getAllSelectionSheets(clientId, accountId, page, limit, productId, search);
 };
 
 /**

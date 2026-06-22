@@ -426,8 +426,8 @@ export const cancelReturn = async (returnId: number) => {
     }
 };
 
-export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter: any) => {
-    return await returnRepository.getAllReturnsPaginated(page, limit, clientId, filter);
+export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter: any, search?: string) => {
+    return await returnRepository.getAllReturnsPaginated(page, limit, clientId, filter, search);
 };
 
 export const updateReturnProductsAndConfirm = async (returnId: number, locationId: number, productIds: number[], clientId: number) => {

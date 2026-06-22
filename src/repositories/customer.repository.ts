@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
@@ -24,9 +24,17 @@ export const updateCustomerById = async (id: number, data: any) => {
 // Get all customers.
 export const getAllCustomers = async (page: number, limit: number, clientId: number, search?: string, filter?: any) => {
   const offset = (page - 1) * limit;
+  const whereClause: any = { ...filter, clientId };
+
+  if (search) {
+    whereClause[Op.or] = [
+      { name: { [Op.like]: `%${search}%` } },
+      { customerCode: { [Op.like]: `%${search}%` } }
+    ];
+  }
 
   const { rows: customers, count: total } = await scoped(models.Customer).findAndCountAll({
-    where: { ...filter, clientId },
+    where: whereClause,
     include: [
       {
         model: models.CustomerAddress,

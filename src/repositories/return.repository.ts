@@ -108,10 +108,19 @@ export const getReturnById = async (returnId: number, transaction?: Transaction)
     return await Return.findByPk(returnId, { transaction });
 };
 
-export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter?: any) => {
+export const getAllReturnsPaginated = async (page: number, limit: number, clientId: number, filter?: any, search?: string) => {
     const offset = (page - 1) * limit;
+    const whereClause = { ...filter };
+
+    if (search) {
+        whereClause[Op.or] = [
+            { code: { [Op.like]: `%${search}%` } },
+            { "$soInvoice.customer.name$": { [Op.like]: `%${search}%` } }
+        ];
+    }
+
     return await scoped(Return).findAndCountAll({
-        where: filter,
+        where: whereClause,
         include: [
             {
                 association: 'soInvoice',

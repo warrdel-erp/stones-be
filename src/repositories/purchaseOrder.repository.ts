@@ -58,12 +58,25 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
     getInInventoryData = true;
   }
 
+  const whereClause: any = {
+    ...otherFilters,
+    ...dateRange,
+    clientId
+  };
+
+  if (search) {
+    const isNumeric = !isNaN(Number(search));
+    const searchConditions: any[] = [
+      { "$supplier.name$": { [Op.like]: `%${search}%` } }
+    ];
+    if (isNumeric) {
+      searchConditions.push({ clientPoNumber: Number(search) });
+    }
+    whereClause[Op.or] = searchConditions;
+  }
+
   return await scoped(models.PurchaseOrder).findAndCountAll({
-    where: {
-      ...otherFilters,
-      ...dateRange,
-      clientId
-    },
+    where: whereClause,
     include: [
       {
         model: models.Vendor,

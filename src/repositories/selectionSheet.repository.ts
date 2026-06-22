@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
 
@@ -100,15 +100,29 @@ export const getAllSelectionSheets = async (
   accountId: number,
   page: number,
   limit: number,
-  productId?: number
+  productId?: number,
+  search?: string
 ) => {
   const offset = (page - 1) * limit;
 
+  const whereClause: any = {
+    clientId,
+    createdById: accountId
+  };
+
+  if (search) {
+    const isNumeric = !isNaN(Number(search));
+    const searchConditions: any[] = [
+      { "$customer.name$": { [Op.like]: `%${search}%` } }
+    ];
+    if (isNumeric) {
+      searchConditions.push({ id: Number(search) });
+    }
+    whereClause[Op.or] = searchConditions;
+  }
+
   const { rows: data, count: total } = await scoped(models.SelectionSheet).findAndCountAll({
-    where: {
-      clientId,
-      createdById: accountId
-    },
+    where: whereClause,
     include: [
       {
         association: "createdBy",
