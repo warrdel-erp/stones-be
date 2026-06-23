@@ -1002,3 +1002,12 @@ sticky navbar.
 2. holds product pricing.
 3. SIPL credit note form.
 4. SO tax change
+
+---
+
+1. returns products are not visible in initiate return and confirm return not working.
+2. in Multiple times user can add more quantity then sipl quantity.
+3. Number of slabs validation in SIPL.
+4. Search feature in All tables.
+5. No. of Slabs mandatory for Slab type product, and not applicable for Generic products (validation)
+6. app DashBoard, Inventory, SO list page Design.

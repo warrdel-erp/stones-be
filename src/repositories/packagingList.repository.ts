@@ -204,11 +204,12 @@ export const getPackagingListById = async (id: number) => {
           {
             association: 'returnProducts',
             attributes: ['id'],
+            required: false,
             include: [
               {
                 association: 'return',
                 attributes: ['id', 'status'],
-                required: true,
+                required: false,
                 where: {
                   status: {
                     [Op.in]: [RETURN_STATUS.COMPLETE, RETURN_STATUS.INITIATED]
