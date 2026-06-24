@@ -1011,3 +1011,4 @@ sticky navbar.
 4. Search feature in All tables.
 5. No. of Slabs mandatory for Slab type product, and not applicable for Generic products (validation)
 6. app DashBoard, Inventory, SO list page Design.
+7. Product details page going blank.

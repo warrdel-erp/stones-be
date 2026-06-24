@@ -214,7 +214,9 @@ export const getPaymentPendingPurchaseOrders = async (page: number, limit: numbe
     return { ...structuredClone(poData), ...po.get({ plain: true }) }
   }))
 
-  return pos
+  pos.count = Array.isArray(pos.count) ? pos.count.length : pos.count;
+
+  return pos;
 };
 
 // Get PO detail by ID
