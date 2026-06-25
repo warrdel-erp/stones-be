@@ -497,11 +497,11 @@ export const getInventoryStats = async (locationId: number) => {
       locationId,
       status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
       isSlabType: true,
-      "$hold.id$": null,
+      "$holdItem.id$": null,
     },
     include: [
       { association: "slab", required: true, attributes: [] },
-      { association: "hold", required: false, attributes: [] },
+      { association: "holdItem", required: false, attributes: [] },
     ],
     raw: true,
   });
@@ -513,10 +513,10 @@ export const getInventoryStats = async (locationId: number) => {
       locationId,
       status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
       isSlabType: false,
-      "$hold.id$": null,
+      "$holdItem.id$": null,
     },
     include: [
-      { association: "hold", required: false, attributes: [] },
+      { association: "holdItem", required: false, attributes: [] },
     ],
   });
 
@@ -541,7 +541,7 @@ export const getInventoryStats = async (locationId: number) => {
     },
     include: [
       { association: "slab", required: true, attributes: [] },
-      { association: "hold", required: true, attributes: [] },
+      { association: "holdItem", required: true, attributes: [] },
     ],
     raw: true,
   });
@@ -555,7 +555,7 @@ export const getInventoryStats = async (locationId: number) => {
       isSlabType: false,
     },
     include: [
-      { association: "hold", required: true, attributes: [] },
+      { association: "holdItem", required: true, attributes: [] },
     ],
   });
 

@@ -155,6 +155,11 @@ export async function createSIPLService(siplData: any, locationId: number, trans
         throw new Error(`Requested Product with ID ${product.requestedPurchaseProductId} not found in given PO.`);
       }
 
+      const prod = await models.Product.findByPk(product.productId, { transaction }) as any;
+      if (prod?.isSlabType && (product.noOfSlabs === undefined || product.noOfSlabs === null || product.noOfSlabs <= 0)) {
+        throw new AppError(`Number of slabs is required for slab product "${prod.name}"`, 400);
+      }
+
       productsWithSIPLId.push({
         ...product,
         siplId: sipl.id,
@@ -215,6 +220,20 @@ export const validatePackagingQuantityNotExceedsSiplProduct = async (
     newPackagingQuantity = Number(payload.quantity);
   } else {
     const slabs = await slabRepository.findBySiplProductId(siplProduct.id);
+
+    // Validate slab count constraint
+    const existingSlabsCount = slabs.length;
+    const newSlabsCount = Number(payload.quantity);
+    const totalSlabsCount = existingSlabsCount + newSlabsCount;
+    const allowedSlabsCount = Number(siplProduct.noOfSlabs || 0);
+
+    if (totalSlabsCount > allowedSlabsCount) {
+      throw new AppError(
+        `Total number of slabs (${totalSlabsCount}) cannot exceed the allowed number of slabs (${allowedSlabsCount}) for "${productName}".`,
+        400
+      );
+    }
+
     existingPackagingQuantity = sumDecimal(slabs, "packagedSqrFt");
 
     const { packageLength, packageWidth, quantity } = payload;

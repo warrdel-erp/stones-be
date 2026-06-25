@@ -22,11 +22,20 @@ export const updateVendorById = async (id: number, data: any) => {
 };
 
 // Get all vendors.
-export const getAllVendors = async (page: number, limit: number, filter?: WhereOptions) => {
+export const getAllVendors = async (page: number, limit: number, filter?: any) => {
   const offset = (page - 1) * limit;
+  const { search, ...whereClause } = filter || {};
+
+  if (search) {
+    whereClause[Op.or] = [
+      { name: { [Op.like]: `%${search}%` } },
+      { printName: { [Op.like]: `%${search}%` } },
+      { primaryPhoneNo: { [Op.like]: `%${search}%` } }
+    ];
+  }
 
   const { rows: vendors, count: total } = await scoped(models.Vendor).findAndCountAll({
-    where: filter,
+    where: whereClause,
     include: [
       {
         model: models.Location,

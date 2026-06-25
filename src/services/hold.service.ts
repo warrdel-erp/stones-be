@@ -123,9 +123,10 @@ export const getAllHolds = async (
     accountId: number,
     page: number = 1,
     limit: number = 10,
-    productId?: number
+    productId?: number,
+    search?: string
 ) => {
-    return await holdRepository.getAllHolds(clientId, accountId, page, limit, productId);
+    return await holdRepository.getAllHolds(clientId, accountId, page, limit, productId, search);
 };
 
 /**

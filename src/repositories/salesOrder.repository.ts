@@ -14,14 +14,29 @@ export const getAllSalesOrders = async (
   page: number,
   limit: number,
   clientId: number,
-  filter?: { [k: string]: string }
+  filter?: { [k: string]: any },
+  search?: string
 ) => {
   const offset = (page - 1) * limit;
+  const whereClause: any = {
+    clientId,
+    ...filter,
+  };
+
+  if (search) {
+    const isNumeric = !isNaN(Number(search));
+    const searchConditions: any[] = [
+      { customerPo: { [Op.like]: `%${search}%` } },
+      { "$customer.name$": { [Op.like]: `%${search}%` } }
+    ];
+    if (isNumeric) {
+      searchConditions.push({ clientSoNumber: Number(search) });
+    }
+    whereClause[Op.or] = searchConditions;
+  }
+
   const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
-    where: {
-      clientId,
-      ...filter,
-    },
+    where: whereClause,
     attributes: {
       include: [
         [
@@ -93,12 +108,26 @@ export const getAllSalesOrders = async (
 };
 
 // Get all sales order
-export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number) => {
+export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit: number, clientId: number, search?: string) => {
   const offset = (page - 1) * limit;
+  const whereClause: any = {
+    clientId,
+  };
+
+  if (search) {
+    const isNumeric = !isNaN(Number(search));
+    const searchConditions: any[] = [
+      { customerPo: { [Op.like]: `%${search}%` } },
+      { "$customer.name$": { [Op.like]: `%${search}%` } }
+    ];
+    if (isNumeric) {
+      searchConditions.push({ clientSoNumber: Number(search) });
+    }
+    whereClause[Op.or] = searchConditions;
+  }
+
   const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
-    where: {
-      clientId,
-    },
+    where: whereClause,
     attributes: {
       include: [
         [
@@ -165,21 +194,35 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
 };
 
 // Get all sales order
-export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number) => {
+export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit: number, clientId: number, search?: string) => {
   const offset = (page - 1) * limit;
-  const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
-    where: {
-      clientId,
-      id: {
-        [Op.in]: sequelize.literal(`(
-          SELECT DISTINCT so.id 
-          FROM sales_orders so
-          INNER JOIN packaging_lists pl ON pl.salesOrderId = so.id
-          INNER JOIN loading_orders lo ON lo.packagingListId = pl.id
-          WHERE so.clientId = ${clientId}
-        )`),
-      },
+  const whereClause: any = {
+    clientId,
+    id: {
+      [Op.in]: sequelize.literal(`(
+        SELECT DISTINCT so.id 
+        FROM sales_orders so
+        INNER JOIN packaging_lists pl ON pl.salesOrderId = so.id
+        INNER JOIN loading_orders lo ON lo.packagingListId = pl.id
+        WHERE so.clientId = ${clientId}
+      )`),
     },
+  };
+
+  if (search) {
+    const isNumeric = !isNaN(Number(search));
+    const searchConditions: any[] = [
+      { customerPo: { [Op.like]: `%${search}%` } },
+      { "$customer.name$": { [Op.like]: `%${search}%` } }
+    ];
+    if (isNumeric) {
+      searchConditions.push({ clientSoNumber: Number(search) });
+    }
+    whereClause[Op.or] = searchConditions;
+  }
+
+  const { rows: data, count: total } = await scoped(models.SalesOrder).findAndCountAll({
+    where: whereClause,
     attributes: {
       include: [
         [

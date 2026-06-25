@@ -112,19 +112,26 @@ export const getAllSalesOrders = async (
   page: number,
   limit: number,
   clientId: number,
-  filter: { [key: string]: string }
+  filter: { [key: string]: any }
 ) => {
   let data: any;
+  const search = filter.search;
+  
+  // Clean filter by removing tab and search
+  const cleanFilter = { ...filter };
+  delete cleanFilter.tab;
+  delete cleanFilter.search;
+
   if (filter.tab == "PACKAGING_LIST") {
-    data = await salesOrderRepository.getAllSalesOrdersOnlyWithPackagingList(page, limit, clientId);
+    data = await salesOrderRepository.getAllSalesOrdersOnlyWithPackagingList(page, limit, clientId, search);
   } else if (filter.tab == "LOADING_ORDER") {
-    data = await salesOrderRepository.getAllSalesOrdersOnlyWithLoadingOrder(page, limit, clientId);
+    data = await salesOrderRepository.getAllSalesOrdersOnlyWithLoadingOrder(page, limit, clientId, search);
   } else if (filter.tab == "OPEN") {
-    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { status: SALES_ORDER_STATUS.OPEN });
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { ...cleanFilter, status: SALES_ORDER_STATUS.OPEN }, search);
   } else if (filter.tab == "CLOSED") {
-    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { status: SALES_ORDER_STATUS.CLOSED });
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { ...cleanFilter, status: SALES_ORDER_STATUS.CLOSED }, search);
   } else {
-    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId);
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, cleanFilter, search);
   }
 
   data.data = data.data.map((salesOrder: any) => {

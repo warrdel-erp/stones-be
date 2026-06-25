@@ -52,7 +52,7 @@ export const getSelectionSheetById = catchAsync(async (req: AuthRequest, res: Re
 export const getAllSelectionSheets = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
     const accountId = req.user?.accountId;
-    const { page = 1, limit = 10, productId } = req.query;
+    const { page = 1, limit = 10, productId, search } = req.query;
 
     if (!clientId || !accountId) {
         throw new AppError("Missing client or account information", 401);
@@ -63,7 +63,8 @@ export const getAllSelectionSheets = catchAsync(async (req: AuthRequest, res: Re
         accountId,
         Number(page),
         Number(limit),
-        productId ? Number(productId) : undefined
+        productId ? Number(productId) : undefined,
+        search as string
     );
 
     return SuccessResponse(res, 200, "Selection sheets fetched successfully", result.data, {

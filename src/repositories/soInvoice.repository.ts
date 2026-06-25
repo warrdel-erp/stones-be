@@ -41,9 +41,10 @@ export const getAllInvoicesList = async (
   };
 
   if (search) {
-    whereClause.invoiceCode = {
-      [Op.like]: `%${search}%`
-    };
+    whereClause[Op.or] = [
+      { invoiceCode: { [Op.like]: `%${search}%` } },
+      { "$customer.name$": { [Op.like]: `%${search}%` } }
+    ];
   }
 
   return await scoped(models.SalesOrderInvoice).findAndCountAll({

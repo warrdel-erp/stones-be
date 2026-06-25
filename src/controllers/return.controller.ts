@@ -36,10 +36,15 @@ export const getAllReturnsPaginated = catchAsync(async (req: AuthRequest, res: R
     // const page = parseInt(req.query.page as string) || 1;
     // const limit = parseInt(req.query.limit as string) || 10;
 
-    const { page = 1, limit = 10, status } = req.query
+    const { page = 1, limit = 10, status, search } = req.query;
 
-    const clientId = req.user?.clientId
-    const result = await returnService.getAllReturnsPaginated(Number(page), Number(limit), Number(clientId), { status });
+    const filter: any = {};
+    if (status) {
+        filter.status = status;
+    }
+
+    const clientId = req.user?.clientId;
+    const result = await returnService.getAllReturnsPaginated(Number(page), Number(limit), Number(clientId), filter, search as string);
     SuccessResponse(res, 200, "Returns fetched successfully", result.rows, {
         limit: Number(limit),
         page: Number(page),

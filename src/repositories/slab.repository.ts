@@ -81,7 +81,6 @@ export const getSlabByInventoryProductId = async (inventoryProductId: number, tr
 export const findBySiplProductId = async (siplProductId: number) => {
   const slabs = await scoped(models.Slab).findAll({
     where: { siplProductId },
-    attributes: ["packageLength", "packageWidth"],
   });
 
   return slabs.map((slab: any) => slab.get({ plain: true }));
@@ -355,9 +354,16 @@ export const getHoldSlabsData = async (productId: number) => {
         attributes: [],
         include: [
           {
-            association: "hold",
+            association: "holdItem",
             required: true,
             attributes: [],
+            include: [
+              {
+                association: "hold",
+                required: true,
+                attributes: [],
+              },
+            ],
           },
         ],
       },
@@ -379,7 +385,7 @@ export const getAvailableSlabsData = async (productId: number) => {
       productId,
       // Need to filter out instances where hold exists
       // We do this by ensuring the associated hold is null
-      "$inventoryProduct.hold.id$": { [Op.is]: null },
+      "$inventoryProduct.holdItem.id$": { [Op.is]: null },
     },
     include: [
       {
@@ -391,7 +397,7 @@ export const getAvailableSlabsData = async (productId: number) => {
         },
         include: [
           {
-            association: "hold",
+            association: "holdItem",
             required: false,
             attributes: [],
           },

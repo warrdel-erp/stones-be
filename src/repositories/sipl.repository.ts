@@ -233,9 +233,11 @@ export const getAllSIPLs = async (
     where.inventoryReceived = inventoryReceived;
   }
   if (search) {
-    where.invoiceCode = {
-      [Op.like]: `%${search}%`
-    };
+    where[Op.or] = [
+      { invoiceCode: { [Op.like]: `%${search}%` } },
+      { "$purchaseOrder.supplier.name$": { [Op.like]: `%${search}%` } },
+      { "$containers.number$": { [Op.like]: `%${search}%` } }
+    ];
   }
 
   return await scoped(models.SIPL).findAndCountAll({
