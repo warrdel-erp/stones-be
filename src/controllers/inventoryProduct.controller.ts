@@ -7,8 +7,9 @@ import * as inventoryProductService from "../services/inventoryProduct.service";
 import { bulkUploadInventoryProducts as bulkUploadInventoryProductsService } from "../services/inventoryProductBulkUpload.service";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { siplId, bundle, block, showSoldCanceled } = req.query;
+    const { siplId, bundle, block, showSoldCanceled, productId } = req.query;
     const excludeSoldCanceled = showSoldCanceled !== "true";
+    const prodId = productId && !isNaN(Number(productId)) ? Number(productId) : undefined;
 
     // Count how many filters are provided
     const filtersProvided = [siplId, bundle, block].filter(Boolean).length;
@@ -27,13 +28,13 @@ export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: A
 
     if (bundle) {
         // Get inventory products by lot filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField(req, "lot", bundle as string, excludeSoldCanceled);
+        data = await inventoryProductService.getInventoryProductsBySlabField(req, "lot", bundle as string, excludeSoldCanceled, prodId);
     } else if (block) {
         // Get inventory products by block filter only
-        data = await inventoryProductService.getInventoryProductsBySlabField(req, "block", block as string, excludeSoldCanceled);
+        data = await inventoryProductService.getInventoryProductsBySlabField(req, "block", block as string, excludeSoldCanceled, prodId);
     } else {
         // Get inventory products by SIPL combined number only
-        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId), excludeSoldCanceled);
+        data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId), excludeSoldCanceled, prodId);
     }
 
     if (!data.length) {

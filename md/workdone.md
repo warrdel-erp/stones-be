@@ -1012,3 +1012,22 @@ sticky navbar.
 5. No. of Slabs mandatory for Slab type product, and not applicable for Generic products (validation)
 6. app DashBoard, Inventory, SO list page Design.
 7. Product details page going blank.
+
+---
+
+By Rajesh
+
+1. Register Form steps changes with location.
+2. When Create User - Assign Location.
+3. Global Store Data for general data (which need to be displayed in multiple components).
+4. CheckBox design fix.
+5. PO Payment Tab going blank.
+6. Validation in user Create Form.
+7. SIPL/PO create isSlabType = false then slabs input should be disabled.
+8. Cancel Invoice btn in PO.
+
+---
+
+Univ
+
+1. annotation sample Project.
