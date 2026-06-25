@@ -101,13 +101,16 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
   return newCombinedNumber;
 };
 
-export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number, excludeSoldCanceled = false) => {
+export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number, excludeSoldCanceled = false, productId?: number) => {
   // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
   const where: any = { siplId };
   if (excludeSoldCanceled) {
     where.status = {
       [Op.notIn]: ['SOLD', 'CANCELED']
     };
+  }
+  if (productId) {
+    where.productId = productId;
   }
 
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
@@ -278,13 +281,16 @@ export const setInventoryProductLandedUnitCostAndFOBcost = async (
   return updatedCount;
 };
 
-export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false) => {
+export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false, productId?: number) => {
   // Find all inventory products where the specified slab field matches
   const where: any = {};
   if (excludeSoldCanceled) {
     where.status = {
       [Op.notIn]: ['SOLD', 'CANCELED']
     };
+  }
+  if (productId) {
+    where.productId = productId;
   }
 
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
