@@ -90,6 +90,7 @@ export const getCustomerOptions = async (clientId: number, status?: string, filt
     attributes: [
       ["name", "label"],
       ["id", "value"],
+      "type"
     ],
     where: {
       clientId,
