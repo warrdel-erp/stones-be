@@ -100,6 +100,15 @@ export const invoicePackagingList = catchAsync(async (req: AuthRequest, res: Res
   SuccessResponse(res, 200, "Packaging List updated successfully", updatedPackagingList);
 });
 
+// Get invoice preview — shows invoice amounts + what advanced deposits will be auto-settled
+export const getInvoicePreview = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+
+  const preview = await packagingListService.getInvoicePreview(Number(id));
+
+  SuccessResponse(res, 200, "Invoice preview fetched successfully", preview);
+});
+
 // Get new SO number
 export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;

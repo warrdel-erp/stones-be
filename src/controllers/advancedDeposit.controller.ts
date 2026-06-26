@@ -6,6 +6,17 @@ import { CreateAdvancedDepositInput } from "../validators";
 import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 
+export const getMaxDepositAmount = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { salesOrderId } = req.query;
+
+    if (!salesOrderId) {
+        throw new AppError("salesOrderId is required", 400);
+    }
+
+    const maxAmount = await advancedDepositService.getMaxDepositAmountForSO(Number(salesOrderId));
+    return SuccessResponse(res, 200, 'Max deposit amount calculated successfully', { maxAmount });
+});
+
 export const createAdvancedDepositHandler = catchAsync(async (req: AuthRequest, res: Response) => {
     const advancedDepositData: CreateAdvancedDepositInput = req.body;
     const locationId = req.user?.defaultLocationId;

@@ -31,6 +31,9 @@ router.get(
 // Get new SO number.
 router.get("/newPlNumber", authenticateUser, packagingListController.getNewPlNumber);
 
+// Get invoice preview (amounts + what ADs will be auto-settled)
+router.get("/:id/invoicePreview", authenticateUser, packagingListController.getInvoicePreview);
+
 // Create invoice.
 router.put("/:id/createInvoice", authenticateUser, packagingListController.invoicePackagingList);
 

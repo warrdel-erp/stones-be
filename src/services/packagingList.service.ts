@@ -43,6 +43,9 @@ import { Return } from "../models";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import { createJournalEntriesForTradeServicesOfPackagingList } from "./journalEntry.service";
 import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
+import * as advancedDepositService from "./advancedDeposit.service";
+import Decimal from "decimal.js";
+import { scoped } from "../utils/scoped";
 
 // Create new LO
 export const createPackagingList = async (data: any) => {
@@ -725,12 +728,187 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       transaction
     );
 
+    // ---- Auto-settle any unsettled Advanced Deposits for this SO (FIFO) ----
+    const autoSettlements = await autoSettleAdvancedDeposits(
+      packagingList.salesOrder.id,
+      invoice.id,
+      Number(invoice.finalAmount),
+      transaction
+    );
+    // ---- End auto-settle ----
+
     transaction.commit();
-    return { packagingList, invoice };
+    return { packagingList, invoice, autoSettlements };
   } catch (error) {
     transaction.rollback();
     throw error;
   }
+};
+
+/**
+ * Auto-settle unsettled advanced deposits for a Sales Order against an invoice (FIFO).
+ * Settles oldest deposits first. Each settlement is min(remaining deposit balance, remaining invoice balance).
+ * Returns an array of settlement summaries.
+ */
+async function autoSettleAdvancedDeposits(
+  salesOrderId: number,
+  invoiceId: number,
+  invoiceFinalAmount: number,
+  transaction: any
+): Promise<Array<{ depositId: number; depositCode: string; settledAmount: number }>> {
+  // Get all deposits for this SO in creation order (FIFO)
+  const deposits: any[] = await scoped(models.AdvancedDeposit).findAll({
+    where: { salesOrderId },
+    order: [['createdAt', 'ASC']],
+    include: [
+      {
+        association: 'settlements',
+        attributes: ['amount'],
+      }
+    ],
+    transaction,
+  });
+
+  let remainingInvoiceBalance = new Decimal(invoiceFinalAmount);
+  const settlementResults: Array<{ depositId: number; depositCode: string; settledAmount: number }> = [];
+
+  for (const deposit of deposits) {
+    if (remainingInvoiceBalance.lte(0)) break;
+
+    const depositAmount = new Decimal(deposit.amount);
+    const totalAlreadySettled = deposit.settlements?.reduce(
+      (sum: Decimal, s: any) => sum.plus(new Decimal(s.amount)),
+      new Decimal(0)
+    ) ?? new Decimal(0);
+
+    const remainingDepositBalance = depositAmount.minus(totalAlreadySettled);
+    if (remainingDepositBalance.lte(0)) continue;
+
+    // Settle min(remaining deposit balance, remaining invoice balance)
+    const settleAmount = Decimal.min(remainingDepositBalance, remainingInvoiceBalance);
+
+    await scoped(models.AdvancedDepositSettlement).create(
+      {
+        amount: settleAmount.toNumber(),
+        soInvoiceId: invoiceId,
+        advancedDepositId: deposit.id,
+      },
+      { transaction }
+    );
+
+    settlementResults.push({
+      depositId: deposit.id,
+      depositCode: deposit.code,
+      settledAmount: settleAmount.toNumber(),
+    });
+
+    remainingInvoiceBalance = remainingInvoiceBalance.minus(settleAmount);
+  }
+
+  return settlementResults;
+}
+
+/**
+ * Preview what would happen when invoicing a Packaging List:
+ * returns invoice amount breakdown + which ADs would be auto-settled and for how much.
+ */
+export const getInvoicePreview = async (packagingListId: number) => {
+  const packagingList: any = await packagingListService.getPackagingListById(Number(packagingListId));
+
+  if (!packagingList) {
+    throw new AppError(`Packaging List not found with id: ${packagingListId}`, 400);
+  }
+
+  if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
+    throw new AppError('Packaging List is already invoiced.', 400);
+  }
+
+  const invoiceAmountObj = packagingList.loadingOrder
+    ? packagingList.calculations.loadingOrder
+    : packagingList.calculations.packagingList;
+
+  let serviceTotals = 0;
+  if (packagingList.tradeServices?.length) {
+    serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
+  }
+
+  // finalAmount = total (with tax) + services
+  const invoiceTotal = decimal.decimalAdd(invoiceAmountObj.total, serviceTotals);
+
+  // Get deposits for this SO and compute what would be auto-settled
+  const salesOrderId = packagingList.salesOrder.id;
+  const deposits: any[] = await scoped(models.AdvancedDeposit).findAll({
+    where: { salesOrderId },
+    order: [['createdAt', 'ASC']],
+    include: [
+      {
+        association: 'settlements',
+        attributes: ['amount'],
+      }
+    ],
+  });
+
+  let remainingInvoiceBalance = new Decimal(invoiceTotal);
+  const depositPreviews: Array<{
+    depositId: number;
+    depositCode: string;
+    depositAmount: number;
+    alreadySettled: number;
+    availableBalance: number;
+    willBeSettled: number;
+  }> = [];
+
+  let totalWillBeSettled = 0;
+
+  for (const deposit of deposits) {
+    const depositAmount = new Decimal(deposit.amount);
+    const totalAlreadySettled = deposit.settlements?.reduce(
+      (sum: Decimal, s: any) => sum.plus(new Decimal(s.amount)),
+      new Decimal(0)
+    ) ?? new Decimal(0);
+
+    const remainingDepositBalance = depositAmount.minus(totalAlreadySettled);
+    if (remainingDepositBalance.lte(0)) {
+      depositPreviews.push({
+        depositId: deposit.id,
+        depositCode: deposit.code,
+        depositAmount: depositAmount.toNumber(),
+        alreadySettled: totalAlreadySettled.toNumber(),
+        availableBalance: 0,
+        willBeSettled: 0,
+      });
+      continue;
+    }
+
+    const willSettle = remainingInvoiceBalance.lte(0)
+      ? new Decimal(0)
+      : Decimal.min(remainingDepositBalance, remainingInvoiceBalance);
+
+    depositPreviews.push({
+      depositId: deposit.id,
+      depositCode: deposit.code,
+      depositAmount: depositAmount.toNumber(),
+      alreadySettled: totalAlreadySettled.toNumber(),
+      availableBalance: remainingDepositBalance.toNumber(),
+      willBeSettled: willSettle.toNumber(),
+    });
+
+    totalWillBeSettled = decimal.decimalAdd(totalWillBeSettled, willSettle.toNumber());
+    remainingInvoiceBalance = remainingInvoiceBalance.minus(willSettle);
+  }
+
+  return {
+    invoiceSummary: {
+      subTotal: invoiceAmountObj.subTotal,
+      taxable: invoiceAmountObj.taxable,
+      tax: invoiceAmountObj.tax,
+      serviceCharges: serviceTotals,
+      total: invoiceTotal,
+    },
+    depositPreviews,
+    totalWillBeSettled,
+    remainingDueAfterSettlement: decimal.decimalAdd(invoiceTotal, -totalWillBeSettled),
+  };
 };
 
 export const checkIfPackagingListInvoiced = async (packagingListId: number, operation: string) => {

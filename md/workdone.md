@@ -1031,3 +1031,9 @@ By Rajesh
 Univ
 
 1. annotation sample Project.
+
+---
+
+1. So Advanced deposit auto settlement.
+2. Dropdown are not showing all data for in SIPL, payment Pages (customer, Products)
+3. tax connection with SO invoice (pending)
