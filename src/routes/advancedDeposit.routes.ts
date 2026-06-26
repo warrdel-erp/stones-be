@@ -9,10 +9,13 @@ const router = Router();
 // Create a new advanced deposit
 router.post("/", authenticateUser, validateRequest(createAdvancedDepositSchema), advancedDepositController.createAdvancedDepositHandler);
 
+// Get max allowed deposit amount for a Sales Order (based on uninvoiced products - existing deposits)
+router.get("/maxAmount", authenticateUser, advancedDepositController.getMaxDepositAmount);
+
 router.get("/withoutPagination", authenticateUser, advancedDepositController.getAdvancedDepositWithoutPagination);
 
 router.get("/:id", authenticateUser, advancedDepositController.getAdvancedDepositById);
 
 router.post("/:id/settle", authenticateUser, advancedDepositController.settleAdvancedDeposit);
 
-export default router; 
+export default router;

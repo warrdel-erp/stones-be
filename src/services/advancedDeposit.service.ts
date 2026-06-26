@@ -4,14 +4,16 @@ import SalesOrder from "../models/salesOrder.model";
 import Payment from "../models/payment.model";
 import PaymentBill from "../models/paymentBills.model";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
-import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import * as advancedDepositRepository from '../repositories/advancedDeposit.repository'
 import * as paymentBillsRepository from '../repositories/paymentBills.repository'
+import * as salesOrderProductRepository from '../repositories/salesOrderProduct.repository'
 import * as models from '../models'
 import { AppError } from "../helper/appError";
 import { sumDecimal } from "../helper";
 import Decimal from "decimal.js";
 import { scoped } from "../utils/scoped";
+import { Op } from "sequelize";
 interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
@@ -19,6 +21,52 @@ interface CreateAdvancedDepositDTO {
     referenceNo?: string;
     accountId: number
 }
+
+/**
+ * Calculate the total value (including tax) of SO products that are NOT yet invoiced.
+ * Stages excluded: invoiced, closed, canceled.
+ */
+export const getUninvoicedSOTotal = async (salesOrderId: number): Promise<number> => {
+    const uninvoicedProducts = await scoped(models.SalesOrderProduct).findAll({
+        where: {
+            salesOrderId,
+            stage: {
+                [Op.notIn]: [
+                    SALE_ORDER_PRODUCT_STAGES.INVOICED,
+                    SALE_ORDER_PRODUCT_STAGES.CLOSED,
+                    SALE_ORDER_PRODUCT_STAGES.CANCELED,
+                ]
+            }
+        },
+        include: [
+            {
+                association: "inventoryProduct",
+            }
+        ]
+    });
+
+    const plainProducts = uninvoicedProducts.map((p: any) => p.get({ plain: true }));
+    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(plainProducts);
+    // soReceiving.total = subTotal + taxAmount (includes tax)
+    return calcs.soReceiving.total;
+};
+
+/**
+ * Get the maximum allowed advanced deposit amount for a given SO.
+ * = uninvoiced product total (with tax) - sum of existing advanced deposits
+ */
+export const getMaxDepositAmountForSO = async (salesOrderId: number): Promise<number> => {
+    const uninvoicedTotal = await getUninvoicedSOTotal(salesOrderId);
+
+    const existingDeposits: any[] = await scoped(AdvancedDeposit).findAll({
+        where: { salesOrderId },
+        attributes: ['amount'],
+    });
+
+    const existingTotal = sumDecimal(existingDeposits, 'amount');
+    const maxAllowed = new Decimal(uninvoicedTotal).minus(new Decimal(existingTotal));
+    return maxAllowed.isNegative() ? 0 : maxAllowed.toNumber();
+};
 
 /**
  * Creates a new advanced deposit with associated payment and payment bill records
@@ -49,6 +97,17 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
 
         if (!salesOrder.clientId) {
             throw new Error("Sales order must be associated with a client");
+        }
+
+        // Validate that the deposit amount does not exceed the uninvoiced SO product total (including tax)
+        const maxAllowed = await getMaxDepositAmountForSO(data.salesOrderId);
+        const requestedAmount = new Decimal(data.amount);
+        if (requestedAmount.gt(new Decimal(maxAllowed))) {
+            throw new AppError(
+                `Advanced deposit amount ($${requestedAmount.toFixed(2)}) exceeds the maximum allowed ($${new Decimal(maxAllowed).toFixed(2)}). ` +
+                `Only un-invoiced SO product value (including tax) minus existing deposits is allowed.`,
+                400
+            );
         }
 
         // Create advanced deposit
