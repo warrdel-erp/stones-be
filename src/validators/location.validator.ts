@@ -50,3 +50,37 @@ export const createLocationSchema = z.object({
 });
 
 export type CreateLocationInput = z.infer<typeof createLocationSchema>;
+
+export const updateLocationSchema = z.object({
+    locationName: z.preprocess(
+        (val) => (typeof val === 'string' ? val.trim() : val),
+        z.string({
+            invalid_type_error: 'Location name must be a string',
+        }).min(1, 'Location name cannot be empty')
+    ).optional(),
+
+    contactName: z.preprocess(
+        (val) => (typeof val === 'string' ? val.trim() : val),
+        z.string({
+            invalid_type_error: 'Contact name must be a string',
+        }).min(1, 'Contact name cannot be empty')
+    ).optional(),
+
+    contactNumber: z.preprocess(
+        (val) => (typeof val === 'number' ? String(val) : typeof val === 'string' ? val.trim() : val),
+        z.string({
+            invalid_type_error: 'Contact number must be a string',
+        }).length(10, 'Contact number must be exactly 10 digits')
+    ).optional(),
+
+    contactMail: z.preprocess(
+        (val) => (typeof val === 'string' ? val.trim() : val),
+        z.string({
+            invalid_type_error: 'Contact email must be a string',
+        }).email('Invalid email format')
+    ).optional(),
+});
+
+export type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
+
+

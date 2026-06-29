@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateUser } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validationMiddleware";
-import { createLocationSchema } from "../validators";
+import { createLocationSchema, updateLocationSchema } from "../validators";
 import * as locationController from "../controllers/location.controller";
 
 const router = Router();
@@ -14,5 +14,9 @@ router.post("/", validateRequest(createLocationSchema), locationController.creat
 // Get location by id
 router.get("/:id", locationController.getLocationById);
 
+// Update location
+router.put("/:id", validateRequest(updateLocationSchema), locationController.updateLocation);
+
 export default router;
+
 

@@ -1036,4 +1036,7 @@ Univ
 
 1. So Advanced deposit auto settlement.
 2. Dropdown are not showing all data for in SIPL, payment Pages (customer, Products)
-3. tax connection with SO invoice (pending)
+
+---
+
+1. Edit API for location.

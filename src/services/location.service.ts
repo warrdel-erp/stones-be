@@ -39,3 +39,17 @@ export const getLocationById = async (id: number, clientId?: number) => {
   return location.get({ plain: true });
 };
 
+export const updateLocation = async (id: number, data: any, clientId?: number) => {
+  const location = await locationRepository.getLocationById(id, clientId);
+
+  if (!location) {
+    throw new AppError("Location not found", 404);
+  }
+
+  await locationRepository.updateLocation(id, data, clientId);
+
+  const updatedLocation = await locationRepository.getLocationById(id, clientId);
+  return updatedLocation!.get({ plain: true });
+};
+
+

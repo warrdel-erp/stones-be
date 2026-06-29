@@ -168,6 +168,66 @@
           "response": []
         },
         {
+          "name": "delete",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "console.log()"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extract the token from the response",
+                  "const response = pm.response.json();",
+                  "",
+                  "if (response.success && response.data && response.data.token) {",
+                  "    pm.environment.set(\"token\", response.data.token);",
+                  "    console.log(\"Token has been set in environment variable: token\");",
+                  "} else {",
+                  "    console.warn(\"Token not found in response or login was unsuccessful.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// {\n//     \"email\": \"newclient@gmail.com\",\n//     \"password\": \"useruser\"\n// }\n\n\n// {\n//     \"email\": \"jitin@gmail.com\",\n//     \"password\": \"user\"\n// }\n\n\n{\n    \"email\": \"contact1@techsolutions.com\",\n    \"password\": \"SecurePass123\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/client/deleteAccount",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "client",
+                "deleteAccount"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "userProfile",
           "request": {
             "auth": {
@@ -1080,7 +1140,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/purchaseOrder",
+              "raw": "{{baseurl}}/api/purchaseOrder?supplierId=2",
               "host": [
                 "{{baseurl}}"
               ],
@@ -1104,6 +1164,11 @@
                   "key": "status",
                   "value": "PAYMENT_PENDING",
                   "disabled": true
+                },
+                {
+                  "key": "supplierId",
+                  "value": "2",
+                  "type": "text"
                 }
               ]
             }
@@ -2142,7 +2207,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/sipl",
+              "raw": "{{baseurl}}/api/sipl?supplierId=2&inventoryReceived=true",
               "host": [
                 "{{baseurl}}"
               ],
@@ -2160,6 +2225,63 @@
                   "key": "page",
                   "value": "1",
                   "disabled": true
+                },
+                {
+                  "key": "supplierId",
+                  "value": "2"
+                },
+                {
+                  "key": "inventoryReceived",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "oOverdue vendor SIPLs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/api/sipl/overdue/vendor/:vendorId",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "sipl",
+                "overdue",
+                "vendor",
+                ":vendorId"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "vendorId",
+                  "value": "5"
                 }
               ]
             }
@@ -2480,6 +2602,218 @@
                 {
                   "key": "locationId",
                   "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"bin from postman\" \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/bin",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "bin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"bin from postman\" \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/bin",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "bin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/bin/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "bin",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "7"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"bin from postman update\" \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/bin/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "bin",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "7"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"bin from postman update\" \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/bin/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "bin",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
                 }
               ]
             }
@@ -3095,6 +3429,16 @@
         {
           "name": "Get customer addresses",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -3111,8 +3455,7 @@
               "query": [
                 {
                   "key": "addressType",
-                  "value": "shipping",
-                  "type": "text"
+                  "value": "shipping"
                 }
               ],
               "variable": [
@@ -3141,13 +3484,25 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/customer",
+              "raw": "{{baseurl}}/api/customer?limit=2&page=2",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "api",
                 "customer"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "page",
+                  "value": "2",
+                  "type": "text"
+                }
               ]
             }
           },
@@ -4402,6 +4757,18 @@
               "path": [
                 "api",
                 "payment"
+              ],
+              "query": [
+                {
+                  "key": "payeeType",
+                  "value": " customer",
+                  "disabled": true
+                },
+                {
+                  "key": "payeeId",
+                  "value": "5",
+                  "disabled": true
+                }
               ]
             }
           },
@@ -6371,6 +6738,35 @@
           "response": []
         },
         {
+          "name": "overdue",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/api/soInvoice/overdue",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "soInvoice",
+                "overdue"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "get all with truck only",
           "request": {
             "auth": {
@@ -7726,7 +8122,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/inventoryProduct?productId=3",
+              "raw": "{{baseurl}}/api/inventoryProduct?productId=5",
               "host": [
                 "{{baseurl}}"
               ],
@@ -7737,7 +8133,42 @@
               "query": [
                 {
                   "key": "productId",
-                  "value": "3"
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get paginated",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/api/inventoryProduct/paginated?productId=4",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "inventoryProduct",
+                "paginated"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "4"
                 }
               ]
             }
@@ -8094,6 +8525,49 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "get info by QR",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ids\": [1],\n    \"sellingPrice\": 4 \n} \n"
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/inventoryProduct/qr/:qrCode",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "inventoryProduct",
+                "qr",
+                ":qrCode"
+              ],
+              "variable": [
+                {
+                  "key": "qrCode",
+                  "value": "f01a5af3-bade-4e7a-9f49-5a87215fb50b"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -8393,13 +8867,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/selectionSheet",
+              "raw": "{{baseurl}}/api/selectionSheet?productId=1",
               "host": [
                 "{{baseurl}}"
               ],
               "path": [
                 "api",
                 "selectionSheet"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "type": "text"
+                }
               ]
             }
           },
@@ -8697,7 +9178,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseurl}}/api/options/customers",
+              "raw": "{{baseurl}}/api/options/customers?type=fabricator",
               "host": [
                 "{{baseurl}}"
               ],
@@ -8705,6 +9186,12 @@
                 "api",
                 "options",
                 "customers"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "fabricator"
+                }
               ]
             }
           },
@@ -8931,7 +9418,7 @@
               "variable": [
                 {
                   "key": "locationId",
-                  "value": "1"
+                  "value": "3"
                 }
               ]
             }
@@ -8971,6 +9458,50 @@
                 "api",
                 "location",
                 ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": 3,\n    \"locationName\": \"Chicago Office 1\",\n    \"address\": \"789 Michigan Avenue, Chicago, IL\",\n    \"contactName\": \"Michael Johnson\",\n    \"contactNumber\": \"9988776655\",\n    \"contactMail\": \"michael.johnson@example.com\",\n    \"lat\": 41.878113,\n    \"long\": -87.629799\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/location/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "location",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "3"
+                }
               ]
             }
           },
@@ -9084,6 +9615,765 @@
                 {
                   "key": "id",
                   "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "vendor contact",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"1233443354\",\n    \"email\": \"jitin@gmail.com\",\n    \"vendorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/vendorContact",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "vendorContact"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"1233443354\",\n    \"email\": \"jitin@gmail.com\",\n    \"vendorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/vendorContact?vendorId=1",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "vendorContact"
+              ],
+              "query": [
+                {
+                  "key": "vendorId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get by vendor id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/vendorContact/vendor/:",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "vendorContact",
+                "vendor",
+                ":"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"2342343563\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/vendorContact/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "vendorContact",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/vendorContact/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "vendorContact",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "vendor wiring instruction",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \" sdf\",\n    \"address\": \"qwe\",\n    \"swiftCode\": \"qwe\",\n    \"accNo\": \"qwe\",\n    \"vendorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/wiringInstruction",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "wiringInstruction"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/wiringInstruction",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "wiringInstruction"
+              ],
+              "query": [
+                {
+                  "key": "vendorId",
+                  "value": "2",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"2342343563\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/wiringInstruction/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "wiringInstruction",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/wiringInstruction/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "wiringInstruction",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "fabricator",
+      "item": [
+        {
+          "name": "get sold products",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \" sdf\",\n    \"address\": \"qwe\",\n    \"swiftCode\": \"qwe\",\n    \"accNo\": \"qwe\",\n    \"vendorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/fabricator/:fabricatorId/products",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "fabricator",
+                ":fabricatorId",
+                "products"
+              ],
+              "variable": [
+                {
+                  "key": "fabricatorId",
+                  "value": "8"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get sold inventory Products",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \" sdf\",\n    \"address\": \"qwe\",\n    \"swiftCode\": \"qwe\",\n    \"accNo\": \"qwe\",\n    \"vendorId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/fabricator/:fabricatorId/products/:productId/inventory",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "fabricator",
+                ":fabricatorId",
+                "products",
+                ":productId",
+                "inventory"
+              ],
+              "variable": [
+                {
+                  "key": "fabricatorId",
+                  "value": "8"
+                },
+                {
+                  "key": "productId",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "external Customer Transaction",
+      "item": [
+        {
+          "name": "external Customer Transaction",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "9d95cef8-02c7-41d5-962e-54f689c0fb98",
+                  "src": "/Users/jitin/Downloads/Copy of Aged Receivables - as of 4_16_2026, Location_ (All Locations).xlsm"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/externalCustomerTransaction/bulkUpload",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "externalCustomerTransaction",
+                "bulkUpload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "external Customer Transaction",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "9d95cef8-02c7-41d5-962e-54f689c0fb98",
+                  "src": "/Users/jitin/Downloads/Copy of Aged Receivables - as of 4_16_2026, Location_ (All Locations).xlsm"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/externalCustomerTransaction?limit=2",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "externalCustomerTransaction"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "file upload",
+      "item": [
+        {
+          "name": "get signed url",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"originalName\" : \"sampleFile\",\n    \"mimeType\": \"image/png\",\n    \"size\" : 3145728, // 3MB,\n    \"isTemp\" : true,\n    \"entityType\": \"customer\"\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/fileUpload/generateUrl",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "fileUpload",
+                "generateUrl"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "confirm upload",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"originalName\" : \"sampleFile\",\n    \"mimeType\": \"image/png\",\n    \"size\" : 3145728, // 3MB,\n    \"isTemp\" : true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/api/fileUpload/confirm/:id",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "api",
+                "fileUpload",
+                "confirm",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "upload in signe url",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": "/Users/jitin/Downloads/slabflare logo.png"
+              }
+            },
+            "url": {
+              "raw": "https://s3.ap-south-1.amazonaws.com/images.stoneerp1/stage/1/847023eb-4491-4b4d-a542-3bd76c643929?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AWS_ACCESS_KEY_ID%2F20260522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20260522T184713Z&X-Amz-Expires=900&X-Amz-Signature=mock_signature&X-Amz-SignedHeaders=content-length%3Bhost&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
+              "protocol": "https",
+              "host": [
+                "s3",
+                "ap-south-1",
+                "amazonaws",
+                "com"
+              ],
+              "path": [
+                "images.stoneerp1",
+                "stage",
+                "1",
+                "847023eb-4491-4b4d-a542-3bd76c643929"
+              ],
+              "query": [
+                {
+                  "key": "X-Amz-Algorithm",
+                  "value": "AWS4-HMAC-SHA256"
+                },
+                {
+                  "key": "X-Amz-Content-Sha256",
+                  "value": "UNSIGNED-PAYLOAD"
+                },
+                {
+                  "key": "X-Amz-Credential",
+                  "value": "AWS_ACCESS_KEY_ID%2F20260522%2Fap-south-1%2Fs3%2Faws4_request"
+                },
+                {
+                  "key": "X-Amz-Date",
+                  "value": "20260522T184713Z"
+                },
+                {
+                  "key": "X-Amz-Expires",
+                  "value": "900"
+                },
+                {
+                  "key": "X-Amz-Signature",
+                  "value": "0aeede54b4a9bee5395fe4799a827597684a5043a1ccee26438298fda513c911"
+                },
+                {
+                  "key": "X-Amz-SignedHeaders",
+                  "value": "content-length%3Bhost"
+                },
+                {
+                  "key": "x-amz-checksum-crc32",
+                  "value": "AAAAAA%3D%3D"
+                },
+                {
+                  "key": "x-amz-sdk-checksum-algorithm",
+                  "value": "CRC32"
+                },
+                {
+                  "key": "x-id",
+                  "value": "PutObject"
                 }
               ]
             }
