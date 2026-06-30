@@ -15,6 +15,7 @@ import * as packagingListService from "../services/packagingList.service";
 import * as holdRepository from "../repositories/hold.repository";
 import { AppError } from "../helper/appError";
 import * as models from "../models";
+import { decimalAdd } from "../helper/decimal";
 
 
 export const createSalesOrder = async (data: any) => {
@@ -256,9 +257,16 @@ export const getOpenSOCountByClient = async (clientId: number) => {
 };
 
 
-export const getPaidAmountForSO = (id: number) => {
-  return salesOrderRepository.getTotalPaidAmountForSO(id);
-}
+export const getPaidAmountForSO = async (id: number) => {
+  const invoiceIds = await salesOrderRepository.getInvoiceIdsForSalesOrder(id);
+  const paymentBillSum = await salesOrderRepository.getPaymentBillsSumForInvoices(invoiceIds);
+  const settlementSum = await salesOrderRepository.getAdvancedDepositSettlementsSumForInvoices(invoiceIds);
+  const totalPaidAmount = decimalAdd(paymentBillSum, settlementSum);
+  return {
+    id,
+    totalPaidAmount,
+  };
+};
 
 export const updateSalesOrderTax = async (id: number, taxId: number, clientId: number) => {
   const transaction = await sequelize.transaction();

@@ -1040,3 +1040,8 @@ Univ
 ---
 
 1. Edit API for location.
+2. Last Stage Summary in SO Details page.
+3. Show all quantities in SO details page.
+4. Show status of each sales order product in SO details page.
+5. SO invoice settlement with other SO's AD.
+6. Show delivery status in loading packing list.
