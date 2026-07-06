@@ -710,6 +710,12 @@ export const getQrCodesBySiplId = async (siplId: number) => {
       siplId
     },
     attributes: ["id", "qrCode", "combinedNumber"],
+    include: [
+      {
+        association: 'product',
+        attributes: ['name']
+      }
+    ]
   });
 };
 
