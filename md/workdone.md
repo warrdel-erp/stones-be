@@ -1036,4 +1036,12 @@ Univ
 
 1. So Advanced deposit auto settlement.
 2. Dropdown are not showing all data for in SIPL, payment Pages (customer, Products)
-3. tax connection with SO invoice (pending)
+
+---
+
+1. Edit API for location.
+2. Last Stage Summary in SO Details page.
+3. Show all quantities in SO details page.
+4. Show status of each sales order product in SO details page.
+5. SO invoice settlement with other SO's AD.
+6. Show delivery status in loading packing list.

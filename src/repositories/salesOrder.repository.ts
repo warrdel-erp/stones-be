@@ -1,7 +1,7 @@
 import { Transaction, Op, Sequelize, fn, cast, col } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
-import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
 
 // Create new Sales Order
@@ -431,6 +431,16 @@ export const getSalesOrderById = async (id: number) => {
           {
             association: "salesOrderInvoice"
           },
+          {
+            association: "invoiceDeliveries",
+            attributes: ["id", "deliveryId"],
+            include: [
+              {
+                association: "delivery",
+                attributes: ["id", "status"]
+              }
+            ]
+          }
         ]
       }
     ],
@@ -541,30 +551,45 @@ export const countOpenSOByClientId = async (clientId: number) => {
   });
 };
 
-// Get total paid amount for a SO.
-export const getTotalPaidAmountForSO = (id: number) => {
-  return models.SalesOrder.findByPk(id, {
+// Get invoice IDs associated with a Sales Order
+export const getInvoiceIdsForSalesOrder = async (salesOrderId: number) => {
+  const invoices = await scoped(models.SalesOrderInvoice).findAll({
+    where: { salesOrderId },
+    attributes: ["id"],
+  });
+  return invoices.map((inv: any) => inv.id);
+};
+
+// Get sum of payment bills for the given invoice IDs
+export const getPaymentBillsSumForInvoices = async (invoiceIds: number[]) => {
+  if (invoiceIds.length === 0) return 0;
+  const result: any = await scoped(models.PaymentBill).findOne({
     attributes: [
-      'id',
-      [
-        fn('COALESCE', fn("SUM", cast(col('salesOrderInvoices->paymentBills.amount'), 'double')), 0), 'totalPaidAmount'
-      ]
+      [fn("COALESCE", fn("SUM", cast(col("amount"), "double")), 0), "totalAmount"]
     ],
-    include: [
-      {
-        association: "salesOrderInvoices",
-        attributes: [],
-        include: [
-          {
-            association: 'paymentBills',
-            attributes: []
-          }
-        ]
-      }
+    where: {
+      referenceId: invoiceIds,
+      referenceType: PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE,
+    },
+    raw: true
+  });
+  return result ? Number(result.totalAmount) : 0;
+};
+
+// Get sum of advanced deposit settlements for the given invoice IDs
+export const getAdvancedDepositSettlementsSumForInvoices = async (invoiceIds: number[]) => {
+  if (invoiceIds.length === 0) return 0;
+  const result: any = await scoped(models.AdvancedDepositSettlement).findOne({
+    attributes: [
+      [fn("COALESCE", fn("SUM", cast(col("amount"), "double")), 0), "totalAmount"]
     ],
-    group: ['id']
-  })
-}
+    where: {
+      soInvoiceId: invoiceIds,
+    },
+    raw: true
+  });
+  return result ? Number(result.totalAmount) : 0;
+};
 
 export const getSimpleSalesOrder = (id: number, transaction?: Transaction) => {
   return models.SalesOrder.findByPk(id, { transaction })

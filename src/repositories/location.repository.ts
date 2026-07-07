@@ -35,3 +35,18 @@ export const getLocationById = async (id: number, clientId?: number) => {
   });
 };
 
+// Update location by id
+export const updateLocation = async (id: number, locationData: any, clientId?: number, transaction?: Transaction) => {
+  const whereCondition: any = { id };
+
+  if (clientId) {
+    whereCondition.clientId = clientId;
+  }
+
+  return await scoped(models.Location).update(locationData, {
+    where: whereCondition,
+    transaction,
+  });
+};
+
+

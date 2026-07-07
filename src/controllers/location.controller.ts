@@ -21,3 +21,14 @@ export const getLocationById = catchAsync(async (req: AuthRequest, res: Response
     SuccessResponse(res, 200, "Location retrieved successfully", location);
 });
 
+export const updateLocation = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const clientId = req.user?.clientId;
+    const payload = req.body;
+
+    const location = await locationService.updateLocation(Number(id), payload, Number(clientId));
+
+    SuccessResponse(res, 200, "Location updated successfully", location);
+});
+
+

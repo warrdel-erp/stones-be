@@ -86,8 +86,6 @@ export const checkSiplSlabsFullyFilled = catchAsync(async (req: Request, res: Re
 
   const result = await slabService.checkSiplSlabsFullyFilled(Number(siplId));
 
-  await siplService.checkSIPLDataIsFilledCorrectly(Number(siplId));
-
   return SuccessResponse(res, 200, result.message, result);
 });
 

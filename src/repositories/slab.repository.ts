@@ -429,6 +429,18 @@ export const getOnlyBarcode = async (siplId: number) => {
       siplId
     },
     attributes: ["id", "barcode"],
+    include: [
+      {
+        association: 'inventoryProduct',
+        attributes: ['combinedNumber'],
+        include: [
+          {
+            association: 'product',
+            attributes: ['name']
+          }
+        ]
+      }
+    ]
   });
 };
 
