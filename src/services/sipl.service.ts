@@ -198,63 +198,7 @@ export const addContainer = async (containerData: Object, siplId: number, client
   return container;
 };
 
-type PackagingQuantityPayload = {
-  quantity: number;
-  packageLength?: number;
-  packageWidth?: number;
-};
 
-export const validatePackagingQuantityNotExceedsSiplProduct = async (
-  siplProduct: any,
-  payload: PackagingQuantityPayload
-) => {
-  const maxQuantity = Number(siplProduct.quantity);
-  const productName = siplProduct.requestedPurchaseProduct?.product?.name ?? "product";
-  const isSlabType = siplProduct.requestedPurchaseProduct?.product?.isSlabType;
-
-  let existingPackagingQuantity = 0;
-  let newPackagingQuantity = 0;
-
-  if (!isSlabType) {
-    existingPackagingQuantity = await genericProductRepository.countBySiplProductId(siplProduct.id);
-    newPackagingQuantity = Number(payload.quantity);
-  } else {
-    const slabs = await slabRepository.findBySiplProductId(siplProduct.id);
-
-    // Validate slab count constraint
-    const existingSlabsCount = slabs.length;
-    const newSlabsCount = Number(payload.quantity);
-    const totalSlabsCount = existingSlabsCount + newSlabsCount;
-    const allowedSlabsCount = Number(siplProduct.noOfSlabs || 0);
-
-    if (totalSlabsCount > allowedSlabsCount) {
-      throw new AppError(
-        `Total number of slabs (${totalSlabsCount}) cannot exceed the allowed number of slabs (${allowedSlabsCount}) for "${productName}".`,
-        400
-      );
-    }
-
-    existingPackagingQuantity = sumDecimal(slabs, "packagedSqrFt");
-
-    const { packageLength, packageWidth, quantity } = payload;
-    if (!packageLength || !packageWidth || !quantity) {
-      throw new AppError("packageLength, packageWidth, and quantity are required for slab products.", 400);
-    }
-
-    const areaPerSlab = decimalDivide(decimalMultiply(packageLength, packageWidth), 144);
-    newPackagingQuantity = decimalMultiply(areaPerSlab, quantity);
-  }
-
-  const totalPackagingQuantity = decimalAdd(existingPackagingQuantity, newPackagingQuantity);
-
-  if (decimalGreaterThan(totalPackagingQuantity, maxQuantity)) {
-    throw new AppError(
-      `Total packaging quantity (${totalPackagingQuantity}) cannot exceed the SIPL product quantity (${maxQuantity}) for "${productName}".`,
-      400
-    );
-  }
-
-};
 
 // Create slabs for SIPL
 export async function handleCreateSlabs(slabData: any) {
@@ -679,36 +623,7 @@ export const getSIPLContainers = async (siplId: number) => {
   return await containerRepository.getContainersBySiplId(siplId);
 };
 
-export const checkSIPLDataIsFilledCorrectly = async (siplId: number) => {
-  const siplRes = await siplRepository.findSIPLById(siplId);
 
-  const sipl = siplRes?.get({ plain: true });
-
-  let isCorrect = true;
-
-  sipl.siplProducts.forEach((sp: any) => {
-
-    if (!sp.requestedPurchaseProduct.product.isSlabType) {
-      const totalGenericQuantity = sp.genericProducts.length;
-
-      if (!decimal.decimalEquals(totalGenericQuantity, sp.quantity)) {
-        isCorrect = false;
-        throw new AppError(`Total generic quantity of product ${sp.requestedPurchaseProduct.product.name} does not match the Billed quantity.`, 400)
-      }
-      return;
-    }
-
-    const totalPackagingArea = decimal.decimalSum(sp.slabs.map((slab: any) => slab.packagedSqrFt ?? []))
-
-    if (!decimal.decimalEquals(totalPackagingArea, sp.quantity)) {
-      isCorrect = false;
-      throw new AppError(`Packaging area of product "${sp.requestedPurchaseProduct.product.name}" does not match the Billed quantity.`, 400)
-    }
-
-  })
-
-  return { isCorrect }
-}
 
 export const cancelSIPLService = async (siplId: number, locationId: number, clientId: number, transaction?: Transaction) => {
   const shouldCommitTransaction = !transaction;
