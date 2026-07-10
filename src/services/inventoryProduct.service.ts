@@ -65,6 +65,30 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
     return plainProducts;
 };
 
+export const getInventoryProductsByBinId = async (req: AuthRequest, binId: number, excludeSoldCanceled = true, productId?: number) => {
+    // Get inventory products by binId filter using repository
+    const inventoryProducts = await inventoryProductRepository.getInventoryProductsByBinId(req, binId, excludeSoldCanceled, productId);
+
+    const plainProducts = inventoryProducts.map((ip: any) => ip.get({ plain: true }));
+
+    await Promise.all(
+        plainProducts.map(async (ip: any) => {
+            if (ip.images && ip.images.length > 0) {
+                const primaryImg = ip.images[0];
+                if (primaryImg.s3File?.s3Bucket && primaryImg.s3File?.s3Key) {
+                    primaryImg.s3File.url = await generateSignedGetUrl(primaryImg.s3File.s3Bucket, primaryImg.s3File.s3Key);
+                }
+                ip.primaryImage = primaryImg;
+            } else {
+                ip.primaryImage = null;
+            }
+            delete ip.images;
+        })
+    );
+
+    return plainProducts;
+};
+
 export const getAllocatedInventoryProductsAccordingToCustomer = async (customerId: number) => {
     return await inventoryProductRepository.getAllocatedInventoryProductsAccordingToCustomer(customerId);
 };
@@ -179,17 +203,17 @@ export const deleteInventoryProductImage = async (imageId: number) => {
     const transaction = await sequelize.transaction();
     try {
         const imageLink = await inventoryProductRepository.findInventoryProductImageById(imageId, transaction);
-        
+
         if (!imageLink) {
             throw new AppError("Image not found", 404);
         }
-        
+
         const s3FileId = (imageLink as any).s3FileId;
         const wasPrimary = (imageLink as any).isPrimary;
         const inventoryProductId = (imageLink as any).inventoryProductId;
 
         await inventoryProductRepository.deleteInventoryProductImage(imageId, transaction);
-        
+
         if (wasPrimary) {
             const nextImage = await inventoryProductRepository.getAnotherInventoryProductImage(inventoryProductId, imageId, transaction);
             if (nextImage) {
@@ -200,7 +224,7 @@ export const deleteInventoryProductImage = async (imageId: number) => {
         if (s3FileId) {
             await s3FileService.deleteS3File(s3FileId, transaction);
         }
-        
+
         await transaction.commit();
         return { message: "Image deleted successfully" };
     } catch (error) {
