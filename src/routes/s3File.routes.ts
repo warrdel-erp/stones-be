@@ -28,6 +28,33 @@ router.get(
   s3FileController.listS3FilesController
 );
 
+// Explore S3 bucket contents
+router.get(
+  "/explore",
+  authenticateUser,
+  s3FileController.exploreS3BucketController
+);
+
+router.post(
+  "/explore/url",
+  authenticateUser,
+  s3FileController.getExploreSignedUrlController
+);
+
+router.post(
+  "/explore/delete",
+  authenticateUser,
+  s3FileController.deleteExploreKeysController
+);
+
+router.post(
+  "/explore/folder",
+  authenticateUser,
+  s3FileController.createExploreFolderController
+);
+
+
+
 // Get a single S3 file record by ID
 router.get(
   "/:id",

@@ -57,3 +57,39 @@ export const listS3FilesController = catchAsync(async (req: AuthRequest, res: Re
 
   return SuccessResponse(res, 200, "S3 files retrieved successfully.", s3Files);
 });
+
+// GET /api/fileUpload/explore
+export const exploreS3BucketController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const result = await s3FileService.exploreS3Bucket();
+  return SuccessResponse(res, 200, "S3 bucket contents retrieved successfully.", result);
+});
+
+// POST /api/fileUpload/explore/url
+export const getExploreSignedUrlController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { key } = req.body;
+  if (!key) {
+    throw new AppError("Key is required.", 400);
+  }
+  const url = await s3FileService.getExploreSignedUrl(key);
+  return SuccessResponse(res, 200, "Signed URL generated successfully.", { url });
+});
+
+// POST /api/fileUpload/explore/delete
+export const deleteExploreKeysController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { keys } = req.body;
+  if (!keys || !Array.isArray(keys)) {
+    throw new AppError("Keys array is required.", 400);
+  }
+  await s3FileService.deleteExploreKeys(keys);
+  return SuccessResponse(res, 200, "Keys deleted successfully.", null);
+});
+
+// POST /api/fileUpload/explore/folder
+export const createExploreFolderController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { folderKey } = req.body;
+  if (!folderKey) {
+    throw new AppError("Folder key is required.", 400);
+  }
+  await s3FileService.createExploreFolder(folderKey);
+  return SuccessResponse(res, 200, "Folder created successfully.", null);
+});
