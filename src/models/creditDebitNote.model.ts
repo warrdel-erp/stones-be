@@ -60,6 +60,11 @@ const CreditDebitNote = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: true,
         },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: 'active',
+        },
         clientId: {
             type: DataTypes.INTEGER,
             allowNull: false,

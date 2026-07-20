@@ -4,21 +4,20 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as creditDebitNoteService from "../services/creditDebitNote.service";
 import { AppError } from "../helper/appError";
-
-// Create credit/debit note
-export const createCreditDebitNote = catchAsync(async (req: AuthRequest, res: Response) => {
+// Create and settle credit/debit note for SIPL
+export const createAndSettleSiplCreditNote = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
 
     if (!clientId) {
         throw new AppError("Client ID is required", 400);
     }
 
-    const creditDebitNote = await creditDebitNoteService.createCreditDebitNote({
+    const creditDebitNote = await creditDebitNoteService.createAndSettleSiplCreditNote({
         ...req.body,
         clientId,
     });
 
-    return SuccessResponse(res, 201, "Credit/Debit note created successfully", creditDebitNote);
+    return SuccessResponse(res, 201, "Credit/Debit note for SIPL created and settled successfully", creditDebitNote);
 });
 
 // Get all credit/debit notes
@@ -65,4 +64,26 @@ export const updateCreditDebitNote = catchAsync(async (req: AuthRequest, res: Re
     );
 
     return SuccessResponse(res, 200, "Credit/Debit note updated successfully", creditDebitNote);
+});
+
+// Settle credit/debit note
+export const settleCreditDebitNote = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+
+    if (!clientId) {
+        throw new AppError("Client ID is required", 400);
+    }
+
+    const { referenceType, referenceId, amount } = req.body;
+    const creditDebitNoteId = Number(req.params.id);
+
+    const settlement = await creditDebitNoteService.settleCreditDebitNote(
+        creditDebitNoteId,
+        referenceType,
+        referenceId,
+        amount,
+        clientId
+    );
+
+    return SuccessResponse(res, 200, "Credit/Debit note settled successfully", settlement);
 });

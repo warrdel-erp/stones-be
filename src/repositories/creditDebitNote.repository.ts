@@ -26,7 +26,7 @@ export const getAllCreditDebitNotes = async (filters: any = {}, page: number = 1
     return { total: count, creditDebitNotes: rows, page, limit };
 };
 
-export const getCreditDebitNoteById = async (id: number) => {
+export const getCreditDebitNoteById = async (id: number, transaction?: Transaction) => {
     return await models.CreditDebitNote.findByPk(id, {
         include: [
             {
@@ -35,6 +35,7 @@ export const getCreditDebitNoteById = async (id: number) => {
                 attributes: ["id", "firstName", "lastName"],
             },
         ],
+        transaction,
     });
 };
 
@@ -48,11 +49,29 @@ export const updateCreditDebitNote = async (id: number, updateData: any, transac
         return null;
     }
 
-    return await getCreditDebitNoteById(id);
+    return await getCreditDebitNoteById(id, transaction);
 };
 
 export const getCreditDebitNoteByReference = async (referenceId: number, referenceType: string) => {
     return await scoped(models.CreditDebitNote).findOne({
         where: { referenceId, referenceType }
     });
+};
+
+export const getSettlementsByCreditDebitNoteId = async (creditDebitNoteId: number, transaction?: Transaction) => {
+    return await scoped(models.CreditDebitNoteSettlement).findAll({
+        where: { creditDebitNoteId },
+        transaction
+    });
+};
+
+export const getSettlementsByReference = async (referenceId: number, referenceType: string, transaction?: Transaction) => {
+    return await scoped(models.CreditDebitNoteSettlement).findAll({
+        where: { referenceId, referenceType },
+        transaction
+    });
+};
+
+export const createSettlement = async (settlementData: any, transaction?: Transaction) => {
+    return await scoped(models.CreditDebitNoteSettlement).create(settlementData, { transaction });
 };

@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import { PAYMENT_BILL_REFERENCE_TYPES, SIPL_STATUS, CREDIT_NOTE_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -459,7 +459,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     })),
     "amount"
   );
-  const totalAmount = sumDecimal([totalProductsAmount, totalTradeServicesAmount, totalBillsCharges]);
+
 
   // Calculate total area of slabs that received.
   let totalReceivingQuantity = Number(
@@ -476,15 +476,23 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     where: {
       referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
       referenceId: siplId,
+      status: { [Op.ne]: 'canceled' }
     },
     transaction,
   });
-  const totalCreditNotesAmount = sumDecimal(creditNotes.map((cn: any) => cn.get({ plain: true })), "amount");
+  
+  const allNotes = creditNotes.map((cn: any) => cn.get({ plain: true }));
+  const totalCreditNotesAmount = sumDecimal(allNotes.filter((cn: any) => cn.type === 'credit'), "amount");
+  const totalDebitNotesAmount = sumDecimal(allNotes.filter((cn: any) => cn.type === 'debit'), "amount");
+
+  const totalAmountBeforeNotes = sumDecimal([totalProductsAmount, totalTradeServicesAmount, totalBillsCharges]);
+  const totalAmount = Number(decimal.decimalAdd(decimal.decimalSubtract(totalAmountBeforeNotes, totalCreditNotesAmount), totalDebitNotesAmount));
 
   // change unit bill price calcs using decimal as well.
   const unitBillPrice = decimalDivide(totalBillsCharges, totalQuantity);
   const unitServicePrice = decimalDivide(totalTradeServicesAmount, totalQuantity);
-  const unitCreditNotePrice = totalQuantity > 0 ? decimalDivide(totalCreditNotesAmount, totalQuantity) : 0;
+  const netNoteEffect = decimal.decimalSubtract(totalCreditNotesAmount, totalDebitNotesAmount);
+  const unitCreditNotePrice = totalQuantity > 0 ? decimalDivide(netNoteEffect, totalQuantity) : 0;
 
   // Calculation according to product.
   const dataAccordingToProduct = siplData.siplProducts.map((siplProduct: any) => {
@@ -496,10 +504,15 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     }
 
     // total packaging area as per product.
-    const totalPackagingAreaPerProduct = sumDecimal(siplProduct.slabs, "packagedSqrFt");
+    let totalPackagingAreaPerProduct = sumDecimal(siplProduct.slabs, "packagedSqrFt");
+
+    if (!siplProduct.requestedPurchaseProduct.product.isSlabType) {
+      totalPackagingAreaPerProduct = siplProduct.genericProducts.length;
+    }
 
     // Total SIPL price as per product.
     const totalSIPLProductPrice = siplProduct.quantity * siplProduct.unitPrice;
+    const totalPackagingPrice = totalPackagingAreaPerProduct * siplProduct.unitPrice;
 
     const unitCost = siplProduct.unitPrice;
 
@@ -523,6 +536,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
         siplProductQuantity: siplProduct.quantity,
 
         totalPrice: totalSIPLProductPrice,
+        totalPackagingPrice,
 
         unitCost,
         landedUnitCost,
@@ -540,6 +554,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
 
         totalSlabs: siplProduct.slabs.length,
         totalPrice: totalSIPLProductPrice,
+        totalPackagingPrice,
 
         totalReceivedArea: totalReceivedQuantity,
         totalPackagingArea: totalPackagingAreaPerProduct,
@@ -553,6 +568,11 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
   });
 
   const totalItemPrice = sumDecimal(dataAccordingToProduct, "totalPrice");
+  const totalPackagingPrice = sumDecimal(dataAccordingToProduct, "totalPackagingPrice");
+  
+  const diffBeforeNotes = Number(decimal.decimalSubtract(Number(totalPackagingPrice), Number(totalItemPrice)));
+  const diffAfterDebitNotes = Number(decimal.decimalSubtract(diffBeforeNotes, totalDebitNotesAmount));
+  const packagingBilledDifference = Number(decimal.decimalAdd(diffAfterDebitNotes, totalCreditNotesAmount));
 
   return {
     dataAccordingToProduct,
@@ -560,8 +580,13 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
     totalPackagingArea,
     totalReceivingQuantity,
     totalQuantity,
+    totalAmountBeforeNotes,
+    totalCreditNotesAmount,
+    totalDebitNotesAmount,
     totalAmount,
     totalItemPrice,
+    totalPackagingPrice,
+    packagingBilledDifference,
     unitBillCharge: unitBillPrice,
     totalTradeServicesAmount,
     unitServicePrice,
@@ -577,7 +602,13 @@ export const getSIPLByVendor = async (vendorId: number) => {
       sipl = sipl.get({ plain: true });
       const calculations = await getSiplCalculations(sipl.id);
 
-      return { ...sipl, totalAmount: calculations.totalAmount };
+      return { 
+        ...sipl, 
+        totalAmount: calculations.totalAmount,
+        totalAmountBeforeNotes: calculations.totalAmountBeforeNotes,
+        totalCreditNotesAmount: calculations.totalCreditNotesAmount,
+        totalDebitNotesAmount: calculations.totalDebitNotesAmount
+      };
     })
   );
 
@@ -592,7 +623,13 @@ export const getOverdueSIPLsByVendor = async (vendorId: number, clientId: number
       sipl = sipl.get({ plain: true });
       const calculations = await getSiplCalculations(sipl.id);
 
-      return { ...sipl, totalAmount: calculations.totalAmount };
+      return { 
+        ...sipl, 
+        totalAmount: calculations.totalAmount,
+        totalAmountBeforeNotes: calculations.totalAmountBeforeNotes,
+        totalCreditNotesAmount: calculations.totalCreditNotesAmount,
+        totalDebitNotesAmount: calculations.totalDebitNotesAmount
+      };
     })
   );
 
@@ -622,8 +659,6 @@ export const getNewCombinedSlabNumberService = async (siplId: number) => {
 export const getSIPLContainers = async (siplId: number) => {
   return await containerRepository.getContainersBySiplId(siplId);
 };
-
-
 
 export const cancelSIPLService = async (siplId: number, locationId: number, clientId: number, transaction?: Transaction) => {
   const shouldCommitTransaction = !transaction;
@@ -662,6 +697,30 @@ export const cancelSIPLService = async (siplId: number, locationId: number, clie
 
     // 3. Reverse journal entries
     await journalEntryService.reverseJournalEntriesForSIPL(siplId, transaction, locationId);
+
+    // 4. Cancel credit notes and reverse their entries
+    const creditNotes = await models.CreditDebitNote.findAll({
+      where: {
+        referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+        referenceId: siplId,
+        status: { [Op.ne]: 'canceled' }
+      },
+      transaction
+    });
+
+    if (creditNotes && creditNotes.length > 0) {
+      await models.CreditDebitNote.update(
+        { status: 'canceled' },
+        {
+          where: {
+            referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+            referenceId: siplId,
+          },
+          transaction
+        }
+      );
+      await journalEntryService.reverseJournalEntriesForSiplCreditNotes(siplId, transaction, locationId);
+    }
 
     if (shouldCommitTransaction) {
       await transaction.commit();

@@ -12,126 +12,44 @@ import _ from "lodash";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as decimal from "../helper/decimal";
 
-// Create a new credit/debit note
-export const createCreditDebitNote = async (creditDebitNoteData: CreateCreditDebitNoteInput & { clientId: number }) => {
+export const createCreditDebitNote = async (
+    creditDebitNoteData: CreateCreditDebitNoteInput & { clientId: number },
+    transaction?: any
+) => {
+    const isExternalTransaction = !!transaction;
+    const t = transaction || await sequelize.transaction();
+    try {
+        const creditDebitNote: any = await creditDebitNoteRepository.createCreditDebitNote(creditDebitNoteData, t);
+
+
+        if (!isExternalTransaction) {
+            await t.commit();
+        }
+        return await creditDebitNoteRepository.getCreditDebitNoteById(creditDebitNote.id, t);
+    } catch (error) {
+        if (!isExternalTransaction) {
+            await t.rollback();
+        }
+        throw error;
+    }
+};
+
+export const createAndSettleSiplCreditNote = async (creditDebitNoteData: CreateCreditDebitNoteInput & { clientId: number }) => {
     const transaction = await sequelize.transaction();
     try {
-        const creditDebitNote: any = await creditDebitNoteRepository.createCreditDebitNote(creditDebitNoteData, transaction);
+        // 1. Create Note
+        const creditDebitNote: any = await createCreditDebitNote(creditDebitNoteData, transaction);
+        console.log("DEBUG: creditDebitNote returned from createCreditDebitNote:", creditDebitNote ? creditDebitNote.id : null);
 
-        if (creditDebitNoteData.referenceType === CREDIT_NOTE_REFERENCE_TYPES.SIPL && creditDebitNoteData.referenceId) {
-            const siplData = await siplRepository.findSIPLById(creditDebitNoteData.referenceId, transaction);
-            if (!siplData) throw new AppError("SIPL not found", 404);
-
-            const impact = creditDebitNoteData.inventoryImpactType || 'cost_revaluation';
-            let cogsAmount = 0;
-            let finishedGoodsAmount = 0;
-
-            if (impact === 'none' || impact === 'No Inventory Impact') {
-                // No Inventory Impact: All credit amount goes to COGS directly (reducing cost)
-                cogsAmount = Number(creditDebitNoteData.amount);
-                finishedGoodsAmount = 0;
-            } else if (impact === 'quantity_reduction' || impact === 'Quantity Reduction') {
-                // Quantity Reduction: selected slabs are removed/canceled
-                const selectedSlabIds = (creditDebitNoteData as any).selectedSlabIds;
-                if (!selectedSlabIds || !Array.isArray(selectedSlabIds) || selectedSlabIds.length === 0) {
-                    throw new AppError("selectedSlabIds must be provided as a non-empty array for Quantity Reduction", 400);
-                }
-
-                const slabs = await models.Slab.findAll({
-                    where: { id: selectedSlabIds },
-                    include: [{ association: "inventoryProduct" }],
-                    transaction
-                });
-
-                if (slabs.length !== selectedSlabIds.length) {
-                    throw new AppError("Some selected slabs were not found", 404);
-                }
-
-                for (const slab of slabs) {
-                    const ip = (slab as any).inventoryProduct;
-                    if (!ip) {
-                        throw new AppError(`Inventory product not found for slab ${(slab as any).id}`, 404);
-                    }
-
-                    if (ip.siplId !== creditDebitNoteData.referenceId) {
-                        throw new AppError(`Slab ${(slab as any).id} does not belong to this SIPL`, 400);
-                    }
-
-                    if (ip.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
-                        throw new AppError(`Only unsold slabs (IN_INVENTORY) can be removed. Slab ${(slab as any).id} is in status ${ip.status}`, 400);
-                    }
-
-                    finishedGoodsAmount = Number(decimal.decimalAdd(finishedGoodsAmount, Number(ip.assetValue || 0)));
-
-                    // Cancel the inventory product and slab
-                    await ip.update({ status: INVENTORY_ITEM_STATUS.CANCELED }, { transaction });
-                    await slab.update({ status: INVENTORY_ITEM_STATUS.CANCELED }, { transaction });
-                }
-
-                // The difference between creditNote amount and finished goods amount goes to COGS
-                cogsAmount = Number(decimal.decimalSubtract(Number(creditDebitNoteData.amount), finishedGoodsAmount));
-            } else {
-                // Cost Revaluation
-                const siplCalc = await siplService.getSiplCalculations(creditDebitNoteData.referenceId, transaction);
-                const totalSiplAmount = Number(siplCalc.totalAmount || 0);
-
-                const existingCreditNotes: any[] = await models.CreditDebitNote.findAll({
-                    where: { referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL, referenceId: creditDebitNoteData.referenceId },
-                    transaction
-                });
-                const existingCreditAmount = _.sumBy(existingCreditNotes, (cn: any) => parseFloat(cn.amount)) || 0;
-
-                if (creditDebitNoteData.amount > (totalSiplAmount - existingCreditAmount)) {
-                    throw new AppError(`Credit note amount cannot exceed remaining SIPL amount of ${(totalSiplAmount - existingCreditAmount).toFixed(2)}`, 400);
-                }
-
-                const totalQuantity = siplCalc.totalQuantity;
-                const unitCreditAmount = totalQuantity > 0 ? decimal.decimalDivide(creditDebitNoteData.amount, totalQuantity) : 0;
-
-                const inventoryProducts = await models.InventoryProduct.findAll({
-                    where: { siplId: creditDebitNoteData.referenceId },
-                    include: [{ association: "slab" }],
-                    transaction
-                });
-
-                for (const ip of inventoryProducts) {
-                    let ipQuantity = 0;
-                    if ((ip as any).isSlabType && (ip as any).slab) {
-                        const slab = (ip as any).slab;
-                        const length = Number(slab.packageLength) || 0;
-                        const width = Number(slab.packageWidth) || 0;
-                        ipQuantity = (length * width) / 144;
-                    } else {
-                        ipQuantity = 1;
-                    }
-
-                    const ipCreditAmount = Number(decimal.decimalMultiply(unitCreditAmount, ipQuantity));
-
-                    if ((ip as any).status === INVENTORY_ITEM_STATUS.SOLD) {
-                        cogsAmount = Number(decimal.decimalAdd(cogsAmount, ipCreditAmount));
-                    } else {
-                        finishedGoodsAmount = Number(decimal.decimalAdd(finishedGoodsAmount, ipCreditAmount));
-                        
-                        // Update landedUnitCost and assetValue for unsold inventory products
-                        const currentLandedUnitCost = Number((ip as any).landedUnitCost) || 0;
-                        const newLandedUnitCost = Number(decimal.decimalSubtract(currentLandedUnitCost, unitCreditAmount));
-                        const newAssetValue = Number(decimal.decimalMultiply(newLandedUnitCost, ipQuantity));
-                        
-                        await ip.update({ 
-                            landedUnitCost: newLandedUnitCost, 
-                            assetValue: newAssetValue 
-                        }, { transaction });
-                    }
-                }
-            }
-
-            // Update credit note with the inventory adjustment value (which is finishedGoodsAmount)
-            await creditDebitNote.update({
-                inventoryAdjustmentValue: finishedGoodsAmount
-            }, { transaction });
-
-            await journalEntryService.createJournalEntriesForSiplCreditNote(creditDebitNote, siplData, cogsAmount, finishedGoodsAmount, creditDebitNoteData.clientId, transaction);
-        }
+        // 2. Settle the note with the given SIPL
+        await _settleCreditDebitNoteInternal(
+            creditDebitNote,
+            CREDIT_NOTE_REFERENCE_TYPES.SIPL,
+            creditDebitNoteData.referenceId as number,
+            Number(creditDebitNoteData.amount),
+            creditDebitNoteData.clientId,
+            transaction
+        );
 
         await transaction.commit();
         return await creditDebitNoteRepository.getCreditDebitNoteById(creditDebitNote.id);
@@ -139,6 +57,141 @@ export const createCreditDebitNote = async (creditDebitNoteData: CreateCreditDeb
         await transaction.rollback();
         throw error;
     }
+};
+
+export const settleCreditDebitNote = async (
+    creditDebitNoteId: number,
+    referenceType: string,
+    referenceId: number,
+    amount: number,
+    clientId: number
+) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const creditDebitNote: any = await creditDebitNoteRepository.getCreditDebitNoteById(creditDebitNoteId, transaction);
+        if (!creditDebitNote) throw new AppError("Credit/Debit Note not found", 404);
+
+        const settlement = await _settleCreditDebitNoteInternal(
+            creditDebitNote,
+            referenceType,
+            referenceId,
+            amount,
+            clientId,
+            transaction
+        );
+        await transaction.commit();
+        return settlement;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
+const _settleCreditDebitNoteInternal = async (
+    creditDebitNote: any,
+    referenceType: string,
+    referenceId: number,
+    amount: number,
+    clientId: number,
+    transaction: any
+) => {
+    const creditDebitNoteId = creditDebitNote.id;
+
+    if (creditDebitNote.clientId !== clientId) {
+        throw new AppError("Unauthorized access to this note", 403);
+    }
+
+    const existingSettlements = await creditDebitNoteRepository.getSettlementsByCreditDebitNoteId(creditDebitNoteId, transaction);
+    const totalSettled = decimal.decimalSum(existingSettlements.map((s: any) => parseFloat(s.amount) || 0));
+    const noteAmount = parseFloat(creditDebitNote.amount);
+
+    if (decimal.decimalGreaterThan(Number(decimal.decimalAdd(totalSettled, amount)), noteAmount)) {
+        throw new AppError(`Cannot settle more than the note amount. Remaining balance is ${decimal.decimalSubtract(noteAmount, totalSettled).toFixed(2)}`, 400);
+    }
+
+    const settlement = await creditDebitNoteRepository.createSettlement({
+        creditDebitNoteId,
+        referenceType,
+        referenceId,
+        amount,
+        clientId
+    }, transaction);
+
+    if (referenceType === CREDIT_NOTE_REFERENCE_TYPES.SIPL) {
+        const siplId = referenceId;
+        const siplData = await siplRepository.findSIPLById(siplId, transaction);
+        if (!siplData) throw new AppError("SIPL not found", 404);
+
+        const { cogsAmount, finishedGoodsAmount } = await handleCostRevaluationSettlement(siplId, amount, transaction);
+
+        await journalEntryService.createJournalEntriesForSiplCreditNote(creditDebitNote, siplData, cogsAmount, finishedGoodsAmount, clientId, transaction);
+    }
+
+    return settlement;
+};
+
+const handleQuantityReductionSettlement = (creditDebitNote: any, amount: number, noteAmount: number) => {
+    const totalNoteFinishedGoods = parseFloat(creditDebitNote.inventoryAdjustmentValue || "0");
+    const proportion = decimal.decimalDivide(amount, noteAmount);
+    const finishedGoodsAmount = Number(decimal.decimalMultiply(totalNoteFinishedGoods, proportion));
+    const cogsAmount = Number(decimal.decimalSubtract(amount, finishedGoodsAmount));
+
+    return { cogsAmount, finishedGoodsAmount };
+};
+
+const handleCostRevaluationSettlement = async (siplId: number, amount: number, transaction: any) => {
+    let cogsAmount = 0;
+    let finishedGoodsAmount = 0;
+
+    const siplCalc = await siplService.getSiplCalculations(siplId, transaction);
+    const totalSiplAmount = Number(siplCalc.totalAmount || 0);
+
+    const existingSIPLNotes: any[] = await creditDebitNoteRepository.getSettlementsByReference(siplId, CREDIT_NOTE_REFERENCE_TYPES.SIPL, transaction);
+    const existingSIPLSettledAmount = decimal.decimalSubtract(decimal.decimalSum(existingSIPLNotes.map((s: any) => parseFloat(s.amount) || 0)), amount);
+
+    if (decimal.decimalGreaterThan(amount, decimal.decimalSubtract(totalSiplAmount, existingSIPLSettledAmount))) {
+        throw new AppError(`Settlement amount cannot exceed remaining SIPL balance of ${decimal.decimalSubtract(totalSiplAmount, existingSIPLSettledAmount).toFixed(2)}`, 400);
+    }
+
+    const totalQuantity = siplCalc.totalQuantity;
+    const unitCreditAmount = totalQuantity > 0 ? decimal.decimalDivide(amount, totalQuantity) : 0;
+
+    const inventoryProducts = await models.InventoryProduct.findAll({
+        where: { siplId },
+        include: [{ association: "slab" }],
+        transaction
+    });
+
+    for (const ip of inventoryProducts) {
+        let ipQuantity = 0;
+        if ((ip as any).isSlabType && (ip as any).slab) {
+            const slab = (ip as any).slab;
+            const length = Number(slab.packageLength) || 0;
+            const width = Number(slab.packageWidth) || 0;
+            ipQuantity = decimal.decimalDivide(decimal.decimalMultiply(length, width), 144);
+        } else {
+            ipQuantity = 1;
+        }
+
+        const ipCreditAmount = Number(decimal.decimalMultiply(unitCreditAmount, ipQuantity));
+
+        if ((ip as any).status === INVENTORY_ITEM_STATUS.SOLD || (ip as any).status === INVENTORY_ITEM_STATUS.CANCELED) {
+            cogsAmount = Number(decimal.decimalAdd(cogsAmount, ipCreditAmount));
+        } else {
+            finishedGoodsAmount = Number(decimal.decimalAdd(finishedGoodsAmount, ipCreditAmount));
+
+            const currentLandedUnitCost = Number((ip as any).landedUnitCost) || 0;
+            const newLandedUnitCost = Number(decimal.decimalSubtract(currentLandedUnitCost, unitCreditAmount));
+            const newAssetValue = Number(decimal.decimalMultiply(newLandedUnitCost, ipQuantity));
+
+            await ip.update({
+                landedUnitCost: newLandedUnitCost,
+                assetValue: newAssetValue
+            }, { transaction });
+        }
+    }
+
+    return { cogsAmount, finishedGoodsAmount };
 };
 
 // Get all credit/debit notes with pagination

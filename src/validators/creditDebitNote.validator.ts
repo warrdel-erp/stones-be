@@ -12,6 +12,10 @@ export const createCreditDebitNoteSchema = z.object({
         invalid_type_error: 'Entry for must be either customer or vendor',
     }),
 
+    type: z.enum(['credit', 'debit'] as [string, ...string[]], {
+        invalid_type_error: 'Type must be either credit or debit',
+    }).optional(),
+
     entryIdFor: z.number({
         required_error: 'Entry ID for is required',
         invalid_type_error: 'Entry ID for must be a number',
@@ -57,5 +61,22 @@ export const updateCreditDebitNoteSchema = z.object({
     }).int('Reference ID must be an integer').positive('Reference ID must be positive').optional(),
 });
 
+export const settleCreditDebitNoteSchema = z.object({
+    referenceType: z.string({
+        required_error: 'Reference Type is required',
+        invalid_type_error: 'Reference Type must be a string',
+    }),
+    referenceId: z.number({
+        required_error: 'Reference ID is required',
+        invalid_type_error: 'Reference ID must be a number',
+    }).int('Reference ID must be an integer').positive('Reference ID must be positive'),
+
+    amount: z.number({
+        required_error: 'Amount is required',
+        invalid_type_error: 'Amount must be a number',
+    }).positive('Amount must be positive'),
+});
+
 export type CreateCreditDebitNoteInput = z.infer<typeof createCreditDebitNoteSchema>;
 export type UpdateCreditDebitNoteInput = z.infer<typeof updateCreditDebitNoteSchema>;
+export type SettleCreditDebitNoteInput = z.infer<typeof settleCreditDebitNoteSchema>;

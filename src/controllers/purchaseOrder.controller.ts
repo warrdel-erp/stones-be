@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import * as poService from "../services/purchaseOrder.service";
 import { AppError } from "../helper/appError";
 import catchAsync from "../helper/asyncCatch";
 import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { NUMBER } from "sequelize";
+import * as poService from "../services/purchaseOrder.service";
 
 /**
  * Controller to handle PO creation.

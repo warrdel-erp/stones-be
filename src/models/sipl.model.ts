@@ -48,6 +48,26 @@ const SIPL = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    poDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    etaDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    expiryDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    deliveryType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shipmentTerms: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
