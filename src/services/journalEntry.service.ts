@@ -7,6 +7,7 @@ import {
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
   PAYMENT_BILL_REFERENCE_TYPES,
+  CREDIT_DEBIT_NOTE_TYPES,
 } from "../constants/tableTypes";
 import { JournalEntry } from "../models/journalEntry.model";
 import JournalEntryModel from "../models/journalEntry.model";
@@ -818,61 +819,77 @@ export async function createJournalEntriesForSiplCreditNote(creditNote: any, sip
 
   const vendorLedgerObj = vendorLedgerAccount.get ? vendorLedgerAccount.get({ plain: true }) : vendorLedgerAccount;
 
-  // Debit Vendor (reduce accounts payable)
+  // Get Inventory In Transit ledger account
+  const inventoryLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
+    clientId,
+  }, transaction);
+
+  if (!inventoryLedgerAccount) throw new AppError("Inventory In Transit ledger account not found", 404);
+
+  const inventoryLedgerObj = inventoryLedgerAccount.get ? inventoryLedgerAccount.get({ plain: true }) : inventoryLedgerAccount;
+
+  const isDebitNote = creditNote.type === CREDIT_DEBIT_NOTE_TYPES.DEBIT;
+  
+  // Debit Note: Vendor CR, Inventory DR
+  // Credit Note: Vendor DR, Inventory CR
+  const vendorEntryType = isDebitNote ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
+  const inventoryEntryType = isDebitNote ? JOURNAL_ENTRY_TYPE.DR : JOURNAL_ENTRY_TYPE.CR;
+
+  // Vendor Entry
   await journalEntryRepository.create({
     amount: creditNote.amount,
     ledgerId: vendorLedgerObj.id,
-    type: JOURNAL_ENTRY_TYPE.DR,
+    type: vendorEntryType,
     processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
     referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
     referenceId: siplData.id,
     entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
     entryForId: siplData.id,
+    partyLedgerAccountId: inventoryLedgerObj.id,
   } as any, transaction);
 
-  if (cogsAmount !== 0) {
-    const cogsLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-      key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
-      clientId,
-    }, transaction);
+  // Inventory In Transit Entry
+  await journalEntryRepository.create({
+    amount: creditNote.amount,
+    ledgerId: inventoryLedgerObj.id,
+    type: inventoryEntryType,
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
+    referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+    referenceId: siplData.id,
+    entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+    entryForId: siplData.id,
+    partyLedgerAccountId: vendorLedgerObj.id,
+  } as any, transaction);
+}
 
-    if (!cogsLedgerAccount) throw new AppError("COGS ledger account not found", 404);
+export async function reverseJournalEntriesForSiplCreditNotes(siplId: number, transaction: Transaction, locationId: number) {
+  const entries: any[] = await scoped(JournalEntryModel).findAll({
+    where: {
+      referenceId: siplId,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
+    },
+    transaction,
+  });
 
-    const cogsLedgerObj = cogsLedgerAccount.get ? cogsLedgerAccount.get({ plain: true }) : cogsLedgerAccount;
+  for (const entry of entries) {
+    const plainEntry = entry.get ? entry.get({ plain: true }) : entry;
+    const reversedType = plainEntry.type === JOURNAL_ENTRY_TYPE.DR ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
 
     await journalEntryRepository.create({
-      amount: Math.abs(cogsAmount),
-      ledgerId: cogsLedgerObj.id,
-      type: cogsAmount > 0 ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: siplData.id,
-      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-      entryForId: siplData.id,
-      partyLedgerAccountId: vendorLedgerObj.id
-    } as any, transaction);
-  }
-
-  if (finishedGoodsAmount > 0) {
-    const finishedGoodsLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-      key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
-      clientId,
+      amount: plainEntry.amount,
+      ledgerId: plainEntry.ledgerId,
+      type: reversedType,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.CANCEL_SIPL,
+      subReferenceId: plainEntry.subReferenceId,
+      subReferenceType: plainEntry.subReferenceType,
+      referenceId: plainEntry.referenceId,
+      referenceType: plainEntry.referenceType,
+      entryFor: plainEntry.entryFor,
+      entryForId: plainEntry.entryForId,
+      locationId: plainEntry.locationId,
+      partyLedgerAccountId: plainEntry.partyLedgerAccountId,
     }, transaction);
-
-    if (!finishedGoodsLedgerAccount) throw new AppError("Finished Goods ledger account not found", 404);
-
-    const finishedGoodsLedgerObj = finishedGoodsLedgerAccount.get ? finishedGoodsLedgerAccount.get({ plain: true }) : finishedGoodsLedgerAccount;
-
-    await journalEntryRepository.create({
-      amount: finishedGoodsAmount,
-      ledgerId: finishedGoodsLedgerObj.id,
-      type: JOURNAL_ENTRY_TYPE.CR,
-      processType: JOURNAL_ENTRY_PROCESS_TYPE.SIPL_CREDIT_NOTE,
-      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.SIPL,
-      referenceId: siplData.id,
-      entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
-      entryForId: siplData.id,
-      partyLedgerAccountId: vendorLedgerObj.id
-    } as any, transaction);
   }
 }

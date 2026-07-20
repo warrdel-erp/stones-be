@@ -1045,3 +1045,6 @@ Univ
 4. Show status of each sales order product in SO details page.
 5. SO invoice settlement with other SO's AD.
 6. Show delivery status in loading packing list.
+7. Credit note (suggestion) in SIPL.
+8. SIPL page, SIPL form, PO form page design changes.
+9. content editable in SIPL form.

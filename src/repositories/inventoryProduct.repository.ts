@@ -338,6 +338,61 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
   return inventoryProducts;
 };
 
+export const getInventoryProductsByBinId = async (req: AuthRequest, binId: number, excludeSoldCanceled = false, productId?: number) => {
+  const where: any = { binId };
+  if (excludeSoldCanceled) {
+    where.status = {
+      [Op.notIn]: ['SOLD', 'CANCELED']
+    };
+  }
+  if (productId) {
+    where.productId = productId;
+  }
+
+  const inventoryProducts = await scoped(models.InventoryProduct).findAll({
+    where,
+    include: [
+      {
+        association: "bin",
+        include: [
+          {
+            association: "warehouse",
+            include: [
+              {
+                association: "location",
+                attributes: ["locationName"],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        association: "slab",
+        required: false,
+      },
+      {
+        association: 'cartItem',
+        where: {
+          accountId: req.user?.accountId
+        },
+        required: false
+      },
+      {
+        association: 'holdItem',
+        include: [{ association: 'hold' }]
+      },
+      {
+        association: 'images',
+        required: false,
+        where: { isPrimary: true },
+        include: [{ association: "s3File" }]
+      },
+    ],
+  });
+
+  return inventoryProducts;
+};
+
 export const getAllocatedInventoryProductsAccordingToCustomer = (customerId: number) => {
   const data = scoped(models.InventoryProduct).findAll({
     where: {

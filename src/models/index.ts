@@ -49,6 +49,7 @@ import Service from "./service.model";
 import TradeService, { TRADE_SERVICE_REFERENCE_TYPES } from "./tradeService.model";
 import GenericProduct from "./genericProduct.model";
 import CreditDebitNote from "./creditDebitNote.model";
+import CreditDebitNoteSettlement from "./creditDebitNoteSettlement.model";
 import SoProductSwapHistory from "./soProductSwapHistory.model";
 import InventoryProductHold from "./inventoryProductHold.model";
 import Hold from "./hold.model";
@@ -713,6 +714,13 @@ AdvancedDeposit.hasOne(Payment, { foreignKey: 'paymentForId', as: 'payment' })
 CreditDebitNote.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(CreditDebitNote, { foreignKey: "clientId", as: "creditDebitNotes" });
 
+// CreditDebitNoteSettlement associations
+CreditDebitNoteSettlement.belongsTo(CreditDebitNote, { foreignKey: "creditDebitNoteId", as: "creditDebitNote" });
+CreditDebitNote.hasMany(CreditDebitNoteSettlement, { foreignKey: "creditDebitNoteId", as: "settlements" });
+
+CreditDebitNoteSettlement.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(CreditDebitNoteSettlement, { foreignKey: "clientId", as: "creditDebitNoteSettlements" });
+
 Payment.hasOne(CreditDebitNote, {
   foreignKey: "referenceId",
   constraints: false,
@@ -1006,6 +1014,7 @@ export {
   TradeService,
   GenericProduct,
   CreditDebitNote,
+  CreditDebitNoteSettlement,
   CartItem,
   SoProductSwapHistory,
   InventoryProductHold,

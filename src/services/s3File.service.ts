@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import { PutObjectCommand, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, HeadObjectCommand, GetObjectCommand, DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client, S3_BUCKET, SIGNED_URL_EXPIRES_IN } from "../config/s3";
+import { s3Client, S3_BUCKET, S3_KEY_PREFIX, SIGNED_URL_EXPIRES_IN } from "../config/s3";
 import { AppError } from "../helper/appError";
 import { FILE_UPLOAD_STATUS, FILE_UPLOAD_ENTITY_TYPE } from "../constants/tableTypes";
 import * as s3FileRepo from "../repositories/s3File.repository";
@@ -96,7 +96,9 @@ export const generateUploadUrl = async (
   // Key format: {env}/{clientId}/{uuid}{ext}  — env is "prod" in production, "stage" everywhere else
   const envPrefix = process.env.NODE_ENV === "production" ? "prod" : "stage";
   const uuid = uuidv4();
-  const s3Key = `${envPrefix}/${user.clientId}/${uuid}${ext}`;
+  const baseKey = `${envPrefix}/${user.clientId}/${uuid}${ext}`;
+  const prefix = S3_KEY_PREFIX ? (S3_KEY_PREFIX.endsWith('/') ? S3_KEY_PREFIX : `${S3_KEY_PREFIX}/`) : "";
+  const s3Key = `${prefix}${baseKey}`;
 
   // Create the pending DB record before issuing the URL
   const s3File = await s3FileRepo.createS3File({
@@ -277,3 +279,105 @@ export const deleteS3File = async (fileId: number, transaction?: Transaction) =>
 
   await s3File.destroy({ transaction });
 };
+
+/**
+ * Explores the S3 bucket and returns all objects with nesting of keys.
+ */
+export const exploreS3Bucket = async () => {
+  if (!S3_BUCKET) {
+    throw new AppError("S3 bucket is not configured.", 500);
+  }
+
+  const command = new ListObjectsV2Command({
+    Bucket: S3_BUCKET,
+  });
+
+  try {
+    const result = await s3Client.send(command);
+    return result.Contents?.map(item => ({
+      Key: item.Key,
+      Size: item.Size,
+      LastModified: item.LastModified,
+      ETag: item.ETag,
+    })) || [];
+  } catch (err: any) {
+    throw new AppError("Failed to fetch S3 bucket contents.", 500);
+  }
+};
+
+/**
+ * Gets a signed URL for a specific key in the S3 bucket.
+ */
+export const getExploreSignedUrl = async (key: string) => {
+  if (!S3_BUCKET) {
+    throw new AppError("S3 bucket is not configured.", 500);
+  }
+  return generateSignedGetUrl(S3_BUCKET, key);
+};
+
+/**
+ * Deletes an array of keys from the S3 bucket.
+ */
+export const deleteExploreKeys = async (keys: string[]) => {
+  if (!S3_BUCKET) {
+    throw new AppError("S3 bucket is not configured.", 500);
+  }
+
+  for (const key of keys) {
+    if (!key || key.trim() === '') continue;
+
+    // Delete the exact key (could be a file or an explicit empty folder marker)
+    await s3Client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: key }));
+
+    // Treat it as a folder prefix and recursively delete all contents
+    const prefix = key.endsWith('/') ? key : `${key}/`;
+    
+    let isTruncated = true;
+    let continuationToken: string | undefined = undefined;
+
+    while (isTruncated) {
+      const listCommand = new ListObjectsV2Command({
+        Bucket: S3_BUCKET,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      });
+      const listResult: any = await s3Client.send(listCommand);
+
+      if (listResult.Contents && listResult.Contents.length > 0) {
+        const objectsToDelete = listResult.Contents.map((obj: any) => ({ Key: obj.Key }));
+        
+        const deleteCommand = new DeleteObjectsCommand({
+          Bucket: S3_BUCKET,
+          Delete: { Objects: objectsToDelete, Quiet: true },
+        });
+        
+        await s3Client.send(deleteCommand);
+      }
+
+      isTruncated = listResult.IsTruncated ?? false;
+      continuationToken = listResult.NextContinuationToken;
+    }
+  }
+};
+
+/**
+ * Creates a new folder (empty object with trailing slash) in the S3 bucket.
+ */
+export const createExploreFolder = async (folderKey: string) => {
+  if (!S3_BUCKET) {
+    throw new AppError("S3 bucket is not configured.", 500);
+  }
+
+  // Ensure the key ends with a slash to represent a folder in S3
+  const key = folderKey.endsWith("/") ? folderKey : `${folderKey}/`;
+
+  const command = new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: "",
+  });
+
+  await s3Client.send(command);
+};
+
+

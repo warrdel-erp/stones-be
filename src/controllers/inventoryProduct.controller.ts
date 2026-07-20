@@ -7,21 +7,21 @@ import * as inventoryProductService from "../services/inventoryProduct.service";
 import { bulkUploadInventoryProducts as bulkUploadInventoryProductsService } from "../services/inventoryProductBulkUpload.service";
 
 export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { siplId, bundle, block, showSoldCanceled, productId } = req.query;
+    const { siplId, bundle, block, showSoldCanceled, productId, binId } = req.query;
     const excludeSoldCanceled = showSoldCanceled !== "true";
     const prodId = productId && !isNaN(Number(productId)) ? Number(productId) : undefined;
 
     // Count how many filters are provided
-    const filtersProvided = [siplId, bundle, block].filter(Boolean).length;
+    const filtersProvided = [siplId, bundle, block, binId].filter(Boolean).length;
 
     // Check if more than one filter is provided - only one should be used at a time
     if (filtersProvided > 1) {
-        return res.status(400).json({ error: "Only one filter can be used at a time. Use either siplId OR lot OR block, not multiple." });
+        return res.status(400).json({ error: "Only one filter can be used at a time. Use either siplId OR lot OR block OR binId, not multiple." });
     }
 
     // Check if at least one filter is provided
     if (filtersProvided === 0) {
-        return res.status(400).json({ error: "Either siplId, lot, or block filter is required" });
+        return res.status(400).json({ error: "Either siplId, lot, block, or binId filter is required" });
     }
 
     let data;
@@ -32,6 +32,9 @@ export const getInventoryProductsBySIPLCombinedNumber = catchAsync(async (req: A
     } else if (block) {
         // Get inventory products by block filter only
         data = await inventoryProductService.getInventoryProductsBySlabField(req, "block", block as string, excludeSoldCanceled, prodId);
+    } else if (binId) {
+        // Get inventory products by binId filter only
+        data = await inventoryProductService.getInventoryProductsByBinId(req, Number(binId), excludeSoldCanceled, prodId);
     } else {
         // Get inventory products by SIPL combined number only
         data = await inventoryProductService.getInventoryProductsBySIPLCombinedNumber(req, Number(siplId), excludeSoldCanceled, prodId);

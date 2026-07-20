@@ -4,17 +4,18 @@ import { validateRequest } from "../middleware/validationMiddleware";
 import { authenticateUser } from "../middleware/authMiddleware";
 import {
     createCreditDebitNoteSchema,
-    updateCreditDebitNoteSchema
+    updateCreditDebitNoteSchema,
+    settleCreditDebitNoteSchema
 } from "../validators/creditDebitNote.validator";
 
 const router = Router();
 
-// Create credit/debit note
+// Create and settle credit/debit note for SIPL
 router.post(
-    "/",
+    "/sipl",
     authenticateUser,
     validateRequest(createCreditDebitNoteSchema),
-    creditDebitNoteController.createCreditDebitNote
+    creditDebitNoteController.createAndSettleSiplCreditNote
 );
 
 // Get all credit/debit notes
@@ -38,5 +39,13 @@ router.get(
 //     validateRequest(updateCreditDebitNoteSchema),
 //     creditDebitNoteController.updateCreditDebitNote
 // );
+
+// Settle credit/debit note
+router.post(
+    "/:id/settle",
+    authenticateUser,
+    validateRequest(settleCreditDebitNoteSchema),
+    creditDebitNoteController.settleCreditDebitNote
+);
 
 export default router;

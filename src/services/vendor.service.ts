@@ -5,6 +5,7 @@ import { Readable } from "stream";
 import * as XLSX from "xlsx";
 import { vendorBulkUploadSchema } from "../validators/vendor.validator";
 import * as vendorRepository from "../repositories/vendor.repository";
+import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as billService from "../services/bill.service";
 import * as siplService from "../services/sipl.service";
@@ -16,6 +17,7 @@ import {
   PAYMENT_BILL_REFERENCE_TYPES,
   CREDIT_NOTE_REFERENCE_TYPES,
 } from "../constants/tableTypes";
+import { decimalSum } from "../helper/decimal";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
 import { PAYMENT_TERMS, SCOP } from "../constants";
@@ -233,13 +235,8 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         PAYMENT_BILL_REFERENCE_TYPES.SIPL
       );
 
-      const creditNotes: any[] = await models.CreditDebitNote.findAll({
-        where: {
-          referenceType: CREDIT_NOTE_REFERENCE_TYPES.SIPL,
-          referenceId: sipl.id,
-        }
-      });
-      const creditNoteAmount = _.sumBy(creditNotes, (cn: any) => parseFloat(cn.amount)) || 0;
+      const settlements = await creditDebitNoteRepository.getSettlementsByReference(sipl.id, CREDIT_NOTE_REFERENCE_TYPES.SIPL);
+      const creditNoteAmount = decimalSum(settlements.map((s: any) => parseFloat(s.amount) || 0));
 
       return {
         id: sipl.id,
@@ -253,6 +250,9 @@ export const getAllBillsForVendor = async (vendorId: number) => {
         transaction: sipl.clientInvoiceNumber,
         paidAmount,
         creditNoteAmount,
+        siplAmountBeforeNotes: sipl.totalAmountBeforeNotes,
+        siplCreditNotesAmount: sipl.totalCreditNotesAmount,
+        siplDebitNotesAmount: sipl.totalDebitNotesAmount,
       };
     })
   );
@@ -260,8 +260,8 @@ export const getAllBillsForVendor = async (vendorId: number) => {
   const finalArr = returnBillData.concat(returnSIPLData);
 
   const finalData = {
-    total: _.sumBy(finalArr, "invoiceAmount"),
-    totalPaid: _.sumBy(finalArr, "paidAmount"),
+    total: decimalSum(finalArr.map((a: any) => parseFloat(a.invoiceAmount) || 0)),
+    totalPaid: decimalSum(finalArr.map((a: any) => parseFloat(a.paidAmount) || 0)),
     data: finalArr,
   };
 
