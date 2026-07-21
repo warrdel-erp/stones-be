@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { AppError } from "../helper/appError";
 import * as siplRepository from "../repositories/sipl.repository";
@@ -459,3 +459,69 @@ function validateSplitSlabs(originalSlab: any, slabsData: Array<{ receivingLengt
   }
 
 }
+
+export const deleteSlab = async (slabId: number) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const slab: any = await models.Slab.findByPk(slabId, {
+      include: [
+        { model: models.SIPL, as: 'sipl' },
+        { model: models.InventoryProduct, as: 'inventoryProduct' }
+      ],
+      transaction
+    });
+
+    if (!slab) {
+      throw new AppError("Slab not found", 404);
+    }
+
+    if (isSIPLLocked(slab.sipl)) {
+      throw new AppError("Slab cannot be deleted as the SIPL is locked (received or canceled)", 400);
+    }
+
+    const { inventoryProductId, siplId } = slab;
+
+    if (inventoryProductId) {
+      const newerInvProd = await scoped(models.InventoryProduct).findOne({
+        where: {
+          siplId,
+          id: { [Op.gt]: inventoryProductId }
+        },
+        transaction
+      });
+
+      if (newerInvProd) {
+        throw new AppError("Only the last created inventory product for this SIPL can be deleted", 400);
+      }
+
+      await models.InventoryProductImage.destroy({
+        where: { inventoryProductId },
+        transaction
+      });
+    }
+
+    await scoped(models.SlabRemeasurement).destroy({
+      where: { slabId },
+      transaction
+    });
+
+    await scoped(models.Slab).destroy({
+      where: { id: slabId },
+      transaction
+    });
+
+    if (inventoryProductId) {
+      await scoped(models.InventoryProduct).destroy({
+        where: { id: inventoryProductId },
+        transaction
+      });
+    }
+
+    await transaction.commit();
+    return { success: true, message: "Slab deleted successfully" };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};

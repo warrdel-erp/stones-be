@@ -30,7 +30,10 @@ router.get("/", authenticateUser, slabController.getAllSlabs);
 // Get split history for a slab (must come before /:slabId route)
 router.get("/:slabId/splitHistory", authenticateUser, slabController.getSlabSplitHistory);
 
-// // Get all remeasurement by Slab id.
+// Delete slab
+router.delete("/:slabId", authenticateUser, slabController.deleteSlab);
+
+// Get all remeasurement by Slab id.
 router.get("/:slabId", authenticateUser, slabController.getSlabWithLogs);
 
 export default router;
