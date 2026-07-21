@@ -122,3 +122,14 @@ export const getSlabSplitHistory = catchAsync(async (req: AuthRequest, res: Resp
 
   return SuccessResponse(res, 200, "Slab split history fetched successfully", history);
 });
+
+// Delete slab
+export const deleteSlab = catchAsync(async (req: AuthRequest, res: Response) => {
+  const slabId = parseInt(req.params.slabId);
+  if (!slabId || isNaN(slabId)) {
+    throw new AppError("Invalid slab ID", 400);
+  }
+  const result = await slabService.deleteSlab(slabId);
+  return SuccessResponse(res, 200, "Slab deleted successfully", result);
+});
+

@@ -11,3 +11,13 @@ export const deleteProductController = catchAsync(async (req: Request, res: Resp
 
   SuccessResponse(res, 200, "SIPL product deleted successfully", data);
 });
+
+// Delete all items for a SIPL product
+export const deleteAllItemsController = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const data = await siplProductService.deleteAllSlabsForSiplProduct(Number(id));
+
+  SuccessResponse(res, 200, "All items deleted successfully", data);
+});
+

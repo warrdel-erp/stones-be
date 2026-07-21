@@ -7,4 +7,7 @@ const router = Router();
 // Get all generic products with filter
 router.get("/", authenticateUser, genericProductController.getAllGenericProducts);
 
+// Delete generic product
+router.delete("/:id", authenticateUser, genericProductController.deleteGenericProduct);
+
 export default router; 
