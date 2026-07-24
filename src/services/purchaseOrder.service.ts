@@ -235,10 +235,15 @@ export const getPurchaseOrderById = async (id: number) => {
       const fulfilledQuantityBySipl =
         rpp.siplProducts?.reduce((sum: number, sp: any) => sum + (sp.quantity || 0), 0) || 0;
 
+      const fulfilledSlabsBySipl =
+        rpp.siplProducts?.reduce((sum: number, sp: any) => sum + (sp.noOfSlabs || 0), 0) || 0;
+
       return {
         ...rpp,
         fulfilledQuantityBySipl,
-        leftQuantity: decimal.decimalSubtract(rpp.quantity, fulfilledQuantityBySipl)
+        fulfilledSlabsBySipl,
+        leftQuantity: decimal.decimalSubtract(rpp.quantity, fulfilledQuantityBySipl),
+        leftNoOfSlabs: decimal.decimalSubtract(rpp.noOfSlabs || 0, fulfilledSlabsBySipl)
       };
     });
   }

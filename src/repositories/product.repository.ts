@@ -119,6 +119,14 @@ export const getAllProducts = async (
           association: "subCategory",
         },
         {
+          association: "finish",
+          attributes: ["id", "name"],
+        },
+        {
+          association: "baseColor",
+          attributes: ["id", "name"],
+        },
+        {
           association: "inventoryProducts",
           include: [
             {
@@ -463,6 +471,9 @@ export const getProductOptions = async (clientId: number, status?: string) => {
     attributes: [
       ["name", "label"],
       ["id", "value"],
+      "isSlabType",
+      "uom",
+      "uomId",
     ],
     where: {
       ...(status ? { status } : {}),

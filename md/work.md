@@ -772,17 +772,14 @@ Email notification.
 
 ---
 
-1. In PO qty (optional) slab(mandetory) in SIPL (both).
 2. PO -> Planned -> ETD -> ETA.
-3. SIPL auto filled from PO.
-4. Invoice date will be disabled in SIPL form.
-5. Due date will be freeze until custom payment term option.
-6. Show payment term and due date nearby.
-7. Credit note suggestion will be after packaging data.
-8. Bundle block in packaging form.
-9. Slab edit/removal option.
-10. Remove “credit” from its SIPL form.
-11. “Credit Note Number” will be manual.
-12. Purpose in SIPL journal entry for “inventory variance” and credit note.
-13. In SO additional summary not managing canceled items.
-14. Add address to supplier via PO/SIPL form.
+3. Due date will be freeze until custom payment term option.
+4. Credit note suggestion will be after packaging data.
+5. “Credit Note Number” will be manual.
+6. Purpose in SIPL journal entry for “inventory variance” and credit note.
+7. In SO additional summary not managing canceled items.
+8. Add address to supplier via PO/SIPL form.
+
+---
+
+4. Checkbox on each inventory product. -> SO/HOLD

@@ -232,7 +232,7 @@ export const getPurchaseOrderById = async (id: number) => {
         as: "requestedPurchaseProducts",
         include: [
           { model: models.SIPLProduct, as: "siplProducts" },
-          { model: models.Product, as: "product", attributes: ["name"] },
+          { model: models.Product, as: "product", attributes: ["name", "isSlabType"] },
         ],
       },
       {

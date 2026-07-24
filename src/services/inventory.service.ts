@@ -444,12 +444,31 @@ export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId
       const totalArea: any = await slabRepository.getTotalAreaBySIPL(sipl.id, excludeSoldCanceled);
       const plain = sipl.get({ plain: true });
       const unitCount = plain.inventoryProducts?.length || 0;
+
+      const binNames = new Set<string>();
+      const prices: number[] = [];
+
+      (plain.inventoryProducts || []).forEach((inv: any) => {
+        if (inv.bin?.name) {
+          binNames.add(inv.bin.name);
+        }
+        const price = Number(inv.sellingPrice);
+        if (!isNaN(price) && price > 0) {
+          prices.push(price);
+        }
+      });
+
+      const locations = Array.from(binNames).join(', ') || '--';
+      const avgSellingPrice = prices.length > 0 ? decimal.decimalDivide(decimal.decimalSum(prices), prices.length) : 0;
+
       // inventoryProducts array intentionally empty — loaded lazily at level 3
       return {
         ...plain,
         totalArea: totalArea[0]?.totalArea,
         inventoryProducts: [],
         unitCount,
+        locations,
+        avgSellingPrice,
       };
     })
   );
