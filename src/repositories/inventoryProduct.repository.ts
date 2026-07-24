@@ -6,6 +6,7 @@ import { INVENTORY_ITEM_STATUS } from "../constants";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { decimalSum, decimalDivide } from "../helper/decimal";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -160,9 +161,6 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
 };
 
 export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot', excludeSoldCanceled = false) => {
-  const groupField = groupBy === 'block' ? 'slab.block' : 'slab.lot';
-  const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
-
   const where: any = {
     productId,
     locationId,
@@ -174,23 +172,64 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
     };
   }
 
-  return await scoped(models.InventoryProduct).findAll({
+  const items = await scoped(models.InventoryProduct).findAll({
     where,
     include: [
       {
         association: 'slab',
-        attributes: [],
+        attributes: ['block', 'lot', 'packageLength', 'packageWidth'],
         required: true,
       },
+      {
+        association: 'bin',
+        attributes: ['id', 'name'],
+        required: false,
+      }
     ],
-    attributes: [
-      [col(groupField), groupAlias],
-      [fn('COUNT', col('InventoryProduct.id')), 'unitCount'],
-      [fn('SUM', sequelize.literal('`slab`.`packageLength` * `slab`.`packageWidth`')), 'totalArea']
-    ],
-    group: [groupField],
-    raw: true,
+    attributes: ['id', 'binId', 'sellingPrice']
   });
+
+  const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
+  const groupMap: Record<string, { groupValue: string | number; unitCount: number; totalArea: number; locationsSet: Set<string>; sellingPrices: number[] }> = {};
+
+  items.forEach((item: any) => {
+    const plain = item.get({ plain: true });
+    const groupVal = groupBy === 'block' ? plain.slab?.block : plain.slab?.lot;
+    if (groupVal === undefined || groupVal === null) return;
+
+    const key = String(groupVal);
+    if (!groupMap[key]) {
+      groupMap[key] = {
+        groupValue: groupVal,
+        unitCount: 0,
+        totalArea: 0,
+        locationsSet: new Set<string>(),
+        sellingPrices: []
+      };
+    }
+
+    groupMap[key].unitCount += 1;
+    const length = Number(plain.slab?.packageLength) || 0;
+    const width = Number(plain.slab?.packageWidth) || 0;
+    groupMap[key].totalArea += (length * width);
+
+    const price = Number(plain.sellingPrice);
+    if (!isNaN(price) && price > 0) {
+      groupMap[key].sellingPrices.push(price);
+    }
+
+    if (plain.bin?.name) {
+      groupMap[key].locationsSet.add(plain.bin.name);
+    }
+  });
+
+  return Object.values(groupMap).map(g => ({
+    [groupAlias]: g.groupValue,
+    unitCount: g.unitCount,
+    totalArea: g.totalArea,
+    locations: Array.from(g.locationsSet).join(', ') || '--',
+    avgSellingPrice: g.sellingPrices.length > 0 ? decimalDivide(decimalSum(g.sellingPrices), g.sellingPrices.length) : 0
+  }));
 };
 
 export const updateInventoryProductsSellingPrice = async (ids: number[], sellingPrice: number, transaction?: Transaction) => {

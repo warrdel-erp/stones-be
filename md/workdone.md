@@ -1048,3 +1048,20 @@ Univ
 7. Credit note (suggestion) in SIPL.
 8. SIPL page, SIPL form, PO form page design changes.
 9. content editable in SIPL form.
+
+---
+
+1. In PO qty (optional) slab(mandetory) in SIPL (both).
+2. SIPL auto filled from PO.
+3. Invoice date will be disabled in SIPL form.
+4. Show payment term and due date nearby.
+5. Bundle block in packaging form.
+6. Slab edit/removal option.
+
+---
+
+1. Total bundles, available, reserved (hold + allocated), selling price, status, category, action.
+   1. Bundle, location available, avg selling price, average landed cost, action
+      1. Slabs.
+2. Full name for products.
+3. product Line height and more info.
