@@ -352,15 +352,8 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (
  * Level 1 — Products only (no SIPLs/bundles/blocks/inventoryProducts).
  * Returns products with aggregate counts so the table renders fast.
  */
-export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, isSlabType?: boolean, search?: string, subCategory?: string) => {
-  const filter: any = {};
-  if (isSlabType !== undefined) {
-    filter.isSlabType = isSlabType;
-  }
-  if (subCategory !== undefined) {
-    filter["$subCategory.name$"] = subCategory;
-  }
-  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
+export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, filter?: any, search?: string) => {
+  const data: any = await productRepository.getAllProducts(page, limit, search, filter, true);
 
   const finalData = await Promise.all(
     data.products.map(async (product: any) => {

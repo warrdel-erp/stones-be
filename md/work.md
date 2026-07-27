@@ -781,5 +781,3 @@ Email notification.
 8. Add address to supplier via PO/SIPL form.
 
 ---
-
-4. Checkbox on each inventory product. -> SO/HOLD

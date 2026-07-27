@@ -20,7 +20,48 @@ export const bulkCreateProductsForBulkUpload = async (productsData: any[], trans
   return models.Product.bulkCreate(productsData, { transaction, validate: true });
 };
 
-// Get all products with minimal data (only subcategory and group)
+// Helper to parse multi-select filter parameters into Sequelize Op.in and appropriate conditions
+const parseFilterWhereClause = (filter?: any) => {
+  if (!filter) return {};
+  const where: any = {};
+
+  Object.keys(filter).forEach((key) => {
+    const val = filter[key];
+    if (val === undefined || val === null || val === '') return;
+
+    if (key === 'isSlabType') {
+      if (val === 'true' || val === true || val === 1 || val === '1') where[key] = true;
+      else if (val === 'false' || val === false || val === 0 || val === '0') where[key] = false;
+      return;
+    }
+
+    if (Array.isArray(val)) {
+      const parsedArray = val
+        .map((v: any) => (typeof v === 'string' ? v.trim() : v))
+        .filter((v: any) => v !== '')
+        .map((v: any) => (isNaN(Number(v)) ? v : Number(v)));
+      if (parsedArray.length > 0) {
+        where[key] = parsedArray.length === 1 ? parsedArray[0] : { [Op.in]: parsedArray };
+      }
+    } else if (typeof val === 'string' && val.includes(',')) {
+      const parsedArray = val
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== '')
+        .map((item) => (isNaN(Number(item)) ? item : Number(item)));
+      if (parsedArray.length > 0) {
+        where[key] = { [Op.in]: parsedArray };
+      }
+    } else {
+      const trimmed = typeof val === 'string' ? val.trim() : val;
+      where[key] = isNaN(Number(trimmed)) ? trimmed : Number(trimmed);
+    }
+  });
+
+  return where;
+};
+
+// Get all products with minimal data (including subcategory, group, baseColor, finish)
 export const getAllProductsMinimal = async (
   page: number,
   limit: number,
@@ -28,9 +69,8 @@ export const getAllProductsMinimal = async (
   filter?: any
 ) => {
   const offset = (page - 1) * limit;
-  const whereClause: any = { ...filter };
-
-  console.log(filter);
+  const parsedWhere = parseFilterWhereClause(filter);
+  const whereClause: any = { ...parsedWhere };
 
   if (search) {
     whereClause.name = { [Op.like]: `%${search}%` };
@@ -49,6 +89,14 @@ export const getAllProductsMinimal = async (
       {
         association: "group",
         attributes: ["id", "name"]
+      },
+      {
+        association: "baseColor",
+        attributes: ["id", "name"]
+      },
+      {
+        association: "finish",
+        attributes: ["id", "name"]
       }
     ],
     attributes: [
@@ -63,7 +111,12 @@ export const getAllProductsMinimal = async (
       "originId",
       "origin",
       "kindId",
-      "kind"
+      "kind",
+      "baseColorId",
+      "finishId",
+      "groupId",
+      "subCategoryId",
+      "thickness"
     ],
     order: [["name", "ASC"]]
   });
@@ -111,7 +164,7 @@ export const getAllProducts = async (
     let { rows: products, count: total } = await productScoped.findAndCountAll({
       where: {
         ...whereClause,
-        ...filter,
+        ...parseFilterWhereClause(filter),
         id: { [Op.in]: productIds }
       },
       include: [
@@ -172,7 +225,7 @@ export const getAllProducts = async (
 
     // Original query for when onlyWithSlabs is false
     const { rows: products, count: total } = await productScoped.findAndCountAll({
-      where: { ...whereClause, ...filter },
+      where: { ...whereClause, ...parseFilterWhereClause(filter) },
       include: [
         {
           association: "subCategory",
