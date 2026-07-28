@@ -7,6 +7,7 @@ import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tabl
 import { scoped } from "../utils/scoped";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { decimalSum, decimalDivide } from "../helper/decimal";
+import { buildEffectiveSellingPriceWhere, buildSlabWhere } from "./product.repository";
 
 export const createInventoryProductsWithCombinedNumbers = async (
   binId: number,
@@ -114,11 +115,24 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
     where.productId = productId;
   }
 
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(req.query);
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
+
+  const slabWhere = buildSlabWhere(req.query);
+
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     where,
     include: [
       {
-        association: 'slab'
+        association: 'product',
+        attributes: ['id', 'name', 'singleUnitPrice']
+      },
+      {
+        association: 'slab',
+        where: slabWhere || undefined,
+        required: !!slabWhere,
       },
       {
         association: 'cartItem',
@@ -160,7 +174,7 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
   return inventoryProducts;
 };
 
-export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot', excludeSoldCanceled = false) => {
+export const getDistinctGroupsByProduct = async (productId: number, locationId: number, groupBy: 'block' | 'lot', excludeSoldCanceled = false, filter?: any) => {
   const where: any = {
     productId,
     locationId,
@@ -172,12 +186,26 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
     };
   }
 
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(filter);
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
+
+  const slabWhere = buildSlabWhere(filter);
+  const combinedSlabWhere = slabWhere ? slabWhere : {};
+
   const items = await scoped(models.InventoryProduct).findAll({
     where,
     include: [
       {
+        association: 'product',
+        attributes: ['singleUnitPrice'],
+        required: false,
+      },
+      {
         association: 'slab',
-        attributes: ['block', 'lot', 'packageLength', 'packageWidth'],
+        attributes: ['block', 'lot', 'receivingLength', 'receivingWidth', 'packageLength', 'packageWidth'],
+        where: combinedSlabWhere,
         required: true,
       },
       {
@@ -332,9 +360,21 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
     where.productId = productId;
   }
 
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(req.query);
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
+
+  const slabWhere = buildSlabWhere(req.query);
+  const combinedSlabWhere = slabWhere ? { [fieldName]: fieldValue, ...slabWhere } : { [fieldName]: fieldValue };
+
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     where,
     include: [
+      {
+        association: 'product',
+        attributes: ['id', 'name', 'singleUnitPrice']
+      },
       {
         association: "bin",
         include: [
@@ -351,7 +391,7 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
       },
       {
         association: "slab",
-        where: { [fieldName]: fieldValue },
+        where: combinedSlabWhere,
         required: true,
       },
       {
@@ -388,9 +428,20 @@ export const getInventoryProductsByBinId = async (req: AuthRequest, binId: numbe
     where.productId = productId;
   }
 
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(req.query);
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
+
+  const slabWhereBin = buildSlabWhere(req.query);
+
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
     where,
     include: [
+      {
+        association: 'product',
+        attributes: ['id', 'name', 'singleUnitPrice']
+      },
       {
         association: "bin",
         include: [
@@ -407,7 +458,8 @@ export const getInventoryProductsByBinId = async (req: AuthRequest, binId: numbe
       },
       {
         association: "slab",
-        required: false,
+        where: slabWhereBin || undefined,
+        required: !!slabWhereBin,
       },
       {
         association: 'cartItem',
@@ -540,19 +592,31 @@ export const updateInventoryProductStatusById = async (
 };
 
 export const getInventoryProducts = (filter: Record<string, string>, locationId?: number) => {
+  let {
+    isHold,
+    minSellingPrice, maxSellingPrice,
+    minPackagingWidth, maxPackagingWidth,
+    minPackagingLength, maxPackagingLength,
+    ...restFilter
+  } = filter;
 
-  // const isHold = filter?.isHold === 'true';
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(filter);
+  const slabWhere = buildSlabWhere(filter);
 
-  let { isHold, ...restFilter } = filter;
+  const where: any = {
+    ...restFilter,
+    status: {
+      [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
+      ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
+    },
+  };
+
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
 
   return scoped(models.InventoryProduct).findAll({
-    where: {
-      ...restFilter,
-      status: {
-        [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
-        ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
-      },
-    },
+    where,
     include: [
       {
         association: 'holdItem',
@@ -560,14 +624,16 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
         include: [{ association: 'hold' }]
       },
       {
-        association: 'slab'
+        association: 'slab',
+        where: slabWhere || undefined,
+        required: !!slabWhere,
       },
       {
         association: 'genericProduct'
       },
       {
         association: 'product',
-        attributes: ['id', 'name']
+        attributes: ['id', 'name', 'singleUnitPrice']
       },
       {
         association: 'bin',
@@ -593,16 +659,31 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
 }
 
 export const getInventoryProductsPaginated = async (filter: Record<string, any>, locationId?: number, limit: number = 10, offset: number = 0) => {
-  let { isHold, ...restFilter } = filter;
+  let {
+    isHold,
+    minSellingPrice, maxSellingPrice,
+    minPackagingWidth, maxPackagingWidth,
+    minPackagingLength, maxPackagingLength,
+    ...restFilter
+  } = filter;
+
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(filter);
+  const slabWhere = buildSlabWhere(filter);
+
+  const where: any = {
+    ...restFilter,
+    status: {
+      [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
+      ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
+    },
+  };
+
+  if (effectiveSellingPriceWhere) {
+    Object.assign(where, effectiveSellingPriceWhere);
+  }
 
   const { count, rows } = await scoped(models.InventoryProduct).findAndCountAll({
-    where: {
-      ...restFilter,
-      status: {
-        [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
-        ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
-      },
-    },
+    where,
     include: [
       {
         association: 'holdItem',
@@ -610,14 +691,16 @@ export const getInventoryProductsPaginated = async (filter: Record<string, any>,
         include: [{ association: 'hold' }]
       },
       {
-        association: 'slab'
+        association: 'slab',
+        where: slabWhere || undefined,
+        required: !!slabWhere,
       },
       {
         association: 'genericProduct'
       },
       {
         association: 'product',
-        attributes: ['id', 'name']
+        attributes: ['id', 'name', 'singleUnitPrice']
       },
       {
         association: 'bin',

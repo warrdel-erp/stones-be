@@ -1045,9 +1045,6 @@ Univ
 4. Show status of each sales order product in SO details page.
 5. SO invoice settlement with other SO's AD.
 6. Show delivery status in loading packing list.
-7. Credit note (suggestion) in SIPL.
-8. SIPL page, SIPL form, PO form page design changes.
-9. content editable in SIPL form.
 
 ---
 
@@ -1055,13 +1052,16 @@ Univ
 2. SIPL auto filled from PO.
 3. Invoice date will be disabled in SIPL form.
 4. Show payment term and due date nearby.
-5. Bundle block in packaging form.
+5. Bundle block in SIPL slab packaging form.
 6. Slab edit/removal option.
-
----
-
-1. Total bundles, available, reserved (hold + allocated), selling price, status, category, action.
+7. Total bundles, available, reserved (hold + allocated), selling price, status, category, action.
    1. Bundle, location available, avg selling price, average landed cost, action
       1. Slabs.
-2. Full name for products.
-3. product Line height and more info.
+8. Full name for products.
+9. product Line height and more info.
+10. Checkbox on each inventory product. -> SO/HOLD
+11. Credit note (suggestion) in SIPL.
+12. SIPL page, SIPL form, PO form page design changes.
+13. content editable in SIPL form.
+
+---

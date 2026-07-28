@@ -782,4 +782,5 @@ Email notification.
 
 ---
 
-4. Checkbox on each inventory product. -> SO/HOLD
+1. Remove duplicates.
+2. CLIENT_ADMIN

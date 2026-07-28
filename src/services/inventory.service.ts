@@ -352,15 +352,8 @@ export const fetchProductsWithSlabsByLocationGroupedByLot = async (
  * Level 1 — Products only (no SIPLs/bundles/blocks/inventoryProducts).
  * Returns products with aggregate counts so the table renders fast.
  */
-export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, isSlabType?: boolean, search?: string, subCategory?: string) => {
-  const filter: any = {};
-  if (isSlabType !== undefined) {
-    filter.isSlabType = isSlabType;
-  }
-  if (subCategory !== undefined) {
-    filter["$subCategory.name$"] = subCategory;
-  }
-  const data: any = await productRepository.getAllProducts(page, limit, search, Object.keys(filter).length ? filter : undefined, true);
+export const fetchProductsOnlyByLocation = async (page: number, limit: number, locationId: number, filter?: any, search?: string) => {
+  const data: any = await productRepository.getAllProducts(page, limit, search, filter, true);
 
   const finalData = await Promise.all(
     data.products.map(async (product: any) => {
@@ -417,8 +410,8 @@ export const fetchProductsOnlyByLocation = async (page: number, limit: number, l
   return { products: finalData, total: data.total };
 };
 
-export const fetchBlocksByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
-  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block', excludeSoldCanceled);
+export const fetchBlocksByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block', excludeSoldCanceled, req.query);
   return blocks.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,
@@ -426,8 +419,8 @@ export const fetchBlocksByProductAndLocation = async (productId: number, locatio
   }));
 };
 
-export const fetchBundlesByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
-  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot', excludeSoldCanceled);
+export const fetchBundlesByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot', excludeSoldCanceled, req.query);
   return bundles.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,

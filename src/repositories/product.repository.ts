@@ -20,7 +20,57 @@ export const bulkCreateProductsForBulkUpload = async (productsData: any[], trans
   return models.Product.bulkCreate(productsData, { transaction, validate: true });
 };
 
-// Get all products with minimal data (only subcategory and group)
+// Helper to parse multi-select filter parameters into Sequelize Op.in and appropriate conditions
+const parseFilterWhereClause = (filter?: any) => {
+  if (!filter) return {};
+  const where: any = {};
+
+  Object.keys(filter).forEach((key) => {
+    const val = filter[key];
+    if (val === undefined || val === null || val === '') return;
+
+    if (key === 'isSlabType') {
+      if (val === 'true' || val === true || val === 1 || val === '1') where[key] = true;
+      else if (val === 'false' || val === false || val === 0 || val === '0') where[key] = false;
+      return;
+    }
+
+    if (
+      key === 'minSellingPrice' || key === 'maxSellingPrice' ||
+      key === 'minPackagingWidth' || key === 'maxPackagingWidth' ||
+      key === 'minPackagingLength' || key === 'maxPackagingLength' ||
+      key === 'locationId'
+    ) {
+      return;
+    }
+
+    if (Array.isArray(val)) {
+      const parsedArray = val
+        .map((v: any) => (typeof v === 'string' ? v.trim() : v))
+        .filter((v: any) => v !== '')
+        .map((v: any) => (isNaN(Number(v)) ? v : Number(v)));
+      if (parsedArray.length > 0) {
+        where[key] = parsedArray.length === 1 ? parsedArray[0] : { [Op.in]: parsedArray };
+      }
+    } else if (typeof val === 'string' && val.includes(',')) {
+      const parsedArray = val
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== '')
+        .map((item) => (isNaN(Number(item)) ? item : Number(item)));
+      if (parsedArray.length > 0) {
+        where[key] = { [Op.in]: parsedArray };
+      }
+    } else {
+      const trimmed = typeof val === 'string' ? val.trim() : val;
+      where[key] = isNaN(Number(trimmed)) ? trimmed : Number(trimmed);
+    }
+  });
+
+  return where;
+};
+
+// Get all products with minimal data (including subcategory, group, baseColor, finish)
 export const getAllProductsMinimal = async (
   page: number,
   limit: number,
@@ -28,9 +78,8 @@ export const getAllProductsMinimal = async (
   filter?: any
 ) => {
   const offset = (page - 1) * limit;
-  const whereClause: any = { ...filter };
-
-  console.log(filter);
+  const parsedWhere = parseFilterWhereClause(filter);
+  const whereClause: any = { ...parsedWhere };
 
   if (search) {
     whereClause.name = { [Op.like]: `%${search}%` };
@@ -49,6 +98,14 @@ export const getAllProductsMinimal = async (
       {
         association: "group",
         attributes: ["id", "name"]
+      },
+      {
+        association: "baseColor",
+        attributes: ["id", "name"]
+      },
+      {
+        association: "finish",
+        attributes: ["id", "name"]
       }
     ],
     attributes: [
@@ -63,7 +120,12 @@ export const getAllProductsMinimal = async (
       "originId",
       "origin",
       "kindId",
-      "kind"
+      "kind",
+      "baseColorId",
+      "finishId",
+      "groupId",
+      "subCategoryId",
+      "thickness"
     ],
     order: [["name", "ASC"]]
   });
@@ -77,6 +139,133 @@ export const getAllProductsMinimal = async (
   };
 };
 
+export const buildProductLevelSellingPriceWhere = (filter: any) => {
+  const minSellingPrice = filter?.minSellingPrice;
+  const maxSellingPrice = filter?.maxSellingPrice;
+
+  const hasMin = minSellingPrice !== undefined && minSellingPrice !== null && minSellingPrice !== '';
+  const hasMax = maxSellingPrice !== undefined && maxSellingPrice !== null && maxSellingPrice !== '';
+
+  if (!hasMin && !hasMax) return null;
+
+  const minVal = Number(minSellingPrice);
+  const maxVal = Number(maxSellingPrice);
+
+  const ownPriceCond: any = {};
+  const productPriceCond: any = {};
+
+  if (hasMin) {
+    ownPriceCond[Op.gte] = minVal;
+    productPriceCond[Op.gte] = minVal;
+  }
+  if (hasMax) {
+    ownPriceCond[Op.lte] = maxVal;
+    productPriceCond[Op.lte] = maxVal;
+  }
+
+  return {
+    [Op.or]: [
+      {
+        '$inventoryProducts.sellingPrice$': {
+          [Op.and]: [
+            { [Op.ne]: null },
+            { [Op.gt]: 0 },
+            ownPriceCond
+          ]
+        }
+      },
+      {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { '$inventoryProducts.sellingPrice$': null },
+              { '$inventoryProducts.sellingPrice$': 0 }
+            ]
+          },
+          {
+            singleUnitPrice: productPriceCond
+          }
+        ]
+      }
+    ]
+  };
+};
+
+export const buildEffectiveSellingPriceWhere = (filter: any) => {
+  const minSellingPrice = filter?.minSellingPrice;
+  const maxSellingPrice = filter?.maxSellingPrice;
+
+  const hasMin = minSellingPrice !== undefined && minSellingPrice !== null && minSellingPrice !== '';
+  const hasMax = maxSellingPrice !== undefined && maxSellingPrice !== null && maxSellingPrice !== '';
+
+  if (!hasMin && !hasMax) return null;
+
+  const minVal = Number(minSellingPrice);
+  const maxVal = Number(maxSellingPrice);
+
+  const ownPriceCond: any = {};
+  const productPriceCond: any = {};
+
+  if (hasMin) {
+    ownPriceCond[Op.gte] = minVal;
+    productPriceCond[Op.gte] = minVal;
+  }
+  if (hasMax) {
+    ownPriceCond[Op.lte] = maxVal;
+    productPriceCond[Op.lte] = maxVal;
+  }
+
+  return {
+    [Op.or]: [
+      {
+        sellingPrice: {
+          [Op.and]: [
+            { [Op.ne]: null },
+            { [Op.gt]: 0 },
+            ownPriceCond
+          ]
+        }
+      },
+      {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { sellingPrice: null },
+              { sellingPrice: 0 }
+            ]
+          },
+          {
+            '$product.singleUnitPrice$': productPriceCond
+          }
+        ]
+      }
+    ]
+  };
+};
+
+export const buildSlabWhere = (filter: any) => {
+  const minWidth = filter?.minPackagingWidth;
+  const maxWidth = filter?.maxPackagingWidth;
+  const minLength = filter?.minPackagingLength;
+  const maxLength = filter?.maxPackagingLength;
+
+  const slabWhere: any = {};
+  if (minWidth !== undefined && minWidth !== null && minWidth !== '') {
+    slabWhere.receivingWidth = { ...slabWhere.receivingWidth, [Op.gte]: Number(minWidth) };
+  }
+  if (maxWidth !== undefined && maxWidth !== null && maxWidth !== '') {
+    slabWhere.receivingWidth = { ...slabWhere.receivingWidth, [Op.lte]: Number(maxWidth) };
+  }
+  if (minLength !== undefined && minLength !== null && minLength !== '') {
+    slabWhere.receivingLength = { ...slabWhere.receivingLength, [Op.gte]: Number(minLength) };
+  }
+  if (maxLength !== undefined && maxLength !== null && maxLength !== '') {
+    slabWhere.receivingLength = { ...slabWhere.receivingLength, [Op.lte]: Number(maxLength) };
+  }
+
+  return Object.keys(slabWhere).length > 0 ? slabWhere : null;
+};
+
 // Get all products
 export const getAllProducts = async (
   page: number,
@@ -86,178 +275,124 @@ export const getAllProducts = async (
   onlyWithSlabs?: boolean
 ) => {
   const offset = (page - 1) * limit;
-  const whereClause = search ? { name: { [Op.like]: `%${search}%` } } : {};
+  const whereClause: any = search ? { name: { [Op.like]: `%${search}%` } } : {};
 
   const productScoped = scoped(models.Product);
 
-  // If onlyWithSlabs is true, we need to handle it differently
-  if (onlyWithSlabs) {
-    // First get product IDs that have either slabs or generic products
-    const productsWithInventory = await productScoped.findAll({
-      attributes: ['id'],
-      include: [
-        {
-          association: 'inventoryProducts',
-          attributes: [],
-          required: true,
-        }
-      ],
-      raw: true
-    });
+  const productSellingPriceWhere = buildProductLevelSellingPriceWhere(filter);
+  const hasSellingPriceFilter = !!productSellingPriceWhere;
 
-    const productIds = productsWithInventory.map((p: any) => p.id);
+  const slabWhere = buildSlabWhere(filter);
+  const hasSlabFilter = !!slabWhere;
 
-    // Now get the full product details with these IDs
-    let { rows: products, count: total } = await productScoped.findAndCountAll({
-      where: {
-        ...whereClause,
-        ...filter,
-        id: { [Op.in]: productIds }
-      },
-      include: [
-        {
-          association: "subCategory",
-        },
-        {
-          association: "finish",
-          attributes: ["id", "name"],
-        },
-        {
-          association: "baseColor",
-          attributes: ["id", "name"],
-        },
-        {
-          association: "inventoryProducts",
-          include: [
-            {
-              association: 'holdItem',
-              attributes: ['id']
-            },
-            {
-              association: "genericProduct",
-            },
-            {
-              association: "slab",
-            },
-          ]
-        },
-        {
-          association: "group",
-          attributes: ["id", "name"],
-        },
-        {
-          association: "images",
-          required: false,
-          where: { isPrimary: true },
-          include: [{ association: "s3File" }]
-        },
-      ],
-      limit,
-      offset,
-      distinct: true,
-      order: [["name", "ASC"]],
-    });
-
-    products = await Promise.all(products.map(async (e: any) => {
-      const plainProduct: any = e.get({ plain: true });
-
-      plainProduct.averageLandedCost = await inventoryProductRepository.getAverageLandedCost(plainProduct.id);
-      plainProduct.lastLandedCost = await inventoryProductRepository.getLastLandedCost(plainProduct.id);
-
-      return plainProduct
-    }))
-
-    return { products, total, page, limit };
-  } else {
-
-    // Original query for when onlyWithSlabs is false
-    const { rows: products, count: total } = await productScoped.findAndCountAll({
-      where: { ...whereClause, ...filter },
-      include: [
-        {
-          association: "subCategory",
-        },
-        {
-          association: "slabs",
-          required: false,
-          include: [
-            {
-              association: "inventoryProduct",
-              include: [
-                {
-                  association: "bin",
-                  attributes: ['name'],
-                  include: [
-                    {
-                      association: "warehouse",
-                      include: [
-                        {
-                          association: "location", attributes: ["locationName"]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              association: 'sipl',
-              attributes: ['id', 'invoiceCode']
-            }
-          ]
-        },
-        {
-          association: "genericProducts",
-          required: false,
-          include: [
-            {
-              association: "inventoryProduct",
-              include: [
-                {
-                  association: "bin",
-                  attributes: ['name'],
-                  include: [
-                    {
-                      association: "warehouse",
-                      include: [
-                        {
-                          association: "location", attributes: ["locationName"]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              association: 'sipl',
-              attributes: ['id', 'invoiceCode']
-            }
-          ]
-        },
-        {
-          association: "group",
-          attributes: ["id", "name"],
-        },
-        {
-          association: "baseColor",
-          attributes: ["id", "name"],
-        },
-        {
-          association: "images",
-          required: false,
-          where: { isPrimary: true },
-          include: [{ association: "s3File" }]
-        },
-      ],
-      limit,
-      offset,
-      distinct: true,
-      order: [["name", "ASC"]],
-    });
-
-    return { products, total, page, limit };
+  // Build inventory condition
+  const inventoryWhere: any = {};
+  if (filter?.locationId) {
+    inventoryWhere.locationId = Number(filter.locationId);
   }
+
+  // First get product IDs that have inventory matching filters
+  const productsWithInventory = await productScoped.findAll({
+    attributes: ['id'],
+    where: {
+      ...whereClause,
+      ...parseFilterWhereClause(filter),
+      ...(hasSellingPriceFilter ? productSellingPriceWhere : {})
+    },
+    include: [
+      {
+        association: 'inventoryProducts',
+        attributes: [],
+        where: Object.keys(inventoryWhere).length > 0 ? inventoryWhere : undefined,
+        required: true,
+        ...(hasSlabFilter ? {
+          include: [
+            {
+              association: 'slab',
+              attributes: [],
+              where: slabWhere,
+              required: true,
+            }
+          ]
+        } : {})
+      }
+    ],
+    subQuery: false,
+    raw: true
+  });
+
+  const productIds = Array.from(new Set(productsWithInventory.map((p: any) => p.id)));
+
+  // Now get the full product details with these IDs
+  let { rows: products, count: total } = await productScoped.findAndCountAll({
+    where: {
+      ...whereClause,
+      ...parseFilterWhereClause(filter),
+      id: { [Op.in]: productIds }
+    },
+    include: [
+      {
+        association: "subCategory",
+      },
+      {
+        association: "finish",
+        attributes: ["id", "name"],
+      },
+      {
+        association: "baseColor",
+        attributes: ["id", "name"],
+      },
+      {
+        association: "inventoryProducts",
+        where: Object.keys(inventoryWhere).length > 0 ? inventoryWhere : undefined,
+        required: false,
+        include: [
+          {
+            association: 'product',
+            attributes: ['singleUnitPrice'],
+            required: false,
+          },
+          {
+            association: 'holdItem',
+            attributes: ['id']
+          },
+          {
+            association: "genericProduct",
+          },
+          {
+            association: "slab",
+            where: hasSlabFilter ? slabWhere : undefined,
+            required: hasSlabFilter ? true : false,
+          },
+        ]
+      },
+      {
+        association: "group",
+        attributes: ["id", "name"],
+      },
+      {
+        association: "images",
+        required: false,
+        where: { isPrimary: true },
+        include: [{ association: "s3File" }]
+      },
+    ],
+    limit,
+    offset,
+    distinct: true,
+    order: [["name", "ASC"]],
+  });
+
+  products = await Promise.all(products.map(async (e: any) => {
+    const plainProduct: any = e.get({ plain: true });
+
+    plainProduct.averageLandedCost = await inventoryProductRepository.getAverageLandedCost(plainProduct.id);
+    plainProduct.lastLandedCost = await inventoryProductRepository.getLastLandedCost(plainProduct.id);
+
+    return plainProduct;
+  }));
+
+  return { products, total, page, limit };
 };
 
 // Get all products

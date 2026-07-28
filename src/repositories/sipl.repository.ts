@@ -4,6 +4,7 @@ import { AppError } from "../helper/appError";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { scoped } from "../utils/scoped";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { buildEffectiveSellingPriceWhere, buildSlabWhere } from "./product.repository";
 
 // Create SIPL
 export async function createSIPL(siplData: any, transaction?: Transaction) {
@@ -312,6 +313,13 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
     };
   }
 
+  const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(req.query);
+  if (effectiveSellingPriceWhere) {
+    Object.assign(inventoryProductsWhere, effectiveSellingPriceWhere);
+  }
+
+  const slabWhere = buildSlabWhere(req.query);
+
   const SIPLs = await scoped(models.SIPL).findAll({
     include: [
       {
@@ -319,6 +327,11 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
         where: inventoryProductsWhere,
         required: true,
         include: [
+          {
+            association: 'product',
+            attributes: ['singleUnitPrice'],
+            required: false,
+          },
           {
             association: 'holdItem',
             attributes: ['id']
@@ -336,6 +349,8 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
           },
           {
             association: "slab",
+            where: slabWhere || undefined,
+            required: !!slabWhere,
           },
           {
             association: "bin",

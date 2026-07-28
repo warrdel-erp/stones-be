@@ -73,24 +73,24 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
 });
 
 export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 200, isSlabType, search, subCategory } = req.query;
+  const { page = 1, limit = 200, search, isSlabType, subCategory, ...filter } = req.query as any;
   const locationId = req.user?.defaultLocationId;
 
   if (!locationId) {
     return res.status(400).json({ error: "User has no default location" });
   }
 
-  let isSlab: boolean | undefined = undefined;
-  if (isSlabType === 'true') isSlab = true;
-  else if (isSlabType === 'false') isSlab = false;
+  const queryFilters: any = { ...filter };
+  if (isSlabType === 'true') queryFilters.isSlabType = true;
+  else if (isSlabType === 'false') queryFilters.isSlabType = false;
+  if (subCategory) queryFilters.subCategory = subCategory;
 
   const data = await inventoryRepository.fetchProductsOnlyByLocation(
     Number(page),
     Number(limit),
     Number(locationId),
-    isSlab,
-    search ? String(search) : undefined,
-    subCategory ? String(subCategory) : undefined
+    queryFilters,
+    search ? String(search) : undefined
   );
 
   if (!data.products.length) {
@@ -114,7 +114,7 @@ export const getBlocksByProduct = catchAsync(async (req: AuthRequest, res: Respo
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
+  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(req, Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Blocks fetched successfully", blocks);
 });
 
@@ -128,7 +128,7 @@ export const getBundlesByProduct = catchAsync(async (req: AuthRequest, res: Resp
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
+  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(req, Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Bundles fetched successfully", bundles);
 });
 
