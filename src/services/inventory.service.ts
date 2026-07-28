@@ -410,8 +410,8 @@ export const fetchProductsOnlyByLocation = async (page: number, limit: number, l
   return { products: finalData, total: data.total };
 };
 
-export const fetchBlocksByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
-  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block', excludeSoldCanceled);
+export const fetchBlocksByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const blocks: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'block', excludeSoldCanceled, req.query);
   return blocks.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,
@@ -419,8 +419,8 @@ export const fetchBlocksByProductAndLocation = async (productId: number, locatio
   }));
 };
 
-export const fetchBundlesByProductAndLocation = async (productId: number, locationId: number, excludeSoldCanceled = false) => {
-  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot', excludeSoldCanceled);
+export const fetchBundlesByProductAndLocation = async (req: AuthRequest, productId: number, locationId: number, excludeSoldCanceled = false) => {
+  const bundles: any = await inventoryProductRepository.getDistinctGroupsByProduct(productId, locationId, 'lot', excludeSoldCanceled, req.query);
   return bundles.map((b: any) => ({
     ...b,
     totalArea: Number(b.totalArea) || 0,

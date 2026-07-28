@@ -114,7 +114,7 @@ export const getBlocksByProduct = catchAsync(async (req: AuthRequest, res: Respo
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
+  const blocks = await inventoryRepository.fetchBlocksByProductAndLocation(req, Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Blocks fetched successfully", blocks);
 });
 
@@ -128,7 +128,7 @@ export const getBundlesByProduct = catchAsync(async (req: AuthRequest, res: Resp
     return res.status(400).json({ error: "productId and default location are required" });
   }
 
-  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(Number(productId), Number(locationId), excludeSoldCanceled);
+  const bundles = await inventoryRepository.fetchBundlesByProductAndLocation(req, Number(productId), Number(locationId), excludeSoldCanceled);
   SuccessResponse(res, 200, "Bundles fetched successfully", bundles);
 });
 

@@ -781,3 +781,6 @@ Email notification.
 8. Add address to supplier via PO/SIPL form.
 
 ---
+
+1. Remove duplicates.
+2. CLIENT_ADMIN
