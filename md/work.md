@@ -784,3 +784,7 @@ Email notification.
 
 1. Remove duplicates.
 2. CLIENT_ADMIN
+
+---
+
+2. Customer address edit.

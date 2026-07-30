@@ -10,7 +10,7 @@ import { PAYMENT_BILL_REFERENCE_TYPES, PO_STATUS, SIPL_STATUS } from "../constan
 import _ from "lodash";
 import * as decimal from '../helper/decimal';
 import * as siplService from "./sipl.service";
-import * as models from "../models";
+import * as productRepository from "../repositories/product.repository";
 import { AppError } from "../helper/appError";
 
 /**
@@ -42,7 +42,7 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     // Create SIPL Products (if provided)
     if (poData.products?.length) {
       for (const product of poData.products) {
-        const prod = await models.Product.findByPk(product.productId, { transaction }) as any;
+        const prod = await productRepository.findProductById(product.productId, transaction);
         if (!prod) {
           throw new AppError(`Product with ID ${product.productId} not found`, 404);
         }
@@ -290,6 +290,11 @@ export const getPurchaseOrderById = async (id: number) => {
     });
   }
 
+  const internalNoteObj = purchaseOrder.notes?.find((n: any) => n.type === 'internal');
+  const printableNoteObj = purchaseOrder.notes?.find((n: any) => n.type === 'printable');
+  if (internalNoteObj) purchaseOrder.internalNote = internalNoteObj.description;
+  if (printableNoteObj) purchaseOrder.printableNote = printableNoteObj.description;
+
   return {
     ...purchaseOrder,
     totalRequestedQuantity: totalQuantity,
@@ -382,7 +387,7 @@ export const addRequestedProductToPOService = async (purchaseOrderId: number, pr
     throw new AppError("Cannot add products to a canceled Purchase Order", 400);
   }
 
-  const prod = await models.Product.findByPk(productData.productId) as any;
+  const prod = await productRepository.findProductById(productData.productId);
   if (!prod) {
     throw new AppError("Product not found", 404);
   }
@@ -404,4 +409,119 @@ export const addRequestedProductToPOService = async (purchaseOrderId: number, pr
   });
 
   return newProduct;
+};
+
+export const updatePurchaseOrderService = async (purchaseOrderId: number, poData: any, notesData: any) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const po: any = await poRepository.getPurchaseOrderById(purchaseOrderId);
+    if (!po) {
+      throw new AppError("Purchase Order not found", 404);
+    }
+
+    if (po.status === PO_STATUS.CANCELED || po.status === PO_STATUS.CLOSED) {
+      throw new AppError(`Cannot edit a ${po.status} Purchase Order`, 400);
+    }
+
+    // Check if PO has any SIPLs
+    if (po.sipls && po.sipls.length > 0) {
+      throw new AppError("Cannot edit Purchase Order after SIPLs have been created", 400);
+    }
+
+    // Check supplier ID edit restriction
+    if (poData.supplierId && Number(poData.supplierId) !== Number(po.supplierId)) {
+      throw new AppError("Supplier cannot be changed for an existing Purchase Order", 400);
+    }
+
+    // Update PurchaseOrder fields
+    const poUpdateData: any = {};
+    if (poData.poDate) poUpdateData.poDate = poData.poDate;
+    if (poData.expiryDate) poUpdateData.expiryDate = poData.expiryDate;
+    if (poData.etaDate !== undefined) poUpdateData.etaDate = poData.etaDate;
+    if (poData.locationId) poUpdateData.locationId = poData.locationId;
+    if (poData.shipmentLocationId) poUpdateData.shipmentLocationId = poData.shipmentLocationId;
+    if (poData.paymentTermId !== undefined) poUpdateData.paymentTermId = poData.paymentTermId;
+    if (poData.container !== undefined) poUpdateData.container = poData.container;
+    if (poData.deliveryType !== undefined) poUpdateData.deliveryType = poData.deliveryType;
+
+    await poRepository.updatePurchaseOrder(purchaseOrderId, poUpdateData, transaction);
+
+    // Update Freight Detail
+    if (poData.freightDetail && Object.keys(poData.freightDetail).length > 0) {
+      const existingFd = await poRepository.getFreightDetailByPoId(purchaseOrderId, transaction);
+      if (existingFd) {
+        await poRepository.updateFreightDetail(purchaseOrderId, poData.freightDetail, transaction);
+      } else {
+        await poRepository.createFreightDetail(poData.freightDetail, { purchaseOrderId }, transaction);
+      }
+    }
+
+    // Update Notes
+    if (notesData) {
+      if (notesData.internal !== undefined) {
+        const existingInternal = await notesRepository.findNoteByReference(purchaseOrderId, "purchase_order", "internal", transaction);
+        if (existingInternal) {
+          if (notesData.internal) {
+            await notesRepository.updateNote(existingInternal.id, { description: notesData.internal }, transaction);
+          } else {
+            await notesRepository.deleteNote(existingInternal.id, transaction);
+          }
+        } else if (notesData.internal) {
+          await notesRepository.createNote(
+            {
+              description: notesData.internal,
+              type: "internal",
+              referenceType: "purchase_order",
+              referenceId: purchaseOrderId,
+            },
+            transaction
+          );
+        }
+      }
+
+      if (notesData.printable !== undefined) {
+        const existingPrintable = await notesRepository.findNoteByReference(purchaseOrderId, "purchase_order", "printable", transaction);
+        if (existingPrintable) {
+          if (notesData.printable) {
+            await notesRepository.updateNote(existingPrintable.id, { description: notesData.printable }, transaction);
+          } else {
+            await notesRepository.deleteNote(existingPrintable.id, transaction);
+          }
+        } else if (notesData.printable) {
+          await notesRepository.createNote(
+            {
+              description: notesData.printable,
+              type: "printable",
+              referenceType: "purchase_order",
+              referenceId: purchaseOrderId,
+            },
+            transaction
+          );
+        }
+      }
+    }
+
+    // Update Requested Purchase Products
+    if (poData.products?.length) {
+      for (const product of poData.products) {
+        const prod = await productRepository.findProductById(product.productId, transaction);
+        if (!prod) {
+          throw new AppError(`Product with ID ${product.productId} not found`, 404);
+        }
+        if (prod.isSlabType && (product.noOfSlabs === undefined || product.noOfSlabs === null || product.noOfSlabs <= 0)) {
+          throw new AppError(`Number of slabs is required for slab product "${prod.name}"`, 400);
+        }
+      }
+
+      await requestedPurchaseProductRepository.deleteRequestedProductsByPurchaseOrderId(purchaseOrderId, transaction);
+      await poRepository.createRequestedPurchaseProducts(poData.products, purchaseOrderId, transaction);
+    }
+
+    await transaction.commit();
+    return await poRepository.getPurchaseOrderById(purchaseOrderId);
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };

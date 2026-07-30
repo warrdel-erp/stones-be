@@ -21,3 +21,15 @@ export const getNotes = async (filters: any, page: number, limit: number) => {
 
   return { total: count, notes: rows };
 };
+
+export const findNoteByReference = async (referenceId: number, referenceType: string, type: string, transaction?: Transaction) => {
+  return await scoped(Notes).findOne({ where: { referenceId, referenceType, type }, transaction });
+};
+
+export const updateNote = async (id: number, data: any, transaction?: Transaction) => {
+  return await scoped(Notes).update(data, { where: { id }, transaction });
+};
+
+export const deleteNote = async (id: number, transaction?: Transaction) => {
+  return await scoped(Notes).destroy({ where: { id }, transaction });
+};

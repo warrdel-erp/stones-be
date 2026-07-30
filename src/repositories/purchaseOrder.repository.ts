@@ -372,3 +372,15 @@ export const countPoInTransit = async (clientId: number) => {
     },
   });
 };
+
+export const updatePurchaseOrder = async (id: number, data: any, transaction?: Transaction) => {
+  return await scoped(models.PurchaseOrder).update(data, { where: { id }, transaction });
+};
+
+export const getFreightDetailByPoId = async (purchaseOrderId: number, transaction?: Transaction) => {
+  return await scoped(models.FreightDetail).findOne({ where: { purchaseOrderId }, transaction });
+};
+
+export const updateFreightDetail = async (purchaseOrderId: number, data: any, transaction?: Transaction) => {
+  return await scoped(models.FreightDetail).update(data, { where: { purchaseOrderId }, transaction });
+};
