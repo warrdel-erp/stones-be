@@ -3,12 +3,22 @@ import { AppError } from "../helper/appError";
 import * as guestSelectionRepository from "../repositories/guestSelection.repository";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 
+const extractActualQrCode = (rawQr: string): string => {
+  if (!rawQr) return '';
+  const trimmed = rawQr.trim();
+  if (trimmed.includes('/')) {
+    return trimmed.split('/')[1] || trimmed;
+  }
+  return trimmed;
+};
+
 export const getClientDetailsByQrCode = async (qrCode: string) => {
-  if (!qrCode) {
+  const cleanQr = extractActualQrCode(qrCode);
+  if (!cleanQr) {
     throw new AppError("Client QR code is required", 400);
   }
 
-  const client = await guestSelectionRepository.findClientByQrCode(qrCode);
+  const client = await guestSelectionRepository.findClientByQrCode(cleanQr);
   if (!client) {
     throw new AppError("Client not found for scanned QR code", 404);
   }
@@ -17,11 +27,12 @@ export const getClientDetailsByQrCode = async (qrCode: string) => {
 };
 
 export const getInventoryProductDetailsByQrCode = async (qrCode: string) => {
-  if (!qrCode) {
+  const cleanQr = extractActualQrCode(qrCode);
+  if (!cleanQr) {
     throw new AppError("Inventory Product QR code is required", 400);
   }
 
-  const inventoryProduct: any = await guestSelectionRepository.findInventoryProductByQrCode(qrCode);
+  const inventoryProduct: any = await guestSelectionRepository.findInventoryProductByQrCode(cleanQr);
   if (!inventoryProduct) {
     throw new AppError("Inventory Product not found for scanned QR code", 404);
   }
