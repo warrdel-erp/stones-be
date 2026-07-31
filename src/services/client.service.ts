@@ -293,6 +293,18 @@ export const getClientProfileSimple = async (clientId: number) => {
   return { ...client, userType: 'client' };
 };
 
+export const getClientQrCode = async (clientId: number) => {
+  const client: any = await clientRepository.getClientByIdSimple(clientId);
+  if (!client) throw new AppError("Client not found", 404);
+  return {
+    clientId: client.id,
+    qrCode: client.qrCode,
+    firstName: client.firstName,
+    lastName: client.lastName,
+    companyName: client.company?.companyName || "",
+  };
+};
+
 // Get client locations
 export const getClientLocations = async (clientId: number) => {
   const client = await clientRepository.getClientById(clientId);

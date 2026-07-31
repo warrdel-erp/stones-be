@@ -520,6 +520,10 @@ export const getProductByIdSimple = async (id: number) => {
   return (await productScoped.findByPk(id))?.get({ plain: true });
 };
 
+export const findProductById = async (id: number, transaction?: Transaction) => {
+  return (await scoped(models.Product).findByPk(id, { transaction })) as any;
+};
+
 // get product details by id
 export const getProductById = async (id: number) => {
   const productScoped = scoped(models.Product);

@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, Op } from "sequelize";
 import { sequelize } from "../config/database";
 import { COA_SUB_HEADERS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import { CUSTOMER_ADDRESS_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
@@ -15,6 +15,8 @@ import * as s3FileRepository from "../repositories/s3File.repository";
 import { generateSignedGetUrl } from "../services/s3File.service";
 import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
 import CustomerExternalAgedInvoice from "../models/customerExternalAgedInvoice.model";
+import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 import { PAYMENT_TERMS, SALES_TAX, SCOP } from "../constants";
 import { COUNTRIES } from "../constants/countries";
@@ -29,7 +31,17 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
   const transaction = await sequelize.transaction();
   try {
     if (!customerData.name || !customerData.email) {
-      throw new Error("Name, and Email are required fields.");
+      throw new AppError("Name and Email are required fields.", 400);
+    }
+
+    if (customerData.primaryPhoneNumber) {
+      const existingCustomer = await scoped(models.Customer).findOne({
+        where: { clientId, primaryPhoneNumber: customerData.primaryPhoneNumber },
+        transaction,
+      });
+      if (existingCustomer) {
+        throw new AppError(`A customer with primary phone number "${customerData.primaryPhoneNumber}" already exists.`, 400);
+      }
     }
 
     // Create customer
@@ -59,23 +71,81 @@ export const registerCustomer = async (customerData: any, addresses: any[], clie
 
     transaction.commit();
     return { customer: newCustomer, addresses: newAddresses, ledgerAccount };
-  } catch (error) {
+  } catch (error: any) {
     transaction.rollback();
+    if (error instanceof AppError) throw error;
+    if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === 'ER_DUP_ENTRY') {
+      throw new AppError(`A customer with primary phone number "${customerData.primaryPhoneNumber || ''}" already exists.`, 400);
+    }
     throw error;
   }
 };
 
 // Update customer
 export const updateCustomer = async (id: number, data: any) => {
-  const updatedCustomer = await customerRepository.updateCustomerById(id, data);
-  if (!updatedCustomer) throw new AppError("Customer not found or update failed", 400);
+  try {
+    const { addresses, ...customerData } = data;
 
-  // If a new S3 file was attached, mark it permanent (isTemp → false)
-  if (data.imageFileId) {
-    await s3FileRepository.markS3FilePermanent(data.imageFileId);
+    const currentCustomer: any = await models.Customer.findByPk(id);
+    if (!currentCustomer) throw new AppError("Customer not found", 404);
+
+    if (customerData.primaryPhoneNumber && customerData.primaryPhoneNumber !== currentCustomer.primaryPhoneNumber) {
+      const existingCustomer = await scoped(models.Customer).findOne({
+        where: {
+          clientId: currentCustomer.clientId,
+          primaryPhoneNumber: customerData.primaryPhoneNumber,
+          id: { [Op.ne]: id }
+        }
+      });
+      if (existingCustomer) {
+        throw new AppError(`A customer with primary phone number "${customerData.primaryPhoneNumber}" already exists.`, 400);
+      }
+    }
+
+    const updatedCustomer = await customerRepository.updateCustomerById(id, customerData);
+    if (!updatedCustomer) throw new AppError("Customer update failed", 400);
+
+    if (Array.isArray(addresses) && addresses.length > 0) {
+      for (const addr of addresses) {
+        if (addr.address) {
+          const addressType = addr.addressType?.toUpperCase() || CUSTOMER_ADDRESS_TYPES.REMIT;
+          const existing = await customerAddressRepository.getAddressesByCustomerId(id, addressType);
+          const primaryAddr = existing.find((a: any) => a.isPrimary) || existing[0];
+          if (primaryAddr) {
+            await customerAddressRepository.updateCustomerAddress(primaryAddr.id, {
+              address: addr.address,
+              addressLine: addr.addressLine || null,
+              lat: addr.lat || null,
+              long: addr.long || null,
+              contactName: addr.contactName || null,
+              contactEmail: addr.contactEmail || addr.email || null,
+              contactNumber: addr.contactNumber || addr.number || null,
+            });
+          } else {
+            await customerAddressRepository.createCustomerAddress({
+              ...addr,
+              addressType,
+              customerId: id,
+              clientId: (updatedCustomer as any).clientId,
+            });
+          }
+        }
+      }
+    }
+
+    // If a new S3 file was attached, mark it permanent (isTemp → false)
+    if (data.imageFileId) {
+      await s3FileRepository.markS3FilePermanent(data.imageFileId);
+    }
+
+    return updatedCustomer;
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === 'ER_DUP_ENTRY') {
+      throw new AppError(`A customer with primary phone number "${data.primaryPhoneNumber || ''}" already exists.`, 400);
+    }
+    throw error;
   }
-
-  return updatedCustomer;
 };
 
 // Get all customers with pagination.

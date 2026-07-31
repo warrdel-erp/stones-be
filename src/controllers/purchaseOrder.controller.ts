@@ -146,3 +146,17 @@ export const addRequestedProductController = catchAsync(async (req: AuthRequest,
   return SuccessResponse(res, 201, "Product added to Purchase Order successfully.", newProduct);
 });
 
+// Update Purchase Order
+export const updatePurchaseOrderController = catchAsync(async (req: AuthRequest, res: Response) => {
+  const purchaseOrderId = parseInt(req.params.id);
+  const { internalNote, printableNote } = req.body;
+  const notesData = { internal: internalNote, printable: printableNote };
+
+  if (!purchaseOrderId) {
+    throw new AppError("Purchase Order ID is required", 400);
+  }
+
+  const updatedPO = await poService.updatePurchaseOrderService(purchaseOrderId, req.body, notesData);
+  return SuccessResponse(res, 200, "Purchase Order updated successfully.", updatedPO);
+});
+

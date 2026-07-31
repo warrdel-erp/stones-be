@@ -43,6 +43,10 @@ export const deleteProductById = async (id: number) => {
   return await scoped(models.RequestedPurchaseProduct).destroy({ where: { id } });
 };
 
+export const deleteRequestedProductsByPurchaseOrderId = async (purchaseOrderId: number, transaction?: Transaction) => {
+  return await scoped(models.RequestedPurchaseProduct).destroy({ where: { purchaseOrderId }, transaction });
+};
+
 export const getTotalQuantityByPurchaseOrder = async (purchaseOrderId: number) => {
   const totalQuantity = await models.RequestedPurchaseProduct.sum("quantity", {
     where: { purchaseOrderId },

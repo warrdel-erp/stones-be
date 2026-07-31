@@ -12,6 +12,9 @@ router.post("/register", validateRequest(registerClientSchema), clientController
 // Get all clients with pagination and optional search filtering
 router.get("/", clientController.getClients);
 
+// Get current client's QR code info
+router.get("/myQrCode", authenticateUser, clientController.getMyQrCodeHandler);
+
 // Update an existing client by ID
 router.put("/:id", clientController.updateClient);
 

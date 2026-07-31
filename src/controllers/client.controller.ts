@@ -52,6 +52,17 @@ export const updateClient = catchAsync(async (req, res) => {
  * The client must provide valid credentials to confirm the deletion.
  * Input is validated upstream by Zod middleware.
  */
+import { AuthRequest } from "../middleware/authMiddleware";
+
+export const getMyQrCodeHandler = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  if (!clientId) {
+    return res.status(400).json({ success: false, message: "Client ID not found" });
+  }
+  const data = await clientService.getClientQrCode(clientId);
+  return SuccessResponse(res, 200, "Client QR Code retrieved successfully", data);
+});
+
 export const deleteClientAccountHandler = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 

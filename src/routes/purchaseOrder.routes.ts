@@ -28,6 +28,9 @@ router.put("/:purchaseOrderId/requestedPurchaseProduct", requestedPurchaseProduc
 // update po status.
 router.patch("/:id/status", poController.updatePurchaseOrderStatus);
 
+// Update Purchase Order
+router.put("/:id", poController.updatePurchaseOrderController);
+
 // Cancel Purchase Order
 router.put("/:id/cancel", poController.cancelPurchaseOrderController);
 
