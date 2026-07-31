@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import Account from "./Account.model";
+import { v4 as uuidv4 } from "uuid";
 
 const Client = sequelize.define(
   "Client",
@@ -54,6 +55,12 @@ const Client = sequelize.define(
         key: "id",
       },
     },
+    qrCode: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      unique: true,
+    },
   },
   {
     tableName: "clients",
@@ -61,5 +68,10 @@ const Client = sequelize.define(
   }
 );
 
+Client.beforeCreate(async (client: any) => {
+  if (!client.qrCode) {
+    client.qrCode = uuidv4();
+  }
+});
 
 export default Client;

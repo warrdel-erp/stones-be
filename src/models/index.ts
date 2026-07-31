@@ -55,6 +55,8 @@ import InventoryProductHold from "./inventoryProductHold.model";
 import Hold from "./hold.model";
 import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
+import GuestSelection from "./guestSelection.model";
+import GuestSelectionItem from "./guestSelectionItem.model";
 import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
@@ -792,6 +794,16 @@ InventoryProduct.hasMany(SelectionSheetItem, { foreignKey: "inventoryProductId",
 SelectionSheetItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SelectionSheetItem, { foreignKey: "clientId", as: "selectionSheetItems" });
 
+// GuestSelection associations
+GuestSelection.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.hasMany(GuestSelection, { foreignKey: "clientId", as: "guestSelections" });
+
+GuestSelection.hasMany(GuestSelectionItem, { foreignKey: "guestSelectionId", as: "items" });
+GuestSelectionItem.belongsTo(GuestSelection, { foreignKey: "guestSelectionId", as: "guestSelection" });
+
+GuestSelectionItem.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+InventoryProduct.hasMany(GuestSelectionItem, { foreignKey: "inventoryProductId", as: "guestSelectionItems" });
+
 PackagingList.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } })
 TradeService.belongsTo(PackagingList, { foreignKey: "referenceId", as: "packagingList", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } });
 
@@ -1021,6 +1033,8 @@ export {
   Hold,
   SelectionSheet,
   SelectionSheetItem,
+  GuestSelection,
+  GuestSelectionItem,
   AccountPermission,
   TermsCondition,
   VendorContact,
