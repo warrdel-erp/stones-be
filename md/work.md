@@ -789,9 +789,6 @@ Email notification.
 
 ---
 
-2. Priority of hold.
-3. Expiry.
-4. Cancel hold
-5. Individual delete hold items.
-6. Customer <-> Fabricator.
-7. Extend expiry, with reason
+1. Priority of hold.
+2. Cancel hold
+3. Individual delete hold items.
