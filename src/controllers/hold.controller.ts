@@ -9,13 +9,13 @@ import * as holdService from "../services/hold.service";
  * Create a new hold
  */
 export const createHold = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { customerId, inventoryProductIds, description, fabricatorId } = req.body;
+    const { customerId, inventoryProductIds, description, fabricatorId, expiryDays } = req.body;
     const accountId = req.user?.accountId;
     const clientId = req.user?.clientId;
     const locationId = req.user?.defaultLocationId;
 
-    if (!customerId) {
-        throw new AppError("Customer ID is required", 400);
+    if (!fabricatorId) {
+        throw new AppError("Fabricator ID is required", 400);
     }
 
     if (!locationId) {
@@ -27,7 +27,7 @@ export const createHold = catchAsync(async (req: AuthRequest, res: Response) => 
     }
 
     const hold = await holdService.createHold(
-        { customerId, inventoryProductIds, description, fabricatorId },
+        { customerId, inventoryProductIds, description, fabricatorId, expiryDays: expiryDays ? Number(expiryDays) : undefined },
         Number(accountId),
         Number(clientId),
         Number(locationId)
@@ -127,4 +127,31 @@ export const updateHoldItem = catchAsync(async (req: AuthRequest, res: Response)
     const result = await holdService.updateHoldItem(Number(itemId), clientId, { unitPrice: Number(unitPrice) });
 
     return SuccessResponse(res, 200, "Hold item updated successfully", result);
+});
+
+/**
+ * Extend hold expiry
+ */
+export const extendHoldExpiry = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const { extendDays, reason } = req.body;
+    const accountId = req.user?.accountId;
+    const clientId = req.user?.clientId;
+
+    if (!accountId || !clientId) {
+        throw new AppError("Missing account or client information", 401);
+    }
+
+    if (!reason || !reason.trim()) {
+        throw new AppError("Reason is required to extend hold expiry", 400);
+    }
+
+    const updatedHold = await holdService.extendHoldExpiry(
+        Number(id),
+        { extendDays: Number(extendDays || 7), reason: String(reason).trim() },
+        Number(accountId),
+        Number(clientId)
+    );
+
+    return SuccessResponse(res, 200, "Hold expiry extended successfully", updatedHold);
 });

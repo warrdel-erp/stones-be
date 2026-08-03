@@ -1,6 +1,7 @@
 import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
+import { AppError } from "../helper/appError";
 
 /**
  * Create a new hold with items
@@ -8,11 +9,12 @@ import { scoped } from "../utils/scoped";
 export const createHold = async (
   data: {
     description?: string;
-    fabricatorId?: number;
+    fabricatorId: number;
     createdById: number;
-    customerId: number;
+    customerId?: number;
     clientId: number;
     locationId: number;
+    expiresAt?: Date;
   },
   transaction?: Transaction
 ) => {
@@ -46,7 +48,7 @@ export const getHoldById = async (id: number) => {
         required: true,
         include: [
           {
-            association: 'holdItem',
+            association: 'holdItems',
             attributes: ['id', 'holdId', 'unitPrice'],
             required: true,
             where: {
@@ -127,11 +129,29 @@ export const getHoldById = async (id: number) => {
           },
         ],
       },
+      {
+        association: "expiryLogs",
+        include: [
+          {
+            association: "createdBy",
+            attributes: { exclude: ['password'] },
+            include: [
+              {
+                association: "user",
+                attributes: ["id", "username", "phone"],
+              },
+            ],
+          },
+        ],
+      },
     ],
   }))?.get({ plain: true });
 
   if (hold) {
     hold.products = products;
+    if (Array.isArray(hold.expiryLogs)) {
+      hold.expiryLogs.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
   }
 
   return hold;
@@ -207,6 +227,10 @@ export const getAllHolds = async (
             ]
           },
         ],
+      },
+      {
+        association: "expiryLogs",
+        attributes: ["id"],
       },
     ],
     limit,
@@ -286,7 +310,7 @@ export const updateHoldItem = async (
 };
 
 /**
- * Find hold item by inventory product ID
+ * Find active (unexpired) hold item by inventory product ID
  */
 export const findHoldByInventoryProductId = async (
   inventoryProductId: number,
@@ -294,6 +318,18 @@ export const findHoldByInventoryProductId = async (
 ) => {
   return await scoped(models.InventoryProductHold).findOne({
     where: { inventoryProductId },
+    include: [
+      {
+        association: "hold",
+        required: true,
+        where: {
+          [Op.or]: [
+            { expiresAt: { [Op.gt]: new Date() } },
+            { expiresAt: { [Op.is]: null } },
+          ],
+        },
+      },
+    ],
     transaction,
   });
 };
@@ -315,4 +351,21 @@ export const updateHold = async (
     where: { id },
     transaction,
   });
+};
+
+/**
+ * Create a new hold expiry log entry
+ */
+export const createHoldExpiryLog = async (
+  data: {
+    holdId: number;
+    oldExpiresAt: Date | null;
+    newExpiresAt: Date;
+    reason: string;
+    createdById: number;
+    clientId: number;
+  },
+  transaction?: Transaction
+) => {
+  return await scoped(models.HoldExpiryLog).create(data, { transaction });
 };

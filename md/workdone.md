@@ -1069,3 +1069,11 @@ Univ
 1. filters in Product Search.
 2. SO create from inventory Product Fix.
 3. ⁠Edit PO
+4. Customer address edit.
+
+---
+
+1. Multi hold.
+2. Expiry.
+3. Extend expiry, with reason
+4. Customer <-> Fabricator.

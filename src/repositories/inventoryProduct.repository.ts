@@ -145,8 +145,8 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
         association: 'genericProduct'
       },
       {
-        association: 'holdItem',
-        include: [{ association: 'hold' }]
+        association: 'holdItems',
+        include: [{ association: 'hold', include: [{ association: 'customer' }] }]
       },
       {
         association: "bin",
@@ -402,8 +402,8 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
         required: false
       },
       {
-        association: 'holdItem',
-        include: [{ association: 'hold' }]
+        association: 'holdItems',
+        include: [{ association: 'hold', include: [{ association: 'customer' }] }]
       },
       {
         association: 'images',
@@ -469,8 +469,8 @@ export const getInventoryProductsByBinId = async (req: AuthRequest, binId: numbe
         required: false
       },
       {
-        association: 'holdItem',
-        include: [{ association: 'hold' }]
+        association: 'holdItems',
+        include: [{ association: 'hold', include: [{ association: 'customer' }] }]
       },
       {
         association: 'images',
@@ -619,9 +619,9 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
     where,
     include: [
       {
-        association: 'holdItem',
+        association: 'holdItems',
         required: isHold === 'true',
-        include: [{ association: 'hold' }]
+        include: [{ association: 'hold', include: [{ association: 'customer' }] }]
       },
       {
         association: 'slab',
@@ -686,9 +686,9 @@ export const getInventoryProductsPaginated = async (filter: Record<string, any>,
     where,
     include: [
       {
-        association: 'holdItem',
+        association: 'holdItems',
         required: isHold === 'true',
-        include: [{ association: 'hold' }]
+        include: [{ association: 'hold', include: [{ association: 'customer' }] }]
       },
       {
         association: 'slab',
@@ -828,14 +828,13 @@ export const getInventoryProductByQrCode = async (qrCode: string, transaction?: 
         association: 'genericProduct'
       },
       {
-        association: 'holdItem',
+        association: 'holdItems',
         include: [
           {
             association: 'hold',
             include: [
               {
-                association: 'customer',
-                attributes: ['id', 'name']
+                association: 'customer'
               }
             ]
           }

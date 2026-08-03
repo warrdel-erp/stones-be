@@ -51,7 +51,7 @@ export const getSelectionSheetById = async (id: number) => {
             },
           },
           {
-            association: 'holdItem',
+            association: 'holdItems',
             attributes: ['id']
           },
           {

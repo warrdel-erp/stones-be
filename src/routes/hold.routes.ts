@@ -21,4 +21,7 @@ router.delete("/items/:itemId", authenticateUser, holdController.deleteHoldItem)
 
 router.put("/items/:itemId", authenticateUser, holdController.updateHoldItem);
 
+// Extend hold expiry
+router.post("/:id/extend-expiry", authenticateUser, holdController.extendHoldExpiry);
+
 export default router;

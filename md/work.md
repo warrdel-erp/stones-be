@@ -787,4 +787,8 @@ Email notification.
 
 ---
 
-2. Customer address edit.
+---
+
+1. Priority of hold.
+2. Cancel hold
+3. Individual delete hold items.
