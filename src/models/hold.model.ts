@@ -21,7 +21,7 @@ const Hold = sequelize.define(
         },
         fabricatorId: {
             type: DataTypes.INTEGER,
-            allowNull: true,
+            allowNull: false,
             references: {
                 model: Customer,
                 key: "id",
@@ -31,7 +31,7 @@ const Hold = sequelize.define(
         },
         customerId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: Customer,
                 key: "id",
@@ -82,6 +82,10 @@ const Hold = sequelize.define(
             type: DataTypes.STRING,
             allowNull: true,
             unique: true,
+        },
+        expiresAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {

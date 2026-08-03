@@ -11,10 +11,11 @@ import { CUSTOMER_TYPE, HOLD_STAGES } from "../constants/tableTypes";
  */
 export const createHold = async (
     data: {
-        customerId: number;
+        fabricatorId: number;
+        customerId?: number;
         description?: string;
-        fabricatorId?: number;
         inventoryProductIds: number[];
+        expiryDays?: number;
     },
     accountId: number,
     clientId: number,
@@ -23,26 +24,29 @@ export const createHold = async (
     const transaction = await sequelize.transaction();
 
     try {
-        // Validate customer exists and belongs to client
-        const customer: any = await customerRepository.getCustomerByIdSimple(data.customerId);
-
-        if (!customer) {
-            throw new AppError("Customer not found", 404);
+        if (!data.fabricatorId) {
+            throw new AppError("Fabricator is required", 400);
         }
 
-        if (customer.clientId !== clientId) {
-            throw new AppError("Customer does not belong to your client", 403);
+        // Validate fabricator exists and belongs to client
+        const fabricator: any = await customerRepository.getCustomerByIdSimple(data.fabricatorId);
+
+        if (!fabricator) {
+            throw new AppError("Fabricator not found", 404);
         }
 
-        if (customer.type === CUSTOMER_TYPE.CUSTOMER) {
-            if (!data.description) {
-                throw new AppError("Description is mandatory for customer type", 400);
+        if (fabricator.clientId !== clientId) {
+            throw new AppError("Fabricator does not belong to your client", 403);
+        }
+
+        // Validate customer if provided
+        if (data.customerId) {
+            const customer: any = await customerRepository.getCustomerByIdSimple(data.customerId);
+            if (!customer) {
+                throw new AppError("Customer not found", 404);
             }
-            if (data.fabricatorId) {
-                const fabricator: any = await customerRepository.getCustomerByIdSimple(data.fabricatorId);
-                if (!fabricator || fabricator.type !== CUSTOMER_TYPE.FABRICATOR) {
-                    throw new AppError("Invalid fabricator selected", 400);
-                }
+            if (customer.clientId !== clientId) {
+                throw new AppError("Customer does not belong to your client", 403);
             }
         }
 
@@ -67,6 +71,10 @@ export const createHold = async (
             }
         }
 
+        // Compute expiry date (default 7 days)
+        const days = data.expiryDays && [7, 15, 30].includes(Number(data.expiryDays)) ? Number(data.expiryDays) : 7;
+        const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
         // Create hold
         const hold: any = await holdRepository.createHold(
             {
@@ -76,6 +84,7 @@ export const createHold = async (
                 customerId: data.customerId,
                 clientId,
                 locationId,
+                expiresAt,
             },
             transaction
         );
@@ -207,4 +216,58 @@ export const updateHoldItem = async (
   }
 
   return { message: "Hold item updated successfully" };
+};
+
+/**
+ * Extend hold expiry by days with a mandatory reason and history logging
+ */
+export const extendHoldExpiry = async (
+  id: number,
+  data: { extendDays: number; reason: string },
+  accountId: number,
+  clientId: number
+) => {
+  if (!data.reason || !data.reason.trim()) {
+    throw new AppError("Reason is required to extend hold expiry", 400);
+  }
+
+  const days = [7, 15, 30].includes(Number(data.extendDays)) ? Number(data.extendDays) : 7;
+
+  const hold: any = await holdRepository.findHoldByIdAndClient(id, clientId);
+  if (!hold) {
+    throw new AppError("Hold not found", 404);
+  }
+
+  if (hold.stage === HOLD_STAGES.SO_CREATED) {
+    throw new AppError("Cannot extend expiry for a hold that has already been converted to Sales Order", 400);
+  }
+
+  const transaction = await sequelize.transaction();
+  try {
+    const oldExpiresAt = hold.expiresAt ? new Date(hold.expiresAt) : new Date(hold.createdAt);
+    const baseTime = Math.max(oldExpiresAt.getTime(), Date.now());
+    const newExpiresAt = new Date(baseTime + days * 24 * 60 * 60 * 1000);
+
+    // Create history log
+    await holdRepository.createHoldExpiryLog(
+      {
+        holdId: id,
+        oldExpiresAt: hold.expiresAt,
+        newExpiresAt,
+        reason: data.reason.trim(),
+        createdById: accountId,
+        clientId,
+      },
+      transaction
+    );
+
+    // Update current hold expiresAt
+    await holdRepository.updateHold(id, { expiresAt: newExpiresAt } as any, transaction);
+
+    await transaction.commit();
+    return await holdRepository.getHoldById(id);
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };

@@ -333,7 +333,7 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
             required: false,
           },
           {
-            association: 'holdItem',
+            association: 'holdItems',
             attributes: ['id']
           },
           {

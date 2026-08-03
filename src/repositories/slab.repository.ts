@@ -354,7 +354,7 @@ export const getHoldSlabsData = async (productId: number) => {
         attributes: [],
         include: [
           {
-            association: "holdItem",
+            association: "holdItems",
             required: true,
             attributes: [],
             include: [
@@ -385,7 +385,7 @@ export const getAvailableSlabsData = async (productId: number) => {
       productId,
       // Need to filter out instances where hold exists
       // We do this by ensuring the associated hold is null
-      "$inventoryProduct.holdItem.id$": { [Op.is]: null },
+      "$inventoryProduct.holdItems.id$": { [Op.is]: null },
     },
     include: [
       {
@@ -397,7 +397,7 @@ export const getAvailableSlabsData = async (productId: number) => {
         },
         include: [
           {
-            association: "holdItem",
+            association: "holdItems",
             required: false,
             attributes: [],
           },

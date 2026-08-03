@@ -53,6 +53,7 @@ import CreditDebitNoteSettlement from "./creditDebitNoteSettlement.model";
 import SoProductSwapHistory from "./soProductSwapHistory.model";
 import InventoryProductHold from "./inventoryProductHold.model";
 import Hold from "./hold.model";
+import HoldExpiryLog from "./holdExpiryLog.model";
 import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import GuestSelection from "./guestSelection.model";
@@ -765,6 +766,10 @@ Location.hasMany(Hold, { foreignKey: "locationId", as: "holds" });
 Hold.hasMany(InventoryProductHold, { foreignKey: "holdId", as: "items" });
 InventoryProductHold.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
 
+Hold.hasMany(HoldExpiryLog, { foreignKey: "holdId", as: "expiryLogs" });
+HoldExpiryLog.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
+HoldExpiryLog.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+
 // Hold-SalesOrder association
 Hold.hasOne(SalesOrder, { foreignKey: "holdId", as: "salesOrder" });
 SalesOrder.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
@@ -772,6 +777,7 @@ SalesOrder.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
 // InventoryProductHold associations
 InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasOne(InventoryProductHold, { foreignKey: "inventoryProductId", as: "holdItem" });
+InventoryProduct.hasMany(InventoryProductHold, { foreignKey: "inventoryProductId", as: "holdItems" });
 
 // SelectionSheet associations
 SelectionSheet.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
@@ -1031,6 +1037,7 @@ export {
   SoProductSwapHistory,
   InventoryProductHold,
   Hold,
+  HoldExpiryLog,
   SelectionSheet,
   SelectionSheetItem,
   GuestSelection,

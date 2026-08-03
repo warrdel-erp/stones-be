@@ -1,11 +1,11 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
-import InventoryProduct from "./inventoryProduct.model";
-import Client from "./client.model";
 import Hold from "./hold.model";
+import Account from "./Account.model";
+import Client from "./client.model";
 
-const InventoryProductHold = sequelize.define(
-  "InventoryProductHold",
+const HoldExpiryLog = sequelize.define(
+  "HoldExpiryLog",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -22,15 +22,27 @@ const InventoryProductHold = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    inventoryProductId: {
+    oldExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    newExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    reason: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    createdById: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: InventoryProduct,
+        model: Account,
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onDelete: "RESTRICT",
     },
     clientId: {
       type: DataTypes.INTEGER,
@@ -42,22 +54,11 @@ const InventoryProductHold = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
-    unitPrice: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-      defaultValue: 0.00,
-    },
   },
   {
-    tableName: "inventory_product_holds",
+    tableName: "hold_expiry_logs",
     timestamps: true,
   }
 );
 
-// Scope configuration for InventoryProductHold model
-(InventoryProductHold as any).scopeConfig = {
-  client: true,
-  location: false,
-};
-
-export default InventoryProductHold;
+export default HoldExpiryLog;
