@@ -20,6 +20,7 @@ import { randomId, sumDecimal, isSIPLLocked } from "../helper";
 import * as genericProductRepository from "../repositories/genericProduct.repository";
 import * as productRepository from "../repositories/product.repository";
 import * as tradeServiceService from "../services/tradeService.service";
+import * as s3FileService from "../services/s3File.service";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import _ from "lodash";
 import * as decimal from "../helper/decimal";
@@ -324,6 +325,10 @@ export const getSIPLById = async (id: number) => {
     throw new Error("SIPL not found");
   }
 
+  if (sipl.s3File && sipl.s3File.s3Bucket && sipl.s3File.s3Key) {
+    sipl.s3File.url = await s3FileService.generateSignedGetUrl(sipl.s3File.s3Bucket, sipl.s3File.s3Key);
+  }
+
   // Calculate totalReceivedQuantity, totalPackagingQuantity
   sipl.siplProducts = sipl.siplProducts.map((siplProduct: any) => {
 
@@ -375,7 +380,44 @@ export const getSIPLById = async (id: number) => {
 
   sipl.creditNotes = creditNotes.map((cn: any) => cn.get({ plain: true }));
 
-  return { ...sipl, ...calculations, totalPaidBillAmount, totalPaidSiloAmount };
+  const latestTempItem: any = await models.TempAiExtractedSiplItem.findOne({
+    where: {
+      siplId: id,
+    },
+    order: [["createdAt", "DESC"]],
+  });
+
+  let aiScanStatus: "none" | "pending" | "confirmed" = "none";
+  let pendingDraftCount = 0;
+  let confirmedCount = 0;
+  let tempExtractedItems = null;
+
+  if (latestTempItem) {
+    if (latestTempItem.status === "pending") {
+      aiScanStatus = "pending";
+      pendingDraftCount = Array.isArray(latestTempItem.extractedData) ? latestTempItem.extractedData.length : 0;
+      tempExtractedItems = { tempId: latestTempItem.id, items: latestTempItem.extractedData || [] };
+    } else if (latestTempItem.status === "confirmed") {
+      aiScanStatus = "confirmed";
+      confirmedCount = Array.isArray(latestTempItem.extractedData) ? latestTempItem.extractedData.length : 0;
+    }
+  }
+
+  const isScanned = aiScanStatus === "pending";
+  const isScanConfirmed = aiScanStatus === "confirmed";
+
+  return {
+    ...sipl,
+    ...calculations,
+    totalPaidBillAmount,
+    totalPaidSiloAmount,
+    isScanned,
+    isScanConfirmed,
+    aiScanStatus,
+    pendingDraftCount,
+    confirmedCount,
+    tempExtractedItems,
+  };
 };
 
 // Get SIPL by ID
@@ -405,7 +447,13 @@ export const getAllSIPLs = async (
   rows = await Promise.all(rows.map(async (sipl: any) => {
     sipl = sipl.get({ plain: true });
 
-    sipl.purchaseOrder.supplier.paymentTerms = PAYMENT_TERMS.find((e) => e.id == sipl.purchaseOrder.supplier.paymentTerms);
+    if (sipl.s3File && sipl.s3File.s3Bucket && sipl.s3File.s3Key) {
+      sipl.s3File.url = await s3FileService.generateSignedGetUrl(sipl.s3File.s3Bucket, sipl.s3File.s3Key);
+    }
+
+    if (sipl.purchaseOrder?.supplier?.paymentTerms) {
+      sipl.purchaseOrder.supplier.paymentTerms = PAYMENT_TERMS.find((e) => e.id == sipl.purchaseOrder.supplier.paymentTerms);
+    }
 
     sipl.calculations = await getSiplCalculations(sipl.id);
 

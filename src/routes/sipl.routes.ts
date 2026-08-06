@@ -1,8 +1,21 @@
 import { Router } from "express";
 import * as siplController from "../controllers/sipl.controller";
+import {
+  extractSiplPdfController,
+  getTempExtractedItemsController,
+  updateTempExtractedItemsController,
+  confirmTempExtractedItemsController,
+} from "../controllers/aiExtraction.controller";
 import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
+
+// --- AI Extraction Routes ---
+router.post("/:siplId/extract-from-pdf", authenticateUser, extractSiplPdfController);
+router.get("/:siplId/temp-items", authenticateUser, getTempExtractedItemsController);
+router.put("/temp-items/:tempId", authenticateUser, updateTempExtractedItemsController);
+router.post("/:siplId/confirm-temp-items", authenticateUser, confirmTempExtractedItemsController);
+
 
 // Receive all slabs in an SIPL in inventory.
 router.put("/:id/receiveInventory", authenticateUser, siplController.receiveInventoryController);
