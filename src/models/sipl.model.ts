@@ -153,6 +153,11 @@ const SIPL = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    s3FileId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Reference to the s3_files record for the SIPL document",
+    },
   },
   {
     tableName: "sipls",

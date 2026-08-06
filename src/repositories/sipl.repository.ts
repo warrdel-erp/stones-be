@@ -39,6 +39,10 @@ export const findSIPLById = async (id: number, transaction?: Transaction) => {
   return await models.SIPL.findByPk(id, {
     include: [
       {
+        model: models.S3File,
+        as: "s3File",
+      },
+      {
         model: models.PurchaseOrder,
         as: "purchaseOrder",
         include: [
@@ -244,6 +248,10 @@ export const getAllSIPLs = async (
   return await scoped(models.SIPL).findAndCountAll({
     where,
     include: [
+      {
+        model: models.S3File,
+        as: "s3File",
+      },
       {
         model: models.PurchaseOrder,
         as: "purchaseOrder",
@@ -473,4 +481,15 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
     invoiceCode: `VI ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
     paymentTermId: sipl.paymentTermId || purchaseOrder.paymentTermId,
   }
-}
+};
+
+export const updateSiplS3FileId = async (
+  siplId: number,
+  s3FileId: number,
+  transaction?: Transaction
+) => {
+  return await models.SIPL.update(
+    { s3FileId },
+    { where: { id: siplId }, transaction }
+  );
+};

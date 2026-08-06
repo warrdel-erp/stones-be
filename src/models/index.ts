@@ -58,6 +58,7 @@ import SelectionSheet from "./selectionSheet.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import GuestSelection from "./guestSelection.model";
 import GuestSelectionItem from "./guestSelectionItem.model";
+import TempAiExtractedSiplItem from "./tempAiExtractedSiplItem.model";
 import AccountPermission from "./AccountPermission.model";
 import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
@@ -335,6 +336,9 @@ InventoryProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" }
 Product.hasMany(ProductImage, { foreignKey: "productId", as: "images" });
 ProductImage.belongsTo(Product, { foreignKey: "productId", as: "product" });
 ProductImage.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
+
+// SIPL-S3File relation
+SIPL.belongsTo(S3File, { foreignKey: "s3FileId", as: "s3File" });
 
 // Client-InventoryProductMetaData relation
 Client.hasMany(InventoryProductMetaData, { foreignKey: "clientId", as: "inventoryProductMetaData" });
@@ -982,7 +986,14 @@ Activity.belongsTo(Account, { foreignKey: "accountId", as: "account" });
 Location.hasMany(Activity, { foreignKey: "locationId", as: "activities" });
 Activity.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 
+SIPL.hasMany(TempAiExtractedSiplItem, { foreignKey: "siplId", as: "tempAiItems" });
+TempAiExtractedSiplItem.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
+
+SIPLProduct.hasMany(TempAiExtractedSiplItem, { foreignKey: "siplProductId", as: "tempAiItems" });
+TempAiExtractedSiplItem.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
+
 export {
+  TempAiExtractedSiplItem,
   Client,
   User,
   Location,

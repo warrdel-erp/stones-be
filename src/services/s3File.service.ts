@@ -7,6 +7,7 @@ import { FILE_UPLOAD_STATUS, FILE_UPLOAD_ENTITY_TYPE } from "../constants/tableT
 import * as s3FileRepo from "../repositories/s3File.repository";
 import * as productRepository from "../repositories/product.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as siplRepository from "../repositories/sipl.repository";
 import { Transaction } from "sequelize";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -14,7 +15,7 @@ import { Transaction } from "sequelize";
 /** Maximum allowed file size: 5 MB */
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
-/** Image MIME types allowed for upload */
+/** Image and Document MIME types allowed for upload */
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -24,6 +25,7 @@ const ALLOWED_MIME_TYPES = [
   "image/svg+xml",
   "image/bmp",
   "image/tiff",
+  "application/pdf",
 ];
 
 // ─── Service Functions ─────────────────────────────────────────────────────────
@@ -88,6 +90,7 @@ export const generateUploadUrl = async (
       "image/svg+xml": ".svg",
       "image/bmp": ".bmp",
       "image/tiff": ".tiff",
+      "application/pdf": ".pdf",
     };
     ext = mimeMap[mimeType] || "";
   }
@@ -138,39 +141,37 @@ export const generateUploadUrl = async (
 };
 
 /**
- * Confirms that a file was successfully uploaded to S3.
- * Runs HeadObject to verify file existence, then marks status as "active".
- *
- * @param fileId - ID of the S3File record to confirm
- * @param clientId - Must match the record's clientId (access control)
- * @returns Updated S3File record
+ * Validates that an S3 file record exists, belongs to the client, and is in a confirmable state.
  */
-export const confirmUpload = async (fileId: number, clientId: number) => {
-  const s3File = await s3FileRepo.findS3FileById(fileId);
-
+const validateFileForConfirmation = (s3File: any, clientId: number): void => {
   if (!s3File) {
     throw new AppError("S3 file record not found.", 404);
   }
 
   // Access control — ensure record belongs to caller's tenant
-  if ((s3File as any).clientId !== clientId) {
+  if (s3File.clientId !== clientId) {
     throw new AppError("Access denied. You do not have permission to confirm this upload.", 403);
   }
 
   // Idempotency — do not allow confirming an already-active record
-  if ((s3File as any).status === FILE_UPLOAD_STATUS.ACTIVE) {
+  if (s3File.status === FILE_UPLOAD_STATUS.ACTIVE) {
     throw new AppError("This file has already been confirmed.", 400);
   }
 
-  if ((s3File as any).status === FILE_UPLOAD_STATUS.FAILED) {
+  if (s3File.status === FILE_UPLOAD_STATUS.FAILED) {
     throw new AppError("This file is in a failed state and cannot be confirmed.", 400);
   }
+};
 
-  // Verify file exists in S3 via HeadObject
+/**
+ * Verifies that the file exists in S3 via HeadObject command.
+ * Marks the DB record as FAILED if missing in S3.
+ */
+const verifyS3FileExistence = async (fileId: number, s3Bucket: string, s3Key: string): Promise<void> => {
   try {
     const headCommand = new HeadObjectCommand({
-      Bucket: (s3File as any).s3Bucket,
-      Key: (s3File as any).s3Key,
+      Bucket: s3Bucket,
+      Key: s3Key,
     });
     await s3Client.send(headCommand);
   } catch (err: any) {
@@ -181,46 +182,112 @@ export const confirmUpload = async (fileId: number, clientId: number) => {
       400
     );
   }
+};
+
+/**
+ * Handles entity-specific linking for Inventory Product files.
+ */
+const handleInventoryProductConfirmation = async (fileId: number, entityId: number): Promise<void> => {
+  try {
+    const images = await inventoryProductRepository.getInventoryProductImagesByInventoryProductId(entityId);
+    const exists = images.some((img: any) => img.s3FileId === fileId);
+
+    if (!exists) {
+      const count = images.length;
+      const isPrimary = count === 0;
+      await inventoryProductRepository.createInventoryProductImage(entityId, fileId, isPrimary);
+    }
+    // Mark file as permanent since it's now linked to an inventory product
+    await s3FileRepo.markS3FilePermanent(fileId);
+  } catch (error) {
+    console.error("Failed to link inventory product image upon S3 confirmation:", error);
+  }
+};
+
+/**
+ * Handles entity-specific linking for Product files.
+ */
+const handleProductConfirmation = async (fileId: number, entityId: number): Promise<void> => {
+  try {
+    const images = await productRepository.getProductImagesByProductId(entityId);
+    const exists = images.some((img: any) => img.s3FileId === fileId);
+
+    if (!exists) {
+      const count = images.length;
+      const isPrimary = count === 0;
+      await productRepository.createProductImage(entityId, fileId, isPrimary);
+    }
+    // Mark file as permanent since it's now linked to a product
+    await s3FileRepo.markS3FilePermanent(fileId);
+  } catch (error) {
+    console.error("Failed to link product image upon S3 confirmation:", error);
+  }
+};
+
+/**
+ * Handles entity-specific linking for SIPL document files (PDF / images).
+ */
+const handleSiplConfirmation = async (fileId: number, entityId: number): Promise<void> => {
+  try {
+    await siplRepository.updateSiplS3FileId(entityId, fileId);
+    // Mark file as permanent since it's now linked to a SIPL
+    await s3FileRepo.markS3FilePermanent(fileId);
+  } catch (error) {
+    console.error("Failed to update SIPL s3FileId upon S3 confirmation:", error);
+  }
+};
+
+/**
+ * Registry mapping entity types to their specific post-confirmation handlers.
+ * To add confirmation logic for new entity types (e.g., CUSTOMER, SALES_ORDER),
+ * define a handler function and register it here.
+ */
+type EntityConfirmationHandler = (fileId: number, entityId: number) => Promise<void>;
+
+const ENTITY_CONFIRMATION_HANDLERS: Record<string, EntityConfirmationHandler> = {
+  [FILE_UPLOAD_ENTITY_TYPE.INVENTORY_PRODUCT]: handleInventoryProductConfirmation,
+  [FILE_UPLOAD_ENTITY_TYPE.PRODUCT]: handleProductConfirmation,
+  [FILE_UPLOAD_ENTITY_TYPE.SIPL]: handleSiplConfirmation,
+};
+
+/**
+ * Dispatches entity-specific post-confirmation hooks based on s3File entityType.
+ */
+const handleEntityConfirmation = async (s3FileRecord: any): Promise<void> => {
+  const { entityType, entityId, id: fileId } = s3FileRecord;
+
+  if (!entityType || !entityId) {
+    return;
+  }
+
+  const handler = ENTITY_CONFIRMATION_HANDLERS[entityType];
+  if (handler) {
+    await handler(fileId, entityId);
+  }
+};
+
+/**
+ * Confirms that a file was successfully uploaded to S3.
+ * Runs HeadObject to verify file existence, then marks status as "active",
+ * and executes any entity-specific post-confirmation hooks.
+ *
+ * @param fileId - ID of the S3File record to confirm
+ * @param clientId - Must match the record's clientId (access control)
+ * @returns Updated S3File record
+ */
+export const confirmUpload = async (fileId: number, clientId: number) => {
+  const s3File = await s3FileRepo.findS3FileById(fileId);
+
+  validateFileForConfirmation(s3File, clientId);
+
+  const s3FileRecord = s3File as any;
+  await verifyS3FileExistence(fileId, s3FileRecord.s3Bucket, s3FileRecord.s3Key);
 
   // Mark as active
   const updated = await s3FileRepo.updateS3FileStatus(fileId, FILE_UPLOAD_STATUS.ACTIVE);
-  const s3FileRecord = updated as any;
-  
-  if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.INVENTORY_PRODUCT && s3FileRecord.entityId) {
-    try {
-      const inventoryProductId = s3FileRecord.entityId;
-      const images = await inventoryProductRepository.getInventoryProductImagesByInventoryProductId(inventoryProductId);
-      const exists = images.some((img: any) => img.s3FileId === fileId);
 
-      if (!exists) {
-        const count = images.length;
-        const isPrimary = count === 0;
-        await inventoryProductRepository.createInventoryProductImage(inventoryProductId, fileId, isPrimary);
-      }
-      // Mark file as permanent since it's now linked to an inventory product
-      await s3FileRepo.markS3FilePermanent(fileId);
-    } catch (error) {
-      console.error("Failed to link inventory product image upon S3 confirmation:", error);
-    }
-  }
-
-  if (s3FileRecord.entityType === FILE_UPLOAD_ENTITY_TYPE.PRODUCT && s3FileRecord.entityId) {
-    try {
-      const productId = s3FileRecord.entityId;
-      const images = await productRepository.getProductImagesByProductId(productId);
-      const exists = images.some((img: any) => img.s3FileId === fileId);
-
-      if (!exists) {
-        const count = images.length;
-        const isPrimary = count === 0;
-        await productRepository.createProductImage(productId, fileId, isPrimary);
-      }
-      // Mark file as permanent since it's now linked to a product
-      await s3FileRepo.markS3FilePermanent(fileId);
-    } catch (error) {
-      console.error("Failed to link product image upon S3 confirmation:", error);
-    }
-  }
+  // Dispatch entity-specific confirmation hooks
+  await handleEntityConfirmation(updated as any);
 
   return updated;
 };
@@ -331,7 +398,7 @@ export const deleteExploreKeys = async (keys: string[]) => {
 
     // Treat it as a folder prefix and recursively delete all contents
     const prefix = key.endsWith('/') ? key : `${key}/`;
-    
+
     let isTruncated = true;
     let continuationToken: string | undefined = undefined;
 
@@ -345,12 +412,12 @@ export const deleteExploreKeys = async (keys: string[]) => {
 
       if (listResult.Contents && listResult.Contents.length > 0) {
         const objectsToDelete = listResult.Contents.map((obj: any) => ({ Key: obj.Key }));
-        
+
         const deleteCommand = new DeleteObjectsCommand({
           Bucket: S3_BUCKET,
           Delete: { Objects: objectsToDelete, Quiet: true },
         });
-        
+
         await s3Client.send(deleteCommand);
       }
 
