@@ -603,9 +603,85 @@ export const getProductsWithSlabsByLocation = async (locationId: number) => {
   });
 };
 
+/**
+ * Common helper to get available inventory products for a product
+ * Available means status in (IN_INVENTORY, INITIATE) and NOT on hold (no holdItem)
+ */
+export const getAvailableInventoryProductsForProduct = async (
+  productId: number,
+  clientId: number,
+  limit?: number
+) => {
+  return await scoped(models.InventoryProduct).findAll({
+    where: {
+      clientId,
+      productId,
+      status: {
+        [Op.in]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.INITIATE],
+      },
+      // "$holdItem.id$": null,
+    },
+    include: [
+      {
+        association: "holdItem",
+        required: false,
+      },
+      {
+        association: "slab",
+      },
+      {
+        association: "bin",
+        include: [
+          {
+            association: "warehouse",
+            include: [{ association: "location" }],
+          },
+        ],
+      },
+      {
+        association: "images",
+        include: [{ association: "s3File" }],
+      },
+    ],
+    ...(limit ? { limit } : {}),
+  });
+};
+
 // Get product options for dropdowns/selects
-export const getProductOptions = async (clientId: number, status?: string) => {
+export const getProductOptions = async (clientId: number, status?: string, availableOnly?: boolean) => {
   const productScoped = scoped(models.Product);
+  const include: any[] = [
+    {
+      model: models.User,
+      attributes: [],
+      where: { clientId },
+      required: true,
+    },
+  ];
+
+  const where: any = {
+    ...(status ? { status } : {}),
+  };
+
+  if (availableOnly) {
+    include.push({
+      association: "inventoryProducts",
+      attributes: [],
+      required: true,
+      where: {
+        status: INVENTORY_ITEM_STATUS.IN_INVENTORY,
+      },
+      include: [
+        {
+          association: "holdItem",
+          required: false,
+          attributes: [],
+        },
+      ],
+    });
+    where["$inventoryProducts->holdItem.id$"] = null;
+  }
+
   return productScoped.findAll({
     attributes: [
       ["name", "label"],
@@ -614,17 +690,9 @@ export const getProductOptions = async (clientId: number, status?: string) => {
       "uom",
       "uomId",
     ],
-    where: {
-      ...(status ? { status } : {}),
-    },
-    include: [
-      {
-        model: models.User,
-        attributes: [],
-        where: { clientId },
-        required: true,
-      },
-    ],
+    where,
+    include,
+    group: ["products.id"],
     order: [["name", "ASC"]],
   });
 };

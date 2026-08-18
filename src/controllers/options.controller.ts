@@ -39,8 +39,9 @@ export const getCustomerOptions = catchAsync(async (req: AuthRequest, res: Respo
 export const getProductOptions = catchAsync(async (req: AuthRequest, res: Response) => {
     const clientId = req.user?.clientId;
     const activeOnly = req.query.activeOnly !== "false"; // Default to true, but allow false
+    const availableOnly = req.query.availableOnly === "true";
 
-    const data = await optionsService.getProductOptions(Number(clientId), activeOnly);
+    const data = await optionsService.getProductOptions(Number(clientId), activeOnly, availableOnly);
 
     SuccessResponse(res, 200, "Product options fetched successfully.", data);
 });

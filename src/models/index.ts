@@ -70,6 +70,38 @@ import S3File from "./s3File.model";
 import InventoryProductImage from "./inventoryProductImage.model";
 import ProductImage from "./productImage.model";
 import Activity from "./activity.model";
+import Opportunity from "./opportunity.model";
+import OpportunityRequirementProduct from "./opportunityRequirementProduct.model";
+import OpportunityInventoryProduct from "./opportunityInventoryProduct.model";
+import OpportunityQuotation from "./opportunityQuotation.model";
+import OpportunityQuotationInventoryProduct from "./opportunityQuotationInventoryProduct.model";
+
+// Opportunity associations
+Opportunity.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Opportunity.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
+Opportunity.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Opportunity.belongsTo(Account, { foreignKey: "salespersonId", as: "salesperson" });
+Opportunity.belongsTo(Account, { foreignKey: "assignedToId", as: "assignedToUser" });
+
+Opportunity.hasMany(OpportunityRequirementProduct, { foreignKey: "opportunityId", as: "requirementProducts" });
+OpportunityRequirementProduct.belongsTo(Opportunity, { foreignKey: "opportunityId", as: "opportunity" });
+OpportunityRequirementProduct.belongsTo(Product, { foreignKey: "productId", as: "product" });
+OpportunityRequirementProduct.hasMany(OpportunityInventoryProduct, { foreignKey: "requirementProductId", as: "inventoryAllocations" });
+
+OpportunityInventoryProduct.belongsTo(OpportunityRequirementProduct, { foreignKey: "requirementProductId", as: "requirementProduct" });
+OpportunityInventoryProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// Opportunity Quotation associations (OpportunityQuotation -> OpportunityQuotationInventoryProduct -> InventoryProduct)
+Opportunity.hasMany(OpportunityQuotation, { foreignKey: "opportunityId", as: "quotations" });
+OpportunityQuotation.belongsTo(Opportunity, { foreignKey: "opportunityId", as: "opportunity" });
+OpportunityQuotation.hasMany(OpportunityQuotationInventoryProduct, { foreignKey: "quotationId", as: "quotationInventoryProducts" });
+
+OpportunityQuotationInventoryProduct.belongsTo(OpportunityQuotation, { foreignKey: "quotationId", as: "quotation" });
+OpportunityQuotationInventoryProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
+
+// Opportunity-Hold association
+Opportunity.hasOne(Hold, { foreignKey: "opportunityId", as: "hold" });
+Hold.belongsTo(Opportunity, { foreignKey: "opportunityId", as: "opportunity" });
 
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
 // Client-User relation (one 'Client' have multiple 'Users') (one 'User' can have one 'Client')
@@ -1064,4 +1096,9 @@ export {
   ProductImage,
   InventoryProductImage,
   Activity,
+  Opportunity,
+  OpportunityRequirementProduct,
+  OpportunityInventoryProduct,
+  OpportunityQuotation,
+  OpportunityQuotationInventoryProduct,
 };

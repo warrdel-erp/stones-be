@@ -68,6 +68,7 @@ import fabricatorRoutes from "./routes/fabricator.routes";
 import customerExternalAgedInvoiceRoutes from "./routes/customerExternalAgedInvoice.routes";
 import customerExternalInvoiceRoutes from "./routes/customerExternalInvoice.routes";
 import fileUploadRoutes from "./routes/s3File.routes";
+import opportunityRoutes from "./routes/opportunity.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -140,6 +141,7 @@ app.use("/api/fabricator", fabricatorRoutes);
 app.use("/api/customerExternalAgedInvoice", customerExternalAgedInvoiceRoutes);
 app.use("/api/customerExternalInvoice", customerExternalInvoiceRoutes);
 app.use("/api/fileUpload", fileUploadRoutes);
+app.use("/api/opportunity", opportunityRoutes);
 
 // Driver
 app.use("/api/driver/delivery", driverDeliveryRoutes);

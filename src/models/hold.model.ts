@@ -69,6 +69,10 @@ const Hold = sequelize.define(
             onDelete: "CASCADE",
             onUpdate: "CASCADE",
         },
+        opportunityId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         clientHoldNumber: {
             type: DataTypes.INTEGER,
             allowNull: true,

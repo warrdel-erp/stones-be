@@ -1082,3 +1082,9 @@ Univ
 
 1. SIPL file uploading.
 2. button design changes.
+
+---
+
+1. Show more info of customer.
+2. Remove estimated value.
+3. Remove “Create Reminder”.

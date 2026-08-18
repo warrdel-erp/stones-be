@@ -14,6 +14,7 @@ export const createHold = async (
     customerId?: number;
     clientId: number;
     locationId: number;
+    opportunityId?: number;
     expiresAt?: Date;
   },
   transaction?: Transaction
@@ -265,6 +266,25 @@ export const findHoldByIdAndClient = async (
 ) => {
   return await scoped(models.Hold).findOne({
     where: { id, clientId },
+  });
+};
+
+/**
+ * Get hold by opportunity ID
+ */
+export const getHoldByOpportunityId = async (
+  opportunityId: number,
+  clientId: number,
+  transaction?: Transaction
+) => {
+  return await scoped(models.Hold).findOne({
+    where: { opportunityId, clientId },
+    include: [
+      {
+        association: "items",
+      }
+    ],
+    transaction,
   });
 };
 

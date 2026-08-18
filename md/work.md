@@ -792,3 +792,13 @@ Email notification.
 1. Priority of hold.
 2. Cancel hold
 3. Individual delete hold items.
+
+---
+
+1. All three sections scrollable independently.
+2. Also show available in first section.
+3. Show saperate line for saperate unit price in quotation.
+4. Show requirement also in quotation.
+5. Show status in quotation inventory Product.
+6. Every opportunity can have one.
+7. During publishing remove hold if inventory Product has been deleted.
