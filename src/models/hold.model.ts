@@ -69,6 +69,10 @@ const Hold = sequelize.define(
             onDelete: "CASCADE",
             onUpdate: "CASCADE",
         },
+        opportunityId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         clientHoldNumber: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -77,6 +81,10 @@ const Hold = sequelize.define(
             type: DataTypes.ENUM(...Object.values(HOLD_STAGES)),
             defaultValue: HOLD_STAGES.INITIATED,
             allowNull: false,
+        },
+        supersededByQuotationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
         },
         barcode: {
             type: DataTypes.STRING,

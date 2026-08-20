@@ -12,3 +12,4 @@ export * from './slab.validator';
 export * from './location.validator';
 export * from './client.validator';
 export * from './inventryProduct.validator';
+export * from './opportunity.validator';

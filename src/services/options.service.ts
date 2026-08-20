@@ -57,13 +57,13 @@ export const getCustomerOptions = async (clientId: number, activeOnly: boolean =
     return customers;
 };
 
-export const getProductOptions = async (clientId: number, activeOnly: boolean = true) => {
+export const getProductOptions = async (clientId: number, activeOnly: boolean = true, availableOnly: boolean = false) => {
     if (!clientId) {
         throw new AppError("Client context missing.", 400);
     }
 
     const status = activeOnly ? "active" : undefined;
-    const products = await productRepository.getProductOptions(clientId, status);
+    const products = await productRepository.getProductOptions(clientId, status, availableOnly);
 
     return products;
 };

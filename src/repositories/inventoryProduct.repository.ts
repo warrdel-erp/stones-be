@@ -106,11 +106,33 @@ export const getNewCombinedNumber = async (siplId: number, transaction?: Transac
 export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: number, excludeSoldCanceled = false, productId?: number) => {
   // Find all inventory products where the middle number in combinedNumber matches the SIPL ID
   const where: any = { siplId };
+  const statusConditions: any[] = [];
   if (excludeSoldCanceled) {
-    where.status = {
-      [Op.notIn]: ['SOLD', 'CANCELED']
-    };
+    statusConditions.push({ [Op.notIn]: ['SOLD', 'CANCELED'] });
   }
+
+  if (req.query.excludeAllocated === 'true') {
+    const includeIds = req.query.includeIds ? String(req.query.includeIds).split(',').map(Number).filter(Boolean) : [];
+    
+    if (includeIds.length > 0) {
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push({
+        [Op.or]: [
+          { status: { [Op.ne]: 'ALLOCATED' } },
+          { id: { [Op.in]: includeIds } }
+        ]
+      });
+    } else {
+      statusConditions.push({ [Op.ne]: 'ALLOCATED' });
+    }
+  }
+
+  if (statusConditions.length === 1) {
+    where.status = statusConditions[0];
+  } else if (statusConditions.length > 1) {
+    where.status = { [Op.and]: statusConditions };
+  }
+
   if (productId) {
     where.productId = productId;
   }
@@ -351,11 +373,33 @@ export const setInventoryProductLandedUnitCostAndFOBcost = async (
 export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldName: "lot" | "block", fieldValue: string, excludeSoldCanceled = false, productId?: number) => {
   // Find all inventory products where the specified slab field matches
   const where: any = {};
+  const statusConditions: any[] = [];
   if (excludeSoldCanceled) {
-    where.status = {
-      [Op.notIn]: ['SOLD', 'CANCELED']
-    };
+    statusConditions.push({ [Op.notIn]: ['SOLD', 'CANCELED'] });
   }
+
+  if (req.query.excludeAllocated === 'true') {
+    const includeIds = req.query.includeIds ? String(req.query.includeIds).split(',').map(Number).filter(Boolean) : [];
+    
+    if (includeIds.length > 0) {
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push({
+        [Op.or]: [
+          { status: { [Op.ne]: 'ALLOCATED' } },
+          { id: { [Op.in]: includeIds } }
+        ]
+      });
+    } else {
+      statusConditions.push({ [Op.ne]: 'ALLOCATED' });
+    }
+  }
+
+  if (statusConditions.length === 1) {
+    where.status = statusConditions[0];
+  } else if (statusConditions.length > 1) {
+    where.status = { [Op.and]: statusConditions };
+  }
+
   if (productId) {
     where.productId = productId;
   }
@@ -419,11 +463,33 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
 
 export const getInventoryProductsByBinId = async (req: AuthRequest, binId: number, excludeSoldCanceled = false, productId?: number) => {
   const where: any = { binId };
+  const statusConditions: any[] = [];
   if (excludeSoldCanceled) {
-    where.status = {
-      [Op.notIn]: ['SOLD', 'CANCELED']
-    };
+    statusConditions.push({ [Op.notIn]: ['SOLD', 'CANCELED'] });
   }
+
+  if (req.query.excludeAllocated === 'true') {
+    const includeIds = req.query.includeIds ? String(req.query.includeIds).split(',').map(Number).filter(Boolean) : [];
+    
+    if (includeIds.length > 0) {
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push({
+        [Op.or]: [
+          { status: { [Op.ne]: 'ALLOCATED' } },
+          { id: { [Op.in]: includeIds } }
+        ]
+      });
+    } else {
+      statusConditions.push({ [Op.ne]: 'ALLOCATED' });
+    }
+  }
+
+  if (statusConditions.length === 1) {
+    where.status = statusConditions[0];
+  } else if (statusConditions.length > 1) {
+    where.status = { [Op.and]: statusConditions };
+  }
+
   if (productId) {
     where.productId = productId;
   }
@@ -734,7 +800,7 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
 };
 
 export const findInventoryProductById = async (id: number, transaction?: Transaction) => {
-  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId'], transaction });
+  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId', 'combinedNumber'], transaction });
 };
 
 // get last landed cost.

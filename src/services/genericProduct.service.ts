@@ -5,6 +5,7 @@ import * as genericProductRepository from "../repositories/genericProduct.reposi
 import * as models from "../models";
 import { isSIPLLocked } from "../helper";
 import { scoped } from "../utils/scoped";
+import * as inventoryProductService from "./inventoryProduct.service";
 
 // Get all generic products
 export const fetchAllGenericProducts = async (filters?: any, transaction?: Transaction, locationId?: number) => {
@@ -45,6 +46,8 @@ export const deleteGenericProduct = async (genericProductId: number) => {
             if (newerInvProd) {
                 throw new AppError("Only the last created inventory product for this SIPL can be deleted", 400);
             }
+
+            await inventoryProductService.checkTiedToPublishedQuotation(inventoryProductId, transaction);
 
             await models.InventoryProductImage.destroy({
                 where: { inventoryProductId },

@@ -10,7 +10,8 @@ import * as models from "../models";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { randomId, isSIPLLocked } from "../helper";
 import { scoped } from "../utils/scoped";
-import * as  genericProductRepository from "../repositories/genericProduct.repository"
+import * as genericProductRepository from "../repositories/genericProduct.repository";
+import * as inventoryProductService from "./inventoryProduct.service";
 import {
   decimalAdd,
   decimalDivide,
@@ -246,6 +247,8 @@ export const splitSlab = async (slabId: number, slabsData: Array<{ receivingLeng
     if (originalSlab.isBroken) {
       throw new AppError("This slab is already marked as broken", 400);
     }
+
+    await inventoryProductService.checkTiedToPublishedQuotation(inventoryProduct.id, transaction);
 
     // Mark the original slab and inventory product as broken
     await scoped(models.Slab).update(
@@ -494,6 +497,8 @@ export const deleteSlab = async (slabId: number) => {
       if (newerInvProd) {
         throw new AppError("Only the last created inventory product for this SIPL can be deleted", 400);
       }
+
+      await inventoryProductService.checkTiedToPublishedQuotation(inventoryProductId, transaction);
 
       await models.InventoryProductImage.destroy({
         where: { inventoryProductId },

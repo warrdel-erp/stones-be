@@ -36,12 +36,14 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
       if (hold) {
         const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
         if (!salesOrder?.holdId || salesOrder.holdId !== hold.holdId) {
-          throw new AppError(`Inventory product is on hold for inventoryProductId: ${product.inventoryProductId}`, 400);
+          const itemCode = inventoryProduct?.combinedNumber || `ID: ${product.inventoryProductId}`;
+          throw new AppError(`Inventory product ${itemCode} is on hold`, 400);
         }
       }
 
       if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
-        throw new AppError(`Inventory product is not in inventory. Inventory product is ${inventoryProduct.status} with id: ${inventoryProduct.id}, and inventoryProductId: ${product.inventoryProductId}`, 400);
+        const itemCode = inventoryProduct?.combinedNumber || `ID: ${product.inventoryProductId}`;
+        throw new AppError(`Inventory product ${itemCode} is not in inventory. Status is ${inventoryProduct.status}`, 400);
       }
 
       // Calculate receivingAreaSqFt if it's a slab type

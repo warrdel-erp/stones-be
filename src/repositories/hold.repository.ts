@@ -14,6 +14,7 @@ export const createHold = async (
     customerId?: number;
     clientId: number;
     locationId: number;
+    opportunityId?: number;
     expiresAt?: Date;
   },
   transaction?: Transaction
@@ -120,6 +121,10 @@ export const getHoldById = async (id: number) => {
             attributes: ["id", "inventoryProductId", "unitPrice", "taxApplied"],
           }
         ]
+      },
+      {
+        association: "supersededByQuotation",
+        attributes: ["id", "quoteNumber", "opportunityId"],
       },
       {
         association: "client",
@@ -269,6 +274,52 @@ export const findHoldByIdAndClient = async (
 };
 
 /**
+ * Get hold by opportunity ID
+ */
+export const getHoldByOpportunityId = async (
+  opportunityId: number,
+  clientId: number,
+  transaction?: Transaction
+) => {
+  return await scoped(models.Hold).findOne({
+    where: { opportunityId, clientId },
+    include: [
+      {
+        association: "items",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Product,
+                as: "product",
+                include: [
+                  { model: models.ProductFinish, as: "finish" },
+                  {
+                    model: models.ProductImage,
+                    as: "images",
+                    include: [{ model: models.S3File, as: "s3File" }],
+                  },
+                ],
+              },
+              { model: models.Slab, as: "slab" },
+              {
+                model: models.InventoryProductImage,
+                as: "images",
+                include: [{ model: models.S3File, as: "s3File" }],
+              },
+              { association: "bin" },
+            ],
+          },
+        ],
+      }
+    ],
+    transaction,
+  });
+};
+
+/**
  * Find hold item by ID and client
  */
 export const findHoldItemByIdAndClient = async (
@@ -344,6 +395,7 @@ export const updateHold = async (
     fabricatorId: number;
     customerId: number;
     stage: string;
+    supersededByQuotationId: number;
   }>,
   transaction?: Transaction
 ) => {

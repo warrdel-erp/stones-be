@@ -108,6 +108,17 @@ const SalesOrder = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+
+    quotationId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: models.OpportunityQuotation,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
     taxId: {
       type: DataTypes.INTEGER,
       allowNull: true,

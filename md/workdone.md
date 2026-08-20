@@ -459,7 +459,7 @@ Pending
 
 ---
 
-1. Removed ₹. ✅
+1. Removed $. ✅
 2. Taxable is wrong for multiple products in SO. ✅
 3. Tax check box should freeze after creation. ✅
 4. Services must be created during create LO. ✅
@@ -1082,3 +1082,59 @@ Univ
 
 1. SIPL file uploading.
 2. button design changes.
+
+---
+
+1. Show more info of customer.
+2. Remove estimated value.
+3. Remove “Create Reminder”.
+
+---
+
+1. show status of inventory Products.
+2. hold <-> quotation sync is optional.
+3. can add hold product into quotation.
+4. quotation <-> hold will be SUPERSEDED (blocked) if one has been created SO.
+5. customer shipping address during creation of SO from quotation.
+6. SO will not be created if one inventory Product have hold from anywhere else.
+7. on Inventory Products only active holds will be visible, not superseded or salesOrdered.
+8. summary of quotation.
+9. Show status in quotation inventory Product.
+
+---
+
+1. selection on top in opportunity requirement.
+2. default price set to products.
+3. note button working.
+4. removed unnecessary UI elements.
+5. delete button of product in requirement.
+6. requirement details on click of it's status.
+7. Deleted inventory product should be selected by default in publishing. (design change).
+8. In opportunity show it’s hold info.
+9. Next follow up in listing of opportunity.
+10. Also show available in first section.
+
+---
+
+| Action                    | How to trigger it                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Follow up — Due Today     | Edit an opportunity, set followUpDate = today                                                          |
+| Follow up — Overdue       | Set followUpDate to a past date                                                                        |
+| Follow up — Due in X days | Set followUpDate to a future date                                                                      |
+| Find / procure slabs      | Add a requirement line on an opportunity where no matching inventory exists (allocation stays PENDING) |
+| Allocate more inventory   | Add a requirement where only some slabs get auto-allocated (PARTIAL)                                   |
+| Create quote              | Have all requirement lines COMPLETE, but don't create a quotation yet                                  |
+| Create Sales Order        | Publish a quotation on an opportunity                                                                  |
+| Sales Order Created       | Convert a published quotation to a Sales Order                                                         |
+
+---
+
+1. Next actions were not working fine.
+2. Automatic name of opportunity.
+3. Remove Polished from requirement inventoryProduct.
+4. requirement inventoryProduct -> Show size on image itself.
+5. In requirement close unused accordions.
+6. Publish popup split vertically by added and deleted.
+7. Show text as AI working on inventory Product selection.
+8. What’s app -> text message in opportunity listing.
+9. From opportunity to SO -> delivery address missing out.

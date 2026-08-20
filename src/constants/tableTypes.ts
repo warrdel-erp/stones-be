@@ -144,6 +144,7 @@ export const PACKAGING_LIST_STAGES = {
 export const HOLD_STAGES = {
   INITIATED: "initiated",
   SO_CREATED: "soCreated",
+  SUPERSEDED: "superseded",
 } as const;
 
 export const SALE_ORDER_PRODUCT_STAGES = {

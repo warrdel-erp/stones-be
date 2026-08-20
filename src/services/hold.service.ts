@@ -5,6 +5,7 @@ import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { CUSTOMER_TYPE, HOLD_STAGES } from "../constants/tableTypes";
+import { isHoldClosed } from "../utils/hold.util";
 
 /**
  * Create a new hold with items
@@ -149,8 +150,8 @@ export const deleteHold = async (id: number, clientId: number) => {
         throw new AppError("Hold not found", 404);
     }
 
-    if ((hold as any).stage === HOLD_STAGES.SO_CREATED) {
-        throw new AppError("Hold cannot be deleted after a Sales Order has been created from it", 400);
+    if (isHoldClosed(hold)) {
+        throw new AppError("Hold cannot be deleted because it is closed", 400);
     }
 
     const deletedCount = await holdRepository.deleteHold(id);
@@ -175,8 +176,8 @@ export const deleteHoldItem = async (id: number, clientId: number) => {
 
   // Fetch the hold to check its stage
   const hold = await holdRepository.findHoldByIdAndClient(item.holdId, clientId);
-  if (hold && (hold as any).stage === HOLD_STAGES.SO_CREATED) {
-    throw new AppError("Hold items cannot be deleted after a Sales Order has been created from the Hold", 400);
+  if (isHoldClosed(hold)) {
+    throw new AppError("Hold items cannot be deleted from a closed Hold", 400);
   }
 
   const deletedCount = await holdRepository.deleteHoldItem(id);
@@ -205,8 +206,8 @@ export const updateHoldItem = async (
 
   // Fetch the hold to check its stage
   const hold = await holdRepository.findHoldByIdAndClient(item.holdId, clientId);
-  if (hold && (hold as any).stage === HOLD_STAGES.SO_CREATED) {
-    throw new AppError("Hold items cannot be updated after a Sales Order has been created from the Hold", 400);
+  if (isHoldClosed(hold)) {
+    throw new AppError("Hold items cannot be updated in a closed Hold", 400);
   }
 
   const [updatedCount] = await holdRepository.updateHoldItem(id, { unitPrice: data.unitPrice });
@@ -238,8 +239,8 @@ export const extendHoldExpiry = async (
     throw new AppError("Hold not found", 404);
   }
 
-  if (hold.stage === HOLD_STAGES.SO_CREATED) {
-    throw new AppError("Cannot extend expiry for a hold that has already been converted to Sales Order", 400);
+  if (isHoldClosed(hold)) {
+    throw new AppError("Cannot extend expiry for a closed hold", 400);
   }
 
   const transaction = await sequelize.transaction();
