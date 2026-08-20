@@ -1,3 +1,4 @@
+import { getAvailableInventoryProductsForProduct } from "./product.repository";
 import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
@@ -226,6 +227,18 @@ export const getRequirementLinesAndAllocations = async (
     ],
     transaction,
   });
+
+  for (const req of requirementProducts) {
+    if (req.productId) {
+      const availableInventory = await getAvailableInventoryProductsForProduct(
+        req.productId,
+        clientId
+      );
+      req.setDataValue("availableCount", availableInventory.length);
+    } else {
+      req.setDataValue("availableCount", 0);
+    }
+  }
 
   return requirementProducts;
 };

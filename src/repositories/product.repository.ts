@@ -643,6 +643,11 @@ export const getAvailableInventoryProductsForProduct = async (
         include: [{ association: "s3File" }],
       },
     ],
+    order: [
+      [{ model: models.Slab, as: 'slab' }, "lot", "ASC"],
+      [{ model: models.Slab, as: 'slab' }, "block", "ASC"],
+      ["combinedNumber", "ASC"]
+    ],
     ...(limit ? { limit } : {}),
   });
 };
