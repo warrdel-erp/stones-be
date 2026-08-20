@@ -95,6 +95,10 @@ const Opportunity = sequelize.define(
       allowNull: false,
       defaultValue: "OPEN",
     },
+    taxRate: {
+      type: DataTypes.DECIMAL,
+      allowNull: true,
+    },
   },
   {
     tableName: "opportunities",

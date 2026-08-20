@@ -10,47 +10,15 @@ export const getQuotationsByOpportunityId = async (
     where: { opportunityId, clientId },
     include: [
       {
-        model: models.OpportunityQuotationInventoryProduct,
-        as: "quotationInventoryProducts",
-        include: [
-          {
-            model: models.InventoryProduct,
-            as: "inventoryProduct",
-            include: [
-              {
-                model: models.Product,
-                as: "product",
-                include: [
-                  { model: models.ProductFinish, as: "finish" },
-                  {
-                    model: models.ProductImage,
-                    as: "images",
-                    include: [{ model: models.S3File, as: "s3File" }],
-                  },
-                ],
-              },
-              { model: models.Slab, as: "slab" },
-              {
-                model: models.InventoryProductImage,
-                as: "images",
-                include: [{ model: models.S3File, as: "s3File" }],
-              },
-            ],
-          },
-        ],
+        model: models.SalesOrder,
+        as: "salesOrders",
+        attributes: ["id", "clientSoNumber"],
       },
-    ],
-    order: [["version", "DESC"]],
-  });
-};
-
-export const getQuotationById = async (
-  quotationId: number,
-  clientId: number
-) => {
-  return await scoped(models.OpportunityQuotation).findOne({
-    where: { id: quotationId, clientId },
-    include: [
+      {
+        model: models.Hold,
+        as: "supersededByHold",
+        attributes: ["id", "clientHoldNumber"],
+      },
       {
         model: models.OpportunityQuotationInventoryProduct,
         as: "quotationInventoryProducts",
@@ -76,6 +44,68 @@ export const getQuotationById = async (
                 model: models.InventoryProductImage,
                 as: "images",
                 include: [{ model: models.S3File, as: "s3File" }],
+              },
+              {
+                model: models.InventoryProductHold,
+                as: "holdItems",
+                include: [{ model: models.Hold, as: "hold" }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    order: [["version", "DESC"]],
+  });
+};
+
+export const getQuotationById = async (
+  quotationId: number,
+  clientId: number
+) => {
+  return await scoped(models.OpportunityQuotation).findOne({
+    where: { id: quotationId, clientId },
+    include: [
+      {
+        model: models.SalesOrder,
+        as: "salesOrders",
+        attributes: ["id", "clientSoNumber"],
+      },
+      {
+        model: models.Hold,
+        as: "supersededByHold",
+        attributes: ["id", "clientHoldNumber"],
+      },
+      {
+        model: models.OpportunityQuotationInventoryProduct,
+        as: "quotationInventoryProducts",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Product,
+                as: "product",
+                include: [
+                  { model: models.ProductFinish, as: "finish" },
+                  {
+                    model: models.ProductImage,
+                    as: "images",
+                    include: [{ model: models.S3File, as: "s3File" }],
+                  },
+                ],
+              },
+              { model: models.Slab, as: "slab" },
+              {
+                model: models.InventoryProductImage,
+                as: "images",
+                include: [{ model: models.S3File, as: "s3File" }],
+              },
+              {
+                model: models.InventoryProductHold,
+                as: "holdItems",
+                include: [{ model: models.Hold, as: "hold" }],
               },
             ],
           },

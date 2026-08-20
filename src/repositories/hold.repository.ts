@@ -123,6 +123,10 @@ export const getHoldById = async (id: number) => {
         ]
       },
       {
+        association: "supersededByQuotation",
+        attributes: ["id", "quoteNumber", "opportunityId"],
+      },
+      {
         association: "client",
         include: [
           {
@@ -364,6 +368,7 @@ export const updateHold = async (
     fabricatorId: number;
     customerId: number;
     stage: string;
+    supersededByQuotationId: number;
   }>,
   transaction?: Transaction
 ) => {

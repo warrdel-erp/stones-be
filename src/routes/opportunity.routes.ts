@@ -27,6 +27,7 @@ import {
   updateQuotationRates,
   addQuotationProducts,
   removeQuotationProduct,
+  createSalesOrderFromQuotation,
 } from "../controllers/quotation.controller";
 
 const router = Router();
@@ -84,6 +85,10 @@ router.route("/:id/quotations/:quoteId/products/:invProductId")
 router.route("/:id/quotations/:quoteId/publish")
   .all(authenticateUser)
   .put(publishQuotation);
+
+router.route("/:id/quotations/:quoteId/create-sales-order")
+  .all(authenticateUser)
+  .post(createSalesOrderFromQuotation);
 
 export default router;
 

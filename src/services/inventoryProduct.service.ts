@@ -266,20 +266,38 @@ export const setPrimaryInventoryProductImage = async (inventoryProductId: number
     }
 };
 
+export const checkTiedToPublishedQuotation = async (inventoryProductId: number, transaction?: any) => {
+    const oppQuoteInvProduct = await scoped(models.OpportunityQuotationInventoryProduct).findOne({
+        where: { inventoryProductId },
+        include: [{
+            association: "quotation",
+            where: { status: "PUBLISHED" },
+            required: true
+        }],
+        transaction
+    });
+
+    if (oppQuoteInvProduct) {
+        throw new AppError("Cannot mutate or delete this inventory product as it is currently tied to a PUBLISHED quotation", 400);
+    }
+};
+
 /**
  * Common function to check if an inventory product is available for allocation/sale.
  * Requires the inventory product to be IN_INVENTORY and not have any active hold.
  */
-export const checkInventoryProductAvailability = (inventoryProduct: any): boolean => {
+export const checkInventoryProductAvailability = (inventoryProduct: any, allowHold: boolean = false): boolean => {
     if (!inventoryProduct) return false;
     
     if (inventoryProduct.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY) {
         return false;
     }
 
-    const hasHold = !!(inventoryProduct.hold || inventoryProduct.holdItem || (inventoryProduct.holdItems && inventoryProduct.holdItems.length > 0));
-    if (hasHold) {
-        return false;
+    if (!allowHold) {
+        const hasHold = !!(inventoryProduct.hold || inventoryProduct.holdItem || (inventoryProduct.holdItems && inventoryProduct.holdItems.length > 0));
+        if (hasHold) {
+            return false;
+        }
     }
 
     return true;
@@ -291,7 +309,8 @@ export const checkInventoryProductAvailability = (inventoryProduct: any): boolea
  */
 export const checkInventoryProductsAvailabilityByIds = async (
     clientId: number,
-    inventoryProductIds: number[]
+    inventoryProductIds: number[],
+    allowHold: boolean = false
 ): Promise<{ allAvailable: boolean; unavailableItems: { id: number; combinedNumber: string; reason: string }[] }> => {
     if (!inventoryProductIds || inventoryProductIds.length === 0) {
         return { allAvailable: true, unavailableItems: [] };
@@ -324,7 +343,7 @@ export const checkInventoryProductsAvailabilityByIds = async (
     }
 
     for (const ip of inventoryProducts) {
-        if (!checkInventoryProductAvailability(ip)) {
+        if (!checkInventoryProductAvailability(ip, allowHold)) {
             const reason = ip.status !== INVENTORY_ITEM_STATUS.IN_INVENTORY ? `Status: ${ip.status}` : "On active hold";
             unavailableItems.push({
                 id: ip.id,

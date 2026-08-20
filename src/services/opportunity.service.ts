@@ -3,8 +3,27 @@ import * as holdRepository from "../repositories/hold.repository";
 import { getAvailableInventoryProductsForProduct } from "../repositories/product.repository";
 import { AppError } from "../helper/appError";
 import { sequelize } from "../config/database";
+import * as models from "../models";
+import { scoped } from "../utils/scoped";
+import { SALES_TAX } from "../constants";
 
 export const create = async (payload: any) => {
+  if (payload.customerId && payload.clientId) {
+    const customer = await scoped(models.Customer).findOne({
+      where: { id: payload.customerId, clientId: payload.clientId },
+    });
+    if (customer) {
+      if (customer.taxExempt) {
+        payload.taxRate = 0;
+      } else if (customer.salesTaxId) {
+        const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
+        if (tax) {
+          payload.taxRate = tax.value;
+        }
+      }
+    }
+  }
+
   return await sequelize.transaction(async (transaction) => {
     return await opportunityRepository.createOpportunity(payload, transaction);
   });
@@ -25,6 +44,22 @@ export const getOne = async (id: number, clientId: number) => {
 };
 
 export const update = async (id: number, clientId: number, payload: any) => {
+  if (payload.customerId) {
+    const customer = await scoped(models.Customer).findOne({
+      where: { id: payload.customerId, clientId },
+    });
+    if (customer) {
+      if (customer.taxExempt) {
+        payload.taxRate = 0;
+      } else if (customer.salesTaxId) {
+        const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
+        if (tax) {
+          payload.taxRate = tax.value;
+        }
+      }
+    }
+  }
+
   return await sequelize.transaction(async (transaction) => {
     return await opportunityRepository.updateOpportunity(id, clientId, payload, transaction);
   });
@@ -46,6 +81,10 @@ export const addRequirement = async (
   }
 ) => {
   return await sequelize.transaction(async (transaction) => {
+    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId);
+    if (!opp) throw new AppError("Opportunity not found", 404);
+    if (opp.status === "SALES_ORDER") throw new AppError("Cannot add requirements as a Sales Order has already been generated.", 400);
+
     // 1. Create requirement line database record
     const requirement = await opportunityRepository.createRequirementProduct(
       {
@@ -126,6 +165,10 @@ export const updateRequirementAllocations = async (
   inventoryProductIds: number[]
 ) => {
   return await sequelize.transaction(async (transaction) => {
+    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId);
+    if (!opp) throw new AppError("Opportunity not found", 404);
+    if (opp.status === "SALES_ORDER") throw new AppError("Cannot update requirement allocations as a Sales Order has already been generated.", 400);
+
     // 1. Find requirement line
     const requirement = await opportunityRepository.getRequirementProductById(
       requirementId,
@@ -220,6 +263,15 @@ export const updateRequirementAllocations = async (
 
 export const removeRequirement = async (requirementId: number, clientId: number) => {
   return await sequelize.transaction(async (transaction) => {
+    const requirement = await scoped(models.OpportunityRequirementProduct).findOne({
+      where: { id: requirementId, clientId },
+      transaction,
+    });
+    if (!requirement) throw new AppError("Requirement line not found", 404);
+    
+    const opp = await opportunityRepository.getOpportunityById(requirement.opportunityId, clientId);
+    if (opp && opp.status === "SALES_ORDER") throw new AppError("Cannot remove requirements as a Sales Order has already been generated.", 400);
+
     return await opportunityRepository.deleteRequirementLine(requirementId, clientId, transaction);
   });
 };

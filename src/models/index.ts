@@ -95,6 +95,8 @@ OpportunityInventoryProduct.belongsTo(InventoryProduct, { foreignKey: "inventory
 Opportunity.hasMany(OpportunityQuotation, { foreignKey: "opportunityId", as: "quotations" });
 OpportunityQuotation.belongsTo(Opportunity, { foreignKey: "opportunityId", as: "opportunity" });
 OpportunityQuotation.hasMany(OpportunityQuotationInventoryProduct, { foreignKey: "quotationId", as: "quotationInventoryProducts" });
+OpportunityQuotation.hasMany(SalesOrder, { foreignKey: "quotationId", as: "salesOrders" });
+SalesOrder.belongsTo(OpportunityQuotation, { foreignKey: "quotationId", as: "quotation" });
 
 OpportunityQuotationInventoryProduct.belongsTo(OpportunityQuotation, { foreignKey: "quotationId", as: "quotation" });
 OpportunityQuotationInventoryProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
@@ -809,6 +811,12 @@ HoldExpiryLog.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" })
 // Hold-SalesOrder association
 Hold.hasOne(SalesOrder, { foreignKey: "holdId", as: "salesOrder" });
 SalesOrder.belongsTo(Hold, { foreignKey: "holdId", as: "hold" });
+
+// Hold-Quotation superseded associations
+Hold.belongsTo(OpportunityQuotation, { foreignKey: "supersededByQuotationId", as: "supersededByQuotation" });
+OpportunityQuotation.hasMany(Hold, { foreignKey: "supersededByQuotationId", as: "supersededHolds" });
+OpportunityQuotation.belongsTo(Hold, { foreignKey: "supersededByHoldId", as: "supersededByHold" });
+Hold.hasMany(OpportunityQuotation, { foreignKey: "supersededByHoldId", as: "supersededQuotations" });
 
 // InventoryProductHold associations
 InventoryProductHold.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });

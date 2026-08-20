@@ -82,6 +82,10 @@ const Hold = sequelize.define(
             defaultValue: HOLD_STAGES.INITIATED,
             allowNull: false,
         },
+        supersededByQuotationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         barcode: {
             type: DataTypes.STRING,
             allowNull: true,

@@ -31,6 +31,10 @@ const OpportunityQuotation = sequelize.define(
       allowNull: false,
       defaultValue: "DRAFT",
     },
+    supersededByHoldId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     subtotal: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,

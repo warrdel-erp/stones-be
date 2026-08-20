@@ -52,6 +52,20 @@ export const getAllSalesOrders = async (
     },
     include: [
       {
+        association: "quotation",
+        attributes: ["id", "quoteNumber", "opportunityId"],
+        include: [
+          {
+            association: "opportunity",
+            attributes: ["id"],
+          },
+        ],
+      },
+      {
+        association: "hold",
+        attributes: ["id", "clientHoldNumber", "opportunityId"],
+      },
+      {
         association: "customer",
         attributes: ["id", "scopeId", 'scope', "daysForHold", "name", "primaryPhoneNumber"],
       },
@@ -378,7 +392,15 @@ export const getSalesOrderById = async (id: number) => {
       { association: "shippingAddress" },
       { association: "notes" },
       { association: "soLocation" },
-      { association: "hold", attributes: ["id", "clientHoldNumber"] },
+      { association: "hold", attributes: ["id", "clientHoldNumber", "opportunityId"] },
+      {
+        association: "quotation",
+        include: [
+          {
+            association: "opportunity",
+          },
+        ],
+      },
       {
         association: "salesOrderProducts",
         include: [

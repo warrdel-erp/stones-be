@@ -6,6 +6,9 @@ import { AppError } from "../helper/appError";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
 import { checkInventoryProductAvailability, checkInventoryProductsAvailabilityByIds } from "./inventoryProduct.service";
+import * as salesOrderService from "./salesOrder.service";
+import * as customerAddressRepository from "../repositories/customerAddress.repository";
+import { CUSTOMER_ADDRESS_TYPES, DELIVERY_TYPES, HOLD_STAGES } from "../constants/tableTypes";
 
 
 export const getQuotations = async (opportunityId: number, clientId: number) => {
@@ -34,6 +37,12 @@ export const createQuotation = async (
   }
 ) => {
   return await sequelize.transaction(async (transaction) => {
+    const opportunity = await scoped(models.Opportunity).findOne({ where: { id: opportunityId, clientId }, transaction });
+    if (!opportunity) throw new AppError("Opportunity not found", 404);
+    if (opportunity.status === "SALES_ORDER" || opportunity.status === "CLOSED") {
+      throw new AppError(`Cannot create quotation for opportunity in ${opportunity.status} stage`, 400);
+    }
+
     // 1. Fetch existing quotations for this opportunity
     const existingQuotations = await quotationRepository.getQuotationsByOpportunityId(
       opportunityId,
@@ -127,7 +136,8 @@ export const publishQuotation = async (
   accountId: number,
   syncHold?: boolean,
   addProductsToHold?: number[],
-  locationId?: number
+  locationId?: number,
+  removeProductsFromHold?: number[]
 ) => {
   return await sequelize.transaction(async (transaction) => {
     const quote: any = await quotationRepository.getQuotationById(quotationId, clientId);
@@ -136,6 +146,12 @@ export const publishQuotation = async (
     }
     if (quote.opportunityId !== Number(opportunityId)) {
       throw new AppError("Quotation does not belong to this opportunity", 400);
+    }
+
+    const opportunity = await scoped(models.Opportunity).findOne({ where: { id: opportunityId, clientId }, transaction });
+    if (!opportunity) throw new AppError("Opportunity not found", 404);
+    if (opportunity.status === "SALES_ORDER") {
+      throw new AppError(`Cannot publish quotation because opportunity is already in SALES_ORDER stage`, 400);
     }
 
     // 1. Verify availability and amount of all allocated inventory products
@@ -148,15 +164,15 @@ export const publishQuotation = async (
     for (const item of items) {
       const sellingRate = item.sellingRate;
       if (sellingRate === null || sellingRate === undefined || Number(sellingRate) === 0) {
-        const itemCode = item.inventoryProduct?.combinedNumber || `Item #${item.inventoryProductId || item.id}`;
-        throw new AppError(`Cannot publish quotation. Product ${itemCode} has no valid selling rate. Please save prices before publishing.`, 400);
+        const itemCode = item.inventoryProduct?.combinedNumber || `Item #${item.inventoryProductId}`;
+        throw new AppError(`Cannot publish quotation. Rate is missing or 0 for ${itemCode}.`, 400);
       }
       
       const invProd = item.inventoryProduct;
       if (invProd) {
-        if (!checkInventoryProductAvailability(invProd)) {
+        if (!checkInventoryProductAvailability(invProd, true)) {
           const itemCode = invProd.combinedNumber || `Item #${invProd.id}`;
-          throw new AppError(`Cannot publish quotation. Inventory product ${itemCode} is no longer available or is on hold.`, 400);
+          throw new AppError(`Cannot publish quotation. Inventory product ${itemCode} is no longer available.`, 400);
         }
       }
     }
@@ -187,14 +203,15 @@ export const publishQuotation = async (
         hold.items = [];
       }
 
-      // Compute items to delete (in hold but not in quotation)
-      const quoteProductIds = items.map((i: any) => i.inventoryProductId);
+      // Compute items to delete (only explicitly requested ones)
       const existingHoldProductIds = (hold.items || []).map((i: any) => i.inventoryProductId);
 
-      const toDeleteHoldItems = (hold.items || []).filter((i: any) => !quoteProductIds.includes(i.inventoryProductId));
-      
-      for (const holdItem of toDeleteHoldItems) {
-        await holdRepository.deleteHoldItem(holdItem.id, transaction);
+      if (removeProductsFromHold && removeProductsFromHold.length > 0) {
+        const toDeleteHoldItems = (hold.items || []).filter((i: any) => removeProductsFromHold.includes(i.inventoryProductId));
+        
+        for (const holdItem of toDeleteHoldItems) {
+          await holdRepository.deleteHoldItem(holdItem.id, transaction);
+        }
       }
 
       // Add requested items
@@ -241,6 +258,11 @@ export const updateQuotationRates = async (
     if (!quote || quote.opportunityId !== opportunityId) throw new AppError("Quotation not found or invalid", 404);
     if (quote.status !== "DRAFT") throw new AppError("Cannot edit a published quotation", 400);
 
+    const opportunity = await scoped(models.Opportunity).findOne({ where: { id: opportunityId, clientId }, transaction });
+    if (opportunity && (opportunity.status === "SALES_ORDER" || opportunity.status === "CLOSED")) {
+      throw new AppError(`Cannot update quotation rates for opportunity in ${opportunity.status} stage`, 400);
+    }
+
     const items = quote.quotationInventoryProducts || [];
     
     for (const item of items) {
@@ -273,7 +295,12 @@ export const addQuotationProducts = async (
     if (!quote || quote.opportunityId !== opportunityId) throw new AppError("Quotation not found or invalid", 404);
     if (quote.status !== "DRAFT") throw new AppError("Cannot edit a published quotation", 400);
 
-    const availability = await checkInventoryProductsAvailabilityByIds(clientId, inventoryProductIds);
+    const opportunity = await scoped(models.Opportunity).findOne({ where: { id: opportunityId, clientId }, transaction });
+    if (opportunity && (opportunity.status === "SALES_ORDER" || opportunity.status === "CLOSED")) {
+      throw new AppError(`Cannot add products to quotation for opportunity in ${opportunity.status} stage`, 400);
+    }
+
+    const availability = await checkInventoryProductsAvailabilityByIds(clientId, inventoryProductIds, true);
     if (!availability.allAvailable) {
       throw new AppError(`Cannot add products: ${availability.unavailableItems.map(i => `${i.combinedNumber} (${i.reason})`).join(', ')}`, 400);
     }
@@ -324,6 +351,11 @@ export const removeQuotationProduct = async (
     if (!quote || quote.opportunityId !== opportunityId) throw new AppError("Quotation not found or invalid", 404);
     if (quote.status !== "DRAFT") throw new AppError("Cannot edit a published quotation", 400);
 
+    const opportunity = await scoped(models.Opportunity).findOne({ where: { id: opportunityId, clientId }, transaction });
+    if (opportunity && (opportunity.status === "SALES_ORDER" || opportunity.status === "CLOSED")) {
+      throw new AppError(`Cannot remove products from quotation for opportunity in ${opportunity.status} stage`, 400);
+    }
+
     await scoped(models.OpportunityQuotationInventoryProduct).destroy({
       where: { quotationId, clientId, inventoryProductId: invProductId },
       transaction
@@ -331,5 +363,79 @@ export const removeQuotationProduct = async (
 
     await recalculateQuotationTotals(quotationId, clientId, transaction);
     return await quotationRepository.getQuotationById(quotationId, clientId);
+  });
+};
+
+export const createSalesOrderFromQuotation = async (
+  opportunityId: number,
+  quotationId: number,
+  clientId: number,
+  accountId: number,
+  passedShippingAddressId?: number
+) => {
+  return await sequelize.transaction(async (transaction) => {
+    const quote: any = await quotationRepository.getQuotationById(quotationId, clientId);
+    if (!quote) throw new AppError("Quotation not found", 404);
+    if (quote.opportunityId !== opportunityId) throw new AppError("Quotation does not belong to this opportunity", 400);
+    if (quote.status !== "PUBLISHED") throw new AppError("Only PUBLISHED quotations can be converted to a Sales Order", 400);
+
+    const opportunity: any = await opportunityRepository.getOpportunityById(opportunityId, clientId);
+    if (!opportunity) throw new AppError("Opportunity not found", 404);
+    if (opportunity.status === "SALES_ORDER") throw new AppError("Opportunity already has a Sales Order", 400);
+
+    const items = quote.quotationInventoryProducts || [];
+    if (items.length === 0) throw new AppError("Quotation has no products", 400);
+
+    let shippingAddressId = passedShippingAddressId;
+
+    if (!shippingAddressId) {
+      // Get an address for the customer
+      const addresses = await customerAddressRepository.getAddressesByCustomerId(opportunity.customerId);
+      if (addresses && addresses.length > 0) {
+        const shippingType = addresses.find((a: any) => a.addressType === CUSTOMER_ADDRESS_TYPES.SHIPPING);
+        shippingAddressId = shippingType ? shippingType.id : addresses[0].id;
+      }
+    }
+
+    if (!shippingAddressId) {
+      throw new AppError("Customer has no shipping address. Please select or create a shipping address.", 400);
+    }
+
+    const locationId = opportunity.locationId || 1; // Default to 1 if not set
+
+    const hold: any = await holdRepository.getHoldByOpportunityId(opportunityId, clientId, transaction);
+    
+    // Prepare Sales Order payload
+    const salesOrderData = {
+      clientId,
+      accountId,
+      customerId: opportunity.customerId,
+      quotationId,
+      locationId,
+      shippingAddressId,
+      deliveryType: DELIVERY_TYPES.PICKUP,
+      holdId: hold ? hold.id : null,
+      internalNote: quote.notes,
+      products: items.map((item: any) => ({
+        inventoryProductId: item.inventoryProductId,
+        unitPrice: item.sellingRate,
+        isTaxable: true,
+      }))
+    };
+
+    const result = await salesOrderService.createSalesOrder(salesOrderData);
+
+    // Update Hold as SUPERSEDED by this Quotation
+    if (hold) {
+      await holdRepository.updateHold(
+        hold.id,
+        { stage: HOLD_STAGES.SUPERSEDED, supersededByQuotationId: quotationId },
+        transaction
+      );
+    }
+
+    await opportunityRepository.updateOpportunity(opportunityId, clientId, { status: "SALES_ORDER" }, transaction);
+
+    return result.salesOrder;
   });
 };

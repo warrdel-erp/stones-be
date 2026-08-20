@@ -459,7 +459,7 @@ Pending
 
 ---
 
-1. Removed ₹. ✅
+1. Removed $. ✅
 2. Taxable is wrong for multiple products in SO. ✅
 3. Tax check box should freeze after creation. ✅
 4. Services must be created during create LO. ✅
@@ -1088,3 +1088,14 @@ Univ
 1. Show more info of customer.
 2. Remove estimated value.
 3. Remove “Create Reminder”.
+
+---
+
+1. show status of inventory Products.
+2. hold <-> quotation sync is optional.
+3. can add hold product into quotation.
+4. quotation <-> hold will be SUPERSEDED (blocked) if one has been created SO.
+5. customer shipping address during creation of SO from quotation.
+6. SO will not be created if one inventory Product have hold from anywhere else.
+7. on Inventory Products only active holds will be visible, not superseded or salesOrdered.
+8. summary of quotation.

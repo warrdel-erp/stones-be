@@ -16,7 +16,10 @@ import * as holdRepository from "../repositories/hold.repository";
 import { AppError } from "../helper/appError";
 import * as models from "../models";
 import { decimalAdd } from "../helper/decimal";
+import { isHoldClosed } from "../utils/hold.util";
 
+
+import * as opportunityRepository from "../repositories/opportunity.repository";
 
 export const createSalesOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
@@ -27,13 +30,14 @@ export const createSalesOrder = async (data: any) => {
       data.taxId = customer?.salesTaxId;
     }
 
+    let holdObj: any = null;
     if (data.holdId) {
-      const hold = await holdRepository.getHoldById(data.holdId);
-      if (!hold) {
+      holdObj = await holdRepository.getHoldById(data.holdId);
+      if (!holdObj) {
         throw new AppError("Hold not found", 404);
       }
-      if (hold.stage === HOLD_STAGES.SO_CREATED) {
-        throw new AppError("A Sales Order has already been created from this Hold.", 400);
+      if (isHoldClosed(holdObj)) {
+        throw new AppError("A Sales Order cannot be created from a closed Hold.", 400);
       }
     }
 
@@ -45,11 +49,30 @@ export const createSalesOrder = async (data: any) => {
 
     // Update hold stage to soCreated if holdId is specified
     if (data.holdId) {
-      await holdRepository.updateHold(
-        data.holdId,
-        { stage: HOLD_STAGES.SO_CREATED },
-        transaction
-      );
+      if (!data.quotationId) {
+        await holdRepository.updateHold(
+          data.holdId,
+          { stage: HOLD_STAGES.SO_CREATED },
+          transaction
+        );
+      }
+
+      if (holdObj && holdObj.opportunityId) {
+        await opportunityRepository.updateOpportunity(
+          holdObj.opportunityId,
+          data.clientId,
+          { status: "SALES_ORDER" },
+          transaction
+        );
+
+        if (!data.quotationId) {
+          // Mark all Opportunity Quotations as SUPERSEDED by this Hold
+          await models.OpportunityQuotation.update(
+            { status: "SUPERSEDED", supersededByHoldId: data.holdId },
+            { where: { opportunityId: holdObj.opportunityId, clientId: data.clientId }, transaction }
+          );
+        }
+      }
     }
 
     // Create sales order products

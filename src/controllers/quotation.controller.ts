@@ -27,11 +27,11 @@ export const createQuotation = catchAsync(async (req: AuthRequest, res: Response
 
 export const publishQuotation = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = Number(req.user?.clientId);
-  const accountId = Number(req.user?.id || req.user?.accountId);
+  const accountId = Number(req.user?.accountId);
   const opportunityId = Number(req.params.id);
   const quotationId = Number(req.params.quoteId);
-  const { syncHold, addProductsToHold, locationId } = req.body;
-  const quotation = await quotationService.publishQuotation(opportunityId, quotationId, clientId, accountId, syncHold, addProductsToHold, locationId);
+  const { syncHold, addProductsToHold, locationId, removeProductsFromHold } = req.body;
+  const quotation = await quotationService.publishQuotation(opportunityId, quotationId, clientId, accountId, syncHold, addProductsToHold, locationId, removeProductsFromHold);
   SuccessResponse(res, 200, "Quotation published successfully", quotation);
 });
 export const updateQuotationRates = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -59,4 +59,20 @@ export const removeQuotationProduct = catchAsync(async (req: AuthRequest, res: R
   const invProductId = Number(req.params.invProductId);
   const quotation = await quotationService.removeQuotationProduct(opportunityId, quotationId, clientId, invProductId);
   SuccessResponse(res, 200, "Product removed from quotation successfully", quotation);
+});
+
+export const createSalesOrderFromQuotation = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id: opportunityId, quoteId } = req.params;
+  const clientId = Number(req.user?.clientId);
+  const accountId = Number(req.user?.accountId);
+  const { shippingAddressId } = req.body;
+
+  const salesOrder = await quotationService.createSalesOrderFromQuotation(
+    Number(opportunityId),
+    Number(quoteId),
+    clientId,
+    accountId,
+    shippingAddressId ? Number(shippingAddressId) : undefined
+  );
+  SuccessResponse(res, 201, "Sales Order created successfully", salesOrder);
 });

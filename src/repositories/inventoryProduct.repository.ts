@@ -734,7 +734,7 @@ export const updateInventoryProductCartStatus = async (id: number, isInCart: boo
 };
 
 export const findInventoryProductById = async (id: number, transaction?: Transaction) => {
-  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId'], transaction });
+  return await models.InventoryProduct.findByPk(id, { attributes: ["id", "status", 'isSlabType', 'clientId', 'combinedNumber'], transaction });
 };
 
 // get last landed cost.
