@@ -1099,3 +1099,30 @@ Univ
 6. SO will not be created if one inventory Product have hold from anywhere else.
 7. on Inventory Products only active holds will be visible, not superseded or salesOrdered.
 8. summary of quotation.
+9. Show status in quotation inventory Product.
+
+---
+
+1. selection on top in opportunity requirement.
+2. default price set to products.
+3. note button working.
+4. removed unnecessary UI elements.
+5. delete button of product in requirement.
+6. requirement details on click of it's status.
+7. Deleted inventory product should be selected by default in publishing. (design change).
+8. In opportunity show it’s hold info.
+9. Next follow up in listing of opportunity.
+10. Also show available in first section.
+
+---
+
+| Action                    | How to trigger it                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Follow up — Due Today     | Edit an opportunity, set followUpDate = today                                                          |
+| Follow up — Overdue       | Set followUpDate to a past date                                                                        |
+| Follow up — Due in X days | Set followUpDate to a future date                                                                      |
+| Find / procure slabs      | Add a requirement line on an opportunity where no matching inventory exists (allocation stays PENDING) |
+| Allocate more inventory   | Add a requirement where only some slabs get auto-allocated (PARTIAL)                                   |
+| Create quote              | Have all requirement lines COMPLETE, but don't create a quotation yet                                  |
+| Create Sales Order        | Publish a quotation on an opportunity                                                                  |
+| Sales Order Created       | Convert a published quotation to a Sales Order                                                         |

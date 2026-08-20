@@ -286,6 +286,33 @@ export const getHoldByOpportunityId = async (
     include: [
       {
         association: "items",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              {
+                model: models.Product,
+                as: "product",
+                include: [
+                  { model: models.ProductFinish, as: "finish" },
+                  {
+                    model: models.ProductImage,
+                    as: "images",
+                    include: [{ model: models.S3File, as: "s3File" }],
+                  },
+                ],
+              },
+              { model: models.Slab, as: "slab" },
+              {
+                model: models.InventoryProductImage,
+                as: "images",
+                include: [{ model: models.S3File, as: "s3File" }],
+              },
+              { association: "bin" },
+            ],
+          },
+        ],
       }
     ],
     transaction,

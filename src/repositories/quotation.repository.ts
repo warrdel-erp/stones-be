@@ -4,10 +4,12 @@ import { scoped } from "../utils/scoped";
 
 export const getQuotationsByOpportunityId = async (
   opportunityId: number,
-  clientId: number
+  clientId: number,
+  transaction?: Transaction
 ) => {
   return await scoped(models.OpportunityQuotation).findAll({
     where: { opportunityId, clientId },
+    transaction,
     include: [
       {
         model: models.SalesOrder,
@@ -50,6 +52,7 @@ export const getQuotationsByOpportunityId = async (
                 as: "holdItems",
                 include: [{ model: models.Hold, as: "hold" }],
               },
+              { association: "bin" },
             ],
           },
         ],
@@ -107,6 +110,7 @@ export const getQuotationById = async (
                 as: "holdItems",
                 include: [{ model: models.Hold, as: "hold" }],
               },
+              { association: "bin" },
             ],
           },
         ],

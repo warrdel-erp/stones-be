@@ -6,6 +6,85 @@ import { sequelize } from "../config/database";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
 import { SALES_TAX } from "../constants";
+import moment from "moment";
+
+interface NextAction {
+  type: 'follow_up' | 'procure' | 'allocate' | 'create_quote' | 'create_so' | 'completed';
+  label: string;
+  dueLabel?: string;
+  urgency: 'normal' | 'warning' | 'critical';
+  followUpAction?: string;
+}
+
+const computeNextAction = (opp: any): NextAction | null => {
+  const reqs = opp.requirementProducts || [];
+  const quotes = opp.quotations || [];
+
+  // 1. Sales Order already created
+  if (opp.status === 'SALES_ORDER' || quotes.some((q: any) => q.salesOrders && q.salesOrders.length > 0)) {
+    return { type: 'completed', label: 'Sales Order Created', urgency: 'normal' };
+  }
+
+  // Skip lost / closed opportunities — status badge already covers this
+  if (opp.status === 'LOST') return null;
+
+  // 2. Published quotation exists — ready for Sales Order
+  if (quotes.some((q: any) => q.status === 'PUBLISHED')) {
+    return { type: 'create_so', label: 'Create Sales Order', urgency: 'normal' };
+  }
+
+  // 3. Find / procure slabs (when any requirement line has 0 allocated / PENDING status)
+  if (reqs.some((r: any) => r.status === 'PENDING')) {
+    return { type: 'procure', label: 'Find / procure slabs', urgency: 'warning' };
+  }
+
+  // 4. Allocate more inventory (when any requirement line is PARTIAL)
+  if (reqs.some((r: any) => r.status === 'PARTIAL')) {
+    return { type: 'allocate', label: 'Allocate more inventory', urgency: 'warning' };
+  }
+
+  // 5. All requirements fulfilled, no published quotation yet -> Create quote
+  if (reqs.length > 0 && reqs.every((r: any) => r.status === 'COMPLETE') && !quotes.some((q: any) => q.status === 'PUBLISHED')) {
+    return { type: 'create_quote', label: 'Create quote', urgency: 'normal' };
+  }
+
+  // 6. Follow-up based on followUpDate (when no operational action is pending)
+  if (opp.followUpDate) {
+    const todayStart = moment().startOf('day');
+    const followUp = moment(opp.followUpDate).startOf('day');
+    if (followUp.isBefore(todayStart)) {
+      return {
+        type: 'follow_up',
+        label: 'Follow up',
+        dueLabel: 'Overdue',
+        urgency: 'critical',
+        followUpAction: opp.followUpAction,
+      };
+    }
+    if (followUp.isSame(todayStart)) {
+      return {
+        type: 'follow_up',
+        label: 'Follow up',
+        dueLabel: 'Due Today',
+        urgency: 'warning',
+        followUpAction: opp.followUpAction,
+      };
+    }
+    if (followUp.isAfter(todayStart)) {
+      const days = followUp.diff(todayStart, 'days');
+      return {
+        type: 'follow_up',
+        label: 'Follow up',
+        dueLabel: days === 1 ? 'Due Tomorrow' : `Due in ${days} days`,
+        urgency: 'normal',
+        followUpAction: opp.followUpAction,
+      };
+    }
+  }
+
+  // No action applicable
+  return null;
+};
 
 export const create = async (payload: any) => {
   if (payload.customerId && payload.clientId) {
@@ -36,7 +115,13 @@ export const getAll = async (
   search?: string,
   filter?: any
 ) => {
-  return await opportunityRepository.getAllOpportunities(clientId, page, limit, search, filter);
+  const result = await opportunityRepository.getAllOpportunities(clientId, page, limit, search, filter);
+  result.data = result.data.map((item: any) => {
+    const opp = item.get ? item.get({ plain: true }) : item;
+    opp.nextAction = computeNextAction(opp);
+    return opp;
+  });
+  return result;
 };
 
 export const getOne = async (id: number, clientId: number) => {
@@ -268,7 +353,7 @@ export const removeRequirement = async (requirementId: number, clientId: number)
       transaction,
     });
     if (!requirement) throw new AppError("Requirement line not found", 404);
-    
+
     const opp = await opportunityRepository.getOpportunityById(requirement.opportunityId, clientId);
     if (opp && opp.status === "SALES_ORDER") throw new AppError("Cannot remove requirements as a Sales Order has already been generated.", 400);
 

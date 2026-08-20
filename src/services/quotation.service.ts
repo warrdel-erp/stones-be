@@ -46,7 +46,8 @@ export const createQuotation = async (
     // 1. Fetch existing quotations for this opportunity
     const existingQuotations = await quotationRepository.getQuotationsByOpportunityId(
       opportunityId,
-      clientId
+      clientId,
+      transaction
     );
 
     // Check if a DRAFT quotation already exists (Max 1 Draft rule)
@@ -55,37 +56,59 @@ export const createQuotation = async (
       throw new AppError("A draft quotation already exists for this opportunity. Cannot create another draft.", 400);
     }
 
-    // 2. Fetch current requirement lines & allocations if items not explicitly passed
+    // Find the latest published quotation
+    const publishedQuotations = existingQuotations
+      .filter((q: any) => q.status !== "DRAFT")
+      .sort((a: any, b: any) => Number(b.version) - Number(a.version));
+    const lastPublishedQuote = publishedQuotations[0];
+
+    // 2. Fetch current items:
+    // If explicitly passed, use them.
+    // Else if a published quotation exists, clone items from the last published quotation.
+    // Else (initial quotation), fetch from opportunity requirement lines & allocations.
     let itemsToProcess = payload.inventoryItems || [];
 
     if (itemsToProcess.length === 0) {
-      const requirements = await opportunityRepository.getRequirementLinesAndAllocations(
-        opportunityId,
-        clientId
-      );
+      if (lastPublishedQuote && lastPublishedQuote.quotationInventoryProducts) {
+        itemsToProcess = lastPublishedQuote.quotationInventoryProducts.map((item: any) => ({
+          inventoryProductId: item.inventoryProductId,
+          sellingRate: Number(item.sellingRate) || 0,
+          amount: Number(item.amount) || 0,
+          priceSource: item.priceSource || "Standard",
+        }));
+      } else {
+        const requirements = await opportunityRepository.getRequirementLinesAndAllocations(
+          opportunityId,
+          clientId,
+          transaction
+        );
 
-      const createdItems: any[] = [];
-      requirements.forEach((req: any) => {
-        const allocations = req.inventoryAllocations || [];
-        const rawPrice = req.product?.sellingPrice;
-        const parsedRate = Number(rawPrice);
-        const defaultRate = isNaN(parsedRate) || rawPrice === null || rawPrice === undefined ? 0 : parsedRate;
+        const createdItems: any[] = [];
+        requirements.forEach((req: any) => {
+          const allocations = req.inventoryAllocations || [];
+          const rawPrice = req.product?.singleUnitPrice;
+          const parsedRate = Number(rawPrice);
+          const defaultRate = isNaN(parsedRate) || rawPrice === null || rawPrice === undefined ? 0 : parsedRate;
 
-        allocations.forEach((alloc: any) => {
-          const area = Number(alloc.inventoryProduct?.areaSqFt || 0);
-          const rate = defaultRate;
-          const amount = area > 0 ? area * rate : rate;
+          allocations.forEach((alloc: any) => {
+            const invProd = alloc.inventoryProduct;
+            const slabArea = Number(invProd?.slab?.receivedSqrFt || 0);
+            const genericQty = Number(invProd?.genericProduct?.quantity || 0);
+            const area = Number(invProd?.areaSqFt || slabArea || genericQty || 0);
+            const rate = defaultRate;
+            const amount = area > 0 ? rate * area : rate;
 
-          createdItems.push({
-            inventoryProductId: alloc.inventoryProductId,
-            sellingRate: isNaN(rate) ? 0 : rate,
-            amount: isNaN(amount) ? 0 : amount,
-            priceSource: "Standard",
+            createdItems.push({
+              inventoryProductId: alloc.inventoryProductId,
+              sellingRate: isNaN(rate) ? 0 : rate,
+              amount: isNaN(amount) ? 0 : amount,
+              priceSource: "Standard",
+            });
           });
         });
-      });
 
-      itemsToProcess = createdItems;
+        itemsToProcess = createdItems;
+      }
     }
 
     // 3. Compute totals
@@ -96,10 +119,10 @@ export const createQuotation = async (
     const taxAmount = 0;
     const grandTotal = subtotal;
 
-    // Calculate version based on published quotations + 1
-    const publishedCount = existingQuotations.filter((q: any) => q.status !== "DRAFT").length;
-    const nextVersion = publishedCount + 1;
+    // Calculate version based on last published quotation version + 1
+    const nextVersion = lastPublishedQuote ? Number(lastPublishedQuote.version) + 1 : 1;
     const quoteNumber = `QUO-OPP-${opportunityId}-V${nextVersion}`;
+    const notesToUse = payload.notes !== undefined ? payload.notes : (lastPublishedQuote?.notes || "");
 
     const quotation = await quotationRepository.createQuotation(
       {
@@ -111,7 +134,7 @@ export const createQuotation = async (
         subtotal,
         taxAmount,
         grandTotal,
-        notes: payload.notes || "",
+        notes: notesToUse,
       },
       itemsToProcess as any,
       transaction
@@ -315,13 +338,21 @@ export const addQuotationProducts = async (
 
     const inventoryProducts = await scoped(models.InventoryProduct).findAll({
       where: { id: newIds, clientId },
-      include: [{ association: "product" }],
+      include: [
+        { association: "product" },
+        { association: "slab" },
+        { association: "genericProduct" },
+      ],
       transaction
     });
 
     const newItems = inventoryProducts.map((ip: any) => {
-      const rate = Number(ip.product?.sellingPrice || 0);
-      const area = Number(ip.areaSqFt || 0);
+      const rawPrice = ip.product?.singleUnitPrice;
+      const parsedRate = Number(rawPrice);
+      const rate = isNaN(parsedRate) || rawPrice === null || rawPrice === undefined ? 0 : parsedRate;
+      const slabArea = Number(ip.slab?.receivedSqrFt || 0);
+      const genericQty = Number(ip.genericProduct?.quantity || 0);
+      const area = Number(ip.areaSqFt || slabArea || genericQty || 0);
       const amount = area > 0 ? rate * area : rate;
       return {
         clientId,

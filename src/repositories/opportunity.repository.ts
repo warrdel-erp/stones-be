@@ -32,6 +32,7 @@ export const getAllOpportunities = async (
 
   const { rows: data, count: total } = await scoped(models.Opportunity).findAndCountAll({
     where: whereClause,
+    distinct: true,
     include: [
       {
         model: models.Customer,
@@ -52,6 +53,32 @@ export const getAllOpportunities = async (
         model: models.Account,
         as: "assignedToUser",
         attributes: ["id", "email"],
+      },
+      {
+        model: models.OpportunityRequirementProduct,
+        as: 'requirementProducts',
+        attributes: ['id', 'status', 'allocatedCount', 'requiredCount'],
+        required: false,
+      },
+      {
+        model: models.OpportunityQuotation,
+        as: 'quotations',
+        attributes: ['id', 'status', 'version'],
+        include: [
+          {
+            model: models.SalesOrder,
+            as: 'salesOrders',
+            attributes: ['id'],
+            required: false,
+          },
+        ],
+        required: false,
+      },
+      {
+        model: models.Hold,
+        as: 'hold',
+        attributes: ['id', 'clientHoldNumber', 'expiresAt', 'stage'],
+        required: false,
       },
     ],
     limit,
@@ -92,6 +119,17 @@ export const getOpportunityById = async (id: number, clientId: number) => {
         model: models.Account,
         as: "assignedToUser",
         attributes: ["id", "email"],
+      },
+      {
+        model: models.Hold,
+        as: "hold",
+        include: [
+          {
+            association: "items",
+            attributes: ["id", "inventoryProductId"],
+          },
+        ],
+        required: false,
       },
     ],
   });
@@ -223,6 +261,17 @@ export const getRequirementLinesAndAllocations = async (
       {
         model: models.OpportunityInventoryProduct,
         as: "inventoryAllocations",
+        include: [
+          {
+            model: models.InventoryProduct,
+            as: "inventoryProduct",
+            include: [
+              { model: models.Slab, as: "slab" },
+              { model: models.GenericProduct, as: "genericProduct" },
+              { model: models.Product, as: "product" },
+            ],
+          },
+        ],
       },
     ],
     transaction,
