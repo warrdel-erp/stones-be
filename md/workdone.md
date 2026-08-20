@@ -1126,3 +1126,15 @@ Univ
 | Create quote              | Have all requirement lines COMPLETE, but don't create a quotation yet                                  |
 | Create Sales Order        | Publish a quotation on an opportunity                                                                  |
 | Sales Order Created       | Convert a published quotation to a Sales Order                                                         |
+
+---
+
+1. Next actions were not working fine.
+2. Automatic name of opportunity.
+3. Remove Polished from requirement inventoryProduct.
+4. requirement inventoryProduct -> Show size on image itself.
+5. In requirement close unused accordions.
+6. Publish popup split vertically by added and deleted.
+7. Show text as AI working on inventory Product selection.
+8. What’s app -> text message in opportunity listing.
+9. From opportunity to SO -> delivery address missing out.

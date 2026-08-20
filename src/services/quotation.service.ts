@@ -444,7 +444,7 @@ export const createSalesOrderFromQuotation = async (
       quotationId,
       locationId,
       shippingAddressId,
-      deliveryType: DELIVERY_TYPES.PICKUP,
+      deliveryType: DELIVERY_TYPES.DELIVERY,
       holdId: hold ? hold.id : null,
       internalNote: quote.notes,
       products: items.map((item: any) => ({

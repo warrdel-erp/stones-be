@@ -796,3 +796,11 @@ Email notification.
 1. All three sections scrollable independently.
 2. Show separate line for separate unit price in quotation.
 3. In holds show all holds.
+
+---
+
+<!-- 2. Option to change tax in quotation (opportunity wise). -->
+
+1. Tabs in quotation listing as per followup states.
+2. Upcoming inventoryProducts in requirement page.
+3. Show so created from which version.
