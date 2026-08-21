@@ -284,8 +284,11 @@ export const getRequirementLinesAndAllocations = async (
         clientId
       );
       req.setDataValue("availableCount", availableInventory.length);
+      const initiateCount = availableInventory.filter((inv: any) => inv.status === 'INITIATE').length;
+      req.setDataValue("initiateCount", initiateCount);
     } else {
       req.setDataValue("availableCount", 0);
+      req.setDataValue("initiateCount", 0);
     }
   }
 

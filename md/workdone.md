@@ -1138,3 +1138,10 @@ Univ
 7. Show text as AI working on inventory Product selection.
 8. What’s app -> text message in opportunity listing.
 9. From opportunity to SO -> delivery address missing out.
+
+---
+
+1. only add in add line button.
+2. upcoming inventoryProduct in requirement.
+3. quotation total quantity digits issue.
+4. merge publish and save price button.
