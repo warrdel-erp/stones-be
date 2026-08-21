@@ -470,7 +470,7 @@ export const createSalesOrderFromQuotation = async (
       }))
     };
 
-    const result = await salesOrderService.createSalesOrder(salesOrderData);
+    const result = await salesOrderService.createSalesOrder(salesOrderData, transaction);
 
     // Update Hold as SUPERSEDED by this Quotation
     if (hold) {
