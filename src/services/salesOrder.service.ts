@@ -21,8 +21,8 @@ import { isHoldClosed } from "../utils/hold.util";
 
 import * as opportunityRepository from "../repositories/opportunity.repository";
 
-export const createSalesOrder = async (data: any) => {
-  const transaction = await sequelize.transaction();
+export const createSalesOrder = async (data: any, externalTransaction?: any) => {
+  const transaction = externalTransaction || await sequelize.transaction();
   try {
     // Fetch customer to get taxId
     if (data.customerId) {
@@ -123,10 +123,14 @@ export const createSalesOrder = async (data: any) => {
       transaction
     );
 
-    await transaction.commit();
+    if (!externalTransaction) {
+      await transaction.commit();
+    }
     return { salesOrder, salesOrderProducts, internalNote, printableNote };
   } catch (error) {
-    await transaction.rollback();
+    if (!externalTransaction) {
+      await transaction.rollback();
+    }
     throw error;
   }
 };
