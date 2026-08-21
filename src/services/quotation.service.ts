@@ -160,13 +160,12 @@ export const publishQuotation = async (
   syncHold?: boolean,
   addProductsToHold?: number[],
   locationId?: number,
-  removeProductsFromHold?: number[]
+  removeProductsFromHold?: number[],
+  rates?: Record<string, number>
 ) => {
   return await sequelize.transaction(async (transaction) => {
-    const quote: any = await quotationRepository.getQuotationById(quotationId, clientId);
-    if (!quote) {
-      throw new AppError("Quotation not found", 404);
-    }
+    const quote = await quotationRepository.getQuotationById(quotationId, clientId);
+    if (!quote) throw new AppError("Quotation not found", 404);
     if (quote.opportunityId !== Number(opportunityId)) {
       throw new AppError("Quotation does not belong to this opportunity", 400);
     }
@@ -182,6 +181,23 @@ export const publishQuotation = async (
     
     if (items.length === 0) {
       throw new AppError("Cannot publish an empty quotation. Please add products first.", 400);
+    }
+
+    if (rates && Object.keys(rates).length > 0) {
+      for (const item of items) {
+        const productId = String(item.inventoryProduct?.productId);
+        if (rates[productId] !== undefined) {
+          const newRate = Number(rates[productId]);
+          const area = Number(item.inventoryProduct?.areaSqFt || 0);
+          const newAmount = area > 0 ? newRate * area : newRate;
+          await scoped(models.OpportunityQuotationInventoryProduct).update(
+            { sellingRate: newRate, amount: newAmount },
+            { where: { id: item.id, clientId, quotationId }, transaction }
+          );
+          item.sellingRate = newRate;
+        }
+      }
+      await recalculateQuotationTotals(quotationId, clientId, transaction);
     }
 
     for (const item of items) {

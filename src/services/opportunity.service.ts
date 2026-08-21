@@ -163,7 +163,8 @@ export const addRequirement = async (
     productId: number;
     unitType: "slabs" | "sqft";
     requiredCount: number;
-  }
+  },
+  locationId?: number
 ) => {
   return await sequelize.transaction(async (transaction) => {
     const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId);
@@ -188,7 +189,8 @@ export const addRequirement = async (
     const availableInventory = await getAvailableInventoryProductsForProduct(
       payload.productId,
       clientId,
-      50
+      50,
+      locationId
     );
 
     let allocatedCount = 0;

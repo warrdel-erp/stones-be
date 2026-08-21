@@ -30,8 +30,8 @@ export const publishQuotation = catchAsync(async (req: AuthRequest, res: Respons
   const accountId = Number(req.user?.accountId);
   const opportunityId = Number(req.params.id);
   const quotationId = Number(req.params.quoteId);
-  const { syncHold, addProductsToHold, locationId, removeProductsFromHold } = req.body;
-  const quotation = await quotationService.publishQuotation(opportunityId, quotationId, clientId, accountId, syncHold, addProductsToHold, locationId, removeProductsFromHold);
+  const { syncHold, addProductsToHold, locationId, removeProductsFromHold, rates } = req.body;
+  const quotation = await quotationService.publishQuotation(opportunityId, quotationId, clientId, accountId, syncHold, addProductsToHold, locationId, removeProductsFromHold, rates);
   SuccessResponse(res, 200, "Quotation published successfully", quotation);
 });
 export const updateQuotationRates = catchAsync(async (req: AuthRequest, res: Response) => {

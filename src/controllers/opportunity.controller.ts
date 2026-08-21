@@ -52,8 +52,9 @@ export const deleteOpportunity = catchAsync(async (req: AuthRequest, res: Respon
 
 export const addRequirementLine = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = Number(req.user?.clientId);
+  const locationId = Number(req.user?.defaultLocationId);
   const opportunityId = Number(req.params.id);
-  const requirements = await opportunityService.addRequirement(opportunityId, clientId, req.body);
+  const requirements = await opportunityService.addRequirement(opportunityId, clientId, req.body, locationId);
   SuccessResponse(res, 201, "Requirement line added & auto-allocated", requirements);
 });
 

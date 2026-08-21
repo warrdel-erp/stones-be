@@ -610,17 +610,21 @@ export const getProductsWithSlabsByLocation = async (locationId: number) => {
 export const getAvailableInventoryProductsForProduct = async (
   productId: number,
   clientId: number,
-  limit?: number
+  limit?: number,
+  locationId?: number
 ) => {
-  return await scoped(models.InventoryProduct).findAll({
-    where: {
-      clientId,
-      productId,
-      status: {
-        [Op.in]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.INITIATE],
-      },
-      // "$holdItem.id$": null,
+  const where: any = {
+    clientId,
+    productId,
+    status: {
+      [Op.in]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.INITIATE],
     },
+  };
+  if (locationId) {
+    where.locationId = locationId;
+  }
+  return await scoped(models.InventoryProduct).findAll({
+    where,
     include: [
       {
         association: "holdItem",
