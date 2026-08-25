@@ -93,7 +93,7 @@ export const createPackagingList = async (data: any) => {
     }
 
     // Create internal note (if provided)
-    let { internalNote, printableNote } = await createLONotes(data, packagingList, transaction);
+    const { internalNote, printableNote } = await createLONotes(data, packagingList, transaction);
 
     transaction.commit();
     return { ...packagingList, products: updatedProducts, internalNote, printableNote };
@@ -360,7 +360,7 @@ export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
 
 export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderProducts: any[] = []) {
 
-  let products = removeDuplicatesWithUnitPrice(
+  const products = removeDuplicatesWithUnitPrice(
     salesOrderProducts.map((salesOrderProduct: any) => ({
       ...salesOrderProduct?.inventoryProduct?.product,
       unitPrice: salesOrderProduct.unitPrice,
@@ -372,7 +372,7 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
 
     const salesOrderProductsAsPerProduct = salesOrderProducts.filter(
       (salesOrderProduct: any) => {
-        let productId = salesOrderProduct.inventoryProduct.productId;
+        const productId = salesOrderProduct.inventoryProduct.productId;
 
         return (productId === product.id)
           &&
@@ -410,7 +410,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
   const transaction = await sequelize.transaction();
 
   try {
-    let packagingList: any = await packagingListService.getPackagingListById(Number(id));
+    const packagingList: any = await packagingListService.getPackagingListById(Number(id));
 
     if (!packagingList) {
       throw new AppError(`Loading order does not exists with given id: ${id}`, 400);
@@ -430,7 +430,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
 
     let serviceTotals = 0;
 
-    if (!!packagingList?.tradeServices) {
+    if (packagingList?.tradeServices) {
       serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
     }
 

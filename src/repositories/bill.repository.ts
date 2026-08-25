@@ -50,7 +50,7 @@ export const getAllBills = async (page: number, limit: number, clientId: number,
 
 export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => {
   // Build where clause dynamically if filters are provided
-  let whereClause = filters ? { ...filters } : {};
+  const whereClause = filters ? { ...filters } : {};
 
   return await scoped(models.Bill).findAll({
     where: whereClause,
@@ -76,7 +76,7 @@ export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => 
 
 // Get latest Bill number
 export const getBillNumber = async (clientId: number) => {
-  let lastBill: any = await scoped(models.Bill).findOne({
+  const lastBill: any = await scoped(models.Bill).findOne({
     where: { clientId: clientId },
     order: [["clientBillNumber", "DESC"]],
   });

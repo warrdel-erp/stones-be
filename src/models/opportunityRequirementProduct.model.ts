@@ -39,6 +39,16 @@ const OpportunityRequirementProduct = sequelize.define(
       allowNull: false,
       defaultValue: "PENDING",
     },
+    minLength: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      field: "min_length",
+    },
+    minWidth: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      field: "min_width",
+    },
   },
   {
     tableName: "opportunity_requirement_products",

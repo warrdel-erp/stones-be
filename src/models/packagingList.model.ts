@@ -138,7 +138,7 @@ PackagingList.beforeCreate(async (packagingList: any) => {
 
   lastPLAccordingToClient = lastPLAccordingToClient?.get({ plain: true });
 
-  packagingList.clientPlNumber = !!lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
+  packagingList.clientPlNumber = lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
 
   if (!packagingList.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soPackagingListNumber.", 400);

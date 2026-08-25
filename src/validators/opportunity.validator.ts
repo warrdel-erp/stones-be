@@ -15,11 +15,7 @@ export const createOpportunitySchema = z.object({
   phone: z.string().optional().nullable(),
   projectName: z.string().optional().nullable(),
   endCustomerName: z.string().optional().nullable(),
-  opportunityType: z.string().optional().nullable(),
   priority: z.string().optional().nullable(),
-  expectedDecisionDate: z.string().optional().nullable(),
-  leadSource: z.string().optional().nullable(),
-
   salespersonId: z.number().optional().nullable(),
   team: z.string().optional().nullable(),
   referralBy: z.string().optional().nullable(),
@@ -48,6 +44,8 @@ export const addOpportunityRequirementSchema = z.object({
       invalid_type_error: "Required Count must be a number",
     })
     .positive("Required Count must be positive"),
+  minLength: z.number().nonnegative("Minimum length cannot be negative").optional(),
+  minWidth: z.number().nonnegative("Minimum width cannot be negative").optional(),
 });
 
 export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;

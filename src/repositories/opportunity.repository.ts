@@ -43,16 +43,19 @@ export const getAllOpportunities = async (
         model: models.Account,
         as: "createdBy",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.Account,
         as: "salesperson",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.Account,
         as: "assignedToUser",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.OpportunityRequirementProduct,
@@ -109,16 +112,19 @@ export const getOpportunityById = async (id: number, clientId: number) => {
         model: models.Account,
         as: "createdBy",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.Account,
         as: "salesperson",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.Account,
         as: "assignedToUser",
         attributes: ["id", "email"],
+        include: [{ model: models.User, as: "user", attributes: ["defaultLocationId"] }]
       },
       {
         model: models.Hold,
@@ -161,6 +167,8 @@ export const createRequirementProduct = async (
     requiredCount: number;
     allocatedCount?: number;
     status?: string;
+    minLength?: number;
+    minWidth?: number;
   },
   transaction?: Transaction
 ) => {
@@ -172,6 +180,8 @@ export const createRequirementProduct = async (
     requiredCount: payload.requiredCount,
     allocatedCount: payload.allocatedCount || 0,
     status: payload.status || "PENDING",
+    minLength: payload.minLength,
+    minWidth: payload.minWidth,
   }, { transaction });
 };
 
@@ -281,7 +291,11 @@ export const getRequirementLinesAndAllocations = async (
     if (req.productId) {
       const availableInventory = await getAvailableInventoryProductsForProduct(
         req.productId,
-        clientId
+        clientId,
+        undefined, // limit
+        undefined, // locationId
+        req.minLength,
+        req.minWidth
       );
       req.setDataValue("availableCount", availableInventory.length);
       const initiateCount = availableInventory.filter((inv: any) => inv.status === 'INITIATE').length;

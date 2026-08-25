@@ -412,7 +412,7 @@ export const getAllProductsWithCompactData = async (
   if (onlyWithSlabs) {
 
     // Now get the full product details with these IDs
-    let { rows: products, count: total }: any = await productScoped.findAndCountAll({
+    const { rows: products, count: total }: any = await productScoped.findAndCountAll({
       where: {
         ...whereClause,
         ...filter,
@@ -462,7 +462,7 @@ export const getAllProductsWithCompactData = async (
     return { products, total, page, limit };
   } else {
     // Original query for when onlyWithSlabs is false
-    let { rows: products, count: total }: any = await productScoped.findAndCountAll({
+    const { rows: products, count: total }: any = await productScoped.findAndCountAll({
       where: { ...whereClause, ...filter },
       include: [
         {
@@ -611,7 +611,9 @@ export const getAvailableInventoryProductsForProduct = async (
   productId: number,
   clientId: number,
   limit?: number,
-  locationId?: number
+  locationId?: number,
+  minLength?: number,
+  minWidth?: number
 ) => {
   const where: any = {
     clientId,
@@ -619,39 +621,40 @@ export const getAvailableInventoryProductsForProduct = async (
     status: {
       [Op.in]: [INVENTORY_ITEM_STATUS.IN_INVENTORY, INVENTORY_ITEM_STATUS.INITIATE],
     },
+    "$holdItem.id$": null,
   };
   if (locationId) {
     where.locationId = locationId;
   }
+  
+  const slabWhere: any = {};
+  if (minLength !== undefined) {
+    slabWhere.receivingLength = { [Op.gte]: minLength };
+  }
+  if (minWidth !== undefined) {
+    slabWhere.receivingWidth = { [Op.gte]: minWidth };
+  }
+
   return await scoped(models.InventoryProduct).findAll({
     where,
     include: [
       {
         association: "holdItem",
         required: false,
+        attributes: [],
       },
       {
         association: "slab",
-      },
-      {
-        association: "bin",
-        include: [
-          {
-            association: "warehouse",
-            include: [{ association: "location" }],
-          },
-        ],
-      },
-      {
-        association: "images",
-        include: [{ association: "s3File" }],
+        where: Object.keys(slabWhere).length > 0 ? slabWhere : undefined,
+        required: false,
       },
     ],
     order: [
-      [{ model: models.Slab, as: 'slab' }, "lot", "ASC"],
-      [{ model: models.Slab, as: 'slab' }, "block", "ASC"],
-      ["combinedNumber", "ASC"]
+      [{ model: models.Slab, as: "slab" }, "lot", "ASC"],
+      [{ model: models.Slab, as: "slab" }, "block", "ASC"],
+      ["combinedNumber", "ASC"],
     ],
+    subQuery: false,
     ...(limit ? { limit } : {}),
   });
 };

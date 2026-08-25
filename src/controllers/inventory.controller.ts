@@ -74,7 +74,7 @@ export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Re
 
 export const getProductsOnly = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 200, search, isSlabType, subCategory, ...filter } = req.query as any;
-  const locationId = req.user?.defaultLocationId;
+  const locationId = req.query.locationId ? Number(req.query.locationId) : req.user?.defaultLocationId;
 
   if (!locationId) {
     return res.status(400).json({ error: "User has no default location" });

@@ -186,7 +186,7 @@ export async function createSIPLService(siplData: any, locationId: number, trans
   }
 }
 
-export const addContainer = async (containerData: Object, siplId: number, clientId: number, transaction?: Transaction) => {
+export const addContainer = async (containerData: object, siplId: number, clientId: number, transaction?: Transaction) => {
   const container = await containerRepository.createContainer(
     {
       ...containerData,
@@ -510,7 +510,7 @@ export const getSiplCalculations = async (siplId: number, transaction?: Transact
 
 
   // Calculate total area of slabs that received.
-  let totalReceivingQuantity = Number(
+  const totalReceivingQuantity = Number(
     siplData.siplProducts
       .reduce(
         (sum: number, siplProduct: any) =>

@@ -12,7 +12,7 @@ export const getAll = async (clientId: number) => {
 };
 
 export const getOne = async (id: number, clientId: number) => {
-    let data: any = await serviceRepository.getServiceById(id, clientId);
+    const data: any = await serviceRepository.getServiceById(id, clientId);
     return data
 };
 

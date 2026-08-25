@@ -658,7 +658,7 @@ export const updateInventoryProductStatusById = async (
 };
 
 export const getInventoryProducts = (filter: Record<string, string>, locationId?: number) => {
-  let {
+  const {
     isHold,
     minSellingPrice, maxSellingPrice,
     minPackagingWidth, maxPackagingWidth,
@@ -673,7 +673,9 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
     ...restFilter,
     status: {
       [Op.ne]: INVENTORY_ITEM_STATUS.BROKEN,
-      ...(restFilter.status ? { [Op.eq]: restFilter.status } : {}),
+      ...(restFilter.status
+        ? { [Array.isArray(restFilter.status) ? Op.in : Op.eq]: restFilter.status }
+        : {}),
     },
   };
 
@@ -725,7 +727,7 @@ export const getInventoryProducts = (filter: Record<string, string>, locationId?
 }
 
 export const getInventoryProductsPaginated = async (filter: Record<string, any>, locationId?: number, limit: number = 10, offset: number = 0) => {
-  let {
+  const {
     isHold,
     minSellingPrice, maxSellingPrice,
     minPackagingWidth, maxPackagingWidth,

@@ -87,7 +87,7 @@ export const deletePayment = async (id: number) => {
 
 // Get latest Bill number
 export const getTransactionNumber = async (clientId: number) => {
-  let lastPayment: any = await scoped(models.Payment).findOne({
+  const lastPayment: any = await scoped(models.Payment).findOne({
     where: { clientId },
     order: [["clientTransactionNo", "DESC"]],
   });

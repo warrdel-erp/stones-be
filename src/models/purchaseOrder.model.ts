@@ -135,7 +135,7 @@ PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
 
   lastPOAccordingToClient = lastPOAccordingToClient?.get({ plain: true });
 
-  purchaseOrder.clientPoNumber = !!lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
+  purchaseOrder.clientPoNumber = lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
 });
 
 // Scope configuration for PurchaseOrder model

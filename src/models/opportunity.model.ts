@@ -41,26 +41,11 @@ const Opportunity = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    opportunityType: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: "New Requirement",
-    },
     priority: {
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: "Normal",
     },
-    expectedDecisionDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    leadSource: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: "WhatsApp",
-    },
-
     salespersonId: {
       type: DataTypes.INTEGER,
       allowNull: true,

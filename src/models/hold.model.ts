@@ -120,7 +120,7 @@ Hold.beforeCreate(async (hold: any) => {
 
     lastHoldAccordingToClient = lastHoldAccordingToClient?.get({ plain: true });
 
-    hold.clientHoldNumber = !!lastHoldAccordingToClient ? lastHoldAccordingToClient.clientHoldNumber + 1 : 1;
+    hold.clientHoldNumber = lastHoldAccordingToClient ? lastHoldAccordingToClient.clientHoldNumber + 1 : 1;
     
     // Generate unique barcode for Hold
     hold.barcode = "hold/" + uuidv4();

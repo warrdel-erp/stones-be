@@ -205,7 +205,7 @@ export const getSalesOrderById = async (id: number) => {
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateLO(id))?.get({ plain: true });
 
-  if (!!salesOrder?.salesOrderProducts) {
+  if (salesOrder?.salesOrderProducts) {
     // Group Products by productId and unit price.
     salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
 

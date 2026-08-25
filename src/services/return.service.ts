@@ -293,7 +293,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
         // Update status of all products to IN_INVENTORY
         for (const returnProduct of returnRecord.returnProducts) {
             // Check if it's a slab or generic product
-            let isSlabType = returnProduct.salesOrderProduct.inventoryProduct.isSlabType;
+            const isSlabType = returnProduct.salesOrderProduct.inventoryProduct.isSlabType;
 
             // Update inventory product status to IN_INVENTORY
             await inventoryProductRepository.updateInventoryProductStatusById(

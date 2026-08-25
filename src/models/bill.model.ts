@@ -135,7 +135,7 @@ Bill.beforeCreate(async (bill: any) => {
 
   lastBillAccordingToClientBillNumber = lastBillAccordingToClientBillNumber?.get({ plain: true });
 
-  bill.clientBillNumber = !!lastBillAccordingToClientBillNumber
+  bill.clientBillNumber = lastBillAccordingToClientBillNumber
     ? lastBillAccordingToClientBillNumber.clientBillNumber + 1
     : 1;
 
@@ -157,7 +157,7 @@ Bill.beforeCreate(async (bill: any) => {
 
     lastSiplBill = lastSiplBill?.get({ plain: true });
 
-    bill.siplBillNumber = !!lastSiplBill
+    bill.siplBillNumber = lastSiplBill
       ? lastSiplBill.siplBillNumber + 1
       : 1;
 

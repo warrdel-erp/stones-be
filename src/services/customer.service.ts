@@ -230,7 +230,7 @@ export const getCustomerMinimal = async (id: number, clientId: number) => {
 
 // Get invoices for a customer
 export const getInvoicesByCustomerId = async (customerId: number) => {
-  let invoices: any = await soInvoiceRepository.getAllInvoices({ customerId });
+  const invoices: any = await soInvoiceRepository.getAllInvoices({ customerId });
 
   const finalData = await Promise.all(
     invoices.map(async (soInvoice: any) => {
@@ -264,7 +264,7 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
 
 // Get advanced deposits for a customer
 export const getAdvancedDepositsByCustomerId = async (customerId: number) => {
-  let advancedDeposits: any = await advancedDepositRepository.getAdvancedDepositWithoutPagination({});
+  const advancedDeposits: any = await advancedDepositRepository.getAdvancedDepositWithoutPagination({});
 
   // Filter advanced deposits by customer through sales order relationship
   const customerAdvancedDeposits = advancedDeposits.filter((deposit: any) =>

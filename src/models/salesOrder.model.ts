@@ -161,7 +161,7 @@ SalesOrder.beforeCreate(async (salesOrder: any) => {
 
   lastSOAccordingToClient = lastSOAccordingToClient?.get({ plain: true });
 
-  salesOrder.clientSoNumber = !!lastSOAccordingToClient ? lastSOAccordingToClient.clientSoNumber + 1 : 1;
+  salesOrder.clientSoNumber = lastSOAccordingToClient ? lastSOAccordingToClient.clientSoNumber + 1 : 1;
 });
 
 // Scope configuration for SalesOrder model

@@ -61,7 +61,7 @@ export const fetchAllProductsWithCompactData = async (
   filter?: any,
   onlyWithSlabs?: boolean
 ) => {
-  let products = await productRepository.getAllProductsWithCompactData(page, limit, search, filter, onlyWithSlabs);
+  const products = await productRepository.getAllProductsWithCompactData(page, limit, search, filter, onlyWithSlabs);
 
   products.products = await Promise.all(
     products.products.map(async (product: any) => {

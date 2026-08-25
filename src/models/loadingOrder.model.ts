@@ -102,7 +102,7 @@ LoadingOrder.beforeCreate(async (loadingOrder: any) => {
 
   lastLOAccordingToClient = lastLOAccordingToClient?.get({ plain: true });
 
-  loadingOrder.clientLoNumber = !!lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
+  loadingOrder.clientLoNumber = lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
 
   if (!loadingOrder.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soLoadingOrderNumber.", 400);

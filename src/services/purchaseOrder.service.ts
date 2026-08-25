@@ -30,7 +30,7 @@ export const registerPurchaseOrder = async (poData: any, notesData: any, transac
     let freightDetail;
 
     // Create Freight Detail (if provided)
-    if (!!Object.keys(poData.freightDetail).length) {
+    if (Object.keys(poData.freightDetail).length) {
       freightDetail = await poRepository.createFreightDetail(
         poData.freightDetail,
         { purchaseOrderId: newPO.id },
@@ -115,7 +115,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
   let { rows, count }: { rows: any[]; count: any } = { rows: [], count: 0 }
 
   if (filter?.status == "PAYMENT_PENDING") {
-    let result = await poRepository.getPaymentPendingPurchaseOrders(
+    const result = await poRepository.getPaymentPendingPurchaseOrders(
       page,
       limit,
       clientId,
@@ -127,7 +127,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
 
   } else {
 
-    let result = await poRepository.getAllPurchaseOrders(
+    const result = await poRepository.getAllPurchaseOrders(
       page,
       limit,
       clientId,
@@ -211,7 +211,7 @@ export const getAllPurchaseOrders = async (page: number = 1, limit: number = 10,
 
 export const getPurchaseOrderById = async (id: number) => {
   // Fetch PO details
-  let purchaseOrder: any = await poRepository.getPurchaseOrderById(id);
+  const purchaseOrder: any = await poRepository.getPurchaseOrderById(id);
 
   if (!purchaseOrder) {
     return null; // Handle case where PO does not exist

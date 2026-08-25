@@ -116,7 +116,7 @@ export const getOverdueInvoices = async (clientId: number, customerId?: number) 
     const plainInvoice = invoice.get({ plain: true });
 
     // Dynamic Due Date Calculation: Lo Date + payment terms
-    let dueDate = new Date(plainInvoice.packagingList.plDate);
+    const dueDate = new Date(plainInvoice.packagingList.plDate);
     const paymentTermId = plainInvoice.packagingList.paymentTermId || plainInvoice.packagingList.salesOrder?.paymentTermId;
 
     if (paymentTermId) {

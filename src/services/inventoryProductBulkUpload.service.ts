@@ -474,7 +474,7 @@ const processSlabStatusColumn = (row: any, errors: string[]) => {
 // ── Received Date ─────────────────────────────────────────────────────────────
 // Parses date strings (e.g., "08/21/2024") or Date objects from XLSX
 const processReceivedDateColumn = (row: any, errors: string[]) => {
-  let raw = row.receivedDateRaw;
+  const raw = row.receivedDateRaw;
   if (raw === null || raw === undefined || raw === "") return;
 
   // 1. If it's already a Date object

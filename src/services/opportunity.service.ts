@@ -9,7 +9,7 @@ import { SALES_TAX } from "../constants";
 import moment from "moment";
 
 interface NextAction {
-  type: 'follow_up' | 'procure' | 'allocate' | 'create_quote' | 'create_so' | 'completed';
+  type: 'follow_up' | 'procure' | 'allocate' | 'create_quote' | 'create_so' | 'completed' | 'create_requirement';
   label: string;
   dueLabel?: string;
   urgency: 'normal' | 'warning' | 'critical';
@@ -28,12 +28,17 @@ const computeNextAction = (opp: any): NextAction | null => {
   // Skip lost / closed opportunities — status badge already covers this
   if (opp.status === 'LOST') return null;
 
-  // 2. Published quotation exists — ready for Sales Order
+  // 2. Published quotation exists — Follow up
   if (quotes.some((q: any) => q.status === 'PUBLISHED')) {
-    return { type: 'create_so', label: 'Create Sales Order', urgency: 'normal' };
+    return { type: 'follow_up', label: 'Follow up', urgency: 'normal' };
   }
 
-  // 3. Find / procure slabs (when any requirement line has 0 allocated / PENDING status)
+  // 3. No requirements yet
+  if (reqs.length === 0) {
+    return { type: 'create_requirement', label: 'Create requirement', urgency: 'normal' };
+  }
+
+  // 4. Find / procure slabs (when any requirement line has 0 allocated / PENDING status)
   if (reqs.some((r: any) => r.status === 'PENDING')) {
     return { type: 'procure', label: 'Find / procure slabs', urgency: 'warning' };
   }
@@ -163,6 +168,8 @@ export const addRequirement = async (
     productId: number;
     unitType: "slabs" | "sqft";
     requiredCount: number;
+    minLength?: number;
+    minWidth?: number;
   },
   locationId?: number
 ) => {
@@ -181,6 +188,8 @@ export const addRequirement = async (
         requiredCount: payload.requiredCount,
         allocatedCount: 0,
         status: "PENDING",
+        minLength: payload.minLength,
+        minWidth: payload.minWidth,
       },
       transaction
     );
@@ -190,7 +199,9 @@ export const addRequirement = async (
       payload.productId,
       clientId,
       50,
-      locationId
+      locationId,
+      payload.minLength,
+      payload.minWidth
     );
 
     let allocatedCount = 0;
@@ -276,7 +287,11 @@ export const updateRequirementAllocations = async (
       // 2. Fetch available inventory items for this product
       const availableInventory = await getAvailableInventoryProductsForProduct(
         requirement.productId,
-        clientId
+        clientId,
+        undefined, // limit
+        undefined, // locationId
+        requirement.minLength,
+        requirement.minWidth
       );
       const availableSet = new Set(availableInventory.map((item: any) => item.id));
 

@@ -9,7 +9,7 @@ export const getCoaData = catchAsync(async (req: Request, res: Response) => {
   const { nested } = req.query
 
   let data;
-  if (!!Number(nested)) {
+  if (Number(nested)) {
     data = coaService.buildNestedCOA();
   } else {
     data = coaService.getCoaData();

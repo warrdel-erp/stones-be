@@ -26,7 +26,7 @@ const getBalanceForLedgerGeneral = async (ledgerId: number): Promise<number> => 
 };
 
 export const getLedgerAccounts = async (page = 1, limit = 10, clientId: number, filters: any) => {
-  let data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, clientId, filters);
+  const data: any = await ledgerAccountRepository.getLedgerAccounts(page, limit, clientId, filters);
 
   data.rows = await Promise.all(data.rows.map(async (e: any) => {
     e = e.get({ plain: true });

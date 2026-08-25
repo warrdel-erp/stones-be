@@ -1,0 +1,158 @@
+
+> stone-erp-be-v2@1.0.0 lint /Users/jitin/Main/warrdel/stone/stone-crm-be-app
+> eslint . --ext .ts --quiet
+
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/controllers/bin.controller.ts
+  19:29  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/controllers/coa.controller.ts
+  12:7  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/controllers/vendor.controller.ts
+  31:25  error  'filter' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/controllers/vendorContact.controller.ts
+  61:27  error  'filter' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/bill.model.ts
+  138:27  error  Redundant double negation  no-extra-boolean-cast
+  160:27  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/hold.model.ts
+  123:29  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/loadingOrder.model.ts
+  105:33  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/packagingList.model.ts
+  141:34  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/purchaseOrder.model.ts
+  138:34  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/models/salesOrder.model.ts
+  164:31  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/bill.repository.ts
+  53:7  error  'whereClause' is never reassigned. Use 'const' instead  prefer-const
+  79:7  error  'lastBill' is never reassigned. Use 'const' instead     prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/customerAddress.repository.ts
+  91:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/customerExternalAgedInvoice.repository.ts
+  15:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/customerExternalInvoice.repository.ts
+  15:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/inventoryProduct.repository.ts
+  662:5   error  'isHold' is never reassigned. Use 'const' instead              prefer-const
+  663:5   error  'minSellingPrice' is never reassigned. Use 'const' instead     prefer-const
+  663:22  error  'maxSellingPrice' is never reassigned. Use 'const' instead     prefer-const
+  664:5   error  'minPackagingWidth' is never reassigned. Use 'const' instead   prefer-const
+  664:24  error  'maxPackagingWidth' is never reassigned. Use 'const' instead   prefer-const
+  665:5   error  'minPackagingLength' is never reassigned. Use 'const' instead  prefer-const
+  665:25  error  'maxPackagingLength' is never reassigned. Use 'const' instead  prefer-const
+  666:8   error  'restFilter' is never reassigned. Use 'const' instead          prefer-const
+  729:5   error  'isHold' is never reassigned. Use 'const' instead              prefer-const
+  730:5   error  'minSellingPrice' is never reassigned. Use 'const' instead     prefer-const
+  730:22  error  'maxSellingPrice' is never reassigned. Use 'const' instead     prefer-const
+  731:5   error  'minPackagingWidth' is never reassigned. Use 'const' instead   prefer-const
+  731:24  error  'maxPackagingWidth' is never reassigned. Use 'const' instead   prefer-const
+  732:5   error  'minPackagingLength' is never reassigned. Use 'const' instead  prefer-const
+  732:25  error  'maxPackagingLength' is never reassigned. Use 'const' instead  prefer-const
+  733:8   error  'restFilter' is never reassigned. Use 'const' instead          prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/journalEntry.repository.ts
+  20:18  error  A `require()` style import is forbidden       @typescript-eslint/no-require-imports
+  65:9   error  Unexpected lexical declaration in case block  no-case-declarations
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/payment.repository.ts
+  90:7  error  'lastPayment' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/repositories/product.repository.ts
+  327:32  error  'total' is never reassigned. Use 'const' instead     prefer-const
+  415:17  error  'products' is never reassigned. Use 'const' instead  prefer-const
+  415:34  error  'total' is never reassigned. Use 'const' instead     prefer-const
+  465:17  error  'products' is never reassigned. Use 'const' instead  prefer-const
+  465:34  error  'total' is never reassigned. Use 'const' instead     prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/bill.service.ts
+  81:9  error  'count' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/client.service.ts
+  163:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  172:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  181:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  190:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  199:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  208:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  217:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  226:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  235:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  244:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  253:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  262:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/customer.service.ts
+  153:23  error  'pagination' is never reassigned. Use 'const' instead                                                       prefer-const
+  183:25  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  197:18  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  233:7   error  'invoices' is never reassigned. Use 'const' instead                                                         prefer-const
+  267:7   error  'advancedDeposits' is never reassigned. Use 'const' instead                                                 prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/customerExternalInvoice.service.ts
+  130:21  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/inventoryProductBulkUpload.service.ts
+  477:7  error  'raw' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/ledgerAccount.service.ts
+  29:7  error  'data' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/packagingList.service.ts
+   96:11  error  'internalNote' is never reassigned. Use 'const' instead   prefer-const
+   96:25  error  'printableNote' is never reassigned. Use 'const' instead  prefer-const
+  363:7   error  'products' is never reassigned. Use 'const' instead       prefer-const
+  375:13  error  'productId' is never reassigned. Use 'const' instead      prefer-const
+  413:9   error  'packagingList' is never reassigned. Use 'const' instead  prefer-const
+  433:9   error  Redundant double negation                                 no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/product.service.ts
+  64:7  error  'products' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/purchaseOrder.service.ts
+   33:9  error  Redundant double negation                                 no-extra-boolean-cast
+  118:9  error  'result' is never reassigned. Use 'const' instead         prefer-const
+  130:9  error  'result' is never reassigned. Use 'const' instead         prefer-const
+  214:7  error  'purchaseOrder' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/return.service.ts
+  256:69  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  296:17  error  'isSlabType' is never reassigned. Use 'const' instead                                                       prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/salesOrder.service.ts
+  208:7  error  Redundant double negation  no-extra-boolean-cast
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/salesOrderInvoice.service.ts
+  119:9  error  'dueDate' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/service.service.ts
+  15:9  error  'data' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/sipl.service.ts
+  189:51  error  Prefer using the primitive `object` as a type name, rather than the upper-cased `Object`  @typescript-eslint/no-wrapper-object-types
+  445:15  error  'count' is never reassigned. Use 'const' instead                                          prefer-const
+  513:7   error  'totalReceivingQuantity' is never reassigned. Use 'const' instead                         prefer-const
+  667:15  error  'count' is never reassigned. Use 'const' instead                                          prefer-const
+
+/Users/jitin/Main/warrdel/stone/stone-crm-be-app/src/services/vendor.service.ts
+  106:27  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+  121:20  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong  @typescript-eslint/no-non-null-asserted-optional-chain
+
+✖ 83 problems (83 errors, 0 warnings)
+  52 errors and 0 warnings potentially fixable with the `--fix` option.
+
+ ELIFECYCLE  Command failed with exit code 1.

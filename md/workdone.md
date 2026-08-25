@@ -1145,3 +1145,22 @@ Univ
 2. upcoming inventoryProduct in requirement.
 3. quotation total quantity digits issue.
 4. merge publish and save price button.
+5. Bug resolved -> SO created even opportunity is still in quotation stage.
+
+---
+
+1. When publishing hold updation will be optional.
+2. Hold details in opportunity page.
+3. Packaging list - Pick list.
+4. SO can be created either from hold or opportunity.
+5. Change summary sidebar.
+6. Show tax info.
+7. Services in quotation.
+8. Status of inventory and hold.
+9. Cmd + B
+
+---
+
+1. ⁠Remove opportunityType, and 3 other
+2. After just creation of opportunity show “Create requirement” and "followup" after one quotation is published.
+3. Update opportunity feature.

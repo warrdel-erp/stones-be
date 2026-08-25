@@ -61,25 +61,12 @@ module.exports = {
           type: Sequelize.STRING(255),
           allowNull: false,
         },
-        opportunityType: {
-          type: Sequelize.STRING(255),
-          allowNull: true,
-          defaultValue: "New Requirement",
-        },
         priority: {
           type: Sequelize.STRING(255),
           allowNull: true,
           defaultValue: "Normal",
         },
-        expectedDecisionDate: {
-          type: Sequelize.DATEONLY,
-          allowNull: true,
-        },
-        leadSource: {
-          type: Sequelize.STRING(255),
-          allowNull: true,
-          defaultValue: "WhatsApp",
-        },
+
         estimatedValue: {
           type: Sequelize.DECIMAL(12, 2),
           allowNull: true,
