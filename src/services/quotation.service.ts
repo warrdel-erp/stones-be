@@ -185,16 +185,22 @@ export const publishQuotation = async (
 
     if (rates && Object.keys(rates).length > 0) {
       for (const item of items) {
-        const productId = String(item.inventoryProduct?.productId);
-        if (rates[productId] !== undefined) {
-          const newRate = Number(rates[productId]);
-          const area = Number(item.inventoryProduct?.areaSqFt || 0);
+        const invProdId = String(item.inventoryProductId);
+        const prodId = String(item.inventoryProduct?.productId);
+        const passedRate = rates[invProdId] !== undefined ? rates[invProdId] : rates[prodId];
+
+        if (passedRate !== undefined && passedRate !== null && !isNaN(Number(passedRate))) {
+          const newRate = Number(passedRate);
+          const slabArea = Number(item.inventoryProduct?.slab?.receivedSqrFt || 0);
+          const genericQty = Number(item.inventoryProduct?.genericProduct?.quantity || 0);
+          const area = Number(item.inventoryProduct?.areaSqFt || slabArea || genericQty || 0);
           const newAmount = area > 0 ? newRate * area : newRate;
           await scoped(models.OpportunityQuotationInventoryProduct).update(
             { sellingRate: newRate, amount: newAmount },
             { where: { id: item.id, clientId, quotationId }, transaction }
           );
           item.sellingRate = newRate;
+          item.amount = newAmount;
         }
       }
       await recalculateQuotationTotals(quotationId, clientId, transaction);
@@ -305,10 +311,15 @@ export const updateQuotationRates = async (
     const items = quote.quotationInventoryProducts || [];
     
     for (const item of items) {
-      const productId = String(item.inventoryProduct?.productId);
-      if (rates[productId] !== undefined) {
-        const newRate = Number(rates[productId]);
-        const area = Number(item.inventoryProduct?.areaSqFt || 0);
+      const invProdId = String(item.inventoryProductId);
+      const prodId = String(item.inventoryProduct?.productId);
+      const passedRate = rates[invProdId] !== undefined ? rates[invProdId] : rates[prodId];
+
+      if (passedRate !== undefined && passedRate !== null && !isNaN(Number(passedRate))) {
+        const newRate = Number(passedRate);
+        const slabArea = Number(item.inventoryProduct?.slab?.receivedSqrFt || 0);
+        const genericQty = Number(item.inventoryProduct?.genericProduct?.quantity || 0);
+        const area = Number(item.inventoryProduct?.areaSqFt || slabArea || genericQty || 0);
         const newAmount = area > 0 ? newRate * area : newRate;
 
         await scoped(models.OpportunityQuotationInventoryProduct).update(

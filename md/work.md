@@ -808,13 +808,10 @@ Email notification.
 ---
 
 1. Show same workflow in SO as in opportunity.
-2. Min length width in add line.
-3. Historical data of customer in opportunity.
-4. Product customer history in quotation part.
-5. Give price input separately in inventoryProduct in quotation.
-6. Discount on inventoryProduct.
-7. Details of SO in opportunity.
-8. Min max slabs filter in inventory.
-9. delivery assigned by PL or LO with order.
-10. one PL ->\* LO.
-11. delivery document.
+
+2. Product customer history in quotation part.
+3. Discount on inventoryProduct.
+4. Min max slabs filter in inventory.
+5. delivery assigned by PL or LO with order.
+6. one PL ->\* LO.
+7. delivery document.

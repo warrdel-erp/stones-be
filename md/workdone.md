@@ -1164,3 +1164,6 @@ Univ
 1. ⁠Remove opportunityType, and 3 other
 2. After just creation of opportunity show “Create requirement” and "followup" after one quotation is published.
 3. Update opportunity feature.
+4. Min length width in add line.
+5. Give price input separately in inventoryProduct in quotation.
+6. Details of SO in opportunity.
