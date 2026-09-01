@@ -111,6 +111,10 @@ export const createQuotation = async (
       }
     }
 
+    if (itemsToProcess.length === 0) {
+      throw new AppError("Cannot create quotation without inventory products.", 400);
+    }
+
     // 3. Compute totals
     const subtotal = itemsToProcess.reduce((acc, item) => {
       const amt = Number(item.amount);

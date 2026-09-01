@@ -11,8 +11,8 @@
     "initialize:db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "build": "tsc",
     "start": "pm2 start dist/index.js",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts",
+    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts --fix"
   },
   "keywords": [],
   "author": "",

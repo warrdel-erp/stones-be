@@ -120,7 +120,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
 
     const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
 
-    if (packagingList.loadingOrder) {
+    if (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) {
       packagingList.loAmounts = calcs.loadingOrder
     } else {
       packagingList.amounts = calcs.packagingList;
@@ -426,7 +426,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
     }
 
-    const invoiceAmountObj = packagingList.loadingOrder ? packagingList.calculations.loadingOrder : packagingList.calculations.packagingList
+    const invoiceAmountObj = (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) ? packagingList.calculations.loadingOrder : packagingList.calculations.packagingList
 
     let serviceTotals = 0;
 
@@ -701,12 +701,14 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
     }
 
     // if Packaging list exists then mark invoiced to loading order.
-    if (packagingList.loadingOrder) {
-      await loadingOrderRepository.updateLoadingOrder(
-        packagingList.loadingOrder?.id,
-        { invoiced: true },
-        transaction
-      );
+    if (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) {
+      for (const lo of packagingList.loadingOrders) {
+        await loadingOrderRepository.updateLoadingOrder(
+          lo.id,
+          { invoiced: true },
+          transaction
+        );
+      }
     }
 
     // Update stage to INVOICED in Packaging List.

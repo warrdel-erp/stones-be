@@ -16,9 +16,21 @@ export const createLoadingOrder = async (data: any) => {
   const transaction = await sequelize.transaction();
 
   try {
+    if (!data?.soProducts || !Array.isArray(data.soProducts) || data.soProducts.length === 0) {
+      throw new AppError("SO products are required.", 400);
+    }
+
     const packagingList = (await packagingListRepository.getPackagingListByIdSimple(data.packagingListId))?.get({
       plain: true,
     });
+
+    // Check concurrency and ensure none of the selected products already have a loadingOrderId
+    for (const product of data.soProducts) {
+      const existingProduct = await salesOrderProductRepository.findByIdSimple(product.id, transaction);
+      if (existingProduct.loadingOrderId) {
+        throw new AppError(`Product ${product.id} is already assigned to a loading order.`, 400);
+      }
+    }
 
     let loadingOrder: any = await loadingOrderRepository.createLoadingOrder(
       { ...data, salesOrderId: packagingList.salesOrderId },
@@ -26,28 +38,29 @@ export const createLoadingOrder = async (data: any) => {
     );
     loadingOrder = loadingOrder.get({ plain: true });
 
-    let updatedProducts = [];
+    const productsToUpdate = data.soProducts.map((e: any) => ({
+      ...e,
+      loadingOrderId: loadingOrder.id,
+      stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+    }));
 
-    if (data?.soProducts) {
-      // Set loadingOrderId and stage for each product
-      const productsToUpdate = data.soProducts.map((e: any) => ({
-        ...e,
-        loadingOrderId: loadingOrder.id,
-        stage: SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
-      }));
+    const updatedProducts = await salesOrderProductService.updateSalesOrderProducts(
+      productsToUpdate,
+      transaction
+    );
 
-      // update sales order products with loading order id and stage -> loadingOrder
-      updatedProducts = await salesOrderProductService.updateSalesOrderProducts(
-        productsToUpdate,
-        transaction
-      );
-    } else {
-      throw new AppError("SO products are required.", 400);
-    }
+    const allPlProducts = await salesOrderProductRepository.getSalesOrderProductsByPackagingListId(data.packagingListId, transaction);
+
+    // Calculate how many products are still unassigned in this PL
+    const unassignedCount = allPlProducts.filter((p: any) => !p.loadingOrderId && !data.soProducts.find((u: any) => Number(u.id) === Number(p.id))).length;
+
+    const newStage = unassignedCount > 0
+      ? PACKAGING_LIST_STAGES.PARTIAL_LOADING_ORDER
+      : PACKAGING_LIST_STAGES.LOADING_ORDER;
 
     await packagingListRepository.updatePackagingList(
       data.packagingListId,
-      { stage: PACKAGING_LIST_STAGES.LOADING_ORDER },
+      { stage: newStage },
       transaction
     );
 

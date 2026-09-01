@@ -54,8 +54,8 @@ export const addRequirementLine = catchAsync(async (req: AuthRequest, res: Respo
   const clientId = Number(req.user?.clientId);
   const locationId = Number(req.user?.defaultLocationId);
   const opportunityId = Number(req.params.id);
-  const requirements = await opportunityService.addRequirement(opportunityId, clientId, req.body, locationId);
-  SuccessResponse(res, 201, "Requirement line added & auto-allocated", requirements);
+  const { requirements } = await opportunityService.addRequirement(opportunityId, clientId, req.body, locationId);
+  SuccessResponse(res, 201, "✨ Requirement line added & AI auto-allocated inventory!", requirements);
 });
 
 export const getRequirementsAndAllocations = catchAsync(async (req: AuthRequest, res: Response) => {

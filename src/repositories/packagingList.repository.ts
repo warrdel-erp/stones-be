@@ -65,7 +65,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
           { model: models.Location, as: "soLocation" },
         ],
       },
-      { model: models.LoadingOrder, as: "loadingOrder" },
+      { model: models.LoadingOrder, as: "loadingOrders" },
       {
         association: "salesOrderProducts",
         include: [
@@ -121,7 +121,7 @@ export const getAllPackagingListsWithoutPagination = async (filters: WhereOption
         association: "salesOrderProducts"
       },
       {
-        association: "loadingOrder"
+        association: "loadingOrders"
       },
       {
         association: "salesOrderInvoice"
@@ -225,7 +225,7 @@ export const getPackagingListById = async (id: number) => {
         ],
       },
       {
-        association: "loadingOrder",
+        association: "loadingOrders",
         include: [
           {
             association: "salesOrderProducts"
@@ -332,7 +332,7 @@ export const getPackagingListAsPerReturn = async (id: number, returnId: number) 
         ],
       },
       {
-        association: "loadingOrder",
+        association: "loadingOrders",
         include: [
           {
             association: "salesOrderProducts"

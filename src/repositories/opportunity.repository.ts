@@ -100,8 +100,9 @@ export const getAllOpportunities = async (
   };
 };
 
-export const getOpportunityById = async (id: number, clientId: number) => {
+export const getOpportunityById = async (id: number, clientId: number, transaction?: Transaction) => {
   return await scoped(models.Opportunity).findOne({
+    transaction,
     where: { id, clientId },
     include: [
       {
@@ -146,7 +147,7 @@ export const updateOpportunity = async (id: number, clientId: number, data: any,
     where: { id, clientId },
     transaction,
   });
-  return await getOpportunityById(id, clientId);
+  return await getOpportunityById(id, clientId, transaction);
 };
 
 export const deleteOpportunity = async (id: number, clientId: number, transaction?: Transaction) => {
@@ -295,7 +296,8 @@ export const getRequirementLinesAndAllocations = async (
         undefined, // limit
         undefined, // locationId
         req.minLength,
-        req.minWidth
+        req.minWidth,
+        transaction
       );
       req.setDataValue("availableCount", availableInventory.length);
       const initiateCount = availableInventory.filter((inv: any) => inv.status === 'INITIATE').length;

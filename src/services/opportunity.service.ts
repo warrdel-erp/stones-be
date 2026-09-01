@@ -92,23 +92,23 @@ const computeNextAction = (opp: any): NextAction | null => {
 };
 
 export const create = async (payload: any) => {
-  if (payload.customerId && payload.clientId) {
-    const customer = await scoped(models.Customer).findOne({
-      where: { id: payload.customerId, clientId: payload.clientId },
-    });
-    if (customer) {
-      if (customer.taxExempt) {
-        payload.taxRate = 0;
-      } else if (customer.salesTaxId) {
-        const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
-        if (tax) {
-          payload.taxRate = tax.value;
+  return await sequelize.transaction(async (transaction) => {
+    if (payload.customerId && payload.clientId) {
+      const customer = await scoped(models.Customer).findOne({
+        where: { id: payload.customerId, clientId: payload.clientId },
+        transaction
+      });
+      if (customer) {
+        if (customer.taxExempt) {
+          payload.taxRate = 0;
+        } else if (customer.salesTaxId) {
+          const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
+          if (tax) {
+            payload.taxRate = tax.value;
+          }
         }
       }
     }
-  }
-
-  return await sequelize.transaction(async (transaction) => {
     return await opportunityRepository.createOpportunity(payload, transaction);
   });
 };
@@ -134,23 +134,23 @@ export const getOne = async (id: number, clientId: number) => {
 };
 
 export const update = async (id: number, clientId: number, payload: any) => {
-  if (payload.customerId) {
-    const customer = await scoped(models.Customer).findOne({
-      where: { id: payload.customerId, clientId },
-    });
-    if (customer) {
-      if (customer.taxExempt) {
-        payload.taxRate = 0;
-      } else if (customer.salesTaxId) {
-        const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
-        if (tax) {
-          payload.taxRate = tax.value;
+  return await sequelize.transaction(async (transaction) => {
+    if (payload.customerId) {
+      const customer = await scoped(models.Customer).findOne({
+        where: { id: payload.customerId, clientId },
+        transaction
+      });
+      if (customer) {
+        if (customer.taxExempt) {
+          payload.taxRate = 0;
+        } else if (customer.salesTaxId) {
+          const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
+          if (tax) {
+            payload.taxRate = tax.value;
+          }
         }
       }
     }
-  }
-
-  return await sequelize.transaction(async (transaction) => {
     return await opportunityRepository.updateOpportunity(id, clientId, payload, transaction);
   });
 };
@@ -174,11 +174,26 @@ export const addRequirement = async (
   locationId?: number
 ) => {
   return await sequelize.transaction(async (transaction) => {
-    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId);
+    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId, transaction);
     if (!opp) throw new AppError("Opportunity not found", 404);
     if (opp.status === "SALES_ORDER") throw new AppError("Cannot add requirements as a Sales Order has already been generated.", 400);
 
-    // 1. Create requirement line database record
+    // 1. Business logic: Find active available inventory products for auto-allocation (excluding on hold)
+    const availableInventory = await getAvailableInventoryProductsForProduct(
+      payload.productId,
+      clientId,
+      50,
+      locationId,
+      payload.minLength,
+      payload.minWidth,
+      transaction
+    );
+
+    if (availableInventory.length === 0) {
+      throw new AppError("No matching inventory found for the specified conditions.", 400);
+    }
+
+    // 2. Create requirement line database record
     const requirement = await opportunityRepository.createRequirementProduct(
       {
         clientId,
@@ -192,16 +207,6 @@ export const addRequirement = async (
         minWidth: payload.minWidth,
       },
       transaction
-    );
-
-    // 2. Business logic: Find active available inventory products for auto-allocation (excluding on hold)
-    const availableInventory = await getAvailableInventoryProductsForProduct(
-      payload.productId,
-      clientId,
-      50,
-      locationId,
-      payload.minLength,
-      payload.minWidth
     );
 
     let allocatedCount = 0;
@@ -244,11 +249,12 @@ export const addRequirement = async (
       transaction
     );
 
-    return await opportunityRepository.getRequirementLinesAndAllocations(
+    const requirementsList = await opportunityRepository.getRequirementLinesAndAllocations(
       opportunityId,
       clientId,
       transaction
     );
+    return { requirements: requirementsList, allocatedCount };
   });
 };
 
@@ -263,7 +269,7 @@ export const updateRequirementAllocations = async (
   inventoryProductIds: number[]
 ) => {
   return await sequelize.transaction(async (transaction) => {
-    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId);
+    const opp = await opportunityRepository.getOpportunityById(opportunityId, clientId, transaction);
     if (!opp) throw new AppError("Opportunity not found", 404);
     if (opp.status === "SALES_ORDER") throw new AppError("Cannot update requirement allocations as a Sales Order has already been generated.", 400);
 
@@ -291,7 +297,8 @@ export const updateRequirementAllocations = async (
         undefined, // limit
         undefined, // locationId
         requirement.minLength,
-        requirement.minWidth
+        requirement.minWidth,
+        transaction
       );
       const availableSet = new Set(availableInventory.map((item: any) => item.id));
 
@@ -371,7 +378,7 @@ export const removeRequirement = async (requirementId: number, clientId: number)
     });
     if (!requirement) throw new AppError("Requirement line not found", 404);
 
-    const opp = await opportunityRepository.getOpportunityById(requirement.opportunityId, clientId);
+    const opp = await opportunityRepository.getOpportunityById(requirement.opportunityId, clientId, transaction);
     if (opp && opp.status === "SALES_ORDER") throw new AppError("Cannot remove requirements as a Sales Order has already been generated.", 400);
 
     return await opportunityRepository.deleteRequirementLine(requirementId, clientId, transaction);

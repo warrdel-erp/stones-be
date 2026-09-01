@@ -74,7 +74,7 @@ export const getAllSalesOrders = async (
         attributes: ["id", "code"],
         include: [
           {
-            association: "loadingOrder",
+            association: "loadingOrders",
             attributes: ["id", "code"],
           }
         ]
@@ -258,7 +258,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
         association: "loadingOrders",
         include: [
           {
-            association: "loadingOrder",
+            association: "loadingOrders",
           },
         ],
       },
@@ -427,7 +427,7 @@ export const getSalesOrderById = async (id: number) => {
             attributes: ["id", "code"],
             include: [
               {
-                association: "loadingOrder",
+                association: "loadingOrders",
                 attributes: ["id", "code"],
               }
             ]
@@ -439,7 +439,7 @@ export const getSalesOrderById = async (id: number) => {
         attributes: ['id', 'code', 'plDate', 'stage'],
         include: [
           {
-            association: 'loadingOrder',
+            association: 'loadingOrders',
             attributes: ['id', 'code'],
           },
           {
@@ -525,7 +525,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
             attributes: ["id", "code"],
             include: [
               {
-                association: "loadingOrder",
+                association: "loadingOrders",
                 attributes: ["id", "code"],
               }
             ]
@@ -537,7 +537,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
         attributes: ['id', 'code', 'plDate', 'stage'],
         include: [
           {
-            association: 'loadingOrder',
+            association: 'loadingOrders',
             attributes: ['id', 'code'],
           },
           {

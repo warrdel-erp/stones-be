@@ -807,11 +807,14 @@ Email notification.
 
 ---
 
-1. Show same workflow in SO as in opportunity.
+1. in inventoryProduct we can give discount but can not change it's price directly. in all sales Process. and when we add material then we'll show separate box for separate priced inventoryProduct groups.
 
-2. Product customer history in quotation part.
-3. Discount on inventoryProduct.
-4. Min max slabs filter in inventory.
-5. delivery assigned by PL or LO with order.
-6. one PL ->\* LO.
+2. Show same workflow in SO as in opportunity.
+3. Product customer history in quotation part.
+4. Discount on inventoryProduct.
+5. Min max slabs filter in inventory.
+6. delivery assigned by PL or LO with order.
 7. delivery document.
+8. in update opportunity customer name can not be changed.
+9. showing selected in requirement stage even condition does not match to any inventoryProduct.
+10. can update product constraints.

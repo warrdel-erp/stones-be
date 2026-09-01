@@ -137,6 +137,7 @@ export const DELIVERY_TYPES = {
 export const PACKAGING_LIST_STAGES = {
   INITIATED: "initiated",
   LOADING_ORDER: "loadingOrder",
+  PARTIAL_LOADING_ORDER: "partialLoadingOrder",
   INVOICED: "invoiced",
   CANCELED: "canceled",
 } as const;

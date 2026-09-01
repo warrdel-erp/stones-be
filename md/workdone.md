@@ -1166,4 +1166,10 @@ Univ
 3. Update opportunity feature.
 4. Min length width in add line.
 5. Give price input separately in inventoryProduct in quotation.
-6. Details of SO in opportunity.
+
+---
+
+1. one PL ->\* LO.
+2. Details of SO in opportunity.
+3. if no product matches in requirement then it should show a warning.
+4. quotation can not be created without InventoryProducts.

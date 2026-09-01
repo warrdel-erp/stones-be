@@ -473,8 +473,8 @@ PackagingListProduct.belongsTo(PackagingList, { foreignKey: "packagingListId", a
 InventoryProduct.hasMany(PackagingListProduct, { foreignKey: "inventoryProductId", as: "packagingListProducts" });
 PackagingListProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 
-// One PackagingList has one LoadingOrder.
-PackagingList.hasOne(LoadingOrder, { foreignKey: "packagingListId", as: "loadingOrder" });
+// One PackagingList has multiple LoadingOrders.
+PackagingList.hasMany(LoadingOrder, { foreignKey: "packagingListId", as: "loadingOrders" });
 LoadingOrder.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 
 // SalesOrder have many SalesOrderProduct (one SalesOrderProduct belongs to one Sales Order)

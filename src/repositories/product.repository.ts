@@ -613,7 +613,8 @@ export const getAvailableInventoryProductsForProduct = async (
   limit?: number,
   locationId?: number,
   minLength?: number,
-  minWidth?: number
+  minWidth?: number,
+  transaction?: Transaction
 ) => {
   const where: any = {
     clientId,
@@ -646,7 +647,7 @@ export const getAvailableInventoryProductsForProduct = async (
       {
         association: "slab",
         where: Object.keys(slabWhere).length > 0 ? slabWhere : undefined,
-        required: false,
+        required: Object.keys(slabWhere).length > 0,
       },
     ],
     order: [
@@ -656,6 +657,7 @@ export const getAvailableInventoryProductsForProduct = async (
     ],
     subQuery: false,
     ...(limit ? { limit } : {}),
+    transaction,
   });
 };
 
