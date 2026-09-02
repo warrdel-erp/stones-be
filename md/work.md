@@ -820,7 +820,3 @@ Email notification.
 10. can update product constraints.
 
 ---
-
-1. Research on software monitoring.
-2. new flow of SO creation and add Product to SO feature.
-3.

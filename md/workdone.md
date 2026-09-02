@@ -1173,3 +1173,9 @@ Univ
 2. Details of SO in opportunity.
 3. if no product matches in requirement then it should show a warning.
 4. quotation can not be created without InventoryProducts.
+
+---
+
+1. Research on software monitoring.
+2. new flow of SO creation and add Product to SO feature.
+3. Packaging list -> Pick list.
