@@ -9,6 +9,8 @@ import { INVENTORY_ITEM_STATUS, SALES_TAX } from "../constants";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import { Transaction } from "sequelize";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import * as models from "../models";
+import { scoped } from "../utils/scoped";
 
 
 // Create multiple SalesOrderProduct entries
@@ -281,10 +283,10 @@ export const deleteSalesOrderProduct = async (soProductId: number) => {
       throw new AppError("Sales Order Product not found", 404);
     }
 
-    // Only allow deletion if stage is "saleOrder"
-    if (salesOrderProduct.stage !== SALE_ORDER_PRODUCT_STAGES.SALES_ORDER) {
+    // Only allow deletion if stage is "saleOrder" and not in a packaging list
+    if (salesOrderProduct.stage !== SALE_ORDER_PRODUCT_STAGES.SALES_ORDER || salesOrderProduct.packagingListId) {
       throw new AppError(
-        `Cannot delete sales order product. Current stage is "${salesOrderProduct.stage}". Deletion is only allowed when stage is "saleOrder".`,
+        `Cannot delete sales order product. Product is currently in stage "${salesOrderProduct.stage}" or has been added to a Packaging List.`,
         400
       );
     }
@@ -298,6 +300,35 @@ export const deleteSalesOrderProduct = async (soProductId: number) => {
 
     // Delete the sales order product
     await salesOrderProductRepository.deleteSalesOrderProduct(soProductId, transaction);
+
+    // If linked to a requirement line, update allocatedCount and status
+    if (salesOrderProduct.requirementLineId) {
+      const remainingCount = await scoped(models.SalesOrderProduct).count({
+        where: {
+          requirementLineId: salesOrderProduct.requirementLineId,
+        },
+        transaction,
+      });
+
+      const reqLine: any = await scoped(models.SalesOrderRequirementLine).findByPk(
+        salesOrderProduct.requirementLineId,
+        { transaction }
+      );
+
+      if (reqLine) {
+        const required = Number(reqLine.requiredCount || 0);
+        let status = "PENDING";
+        if (remainingCount >= required && required > 0) {
+          status = "COMPLETE";
+        } else if (remainingCount > 0) {
+          status = "PARTIAL";
+        }
+        await scoped(models.SalesOrderRequirementLine).update(
+          { allocatedCount: remainingCount, status },
+          { where: { id: reqLine.id }, transaction }
+        );
+      }
+    }
 
     await transaction.commit();
 

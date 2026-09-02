@@ -212,6 +212,17 @@ const SalesOrderProduct = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    requirementLineId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "requirement_line_id",
+      references: {
+        model: "sales_order_requirement_lines",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
   },
   {
     tableName: "sales_order_products",

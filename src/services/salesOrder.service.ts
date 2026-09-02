@@ -75,12 +75,15 @@ export const createSalesOrder = async (data: any, externalTransaction?: any) => 
       }
     }
 
-    // Create sales order products
-    const salesOrderProducts = await salesOrderProductService.createSalesOrderProducts(
-      data.products,
-      salesOrder.id,
-      transaction
-    );
+    // Create sales order products (if any provided)
+    let salesOrderProducts: any[] = [];
+    if (data.products && data.products.length > 0) {
+      salesOrderProducts = await salesOrderProductService.createSalesOrderProducts(
+        data.products,
+        salesOrder.id,
+        transaction
+      );
+    }
 
     // Create internal note (if provided)
     let internalNote: any = null;

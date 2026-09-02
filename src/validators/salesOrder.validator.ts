@@ -22,7 +22,7 @@ export const createSalesOrderSchema = z.object({
       unitPrice: z.coerce.number().positive(),
       taxApplied: z.boolean().optional(),
     })
-  ).min(1, "At least one product is required"),
+  ).optional().default([]),
 });
 
 export type CreateSalesOrderInput = z.infer<typeof createSalesOrderSchema>;

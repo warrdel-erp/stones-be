@@ -430,7 +430,7 @@ PL cancel page => not working correctly.  ✅
 
 14. Invoice missing - ship date - Weight not required - customer PO required - lead# not required
 
-15. Packing List - Delivery charge option present - discount
+15. Pick List - Delivery charge option present - discount
 
 ---
 
@@ -818,3 +818,9 @@ Email notification.
 8. in update opportunity customer name can not be changed.
 9. showing selected in requirement stage even condition does not match to any inventoryProduct.
 10. can update product constraints.
+
+---
+
+1. Research on software monitoring.
+2. new flow of SO creation and add Product to SO feature.
+3.

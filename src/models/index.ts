@@ -75,6 +75,7 @@ import OpportunityRequirementProduct from "./opportunityRequirementProduct.model
 import OpportunityInventoryProduct from "./opportunityInventoryProduct.model";
 import OpportunityQuotation from "./opportunityQuotation.model";
 import OpportunityQuotationInventoryProduct from "./opportunityQuotationInventoryProduct.model";
+import SalesOrderRequirementLine from "./salesOrderRequirementLine.model";
 
 // Opportunity associations
 Opportunity.belongsTo(Client, { foreignKey: "clientId", as: "client" });
@@ -484,6 +485,13 @@ SalesOrder.hasMany(SalesOrderProduct, { foreignKey: "salesOrderId", as: "salesOr
 // One sales Order belongs to inventory product.
 SalesOrderProduct.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasMany(SalesOrderProduct, { foreignKey: "inventoryProductId", as: "salesOrderProducts" });
+
+// SalesOrder ↔ SalesOrderRequirementLine
+SalesOrder.hasMany(SalesOrderRequirementLine, { foreignKey: "salesOrderId", as: "requirementLines" });
+SalesOrderRequirementLine.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+SalesOrderRequirementLine.belongsTo(Product, { foreignKey: "productId", as: "product" });
+SalesOrderRequirementLine.hasMany(SalesOrderProduct, { foreignKey: "requirementLineId", as: "allocatedProducts" });
+SalesOrderProduct.belongsTo(SalesOrderRequirementLine, { foreignKey: "requirementLineId", as: "requirementLine" });
 
 // One Payment belongs to one user (One user can have multiple payments)
 Payment.belongsTo(User, { foreignKey: "userId", as: "createdBy" });
@@ -1109,4 +1117,5 @@ export {
   OpportunityInventoryProduct,
   OpportunityQuotation,
   OpportunityQuotationInventoryProduct,
+  SalesOrderRequirementLine,
 };

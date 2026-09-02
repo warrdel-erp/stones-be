@@ -69,6 +69,7 @@ import customerExternalAgedInvoiceRoutes from "./routes/customerExternalAgedInvo
 import customerExternalInvoiceRoutes from "./routes/customerExternalInvoice.routes";
 import fileUploadRoutes from "./routes/s3File.routes";
 import opportunityRoutes from "./routes/opportunity.routes";
+import salesOrderRequirementRoutes from "./routes/salesOrderRequirement.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -100,6 +101,7 @@ app.use("/api/slab", slabRoute);
 app.use("/api/coa", coaRoute);
 app.use("/api/customer", customerRoute);
 app.use("/api/salesOrder", salesOrderRoute);
+app.use("/api/salesOrder", salesOrderRequirementRoutes);
 app.use("/api/loadingOrder", loadingOrderRoute);
 app.use("/api/packagingList", packagingListRoute);
 app.use("/api/requestedPurchaseProduct", requestedPurchaseProductRoute);
