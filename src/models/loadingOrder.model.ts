@@ -32,7 +32,7 @@ const LoadingOrder = sequelize.define(
     },
     packagingListId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: PackagingList,
         key: "id",

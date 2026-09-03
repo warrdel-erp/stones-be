@@ -171,21 +171,24 @@ export const getPackagingListAsPerReturn = async (returnId: number) => {
   }
 
   // this packaging list does have only return products that belong to given returnId
-  const packagingListId = returnData.soInvoice?.packagingListId;
-  if (!packagingListId) {
-    throw new AppError('Packaging List ID not found on the associated invoice.', 400);
+  let packagingListId = returnData.soInvoice?.packagingListId;
+  let isLo = false;
+  let targetId = packagingListId;
+
+  if (!packagingListId && returnData.soInvoice?.loadingOrderId) {
+    targetId = returnData.soInvoice.loadingOrderId;
+    isLo = true;
   }
 
-  const packagingList = await packagingListRepository.getPackagingListAsPerReturn(packagingListId, returnId);
+  if (!targetId) {
+    throw new AppError('Packaging List / Loading Order ID not found on the associated invoice.', 400);
+  }
+
+  const packagingList = await packagingListRepository.getPackagingListAsPerReturn(targetId, returnId, isLo);
 
   if (!packagingList) {
-    throw new AppError('Packaging List does not exists.', 400);
+    throw new AppError('Packaging List / Loading Order does not exists.', 400);
   }
-
-  // these are product for an invoice that are available for invoicing
-  // const soProductsAvailableToReturnAsPerInvoice = await salesOrderInvoiceService.getSalesOrderProductsWithoutReturns(packagingList.salesOrderInvoice.id)
-
-  // packagingList.salesOrderProducts.push(...(soProductsAvailableToReturnAsPerInvoice.map(e => e.get({ plain: true }))))
 
   // Calculate total amount added in SO.
   packagingList.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
@@ -211,16 +214,23 @@ export const getPackagingListOnlyAsPerReturn = async (returnId: number) => {
     throw new AppError('Return does not exists.', 400);
   }
 
-  // this packaging list does have only return products that belong to given returnId
-  const packagingListId = returnData.soInvoice?.packagingListId;
-  if (!packagingListId) {
-    throw new AppError('Packaging List ID not found on the associated invoice.', 400);
+  let packagingListId = returnData.soInvoice?.packagingListId;
+  let isLo = false;
+  let targetId = packagingListId;
+
+  if (!packagingListId && returnData.soInvoice?.loadingOrderId) {
+    targetId = returnData.soInvoice.loadingOrderId;
+    isLo = true;
   }
 
-  const packagingList = await packagingListRepository.getPackagingListAsPerReturn(packagingListId, returnId);
+  if (!targetId) {
+    throw new AppError('Packaging List / Loading Order ID not found on the associated invoice.', 400);
+  }
+
+  const packagingList = await packagingListRepository.getPackagingListAsPerReturn(targetId, returnId, isLo);
 
   if (!packagingList) {
-    throw new AppError('Packaging List does not exists.', 400);
+    throw new AppError('Packaging List / Loading Order does not exists.', 400);
   }
 
   // Calculate total amount added in SO.
@@ -421,12 +431,19 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       throw new AppError("Cannot invoice Packaging List as it is already invoiced.", 400);
     }
 
-    // If PL doesn't have any product.
-    if (!packagingList?.salesOrderProducts?.length) {
-      throw new AppError(`Loading order with id: ${id} does not have any product added. So it can't be invoiced`, 400);
+    // Filter products that are not assigned to a loading order.
+    const productsToInvoice = (packagingList.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
+
+    // If PL doesn't have any unassigned products.
+    if (!productsToInvoice.length) {
+      throw new AppError(`Packaging list with id: ${id} does not have any product available for invoicing (all assigned to LO).`, 400);
     }
 
-    const invoiceAmountObj = (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) ? packagingList.calculations.loadingOrder : packagingList.calculations.packagingList
+    // Replace salesOrderProducts so that calculations only consider the unassigned ones
+    packagingList.salesOrderProducts = productsToInvoice;
+    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+
+    const invoiceAmountObj = packagingList.calculations.packagingList;
 
     let serviceTotals = 0;
 
@@ -700,17 +717,6 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       }
     }
 
-    // if Packaging list exists then mark invoiced to loading order.
-    if (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) {
-      for (const lo of packagingList.loadingOrders) {
-        await loadingOrderRepository.updateLoadingOrder(
-          lo.id,
-          { invoiced: true },
-          transaction
-        );
-      }
-    }
-
     // Update stage to INVOICED in Packaging List.
     await packagingListRepository.updatePackagingList(id, { stage: PACKAGING_LIST_STAGES.INVOICED }, transaction);
 
@@ -752,7 +758,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
  * Settles oldest deposits first. Each settlement is min(remaining deposit balance, remaining invoice balance).
  * Returns an array of settlement summaries.
  */
-async function autoSettleAdvancedDeposits(
+export async function autoSettleAdvancedDeposits(
   salesOrderId: number,
   invoiceId: number,
   invoiceFinalAmount: number,

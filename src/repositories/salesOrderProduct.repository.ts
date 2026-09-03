@@ -54,6 +54,7 @@ export const getSalesOrderProductsBySalesOrderId = async (salesOrderId: number) 
       {
         model: models.InventoryProduct,
         as: "inventoryProduct", // Ensures inventory product details are fetched
+        include: [{ association: "slab" }]
       },
     ],
   });

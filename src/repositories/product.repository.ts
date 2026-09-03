@@ -1,4 +1,5 @@
 import { Op, Transaction } from "sequelize";
+import _ from "lodash";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import * as models from "../models";
 import * as slabRepository from '../repositories/slab.repository';
@@ -703,6 +704,8 @@ export const getProductOptions = async (clientId: number, status?: string, avail
       "isSlabType",
       "uom",
       "uomId",
+      "singleUnitPrice",
+      "bundlePrice",
     ],
     where,
     include,
@@ -808,4 +811,117 @@ export const getProductImagesByProductId = async (productId: number) => {
     where: { productId },
     include: [{ association: "s3File" }],
   });
+};
+
+export const getProductInventorySummary = async (
+  productId: number,
+  clientId: number,
+  locationId?: number
+) => {
+  const productScoped = scoped(models.Product);
+  const product: any = await productScoped.findOne({
+    where: { id: productId },
+    attributes: ["id", "name", "isSlabType", "uom", "uomId"],
+  });
+
+  if (!product) {
+    return null;
+  }
+
+  const invScoped = scoped(models.InventoryProduct);
+  const items = await invScoped.findAll({
+    where: { productId },
+    attributes: ["id", "status", "locationId"],
+    include: [
+      {
+        association: "holdItem",
+        required: false,
+        attributes: ["id"],
+      },
+      {
+        association: "slab",
+        required: false,
+        attributes: ["id", "receivingLength", "receivingWidth"],
+      },
+      {
+        association: "genericProduct",
+        required: false,
+        attributes: ["id", "isHold"],
+      },
+    ],
+  });
+
+  const calculateStats = (itemList: any[]) => {
+    let availableCount = 0;
+    let availableArea = 0;
+    let onHoldCount = 0;
+    let onHoldArea = 0;
+    let soldCount = 0;
+    let soldArea = 0;
+    let allocatedCount = 0;
+    let allocatedArea = 0;
+
+    for (const item of itemList) {
+      const sqft = item.slab
+        ? _.round(((Number(item.slab.receivingLength) || 0) * (Number(item.slab.receivingWidth) || 0)) / 144, 2)
+        : 0;
+
+      const isHold = !!item.holdItem || !!(item.genericProduct && item.genericProduct.isHold);
+
+      if (isHold) {
+        onHoldCount += 1;
+        onHoldArea += sqft;
+      } else if (item.status === INVENTORY_ITEM_STATUS.IN_INVENTORY) {
+        availableCount += 1;
+        availableArea += sqft;
+      } else if (item.status === INVENTORY_ITEM_STATUS.SOLD) {
+        soldCount += 1;
+        soldArea += sqft;
+      } else if (item.status === INVENTORY_ITEM_STATUS.ALLOCATED) {
+        allocatedCount += 1;
+        allocatedArea += sqft;
+      }
+    }
+
+    return {
+      available: {
+        count: availableCount,
+        area: _.round(availableArea, 2),
+      },
+      onHold: {
+        count: onHoldCount,
+        area: _.round(onHoldArea, 2),
+      },
+      sold: {
+        count: soldCount,
+        area: _.round(soldArea, 2),
+      },
+      allocated: {
+        count: allocatedCount,
+        area: _.round(allocatedArea, 2),
+      },
+      total: {
+        count: itemList.length,
+        area: _.round(availableArea + onHoldArea + soldArea + allocatedArea, 2),
+      },
+    };
+  };
+
+  const allStats = calculateStats(items as any[]);
+  let locationStats = allStats;
+
+  if (locationId) {
+    const locItems = (items as any[]).filter((item) => Number(item.locationId) === Number(locationId));
+    locationStats = calculateStats(locItems);
+  }
+
+  return {
+    productId,
+    productName: product.name,
+    isSlabType: product.isSlabType !== false,
+    uom: product.uom || "SqFt",
+    locationId: locationId ? Number(locationId) : undefined,
+    ...locationStats,
+    allLocations: locationId ? allStats : undefined,
+  };
 };

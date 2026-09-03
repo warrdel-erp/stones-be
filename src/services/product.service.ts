@@ -239,4 +239,17 @@ export const setPrimaryProductImage = async (productId: number, imageId: number)
   }
 };
 
+export const fetchProductInventorySummary = async (
+  productId: number,
+  clientId: number,
+  locationId?: number
+) => {
+  const summary = await productRepository.getProductInventorySummary(productId, clientId, locationId);
+  if (!summary) {
+    throw new AppError("Product not found", 404);
+  }
+  return summary;
+};
+
+
 

@@ -23,6 +23,9 @@ router.get("/landedCost/:productId", authenticateUser, productController.getLand
 // Get all products.
 router.get("/:productId/tabs/:tab", authenticateUser, productController.getProductsTabsData);
 
+// Product inventory summary (available, onHold, sold)
+router.get("/:productId/inventory-summary", authenticateUser, productController.getProductInventorySummary);
+
 // Update product
 router.put("/:id", authenticateUser, productController.updateProductById);
 

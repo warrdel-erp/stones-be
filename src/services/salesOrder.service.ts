@@ -189,8 +189,18 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
 
   // Calculations for PackagingList
+  if (salesOrder.actualLoadingOrders) {
+    salesOrder.actualLoadingOrders = salesOrder.actualLoadingOrders.map((lo: any) => {
+      lo.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(lo.salesOrderProducts);
+      return lo;
+    });
+  }
+
   salesOrder.loadingOrders = salesOrder.loadingOrders.map((packagingList: any) => {
     packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+    packagingList.allProductsInLO = packagingList.salesOrderProducts?.length > 0 && packagingList.salesOrderProducts.every((p: any) => p.loadingOrderId !== null);
+    packagingList.totalProducts = packagingList.salesOrderProducts?.length || 0;
+    packagingList.assignedProducts = packagingList.salesOrderProducts?.filter((p: any) => p.loadingOrderId !== null).length || 0;
     delete packagingList.salesOrderProducts;
     return packagingList;
   });
@@ -205,6 +215,17 @@ export const getSalesOrderById = async (id: number) => {
 };
 
 // Get sales order by ID
+
+export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
+  const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateActualLO(id))?.get({ plain: true });
+
+  if (salesOrder?.salesOrderProducts) {
+    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+    delete salesOrder.salesOrderProducts;
+  }
+  return salesOrder;
+};
+
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateLO(id))?.get({ plain: true });
 

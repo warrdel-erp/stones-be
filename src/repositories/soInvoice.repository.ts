@@ -97,7 +97,7 @@ export const getAllInvoicesList = async (
           },
           {
             model: models.LoadingOrder,
-            as: "loadingOrder",
+            as: "loadingOrders",
           },
           {
             model: models.SalesOrderProduct,
@@ -105,6 +105,16 @@ export const getAllInvoicesList = async (
           },
         ],
       },
+      {
+        model: models.LoadingOrder,
+        as: "loadingOrder",
+        include: [
+          {
+            model: models.SalesOrderProduct,
+            as: "salesOrderProducts",
+          }
+        ]
+      }
     ],
     transaction,
     limit: Number(limit),
@@ -129,6 +139,10 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
       {
         model: models.PackagingList,
         as: "packagingList",
+      },
+      {
+        model: models.LoadingOrder,
+        as: "loadingOrder",
       },
       {
         association: 'advancedDepositSettlements',
@@ -240,7 +254,7 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
             ],
           },
           {
-            association: "loadingOrder"
+            association: "loadingOrders"
           },
           {
             association: "shippingAddress",
@@ -262,6 +276,28 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
           },
         ],
       },
+      {
+        association: "loadingOrder",
+        include: [
+          {
+            association: "salesOrderProducts",
+            include: [
+              {
+                association: "inventoryProduct",
+                include: [
+                  { association: "product" },
+                  { association: "slab" },
+                  { association: "genericProduct" },
+                ],
+              }
+            ]
+          },
+          {
+            association: "salesOrder",
+            include: ['customer', 'shippingAddress', 'soLocation']
+          }
+        ]
+      }
     ],
     transaction,
   });
@@ -292,7 +328,7 @@ export const getSalesOrderProductsWithoutReturns = async (
             attributes: ['id']
           },
           {
-            association: "loadingOrder"
+            association: "loadingOrders"
           }
         ]
       },

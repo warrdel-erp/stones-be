@@ -1179,3 +1179,7 @@ Univ
 1. Research on software monitoring.
 2. new flow of SO creation and add Product to SO feature.
 3. Packaging list -> Pick list.
+4. LO will be created from any product of PL.
+5. Unit price auto filling.
+6. One product can not be added again.
+7. show inventory info if we select product to add a line.

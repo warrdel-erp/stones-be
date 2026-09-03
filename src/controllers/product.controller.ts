@@ -172,4 +172,23 @@ export const setPrimaryImage = catchAsync(async (req: AuthRequest, res: Response
   return SuccessResponse(res, 200, "Primary image updated successfully", result);
 });
 
+export const getProductInventorySummary = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { productId } = req.params;
+  const { locationId } = req.query;
+  const clientId = req.user?.clientId;
+
+  if (!productId) {
+    throw new AppError("Product ID is required", 400);
+  }
+
+  const result = await productService.fetchProductInventorySummary(
+    Number(productId),
+    Number(clientId),
+    locationId ? Number(locationId) : undefined
+  );
+
+  return SuccessResponse(res, 200, "Product inventory summary retrieved successfully", result);
+});
+
+
 

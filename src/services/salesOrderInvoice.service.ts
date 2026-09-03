@@ -32,9 +32,20 @@ export const getInvoiceById = async (id: number) => {
     throw new AppError("Invoice does not exists.", 400);
   }
 
-  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(soInvoice.packagingList.salesOrderProducts);
+  let relevantProducts = [];
 
-  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(soInvoice.packagingList.salesOrderProducts)
+  if (soInvoice.loadingOrderId) {
+    // It's a Loading Order Invoice
+    relevantProducts = soInvoice.loadingOrder?.salesOrderProducts || [];
+  } else if (soInvoice.packagingListId) {
+    // It's a Packaging List Invoice
+    // Filter to only products that are NOT assigned to an LO
+    relevantProducts = (soInvoice.packagingList?.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
+  }
+
+  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(relevantProducts);
+
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(relevantProducts)
 
   return {
     ...soInvoice,
@@ -49,13 +60,20 @@ export const getAllSoInvoiceList = async (clientId: number, filter: any, page: n
     const finalAmount = invoice.finalAmount;
     invoice = invoice.get({ plain: true });
 
+    let relevantProducts = [];
+    if (invoice.loadingOrderId) {
+      relevantProducts = invoice.loadingOrder?.salesOrderProducts || [];
+    } else if (invoice.packagingListId) {
+      relevantProducts = (invoice.packagingList?.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
+    }
+
     invoice.totalQuantity = _.sumBy(
-      invoice.packagingList.salesOrderProducts,
+      relevantProducts,
       (item: any) => item.isSlabType ? item.finalSqrFt : 1
     );
 
-    invoice.totalSlabs = invoice.packagingList.salesOrderProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
-    invoice.totalGenericProducts = invoice.packagingList.salesOrderProducts.length - invoice.totalSlabs;
+    invoice.totalSlabs = relevantProducts.filter((salesOrderProduct: any) => salesOrderProduct.isSlabType).length;
+    invoice.totalGenericProducts = relevantProducts.length - invoice.totalSlabs;
     invoice.finalAmount = finalAmount;
 
     return { ...invoice };

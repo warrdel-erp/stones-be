@@ -27,6 +27,8 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
   BILL: "BILL",
   PACKAGING_LIST: "PACKAGING_LIST",
   PACKAGING_LIST_INVOICE: "PACKAGING_LIST_INVOICE",
+  LOADING_ORDER: "LOADING_ORDER",
+  LOADING_ORDER_INVOICE: "LOADING_ORDER_INVOICE",
   SALES_ORDER: "SALES_ORDER",
   RETURN: "RETURN",
   ADVANCE_DEPOSIT: "ADVANCE_DEPOSIT",
@@ -35,6 +37,7 @@ export const JOURNAL_ENTRY_REFERENCE_TYPES = {
 export const JOURNAL_ENTRY_FOR_TYPES = {
   SIPL: "SIPL",
   PACKAGING_LIST: "PACKAGING_LIST",
+  LOADING_ORDER: "LOADING_ORDER",
   RETURN: "RETURN"
 } as const;
 
@@ -248,6 +251,7 @@ export const ACTIVITY_TYPE = {
   RETURN_CONFIRMATION: "return_confirmation",
   RETURN_REJECTION: "return_rejection",
   PACKAGING_LIST_CANCELLATION: "packaging_list_cancellation",
+  LOADING_ORDER_CANCELLATION: "loading_order_cancellation",
 } as const;
 
 export const ACTIVITY_REFERENCE_TYPE = {
@@ -256,4 +260,5 @@ export const ACTIVITY_REFERENCE_TYPE = {
   DELIVERY: "delivery",
   RETURN: "return",
   PACKAGING_LIST: "packaging_list",
+  LOADING_ORDER: "loading_order",
 } as const;

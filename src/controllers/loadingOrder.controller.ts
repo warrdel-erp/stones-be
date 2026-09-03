@@ -7,13 +7,14 @@ import { SuccessResponse } from "../helper/response";
 import { AppError } from "../helper/appError";
 import { AuthRequest } from "../middleware/authMiddleware";
 
-// Create new PL
+// Create new LO
 export const createLoadingOrder = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { packagingListId } = req.body;
+  const { salesOrderId } = req.body;
   const clientId = req.user?.clientId;
 
-  // Check if packaging list is invoiced then can't create loading order.
-  await packagingListService.checkIfPackagingListInvoiced(packagingListId, "create loading order");
+  if (!salesOrderId) {
+    throw new AppError("salesOrderId is required.", 400);
+  }
 
   // Create loading order.
   const loadingOrder = await loadingOrderService.createLoadingOrder({ ...req.body, clientId });
@@ -80,4 +81,15 @@ export const getNewPlNumber = catchAsync(async (req: AuthRequest, res: Response)
 
   const data = await loadingOrderService.getPLNumber(clientId!, salesOrderId);
   SuccessResponse(res, 200, "New LO number fetched successfully.", data);
+});
+
+// Invoice Loading Order
+export const invoiceLoadingOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = req.user?.clientId;
+  const locationId = req.user?.defaultLocationId;
+
+  const result = await loadingOrderService.invoiceLoadingOrder(Number(id), clientId!, Number(locationId));
+
+  SuccessResponse(res, 201, "Loading Order invoiced successfully", result);
 });

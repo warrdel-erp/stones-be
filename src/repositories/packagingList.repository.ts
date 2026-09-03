@@ -202,6 +202,10 @@ export const getPackagingListById = async (id: number) => {
             ],
           },
           {
+            association: "loadingOrder",
+            attributes: ["id", "code"],
+          },
+          {
             association: 'returnProducts',
             attributes: ['id'],
             required: false,
@@ -255,100 +259,107 @@ export const getPackagingListById = async (id: number) => {
 };
 
 // Get packaging list by Id
-export const getPackagingListAsPerReturn = async (id: number, returnId: number) => {
-  const packagingList = await models.PackagingList.findByPk(id, {
-    include: [
-      {
-        association: "salesOrder",
-        include: [
-          {
-            association: "customer",
-            include: [
-              {
-                association: "addresses"
-              }
-            ],
-          },
-          {
-            association: "shippingAddress",
-          },
-          {
-            association: "salesOrderProducts",
-            attributes: ["id", "unitPrice"],
-            include: [
-              {
-                association: "inventoryProduct",
-                attributes: ["id", "landedUnitCost", 'productId'],
+export const getPackagingListAsPerReturn = async (id: number, returnId: number, isLo: boolean = false) => {
+  const modelToQuery = isLo ? models.LoadingOrder : models.PackagingList;
+  const associationProducts = "salesOrderProducts";
 
-                include: [
-                  {
-                    association: "product",
-                    attributes: ["id",],
-                  },
-                  {
-                    association: "slab",
-                    attributes: ["id", "receivingLength", "receivingWidth"]
-                  },
-                  {
-                    association: "genericProduct",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            association: "soLocation",
-            attributes: ["id", "locationName"],
-          },
-        ],
-      },
-      {
-        association: "salesOrderProducts",
-        include: [
-          {
-            association: "inventoryProduct",
-            include: [
-              {
-                association: "product",
-              },
-              {
-                association: "bin",
-                attributes: ["id", "name"],
-              },
-              {
-                association: "slab",
-              },
-              {
-                association: "genericProduct",
-              },
-            ],
-          },
-          {
-            association: 'returnProducts',
-            attributes: ['id', 'returnId'],
-            where: { returnId },
-            required: true
-          }
-        ],
-      },
-      {
-        association: "loadingOrders",
-        include: [
-          {
-            association: "salesOrderProducts"
-          }
-        ],
-      },
-      {
-        association: "shippingAddress",
-      },
-      {
-        association: "salesOrderInvoice",
-      },
-    ],
+  const includeConfig: any[] = [
+    {
+      association: "salesOrder",
+      include: [
+        {
+          association: "customer",
+          include: [
+            {
+              association: "addresses"
+            }
+          ],
+        },
+        {
+          association: "shippingAddress",
+        },
+        {
+          association: "salesOrderProducts",
+          attributes: ["id", "unitPrice"],
+          include: [
+            {
+              association: "inventoryProduct",
+              attributes: ["id", "landedUnitCost", 'productId'],
+              include: [
+                {
+                  association: "product",
+                  attributes: ["id",],
+                },
+                {
+                  association: "slab",
+                  attributes: ["id", "receivingLength", "receivingWidth"]
+                },
+                {
+                  association: "genericProduct",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          association: "soLocation",
+          attributes: ["id", "locationName"],
+        },
+      ],
+    },
+    {
+      association: associationProducts,
+      include: [
+        {
+          association: "inventoryProduct",
+          include: [
+            {
+              association: "product",
+            },
+            {
+              association: "bin",
+              attributes: ["id", "name"],
+            },
+            {
+              association: "slab",
+            },
+            {
+              association: "genericProduct",
+            },
+          ],
+        },
+        {
+          association: 'returnProducts',
+          attributes: ['id', 'returnId'],
+          where: { returnId },
+          required: true
+        }
+      ],
+    },
+    {
+      association: "salesOrderInvoice",
+    },
+  ];
+
+  if (!isLo) {
+    includeConfig.push({
+      association: "loadingOrders",
+      include: [
+        {
+          association: "salesOrderProducts"
+        }
+      ],
+    });
+    includeConfig.push({
+      association: "shippingAddress",
+    });
+  }
+
+  const result = await modelToQuery.findByPk(id, {
+    include: includeConfig,
   });
 
-  return packagingList?.get({ plain: true });
+  return result?.get({ plain: true });
 };
 
 // Get packaging list by Id

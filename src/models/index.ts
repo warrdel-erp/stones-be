@@ -463,6 +463,8 @@ Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" })
 
 // One SO can have multiple Packaging Lists (one Loading Order belongs to just one SO)
 SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "packagingLists" });
+SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "actualLoadingOrders" });
+LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "loadingOrders" });
 PackagingList.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 
@@ -599,6 +601,10 @@ SalesOrder.hasMany(SalesOrderInvoice, { foreignKey: "salesOrderId", as: "salesOr
 // SalesOrderInvoice belongs to one PackagingList (one PackagingList can have one SalesOrderInvoice)
 SalesOrderInvoice.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
 PackagingList.hasOne(SalesOrderInvoice, { foreignKey: "packagingListId", as: "salesOrderInvoice" });
+
+// SalesOrderInvoice belongs to one LoadingOrder (one LoadingOrder can have one SalesOrderInvoice)
+SalesOrderInvoice.belongsTo(LoadingOrder, { foreignKey: "loadingOrderId", as: "loadingOrder" });
+LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "salesOrderInvoice" });
 
 // SalesOrderInvoice belongs to one Client (one Client can have many SalesOrderInvoice)
 SalesOrderInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });

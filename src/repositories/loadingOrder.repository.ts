@@ -20,6 +20,27 @@ export const getLoadingOrderById = async (id: number) => {
     await models.LoadingOrder.findByPk(id, {
       include: [
         {
+          association: "salesOrder",
+          include: [
+            {
+              association: "customer",
+              attributes: ["id", "name", "salesTax"],
+              include: [
+                {
+                  association: "addresses",
+                },
+              ],
+            },
+            {
+              association: "shippingAddress",
+            },
+            {
+              association: "soLocation",
+              attributes: ["id", "locationName"],
+            },
+          ]
+        },
+        {
           association: "packagingList",
           include: [
             {

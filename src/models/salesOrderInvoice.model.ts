@@ -11,7 +11,8 @@ import { scoped } from "../utils/scoped";
 
 export type SoInvoice = {
   customerId: number;
-  packagingListId: number;
+  packagingListId?: number;
+  loadingOrderId?: number;
   clientId: number;
   amount: number;
   salesOrderId: number;
@@ -96,7 +97,17 @@ const SalesOrderInvoice = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      allowNull: false,
+      allowNull: true,
+    },
+    loadingOrderId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: models.LoadingOrder,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     clientId: {
       type: DataTypes.INTEGER,

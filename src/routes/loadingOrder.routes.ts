@@ -19,5 +19,7 @@ router.put("/:id", authenticateUser, loadingOrderController.updateLoadingOrder);
 // Get Loading Order by Id
 router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById);
 
+// Invoice Loading Order
+router.post("/:id/invoice", authenticateUser, loadingOrderController.invoiceLoadingOrder);
 
 export default router;
