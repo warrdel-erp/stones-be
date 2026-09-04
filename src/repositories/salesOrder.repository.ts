@@ -388,7 +388,7 @@ export const getSalesOrderById = async (id: number) => {
       },
 
       { association: 'advancedDeposits' },
-      { association: "createdBy" },
+      { association: "createdBy", include: ["user"] },
       { association: "shippingAddress" },
       { association: "notes" },
       { association: "soLocation" },
@@ -436,8 +436,9 @@ export const getSalesOrderById = async (id: number) => {
       },
       {
         association: 'loadingOrders',
-        attributes: ['id', 'code', 'plDate', 'stage'],
+        attributes: ['id', 'code', 'plDate', 'stage', 'createdById'],
         include: [
+          { association: 'createdBy', include: ['user'] },
           {
             association: 'loadingOrders',
             attributes: ['id', 'code'],
@@ -446,7 +447,21 @@ export const getSalesOrderById = async (id: number) => {
             association: 'salesOrderProducts',
             include: [
               {
-                association: 'inventoryProduct'
+                association: 'inventoryProduct',
+                include: [
+                  { association: 'product' },
+                  { association: 'bin', attributes: ['id', 'name'] },
+                  { association: 'slab' },
+                  { association: 'genericProduct' }
+                ]
+              },
+              {
+                association: 'loadingOrder',
+                attributes: ['id', 'code']
+              },
+              {
+                association: 'packagingList',
+                attributes: ['id', 'code']
               }
             ]
           },
@@ -454,7 +469,7 @@ export const getSalesOrderById = async (id: number) => {
             association: "salesOrderInvoice"
           },
           {
-            association: "invoiceDeliveries",
+            association: "deliveryAddresses",
             attributes: ["id", "deliveryId"],
             include: [
               {
@@ -467,11 +482,30 @@ export const getSalesOrderById = async (id: number) => {
       },
       {
         association: 'actualLoadingOrders',
-        attributes: ['id', 'code', 'createdAt'],
+        attributes: ['id', 'code', 'createdAt', 'createdById'],
         include: [
+          { association: 'createdBy', include: ['user'] },
           {
             association: 'salesOrderProducts',
-            include: [{ association: 'inventoryProduct' }]
+            include: [
+              {
+                association: 'inventoryProduct',
+                include: [
+                  { association: 'product' },
+                  { association: 'bin', attributes: ['id', 'name'] },
+                  { association: 'slab' },
+                  { association: 'genericProduct' }
+                ]
+              },
+              {
+                association: 'loadingOrder',
+                attributes: ['id', 'code']
+              },
+              {
+                association: 'packagingList',
+                attributes: ['id', 'code']
+              }
+            ]
           },
           {
             association: "salesOrderInvoice"
@@ -592,8 +626,9 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
       },
       {
         association: 'loadingOrders',
-        attributes: ['id', 'code', 'plDate', 'stage'],
+        attributes: ['id', 'code', 'plDate', 'stage', 'createdById'],
         include: [
+          { association: 'createdBy', include: ['user'] },
           {
             association: 'loadingOrders',
             attributes: ['id', 'code'],

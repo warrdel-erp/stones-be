@@ -1,3 +1,5 @@
+import DeliveryAddress from "./DeliveryAddress.model";
+import DeliveryItem from "./DeliveryItem.model";
 import Bill from "./bill.model";
 import BillItem from "./billItem.model";
 import Bin from "./bin.model";
@@ -43,7 +45,7 @@ import AdvancedDepositSettlement from "./advancedDepositSettlement.model";
 import Return from "./return.model";
 import ReturnProduct from "./returnProduct.model";
 import Delivery from "./Delivery.model";
-import InvoiceDelivery from "./InvoiceDelivery.model";
+
 import ServiceCategory from "./serviceCategory.model";
 import Service from "./service.model";
 import TradeService, { TRADE_SERVICE_REFERENCE_TYPES } from "./tradeService.model";
@@ -425,7 +427,7 @@ Customer.belongsTo(User, { foreignKey: "createdBy", as: "user" });
 
 // SO-Account (one 'Account' have multiple 'SO') (one 'SO' have one 'Account')
 Account.hasMany(SalesOrder, { foreignKey: "accountId", as: "salesOrders" });
-SalesOrder.belongsTo(Account, { foreignKey: "accountId", as: "createdBy" });
+SalesOrder.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
 
 // One Customer has Many SalesOrders, One SalesOrder belongs to One Customer
 Customer.hasMany(SalesOrder, { foreignKey: "customerId" });
@@ -465,7 +467,11 @@ Customer.hasMany(CustomerAddress, { foreignKey: "customerId", as: "addresses" })
 SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "packagingLists" });
 SalesOrder.hasMany(LoadingOrder, { foreignKey: "salesOrderId", as: "actualLoadingOrders" });
 LoadingOrder.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
+LoadingOrder.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Account.hasMany(LoadingOrder, { foreignKey: "createdById" });
 SalesOrder.hasMany(PackagingList, { foreignKey: "salesOrderId", as: "loadingOrders" });
+PackagingList.belongsTo(Account, { foreignKey: "createdById", as: "createdBy" });
+Account.hasMany(PackagingList, { foreignKey: "createdById" });
 PackagingList.belongsTo(SalesOrder, { foreignKey: "salesOrderId", as: "salesOrder" });
 
 // Packaging List have many PackagingListProduct
@@ -723,12 +729,12 @@ Delivery.belongsTo(Truck, { foreignKey: "truckId", as: "truck" });
 Truck.hasMany(Delivery, { foreignKey: "truckId", as: "deliveries" });
 
 // one packaging list can have multiple invoice deliveries, one invoice delivery belongs to one packaging list
-InvoiceDelivery.belongsTo(PackagingList, { foreignKey: "packagingListId", as: "packagingList" });
-PackagingList.hasMany(InvoiceDelivery, { foreignKey: "packagingListId", as: "invoiceDeliveries" });
+
+
 
 // one delivery can have multiple invoice deliveries, one invoice delivery belongs to one delivery
-InvoiceDelivery.belongsTo(Delivery, { foreignKey: "deliveryId", as: "delivery" });
-Delivery.hasMany(InvoiceDelivery, { foreignKey: "deliveryId", as: "invoiceDeliveries" });
+
+
 
 // ServiceCategory-Client relation (many ServiceCategory to one Client)
 ServiceCategory.belongsTo(Client, { foreignKey: "clientId", as: "client" });
@@ -1004,8 +1010,36 @@ Client.hasMany(FreightDetail, { foreignKey: "clientId", as: "freightDetails" });
 FreightDetail.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // Client-InvoiceDelivery relation
-Client.hasMany(InvoiceDelivery, { foreignKey: "clientId", as: "invoiceDeliveries" });
-InvoiceDelivery.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+// Delivery -> DeliveryAddress (one-to-many)
+Delivery.hasMany(DeliveryAddress, { foreignKey: 'deliveryId', as: 'deliveryAddresses' });
+DeliveryAddress.belongsTo(Delivery, { foreignKey: 'deliveryId', as: 'delivery' });
+
+// DeliveryAddress -> DeliveryItem (one-to-many)
+DeliveryAddress.hasMany(DeliveryItem, { foreignKey: 'deliveryAddressId', as: 'deliveryItems' });
+DeliveryItem.belongsTo(DeliveryAddress, { foreignKey: 'deliveryAddressId', as: 'deliveryAddress' });
+
+// DeliveryItem -> SalesOrderProduct
+DeliveryItem.belongsTo(SalesOrderProduct, { foreignKey: 'salesOrderProductId', as: 'salesOrderProduct' });
+SalesOrderProduct.hasMany(DeliveryItem, { foreignKey: 'salesOrderProductId', as: 'deliveryItems' });
+
+// Delivery -> DeliveryItem shortcut
+Delivery.hasMany(DeliveryItem, { foreignKey: 'deliveryId', as: 'deliveryItems' });
+DeliveryItem.belongsTo(Delivery, { foreignKey: 'deliveryId', as: 'delivery' });
+
+// Client associations
+DeliveryAddress.belongsTo(Client, { foreignKey: 'clientId', as: 'client' });
+DeliveryItem.belongsTo(Client, { foreignKey: 'clientId', as: 'client' });
+
+// PackagingList -> DeliveryAddress (polymorphic-style, constraints: false)
+DeliveryAddress.belongsTo(PackagingList, { foreignKey: 'referenceId', as: 'packagingList', constraints: false });
+PackagingList.hasMany(DeliveryAddress, { foreignKey: 'referenceId', as: 'deliveryAddresses', constraints: false });
+
+// LoadingOrder -> DeliveryAddress (polymorphic-style, constraints: false)
+DeliveryAddress.belongsTo(LoadingOrder, { foreignKey: 'referenceId', as: 'loadingOrder', constraints: false });
+LoadingOrder.hasMany(DeliveryAddress, { foreignKey: 'referenceId', as: 'deliveryAddresses', constraints: false });
+
+
 
 // Location-InventoryProduct relation
 Location.hasMany(InventoryProduct, { foreignKey: "locationId", as: "inventoryProducts" });
@@ -1047,6 +1081,8 @@ SIPLProduct.hasMany(TempAiExtractedSiplItem, { foreignKey: "siplProductId", as: 
 TempAiExtractedSiplItem.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
 
 export {
+  DeliveryAddress,
+  DeliveryItem,
   TempAiExtractedSiplItem,
   Client,
   User,
@@ -1091,7 +1127,7 @@ export {
   Return,
   ReturnProduct,
   Delivery,
-  InvoiceDelivery,
+  
   ServiceCategory,
   Service,
   TradeService,

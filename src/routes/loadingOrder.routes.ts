@@ -10,6 +10,10 @@ router.post("/", authenticateUser, loadingOrderController.createLoadingOrder);
 // Get all PL
 router.get("/", authenticateUser, loadingOrderController.getAllLoadingOrders);
 
+// Get loading orders for delivery
+router.get("/for-delivery", authenticateUser, loadingOrderController.getLoadingOrdersForDelivery);
+
+
 // Get new SO number.
 router.get("/newLoNumber", authenticateUser, loadingOrderController.getNewPlNumber);
 

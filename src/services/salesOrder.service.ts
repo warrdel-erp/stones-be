@@ -180,6 +180,46 @@ export const getAllSalesOrders = async (
 };
 
 // Get sales order by ID
+export const getSalesOrderSummary = async (id: number) => {
+  const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
+  if (!salesOrder) return null;
+
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
+  const totalAdvancedDeposit = _.sumBy(salesOrder.advancedDeposits, (e: any) => Number(e.amount));
+
+  const totalItems = salesOrder.salesOrderProducts?.length || 0;
+  const totalSlabs = salesOrder.salesOrderProducts?.filter((p: any) => p.inventoryProduct?.slabId).length || 0;
+  const totalSqft = salesOrder.salesOrderProducts?.reduce((acc: number, p: any) => {
+      if (p.inventoryProduct?.slab) {
+          return acc + ((p.inventoryProduct.slab.receivingLength * p.inventoryProduct.slab.receivingWidth) / 144);
+      }
+      return acc;
+  }, 0) || 0;
+
+  const numPickLists = salesOrder.loadingOrders?.length || 0;
+  const numLoadingOrders = salesOrder.actualLoadingOrders?.length || 0;
+
+  return {
+    customer: salesOrder.customer,
+    financials: calculations,
+    advancedDeposit: totalAdvancedDeposit,
+    quantities: {
+      totalItems,
+      totalSlabs,
+      totalSqft: Number(totalSqft.toFixed(2))
+    },
+    logistics: {
+      pickLists: numPickLists,
+      loadingOrders: numLoadingOrders
+    },
+    salesRep: salesOrder.salesRep,
+    createdBy: salesOrder.createdBy,
+    status: salesOrder.status,
+    soNumber: salesOrder.soNumber,
+    clientSoNumber: salesOrder.clientSoNumber
+  };
+};
+
 export const getSalesOrderById = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
 
@@ -192,6 +232,8 @@ export const getSalesOrderById = async (id: number) => {
   if (salesOrder.actualLoadingOrders) {
     salesOrder.actualLoadingOrders = salesOrder.actualLoadingOrders.map((lo: any) => {
       lo.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(lo.salesOrderProducts);
+      lo.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(lo.salesOrderProducts);
+      delete lo.salesOrderProducts;
       return lo;
     });
   }
@@ -201,6 +243,7 @@ export const getSalesOrderById = async (id: number) => {
     packagingList.allProductsInLO = packagingList.salesOrderProducts?.length > 0 && packagingList.salesOrderProducts.every((p: any) => p.loadingOrderId !== null);
     packagingList.totalProducts = packagingList.salesOrderProducts?.length || 0;
     packagingList.assignedProducts = packagingList.salesOrderProducts?.filter((p: any) => p.loadingOrderId !== null).length || 0;
+    packagingList.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts);
     delete packagingList.salesOrderProducts;
     return packagingList;
   });

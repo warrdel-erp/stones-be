@@ -110,13 +110,13 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
   data.data = data.data.map((packagingList: any) => {
     packagingList = packagingList.get({ plain: true });
 
-    // Filter invoiceDeliveries to exclude those with rejected deliveries
-    // if (packagingList.invoiceDeliveries) {
-    //   packagingList.invoiceDeliveries = packagingList.invoiceDeliveries.filter((invoiceDelivery: any) => {
-    //     // Keep invoiceDelivery if it doesn't have a delivery, or if delivery status is not rejected
-    //     return !invoiceDelivery.delivery || invoiceDelivery.delivery.status !== DELIVERY_STATUS.REJECTED;
-    //   });
-    // }
+    // Filter deliveryAddresses to exclude those with rejected deliveries
+    if (packagingList.deliveryAddresses) {
+      packagingList.deliveryAddresses = packagingList.deliveryAddresses.filter((deliveryAddress: any) => {
+        // Keep deliveryAddress if it doesn't have a delivery, or if delivery status is not rejected
+        return !deliveryAddress.delivery || deliveryAddress.delivery.status !== 'rejected';
+      });
+    }
 
     const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
 
@@ -973,7 +973,7 @@ const validatePackagingListForCancel = (packagingList: any) => {
 
 // Helper to check and validate active deliveries
 const validateNoActiveDeliveries = async (packagingListId: number) => {
-  const activeDeliveries = await deliveryRepository.findExistingInvoiceDeliveriesByPackagingListIds([packagingListId]);
+  const activeDeliveries = await deliveryRepository.findExistingDeliveryAddressesByReferenceIds([packagingListId], 'packagingList');
   if (activeDeliveries && activeDeliveries.length > 0) {
     throw new AppError("Cannot cancel Packaging List because active deliveries are present.", 400);
   }

@@ -11,13 +11,14 @@ import { AuthRequest } from "../middleware/authMiddleware";
 export const createLoadingOrder = catchAsync(async (req: AuthRequest, res: Response) => {
   const { salesOrderId } = req.body;
   const clientId = req.user?.clientId;
+  const createdById = req.user?.accountId;
 
   if (!salesOrderId) {
     throw new AppError("salesOrderId is required.", 400);
   }
 
   // Create loading order.
-  const loadingOrder = await loadingOrderService.createLoadingOrder({ ...req.body, clientId });
+  const loadingOrder = await loadingOrderService.createLoadingOrder({ ...req.body, clientId, createdById });
 
   SuccessResponse(res, 201, "Loading Order created successfully", loadingOrder);
 });
@@ -88,8 +89,35 @@ export const invoiceLoadingOrder = catchAsync(async (req: AuthRequest, res: Resp
   const { id } = req.params;
   const clientId = req.user?.clientId;
   const locationId = req.user?.defaultLocationId;
+  const createdById = req.user?.accountId;
 
   const result = await loadingOrderService.invoiceLoadingOrder(Number(id), clientId!, Number(locationId));
 
   SuccessResponse(res, 201, "Loading Order invoiced successfully", result);
+});
+
+export const getLoadingOrdersForDelivery = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { page = 1, limit = 10, deliveryStatus, ...filters } = req.query;
+  const clientId = Number(req.user?.clientId);
+
+  if (deliveryStatus) {
+    filters.deliveryStatus = deliveryStatus;
+  }
+
+  const result = await loadingOrderRepository.getAllLoadingOrdersForDelivery(
+    Number(page),
+    Number(limit),
+    clientId,
+    filters
+  );
+
+  SuccessResponse(res, 200, "Loading orders for delivery fetched successfully", {
+    data: result.data,
+    paginationData: {
+      page: result.page,
+      limit: result.limit,
+      total: result.total,
+      totalPages: result.totalPages
+    }
+  });
 });

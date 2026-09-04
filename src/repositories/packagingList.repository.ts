@@ -33,17 +33,19 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
     if (filters.deliveryStatus === 'pending') {
       whereClause.id = {
         [Op.notIn]: sequelize.literal(`(
-          SELECT packagingListId FROM invoice_deliveries id
-          JOIN deliveries d ON id.deliveryId = d.id
-          WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+          SELECT da.referenceId FROM delivery_addresses da
+          JOIN deliveries d ON da.deliveryId = d.id
+          WHERE da.referenceType = 'packagingList'
+          AND d.status IN ('pending', 'approved', 'started', 'completed')
         )`)
       };
     } else if (filters.deliveryStatus === 'assigned') {
       whereClause.id = {
         [Op.in]: sequelize.literal(`(
-          SELECT packagingListId FROM invoice_deliveries id
-          JOIN deliveries d ON id.deliveryId = d.id
-          WHERE d.status IN ('pending', 'approved', 'started')
+          SELECT da.referenceId FROM delivery_addresses da
+          JOIN deliveries d ON da.deliveryId = d.id
+          WHERE da.referenceType = 'packagingList'
+          AND d.status IN ('pending', 'approved', 'started')
         )`)
       };
     }
@@ -80,7 +82,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
       },
       { association: 'shippingAddress' },
       {
-        association: 'invoiceDeliveries',
+        association: 'deliveryAddresses',
         required: false,
         separate: true,
         include: [
@@ -139,6 +141,7 @@ export const getPackagingListById = async (id: number) => {
       {
         association: "salesOrder",
         include: [
+          { association: "createdBy", include: ["user"] },
           {
             association: "customer",
             include: [
@@ -203,6 +206,10 @@ export const getPackagingListById = async (id: number) => {
           },
           {
             association: "loadingOrder",
+            attributes: ["id", "code"],
+          },
+          {
+            association: "packagingList",
             attributes: ["id", "code"],
           },
           {

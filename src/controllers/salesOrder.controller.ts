@@ -11,7 +11,7 @@ export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Respons
   const accountId = req.user?.accountId;
   const locationId = req.user?.defaultLocationId
 
-  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, accountId, clientId, locationId });
+  const salesOrder = await salesOrderService.createSalesOrder({ ...req.body, accountId, createdById: accountId, clientId, locationId });
   SuccessResponse(res, 201, "Sales Order created successfully", salesOrder);
 });
 
@@ -31,6 +31,17 @@ export const getAllSalesOrders = catchAsync(async (req: AuthRequest, res: Respon
 });
 
 // Get SO by ID
+export const getSalesOrderSummary = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const summary = await salesOrderService.getSalesOrderSummary(Number(id));
+
+  if (!summary) {
+    return SuccessResponse(res, 404, "Sales Order not found", null);
+  }
+
+  SuccessResponse(res, 200, "Sales Order summary retrieved successfully", summary);
+});
+
 export const getSalesOrderById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const salesOrder = await salesOrderService.getSalesOrderById(Number(id));

@@ -7,8 +7,9 @@ import { AuthRequest } from "../middleware/authMiddleware";
 // Create new LO
 export const createPackagingList = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
+  const createdById = req.user?.accountId;
 
-  const packagingList = await packagingListService.createPackagingList({ ...req.body, clientId });
+  const packagingList = await packagingListService.createPackagingList({ ...req.body, clientId, createdById });
   SuccessResponse(res, 201, "Packaging List created successfully", packagingList);
 });
 
@@ -94,6 +95,7 @@ export const invoicePackagingList = catchAsync(async (req: AuthRequest, res: Res
   const { id } = req.params;
   const clientId = req.user?.clientId;
   const locationId = req.user?.defaultLocationId;
+  const createdById = req.user?.accountId;
 
   const updatedPackagingList = await packagingListService.invoicePackagingList(Number(id), clientId!, Number(locationId));
 

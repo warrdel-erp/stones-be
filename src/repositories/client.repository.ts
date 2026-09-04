@@ -38,7 +38,7 @@ import {
   Return,
   ReturnProduct,
   Delivery,
-  InvoiceDelivery,
+  
   ServiceCategory,
   Service,
   TradeService,
@@ -233,7 +233,7 @@ async function deleteStandardModels(clientId: number, t: Transaction) {
     SlabRemeasurement, SoProductSwapHistory, InventoryProductHold, ReturnProduct,
     TradeService, SelectionSheetItem, PaymentBill, BillItem, CartItem,
     Notes, JournalEntry, CreditDebitNote, VendorContact, WiringInstruction,
-    GenericProduct, FreightDetail, InvoiceDelivery, Container, AdvancedDepositSettlement,
+    GenericProduct, FreightDetail,  Container, AdvancedDepositSettlement,
     // Mid-level
     SelectionSheet, Return, SalesOrderProduct, AdvancedDeposit, Payment,
     SalesOrderInvoice, LoadingOrder,

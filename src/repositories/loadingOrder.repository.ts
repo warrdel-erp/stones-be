@@ -22,6 +22,7 @@ export const getLoadingOrderById = async (id: number) => {
         {
           association: "salesOrder",
           include: [
+            { association: "createdBy", include: ["user"] },
             {
               association: "customer",
               attributes: ["id", "name", "salesTax"],
@@ -36,7 +37,7 @@ export const getLoadingOrderById = async (id: number) => {
             },
             {
               association: "soLocation",
-              attributes: ["id", "locationName"],
+              attributes: ["id", "locationName", "lat", "long", "address"],
             },
           ]
         },
@@ -63,7 +64,7 @@ export const getLoadingOrderById = async (id: number) => {
                 },
                 {
                   association: "soLocation",
-                  attributes: ["id", "locationName"],
+                  attributes: ["id", "locationName", "lat", "long", "address"],
                 },
               ],
             },
@@ -164,4 +165,67 @@ export const updateLoadingOrderByPackagingListId = async (
     where: { packagingListId },
     transaction
   });
+};
+
+export const getAllLoadingOrdersForDelivery = async (page: number, limit: number, clientId: number, filters?: any) => {
+  const offset = (page - 1) * limit;
+  const whereClause: any = { ...filters };
+  if (clientId) whereClause.clientId = clientId;
+
+  if (filters?.deliveryStatus) {
+    const { sequelize } = require('../config/database');
+    const { Op } = require('sequelize');
+    if (filters.deliveryStatus === 'pending') {
+      whereClause.id = {
+        [Op.notIn]: sequelize.literal(`(
+          SELECT da.referenceId FROM delivery_addresses da
+          JOIN deliveries d ON da.deliveryId = d.id
+          WHERE da.referenceType = 'loadingOrder'
+          AND d.status IN ('pending', 'approved', 'started', 'completed')
+        )`)
+      };
+    } else if (filters.deliveryStatus === 'assigned') {
+      whereClause.id = {
+        [Op.in]: sequelize.literal(`(
+          SELECT da.referenceId FROM delivery_addresses da
+          JOIN deliveries d ON da.deliveryId = d.id
+          WHERE da.referenceType = 'loadingOrder'
+          AND d.status IN ('pending', 'approved', 'started')
+        )`)
+      };
+    }
+    delete whereClause.deliveryStatus;
+  }
+
+  const { rows: data, count: total } = await scoped(models.LoadingOrder).findAndCountAll({
+    distinct: true,
+    where: whereClause,
+    include: [
+      {
+        model: models.SalesOrder,
+        as: 'salesOrder',
+        include: [
+          { model: models.Customer, as: 'customer' },
+          { model: models.Location, as: 'soLocation' },
+        ],
+      },
+      { model: models.PackagingList, as: 'packagingList', include: [{ association: 'shippingAddress' }] },
+      {
+        association: 'salesOrderProducts',
+        required: false,
+        include: [{ association: 'inventoryProduct', include: [{ association: 'product', attributes: ['id', 'name', 'isSlabType'] }, { association: 'slab' }] }],
+      }
+    ],
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']],
+  });
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit)
+  };
 };

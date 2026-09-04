@@ -20,6 +20,10 @@ const PackagingList = sequelize.define(
     code: {
       type: DataTypes.STRING,
     },
+    createdById: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     clientPlNumber: {
       type: DataTypes.INTEGER,
       allowNull: true,

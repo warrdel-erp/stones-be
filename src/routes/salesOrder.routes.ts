@@ -27,6 +27,9 @@ router.get("/newSoNumber", authenticateUser, salesOrderController.getNewSoNumber
 // Get Paid Amount for a SO
 router.get("/paidAmount/:id", authenticateUser, salesOrderController.getPaidAmountForSO)
 
+// Get SO Summary
+router.get("/:id/summary", authenticateUser, salesOrderController.getSalesOrderSummary);
+
 // Get SO by Id for Create LO
 router.get("/:id/forCreateLO", authenticateUser, salesOrderController.getSalesOrderByIdForCreateLO);
 router.get("/:id/forCreateActualLO", authenticateUser, salesOrderController.getSalesOrderByIdForCreateActualLO);

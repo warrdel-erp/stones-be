@@ -10,39 +10,23 @@ const driverInclude = {
 };
 
 const deliveryInclude = {
-  association: "deliveries",
+  association: 'deliveries',
   required: false,
   where: {
     status: {
-      [Op.in]: ["pending", "approved", "started"]
+      [Op.in]: ['pending', 'approved', 'started']
     }
   },
   include: [
     {
-      association: "invoiceDeliveries",
+      association: 'deliveryAddresses',
       include: [
         {
-          association: "packagingList",
-          include: [
-            {
-              association: "salesOrder",
-              include: [
-                { association: "customer", as: "customer" }
-              ]
-            },
-            {
-              association: "salesOrderProducts",
-              include: [
-                {
-                  association: "inventoryProduct"
-                }
-              ]
-            },
-            {
-              association: "shippingAddress"
-            }
-          ]
-        }
+          association: 'deliveryItems',
+          include: [{ association: 'salesOrderProduct' }]
+        },
+        { association: 'packagingList', attributes: ['id', 'code'] },
+        { association: 'loadingOrder', attributes: ['id', 'code'] },
       ]
     }
   ]
