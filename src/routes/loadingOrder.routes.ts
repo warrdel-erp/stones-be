@@ -25,5 +25,6 @@ router.get("/:id", authenticateUser, loadingOrderController.getLoadingOrderById)
 
 // Invoice Loading Order
 router.post("/:id/invoice", authenticateUser, loadingOrderController.invoiceLoadingOrder);
+router.get("/:id/invoicePreview", authenticateUser, loadingOrderController.getInvoicePreview);
 
 export default router;
