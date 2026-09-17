@@ -245,14 +245,14 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
 
       return {
         id: soInvoice.id,
-        dueDate: soInvoice.packagingList.expDeliveryDate,
+        dueDate: soInvoice.packagingList?.expDeliveryDate || null,
         amount: soInvoice.finalAmount,
         paidAmount,
         dueAmount: decimalSubtract(soInvoice.finalAmount, paidAmount),
         creationDate: soInvoice.createdAt,
         code: soInvoice.invoiceCode,
-        loNumber: soInvoice.packagingList.clientPlNumber,
-        plDate: soInvoice.packagingList.plDate,
+        loNumber: soInvoice.packagingList?.clientPlNumber || soInvoice.loadingOrder?.code || null,
+        plDate: soInvoice.packagingList?.plDate || soInvoice.loadingOrder?.createdAt || null,
         settledWithAdvancedDeposits,
         type: "invoice"
       };

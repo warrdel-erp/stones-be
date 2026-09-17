@@ -122,7 +122,7 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
 export const getReturnById = async (returnId: number, transaction?: Transaction) => {
     const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId, transaction))?.get({ plain: true });
 
-    const salesTax = returnRecord.soInvoice.packagingList.salesOrder.tax;
+    const salesTax = (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).tax;
 
     if (!salesTax) {
         throw new AppError('Error in getting tax value', 400);
@@ -160,7 +160,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
 
         // Ledger Account for Customer
         const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            referenceId: returnRecord.soInvoice.packagingList.salesOrder.customerId,
+            referenceId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).customerId,
             referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
         });
 
@@ -188,7 +188,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                 partyLedgerAccountId: ledgerAccountForGoodsSold.id,
             },
             transaction
@@ -210,7 +210,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -228,7 +228,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
             clientId,
         });
 
-        const customerTax = returnRecord.soInvoice.packagingList.salesOrder.tax;
+        const customerTax = (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).tax;
 
         // #3
         // Journal Entry for state tax.
@@ -246,7 +246,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -271,7 +271,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryForId: returnRecord.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                 partyLedgerAccountId: ledgerAccount.id,
             },
             transaction
@@ -325,7 +325,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                        locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                         partyLedgerAccountId: ledgerAccountForCogs.id,
                     },
                     transaction
@@ -349,7 +349,7 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                         entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                         entryForId: returnRecord.id,
 
-                        locationId: returnRecord.soInvoice.packagingList.salesOrder.locationId,
+                        locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
                         partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
                     },
                     transaction

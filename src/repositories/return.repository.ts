@@ -78,6 +78,19 @@ export const getReturnWithProducts = async (returnId: number, transaction?: Tran
                                 ]
                             }
                         ]
+                    },
+                    {
+                        association: 'loadingOrder',
+                        include: [
+                            {
+                                association: 'salesOrder',
+                                include: [
+                                    {
+                                        association: 'customer'
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
