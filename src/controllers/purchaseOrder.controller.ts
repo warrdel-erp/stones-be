@@ -30,7 +30,7 @@ export const createPurchaseOrderController = catchAsync(async (req: AuthRequest,
 
 // Get all po with pagination.
 export const getAllPurchaseOrders = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10, ...filter }: any = req.query;
+  const { page = 1, limit = 10, sort, ...filter }: any = req.query;
 
   const clientId = req.user?.clientId;
 

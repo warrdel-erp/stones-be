@@ -146,7 +146,7 @@ export const getAllInvoices = async (filter: WhereOptions, transaction?: Transac
       },
       {
         association: 'advancedDepositSettlements',
-        attributes: ['id'],
+        attributes: ['id', 'amount'],
         include: [
           {
             association: 'advancedDeposit',

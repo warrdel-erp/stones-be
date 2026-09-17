@@ -8,6 +8,8 @@ export const addRequirementLineSchema = z.object({
   taxApplied: z.boolean().optional().default(true),
   minLength: z.coerce.number().optional(),
   minWidth: z.coerce.number().optional(),
+  autoAllocate: z.boolean().optional().default(true),
+  inventoryProductIds: z.array(z.number().int()).optional(),
 });
 
 export const updateAllocationsSchema = z.object({

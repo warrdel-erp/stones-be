@@ -99,6 +99,7 @@ export const getAllSalesOrders = async (
       {
         association: "salesOrderProducts",
         include: [
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             attributes: ["id", 'landedUnitCost'],
@@ -185,6 +186,7 @@ export const getAllSalesOrdersOnlyWithPackagingList = async (page: number, limit
         association: "salesOrderProducts",
         attributes: ["id", "unitPrice", "stage"],
         include: [
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             attributes: ["id"],
@@ -283,6 +285,7 @@ export const getAllSalesOrdersOnlyWithLoadingOrder = async (page: number, limit:
         association: "salesOrderProducts",
         attributes: ["id", "unitPrice", "stage"],
         include: [
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             attributes: ["id"],
@@ -404,6 +407,7 @@ export const getSalesOrderById = async (id: number) => {
       {
         association: "salesOrderProducts",
         include: [
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             include: [
@@ -537,6 +541,8 @@ export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
         },
         required: false,
         include: [
+          { association: 'packagingList' },
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             include: [
@@ -582,6 +588,8 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
         where: { stage: SALE_ORDER_PRODUCT_STAGES.SALES_ORDER },
         required: false,
         include: [
+          { association: 'packagingList' },
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
             include: [

@@ -3,12 +3,13 @@ import * as deliveryRepository from '../repositories/delivery.repository';
 import * as packagingListRepository from '../repositories/packagingList.repository';
 import * as loadingOrderRepository from '../repositories/loadingOrder.repository';
 import * as truckRepository from '../repositories/truck.repository';
+import * as models from '../models';
 import { DELIVERY_STATUS, TRUCK_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from '../constants/tableTypes';
 import * as activityService from '../services/activity.service';
 import { requestContext } from '../utils/requestContext';
 import { AppError } from '../helper/appError';
 
-type DeliveryReference = { id: number; referenceType: 'packagingList' | 'loadingOrder' };
+type DeliveryReference = { id: number; referenceType: 'packagingList' | 'loadingOrder'; salesOrderProductIds?: number[] };
 
 export const initiateDelivery = async (
     truckId: number,
@@ -21,44 +22,27 @@ export const initiateDelivery = async (
         throw new AppError('Truck is not available.', 400);
     }
 
-    // Check if any reference already has an active delivery
-    const plIds = references.filter(r => r.referenceType === 'packagingList').map(r => r.id);
-    const loIds = references.filter(r => r.referenceType === 'loadingOrder').map(r => r.id);
-
-    if (plIds.length > 0) {
-        const existing = await deliveryRepository.findExistingDeliveryAddressesByReferenceIds(plIds, 'packagingList');
-        if (existing.length > 0) {
-            const usedIds = existing.map((d: any) => d.get('referenceId')).join(', ');
-            throw new AppError(`The following Packaging Lists already have a delivery assigned: [${usedIds}].`, 400);
-        }
-    }
-    if (loIds.length > 0) {
-        const existing = await deliveryRepository.findExistingDeliveryAddressesByReferenceIds(loIds, 'loadingOrder');
-        if (existing.length > 0) {
-            const usedIds = existing.map((d: any) => d.get('referenceId')).join(', ');
-            throw new AppError(`The following Loading Orders already have a delivery assigned: [${usedIds}].`, 400);
-        }
-    }
+    // The check for existing items is moved down inside the transaction after we get the salesOrderProducts
 
     const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);
+    
+    let currentLoadCount = 0;
+    if (existingPendingDelivery) {
+        currentLoadCount = await models.DeliveryItem.count({
+            where: { deliveryId: existingPendingDelivery.get('id') }
+        });
+    }
 
     const fromLocation = [0, 0];
 
     return await sequelize.transaction(async (transaction) => {
         let delivery = existingPendingDelivery;
         if (delivery) {
-            // Get fromLocation from existing deliveryAddresses if any
-            const existing = await deliveryRepository.findDeliveryById(delivery.get('id') as number);
-            const firstAddr = (existing?.get({ plain: true }) as any)?.deliveryAddresses?.[0];
-            if (firstAddr) {
-                fromLocation[0] = firstAddr.fromLat;
-                fromLocation[1] = firstAddr.fromLng;
-            }
-        } else {
-            delivery = await deliveryRepository.createDelivery(truckId, clientId, transaction);
+            fromLocation[0] = delivery.get('fromLat') as number;
+            fromLocation[1] = delivery.get('fromLng') as number;
         }
 
-        const deliveryId = delivery.get('id') as number;
+        let deliveryId = delivery ? (delivery.get('id') as number) : 0;
         const deliveryAddresses = [];
 
         for (const ref of references) {
@@ -81,30 +65,58 @@ export const initiateDelivery = async (
                 salesOrderProducts = lo.salesOrderProducts || [];
             }
 
-            if (!soLocation || (!soLocation.lat && !soLocation.long)) {
+            const soLat = Number(soLocation.lat);
+            const soLng = Number(soLocation.long);
+
+            if (!soLocation || (!soLat && !soLng)) {
                 throw new AppError(`soLocation missing for ${ref.referenceType} ${ref.id}`, 400);
             }
             if (!shippingAddress) {
                 throw new AppError(`shippingAddress missing for ${ref.referenceType} ${ref.id}`, 400);
             }
 
-            // Validate consistent fromLocation
+            // Validate consistent fromLocation with floating point tolerance
             if (fromLocation[0] === 0 && fromLocation[1] === 0) {
-                fromLocation[0] = soLocation.lat;
-                fromLocation[1] = soLocation.long;
-            } else if (fromLocation[0] !== soLocation.lat || fromLocation[1] !== soLocation.long) {
-                throw new AppError('All references must share the same pickup location (soLocation).', 400);
+                fromLocation[0] = soLat;
+                fromLocation[1] = soLng;
+            } else if (Math.abs(Number(fromLocation[0]) - soLat) > 0.0001 || Math.abs(Number(fromLocation[1]) - soLng) > 0.0001) {
+                throw new AppError(`All references must share the same pickup location. Expected (${fromLocation[0]}, ${fromLocation[1]}), got (${soLat}, ${soLng}) for ${ref.referenceType} ${ref.id}.`, 400);
+            }
+
+            if (!delivery) {
+                delivery = await deliveryRepository.createDelivery(
+                    truckId,
+                    clientId,
+                    soLat,
+                    soLng,
+                    soLocation.address || '',
+                    transaction
+                );
+                deliveryId = delivery.get('id') as number;
+            }
+
+            if (ref.salesOrderProductIds !== undefined) {
+                salesOrderProducts = salesOrderProducts.filter((sop: any) => ref.salesOrderProductIds?.includes(sop.id));
             }
 
             if (!salesOrderProducts.length) {
                 throw new AppError(`No salesOrderProducts found for ${ref.referenceType} ${ref.id}`, 400);
             }
 
+            // check if any of these products are already assigned
+            const sopIds = salesOrderProducts.map((sop: any) => sop.id);
+            const existingItems = await deliveryRepository.findExistingDeliveryItemsBySopIds(sopIds);
+            if (existingItems.length > 0) {
+                throw new AppError(`Some products in ${ref.referenceType} ${ref.id} are already assigned to a delivery.`, 400);
+            }
+
+            currentLoadCount += salesOrderProducts.length;
+            if (truckData.capacity && currentLoadCount > truckData.capacity) {
+                throw new AppError(`Cannot assign: Total load (${currentLoadCount} slabs) exceeds truck capacity (${truckData.capacity} slabs).`, 400);
+            }
+
             const deliveryAddress = await deliveryRepository.createDeliveryAddress({
                 deliveryId,
-                fromLat: soLocation.lat,
-                fromLng: soLocation.long,
-                fromAddress: soLocation.address || '',
                 toLat: shippingAddress.lat,
                 toLng: shippingAddress.long,
                 toAddress: shippingAddress.address || shippingAddress.addressLine || '',

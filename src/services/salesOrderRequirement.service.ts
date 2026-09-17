@@ -22,6 +22,8 @@ export const addRequirementLine = async (
     taxApplied?: boolean;
     minLength?: number;
     minWidth?: number;
+    autoAllocate?: boolean;
+    inventoryProductIds?: number[];
   },
   locationId?: number
 ) => {
@@ -74,12 +76,12 @@ export const addRequirementLine = async (
 
     let allocatedCount = 0;
     const needed = Number(payload.requiredCount);
-
     const taxPercentage = (payload.taxApplied !== false && so.taxId) ? (SALES_TAX.find((e) => e.id == so.taxId)?.value || 0) : 0;
+    const manuallySelectedIds = payload.inventoryProductIds || [];
+    const shouldAutoAllocate = payload.autoAllocate !== false;
 
-    for (const inv of availableInventory) {
-      if (allocatedCount >= needed) break;
-
+    // Helper to allocate a specific inventory product
+    const allocateProduct = async (inv: any) => {
       const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(inv.id);
       
       let receivingAreaSqFt = null;
@@ -114,6 +116,24 @@ export const addRequirementLine = async (
       );
 
       allocatedCount += 1;
+    };
+
+    // 1. First allocate manually selected ones
+    for (const inv of availableInventory) {
+      if (allocatedCount >= needed) break;
+      if (manuallySelectedIds.includes(inv.id)) {
+        await allocateProduct(inv);
+      }
+    }
+
+    // 2. Then auto allocate the rest if requested
+    if (shouldAutoAllocate) {
+      for (const inv of availableInventory) {
+        if (allocatedCount >= needed) break;
+        if (!manuallySelectedIds.includes(inv.id)) {
+          await allocateProduct(inv);
+        }
+      }
     }
 
     // 4. Calculate requirement status

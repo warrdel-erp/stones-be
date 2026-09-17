@@ -1183,3 +1183,30 @@ Univ
 5. Unit price auto filling.
 6. One product can not be added again.
 7. show inventory info if we select product to add a line.
+
+---
+
+1. exceeded capacity can not be added.
+2. if any truck has approved active delivery then it can't be assigned more.
+3. partial delivery assignment.
+4. any SOProduct that has been assigned to delivery or completed then it can't be assigned to LO.
+5. delivery can be assigned to LO or PL.
+6. if any product get into delivery from PL then it's LO can not be created.
+
+---
+
+1. delivery stage in SO.
+2. Dashboard SO API error.
+3. billing stage on SO.
+4. hide SO summary.
+5. change design of summary sections.
+6. product stage drawer selection and design change.
+
+---
+
+1. show atlanta as default location of MAP.
+2. continue to order Detail should go to next stage.
+3. in Create LO show inventoryProduct's PL info.
+4. check all submit redirection in SO
+5. if we assign LO to truck it is not showing in deliveries's card in design. but showing PLs
+6. show start point in deliveries.

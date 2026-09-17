@@ -19,13 +19,19 @@ const DeliveryAddress = sequelize.define(
       references: { model: Client, key: 'id' },
       onDelete: 'RESTRICT', onUpdate: 'CASCADE',
     },
-    fromLat: { type: DataTypes.FLOAT, allowNull: false },
-    fromLng: { type: DataTypes.FLOAT, allowNull: false },
-    fromAddress: { type: DataTypes.TEXT, allowNull: false },
-    toLat: { type: DataTypes.FLOAT, allowNull: false },
-    toLng: { type: DataTypes.FLOAT, allowNull: false },
-    toAddress: { type: DataTypes.TEXT, allowNull: false },
-    order: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
+
+    toLat: {
+      type: DataTypes.FLOAT, allowNull: false
+    },
+    toLng: {
+      type: DataTypes.FLOAT, allowNull: false
+    },
+    toAddress: {
+      type: DataTypes.TEXT, allowNull: false
+    },
+    order: {
+      type: DataTypes.INTEGER, allowNull: true, defaultValue: 0
+    },
     referenceType: {
       type: DataTypes.ENUM('packagingList', 'loadingOrder'),
       allowNull: false,

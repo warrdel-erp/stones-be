@@ -35,6 +35,9 @@ const Delivery = sequelize.define(
             onDelete: "RESTRICT",
             onUpdate: "CASCADE",
         },
+        fromLat: { type: DataTypes.FLOAT, allowNull: true },
+        fromLng: { type: DataTypes.FLOAT, allowNull: true },
+        fromAddress: { type: DataTypes.TEXT, allowNull: true },
     },
     {
         tableName: "deliveries",

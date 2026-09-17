@@ -18,13 +18,13 @@ export const removeDuplicatesWithUnitPrice = (array: any[]) =>
   );
 
 export const addPercentage = (value: number, percentage: number) =>
-  value + (value * percentage) / 100;
+  new Decimal(value || 0).times(percentage || 0).dividedBy(100).plus(value || 0).toDP(2).toNumber();
 
 export const getPercentageValue = (value: number, percentage: number) =>
-  (value * percentage) / 100;
+  new Decimal(value || 0).times(percentage || 0).dividedBy(100).toDP(2).toNumber();
 
 export const getPercentageValueFromValue = (total: number, value: number) =>
-  (value / total) * 100;
+  total ? new Decimal(value || 0).dividedBy(total).times(100).toDP(2).toNumber() : 0;
 
 export const randomId = () => Math.random().toString(36).substring(2, 10);
 

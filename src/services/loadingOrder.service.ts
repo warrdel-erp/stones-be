@@ -3,7 +3,13 @@ import * as salesOrderProductService from "../services/salesOrderProduct.service
 import * as packagingListRepository from "../repositories/packagingList.repository";
 import { PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES, LEDGER_ACCOUNT_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
 import { INVENTORY_ITEM_STATUS } from "../constants";
+import Decimal from 'decimal.js';
+import * as decimal from '../helper/decimal';
+import * as models from '../models';
+import { scoped } from '../utils/scoped';
 import { sequelize } from "../config/database";
+import { Op } from "sequelize";
+import { DELIVERY_STATUS } from "../constants/tableTypes";
 import { AppError } from "../helper/appError";
 import { removeDuplicatesWithUnitPrice, getPercentageValue } from "../helper";
 import { PAYMENT_TERMS, SALES_TAX } from "../constants";
@@ -31,8 +37,24 @@ export const createLoadingOrder = async (data: any) => {
       throw new AppError("Sales order ID is required.", 400);
     }
 
-    // Determine the distinct packaging lists involved.
+        // Determine the distinct packaging lists involved.
     const packagingListIds = new Set<number>();
+    
+    // Ensure products are not assigned to a delivery
+    const sopIds = data.soProducts.map((p: any) => p.id);
+    const existingDeliveryItems = await sequelize.models.DeliveryItem.findAll({
+      where: { salesOrderProductId: { [Op.in]: sopIds } },
+      include: [{
+        association: 'delivery',
+        where: { status: { [Op.ne]: 'rejected' } } // Fallback hardcoded string since DELIVERY_STATUS might not be imported correctly if I messed up
+      }],
+      transaction
+    });
+    
+    if (existingDeliveryItems && existingDeliveryItems.length > 0) {
+      const conflictSopId = (existingDeliveryItems[0] as any).salesOrderProductId;
+      throw new AppError(`Product ${conflictSopId} is already assigned to a delivery and cannot be added to a loading order.`, 400);
+    }
 
     // Check concurrency and ensure none of the selected products already have a loadingOrderId
     for (const product of data.soProducts) {
@@ -380,4 +402,95 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     transaction.rollback();
     throw error;
   }
+};
+
+
+
+export const getInvoicePreview = async (loadingOrderId: number) => {
+  const loadingOrder: any = await loadingOrderRepository.getLoadingOrderById(Number(loadingOrderId));
+
+  if (!loadingOrder) {
+    throw new AppError(`Loading Order not found with id: ${loadingOrderId}`, 400);
+  }
+
+  if (loadingOrder.stage === PACKAGING_LIST_STAGES.INVOICED) {
+    throw new AppError('Loading Order is already invoiced.', 400);
+  }
+
+  const invoiceAmountObj = loadingOrder.calculations.loadingOrder;
+  let serviceTotals = 0; // if you have tradeServices on LO, calculate here, else 0
+
+  const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
+  const invoiceTotal = decimal.decimalAdd(invoiceAmountObj.total, serviceTotals);
+
+  const salesOrderId = actualSalesOrder.id;
+  const deposits: any[] = await scoped(models.AdvancedDeposit).findAll({
+    where: { salesOrderId },
+    order: [['createdAt', 'ASC']],
+    include: [
+      {
+        association: 'settlements',
+        attributes: ['amount'],
+      }
+    ],
+  });
+
+  let remainingInvoiceBalance = new Decimal(invoiceTotal);
+  const depositPreviews: Array<{
+    depositId: number;
+    depositCode: string;
+    depositAmount: number;
+    alreadySettled: number;
+    availableBalance: number;
+    willBeSettled: number;
+  }> = [];
+
+  for (const dep of deposits) {
+    if (remainingInvoiceBalance.lte(0)) break;
+
+    const depAmount = new Decimal(dep.amount);
+    let settledSoFar = new Decimal(0);
+    if (dep.settlements && dep.settlements.length > 0) {
+      settledSoFar = dep.settlements.reduce(
+        (sum: Decimal, s: any) => sum.plus(new Decimal(s.amount)),
+        new Decimal(0)
+      );
+    }
+    const available = depAmount.minus(settledSoFar);
+
+    if (available.gt(0)) {
+      let settlementAmount = new Decimal(0);
+      if (available.gte(remainingInvoiceBalance)) {
+        settlementAmount = remainingInvoiceBalance;
+        remainingInvoiceBalance = new Decimal(0);
+      } else {
+        settlementAmount = available;
+        remainingInvoiceBalance = remainingInvoiceBalance.minus(available);
+      }
+
+      depositPreviews.push({
+        depositId: dep.id as number,
+        depositCode: dep.code,
+        depositAmount: depAmount.toNumber(),
+        alreadySettled: settledSoFar.toNumber(),
+        availableBalance: available.toNumber(),
+        willBeSettled: settlementAmount.toNumber(),
+      });
+    }
+  }
+
+  const totalWillBeSettled = depositPreviews.reduce((sum, d) => sum + d.willBeSettled, 0);
+
+  return {
+    invoiceSummary: {
+      subTotal: invoiceAmountObj.subTotal,
+      taxable: invoiceAmountObj.taxable,
+      tax: invoiceAmountObj.tax,
+      serviceCharges: serviceTotals,
+      total: invoiceTotal,
+    },
+    depositPreviews,
+    totalWillBeSettled,
+    remainingDueAfterSettlement: remainingInvoiceBalance.toNumber(),
+  };
 };

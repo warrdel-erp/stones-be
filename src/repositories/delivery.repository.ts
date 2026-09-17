@@ -33,16 +33,40 @@ export const findExistingDeliveryAddressesByReferenceIds = async (
     });
 };
 
-export const createDelivery = async (truckId: number, clientId: number, transaction: Transaction) => {
-    return scoped(models.Delivery).create({ truckId, clientId, status: DELIVERY_STATUS.PENDING }, { transaction });
+
+export const findExistingDeliveryItemsBySopIds = async (sopIds: number[]) => {
+    return scoped(models.DeliveryItem).findAll({
+        where: { salesOrderProductId: { [Op.in]: sopIds } },
+        include: [
+            {
+                association: 'delivery',
+                where: { status: { [Op.ne]: DELIVERY_STATUS.REJECTED } }
+            }
+        ]
+    });
+};
+
+export const createDelivery = async (
+    truckId: number, 
+    clientId: number, 
+    fromLat: number, 
+    fromLng: number, 
+    fromAddress: string, 
+    transaction?: Transaction
+) => {
+    return scoped(models.Delivery).create({
+        truckId,
+        clientId,
+        status: DELIVERY_STATUS.PENDING,
+        fromLat,
+        fromLng,
+        fromAddress
+    }, { transaction });
 };
 
 export const createDeliveryAddress = async (
     data: {
         deliveryId: number;
-        fromLat: number;
-        fromLng: number;
-        fromAddress: string;
         toLat: number;
         toLng: number;
         toAddress: string;
@@ -70,7 +94,14 @@ const deliveryIncludeWithAddresses = [
                 include: [
                     {
                         association: 'salesOrderProduct',
-                        include: [{ association: 'inventoryProduct' }]
+                        include: [{
+                            association: 'inventoryProduct',
+                            include: [
+                                { association: 'product', include: [{ association: 'images', include: [{ association: 's3File' }] }] },
+                                { association: 'sipl' },
+                                { association: 'slab' }
+                            ]
+                        }]
                     }
                 ]
             },
@@ -86,8 +117,29 @@ const deliveryIncludeWithAddresses = [
 
 export const getAllDeliveriesByClientId = async (page: number, limit: number, clientId: number, filters?: any) => {
     const offset = (page - 1) * limit;
+    const { salesOrderId, ...otherFilters } = filters || {};
+    let finalWhere: any = { clientId, ...otherFilters };
+
+    if (salesOrderId) {
+        const deliveryItems = await scoped(models.DeliveryItem).findAll({
+            include: [{
+                association: 'salesOrderProduct',
+                where: { salesOrderId: Number(salesOrderId) },
+                required: true,
+                attributes: ['id']
+            }],
+            attributes: ['deliveryId']
+        });
+        const deliveryIds = [...new Set(deliveryItems.map((di: any) => di.get('deliveryId')))];
+        if (deliveryIds.length > 0) {
+            finalWhere.id = { [Op.in]: deliveryIds };
+        } else {
+            finalWhere.id = { [Op.in]: [] };
+        }
+    }
+
     return await scoped(models.Delivery).findAndCountAll({
-        where: { clientId, ...filters },
+        where: finalWhere,
         order: [['createdAt', 'DESC']],
         include: deliveryIncludeWithAddresses,
         limit,

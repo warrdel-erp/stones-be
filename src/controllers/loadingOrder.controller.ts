@@ -121,3 +121,11 @@ export const getLoadingOrdersForDelivery = catchAsync(async (req: AuthRequest, r
     }
   });
 });
+
+
+
+export const getInvoicePreview = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const preview = await loadingOrderService.getInvoicePreview(Number(id));
+  SuccessResponse(res, 200, "Invoice preview fetched successfully", preview);
+});

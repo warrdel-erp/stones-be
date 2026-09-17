@@ -17,7 +17,7 @@ export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Respons
 
 // Get all SO
 export const getAllSalesOrders = catchAsync(async (req: AuthRequest, res: Response) => {
-  const { page = 1, limit = 10, ...filter }: any = req.query;
+  const { page = 1, limit = 10, sort, ...filter }: any = req.query;
 
   const clientId = req.user?.clientId;
 

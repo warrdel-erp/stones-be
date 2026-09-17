@@ -32,20 +32,26 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
   if (filters.deliveryStatus) {
     if (filters.deliveryStatus === 'pending') {
       whereClause.id = {
-        [Op.notIn]: sequelize.literal(`(
-          SELECT da.referenceId FROM delivery_addresses da
-          JOIN deliveries d ON da.deliveryId = d.id
-          WHERE da.referenceType = 'packagingList'
-          AND d.status IN ('pending', 'approved', 'started', 'completed')
+        [Op.in]: sequelize.literal(`(
+          SELECT sop.packagingListId FROM sales_order_products sop
+          WHERE sop.packagingListId IS NOT NULL
+          AND sop.id NOT IN (
+            SELECT di.salesOrderProductId FROM delivery_items di
+            JOIN deliveries d ON di.deliveryId = d.id
+            WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+          )
         )`)
       };
     } else if (filters.deliveryStatus === 'assigned') {
       whereClause.id = {
         [Op.in]: sequelize.literal(`(
-          SELECT da.referenceId FROM delivery_addresses da
-          JOIN deliveries d ON da.deliveryId = d.id
-          WHERE da.referenceType = 'packagingList'
-          AND d.status IN ('pending', 'approved', 'started')
+          SELECT sop.packagingListId FROM sales_order_products sop
+          WHERE sop.packagingListId IS NOT NULL
+          AND sop.id IN (
+            SELECT di.salesOrderProductId FROM delivery_items di
+            JOIN deliveries d ON di.deliveryId = d.id
+            WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+          )
         )`)
       };
     }
@@ -71,6 +77,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
       {
         association: "salesOrderProducts",
         include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: 'inventoryProduct',
             include: [
@@ -86,6 +93,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
         required: false,
         separate: true,
         include: [
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: 'delivery',
             where: {
@@ -157,6 +165,7 @@ export const getPackagingListById = async (id: number) => {
             association: "salesOrderProducts",
             attributes: ["id", "unitPrice"],
             include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },
               {
                 association: "inventoryProduct",
                 attributes: ["id", "landedUnitCost"],
@@ -179,6 +188,7 @@ export const getPackagingListById = async (id: number) => {
         association: "salesOrderProducts",
         required: false,
         include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },
           {
             association: "inventoryProduct",
 
@@ -289,6 +299,7 @@ export const getPackagingListAsPerReturn = async (id: number, returnId: number, 
           association: "salesOrderProducts",
           attributes: ["id", "unitPrice"],
           include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },
             {
               association: "inventoryProduct",
               attributes: ["id", "landedUnitCost", 'productId'],

@@ -74,6 +74,7 @@ export const getLoadingOrderById = async (id: number) => {
           association: "salesOrderProducts",
           required: false,
           include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },
             {
               association: "inventoryProduct",
 
@@ -177,20 +178,26 @@ export const getAllLoadingOrdersForDelivery = async (page: number, limit: number
     const { Op } = require('sequelize');
     if (filters.deliveryStatus === 'pending') {
       whereClause.id = {
-        [Op.notIn]: sequelize.literal(`(
-          SELECT da.referenceId FROM delivery_addresses da
-          JOIN deliveries d ON da.deliveryId = d.id
-          WHERE da.referenceType = 'loadingOrder'
-          AND d.status IN ('pending', 'approved', 'started', 'completed')
+        [Op.in]: sequelize.literal(`(
+          SELECT sop.loadingOrderId FROM sales_order_products sop
+          WHERE sop.loadingOrderId IS NOT NULL
+          AND sop.id NOT IN (
+            SELECT di.salesOrderProductId FROM delivery_items di
+            JOIN deliveries d ON di.deliveryId = d.id
+            WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+          )
         )`)
       };
     } else if (filters.deliveryStatus === 'assigned') {
       whereClause.id = {
         [Op.in]: sequelize.literal(`(
-          SELECT da.referenceId FROM delivery_addresses da
-          JOIN deliveries d ON da.deliveryId = d.id
-          WHERE da.referenceType = 'loadingOrder'
-          AND d.status IN ('pending', 'approved', 'started')
+          SELECT sop.loadingOrderId FROM sales_order_products sop
+          WHERE sop.loadingOrderId IS NOT NULL
+          AND sop.id IN (
+            SELECT di.salesOrderProductId FROM delivery_items di
+            JOIN deliveries d ON di.deliveryId = d.id
+            WHERE d.status IN ('pending', 'approved', 'started', 'completed')
+          )
         )`)
       };
     }
@@ -213,7 +220,8 @@ export const getAllLoadingOrdersForDelivery = async (page: number, limit: number
       {
         association: 'salesOrderProducts',
         required: false,
-        include: [{ association: 'inventoryProduct', include: [{ association: 'product', attributes: ['id', 'name', 'isSlabType'] }, { association: 'slab' }] }],
+        include: [
+            { association: 'deliveryItems', include: [{ association: 'delivery' }] },{ association: 'deliveryItems', include: [{ association: 'delivery' }] }, { association: 'inventoryProduct', include: [{ association: 'product', attributes: ['id', 'name', 'isSlabType'] }, { association: 'slab' }] }],
       }
     ],
     limit,
