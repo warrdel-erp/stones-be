@@ -407,7 +407,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
 
 export const getInvoicePreview = async (loadingOrderId: number) => {
-  const loadingOrder: any = await loadingOrderRepository.getLoadingOrderById(Number(loadingOrderId));
+  const loadingOrder: any = await getLoadingOrderById(Number(loadingOrderId));
 
   if (!loadingOrder) {
     throw new AppError(`Loading Order not found with id: ${loadingOrderId}`, 400);
