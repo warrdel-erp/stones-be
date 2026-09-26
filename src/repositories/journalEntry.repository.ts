@@ -18,7 +18,18 @@ export const createBulk = async (data: JournalEntry[], transaction?: Transaction
 // Fetch find journal entries with filters.
 export const findAll = async (filters: any, clientId: number) => {
   const { Op } = require("sequelize");
-  const whereCondition: any = { ...filters };
+  const { startDate, endDate, ...restFilters } = filters;
+  const whereCondition: any = { ...restFilters };
+
+  if (startDate || endDate) {
+    whereCondition.createdAt = {};
+    if (startDate) {
+      whereCondition.createdAt[Op.gte] = new Date(`${startDate}T00:00:00.000Z`);
+    }
+    if (endDate) {
+      whereCondition.createdAt[Op.lte] = new Date(`${endDate}T23:59:59.999Z`);
+    }
+  }
 
   if (whereCondition.ledgerId) {
     if (typeof whereCondition.ledgerId === "string" && whereCondition.ledgerId.includes(",")) {

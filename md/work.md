@@ -821,7 +821,11 @@ Email notification.
 
 ---
 
-1. give direct button in front of PL to create LO. [should-we-show-only-that-SO-products-or-create-it-directly]
-2. show invoice summary in popup during it's creation.
-3. Payment page is not showing customer invoices.
-4. remove PAYMENT STATUS from billing page.
+1. monitoring.
+
+---
+
+1. interview.
+2. KT.
+3. discussion of univ. classSection and feePlan.
+4. reports.

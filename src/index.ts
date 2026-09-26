@@ -35,6 +35,7 @@ import notesRoutes from "./routes/note.routes";
 import containerRoutes from "./routes/container.routes";
 import masterRoutes from "./routes/master.routes";
 import salesOrderProductRoutes from "./routes/salesOrderProduct.routes";
+import reportRoute from "./routes/report.routes";
 import journalEntryRoutes from "./routes/journalEntry.routes";
 import truckRoutes from "./routes/truck.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
@@ -144,7 +145,7 @@ app.use("/api/customerExternalAgedInvoice", customerExternalAgedInvoiceRoutes);
 app.use("/api/customerExternalInvoice", customerExternalInvoiceRoutes);
 app.use("/api/fileUpload", fileUploadRoutes);
 app.use("/api/opportunity", opportunityRoutes);
-
+app.use("/api/reports", reportRoute);
 // Driver
 app.use("/api/driver/delivery", driverDeliveryRoutes);
 

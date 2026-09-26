@@ -1210,3 +1210,19 @@ Univ
 4. check all submit redirection in SO
 5. if we assign LO to truck it is not showing in deliveries's card in design. but showing PLs
 6. show start point in deliveries.
+7. give direct button in front of PL to create LO.
+8. show invoice summary in popup during it's creation.
+9. Payment page is not showing customer invoices.
+10. remove PAYMENT STATUS from billing page.
+
+---
+
+1. PL printable.
+2. Delivery page more tabs.
+3. Delivery Printable. (in our software we can have multiple customer in single delivery.)
+4. printable for inventoryProduct.
+
+---
+
+1. Reports [what-is-difference-between (Inventory Summary) and (Inventory Valuation)] [?????]
+2. Inventory Movement, Inventory Adjustments, Open Purchase Orders, Sales Tax Report, Customer Statement [?????]

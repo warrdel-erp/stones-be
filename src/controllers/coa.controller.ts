@@ -20,12 +20,13 @@ export const getCoaData = catchAsync(async (req: Request, res: Response) => {
 
 export const getBalanceSheetData = catchAsync(async (req: AuthRequest, res: Response) => {
   const clientId = req.user?.clientId;
+  const { asOfDate } = req.query;
 
   if (!clientId) {
     return res.status(400).json({ message: "Client ID is required" });
   }
 
-  const data = await coaService.getBalanceSheetData(clientId);
+  const data = await coaService.getBalanceSheetData(clientId, asOfDate as string);
 
   SuccessResponse(res, 200, "Balance sheet data fetched successfully", data);
 });

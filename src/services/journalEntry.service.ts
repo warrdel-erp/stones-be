@@ -893,3 +893,23 @@ export async function reverseJournalEntriesForSiplCreditNotes(siplId: number, tr
     }, transaction);
   }
 }
+export const getOpeningBalance = async (ledgerId: number, startDate: string) => {
+  const { Op } = require("sequelize");
+  const { JournalEntry, LedgerAccount } = require("../models");
+  const { scoped } = require("../utils/scoped");
+
+  const lastEntry = await scoped(JournalEntry).findOne({
+    where: {
+      ledgerId,
+      createdAt: { [Op.lt]: new Date(`${startDate}T00:00:00.000Z`) }
+    },
+    order: [["id", "DESC"]],
+  });
+
+  if (lastEntry) {
+    return Number(lastEntry.get("balance"));
+  }
+
+  const ledgerAccount = await scoped(LedgerAccount).findOne({ where: { id: ledgerId } });
+  return ledgerAccount ? Number(ledgerAccount.get("openingBalance")) : 0;
+};

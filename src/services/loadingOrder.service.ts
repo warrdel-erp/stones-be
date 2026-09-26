@@ -492,5 +492,6 @@ export const getInvoicePreview = async (loadingOrderId: number) => {
     depositPreviews,
     totalWillBeSettled,
     remainingDueAfterSettlement: remainingInvoiceBalance.toNumber(),
+    products: loadingOrder.products || [],
   };
 };

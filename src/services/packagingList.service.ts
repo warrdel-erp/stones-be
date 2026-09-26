@@ -916,6 +916,7 @@ export const getInvoicePreview = async (packagingListId: number) => {
     depositPreviews,
     totalWillBeSettled,
     remainingDueAfterSettlement: decimal.decimalAdd(invoiceTotal, -totalWillBeSettled),
+    products: packagingList.products || [],
   };
 };
 

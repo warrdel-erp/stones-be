@@ -10,7 +10,14 @@ export const getJournalEntries = catchAsync(async (req: AuthRequest, res: Respon
   const filters = req.query;
 
   const entries = await journalEntryService.getAllJournalEntries(filters, Number(clientId));
-  SuccessResponse(res, 200, "Fetched journal entries", entries);
+
+  let openingBalance = undefined;
+  if (filters.startDate && filters.ledgerId) {
+     openingBalance = await journalEntryService.getOpeningBalance(Number(filters.ledgerId), filters.startDate as string);
+     SuccessResponse(res, 200, "Fetched journal entries", { entries, openingBalance });
+  } else {
+     SuccessResponse(res, 200, "Fetched journal entries", entries);
+  }
 });
 
 // Create journal entry

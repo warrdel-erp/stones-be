@@ -1,6 +1,7 @@
 import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES } from "../constants/coa";
 import { getLedgerAccountsWithoutPagination } from "../repositories/ledgerAccount.repository";
 import JournalEntry from "../models/journalEntry.model";
+import { Op } from "sequelize";
 import { scoped } from "../utils/scoped";
 
 export const getCoaData = () => {
@@ -33,13 +34,19 @@ export const buildNestedCOA = () => {
   });
 };
 
-export const getBalanceSheetData = async (clientId: number) => {
-  const nestedData = buildNestedCOA().filter(e => [1, 2].includes(e.id));
+export const getBalanceSheetData = async (clientId: number, asOfDate?: string) => {
+  const nestedData = buildNestedCOA().filter(e => [1, 2, 3].includes(e.id));
 
   // Helper to get last journal entry balance for a ledger
   const getLedgerLastBalance = async (ledgerId: number) => {
+    const whereClause: any = { ledgerId };
+    if (asOfDate) {
+      whereClause.createdAt = {
+        [Op.lte]: new Date(`${asOfDate}T23:59:59.999Z`)
+      };
+    }
     const lastEntry = await scoped(JournalEntry).findOne({
-      where: { ledgerId },
+      where: whereClause,
       order: [["id", "DESC"]], // ordering by ID is safer than createdAt since multiple entries can have same createdAt
     });
     return lastEntry ? Number(lastEntry.get("balance")) : 0;
