@@ -829,3 +829,15 @@ Email notification.
 2. KT.
 3. discussion of univ. classSection and feePlan.
 4. reports.
+
+---
+
+1. Customer wise Delivery printable document.
+2. Create a Printable by bin (product-bin label).
+3. In Customer selection only be product selectable not InventoryProduct.
+4. Discount rule. (Product, inventoryProduct)
+5. Check Custom selection of InventoryProduct.
+
+6. Service rule.
+7. AI inventory search.
+8. code quality measurement.

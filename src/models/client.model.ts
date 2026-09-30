@@ -61,6 +61,14 @@ const Client = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    s3FileId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "s3_files",
+        key: "id",
+      },
+    },
   },
   {
     tableName: "clients",

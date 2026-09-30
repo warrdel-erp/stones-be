@@ -1226,3 +1226,10 @@ Univ
 
 1. Reports [what-is-difference-between (Inventory Summary) and (Inventory Valuation)] [?????]
 2. Inventory Movement, Inventory Adjustments, Open Purchase Orders, Sales Tax Report, Customer Statement [?????]
+
+---
+
+1. Remove checkbox from pick list printable.
+2. Upload Printable’s LOGO client wise.
+3. SO invoices pages are not opening.
+4. Print feature for printable.

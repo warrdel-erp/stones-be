@@ -43,7 +43,21 @@ export const updateClient = catchAsync(async (req, res) => {
     });
   }
 
-  return SuccessResponse(res, 200, "Vendor updated successfully", updatedClient);
+  return SuccessResponse(res, 200, "Client updated successfully", updatedClient);
+});
+
+export const getClientById = catchAsync(async (req, res) => {
+  const clientId = Number(req.params.id);
+  const client = await clientService.getClientById(clientId);
+  
+  if (!client) {
+    return res.status(404).json({
+      success: false,
+      message: "Client not found",
+    });
+  }
+
+  return SuccessResponse(res, 200, "Client retrieved successfully", client);
 });
 
 /**

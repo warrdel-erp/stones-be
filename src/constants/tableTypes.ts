@@ -239,6 +239,7 @@ export const FILE_UPLOAD_ENTITY_TYPE = {
   PACKAGING_LIST: "packagingList",
   PAYMENT: "payment",
   BILL: "bill",
+  CLIENT: "client",
 } as const;
 
 export const ACTIVITY_TYPE = {

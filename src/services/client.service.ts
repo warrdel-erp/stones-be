@@ -154,6 +154,12 @@ export const modifyClient = async (id: number, updateData: any) => {
   return updatedClient;
 };
 
+export const getClientById = async (id: number) => {
+  const client = await clientRepository.getClientById(id);
+  if (!client) throw new AppError("Client not found", 404);
+  return client;
+};
+
 const createDefaultLedgerAccountsForClient = async (clientId: number, transaction: Transaction) => {
   const data = [
     {

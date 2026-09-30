@@ -1056,6 +1056,7 @@ VendorContact.belongsTo(Vendor, { foreignKey: "vendorId", as: "vendor" });
 // S3File associations
 Client.hasMany(S3File, { foreignKey: "clientId", as: "s3Files" });
 S3File.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Client.belongsTo(S3File, { foreignKey: "s3FileId", as: "logo" });
 
 Account.hasMany(S3File, { foreignKey: "uploadedById", as: "uploadedS3Files" });
 S3File.belongsTo(Account, { foreignKey: "uploadedById", as: "uploadedBy" });

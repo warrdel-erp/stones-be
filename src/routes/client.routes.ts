@@ -15,6 +15,9 @@ router.get("/", clientController.getClients);
 // Get current client's QR code info
 router.get("/myQrCode", authenticateUser, clientController.getMyQrCodeHandler);
 
+// Get client by ID
+router.get("/:id", authenticateUser, clientController.getClientById);
+
 // Update an existing client by ID
 router.put("/:id", clientController.updateClient);
 

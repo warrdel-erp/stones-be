@@ -118,7 +118,7 @@ use production_univeristy_db;
 ## University deployment commands for staging
 
 ```
-
+warrdel
 cd /var/www/html/bestage.hiveerp.com/university-erp-be/
 sudo git pull --no-rebase
 sudo npm i
