@@ -11,5 +11,8 @@ router.get("/products/:productId/blocks", authenticateUser, inventoryController.
 router.get("/products/:productId/bundles", authenticateUser, inventoryController.getBundlesByProduct);
 router.get("/products/:productId/sipls", authenticateUser, inventoryController.getSiplsByProduct);
 
+// AI-powered natural-language inventory filter — returns matching product IDs
+router.post("/ai-filter", authenticateUser, inventoryController.getAiInventoryFilter);
+
 export default router;
 

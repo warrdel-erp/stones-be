@@ -4,6 +4,7 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as inventoryRepository from "../services/inventory.service";
 import { checkUserLocationAccess } from "../services/user.service";
+import { getAiFilteredProductIds } from "../services/inventoryAiFilter.service";
 
 export const getProductsByLocation = catchAsync(async (req: AuthRequest, res: Response) => {
   const { page = 1, limit = 10, categorization, isSlabType, search, subCategory } = req.query;
@@ -157,3 +158,28 @@ export const getInventoryStats = catchAsync(async (req: AuthRequest, res: Respon
   SuccessResponse(res, 200, "Inventory stats fetched successfully", stats);
 });
 
+/**
+ * POST /inventory/ai-filter
+ * Accepts a natural-language query and returns a paginated list of matching products.
+ * The AI only runs once per query — subsequent pages pass the same query string and the
+ * WHERE clause is rebuilt from the same AI prompt (cheap: just JSON generation).
+ */
+export const getAiInventoryFilter = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { query, page = 1, limit = 20, showSoldCanceled = false } = req.body;
+
+  if (!query || typeof query !== "string") {
+    return res.status(400).json({ success: false, message: "query (string) is required in the request body" });
+  }
+
+  const pageNum = Math.max(1, Number(page));
+  const limitNum = Math.min(100, Math.max(1, Number(limit)));
+  const excludeSoldCanceled = showSoldCanceled !== true && showSoldCanceled !== "true";
+
+  const result = await getAiFilteredProductIds(query, pageNum, limitNum, excludeSoldCanceled);
+
+  SuccessResponse(res, 200, "AI filter applied successfully", result.products, {
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  });
+});

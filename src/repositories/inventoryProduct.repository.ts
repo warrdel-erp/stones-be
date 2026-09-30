@@ -142,6 +142,13 @@ export const getInventoryProductsBySIPL = async (req: AuthRequest, siplId: numbe
     Object.assign(where, effectiveSellingPriceWhere);
   }
 
+  if (req.query.ipIds) {
+    const ids = String(req.query.ipIds).split(',').map((id: string) => Number(id.trim())).filter((id: number) => !isNaN(id));
+    if (ids.length > 0) {
+      where.id = { [Op.in]: ids };
+    }
+  }
+
   const slabWhere = buildSlabWhere(req.query);
 
   const inventoryProducts = await scoped(models.InventoryProduct).findAll({
@@ -213,6 +220,13 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
     Object.assign(where, effectiveSellingPriceWhere);
   }
 
+  if (filter?.ipIds) {
+    const ids = String(filter.ipIds).split(',').map(id => Number(id.trim())).filter(id => !isNaN(id));
+    if (ids.length > 0) {
+      where.id = { [Op.in]: ids };
+    }
+  }
+
   const slabWhere = buildSlabWhere(filter);
   const combinedSlabWhere = slabWhere ? slabWhere : {};
 
@@ -240,7 +254,7 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
   });
 
   const groupAlias = groupBy === 'block' ? 'block' : 'bundle';
-  const groupMap: Record<string, { groupValue: string | number; unitCount: number; totalArea: number; locationsSet: Set<string>; sellingPrices: number[] }> = {};
+  const groupMap: Record<string, { groupValue: string | number; unitCount: number; totalArea: number; locationsSet: Set<string>; sellingPrices: number[]; inventoryProductIds: number[] }> = {};
 
   items.forEach((item: any) => {
     const plain = item.get({ plain: true });
@@ -254,11 +268,13 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
         unitCount: 0,
         totalArea: 0,
         locationsSet: new Set<string>(),
-        sellingPrices: []
+        sellingPrices: [],
+        inventoryProductIds: []
       };
     }
 
     groupMap[key].unitCount += 1;
+    groupMap[key].inventoryProductIds.push(plain.id);
     const length = Number(plain.slab?.packageLength) || 0;
     const width = Number(plain.slab?.packageWidth) || 0;
     groupMap[key].totalArea += (length * width);
@@ -278,7 +294,8 @@ export const getDistinctGroupsByProduct = async (productId: number, locationId: 
     unitCount: g.unitCount,
     totalArea: g.totalArea,
     locations: Array.from(g.locationsSet).join(', ') || '--',
-    avgSellingPrice: g.sellingPrices.length > 0 ? decimalDivide(decimalSum(g.sellingPrices), g.sellingPrices.length) : 0
+    avgSellingPrice: g.sellingPrices.length > 0 ? decimalDivide(decimalSum(g.sellingPrices), g.sellingPrices.length) : 0,
+    inventoryProductIds: g.inventoryProductIds
   }));
 };
 
@@ -409,6 +426,13 @@ export const getInventoryProductsBySlabField = async (req: AuthRequest, fieldNam
     Object.assign(where, effectiveSellingPriceWhere);
   }
 
+  if (req.query.ipIds) {
+    const ids = String(req.query.ipIds).split(',').map((id: string) => Number(id.trim())).filter((id: number) => !isNaN(id));
+    if (ids.length > 0) {
+      where.id = { [Op.in]: ids };
+    }
+  }
+
   const slabWhere = buildSlabWhere(req.query);
   const combinedSlabWhere = slabWhere ? { [fieldName]: fieldValue, ...slabWhere } : { [fieldName]: fieldValue };
 
@@ -497,6 +521,13 @@ export const getInventoryProductsByBinId = async (req: AuthRequest, binId: numbe
   const effectiveSellingPriceWhere = buildEffectiveSellingPriceWhere(req.query);
   if (effectiveSellingPriceWhere) {
     Object.assign(where, effectiveSellingPriceWhere);
+  }
+
+  if (req.query.ipIds) {
+    const ids = String(req.query.ipIds).split(',').map((id: string) => Number(id.trim())).filter((id: number) => !isNaN(id));
+    if (ids.length > 0) {
+      where.id = { [Op.in]: ids };
+    }
   }
 
   const slabWhereBin = buildSlabWhere(req.query);

@@ -326,6 +326,13 @@ export const getSIPLByProduct = async (req: AuthRequest, productId: number, loca
     Object.assign(inventoryProductsWhere, effectiveSellingPriceWhere);
   }
 
+  if (req.query.ipIds) {
+    const ids = String(req.query.ipIds).split(',').map((id: string) => Number(id.trim())).filter((id: number) => !isNaN(id));
+    if (ids.length > 0) {
+      inventoryProductsWhere.id = { [Op.in]: ids };
+    }
+  }
+
   const slabWhere = buildSlabWhere(req.query);
 
   const SIPLs = await scoped(models.SIPL).findAll({

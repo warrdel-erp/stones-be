@@ -440,8 +440,10 @@ export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId
 
       const binNames = new Set<string>();
       const prices: number[] = [];
+      const inventoryProductIds: number[] = [];
 
       (plain.inventoryProducts || []).forEach((inv: any) => {
+        inventoryProductIds.push(inv.id);
         if (inv.bin?.name) {
           binNames.add(inv.bin.name);
         }
@@ -462,6 +464,7 @@ export const fetchSiplsByProductAndLocation = async (req: AuthRequest, productId
         unitCount,
         locations,
         avgSellingPrice,
+        inventoryProductIds,
       };
     })
   );
