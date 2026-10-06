@@ -65,7 +65,7 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
           ...product,
           salesOrderId,
           isSlabType: inventoryProduct.isSlabType,
-          taxPercentage: product.taxApplied ? SALES_TAX.find((e) => e.id == salesOrder?.taxId)?.value : 0,
+          taxPercentage: SALES_TAX.find((e) => e.id == salesOrder?.taxId)?.value || 0,
           receivingAreaSqFt,
         },
         transaction
@@ -109,6 +109,10 @@ export const updateSalesOrderProducts = async (products: any[], transaction?: Tr
         throw new AppError("Product id is required for update", 400);
       }
 
+      if (product.discountPercentage !== undefined && (Number(product.discountPercentage) > 100 || Number(product.discountPercentage) < 0)) {
+        throw new AppError("Discount percentage must be between 0 and 100", 400);
+      }
+
       // Fetch existing product with SOid because update should happen when product belongs to given SO
       const existingProduct = await salesOrderProductRepository.findByIdSimple(
         product.id,
@@ -117,6 +121,10 @@ export const updateSalesOrderProducts = async (products: any[], transaction?: Tr
 
       if (!existingProduct) {
         throw new AppError(`Invalid Id '${product.id}' or so product does not exists`, 400);
+      }
+
+      if (existingProduct.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED) {
+        throw new AppError(`Cannot modify product ${product.id} because it is already invoiced.`, 400);
       }
 
       // Prevent updating `inventoryProductId` & `salesOrderId`

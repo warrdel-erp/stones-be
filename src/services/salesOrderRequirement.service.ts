@@ -5,6 +5,7 @@ import * as inventoryProductRepository from "../repositories/inventoryProduct.re
 import { getAvailableInventoryProductsForProduct } from "../repositories/product.repository";
 import * as slabRepository from "../repositories/slab.repository";
 import { AppError } from "../helper/appError";
+import { Op } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
@@ -19,7 +20,7 @@ export const addRequirementLine = async (
     unitType: "slabs" | "sqft";
     requiredCount: number;
     unitPrice: number;
-    taxApplied?: boolean;
+    lineDiscountPercentage?: number;
     minLength?: number;
     minWidth?: number;
     autoAllocate?: boolean;
@@ -65,7 +66,7 @@ export const addRequirementLine = async (
         requiredCount: payload.requiredCount,
         allocatedCount: 0,
         unitPrice: payload.unitPrice,
-        taxApplied: payload.taxApplied !== undefined ? payload.taxApplied : true,
+        lineDiscountPercentage: payload.lineDiscountPercentage || 0,
         status: "PENDING",
         minLength: payload.minLength,
         minWidth: payload.minWidth,
@@ -76,7 +77,7 @@ export const addRequirementLine = async (
 
     let allocatedCount = 0;
     const needed = Number(payload.requiredCount);
-    const taxPercentage = (payload.taxApplied !== false && so.taxId) ? (SALES_TAX.find((e) => e.id == so.taxId)?.value || 0) : 0;
+    const taxPercentage = so.taxId ? (SALES_TAX.find((e) => e.id == so.taxId)?.value || 0) : 0;
     const manuallySelectedIds = payload.inventoryProductIds || [];
     const shouldAutoAllocate = payload.autoAllocate !== false;
 
@@ -97,7 +98,7 @@ export const addRequirementLine = async (
           salesOrderId,
           inventoryProductId: inv.id,
           unitPrice: payload.unitPrice,
-          taxApplied: payload.taxApplied !== undefined ? payload.taxApplied : true,
+          lineDiscountPercentage: payload.lineDiscountPercentage || 0,
           taxPercentage,
           isSlabType: inventoryProduct.isSlabType,
           receivingAreaSqFt,
@@ -256,7 +257,8 @@ export const updateRequirementAllocations = async (
         );
       }
 
-      const taxPercentage = (requirement.taxApplied !== false && so.taxId) ? (SALES_TAX.find((e) => e.id == so.taxId)?.value || 0) : 0;
+
+      const taxPercentage = so.taxId ? (SALES_TAX.find((e) => e.id == so.taxId)?.value || 0) : 0;
 
       for (const invId of idsToAdd) {
         const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(invId);
@@ -273,7 +275,7 @@ export const updateRequirementAllocations = async (
             salesOrderId,
             inventoryProductId: invId,
             unitPrice: requirement.unitPrice,
-            taxApplied: requirement.taxApplied,
+            lineDiscountPercentage: requirement.lineDiscountPercentage || 0,
             taxPercentage,
             isSlabType: inventoryProduct.isSlabType,
             receivingAreaSqFt,
@@ -371,5 +373,78 @@ export const removeRequirementLine = async (salesOrderId: number, requirementId:
       clientId,
       transaction
     );
+  });
+};
+
+/**
+ * Updates the discount of a requirement line.
+ *
+ * The discount is snapshotted on every SalesOrderProduct of the line, so only products that are
+ * not invoiced yet (SO / PL / LO stage) are re-priced. Invoiced (and closed/canceled) products keep
+ * the discount they were invoiced with, which freezes their calculations.
+ */
+export const updateRequirementLineDiscount = async (
+  salesOrderId: number,
+  requirementId: number,
+  clientId: number,
+  lineDiscountPercentage: number
+) => {
+  return await sequelize.transaction(async (transaction) => {
+    const so: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
+    if (!so) throw new AppError("Sales Order not found", 404);
+    if (so.clientId !== clientId) throw new AppError("Unauthorized access to Sales Order", 403);
+    if (so.status !== SALES_ORDER_STATUS.OPEN) {
+      throw new AppError("Cannot update discount on a closed Sales Order.", 400);
+    }
+
+    const requirement: any = await salesOrderRequirementRepository.getRequirementLineById(
+      requirementId,
+      salesOrderId,
+      clientId,
+      transaction
+    );
+    if (!requirement) throw new AppError("Requirement line not found", 404);
+
+    await salesOrderRequirementRepository.updateRequirementLine(
+      requirementId,
+      clientId,
+      { lineDiscountPercentage },
+      transaction
+    );
+
+    const [updatedCount] = await scoped(models.SalesOrderProduct).update(
+      { lineDiscountPercentage },
+      {
+        where: {
+          salesOrderId,
+          requirementLineId: requirementId,
+          clientId,
+          stage: {
+            [Op.in]: [
+              SALE_ORDER_PRODUCT_STAGES.SALES_ORDER,
+              SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
+              SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+            ],
+          },
+        },
+        transaction,
+      }
+    );
+
+    const frozenCount = await scoped(models.SalesOrderProduct).count({
+      where: {
+        salesOrderId,
+        requirementLineId: requirementId,
+        clientId,
+        stage: { [Op.notIn]: [
+          SALE_ORDER_PRODUCT_STAGES.SALES_ORDER,
+          SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
+          SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+        ] },
+      },
+      transaction,
+    });
+
+    return { requirementId, lineDiscountPercentage, updatedCount, frozenCount };
   });
 };

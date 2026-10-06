@@ -118,7 +118,7 @@ export const getAllPackagingLists = async (page: number, limit: number, clientId
       });
     }
 
-    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
     if (packagingList.loadingOrders && packagingList.loadingOrders.length > 0) {
       packagingList.loAmounts = calcs.loadingOrder
@@ -148,10 +148,10 @@ export const getAllPackagingListsWithoutPagination = async (filters: WhereOption
 export const getPackagingListById = async (id: number) => {
   const packagingList = await packagingListRepository.getPackagingListById(id);
 
-  packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+  packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
   // so product as per product and unitPrice.
-  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts);
+  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage);
 
   return packagingList;
 };
@@ -191,10 +191,10 @@ export const getPackagingListAsPerReturn = async (returnId: number) => {
   }
 
   // Calculate total amount added in SO.
-  packagingList.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+  packagingList.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
   // so product as per product and unitPrice.
-  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList?.salesOrderProducts);
+  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList?.salesOrderProducts, packagingList?.salesOrder?.discountPercentage);
 
 
   return { ...packagingList, returnData };
@@ -234,11 +234,11 @@ export const getPackagingListOnlyAsPerReturn = async (returnId: number) => {
   }
 
   // Calculate total amount added in SO.
-  packagingList.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+  packagingList.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
 
   // so product as per product and unitPrice.
-  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList?.salesOrderProducts);
+  packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList?.salesOrderProducts, packagingList?.salesOrder?.discountPercentage);
 
   // get payment terms constant data.
 
@@ -289,14 +289,7 @@ export function getTotalPackagingListAmount(salesOrderProducts: any[], tax: numb
       totalAmount += Number(salesOrderProduct.unitPrice);
     }
 
-    // Calculate Total Amount
-    if (salesOrderProduct.taxApplied) {
-      if (salesOrderProduct?.inventoryProduct?.slab) {
-        taxableAmount += (salesOrderProduct.plRemeasureLength * salesOrderProduct.plRemeasureWidth * salesOrderProduct.unitPrice) / 144;
-      } else {
-        taxableAmount += Number(salesOrderProduct.unitPrice);
-      }
-    }
+    taxableAmount = totalAmount;
   }
 
   const taxAmount = getPercentageValue(taxableAmount, tax)
@@ -368,7 +361,7 @@ export function getTotalPlAmount(salesOrderProducts: any[], tax: number) {
   }
 }
 
-export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderProducts: any[] = []) {
+export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderProducts: any[] = [], discountPercentage: number = 0) {
 
   const products = removeDuplicatesWithUnitPrice(
     salesOrderProducts.map((salesOrderProduct: any) => ({
@@ -390,11 +383,11 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
       }
     );
 
-    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProductsAsPerProduct);
+    const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProductsAsPerProduct, discountPercentage, salesOrderProductsAsPerProduct[0]?.salesOrder?.tax?.value || salesOrderProductsAsPerProduct[0]?.taxPercentage || 0);
 
     return {
       ...product,
-      taxApplied: !!salesOrderProductsAsPerProduct[0]?.taxApplied,
+      
       salesOrderProduct: salesOrderProductsAsPerProduct,
       calculations,
       totalQuantity: calculations.quantities.packagingList,
@@ -441,7 +434,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
 
     // Replace salesOrderProducts so that calculations only consider the unassigned ones
     packagingList.salesOrderProducts = productsToInvoice;
-    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
     const invoiceAmountObj = packagingList.calculations.packagingList;
 
@@ -457,11 +450,13 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
         clientId: clientId,
         customerId: packagingList.salesOrder.customerId,
         packagingListId: packagingList.id,
-        amount: invoiceAmountObj.subTotal,
+        amount: invoiceAmountObj.subTotal - (invoiceAmountObj.inlineDiscountAmount || 0),
         taxableAmount: invoiceAmountObj.taxable,
         taxValue: invoiceAmountObj.tax,
         totalServiceCharges: serviceTotals,
         salesOrderId: packagingList.salesOrder.id,
+        discountPercentage: packagingList.salesOrder.discountPercentage,
+        discountAmount: invoiceAmountObj.discountAmount,
       },
       transaction
     );

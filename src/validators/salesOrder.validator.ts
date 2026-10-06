@@ -16,11 +16,12 @@ export const createSalesOrderSchema = z.object({
   paymentTermId: z.number().int().optional().nullable(),
   internalNote: z.string().optional().nullable(),
   printableNote: z.string().optional().nullable(),
+  discountPercentage: z.coerce.number().min(0).max(100).transform((v) => Math.round(v * 100) / 100).optional().nullable(),
+
   products: z.array(
     z.object({
       inventoryProductId: z.number().int(),
       unitPrice: z.coerce.number().positive(),
-      taxApplied: z.boolean().optional(),
     })
   ).optional().default([]),
 });

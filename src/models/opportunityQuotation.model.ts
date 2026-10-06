@@ -54,6 +54,11 @@ const OpportunityQuotation = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    validityDays: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     tableName: "opportunity_quotations",

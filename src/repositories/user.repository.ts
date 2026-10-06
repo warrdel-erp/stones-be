@@ -159,6 +159,7 @@ export const getUsersByClientId = async (clientId: number) => {
     attributes: { exclude: ['password'] },
     include: [
       { model: models.Account, attributes: ['email'], as: "account" },
+      { model: models.Location, as: "locations", attributes: ['id', 'locationName'] },
     ]
   });
 };

@@ -69,6 +69,15 @@ const Client = sequelize.define(
         key: "id",
       },
     },
+    defaultPaymentTerms: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    defaultQuotationValidity: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 30,
+    },
   },
   {
     tableName: "clients",

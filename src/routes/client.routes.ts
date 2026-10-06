@@ -12,8 +12,16 @@ router.post("/register", validateRequest(registerClientSchema), clientController
 // Get all clients with pagination and optional search filtering
 router.get("/", clientController.getClients);
 
+// Organization Profile routes
+router.get("/company", authenticateUser, clientController.getCompanyProfileHandler);
+router.put("/company", authenticateUser, clientController.updateCompanyProfileHandler);
+
 // Get current client's QR code info
 router.get("/myQrCode", authenticateUser, clientController.getMyQrCodeHandler);
+
+// Update Sales & Pricing defaults
+router.get("/sales-settings", authenticateUser, clientController.getSalesSettingsHandler);
+router.put("/sales-settings", authenticateUser, clientController.updateSalesSettingsHandler);
 
 // Get client by ID
 router.get("/:id", authenticateUser, clientController.getClientById);

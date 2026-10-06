@@ -32,11 +32,6 @@ const SalesOrderProduct = sequelize.define(
       allowNull: true,
       defaultValue: 0,
     },
-    taxApplied: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: false,
-    },
     picked: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -134,6 +129,11 @@ const SalesOrderProduct = sequelize.define(
         return this.get("plSqrFt") || this.get("loSqrFt");
       }
     },
+    discountPercentage: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
     amount: {
       type: DataTypes.VIRTUAL,
       get() {
@@ -211,6 +211,15 @@ const SalesOrderProduct = sequelize.define(
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    /**
+     * Snapshot of the requirement line discount taken at allocation time.
+     * Kept per product so already invoiced products stay frozen when the line discount is changed.
+     */
+    lineDiscountPercentage: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0,
     },
     requirementLineId: {
       type: DataTypes.INTEGER,

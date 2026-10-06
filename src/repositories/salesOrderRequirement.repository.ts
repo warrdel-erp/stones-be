@@ -12,6 +12,7 @@ export const createRequirementLine = async (
     requiredCount: number;
     allocatedCount?: number;
     unitPrice: number;
+    lineDiscountPercentage?: number;
     taxApplied?: boolean;
     status?: string;
     minLength?: number;
@@ -28,6 +29,7 @@ export const createRequirementLine = async (
     requiredCount: payload.requiredCount,
     allocatedCount: payload.allocatedCount || 0,
     unitPrice: payload.unitPrice,
+    lineDiscountPercentage: payload.lineDiscountPercentage || 0,
     taxApplied: payload.taxApplied !== undefined ? payload.taxApplied : true,
     status: payload.status || "PENDING",
     minLength: payload.minLength,
@@ -51,7 +53,7 @@ export const getRequirementLineById = async (
 export const updateRequirementLine = async (
   id: number,
   clientId: number,
-  data: { allocatedCount?: number; status?: string },
+  data: { allocatedCount?: number; status?: string; lineDiscountPercentage?: number },
   transaction?: Transaction
 ) => {
   return await scoped(models.SalesOrderRequirementLine).update(data, {

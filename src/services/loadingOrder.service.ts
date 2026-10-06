@@ -123,10 +123,10 @@ export const getLoadingOrderById = async (id: number) => {
     throw new AppError("Invalid Id", 400);
   }
 
-  loadingOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder.salesOrderProducts);
+  loadingOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder.salesOrderProducts, loadingOrder.salesOrder?.discountPercentage);
 
   // Calculations for loading order.
-  loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts);
+  loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts, loadingOrder.salesOrder?.discountPercentage, loadingOrder.salesOrderProducts[0]?.salesOrder?.tax?.value || loadingOrder.salesOrderProducts[0]?.taxPercentage || 0);
 
   // get payment terms constant data.
   if (loadingOrder.packagingList) {
@@ -193,11 +193,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         clientId: clientId,
         customerId: actualSalesOrder.customerId,
         loadingOrderId: loadingOrder.id,
-        amount: invoiceAmountObj.subTotal,
+        amount: invoiceAmountObj.subTotal - (invoiceAmountObj.inlineDiscountAmount || 0),
         taxableAmount: invoiceAmountObj.taxable,
         taxValue: invoiceAmountObj.tax,
         totalServiceCharges: serviceTotals,
         salesOrderId: loadingOrder.salesOrderId,
+        discountPercentage: actualSalesOrder.discountPercentage,
+        discountAmount: invoiceAmountObj.discountAmount,
       },
       transaction
     );

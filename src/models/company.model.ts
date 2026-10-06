@@ -49,6 +49,30 @@ const Company = sequelize.define(
                 isEmail: true,
             },
         },
+        displayName: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        taxId: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        website: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        addressLine2: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        latitude: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+        },
+        longitude: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+        },
         clientId: {
             type: DataTypes.INTEGER,
             allowNull: false,

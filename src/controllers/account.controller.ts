@@ -6,6 +6,7 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import * as userService from "../services/user.service";
 import * as clientService from "../services/client.service";
 import * as accountService from "../services/account.service";
+import * as locationService from "../services/location.service";
 
 // Get locations based on account type (user or client)
 export const getAccountLocations = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -22,7 +23,9 @@ export const getAccountLocations = catchAsync(async (req: AuthRequest, res: Resp
         throw new AppError("Invalid account type", 400);
     }
 
-    return SuccessResponse(res, 200, "Locations fetched successfully", locations);
+    const withCounts = await locationService.attachInventoryCounts(locations);
+
+    return SuccessResponse(res, 200, "Locations fetched successfully", withCounts);
 });
 
 // Check if email exists in accounts

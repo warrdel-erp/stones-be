@@ -13,6 +13,7 @@ import * as cartItemService from "../services/cartItem.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as packagingListService from "../services/packagingList.service";
 import * as holdRepository from "../repositories/hold.repository";
+import * as clientRepository from "../repositories/client.repository";
 import { AppError } from "../helper/appError";
 import * as models from "../models";
 import { decimalAdd } from "../helper/decimal";
@@ -24,10 +25,21 @@ import * as opportunityRepository from "../repositories/opportunity.repository";
 export const createSalesOrder = async (data: any, externalTransaction?: any) => {
   const transaction = externalTransaction || await sequelize.transaction();
   try {
-    // Fetch customer to get taxId
+    // Fetch customer to get taxId and paymentTermId
     if (data.customerId) {
       const customer = await customerRepository.getCustomerByIdSimple(data.customerId);
       data.taxId = customer?.salesTaxId;
+      
+      if (!data.paymentTermId) {
+        data.paymentTermId = customer?.paymentTermId;
+      }
+    }
+
+    if (!data.paymentTermId) {
+      const client: any = await clientRepository.getClientById(data.clientId);
+      if (client?.defaultPaymentTerms) {
+        data.paymentTermId = client.defaultPaymentTerms;
+      }
     }
 
     let holdObj: any = null;
@@ -170,7 +182,7 @@ export const getAllSalesOrders = async (
 
     salesOrder.totalAmount = getTotalAmount(salesOrder.salesOrderProducts);
 
-    salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
+    salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || salesOrder.salesOrderProducts[0]?.taxPercentage || 0);
     salesOrder.fulFilled = getPercentageValueFromValue(salesOrder.salesOrderProducts.length, salesOrder.salesOrderProducts.filter((e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED).length)
 
     return salesOrder;
@@ -184,7 +196,7 @@ export const getSalesOrderSummary = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderById(id))?.get({ plain: true });
   if (!salesOrder) return null;
 
-  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || salesOrder.salesOrderProducts[0]?.taxPercentage || 0);
   const totalAdvancedDeposit = _.sumBy(salesOrder.advancedDeposits, (e: any) => Number(e.amount));
 
   const totalItems = salesOrder.salesOrderProducts?.length || 0;
@@ -226,30 +238,30 @@ export const getSalesOrderById = async (id: number) => {
   salesOrder.totalAdvancedDeposit = _.sumBy(salesOrder.advancedDeposits, (e: any) => Number(e.amount));
 
   // Calculations for sales order products.
-  salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts);
+  salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || salesOrder.salesOrderProducts[0]?.taxPercentage || 0);
 
   // Calculations for PackagingList
   if (salesOrder.actualLoadingOrders) {
     salesOrder.actualLoadingOrders = salesOrder.actualLoadingOrders.map((lo: any) => {
-      lo.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(lo.salesOrderProducts);
-      lo.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(lo.salesOrderProducts);
+      lo.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(lo.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || lo.salesOrderProducts[0]?.taxPercentage || 0);
+      lo.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(lo.salesOrderProducts, salesOrder.discountPercentage);
       delete lo.salesOrderProducts;
       return lo;
     });
   }
 
   salesOrder.loadingOrders = salesOrder.loadingOrders.map((packagingList: any) => {
-    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts);
+    packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
     packagingList.allProductsInLO = packagingList.salesOrderProducts?.length > 0 && packagingList.salesOrderProducts.every((p: any) => p.loadingOrderId !== null);
     packagingList.totalProducts = packagingList.salesOrderProducts?.length || 0;
     packagingList.assignedProducts = packagingList.salesOrderProducts?.filter((p: any) => p.loadingOrderId !== null).length || 0;
-    packagingList.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts);
+    packagingList.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts, salesOrder.discountPercentage);
     delete packagingList.salesOrderProducts;
     return packagingList;
   });
 
   // Group Products by productId and unit price.
-  salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+  salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts, salesOrder.discountPercentage);
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
@@ -263,7 +275,7 @@ export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateActualLO(id))?.get({ plain: true });
 
   if (salesOrder?.salesOrderProducts) {
-    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts, salesOrder.discountPercentage);
     delete salesOrder.salesOrderProducts;
   }
   return salesOrder;
@@ -274,7 +286,7 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
 
   if (salesOrder?.salesOrderProducts) {
     // Group Products by productId and unit price.
-    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts);
+    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts, salesOrder.discountPercentage);
 
     // delete salesOrder.salesOrderProducts because it is in products;
     delete salesOrder.salesOrderProducts;
@@ -397,7 +409,6 @@ export const updateSalesOrderTax = async (id: number, taxId: number, clientId: n
       {
         where: {
           salesOrderId: id,
-          taxApplied: true,
         },
         transaction,
       }

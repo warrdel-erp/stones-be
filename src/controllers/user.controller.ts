@@ -74,13 +74,17 @@ export const updateUserController = catchAsync(async (req: Request, res: Respons
   const { id } = req.params;
   const updateData = req.body;
 
+  if (updateData.email || updateData.phone) {
+    return res.status(400).json({ success: false, message: "Email and mobile number cannot be updated" });
+  }
+
   const updatedUser = await userService.modifyUser(Number(id), updateData);
 
   if (!updatedUser) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
-  return SuccessResponse(res, 200, "Vendor updated successfully", updatedUser);
+  return SuccessResponse(res, 200, "User updated successfully", updatedUser);
 });
 
 // Get Locations for user

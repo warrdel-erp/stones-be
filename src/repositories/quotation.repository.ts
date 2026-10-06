@@ -130,6 +130,7 @@ export const createQuotation = async (
     taxAmount: number;
     grandTotal: number;
     notes?: string;
+    validityDays?: number | null;
   },
   inventoryItemsData: Array<{
     inventoryProductId: number;

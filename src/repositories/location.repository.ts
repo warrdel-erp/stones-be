@@ -1,5 +1,6 @@
 import * as models from "../models";
-import { Transaction } from "sequelize";
+import { Op, Transaction, fn, col } from "sequelize";
+import { INVENTORY_ITEM_STATUS } from "../constants";
 import { scoped } from "../utils/scoped";
 
 // Create a new location
@@ -50,3 +51,32 @@ export const updateLocation = async (id: number, locationData: any, clientId?: n
 };
 
 
+
+// Count on-hand slabs and generic products grouped by location
+export const getInventoryCountsByLocation = async (locationIds: number[]) => {
+  if (!locationIds.length) return { slabs: [], genericProducts: [] };
+
+  const options = {
+    attributes: ["locationId", [fn("COUNT", col("id")), "count"]],
+    where: {
+      locationId: { [Op.in]: locationIds },
+      status: {
+        [Op.notIn]: [
+          INVENTORY_ITEM_STATUS.INITIATE,
+          INVENTORY_ITEM_STATUS.SOLD,
+          INVENTORY_ITEM_STATUS.BROKEN,
+          INVENTORY_ITEM_STATUS.CANCELED,
+        ],
+      },
+    },
+    group: ["locationId"],
+    raw: true,
+  };
+
+  const [slabs, genericProducts] = await Promise.all([
+    scoped(models.Slab).findAll(options),
+    scoped(models.GenericProduct).findAll(options),
+  ]);
+
+  return { slabs, genericProducts };
+};

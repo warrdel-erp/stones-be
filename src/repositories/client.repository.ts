@@ -55,6 +55,7 @@ import {
   Vendor,
   PurchaseOrder,
   Bin,
+  Company,
 } from "../models";
 import { scoped } from "../utils/scoped";
 import { sequelize } from "../config/database";
@@ -112,11 +113,11 @@ export const getAllClients = async (page: number, limit: number, search?: string
 /**
  * Update client details by ID.
  */
-export const updateClient = async (id: number, updateData: any) => {
-  const [updatedRows] = await scoped(Client).update(updateData, { where: { id } });
+export const updateClient = async (id: number, updateData: any, transaction?: Transaction) => {
+  const [updatedRows] = await scoped(Client).update(updateData, { where: { id }, transaction });
 
   // If update was successful, return the updated client
-  return updatedRows ? await Client.findByPk(id) : null;
+  return updatedRows ? await Client.findByPk(id, { transaction }) : null;
 };
 
 /**
@@ -278,4 +279,13 @@ export const doesClientHaveLocation = async (locationId: number, clientId: numbe
   });
 
   return !!location;
+};
+
+export const getCompanyByClientId = async (clientId: number) => {
+  return await scoped(Company).findOne({ where: { clientId } });
+};
+
+export const updateCompanyProfile = async (clientId: number, updateData: any, transaction?: Transaction) => {
+  const [updatedRows] = await scoped(Company).update(updateData, { where: { clientId }, transaction });
+  return updatedRows ? await scoped(Company).findOne({ where: { clientId }, transaction }) : null;
 };

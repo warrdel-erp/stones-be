@@ -1233,3 +1233,15 @@ Univ
 2. Upload Printable’s LOGO client wise.
 3. SO invoices pages are not opening.
 4. Print feature for printable.
+
+---
+
+1. SO discounts, inline discounts.
+2. remove inline tax.
+3. organization settings.
+4. users and access.
+5. sales & price => Sales Default.
+6. sales & price => service and charge.
+7. sales & price => Pricing.
+8. quotation validity.
+9. sales & price => terms and policies.

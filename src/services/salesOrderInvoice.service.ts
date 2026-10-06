@@ -43,9 +43,9 @@ export const getInvoiceById = async (id: number) => {
     relevantProducts = (soInvoice.packagingList?.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
   }
 
-  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(relevantProducts);
+  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(relevantProducts, soInvoice.discountPercentage || soInvoice.salesOrder?.discountPercentage);
 
-  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(relevantProducts)
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(relevantProducts, soInvoice.discountPercentage || soInvoice.salesOrder?.discountPercentage, relevantProducts[0]?.salesOrder?.tax?.value || relevantProducts[0]?.taxPercentage || 0)
 
   return {
     ...soInvoice,

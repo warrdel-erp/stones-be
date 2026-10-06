@@ -84,3 +84,39 @@ export const deleteClientAccountHandler = catchAsync(async (req: Request, res: R
 
   return SuccessResponse(res, 200, "Account deleted successfully", null);
 });
+export const getCompanyProfileHandler = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  if (!clientId) {
+    return res.status(400).json({ success: false, message: "Client ID not found" });
+  }
+  const company = await clientService.getCompanyProfileData(clientId);
+  return SuccessResponse(res, 200, "Company profile retrieved successfully", company);
+});
+
+export const updateCompanyProfileHandler = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  if (!clientId) {
+    return res.status(400).json({ success: false, message: "Client ID not found" });
+  }
+  const updatedCompany = await clientService.updateCompanyProfileData(clientId, req.body);
+  return SuccessResponse(res, 200, "Company profile updated successfully", updatedCompany);
+});
+
+export const getSalesSettingsHandler = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  if (!clientId) {
+    return res.status(400).json({ success: false, message: "Client ID not found" });
+  }
+  const client: any = await clientService.getClientById(clientId);
+  return SuccessResponse(res, 200, "Sales settings retrieved successfully", { defaultPaymentTerms: client?.defaultPaymentTerms, defaultQuotationValidity: client?.defaultQuotationValidity });
+});
+
+export const updateSalesSettingsHandler = catchAsync(async (req: AuthRequest, res: Response) => {
+  const clientId = req.user?.clientId;
+  if (!clientId) {
+    return res.status(400).json({ success: false, message: "Client ID not found" });
+  }
+  const { defaultPaymentTerms, defaultQuotationValidity } = req.body;
+  const updatedClient: any = await clientService.modifyClient(clientId, { defaultPaymentTerms, defaultQuotationValidity });
+  return SuccessResponse(res, 200, "Sales settings updated successfully", { defaultPaymentTerms: updatedClient?.defaultPaymentTerms, defaultQuotationValidity: updatedClient?.defaultQuotationValidity });
+});

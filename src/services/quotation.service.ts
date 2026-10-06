@@ -34,6 +34,7 @@ export const createQuotation = async (
       priceSource?: string;
     }>;
     notes?: string;
+    validityDays?: number;
   }
 ) => {
   return await sequelize.transaction(async (transaction) => {
@@ -127,6 +128,7 @@ export const createQuotation = async (
     const nextVersion = lastPublishedQuote ? Number(lastPublishedQuote.version) + 1 : 1;
     const quoteNumber = `QUO-OPP-${opportunityId}-V${nextVersion}`;
     const notesToUse = payload.notes !== undefined ? payload.notes : (lastPublishedQuote?.notes || "");
+    const validityDaysToUse = payload.validityDays !== undefined ? payload.validityDays : (lastPublishedQuote?.validityDays ?? null);
 
     const quotation = await quotationRepository.createQuotation(
       {
@@ -139,6 +141,7 @@ export const createQuotation = async (
         taxAmount,
         grandTotal,
         notes: notesToUse,
+        validityDays: validityDaysToUse,
       },
       itemsToProcess as any,
       transaction

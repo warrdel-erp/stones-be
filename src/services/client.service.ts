@@ -387,3 +387,32 @@ export const deleteClientAccount = async (email: string, password: string) => {
 
 
 
+
+export const getCompanyProfileData = async (clientId: number) => {
+  const company = await clientRepository.getCompanyByClientId(clientId);
+  if (!company) throw new AppError("Company not found", 404);
+  const client: any = await clientRepository.getClientById(clientId);
+  return { ...company.get({ plain: true }), s3FileId: client?.s3FileId };
+};
+
+export const updateCompanyProfileData = async (clientId: number, updateData: any) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { s3FileId, ...companyData } = updateData;
+    
+    let updatedCompany = await clientRepository.updateCompanyProfile(clientId, companyData, transaction);
+    
+    if (s3FileId !== undefined) {
+      await clientRepository.updateClient(clientId, { s3FileId }, transaction);
+    }
+    
+    await transaction.commit();
+    
+    if (!updatedCompany) throw new AppError("Company not found or update failed", 400);
+    
+    return updatedCompany;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};

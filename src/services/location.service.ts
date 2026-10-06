@@ -53,3 +53,23 @@ export const updateLocation = async (id: number, data: any, clientId?: number) =
 };
 
 
+
+/**
+ * Attaches slabCount and genericProductCount to each location.
+ */
+export const attachInventoryCounts = async (locations: any[] | null) => {
+  const list = locations || [];
+  const { slabs, genericProducts } = await locationRepository.getInventoryCountsByLocation(
+    list.map((l: any) => l.id)
+  );
+  const toMap = (rows: any[]) =>
+    new Map(rows.map((r: any) => [Number(r.locationId), Number(r.count)]));
+  const slabMap = toMap(slabs);
+  const genericMap = toMap(genericProducts);
+
+  return list.map((l: any) => ({
+    ...(typeof l.toJSON === "function" ? l.toJSON() : l),
+    slabCount: slabMap.get(Number(l.id)) || 0,
+    genericProductCount: genericMap.get(Number(l.id)) || 0,
+  }));
+};

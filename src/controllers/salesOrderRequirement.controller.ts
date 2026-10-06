@@ -35,3 +35,19 @@ export const deleteRequirementLine = catchAsync(async (req: AuthRequest, res: Re
   const data = await salesOrderRequirementService.removeRequirementLine(Number(salesOrderId), Number(reqId), clientId);
   return SuccessResponse(res, 200, "Requirement line deleted successfully", data);
 });
+
+export const updateLineDiscount = catchAsync(async (req: AuthRequest, res: Response) => {
+  const salesOrderId = req.params.salesOrderId;
+  const reqId = req.params.reqId;
+  const clientId = Number(req.user?.clientId);
+  const data = await salesOrderRequirementService.updateRequirementLineDiscount(
+    Number(salesOrderId),
+    Number(reqId),
+    clientId,
+    req.body.lineDiscountPercentage
+  );
+  const message = data.frozenCount
+    ? `Line discount updated for ${data.updatedCount} product(s). ${data.frozenCount} invoiced product(s) were not changed.`
+    : "Line discount updated successfully";
+  return SuccessResponse(res, 200, message, data);
+});

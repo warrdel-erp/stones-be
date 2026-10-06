@@ -19,6 +19,8 @@ export type SoInvoice = {
   taxableAmount: number;
   taxValue: number;
   totalServiceCharges: number;
+  discountPercentage?: number;
+  discountAmount?: number;
 };
 
 const SalesOrderInvoice = sequelize.define(
@@ -109,6 +111,17 @@ const SalesOrderInvoice = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    discountPercentage: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
+    discountAmount: {
+      type: DataTypes.DECIMAL(15, 3),
+      allowNull: true,
+      defaultValue: 0,
+    },
+
     clientId: {
       type: DataTypes.INTEGER,
       references: {

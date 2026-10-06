@@ -79,6 +79,12 @@ const SalesOrder = sequelize.define(
         key: "id",
       },
     },
+    discountPercentage: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+      defaultValue: 0,
+    },
+
     clientId: {
       type: DataTypes.INTEGER,
       references: {

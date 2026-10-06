@@ -45,8 +45,10 @@ export const getUninvoicedSOTotal = async (salesOrderId: number): Promise<number
         ]
     });
 
+    const salesOrder = await scoped(models.SalesOrder).findByPk(salesOrderId);
+
     const plainProducts = uninvoicedProducts.map((p: any) => p.get({ plain: true }));
-    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(plainProducts);
+    const calcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(plainProducts, salesOrder?.discountPercentage, salesOrder?.tax?.value || plainProducts[0]?.taxPercentage || 0);
     // soReceiving.total = subTotal + taxAmount (includes tax)
     return calcs.soReceiving.total;
 };

@@ -131,7 +131,7 @@ export const getReturnById = async (returnId: number, transaction?: Transaction)
     const salesOrderProducts = returnRecord.returnProducts.map((e: any) => e.salesOrderProduct);
 
     // Calculate total pl amount added in return.
-    returnRecord.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProducts);
+    returnRecord.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProducts, returnRecord.salesOrder?.discountPercentage, returnRecord.salesOrder?.tax?.value || salesOrderProducts[0]?.taxPercentage || 0);
 
     return returnRecord;
 }

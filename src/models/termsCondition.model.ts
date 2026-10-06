@@ -20,6 +20,10 @@ const TermsCondition = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    quotationDetails: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
