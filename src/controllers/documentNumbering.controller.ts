@@ -4,6 +4,7 @@ import { SuccessResponse } from "../helper/response";
 import { AuthRequest } from "../middleware/authMiddleware";
 import * as docNumberingService from "../services/documentNumbering.service";
 import { DOCUMENT_NUMBERING_TYPE } from "../models/documentNumberingConfig.model";
+import { AppError } from "../helper/appError";
 
 export const getDocumentNumberingConfigs = asyncCatch(async (req: AuthRequest, res: Response) => {
   const clientId = req.user!.clientId;
@@ -14,6 +15,11 @@ export const getDocumentNumberingConfigs = asyncCatch(async (req: AuthRequest, r
 export const updateDocumentNumberingConfig = asyncCatch(async (req: AuthRequest, res: Response) => {
   const clientId = req.user!.clientId;
   const documentType = req.params.documentType as DOCUMENT_NUMBERING_TYPE;
+
+  if (!Object.values(DOCUMENT_NUMBERING_TYPE).includes(documentType)) {
+    throw new AppError(`Invalid document type: ${req.params.documentType}`, 400);
+  }
+
   const data = await docNumberingService.updateDocumentNumberingConfig(clientId, documentType, req.body);
   return SuccessResponse(res, 200, "Document numbering configuration updated successfully", data);
 });
