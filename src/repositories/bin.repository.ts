@@ -1,5 +1,6 @@
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
+import { sequelize } from "../config/database";
 
 export async function findBinsByLocation(locationId: number) {
   return await scoped(models.Bin).findAll({
@@ -20,10 +21,35 @@ export const createBin = async (payload: any) => {
 
 export const getAllBins = async () => {
   return await scoped(models.Bin).findAll({
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM inventory_products AS ip
+            WHERE ip.binId = bins.id AND ip.isSlabType = true
+          )`),
+          "slabCount",
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM inventory_products AS ip
+            WHERE ip.binId = bins.id AND ip.isSlabType = false
+          )`),
+          "genericCount",
+        ],
+      ],
+    },
     include: [
       {
         model: models.Warehouse,
         attributes: ["id", "locationId"],
+      },
+      {
+        model: models.Area,
+        as: "area",
+        attributes: ["id", "name"],
       },
     ],
   });
@@ -36,6 +62,11 @@ export const getBinById = async (id: number) => {
       {
         model: models.Warehouse,
         attributes: ["id", "locationId"],
+      },
+      {
+        model: models.Area,
+        as: "area",
+        attributes: ["id", "name"],
       },
     ],
   });

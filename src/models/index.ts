@@ -3,6 +3,7 @@ import DeliveryItem from "./DeliveryItem.model";
 import Bill from "./bill.model";
 import BillItem from "./billItem.model";
 import Bin from "./bin.model";
+import Area from "./area.model";
 import Client from "./client.model";
 import Company from "./company.model";
 import Container from "./container.model";
@@ -57,6 +58,8 @@ import InventoryProductHold from "./inventoryProductHold.model";
 import Hold from "./hold.model";
 import HoldExpiryLog from "./holdExpiryLog.model";
 import SelectionSheet from "./selectionSheet.model";
+import ModelSequence from "./modelSequence.model";
+import DocumentNumberingConfig from "./documentNumberingConfig.model";
 import SelectionSheetItem from "./selectionSheetItem.model";
 import GuestSelection from "./guestSelection.model";
 import GuestSelectionItem from "./guestSelectionItem.model";
@@ -301,6 +304,12 @@ Warehouse.belongsTo(Location, { foreignKey: "locationId", as: "location" });
 // One Warehouse has Many Bins
 Warehouse.hasMany(Bin, { foreignKey: "warehouseId" });
 Bin.belongsTo(Warehouse, { foreignKey: "warehouseId" });
+
+Warehouse.hasMany(Area, { foreignKey: "warehouseId", as: "areas" });
+Area.belongsTo(Warehouse, { foreignKey: "warehouseId", as: "warehouse" });
+
+Area.hasMany(Bin, { foreignKey: "areaId", as: "bins" });
+Bin.belongsTo(Area, { foreignKey: "areaId", as: "area" });
 
 // one Bin has many slabs.
 // Slab.belongsTo(Bin, { foreignKey: "binId" });
@@ -911,6 +920,7 @@ BillItem.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 // Client-Bin relation
 Client.hasMany(Bin, { foreignKey: "clientId", as: "bins" });
 Bin.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+Area.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
 // Client-CustomerAddress relation
 Client.hasMany(CustomerAddress, { foreignKey: "clientId", as: "customerAddresses" });
@@ -1081,6 +1091,12 @@ TempAiExtractedSiplItem.belongsTo(SIPL, { foreignKey: "siplId", as: "sipl" });
 SIPLProduct.hasMany(TempAiExtractedSiplItem, { foreignKey: "siplProductId", as: "tempAiItems" });
 TempAiExtractedSiplItem.belongsTo(SIPLProduct, { foreignKey: "siplProductId", as: "siplProduct" });
 
+Client.hasMany(ModelSequence, { foreignKey: "clientId", as: "modelSequences" });
+ModelSequence.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
+Client.hasMany(DocumentNumberingConfig, { foreignKey: "clientId", as: "documentNumberingConfigs" });
+DocumentNumberingConfig.belongsTo(Client, { foreignKey: "clientId", as: "client" });
+
 export {
   DeliveryAddress,
   DeliveryItem,
@@ -1091,6 +1107,7 @@ export {
   PurchaseOrder,
   Vendor,
   Bin,
+  Area,
   Notes,
   FreightDetail,
   Product,
@@ -1161,4 +1178,6 @@ export {
   OpportunityQuotation,
   OpportunityQuotationInventoryProduct,
   SalesOrderRequirementLine,
+  ModelSequence,
+  DocumentNumberingConfig,
 };

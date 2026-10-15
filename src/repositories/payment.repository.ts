@@ -1,6 +1,8 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 export const createPayment = async (paymentData: any, transaction: Transaction) => {
   return await scoped(models.Payment).create(paymentData, { transaction });
@@ -85,14 +87,14 @@ export const deletePayment = async (id: number) => {
   return await scoped(models.Payment).destroy({ where: { id } });
 };
 
-// Get latest Bill number
+// Get latest Transaction number preview
 export const getTransactionNumber = async (clientId: number) => {
-  const lastPayment: any = await scoped(models.Payment).findOne({
-    where: { clientId },
-    order: [["clientTransactionNo", "DESC"]],
+  const nextNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.PAYMENT,
   });
 
-  return { clientTransactionNo: lastPayment ? lastPayment?.clientTransactionNo + 1 : 1 };
+  return { clientTransactionNo: nextNumber };
 };
 
 export const getTotalAmountByPayeeTypeAndClientId = async (payeeType: string, clientId: number) => {

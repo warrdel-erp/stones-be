@@ -23,20 +23,24 @@ import { isHoldClosed } from "../utils/hold.util";
 import * as opportunityRepository from "../repositories/opportunity.repository";
 
 export const createSalesOrder = async (data: any, externalTransaction?: any) => {
+  console.log("hit 2")
+
   const transaction = externalTransaction || await sequelize.transaction();
+  console.log("hit 3")
   try {
     // Fetch customer to get taxId and paymentTermId
     if (data.customerId) {
-      const customer = await customerRepository.getCustomerByIdSimple(data.customerId);
+      const customer = await customerRepository.getCustomerByIdSimple(data.customerId, transaction);
       data.taxId = customer?.salesTaxId;
-      
+
+
       if (!data.paymentTermId) {
         data.paymentTermId = customer?.paymentTermId;
       }
     }
 
     if (!data.paymentTermId) {
-      const client: any = await clientRepository.getClientById(data.clientId);
+      const client: any = await clientRepository.getClientById(data.clientId, { transaction });
       if (client?.defaultPaymentTerms) {
         data.paymentTermId = client.defaultPaymentTerms;
       }
@@ -44,7 +48,7 @@ export const createSalesOrder = async (data: any, externalTransaction?: any) => 
 
     let holdObj: any = null;
     if (data.holdId) {
-      holdObj = await holdRepository.getHoldById(data.holdId);
+      holdObj = await holdRepository.getHoldById(data.holdId, transaction);
       if (!holdObj) {
         throw new AppError("Hold not found", 404);
       }
@@ -159,7 +163,7 @@ export const getAllSalesOrders = async (
 ) => {
   let data: any;
   const search = filter.search;
-  
+
   // Clean filter by removing tab and search
   const cleanFilter = { ...filter };
   delete cleanFilter.tab;
@@ -202,10 +206,10 @@ export const getSalesOrderSummary = async (id: number) => {
   const totalItems = salesOrder.salesOrderProducts?.length || 0;
   const totalSlabs = salesOrder.salesOrderProducts?.filter((p: any) => p.inventoryProduct?.slabId).length || 0;
   const totalSqft = salesOrder.salesOrderProducts?.reduce((acc: number, p: any) => {
-      if (p.inventoryProduct?.slab) {
-          return acc + ((p.inventoryProduct.slab.receivingLength * p.inventoryProduct.slab.receivingWidth) / 144);
-      }
-      return acc;
+    if (p.inventoryProduct?.slab) {
+      return acc + ((p.inventoryProduct.slab.receivingLength * p.inventoryProduct.slab.receivingWidth) / 144);
+    }
+    return acc;
   }, 0) || 0;
 
   const numPickLists = salesOrder.loadingOrders?.length || 0;
@@ -428,7 +432,7 @@ export const updateSalesOrderTax = async (id: number, taxId: number, clientId: n
     );
 
     await transaction.commit();
-    
+
     // Fetch and return the updated sales order with associations
     const updatedSalesOrder = await getSalesOrderById(id);
     return updatedSalesOrder;

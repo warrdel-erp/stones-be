@@ -5,7 +5,9 @@ import * as models from "../models";
 import CustomerAddress from "./customerAddress.model";
 import { DELIVERY_TYPES, SALES_ORDER_STATUS } from "../constants/tableTypes";
 import { PAYMENT_TERMS, SALES_TAX } from "../constants";
-import { scoped } from "../utils/scoped";
+import { AppError } from "../helper/appError";
+import { allocateDocumentSequenceAndCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "./documentNumberingConfig.model";
 
 const SalesOrder = sequelize.define(
   "SalesOrder",
@@ -18,6 +20,10 @@ const SalesOrder = sequelize.define(
     clientSoNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
+    code: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
     soDate: {
       type: DataTypes.DATE,
@@ -150,24 +156,36 @@ const SalesOrder = sequelize.define(
         unique: true,
         fields: ["clientId", "clientSoNumber"],
       },
+      {
+        unique: true,
+        fields: ["clientId", "code"],
+      },
     ],
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
-SalesOrder.beforeCreate(async (salesOrder: any) => {
+// 🔹 Hook: Prevent updating clientSoNumber or code (immutable)
+SalesOrder.beforeUpdate(async (salesOrder: any) => {
+  if (salesOrder.changed("clientSoNumber") || salesOrder.changed("code")) {
+    throw new AppError("Sales Order number and code are immutable and cannot be updated.", 400);
+  }
+});
+
+// 🔹 Hook: Auto-Increment `clientSoNumber` and format `code` using locked sequence
+SalesOrder.beforeCreate(async (salesOrder: any, options: any) => {
   if (!salesOrder.clientId) {
-    throw new Error("Client ID is required to generate clientSONumber.");
+    throw new AppError("Client ID is required to generate clientSoNumber.", 400);
   }
 
-  let lastSOAccordingToClient: any = await scoped(SalesOrder).findOne({
-    where: { clientId: salesOrder.clientId },
-    order: [["clientSoNumber", "DESC"]],
-  });
-
-  lastSOAccordingToClient = lastSOAccordingToClient?.get({ plain: true });
-
-  salesOrder.clientSoNumber = lastSOAccordingToClient ? lastSOAccordingToClient.clientSoNumber + 1 : 1;
+  if (!salesOrder.clientSoNumber || !salesOrder.code) {
+    const { sequenceNumber, code } = await allocateDocumentSequenceAndCode({
+      clientId: salesOrder.clientId,
+      documentType: DOCUMENT_NUMBERING_TYPE.SALES_ORDER,
+      transaction: options?.transaction,
+    });
+    if (!salesOrder.clientSoNumber) salesOrder.clientSoNumber = sequenceNumber;
+    if (!salesOrder.code) salesOrder.code = code;
+  }
 });
 
 // Scope configuration for SalesOrder model

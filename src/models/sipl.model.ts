@@ -4,7 +4,9 @@ import User from "./user.model";
 import PurchaseOrder from "./purchaseOrder.model";
 import Client from "./client.model";
 import Location from "./location.model";
-import { scoped } from "../utils/scoped";
+import { AppError } from "../helper/appError";
+import { allocateDocumentSequenceAndCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "./documentNumberingConfig.model";
 import { PAYMENT_TERMS } from "../constants";
 import { SIPL_STATUS } from "../constants/tableTypes";
 
@@ -169,25 +171,38 @@ const SIPL = sequelize.define(
       },
       {
         unique: true,
+        fields: ["clientId", "invoiceCode"],
+      },
+      {
+        unique: true,
         fields: ["purchaseOrderId", "poSiplNumber"],
       },
     ],
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
-SIPL.beforeCreate(async (sipl: any) => {
-  if (!sipl.clientId && !sipl.purchaseOrderId) {
-    throw new Error("Client ID and purchaseOrderId is required to generate clientInvoiceNumber and poSiplNumber.");
+// 🔹 Hook: Prevent updating clientInvoiceNumber or invoiceCode (immutable)
+SIPL.beforeUpdate(async (sipl: any) => {
+  if (sipl.changed("clientInvoiceNumber") || sipl.changed("invoiceCode")) {
+    throw new AppError("Goods Receipt invoice number and code are immutable and cannot be updated.", 400);
+  }
+});
+
+// 🔹 Hook: Auto-Increment `clientInvoiceNumber` and format `invoiceCode` using locked sequence
+SIPL.beforeCreate(async (sipl: any, options: any) => {
+  if (!sipl.clientId) {
+    throw new AppError("Client ID is required to generate clientInvoiceNumber.", 400);
   }
 
-  const lastSIPLAccordingToClient: any = await scoped(SIPL).findOne({
-    where: { clientId: sipl.clientId },
-    order: [["clientInvoiceNumber", "DESC"]],
-  });
-
-  sipl.clientInvoiceNumber = lastSIPLAccordingToClient ? lastSIPLAccordingToClient.clientInvoiceNumber + 1 : 1;
-
+  if (!sipl.clientInvoiceNumber || !sipl.invoiceCode) {
+    const { sequenceNumber, code } = await allocateDocumentSequenceAndCode({
+      clientId: sipl.clientId,
+      documentType: DOCUMENT_NUMBERING_TYPE.GOODS_RECEIPT,
+      transaction: options?.transaction,
+    });
+    if (!sipl.clientInvoiceNumber) sipl.clientInvoiceNumber = sequenceNumber;
+    if (!sipl.invoiceCode) sipl.invoiceCode = code;
+  }
 });
 
 // Scope configuration for SIPL model

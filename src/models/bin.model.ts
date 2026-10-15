@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Warehouse from "./warehouse.model";
 import Client from "./client.model";
 import Location from "./location.model";
+import { BIN_TYPES } from "../constants";
 
 const Bin = sequelize.define(
   "bins",
@@ -45,6 +46,21 @@ const Bin = sequelize.define(
       },
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
+    },
+    areaId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    typeId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    type: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const typeId = this.get('typeId');
+        return typeId ? BIN_TYPES.find((t: any) => t.id === typeId) : null;
+      }
     },
   },
   {

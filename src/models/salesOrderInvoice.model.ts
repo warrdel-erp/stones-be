@@ -8,6 +8,8 @@ import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
 import * as decimal from '../helper/decimal'
 import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 export type SoInvoice = {
   customerId: number;
@@ -21,6 +23,7 @@ export type SoInvoice = {
   totalServiceCharges: number;
   discountPercentage?: number;
   discountAmount?: number;
+  termsAndConditions?: string;
 };
 
 const SalesOrderInvoice = sequelize.define(
@@ -121,6 +124,10 @@ const SalesOrderInvoice = sequelize.define(
       allowNull: true,
       defaultValue: 0,
     },
+    termsAndConditions: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
 
     clientId: {
       type: DataTypes.INTEGER,
@@ -158,38 +165,42 @@ const SalesOrderInvoice = sequelize.define(
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
-SalesOrderInvoice.beforeCreate(async (soInvoice: any) => {
-  if (!soInvoice.clientId && !soInvoice.purchaseOrderId) {
+// 🔹 Hook: Auto-Increment `clientSoInvoiceNumber` and `soInvoiceNumber` using locked sequence
+SalesOrderInvoice.beforeCreate(async (soInvoice: any, options: any) => {
+  if (!soInvoice.clientId) {
     throw new Error("Client ID is required to generate clientSoInvoiceNumber.");
   }
 
-  const lastSoInvoiceAccordingToClient: any = await scoped(SalesOrderInvoice).findOne({
-    where: { clientId: soInvoice.clientId },
-    order: [["clientSoInvoiceNumber", "DESC"]],
-  });
+  if (!soInvoice.clientSoInvoiceNumber) {
+    soInvoice.clientSoInvoiceNumber = await getNextSequenceNumber({
+      clientId: soInvoice.clientId,
+      modelName: SEQUENCE_MODEL.SALES_ORDER_INVOICE,
+      transaction: options?.transaction,
+    });
+  }
 
-  soInvoice.clientSoInvoiceNumber = lastSoInvoiceAccordingToClient
-    ? Number(lastSoInvoiceAccordingToClient.clientSoInvoiceNumber) + 1
-    : 1;
-
-  //  Generate soInvoiceNumber
+  // Generate soInvoiceNumber
   if (!soInvoice.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soInvoiceNumber.", 400);
   }
 
-  const lastInvAccordingToSo: any = await scoped(SalesOrderInvoice).findOne({
-    where: { salesOrderId: soInvoice.salesOrderId },
-    order: [["soInvoiceNumber", "DESC"]],
+  const salesOrder: any = await SalesOrder.findByPk(soInvoice.salesOrderId, {
+    transaction: options?.transaction,
   });
-
-  const salesOrder: any = await SalesOrder.findByPk(soInvoice.salesOrderId);
 
   if (!salesOrder) {
     throw new AppError("sales Order not found", 400);
   }
 
-  soInvoice.soInvoiceNumber = lastInvAccordingToSo ? lastInvAccordingToSo.soInvoiceNumber + 1 : 1;
+  if (!soInvoice.soInvoiceNumber) {
+    soInvoice.soInvoiceNumber = await getNextSequenceNumber({
+      clientId: soInvoice.clientId,
+      modelName: SEQUENCE_MODEL.SO_INVOICE,
+      scopeKey: String(soInvoice.salesOrderId),
+      transaction: options?.transaction,
+    });
+  }
+
   soInvoice.invoiceCode = `INV ${salesOrder.clientSoNumber}-${soInvoice.soInvoiceNumber}`;
 });
 

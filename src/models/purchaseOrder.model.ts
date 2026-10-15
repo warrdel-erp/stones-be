@@ -7,7 +7,9 @@ import Client from "./client.model";
 import * as models from "./index";
 import { PO_STATUS } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
-import { scoped } from "../utils/scoped";
+import { AppError } from "../helper/appError";
+import { allocateDocumentSequenceAndCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "./documentNumberingConfig.model";
 
 const PurchaseOrder = sequelize.define(
   "PurchaseOrder",
@@ -24,6 +26,10 @@ const PurchaseOrder = sequelize.define(
     clientPoNumber: {
       type: DataTypes.INTEGER,
       allowNull: true, // Auto-Incremented and not null is handled in hook
+    },
+    code: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
     paymentTermId: {
       type: DataTypes.INTEGER,
@@ -118,24 +124,36 @@ const PurchaseOrder = sequelize.define(
         unique: true,
         fields: ["clientId", "clientPoNumber"],
       },
+      {
+        unique: true,
+        fields: ["clientId", "code"],
+      },
     ],
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
-PurchaseOrder.beforeCreate(async (purchaseOrder: any) => {
+// 🔹 Hook: Prevent updating clientPoNumber or code (immutable)
+PurchaseOrder.beforeUpdate(async (purchaseOrder: any) => {
+  if (purchaseOrder.changed("clientPoNumber") || purchaseOrder.changed("code")) {
+    throw new AppError("Purchase Order number and code are immutable and cannot be updated.", 400);
+  }
+});
+
+// 🔹 Hook: Auto-Increment `clientPoNumber` and format `code` using locked sequence
+PurchaseOrder.beforeCreate(async (purchaseOrder: any, options: any) => {
   if (!purchaseOrder.clientId) {
-    throw new Error("Client ID is required to generate clientPONumber.");
+    throw new AppError("Client ID is required to generate clientPoNumber.", 400);
   }
 
-  let lastPOAccordingToClient: any = await scoped(PurchaseOrder).findOne({
-    where: { clientId: purchaseOrder.clientId },
-    order: [["clientPoNumber", "DESC"]],
-  });
-
-  lastPOAccordingToClient = lastPOAccordingToClient?.get({ plain: true });
-
-  purchaseOrder.clientPoNumber = lastPOAccordingToClient ? lastPOAccordingToClient.clientPoNumber + 1 : 1;
+  if (!purchaseOrder.clientPoNumber || !purchaseOrder.code) {
+    const { sequenceNumber, code } = await allocateDocumentSequenceAndCode({
+      clientId: purchaseOrder.clientId,
+      documentType: DOCUMENT_NUMBERING_TYPE.PURCHASE_ORDER,
+      transaction: options?.transaction,
+    });
+    if (!purchaseOrder.clientPoNumber) purchaseOrder.clientPoNumber = sequenceNumber;
+    if (!purchaseOrder.code) purchaseOrder.code = code;
+  }
 });
 
 // Scope configuration for PurchaseOrder model

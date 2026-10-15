@@ -19,6 +19,7 @@ import billRoute from "./routes/bill.routes";
 import siplRoute from "./routes/sipl.routes";
 import generalRoute from "./routes/general.routes";
 import binRoute from "./routes/bin.routes";
+import areaRoute from "./routes/area.routes";
 import inventoryRoute from "./routes/inventory.routes";
 import slabRoute from "./routes/slab.routes";
 import coaRoute from "./routes/coa.routes";
@@ -71,6 +72,7 @@ import customerExternalInvoiceRoutes from "./routes/customerExternalInvoice.rout
 import fileUploadRoutes from "./routes/s3File.routes";
 import opportunityRoutes from "./routes/opportunity.routes";
 import salesOrderRequirementRoutes from "./routes/salesOrderRequirement.routes";
+import documentNumberingRoutes from "./routes/documentNumbering.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -97,6 +99,7 @@ app.use("/api/bill", billRoute);
 app.use("/api/sipl", siplRoute);
 app.use("/api/general", generalRoute);
 app.use("/api/bin", binRoute);
+app.use("/api/area", areaRoute);
 app.use("/api/inventory", inventoryRoute);
 app.use("/api/slab", slabRoute);
 app.use("/api/coa", coaRoute);
@@ -146,6 +149,7 @@ app.use("/api/customerExternalInvoice", customerExternalInvoiceRoutes);
 app.use("/api/fileUpload", fileUploadRoutes);
 app.use("/api/opportunity", opportunityRoutes);
 app.use("/api/reports", reportRoute);
+app.use("/api/document-numbering", documentNumberingRoutes);
 // Driver
 app.use("/api/driver/delivery", driverDeliveryRoutes);
 

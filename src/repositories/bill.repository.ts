@@ -2,6 +2,8 @@ import { col, fn, Op, Transaction, where, WhereOptions } from "sequelize";
 import * as models from "../models";
 import { BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 export const createBill = async (billData: any, transaction?: Transaction) => {
   return await scoped(models.Bill).create(billData, { transaction });
@@ -76,12 +78,12 @@ export const getAllBillsForVendor = async (filters?: { [key: string]: any }) => 
 
 // Get latest Bill number
 export const getBillNumber = async (clientId: number) => {
-  const lastBill: any = await scoped(models.Bill).findOne({
-    where: { clientId: clientId },
-    order: [["clientBillNumber", "DESC"]],
+  const nextNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.BILL,
   });
 
-  return { clientBillNumber: lastBill ? lastBill?.clientBillNumber + 1 : 1 };
+  return { clientBillNumber: nextNumber };
 };
 
 // does all given bills belong to the given vendor

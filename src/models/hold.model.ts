@@ -6,6 +6,9 @@ import Client from "./client.model";
 import Location from "./location.model";
 import { HOLD_STAGES } from "../constants/tableTypes";
 import { v4 as uuidv4 } from "uuid";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { AppError } from "../helper/appError";
 
 const Hold = sequelize.define(
     "Hold",
@@ -77,6 +80,10 @@ const Hold = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
+        code: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        },
         stage: {
             type: DataTypes.ENUM(...Object.values(HOLD_STAGES)),
             defaultValue: HOLD_STAGES.INITIATED,
@@ -104,23 +111,36 @@ const Hold = sequelize.define(
                 unique: true,
                 fields: ["clientId", "clientHoldNumber"],
             },
+            {
+                unique: true,
+                fields: ["clientId", "code"],
+            },
         ],
     }
 );
 
-Hold.beforeCreate(async (hold: any) => {
+Hold.beforeUpdate(async (hold: any) => {
+    if (hold.changed("clientHoldNumber") || hold.changed("code")) {
+        throw new AppError("Hold number and code are immutable and cannot be updated.", 400);
+    }
+});
+
+Hold.beforeCreate(async (hold: any, options: any) => {
     if (!hold.clientId) {
         throw new Error("Client ID is required to generate clientHoldNumber.");
     }
 
-    let lastHoldAccordingToClient: any = await Hold.findOne({
-        where: { clientId: hold.clientId },
-        order: [["clientHoldNumber", "DESC"]],
-    });
+    if (!hold.clientHoldNumber) {
+        hold.clientHoldNumber = await getNextSequenceNumber({
+            clientId: hold.clientId,
+            modelName: SEQUENCE_MODEL.HOLD,
+            transaction: options?.transaction,
+        });
+    }
 
-    lastHoldAccordingToClient = lastHoldAccordingToClient?.get({ plain: true });
-
-    hold.clientHoldNumber = lastHoldAccordingToClient ? lastHoldAccordingToClient.clientHoldNumber + 1 : 1;
+    if (!hold.code) {
+        hold.code = `HLD-${hold.clientHoldNumber}`;
+    }
     
     // Generate unique barcode for Hold
     hold.barcode = "hold/" + uuidv4();

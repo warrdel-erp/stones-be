@@ -39,9 +39,10 @@ export const createHoldItems = async (
 /**
  * Get hold by ID with all details
  */
-export const getHoldById = async (id: number) => {
+export const getHoldById = async (id: number, transaction?: Transaction) => {
   const productScoped = scoped(models.Product);
   const products = (await productScoped.findAll({
+    transaction,
     attributes: ['id', 'name'],
     include: [
       {
@@ -81,6 +82,7 @@ export const getHoldById = async (id: number) => {
   }));
 
   const hold = (await models.Hold.findByPk(id, {
+    transaction,
     include: [
       {
         association: "createdBy",
@@ -184,7 +186,8 @@ export const getAllHolds = async (
     const isNumeric = !isNaN(Number(search));
     const searchConditions: any[] = [
       { "$customer.name$": { [Op.like]: `%${search}%` } },
-      { "$fabricator.name$": { [Op.like]: `%${search}%` } }
+      { "$fabricator.name$": { [Op.like]: `%${search}%` } },
+      { code: { [Op.like]: `%${search}%` } },
     ];
     if (isNumeric) {
       searchConditions.push({ clientHoldNumber: Number(search) });

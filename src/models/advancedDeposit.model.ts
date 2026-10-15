@@ -5,7 +5,8 @@ import LedgerAccount from "./ledgerAccount.model";
 import Client from "./client.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 const AdvancedDeposit = sequelize.define(
     "AdvancedDeposit",
@@ -92,28 +93,29 @@ const AdvancedDeposit = sequelize.define(
 export default AdvancedDeposit;
 
 
-AdvancedDeposit.beforeCreate(async (advancedDeposit: any) => {
-
+AdvancedDeposit.beforeCreate(async (advancedDeposit: any, options: any) => {
     if (!advancedDeposit.salesOrderId) {
-        throw new AppError('salesOrderId is required', 400)
+        throw new AppError('salesOrderId is required', 400);
     }
 
-    const lastAdvancedDepositNumberAsPerSO: any = await scoped(AdvancedDeposit).findOne({
-        where: { salesOrderId: advancedDeposit.salesOrderId },
-        attributes: ['soAdvancedDepositNumber', 'code'],
-        order: [['soAdvancedDepositNumber', 'DESC']]
-    })
+    const salesOrder: any = await SalesOrder.findByPk(advancedDeposit.salesOrderId, {
+        attributes: ['id', 'clientId', 'clientSoNumber'],
+        raw: true,
+        transaction: options?.transaction,
+    });
 
-    advancedDeposit.soAdvancedDepositNumber = lastAdvancedDepositNumberAsPerSO ? lastAdvancedDepositNumberAsPerSO.soAdvancedDepositNumber + 1 : 1
-
-    // Save pre-created code. 
-    if (lastAdvancedDepositNumberAsPerSO) {
-        const withoutLastCode = lastAdvancedDepositNumberAsPerSO.code.split('-')[0];
-        const newCode = withoutLastCode + '-' + advancedDeposit.soAdvancedDepositNumber
-        advancedDeposit.code = newCode
-    } else {
-        const salesOrder: any = await SalesOrder.findByPk(advancedDeposit.salesOrderId, { attributes: ['clientSoNumber'], raw: true });
-        advancedDeposit.code = "AD " + salesOrder.clientSoNumber + '-' + 1
+    if (!salesOrder) {
+        throw new AppError('Sales Order not found', 400);
     }
 
-})
+    if (!advancedDeposit.soAdvancedDepositNumber) {
+        advancedDeposit.soAdvancedDepositNumber = await getNextSequenceNumber({
+            clientId: salesOrder.clientId,
+            modelName: SEQUENCE_MODEL.ADVANCED_DEPOSIT,
+            scopeKey: String(advancedDeposit.salesOrderId),
+            transaction: options?.transaction,
+        });
+    }
+
+    advancedDeposit.code = "AD " + salesOrder.clientSoNumber + '-' + advancedDeposit.soAdvancedDepositNumber;
+});

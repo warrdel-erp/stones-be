@@ -25,7 +25,7 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
 
   try {
     for (const product of products) {
-      const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId);
+      const inventoryProduct: any = await inventoryProductRepository.findInventoryProductById(product.inventoryProductId, transaction);
 
       // Validate unitPrice is greater than 0
       const priceNum = Number(product.unitPrice);
@@ -51,7 +51,7 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
       // Calculate receivingAreaSqFt if it's a slab type
       let receivingAreaSqFt = null;
       if (inventoryProduct.isSlabType) {
-        const slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId);
+        const slab: any = await slabRepository.getSlabByInventoryProductId(product.inventoryProductId, transaction);
         if (slab) {
           receivingAreaSqFt = slab.receivedSqrFt;
         }

@@ -21,6 +21,7 @@ import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as activityService from "../services/activity.service";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
@@ -187,6 +188,12 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
 
+    // Fetch terms and conditions
+    const termsRecord: any = await termsConditionRepository.getTermsConditionByFilter({ clientId }, transaction);
+    if (!termsRecord || !termsRecord.details) {
+      throw new AppError("Please set Commercial Terms & Conditions first.", 400);
+    }
+
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
       {
@@ -200,6 +207,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         salesOrderId: loadingOrder.salesOrderId,
         discountPercentage: actualSalesOrder.discountPercentage,
         discountAmount: invoiceAmountObj.discountAmount,
+        termsAndConditions: termsRecord.details,
       },
       transaction
     );

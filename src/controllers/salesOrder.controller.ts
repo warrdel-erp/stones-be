@@ -7,6 +7,8 @@ import { AppError } from "../helper/appError";
 
 // Create new SO
 export const createSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+  console.log("----")
+  console.log("hit 1")
   const clientId = req.user?.clientId;
   const accountId = req.user?.accountId;
   const locationId = req.user?.defaultLocationId

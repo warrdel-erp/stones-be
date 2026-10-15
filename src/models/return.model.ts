@@ -5,7 +5,8 @@ import SalesOrderInvoice from "./salesOrderInvoice.model";
 import { AppError } from "../helper/appError";
 import Client from "./client.model";
 import Location from "./location.model";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 const RETURN_STATUS = {
     INITIATED: "initiated",
@@ -84,29 +85,30 @@ const Return = sequelize.define(
     }
 );
 
-// Hook: Auto-Generate return code based on invoice
-Return.beforeCreate(async (returnRecord: any) => {
+// Hook: Auto-Generate return code based on invoice using locked sequence
+Return.beforeCreate(async (returnRecord: any, options: any) => {
     if (!returnRecord.invoiceId) {
         throw new AppError("Invoice ID is required to generate return code.", 400);
     }
 
     // Get the invoice to access its number
-    const invoice: any = await SalesOrderInvoice.findByPk(returnRecord.invoiceId);
+    const invoice: any = await SalesOrderInvoice.findByPk(returnRecord.invoiceId, {
+        transaction: options?.transaction,
+    });
     if (!invoice) {
         throw new AppError("Invoice not found.", 404);
     }
 
-    // Find the last return for this invoice to get the next return number
-    const lastReturnForInvoice: any = await scoped(Return).findOne({
-        where: { invoiceId: returnRecord.invoiceId },
-        order: [["id", "DESC"]],
+    const returnNumber = await getNextSequenceNumber({
+        clientId: invoice.clientId,
+        modelName: SEQUENCE_MODEL.RETURN,
+        scopeKey: String(returnRecord.invoiceId),
+        transaction: options?.transaction,
     });
-
-    const returnNumber = lastReturnForInvoice ? lastReturnForInvoice.roInvoiceNumber + 1 : 1; // First return is 1, subsequent returns increment
 
     const invoiceNumber = invoice.invoiceCode.split(' ')[1];
 
-    // Generate code in format: "RET {invoiceNumber}-{returnNumber}"
+    // Generate code in format: "RO {invoiceNumber}-{returnNumber}"
     returnRecord.roInvoiceNumber = returnNumber;
     returnRecord.code = `RO ${invoiceNumber}-${returnNumber}`;
 });

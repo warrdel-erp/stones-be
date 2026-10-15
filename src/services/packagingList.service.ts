@@ -15,6 +15,7 @@ import * as loadingOrderRepository from "../repositories/loadingOrder.repository
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as deliveryRepository from "../repositories/delivery.repository";
+import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as packagingListService from "../services/packagingList.service";
 import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
@@ -444,6 +445,12 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
     }
 
+    // Fetch terms and conditions
+    const termsRecord: any = await termsConditionRepository.getTermsConditionByFilter({ clientId }, transaction);
+    if (!termsRecord || !termsRecord.details) {
+      throw new AppError("Please set Commercial Terms & Conditions first.", 400);
+    }
+
     // create invoice
     const invoice: any = await soInvoiceRepository.createInvoice(
       {
@@ -457,6 +464,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
         salesOrderId: packagingList.salesOrder.id,
         discountPercentage: packagingList.salesOrder.discountPercentage,
         discountAmount: invoiceAmountObj.discountAmount,
+        termsAndConditions: termsRecord.details,
       },
       transaction
     );

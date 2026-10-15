@@ -1,8 +1,11 @@
-import { col, fn, Op, Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import * as models from "../models";
 import { AppError } from "../helper/appError";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber, getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { requestContext } from "../utils/requestContext";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { buildEffectiveSellingPriceWhere, buildSlabWhere } from "./product.repository";
 
@@ -11,18 +14,19 @@ export async function createSIPL(siplData: any, transaction?: Transaction) {
   return await scoped(models.SIPL).create(siplData, { transaction });
 }
 
-// Get latest invoice number
+// Get latest invoice number preview
 export const getInvoiceNumber = async () => {
-  let lastSIPL: any = await scoped(models.SIPL).findOne({
-    order: [["id", "DESC"]],
-    attributes: ["clientInvoiceNumber", "poSiplNumber"],
+  const store = requestContext.getStore();
+  const clientId = store?.clientId || 0;
+
+  const clientInvoiceNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.SIPL,
   });
 
-  lastSIPL = lastSIPL?.get({ plain: true });
-
   return {
-    clientInvoiceNumber: lastSIPL ? lastSIPL?.clientInvoiceNumber + 1 : 1,
-    poSiplNumber: lastSIPL ? lastSIPL?.poSiplNumber + 1 : 1,
+    clientInvoiceNumber,
+    poSiplNumber: 1,
   };
 };
 
@@ -473,21 +477,23 @@ export const getCombinedSIPlNumber = async (sipl: any, transaction: Transaction)
     throw new AppError("purchaseOrderId is required to generate poSiplNumber.", 400);
   }
 
-  const lastSIPLAccordingToPO: any = await scoped(models.SIPL).findOne({
-    where: { purchaseOrderId: sipl.purchaseOrderId },
-    order: [["poSiplNumber", "DESC"]],
-    transaction
+  const purchaseOrder: any = await models.PurchaseOrder.findByPk(sipl.purchaseOrderId, { transaction });
+  if (!purchaseOrder) {
+    throw new AppError("Purchase order not found", 404);
+  }
+
+  const poSiplNumber = await getNextSequenceNumber({
+    clientId: purchaseOrder.clientId,
+    modelName: SEQUENCE_MODEL.PO_SIPL,
+    scopeKey: String(sipl.purchaseOrderId),
+    transaction,
   });
-
-  const purchaseOrder: any = await models.PurchaseOrder.findByPk(sipl.purchaseOrderId, { transaction })
-
-  const poSiplNumber = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.poSiplNumber + 1 : 1;
 
   return {
     poSiplNumber,
     invoiceCode: `VI ${purchaseOrder.clientPoNumber}-${poSiplNumber}`,
     paymentTermId: sipl.paymentTermId || purchaseOrder.paymentTermId,
-  }
+  };
 };
 
 export const updateSiplS3FileId = async (

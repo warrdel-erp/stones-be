@@ -2,6 +2,9 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { CREDIT_NOTE_REFERENCE_TYPES, CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES, CREDIT_DEBIT_NOTE_TYPES } from "../constants/tableTypes";
 import Client from "./client.model";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { AppError } from "../helper/appError";
 
 const CreditDebitNote = sequelize.define(
     "CreditDebitNote",
@@ -32,8 +35,16 @@ const CreditDebitNote = sequelize.define(
         referenceId: {
             type: DataTypes.INTEGER,
         },
+        clientCreditNoteNumber: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         creditNoteNumber: {
             type: DataTypes.STRING,
+            allowNull: true,
+        },
+        code: {
+            type: DataTypes.STRING(100),
             allowNull: true,
         },
         creditNoteDate: {
@@ -77,33 +88,44 @@ const CreditDebitNote = sequelize.define(
     {
         tableName: "credit_debit_notes",
         timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ["clientId", "code"],
+            },
+        ],
     }
 );
 
-// 🔹 Hook: Auto-Increment `creditNoteNumber` based on `clientId`
-CreditDebitNote.beforeCreate(async (note: any) => {
+// 🔹 Hook: Prevent updating creditNoteNumber or code (immutable)
+CreditDebitNote.beforeUpdate(async (note: any) => {
+    if (note.changed("creditNoteNumber") || note.changed("clientCreditNoteNumber") || note.changed("code")) {
+        throw new AppError("Credit Note number and code are immutable and cannot be updated.", 400);
+    }
+});
+
+// 🔹 Hook: Auto-Increment `creditNoteNumber` using locked sequence
+CreditDebitNote.beforeCreate(async (note: any, options: any) => {
     if (!note.clientId) {
         throw new Error("Client ID is required to generate creditNoteNumber.");
     }
 
-    // Retrieve all notes for this client to determine next sequence number
-    const notes: any[] = await CreditDebitNote.findAll({
-        where: { clientId: note.clientId },
-        attributes: ["creditNoteNumber"],
-        raw: true
-    });
+    if (!note.creditNoteNumber) {
+        const nextNum = await getNextSequenceNumber({
+            clientId: note.clientId,
+            modelName: SEQUENCE_MODEL.CREDIT_DEBIT_NOTE,
+            transaction: options?.transaction,
+        });
 
-    let maxNum = 0;
-    for (const n of notes) {
-        if (n.creditNoteNumber) {
-            const num = parseInt(n.creditNoteNumber, 10);
-            if (!isNaN(num) && num > maxNum) {
-                maxNum = num;
-            }
+        note.creditNoteNumber = String(nextNum);
+        if (!note.clientCreditNoteNumber) {
+            note.clientCreditNoteNumber = nextNum;
         }
     }
 
-    note.creditNoteNumber = String(maxNum + 1);
+    if (!note.code) {
+        note.code = `CN-${note.clientCreditNoteNumber || note.creditNoteNumber}`;
+    }
 });
 
 // // Define associations

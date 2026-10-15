@@ -1,11 +1,12 @@
-import { DataTypes, Op } from "sequelize";
+import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { PAYEE_TYPE, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_TYPE } from "../constants/tableTypes";
 import User from "./user.model";
 import Client from "./client.model";
 import LedgerAccount from "./ledgerAccount.model";
 import Location from "./location.model";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 const Payment = sequelize.define(
   "Payment",
@@ -121,47 +122,37 @@ const Payment = sequelize.define(
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientInvoiceNumber` based on `clientId`
-Payment.beforeCreate(async (payment: any) => {
+// 🔹 Hook: Auto-Increment `clientTransactionNo` and `transactionCode` using locked sequence
+Payment.beforeCreate(async (payment: any, options: any) => {
   if (!payment.clientId) {
     throw new Error("Client ID is required to generate transaction number");
   }
 
-  const lastSIPLAccordingToPO: any = await scoped(Payment).findOne({
-    where: { clientId: payment.clientId },
-    order: [["clientTransactionNo", "DESC"]],
-  });
-
-  payment.clientTransactionNo = lastSIPLAccordingToPO ? lastSIPLAccordingToPO.clientTransactionNo + 1 : 1;
+  if (!payment.clientTransactionNo) {
+    payment.clientTransactionNo = await getNextSequenceNumber({
+      clientId: payment.clientId,
+      modelName: SEQUENCE_MODEL.PAYMENT,
+      transaction: options?.transaction,
+    });
+  }
 
   // Generate transaction code based on Ledger Account name
-  if (payment.accountId) {
-    const ledgerAccount: any = await LedgerAccount.findByPk(payment.accountId);
+  if (payment.accountId && !payment.transactionCode) {
+    const ledgerAccount: any = await LedgerAccount.findByPk(payment.accountId, {
+      transaction: options?.transaction,
+    });
     if (ledgerAccount && ledgerAccount.name) {
       // Get first 2-3 characters from the account name
       const accountPrefix = ledgerAccount.name.substring(0, 3).toUpperCase();
 
-      // Find the last transaction code with this prefix
-      const lastPayment: any = await scoped(Payment).findOne({
-        where: {
-          clientId: payment.clientId,
-          transactionCode: {
-            [Op.like]: `${accountPrefix}%`
-          }
-        },
-        order: [["transactionCode", "DESC"]],
+      const sequenceNumber = await getNextSequenceNumber({
+        clientId: payment.clientId,
+        modelName: SEQUENCE_MODEL.PAYMENT_CODE,
+        scopeKey: accountPrefix,
+        transaction: options?.transaction,
       });
 
-      let sequenceNumber = 1;
-      if (lastPayment && lastPayment.transactionCode) {
-        // Extract the number from the last transaction code
-        const lastNumber = parseInt(lastPayment.transactionCode.replace(accountPrefix, ''));
-        if (!isNaN(lastNumber)) {
-          sequenceNumber = lastNumber + 1;
-        }
-      }
-
-      payment.transactionCode = `${accountPrefix}${sequenceNumber.toString().padStart(3, '0')}`;
+      payment.transactionCode = `${accountPrefix}${sequenceNumber.toString().padStart(3, "0")}`;
     }
   }
 });

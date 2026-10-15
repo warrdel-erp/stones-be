@@ -1,7 +1,11 @@
-import { col, fn, literal, Op, Sequelize, Transaction, WhereOptions } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import * as models from "../models";
 import { PO_STATUS } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL, GLOBAL_SCOPE_KEY } from "../constants/sequenceTypes";
+import { getOrInitConfig } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE, SEQUENCE_RESET_FREQUENCY } from "../models/documentNumberingConfig.model";
 
 /**
  * Create a new Purchase Order in the database.
@@ -67,7 +71,8 @@ export const getAllPurchaseOrders = async (page: number, limit: number, clientId
   if (search) {
     const isNumeric = !isNaN(Number(search));
     const searchConditions: any[] = [
-      { "$supplier.name$": { [Op.like]: `%${search}%` } }
+      { "$supplier.name$": { [Op.like]: `%${search}%` } },
+      { code: { [Op.like]: `%${search}%` } }
     ];
     if (isNumeric) {
       searchConditions.push({ clientPoNumber: Number(search) });
@@ -328,15 +333,27 @@ export const getSIPLsByPurchaseOrderId = async (purchaseOrderId: number) => {
   });
 };
 
-// Get latest PO number
+// Get latest PO number and preview code
 export const getPoNumber = async (clientId: number) => {
-  const lastPO: any = await scoped(models.PurchaseOrder).findOne({
-    where: { clientId },
-    order: [["clientPoNumber", "DESC"]],
-    attributes: ["clientPoNumber"],
+  const currentYear = new Date().getFullYear();
+  const config = await getOrInitConfig(clientId, DOCUMENT_NUMBERING_TYPE.PURCHASE_ORDER);
+  const scopeKey =
+    config.sequenceReset === SEQUENCE_RESET_FREQUENCY.YEARLY
+      ? String(currentYear)
+      : GLOBAL_SCOPE_KEY;
+
+  const nextNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.PURCHASE_ORDER,
+    scopeKey,
   });
 
-  return { clientPoNumber: lastPO ? lastPO?.clientPoNumber + 1 : 1 };
+  const parts: string[] = [config.prefix];
+  if (config.includeYear) parts.push(String(currentYear));
+  parts.push(String(nextNumber).padStart(config.numberLength, "0"));
+  const code = parts.join(config.separator);
+
+  return { clientPoNumber: nextNumber, code };
 };
 
 export async function updatePurchaseOrderStatus(purchaseOrderId: number, status: string, transaction?: any) {

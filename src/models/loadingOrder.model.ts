@@ -5,7 +5,10 @@ import SalesOrder from "./salesOrder.model";
 import PackagingList from "./packagingList.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { allocateDocumentSequenceAndCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "./documentNumberingConfig.model";
 
 const LoadingOrder = sequelize.define(
   "LoadingOrder",
@@ -83,39 +86,58 @@ const LoadingOrder = sequelize.define(
       },
       {
         unique: true,
+        fields: ["clientId", "code"],
+      },
+      {
+        unique: true,
         fields: ["salesOrderId", "soLoadingOrderNumber"],
       },
     ],
   }
 );
 
-LoadingOrder.beforeCreate(async (loadingOrder: any) => {
+// 🔹 Hook: Prevent updating clientLoNumber or code (immutable)
+LoadingOrder.beforeUpdate(async (loadingOrder: any) => {
+  if (loadingOrder.changed("clientLoNumber") || loadingOrder.changed("code")) {
+    throw new AppError("Loading Order number and code are immutable and cannot be updated.", 400);
+  }
+});
+
+LoadingOrder.beforeCreate(async (loadingOrder: any, options: any) => {
   if (!loadingOrder.clientId) {
-    throw new Error("Client ID is required to generate clientLoNumber.");
+    throw new AppError("Client ID is required to generate clientLoNumber.", 400);
   }
 
-  let lastLOAccordingToClient: any = await scoped(LoadingOrder).findOne({
-    where: { clientId: loadingOrder.clientId },
-    order: [["clientLoNumber", "DESC"]],
-  });
-
-  lastLOAccordingToClient = lastLOAccordingToClient?.get({ plain: true });
-
-  loadingOrder.clientLoNumber = lastLOAccordingToClient ? lastLOAccordingToClient.clientLoNumber + 1 : 1;
+  if (!loadingOrder.clientLoNumber || !loadingOrder.code) {
+    const { sequenceNumber, code } = await allocateDocumentSequenceAndCode({
+      clientId: loadingOrder.clientId,
+      documentType: DOCUMENT_NUMBERING_TYPE.LOADING_ORDER,
+      transaction: options?.transaction,
+    });
+    if (!loadingOrder.clientLoNumber) loadingOrder.clientLoNumber = sequenceNumber;
+    if (!loadingOrder.code) loadingOrder.code = code;
+  }
 
   if (!loadingOrder.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soLoadingOrderNumber.", 400);
   }
 
-  const lastLOAccordingToSo: any = await scoped(LoadingOrder).findOne({
-    where: { salesOrderId: loadingOrder.salesOrderId },
-    order: [["soLoadingOrderNumber", "DESC"]],
+  const salesOrder: any = await SalesOrder.findByPk(loadingOrder.salesOrderId, {
+    transaction: options?.transaction,
   });
 
-  const salesOrder: any = await SalesOrder.findByPk(loadingOrder.salesOrderId);
+  if (!salesOrder) {
+    throw new AppError("Sales Order not found", 400);
+  }
 
-  loadingOrder.soLoadingOrderNumber = lastLOAccordingToSo ? lastLOAccordingToSo.soLoadingOrderNumber + 1 : 1;
-  loadingOrder.code = `LO ${salesOrder.clientSoNumber}-${loadingOrder.soLoadingOrderNumber}`;
+  if (!loadingOrder.soLoadingOrderNumber) {
+    loadingOrder.soLoadingOrderNumber = await getNextSequenceNumber({
+      clientId: loadingOrder.clientId,
+      modelName: SEQUENCE_MODEL.SO_LOADING_ORDER,
+      scopeKey: String(loadingOrder.salesOrderId),
+      transaction: options?.transaction,
+    });
+  }
 });
 
 (LoadingOrder as any).scopeConfig = {

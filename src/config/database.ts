@@ -10,6 +10,12 @@ export const sequelize = new Sequelize({
   password: DB_CONFIG.PASSWORD,
   host: DB_CONFIG.DB_HOST,
   port: DB_CONFIG.DB_PORT,
+  // pool: {
+  //   max: 10,
+  //   min: 0,
+  //   acquire: 30000,
+  //   idle: 10000,
+  // },
   logging: false,
   dialect: "mysql",
 });

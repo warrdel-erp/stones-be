@@ -147,6 +147,14 @@ export const SALES_TAX = [
   { id: 44, code: "ALMO", label: "Alabama State, Montgomery County", value: 10, stateTax: 4 },
 ];
 
+export const BIN_TYPES = [
+  { id: 1, label: 'A-Frame', value: 'A-Frame' },
+  { id: 2, label: 'Slab Rack', value: 'Slab Rack' },
+  { id: 3, label: 'Shelf', value: 'Shelf' },
+  { id: 4, label: 'Floor', value: 'Floor' },
+  { id: 5, label: 'Pallet', value: 'Pallet' },
+];
+
 
 
 

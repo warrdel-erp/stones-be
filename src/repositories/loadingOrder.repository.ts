@@ -1,6 +1,10 @@
 import { Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { previewDocumentCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "../models/documentNumberingConfig.model";
 
 // Create new LO
 export const createLoadingOrder = async (data: any, transaction?: Transaction) => {
@@ -133,28 +137,32 @@ export const updateLoadingOrder = async (id: number, data: any, transaction?: Tr
 
 // Get latest LO number
 export const getPlNumber = async (clientId: number, salesOrderId?: number) => {
-  const lastLOByClient: any = await scoped(models.LoadingOrder).findOne({
-    where: { clientId },
-    order: [["clientLoNumber", "DESC"]],
-    attributes: ["clientLoNumber"],
+  const clientLoNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.LOADING_ORDER,
   });
 
-  const clientLoNumber = lastLOByClient ? lastLOByClient.clientLoNumber + 1 : 1;
+  const code = await previewDocumentCode({
+    clientId,
+    documentType: DOCUMENT_NUMBERING_TYPE.LOADING_ORDER,
+    nextNumber: clientLoNumber,
+  });
 
   if (salesOrderId) {
-    const lastLOBySo: any = await scoped(models.LoadingOrder).findOne({
-      where: { salesOrderId },
-      order: [["soLoadingOrderNumber", "DESC"]],
-      attributes: ["soLoadingOrderNumber"],
+    const soLoadingOrderNumber = await getPreviewSequenceNumber({
+      clientId,
+      modelName: SEQUENCE_MODEL.SO_LOADING_ORDER,
+      scopeKey: String(salesOrderId),
     });
 
     return {
       clientLoNumber,
-      soLoadingOrderNumber: lastLOBySo ? lastLOBySo.soLoadingOrderNumber + 1 : 1,
+      code,
+      soLoadingOrderNumber,
     };
   }
 
-  return { clientLoNumber };
+  return { clientLoNumber, code };
 };
 
 export const updateLoadingOrderByPackagingListId = async (

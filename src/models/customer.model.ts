@@ -4,6 +4,8 @@ import User from "./user.model";
 import { SALES_TAX, SCOP, PAYMENT_TERMS } from "../constants";
 import { CUSTOMER_STATUS, CUSTOMER_TYPE } from "../constants/tableTypes";
 import Client from "./client.model";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 const Customer = sequelize.define(
   "Customer",
@@ -219,19 +221,11 @@ Customer.beforeValidate(async (customer: any, options: any) => {
 
   // If customerCode is empty, auto-generate it
   if (!customer.customerCode) {
-    // Use Sequelize functions to get the max numeric customerCode
-    const maxCodeResult: any = await Customer.findOne({
-      attributes: [[sequelize.fn("MAX", sequelize.cast(sequelize.col("customerCode"), "UNSIGNED")), "maxCode"]],
-      where: {
-        clientId: customer.clientId,
-      },
-      raw: true,
+    const nextCode = await getNextSequenceNumber({
+      clientId: customer.clientId,
+      modelName: SEQUENCE_MODEL.CUSTOMER,
+      transaction: options?.transaction,
     });
-
-    let nextCode = 1;
-    if (maxCodeResult && maxCodeResult.maxCode) {
-      nextCode = parseInt(maxCodeResult.maxCode) + 1;
-    }
 
     customer.customerCode = String(nextCode);
   }

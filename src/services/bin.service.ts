@@ -32,6 +32,8 @@ export async function create(payload: any, defaultLocationId: number) {
   const warehouseData = warehouse.get({ plain: true });
   const enrichedPayload = {
     name,
+    areaId: payload.areaId,
+    typeId: payload.typeId,
     warehouseId: warehouseData.id,
   };
 

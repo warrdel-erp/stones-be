@@ -7,7 +7,10 @@ import CustomerAddress from "./customerAddress.model";
 import * as models from "./index";
 import { DELIVERY_TYPES, PACKAGING_LIST_STAGES } from "../constants/tableTypes";
 import { PAYMENT_TERMS } from "../constants";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { allocateDocumentSequenceAndCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "./documentNumberingConfig.model";
 
 const PackagingList = sequelize.define(
   "PackagingList",
@@ -111,14 +114,22 @@ const PackagingList = sequelize.define(
       },
       {
         unique: true,
+        fields: ["clientId", "code"],
+      },
+      {
+        unique: true,
         fields: ["salesOrderId", "soPackagingListNumber"],
       },
     ],
   }
 );
 
-// Hook to prevent updates if invoiced = true or if it is already canceled
-PackagingList.beforeUpdate(async (packagingList) => {
+// Hook to prevent updates if invoiced = true, canceled, or attempting to update immutable numbers
+PackagingList.beforeUpdate(async (packagingList: any) => {
+  if (packagingList.changed("clientPlNumber") || packagingList.changed("code")) {
+    throw new AppError("Packaging List number and code are immutable and cannot be updated.", 400);
+  }
+
   const packagingListExisting = await PackagingList.findByPk(packagingList.dataValues.id);
 
   if (packagingListExisting?.dataValues.stage === PACKAGING_LIST_STAGES.INVOICED) {
@@ -129,34 +140,42 @@ PackagingList.beforeUpdate(async (packagingList) => {
   }
 });
 
-// Hook: Auto-Increment clientPlNumber based on clientId
-PackagingList.beforeCreate(async (packagingList: any) => {
+// Hook: Auto-Increment clientPlNumber and soPackagingListNumber using locked sequence
+PackagingList.beforeCreate(async (packagingList: any, options: any) => {
   if (!packagingList.clientId) {
     throw new Error("Client ID is required to generate clientPlNumber.");
   }
 
-  let lastPLAccordingToClient: any = await scoped(PackagingList).findOne({
-    where: { clientId: packagingList.clientId },
-    order: [["clientPlNumber", "DESC"]],
-  });
-
-  lastPLAccordingToClient = lastPLAccordingToClient?.get({ plain: true });
-
-  packagingList.clientPlNumber = lastPLAccordingToClient ? lastPLAccordingToClient.clientPlNumber + 1 : 1;
+  if (!packagingList.clientPlNumber || !packagingList.code) {
+    const { sequenceNumber, code } = await allocateDocumentSequenceAndCode({
+      clientId: packagingList.clientId,
+      documentType: DOCUMENT_NUMBERING_TYPE.PACKAGING_LIST,
+      transaction: options?.transaction,
+    });
+    if (!packagingList.clientPlNumber) packagingList.clientPlNumber = sequenceNumber;
+    if (!packagingList.code) packagingList.code = code;
+  }
 
   if (!packagingList.salesOrderId) {
     throw new AppError("salesOrderId is required to generate soPackagingListNumber.", 400);
   }
 
-  const lastPlAccordingToSo: any = await scoped(PackagingList).findOne({
-    where: { salesOrderId: packagingList.salesOrderId },
-    order: [["soPackagingListNumber", "DESC"]],
+  const salesOrder: any = await SalesOrder.findByPk(packagingList.salesOrderId, {
+    transaction: options?.transaction,
   });
 
-  const salesOrder: any = await SalesOrder.findByPk(packagingList.salesOrderId);
+  if (!salesOrder) {
+    throw new AppError("Sales Order not found", 400);
+  }
 
-  packagingList.soPackagingListNumber = lastPlAccordingToSo ? lastPlAccordingToSo.soPackagingListNumber + 1 : 1;
-  packagingList.code = `PL ${salesOrder.clientSoNumber}-${packagingList.soPackagingListNumber}`;
+  if (!packagingList.soPackagingListNumber) {
+    packagingList.soPackagingListNumber = await getNextSequenceNumber({
+      clientId: packagingList.clientId,
+      modelName: SEQUENCE_MODEL.SO_PACKAGING_LIST,
+      scopeKey: String(packagingList.salesOrderId),
+      transaction: options?.transaction,
+    });
+  }
 });
 
 (PackagingList as any).scopeConfig = {

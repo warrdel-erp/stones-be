@@ -1245,3 +1245,19 @@ Univ
 7. sales & price => Pricing.
 8. quotation validity.
 9. sales & price => terms and policies.
+10. quotation page design correction.
+11. terms update should not affect existing invoice terms.
+12. research on blue/green deployment, Kubernetes.
+13. existing machines RAM matrix analysis
+14. University Roles change bug.
+15. single and multi bin creation. with existing/delete individual feature.
+16. testing multiple hit failure.
+17. problem with duplicate number generation.
+18. unique Subject code constraint.
+19. University roles change bug.
+20. unique Email Ids [working]
+    1. remove students without users.
+    2. remove deleted_at not null students and users with duplicate emails.
+21. new client creation roles and permissions error.
+22. API tracking system.
+23. University auto logout issue.

@@ -1,8 +1,12 @@
-import { Transaction, Op, Sequelize, fn, cast, col } from "sequelize";
+import { Transaction, Op, fn, cast, col } from "sequelize";
 import * as models from "../models";
 import { sequelize } from "../config/database";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, PAYMENT_BILL_REFERENCE_TYPES } from "../constants/tableTypes";
 import { scoped } from "../utils/scoped";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL, GLOBAL_SCOPE_KEY } from "../constants/sequenceTypes";
+import { getOrInitConfig } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE, SEQUENCE_RESET_FREQUENCY } from "../models/documentNumberingConfig.model";
 
 // Create new Sales Order
 export const createSalesOrder = async (data: any, transaction?: Transaction) => {
@@ -27,7 +31,8 @@ export const getAllSalesOrders = async (
     const isNumeric = !isNaN(Number(search));
     const searchConditions: any[] = [
       { customerPo: { [Op.like]: `%${search}%` } },
-      { "$customer.name$": { [Op.like]: `%${search}%` } }
+      { "$customer.name$": { [Op.like]: `%${search}%` } },
+      { code: { [Op.like]: `%${search}%` } }
     ];
     if (isNumeric) {
       searchConditions.push({ clientSoNumber: Number(search) });
@@ -653,15 +658,27 @@ export const getSalesOrderByIdForCreateLO = async (id: number) => {
   });
 };
 
-// Get latest SO number
+// Get latest SO number and preview code
 export const getSoNumber = async (clientId: number) => {
-  const lastSO: any = await scoped(models.SalesOrder).findOne({
-    where: { clientId },
-    order: [["clientSoNumber", "DESC"]],
-    attributes: ["clientSoNumber"],
+  const currentYear = new Date().getFullYear();
+  const config = await getOrInitConfig(clientId, DOCUMENT_NUMBERING_TYPE.SALES_ORDER);
+  const scopeKey =
+    config.sequenceReset === SEQUENCE_RESET_FREQUENCY.YEARLY
+      ? String(currentYear)
+      : GLOBAL_SCOPE_KEY;
+
+  const nextNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.SALES_ORDER,
+    scopeKey,
   });
 
-  return { clientSoNumber: lastSO ? lastSO?.clientSoNumber + 1 : 1 };
+  const parts: string[] = [config.prefix];
+  if (config.includeYear) parts.push(String(currentYear));
+  parts.push(String(nextNumber).padStart(config.numberLength, "0"));
+  const code = parts.join(config.separator);
+
+  return { clientSoNumber: nextNumber, code };
 };
 
 // Get all open SO by clientId

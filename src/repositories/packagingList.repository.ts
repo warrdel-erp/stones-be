@@ -4,6 +4,10 @@ import { DELIVERY_STATUS, PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES } fro
 import { RETURN_STATUS } from "../models/return.model";
 import { scoped } from "../utils/scoped";
 import { sequelize } from "../config/database";
+import { getPreviewSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
+import { previewDocumentCode } from "../services/documentNumbering.service";
+import { DOCUMENT_NUMBERING_TYPE } from "../models/documentNumberingConfig.model";
 
 // Create new LO
 export const createPackagingList = async (data: any, transaction?: Transaction) => {
@@ -402,28 +406,32 @@ export const updatePackagingList = async (id: number, data: any, transaction?: T
   return packagingList;
 };
 
-// Get latest SO number
+// Get latest PL number
 export const getPlNumber = async (clientId: number, salesOrderId?: number) => {
-  const lastPLByClient: any = await scoped(models.PackagingList).findOne({
-    where: { clientId },
-    order: [["clientPlNumber", "DESC"]],
-    attributes: ["clientPlNumber"],
+  const clientPlNumber = await getPreviewSequenceNumber({
+    clientId,
+    modelName: SEQUENCE_MODEL.PACKAGING_LIST,
   });
 
-  const clientPlNumber = lastPLByClient ? lastPLByClient.clientPlNumber + 1 : 1;
+  const code = await previewDocumentCode({
+    clientId,
+    documentType: DOCUMENT_NUMBERING_TYPE.PACKAGING_LIST,
+    nextNumber: clientPlNumber,
+  });
 
   if (salesOrderId) {
-    const lastPLBySo: any = await scoped(models.PackagingList).findOne({
-      where: { salesOrderId },
-      order: [["soPackagingListNumber", "DESC"]],
-      attributes: ["soPackagingListNumber"],
+    const soPackagingListNumber = await getPreviewSequenceNumber({
+      clientId,
+      modelName: SEQUENCE_MODEL.SO_PACKAGING_LIST,
+      scopeKey: String(salesOrderId),
     });
 
     return {
       clientPlNumber,
-      soPackagingListNumber: lastPLBySo ? lastPLBySo.soPackagingListNumber + 1 : 1,
+      code,
+      soPackagingListNumber,
     };
   }
 
-  return { clientPlNumber };
+  return { clientPlNumber, code };
 };

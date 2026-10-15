@@ -7,7 +7,8 @@ import SIPL from "./sipl.model";
 import Client from "./client.model";
 import Location from "./location.model";
 import { PAYMENT_TERMS } from "../constants";
-import { scoped } from "../utils/scoped";
+import { getNextSequenceNumber } from "../services/sequence.service";
+import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
 const Bill = sequelize.define(
   "bills",
@@ -121,23 +122,19 @@ const Bill = sequelize.define(
   }
 );
 
-// 🔹 Hook: Auto-Increment `clientBillNumber` based on `clientId`
-Bill.beforeCreate(async (bill: any) => {
+// 🔹 Hook: Auto-Increment `clientBillNumber` and `siplBillNumber` using locked sequence
+Bill.beforeCreate(async (bill: any, options: any) => {
   if (!bill.clientId) {
     throw new Error("Client ID is required to generate clientBillNumber.");
   }
 
-  // Generate unique key for client.
-  let lastBillAccordingToClientBillNumber: any = await scoped(Bill).findOne({
-    where: { clientId: bill.clientId },
-    order: [["clientBillNumber", "DESC"]],
-  });
-
-  lastBillAccordingToClientBillNumber = lastBillAccordingToClientBillNumber?.get({ plain: true });
-
-  bill.clientBillNumber = lastBillAccordingToClientBillNumber
-    ? lastBillAccordingToClientBillNumber.clientBillNumber + 1
-    : 1;
+  if (!bill.clientBillNumber) {
+    bill.clientBillNumber = await getNextSequenceNumber({
+      clientId: bill.clientId,
+      modelName: SEQUENCE_MODEL.BILL,
+      transaction: options?.transaction,
+    });
+  }
 
   // Auto-increment siplBillNumber only if referenceType is 'sipl'
   if (bill.referenceType === BILL_REFERENCE_TYPES.SIPL) {
@@ -145,25 +142,25 @@ Bill.beforeCreate(async (bill: any) => {
       throw new Error("referenceId (SIPL ID) is required for siplBillNumber.");
     }
 
-    let lastSiplBill: any = await scoped(Bill).findOne({
-      where: {
-        referenceType: BILL_REFERENCE_TYPES.SIPL,
-        referenceId: bill.referenceId,
-      },
-      order: [["siplBillNumber", "DESC"]],
+    const sipl: any = await SIPL.findByPk(bill.referenceId, {
+      transaction: options?.transaction,
     });
 
-    const sipl: any = await SIPL.findByPk(bill.referenceId)
+    if (!sipl) {
+      throw new Error(`SIPL not found with id: ${bill.referenceId}`);
+    }
 
-    lastSiplBill = lastSiplBill?.get({ plain: true });
+    if (!bill.siplBillNumber) {
+      bill.siplBillNumber = await getNextSequenceNumber({
+        clientId: bill.clientId,
+        modelName: SEQUENCE_MODEL.SIPL_BILL,
+        scopeKey: String(bill.referenceId),
+        transaction: options?.transaction,
+      });
+    }
 
-    bill.siplBillNumber = lastSiplBill
-      ? lastSiplBill.siplBillNumber + 1
-      : 1;
-
-    bill.invoiceCode = "FB " + sipl.invoiceCode.split(" ")[1] + "-" + bill.siplBillNumber
+    bill.invoiceCode = "FB " + sipl.invoiceCode.split(" ")[1] + "-" + bill.siplBillNumber;
   }
-
 });
 
 // Scope configuration for Bill model
