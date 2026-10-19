@@ -886,6 +886,9 @@ InventoryProduct.hasMany(GuestSelectionItem, { foreignKey: "inventoryProductId",
 PackagingList.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } })
 TradeService.belongsTo(PackagingList, { foreignKey: "referenceId", as: "packagingList", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } });
 
+LoadingOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
+TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOrder", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER } });
+
 SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } })
 TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 

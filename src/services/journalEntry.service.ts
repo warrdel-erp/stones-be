@@ -612,8 +612,12 @@ export async function createJournalEntriesForTradeServicesOfPackagingList(packag
       throw new AppError("TradeService's service or ledgerAccountId not found", 400);
     }
 
+    const serviceAmount = tradeService.chargeType === "fixed"
+      ? Number(tradeService.price)
+      : (Number(tradeService.quantity) || 1) * Number(tradeService.price);
+
     await journalEntryRepository.create({
-      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      amount: serviceAmount,
       ledgerId: service.ledgerAccountId,
       type: JOURNAL_ENTRY_TYPE.CR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
@@ -626,7 +630,7 @@ export async function createJournalEntriesForTradeServicesOfPackagingList(packag
     }, transaction);
 
     await journalEntryRepository.create({
-      amount: Number(tradeService.quantity) * Number(tradeService.price),
+      amount: serviceAmount,
       ledgerId: customerLedgerAccountObj.id,
       type: JOURNAL_ENTRY_TYPE.DR,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
@@ -638,6 +642,69 @@ export async function createJournalEntriesForTradeServicesOfPackagingList(packag
       partyLedgerAccountId: service.ledgerAccountId
     }, transaction);
 
+  }
+}
+
+export async function createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder: any, locationId: number, transaction: Transaction) {
+  // Find all trade services for this loading order
+  const tradeServices = await tradeServiceRepository.findTradeServices({
+    referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+    referenceId: loadingOrder.id
+  });
+
+  if (!tradeServices.length) return;
+
+  if (!loadingOrder) throw new AppError("Loading Order not found", 404);
+
+  const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
+
+  // Get customer ledger account
+  const customerLedgerAccount = await ledgerAccountRepository.getLedgerAccountByFilter({
+    referenceId: actualSalesOrder?.customerId,
+    referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER
+  }, transaction);
+
+  if (!customerLedgerAccount) throw new AppError("Customer ledger account not found", 404);
+
+  const customerLedgerAccountObj = customerLedgerAccount?.get({ plain: true });
+  if (!customerLedgerAccountObj) throw new AppError("Customer ledger account not found", 404);
+
+  for (const tradeServiceInstance of tradeServices) {
+    const tradeService = tradeServiceInstance.get ? tradeServiceInstance.get({ plain: true }) : tradeServiceInstance;
+    const service = tradeService.service;
+    if (!service || !service.ledgerAccountId) {
+      throw new AppError("TradeService's service or ledgerAccountId not found", 400);
+    }
+
+    const serviceAmount = tradeService.chargeType === "fixed"
+      ? Number(tradeService.price)
+      : (Number(tradeService.quantity) || 1) * Number(tradeService.price);
+
+    await journalEntryRepository.create({
+      amount: serviceAmount,
+      ledgerId: service.ledgerAccountId,
+      type: JOURNAL_ENTRY_TYPE.CR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+      referenceId: loadingOrder.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+      entryForId: loadingOrder.id,
+      locationId: locationId,
+      partyLedgerAccountId: customerLedgerAccountObj.id
+    }, transaction);
+
+    await journalEntryRepository.create({
+      amount: serviceAmount,
+      ledgerId: customerLedgerAccountObj.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+      referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER,
+      referenceId: loadingOrder.id,
+      entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+      entryForId: loadingOrder.id,
+      locationId: locationId,
+      partyLedgerAccountId: service.ledgerAccountId
+    }, transaction);
   }
 }
 export async function createJournalEntriesForTradeServicesOfReturns(returnData: any, locationId: number, transaction: Transaction) {

@@ -106,6 +106,15 @@ export const getLoadingOrderById = async (id: number) => {
             },
           ],
         },
+        {
+          association: 'tradeServices',
+          include: [
+            {
+              association: 'service',
+              attributes: ['id', 'name', 'ledgerAccountId'],
+            }
+          ]
+        },
       ],
     })
   )?.get({ plain: true });

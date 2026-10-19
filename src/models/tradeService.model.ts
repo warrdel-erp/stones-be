@@ -7,6 +7,7 @@ import * as decimal from '../helper/decimal'
 
 export const TRADE_SERVICE_REFERENCE_TYPES = {
     PACKAGING_LIST: "packagingList",
+    LOADING_ORDER: "loadingOrder",
     SIPL: "sipl",
     RETURN: "return",
 } as const;
@@ -26,11 +27,20 @@ const TradeService = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
+        chargeType: {
+            type: DataTypes.ENUM("fixed", "variable"),
+            allowNull: false,
+            defaultValue: "variable",
+        },
         total: {
             type: DataTypes.VIRTUAL,
             get() {
-                const quantity = (Number(this.get("quantity")) || 0);
+                const chargeType = this.get("chargeType");
                 const price = (Number(this.get("price")) || 0);
+                if (chargeType === "fixed") {
+                    return price;
+                }
+                const quantity = (Number(this.get("quantity")) || 0);
                 const result = decimal.decimalMultiply(quantity, price);
                 return result;
             },

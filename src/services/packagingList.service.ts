@@ -426,12 +426,17 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
     }
 
     // Filter products that are not assigned to a loading order.
-    const productsToInvoice = (packagingList.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
+    const allProducts = packagingList.salesOrderProducts || [];
+    const productsToInvoice = allProducts.filter((p: any) => p.loadingOrderId === null);
 
     // If PL doesn't have any unassigned products.
     if (!productsToInvoice.length) {
       throw new AppError(`Packaging list with id: ${id} does not have any product available for invoicing (all assigned to LO).`, 400);
     }
+
+    // Check if an LO was created from this PL without selecting all products (partial LO)
+    const hasAssignedToLO = allProducts.some((p: any) => p.loadingOrderId !== null);
+    const isPartialLO = hasAssignedToLO && productsToInvoice.length > 0;
 
     // Replace salesOrderProducts so that calculations only consider the unassigned ones
     packagingList.salesOrderProducts = productsToInvoice;
@@ -441,7 +446,8 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
 
     let serviceTotals = 0;
 
-    if (packagingList?.tradeServices) {
+    // If partial LO was created from this PL, PL's services are not applicable during invoice from PL
+    if (!isPartialLO && packagingList?.tradeServices?.length) {
       serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
     }
 
@@ -723,8 +729,10 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
     // Update stage to INVOICED in Packaging List.
     await packagingListRepository.updatePackagingList(id, { stage: PACKAGING_LIST_STAGES.INVOICED }, transaction);
 
-    // Create journal entries for trade services
-    await createJournalEntriesForTradeServicesOfPackagingList(packagingList, locationId, transaction);
+    // Create journal entries for trade services if applicable
+    if (serviceTotals > 0) {
+      await createJournalEntriesForTradeServicesOfPackagingList(packagingList, locationId, transaction);
+    }
 
     await activityService.logActivity(
       {
@@ -834,12 +842,29 @@ export const getInvoicePreview = async (packagingListId: number) => {
     throw new AppError('Packaging List is already invoiced.', 400);
   }
 
-  const invoiceAmountObj = packagingList.loadingOrder
+  // Check if an LO was created from this PL without selecting all products (partial LO)
+  const allProducts = packagingList.salesOrderProducts || [];
+  const productsToInvoice = allProducts.filter((p: any) => p.loadingOrderId === null);
+  const hasAssignedToLO = allProducts.some((p: any) => p.loadingOrderId !== null);
+  const isPartialLO = hasAssignedToLO && productsToInvoice.length > 0;
+
+  // If products are unassigned, calculate based on unassigned products
+  let invoiceAmountObj = packagingList.loadingOrder
     ? packagingList.calculations.loadingOrder
     : packagingList.calculations.packagingList;
 
+  if (productsToInvoice.length > 0 && productsToInvoice.length < allProducts.length) {
+    const unassignedCalcs = salesOrderProductRepository.getTotalsOfSalesOrderProducts(
+      productsToInvoice,
+      packagingList.salesOrder?.discountPercentage,
+      productsToInvoice[0]?.salesOrder?.tax?.value || productsToInvoice[0]?.taxPercentage || 0
+    );
+    invoiceAmountObj = unassignedCalcs.packagingList;
+  }
+
   let serviceTotals = 0;
-  if (packagingList.tradeServices?.length) {
+  // If partial LO was created from this PL, PL's services are not applicable during invoice from PL
+  if (!isPartialLO && packagingList.tradeServices?.length) {
     serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
   }
 

@@ -23,6 +23,7 @@ import * as journalEntryRepository from "../repositories/journalEntry.repository
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as activityService from "../services/activity.service";
+import * as journalEntryService from "../services/journalEntry.service";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 
 // Create new PL
@@ -184,7 +185,10 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     }
 
     const invoiceAmountObj = loadingOrder.calculations.loadingOrder;
-    let serviceTotals = 0; // if you have tradeServices on LO, calculate here, else 0
+    let serviceTotals = 0;
+    if (loadingOrder.tradeServices?.length) {
+      serviceTotals = decimal.decimalSum(loadingOrder.tradeServices.map((e: any) => e.total));
+    }
 
     const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
 
@@ -386,6 +390,10 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       transaction
     );
 
+    if (serviceTotals > 0) {
+      await journalEntryService.createJournalEntriesForTradeServicesOfLoadingOrder(loadingOrder, locationId, transaction);
+    }
+
     await activityService.logActivity(
       {
         clientId: clientId,
@@ -428,7 +436,10 @@ export const getInvoicePreview = async (loadingOrderId: number) => {
   }
 
   const invoiceAmountObj = loadingOrder.calculations.loadingOrder;
-  let serviceTotals = 0; // if you have tradeServices on LO, calculate here, else 0
+  let serviceTotals = 0;
+  if (loadingOrder.tradeServices?.length) {
+    serviceTotals = decimal.decimalSum(loadingOrder.tradeServices.map((e: any) => e.total));
+  }
 
   const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
   const invoiceTotal = decimal.decimalAdd(invoiceAmountObj.total, serviceTotals);

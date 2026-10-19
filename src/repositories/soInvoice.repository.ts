@@ -280,6 +280,14 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
         association: "loadingOrder",
         include: [
           {
+            association: 'tradeServices',
+            include: [
+              {
+                association: 'service'
+              }
+            ]
+          },
+          {
             association: "salesOrderProducts",
             include: [
               {

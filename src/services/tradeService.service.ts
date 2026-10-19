@@ -8,6 +8,7 @@ import { Transaction } from "sequelize";
 import { ensureServicesBelongToCategory } from "../services/service.service";
 import { sumDecimal } from "../helper";
 import * as returnRepository from "../repositories/return.repository";
+import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import { RETURN_STATUS } from "../models/return.model";
 
 export async function createTradeService(data: any, transaction?: Transaction) {
@@ -21,6 +22,19 @@ export async function createTradeService(data: any, transaction?: Transaction) {
         }
         if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
             throw new AppError("Cannot create Trade Service for an invoiced Packaging List", 400);
+        }
+    }
+
+    if (data.referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
+        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(data.referenceId, transaction);
+
+        const loadingOrder = loadingOrderInstance?.get({ plain: true });
+
+        if (!loadingOrder) {
+            throw new AppError("Loading Order not found", 404);
+        }
+        if (loadingOrder.invoiced || loadingOrder.stage === PACKAGING_LIST_STAGES.INVOICED) {
+            throw new AppError("Cannot create Trade Service for an invoiced Loading Order", 400);
         }
     }
 
@@ -76,6 +90,18 @@ export async function updateTradeService(id: number, data: any, transaction?: Tr
         }
         if (packagingList.stage === PACKAGING_LIST_STAGES.INVOICED) {
             throw new AppError("Cannot update Trade Service for an invoiced Packaging List", 400);
+        }
+    }
+
+    if (referenceType === TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER) {
+        const loadingOrderInstance = await loadingOrderRepository.getLoadingOrderByIdSimple(referenceId, transaction);
+        const loadingOrder = loadingOrderInstance?.get({ plain: true });
+
+        if (!loadingOrder) {
+            throw new AppError("Loading Order not found", 404);
+        }
+        if (loadingOrder.invoiced || loadingOrder.stage === PACKAGING_LIST_STAGES.INVOICED) {
+            throw new AppError("Cannot update Trade Service for an invoiced Loading Order", 400);
         }
     }
 

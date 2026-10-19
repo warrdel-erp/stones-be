@@ -31,6 +31,10 @@ const Service = sequelize.define(
             type: DataTypes.FLOAT,
             allowNull: true,
         },
+        fixedAmount: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+        },
         ledgerAccountId: {
             type: DataTypes.INTEGER,
             allowNull: false,

@@ -1255,9 +1255,13 @@ Univ
 17. problem with duplicate number generation.
 18. unique Subject code constraint.
 19. University roles change bug.
-20. unique Email Ids [working]
+20. unique Email Ids
     1. remove students without users.
     2. remove deleted_at not null students and users with duplicate emails.
+    3. applied constraint for non duplicacy.
 21. new client creation roles and permissions error.
 22. API tracking system.
 23. University auto logout issue.
+24. if we create LO from PL partially then PL's services will not be applied.
+25. token discussion in university.
+26. stone KT to Ajay.

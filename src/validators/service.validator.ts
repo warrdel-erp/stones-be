@@ -21,6 +21,10 @@ export const createServiceSchema = z.object({
         invalid_type_error: 'basePrice must be a number',
     }).positive('basePrice must be positive'),
 
+    fixedAmount: z.number({
+        invalid_type_error: 'Fixed amount must be a number',
+    }).min(0, 'Fixed amount must be non-negative').optional().nullable(),
+
     description: z.string({
         invalid_type_error: 'Description must be a string',
     }).optional(),
