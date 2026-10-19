@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn('Clients', 'defaultQuotationValidity', {
+    await queryInterface.addColumn('clients', 'defaultQuotationValidity', {
       type: Sequelize.INTEGER,
       allowNull: true,
       defaultValue: 30, // By default 30 days based on the mock
@@ -11,6 +11,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Clients', 'defaultQuotationValidity');
+    await queryInterface.removeColumn('clients', 'defaultQuotationValidity');
   }
 };

@@ -1265,3 +1265,8 @@ Univ
 24. if we create LO from PL partially then PL's services will not be applied.
 25. token discussion in university.
 26. stone KT to Ajay.
+
+== 20261006162111-add-defaultQuotationValidity-to-clients: migrating =======
+
+ERROR: Table 'stone_erp_v2.Clients' doesn't exist
+ ELIFECYCLE  Command failed with exit code 1.
