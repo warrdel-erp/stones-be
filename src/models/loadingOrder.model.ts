@@ -3,6 +3,7 @@ import { sequelize } from "../config/database";
 import Client from "./client.model";
 import SalesOrder from "./salesOrder.model";
 import PackagingList from "./packagingList.model";
+import Account from "./Account.model";
 import * as models from "./index";
 import { AppError } from "../helper/appError";
 import { getNextSequenceNumber } from "../services/sequence.service";
@@ -32,6 +33,16 @@ const LoadingOrder = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: "active",
       allowNull: false,
+    },
+    createdById: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Account,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     packagingListId: {
       type: DataTypes.INTEGER,

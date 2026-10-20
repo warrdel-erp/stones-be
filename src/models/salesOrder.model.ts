@@ -69,6 +69,16 @@ const SalesOrder = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
+    createdById: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Account,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
     customerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -173,6 +183,10 @@ SalesOrder.beforeUpdate(async (salesOrder: any) => {
 
 // 🔹 Hook: Auto-Increment `clientSoNumber` and format `code` using locked sequence
 SalesOrder.beforeCreate(async (salesOrder: any, options: any) => {
+  if (!salesOrder.createdById && salesOrder.accountId) {
+    salesOrder.createdById = salesOrder.accountId;
+  }
+
   if (!salesOrder.clientId) {
     throw new AppError("Client ID is required to generate clientSoNumber.", 400);
   }
