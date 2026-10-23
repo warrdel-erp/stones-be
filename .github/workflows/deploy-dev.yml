@@ -55,9 +55,14 @@ jobs:
             # Pull Latest Image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/stone-erp-be:v2-dev
 
-            # Stop and Remove Existing Container
-            sudo docker stop stone-erp-be-dev || true
-            sudo docker rm stone-erp-be-dev || true
+            # Stop and remove existing container if it exists
+            if sudo docker inspect stone-erp-be-dev > /dev/null 2>&1; then
+              echo "Existing container stone-erp-be-dev found. Stopping and removing..."
+              sudo docker stop stone-erp-be-dev
+              sudo docker rm stone-erp-be-dev
+            else
+              echo "Container stone-erp-be-dev does not exist. Starting for the first time..."
+            fi
 
             # Run New Container
             sudo docker run \
