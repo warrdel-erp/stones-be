@@ -114,21 +114,21 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
       stage.lineDiscountAmount = decimals.decimalAddDP(stage.lineDiscountAmount, lineDiscount, 2);
       stage.inlineDiscountAmount = decimals.decimalAddDP(stage.inlineDiscountAmount, decimals.decimalAddDP(productDiscount, lineDiscount, 2), 2);
     };
-    
+
     const amt = Number(salesOrderProduct.amount) || 0;
     calcs.soReceiving.subTotal = decimals.decimalAddDP(calcs.soReceiving.subTotal, amt, 2);
     addProductDiscounts(calcs.soReceiving, amt);
-    
+
     calcs.receiving.total = decimals.decimalAddDP(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct?.assetValue) || 0, 2);
-    
+
     const plAmt = Number(salesOrderProduct.plAmount) || 0;
     calcs.packagingList.subTotal = decimals.decimalAddDP(calcs.packagingList.subTotal, plAmt, 2);
     addProductDiscounts(calcs.packagingList, plAmt);
-    
+
     const loAmt = Number(salesOrderProduct.loAmount) || 0;
     calcs.loadingOrder.subTotal = decimals.decimalAddDP(calcs.loadingOrder.subTotal, loAmt, 2);
     addProductDiscounts(calcs.loadingOrder, loAmt);
-    
+
     if (salesOrderProduct.isSlabType) {
       calcs.quantities.receiving = decimals.decimalAddDP(calcs.quantities.receiving, Number(salesOrderProduct.receivingAreaSqFt) || 0, 2);
       calcs.quantities.packagingList = decimals.decimalAddDP(calcs.quantities.packagingList, Number(salesOrderProduct.plSqrFt) || 0, 2);
@@ -148,10 +148,10 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
   if (discountPercentage > 0) {
     const soAfterInline = decimals.decimalSubtractDP(calcs.soReceiving.subTotal, calcs.soReceiving.inlineDiscountAmount, 2);
     calcs.soReceiving.discountAmount = decimals.decimalValueByPercentage(soAfterInline, discountPercentage, 2);
-    
+
     const plAfterInline = decimals.decimalSubtractDP(calcs.packagingList.subTotal, calcs.packagingList.inlineDiscountAmount, 2);
     calcs.packagingList.discountAmount = decimals.decimalValueByPercentage(plAfterInline, discountPercentage, 2);
-    
+
     const loAfterInline = decimals.decimalSubtractDP(calcs.loadingOrder.subTotal, calcs.loadingOrder.inlineDiscountAmount, 2);
     calcs.loadingOrder.discountAmount = decimals.decimalValueByPercentage(loAfterInline, discountPercentage, 2);
   } else {

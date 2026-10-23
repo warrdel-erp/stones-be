@@ -841,3 +841,23 @@ Email notification.
 6. Service rule.
 7. AI inventory search.
 8. code quality measurement.
+
+---
+
+1. Form loading is not working in create Client.
+2. Product Color duplicity is checking with another client. (product-group,color, finish)
+3. Remove tax exempt option for customer creation.
+4. SIPL is showing add, edit for inventoryProduct even after recieve inventory.
+5. If any one of SO product is in PL then its product line can not be deleted.
+6. Tax info is showing wrong in SO whole.
+7. pagination numbers is now showing correctly check all tables.
+8. Show numbers with tabs of deliveries.
+9. In SO deliveries truck icon is incorrect, Material -> products.
+10. On partial delivery started stuck is being assigned.
+11. From PL if we create invoice and terms are not set then not giving user friendly message.
+12. Two decimal presentation should be always there like 23.00 not it is showing 23 in SO payment poge.
+
+---
+
+14. Advanced Deposit is not being saved.
+15. Due is incorrect in SO if we create credit note.
