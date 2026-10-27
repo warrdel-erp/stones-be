@@ -65,10 +65,6 @@ const Customer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    taxExempt: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
     salesTaxId: {
       type: DataTypes.INTEGER,
       allowNull: true,

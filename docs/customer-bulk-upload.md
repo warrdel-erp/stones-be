@@ -1,9 +1,11 @@
 # Customer Bulk Upload
 
 ## Overview
+
 The customer bulk upload endpoint allows you to create multiple customers with their addresses (shipping and remit) in a single CSV file upload.
 
 ## Endpoint
+
 ```
 POST /customers/bulkUpload
 Content-Type: multipart/form-data
@@ -13,18 +15,19 @@ Authorization: Bearer <token>
 ## CSV Format
 
 ### Required Fields
+
 - `name` - Customer name (required)
 - `email` - Customer email (required, must be valid email format)
 - `primaryPhoneNumber` - Primary phone number (required for bulk upload; must be unique per client)
 
 ### Optional Customer Fields
+
 - `contactName` - Primary contact person name
 - `printName` - Name to use on printed documents
 - `secondaryPhoneNumber` - Secondary phone number
 - `landlineNumber` - Landline phone number
 - `type` - Customer type
 - `priceLevel` - Price level for customer
-- `taxExempt` - Tax exempt status (true/false or 1/0)
 - `salesTaxId` - Sales tax ID (must be valid ID from SALES_TAX constant)
 - `paymentTermId` - Payment term ID (must be valid ID from PAYMENT_TERMS constant)
 - `internalNotes` - Internal notes about customer
@@ -32,6 +35,7 @@ Authorization: Bearer <token>
 - `scopeId` - Scope ID (must be valid ID from SCOP constant: 1=National, 2=International)
 
 ### Shipping Address Fields (Optional)
+
 - `shippingAddress` - Shipping address (street)
 - `shippingAddressLine` - Additional address line
 - `shippingUnit` - Unit/Suite number
@@ -43,6 +47,7 @@ Authorization: Bearer <token>
 - `shippingCountryId` - Country ID (must be valid ID from COUNTRIES constant)
 
 ### Remit Address Fields (Optional)
+
 - `remitAddress` - Remit address (street)
 - `remitAddressLine` - Additional address line
 - `remitUnit` - Unit/Suite number
@@ -65,6 +70,7 @@ Gamma LLC,gamma@example.com,Tom Wilson,555-8888,1,3,321 Pine Rd,Building C,,33.7
 ## Response
 
 ### Success Response (201)
+
 ```json
 {
   "success": true,
@@ -76,6 +82,7 @@ Gamma LLC,gamma@example.com,Tom Wilson,555-8888,1,3,321 Pine Rd,Building C,,33.7
 ```
 
 ### Error Response (400)
+
 ```json
 {
   "success": false,
@@ -88,13 +95,13 @@ Gamma LLC,gamma@example.com,Tom Wilson,555-8888,1,3,321 Pine Rd,Building C,,33.7
 
 1. **Bulk Operations**: The endpoint uses efficient bulk operations to create all customers, addresses, and ledger accounts at once for optimal performance.
 
-2. **Address Types**: 
+2. **Address Types**:
    - Shipping addresses are automatically marked as `SHIPPING` type
    - Remit addresses are automatically marked as `REMIT` type
 
 3. **Ledger Accounts**: A ledger account is automatically created for each customer for accounting purposes.
 
-4. **Validation**: 
+4. **Validation**:
    - All referenced IDs (salesTaxId, paymentTermId, scopeId, countryId) are validated against their respective constants
    - Email format is validated
    - All data is validated using Zod schema before database insertion
@@ -106,18 +113,23 @@ Gamma LLC,gamma@example.com,Tom Wilson,555-8888,1,3,321 Pine Rd,Building C,,33.7
 7. **Performance**: Designed to efficiently handle thousands of customers in a single upload
 
 ## Common Country IDs
+
 Refer to the `COUNTRIES` constant in the system. Some examples:
+
 - 1: United States
 - (Check the constants file for the complete list)
 
 ## Common Sales Tax IDs
+
 Refer to the `SALES_TAX` constant. Some examples:
+
 - 1: GW - Georgia State, Gwinnett County (6%)
 - 2: FR - Georgia State, Forsyth County (7%)
 - 3: EX - Tax Exempt (0%)
 - (Check the constants file for the complete list)
 
 ## Common Payment Term IDs
+
 - 1: 30 days
 - 2: 45 days
 - 3: 60 days

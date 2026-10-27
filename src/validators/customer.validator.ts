@@ -12,7 +12,6 @@ export const customerBulkUploadSchema = z.object({
   accEmail: z.preprocess((val) => (val === "" ? null : val), z.string().trim().email("Invalid accounting email format").optional().nullable()),
   type: z.string().optional().nullable(),
   priceLevel: z.string().optional().nullable(),
-  taxExempt: z.boolean().optional().nullable(),
   salesTax: z.string().optional().nullable(),
   paymentTermId: z.number().int().optional().nullable(),
   internalNotes: z.string().optional().nullable(),

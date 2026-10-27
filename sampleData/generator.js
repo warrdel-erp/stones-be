@@ -16,7 +16,6 @@ const headers = [
   "landlineNumber",
   "type",
   "priceLevel",
-  "taxExempt",
   "salesTaxId",
   "paymentTermId",
   "internalNotes",

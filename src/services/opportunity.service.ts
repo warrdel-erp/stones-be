@@ -99,9 +99,7 @@ export const create = async (payload: any) => {
         transaction
       });
       if (customer) {
-        if (customer.taxExempt) {
-          payload.taxRate = 0;
-        } else if (customer.salesTaxId) {
+        if (customer.salesTaxId) {
           const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
           if (tax) {
             payload.taxRate = tax.value;
@@ -141,9 +139,7 @@ export const update = async (id: number, clientId: number, payload: any) => {
         transaction
       });
       if (customer) {
-        if (customer.taxExempt) {
-          payload.taxRate = 0;
-        } else if (customer.salesTaxId) {
+        if (customer.salesTaxId) {
           const tax = SALES_TAX.find((t) => t.id === customer.salesTaxId);
           if (tax) {
             payload.taxRate = tax.value;
