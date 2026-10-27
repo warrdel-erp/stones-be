@@ -270,6 +270,8 @@ export async function handleCreateGenericProduct(data: any) {
 
     if (!sipl) {
       throw new Error("SIPL not found.");
+    } else if (sipl.inventoryReceived) {
+      throw new Error("Inventory already received!");
     }
 
     const product = (await productRepository.getProductByIdSimple(data.productId));
