@@ -14,10 +14,6 @@ const ProductFinish = sequelize.define(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: {
-                name: "unique_group_name",
-                msg: "Group name must be unique",
-            },
         },
         clientId: {
             type: DataTypes.INTEGER,
@@ -53,6 +49,13 @@ const ProductFinish = sequelize.define(
     {
         tableName: "product_finishes",
         timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ["name", "clientId"],
+                name: "unique_finish_per_client",
+            },
+        ],
     }
 );
 

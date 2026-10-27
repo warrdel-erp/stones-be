@@ -14,11 +14,7 @@ const ProductGroup = sequelize.define(
 
         name: {
             type: DataTypes.STRING,
-            allowNull: false,
-            unique: {
-                name: "unique_group_name",
-                msg: "Group name must be unique",
-            },
+            allowNull: false
         },
 
         createdBy: {
@@ -56,6 +52,13 @@ const ProductGroup = sequelize.define(
     {
         tableName: "product_groups",
         timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ["name", "clientId"],
+                name: "unique_group_per_client",
+            },
+        ],
     }
 );
 
