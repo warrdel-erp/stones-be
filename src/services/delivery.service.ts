@@ -22,6 +22,11 @@ export const initiateDelivery = async (
         throw new AppError('Truck is not available.', 400);
     }
 
+    const approvedDelivery = await deliveryRepository.findApprovedDeliveryByTruck(truckId);
+    if (approvedDelivery) {
+        throw new AppError('Truck is already assigned to a delivery.', 400);
+    }
+    
     // The check for existing items is moved down inside the transaction after we get the salesOrderProducts
 
     const existingPendingDelivery = await deliveryRepository.findPendingDeliveryByTruck(truckId);

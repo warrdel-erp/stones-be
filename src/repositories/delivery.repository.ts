@@ -11,6 +11,12 @@ export const findPendingDeliveryByTruck = async (truckId: number) => {
     });
 };
 
+export const findApprovedDeliveryByTruck = async (truckId: number) => {
+    return scoped(models.Delivery).findOne({
+        where: { truckId, status: DELIVERY_STATUS.APPROVED }
+    });
+};
+
 export const checkTruckIsOccupied = async (truckId: number) => {
     return scoped(models.Delivery).findOne({
         where: { truckId, status: { [Op.in]: [DELIVERY_STATUS.APPROVED, DELIVERY_STATUS.STARTED, DELIVERY_STATUS.PENDING] } }

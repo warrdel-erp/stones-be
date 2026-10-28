@@ -97,7 +97,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
     receiving: { total: 0 },
     packagingList: { subTotal: 0, tax: 0, total: 0, discountAmount: 0, taxable: 0, inlineDiscountAmount: 0, productDiscountAmount: 0, lineDiscountAmount: 0 },
     loadingOrder: { subTotal: 0, tax: 0, total: 0, discountAmount: 0, taxable: 0, inlineDiscountAmount: 0, productDiscountAmount: 0, lineDiscountAmount: 0 },
-    final: { subTotal: 0, tax: 0, total: 0, discountAmount: 0, taxable: 0, inlineDiscountAmount: 0, productDiscountAmount: 0, lineDiscountAmount: 0 },
+    final: { subTotal: 0, tax: 0, total: 0, discountAmount: 0, taxable: 0, inlineDiscountAmount: 0, productDiscountAmount: 0, lineDiscountAmount: 0 ,taxPercentage:0},
     quantities: { receiving: 0, packagingList: 0, loadingOrder: 0, final: 0 }
   };
 
@@ -160,6 +160,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
     calcs.loadingOrder.discountAmount = 0;
   }
 
+
   // --- Calculate Taxes ---
   let soAmountAfterDiscount = decimals.decimalSubtractDP(decimals.decimalSubtractDP(calcs.soReceiving.subTotal, calcs.soReceiving.inlineDiscountAmount, 2), calcs.soReceiving.discountAmount, 2);
   calcs.soReceiving.taxable = soAmountAfterDiscount;
@@ -180,13 +181,13 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
 
   // Determine final quantities and final totals based on availability
   if (calcs.loadingOrder.subTotal > 0) {
-    calcs.final = { ...calcs.loadingOrder };
+    calcs.final = { ...calcs.loadingOrder ,taxPercentage};
     calcs.quantities.final = calcs.quantities.loadingOrder;
   } else if (calcs.packagingList.subTotal > 0) {
-    calcs.final = { ...calcs.packagingList };
+    calcs.final = { ...calcs.packagingList ,taxPercentage};
     calcs.quantities.final = calcs.quantities.packagingList;
   } else {
-    calcs.final = { ...calcs.soReceiving };
+    calcs.final = { ...calcs.soReceiving,taxPercentage };
     calcs.quantities.final = calcs.quantities.receiving;
   }
 
