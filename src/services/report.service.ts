@@ -1178,7 +1178,7 @@ export const getCustomerMasterReport = async (
       city,
       state,
       zip,
-      taxStatus: c.taxExempt ? 'Exempt' : 'Taxable',
+      taxStatus: c.salesTax?.value === 0 ? 'Exempt' : 'Taxable',
       taxId: c.exemptCerti || c.einNumber || '-',
       creditLimit: 0,
       paymentTerms: c.paymentTerm ? c.paymentTerm.value : '-',

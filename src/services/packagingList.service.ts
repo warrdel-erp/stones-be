@@ -149,7 +149,7 @@ export const getAllPackagingListsWithoutPagination = async (filters: WhereOption
 export const getPackagingListById = async (id: number) => {
   const packagingList = await packagingListRepository.getPackagingListById(id);
 
-  packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrderProducts[0]?.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
+  packagingList.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage, packagingList.salesOrder?.tax?.value || packagingList.salesOrderProducts[0]?.taxPercentage || 0);
 
   // so product as per product and unitPrice.
   packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage);

@@ -128,7 +128,7 @@ export const getLoadingOrderById = async (id: number) => {
   loadingOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(loadingOrder.salesOrderProducts, loadingOrder.salesOrder?.discountPercentage);
 
   // Calculations for loading order.
-  loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts, loadingOrder.salesOrder?.discountPercentage, loadingOrder.salesOrderProducts[0]?.salesOrder?.tax?.value || loadingOrder.salesOrderProducts[0]?.taxPercentage || 0);
+  loadingOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(loadingOrder.salesOrderProducts, loadingOrder.salesOrder?.discountPercentage, loadingOrder?.salesOrder?.tax?.value || loadingOrder.salesOrderProducts[0]?.taxPercentage || 0);
 
   // get payment terms constant data.
   if (loadingOrder.packagingList) {

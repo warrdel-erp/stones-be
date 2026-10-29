@@ -14,10 +14,6 @@ const ProductBaseColor = sequelize.define(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: {
-                name: "unique_base_color_name",
-                msg: "Base color name must be unique",
-            },
         },
         createdBy: {
             type: DataTypes.INTEGER,
@@ -54,6 +50,13 @@ const ProductBaseColor = sequelize.define(
     {
         tableName: "product_base_colors",
         timestamps: true,
+          indexes: [
+            {
+                unique: true,
+                fields: ["name", "clientId"],
+                name: "unique_base_color_per_client",
+            },
+        ],
     }
 );
 
