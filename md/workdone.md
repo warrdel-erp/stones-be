@@ -1251,11 +1251,11 @@ Univ
 13. existing machines RAM matrix analysis
 14. University Roles change bug.
 15. single and multi bin creation. with existing/delete individual feature.
-16. testing multiple hit failure.
+16. stone -> testing multiple hit failure.
 17. problem with duplicate number generation.
 18. unique Subject code constraint.
 19. University roles change bug.
-20. unique Email Ids
+20. University -> unique Email Ids
     1. remove students without users.
     2. remove deleted_at not null students and users with duplicate emails.
     3. applied constraint for non duplicacy.
@@ -1264,5 +1264,8 @@ Univ
 23. University auto logout issue.
 24. if we create LO from PL partially then PL's services will not be applied.
 25. token discussion in university.
-26. stone KT to Ajay. [ongoing]
+26. stone KT to Ajay.
 27. learning about testing and code quality.
+28. Deployment automation for dev. [ongoing]
+29. remove is_teacher from university.
+30. university deployment automation.
