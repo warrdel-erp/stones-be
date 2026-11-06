@@ -1292,6 +1292,10 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   COUNTY_TAX: "county_tax",
   DEFAULT_SERVICE_ACCOUNT: "default_service_account",
   INVENTORY_VARIANCE: "inventory_variance",
+  SALES_DISCOUNTS: "sales_discounts",
+  SALES_RETURNS_AND_ALLOWANCES: "sales_returns_and_allowances",
+  CUSTOMER_ADVANCES: "customer_advances",
+  DELIVERY_CHARGES_REVENUE: "delivery_charges_revenue",
 } as const;
 
 export const FREIGHT_BILL_ACCOUNT_KEYS = {

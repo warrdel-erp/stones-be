@@ -1,8 +1,9 @@
+import { Transaction } from "sequelize";
 import * as models from "../models";
 import { scoped } from "../utils/scoped";
 
-export const createServiceCategory = async (payload: any) => {
-    return await scoped(models.ServiceCategory).create(payload);
+export const createServiceCategory = async (payload: any, transaction?: Transaction) => {
+    return await scoped(models.ServiceCategory).create(payload, { transaction });
 };
 
 export const getAllServiceCategories = async (clientId: number) => {

@@ -1,30 +1,27 @@
-import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
-import * as salesOrderProductService from "../services/salesOrderProduct.service";
-import * as packagingListRepository from "../repositories/packagingList.repository";
-import { PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES, LEDGER_ACCOUNT_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
-import { INVENTORY_ITEM_STATUS } from "../constants";
 import Decimal from 'decimal.js';
+import { Op } from "sequelize";
+import { sequelize } from "../config/database";
+import { INVENTORY_ITEM_STATUS, PAYMENT_TERMS, SALES_TAX } from "../constants";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { ACTIVITY_REFERENCE_TYPE, ACTIVITY_TYPE, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES, PACKAGING_LIST_STAGES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { getPercentageValue } from "../helper";
+import { AppError } from "../helper/appError";
 import * as decimal from '../helper/decimal';
 import * as models from '../models';
-import { scoped } from '../utils/scoped';
-import { sequelize } from "../config/database";
-import { Op } from "sequelize";
-import { DELIVERY_STATUS } from "../constants/tableTypes";
-import { AppError } from "../helper/appError";
-import { removeDuplicatesWithUnitPrice, getPercentageValue } from "../helper";
-import { PAYMENT_TERMS, SALES_TAX } from "../constants";
-import { getTotalLoOrderQuantity, getTotalPlAmount } from "./packagingList.service";
-import _ from "lodash";
-import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import * as packagingListService from "../services/packagingList.service";
-import * as soInvoiceRepository from "../repositories/soInvoice.repository";
-import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as activityService from "../services/activity.service";
 import * as journalEntryService from "../services/journalEntry.service";
-import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import * as ledgerAccountService from "../services/ledgerAccount.service";
+import * as packagingListService from "../services/packagingList.service";
+import * as salesOrderProductService from "../services/salesOrderProduct.service";
+import { scoped } from '../utils/scoped';
 
 // Create new PL
 export const createLoadingOrder = async (data: any) => {
@@ -39,9 +36,9 @@ export const createLoadingOrder = async (data: any) => {
       throw new AppError("Sales order ID is required.", 400);
     }
 
-        // Determine the distinct packaging lists involved.
+    // Determine the distinct packaging lists involved.
     const packagingListIds = new Set<number>();
-    
+
     // Ensure products are not assigned to a delivery
     const sopIds = data.soProducts.map((p: any) => p.id);
     const existingDeliveryItems = await sequelize.models.DeliveryItem.findAll({
@@ -52,7 +49,7 @@ export const createLoadingOrder = async (data: any) => {
       }],
       transaction
     });
-    
+
     if (existingDeliveryItems && existingDeliveryItems.length > 0) {
       const conflictSopId = (existingDeliveryItems[0] as any).salesOrderProductId;
       throw new AppError(`Product ${conflictSopId} is already assigned to a delivery and cannot be added to a loading order.`, 400);
@@ -249,10 +246,10 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       transaction
     );
 
-    // Journal Entry for Without tax.
+    // Journal Entry for Without tax (Gross Revenue before discounts).
     await journalEntryRepository.create(
       {
-        amount: invoice.amount,
+        amount: invoiceAmountObj.subTotal,
         ledgerId: ledgerAccountForGoodsSold.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -268,6 +265,47 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       },
       transaction
     );
+
+    const totalDiscountAmount = decimal.decimalAddDP(
+      invoiceAmountObj.inlineDiscountAmount || 0,
+      invoiceAmountObj.discountAmount || 0,
+      2
+    );
+
+    if (totalDiscountAmount > 0) {
+          let ledgerAccountForSalesDiscounts: any =
+        await ledgerAccountService.getSalesDiscountsLedgerAccount(
+          clientId,
+          transaction
+        );
+
+      if (!ledgerAccountForSalesDiscounts) {
+        ledgerAccountForSalesDiscounts =
+          await ledgerAccountService.createSalesDiscountsLedgerAccount(
+            clientId,
+            transaction
+          );
+      }
+
+      await journalEntryRepository.create(
+        {
+          amount: totalDiscountAmount,
+          ledgerId: ledgerAccountForSalesDiscounts.id,
+          type: JOURNAL_ENTRY_TYPE.DR,
+
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+          referenceId: invoice.id,
+
+          entryFor: JOURNAL_ENTRY_FOR_TYPES.LOADING_ORDER,
+          entryForId: loadingOrder.id,
+
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+          locationId,
+          partyLedgerAccountId: ledgerAccount.id,
+        },
+        transaction
+      );
+    }
 
     const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
@@ -414,10 +452,10 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       transaction
     );
 
-    transaction.commit();
+    await transaction.commit();
     return { loadingOrder, invoice, autoSettlements };
   } catch (error) {
-    transaction.rollback();
+    await transaction.rollback();
     throw error;
   }
 };

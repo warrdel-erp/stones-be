@@ -1269,3 +1269,8 @@ Univ
 28. Deployment automation for dev. [ongoing]
 29. remove is_teacher from university.
 30. university deployment automation.
+31. new accounts in stone.
+
+questions---
+
+1. what is delivery charge.

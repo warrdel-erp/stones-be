@@ -1,52 +1,49 @@
-import { INVENTORY_ITEM_STATUS, PAYMENT_TERMS, SALES_TAX } from "../constants";
+import { INVENTORY_ITEM_STATUS, SALES_TAX } from "../constants";
 import { AppError } from "../helper/appError";
 import * as notesRepository from "../repositories/notes.repository";
 
 import _ from "lodash";
-import { Transaction, WhereOptions, Op } from "sequelize";
+import { Transaction, WhereOptions } from "sequelize";
 import { sequelize } from "../config/database";
 import * as models from "../models";
 
+import * as decimal from '../helper/decimal';
+import * as deliveryRepository from "../repositories/delivery.repository";
 import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
+import * as packagingListRepository from "../repositories/packagingList.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
-import * as deliveryRepository from "../repositories/delivery.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as packagingListService from "../services/packagingList.service";
-import * as salesOrderService from "../services/salesOrder.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as tradeServiceService from '../services/tradeService.service';
-import * as decimal from '../helper/decimal'
 
+import Decimal from "decimal.js";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
 import {
-  DELIVERY_STATUS,
+  ACTIVITY_REFERENCE_TYPE,
+  ACTIVITY_TYPE,
   JOURNAL_ENTRY_FOR_TYPES,
   JOURNAL_ENTRY_PROCESS_TYPE,
   JOURNAL_ENTRY_REFERENCE_TYPES,
   JOURNAL_ENTRY_SUB_REFERENCE_TYPES,
   JOURNAL_ENTRY_TYPE,
   LEDGER_ACCOUNT_REFERENCE_TYPES,
-  PACKAGING_LIST_STAGES,
   NOTES_REFERENCE_TYPES,
   NOTES_TYPE,
-  SALE_ORDER_PRODUCT_STAGES,
-  ACTIVITY_TYPE,
-  ACTIVITY_REFERENCE_TYPE,
+  PACKAGING_LIST_STAGES,
+  SALE_ORDER_PRODUCT_STAGES
 } from "../constants/tableTypes";
-import * as activityService from "../services/activity.service";
-import { getPercentageValue, removeDuplicatesWithUnitPrice, sumDecimal } from "../helper";
+import { getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
 import { Return } from "../models";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
-import { createJournalEntriesForTradeServicesOfPackagingList } from "./journalEntry.service";
-import * as salesOrderInvoiceService from "./salesOrderInvoice.service";
-import * as advancedDepositService from "./advancedDeposit.service";
-import Decimal from "decimal.js";
+import * as activityService from "../services/activity.service";
 import { scoped } from "../utils/scoped";
+import { createJournalEntriesForTradeServicesOfPackagingList } from "./journalEntry.service";
+import * as ledgerAccountService from "./ledgerAccount.service";
 
 // Create new LO
 export const createPackagingList = async (data: any) => {
@@ -388,7 +385,7 @@ export function getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrderPr
 
     return {
       ...product,
-      
+
       salesOrderProduct: salesOrderProductsAsPerProduct,
       calculations,
       totalQuantity: calculations.quantities.packagingList,
@@ -569,10 +566,10 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       transaction
     );
 
-    // Journal Entry for Without tax.
+    // Journal Entry for Without tax (Gross Revenue before discounts).
     await journalEntryRepository.create(
       {
-        amount: invoice.amount,
+        amount: invoiceAmountObj.subTotal,
         ledgerId: ledgerAccountForGoodsSold.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -589,6 +586,48 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       },
       transaction
     );
+
+    const totalDiscountAmount = decimal.decimalAddDP(
+      invoiceAmountObj.inlineDiscountAmount || 0,
+      invoiceAmountObj.discountAmount || 0,
+      2
+    );
+
+    if (totalDiscountAmount > 0) {
+          let ledgerAccountForSalesDiscounts: any =
+        await ledgerAccountService.getSalesDiscountsLedgerAccount(
+          clientId,
+          transaction
+        );
+
+      if (!ledgerAccountForSalesDiscounts) {
+        ledgerAccountForSalesDiscounts =
+          await ledgerAccountService.createSalesDiscountsLedgerAccount(
+            clientId,
+            transaction
+          );
+      }
+
+      await journalEntryRepository.create(
+        {
+          amount: totalDiscountAmount,
+          ledgerId: ledgerAccountForSalesDiscounts.id,
+          type: JOURNAL_ENTRY_TYPE.DR,
+
+          // reference
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE,
+          referenceId: invoice.id,
+
+          entryFor: JOURNAL_ENTRY_FOR_TYPES.PACKAGING_LIST,
+          entryForId: packagingList.id,
+
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.SO_INVOICING,
+          locationId,
+          partyLedgerAccountId: ledgerAccount.id,
+        },
+        transaction
+      );
+    }
 
     // Get ledger account for State tax.
     const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
@@ -791,6 +830,38 @@ export async function autoSettleAdvancedDeposits(
   let remainingInvoiceBalance = new Decimal(invoiceFinalAmount);
   const settlementResults: Array<{ depositId: number; depositCode: string; settledAmount: number }> = [];
 
+  if (deposits.length === 0) {
+    return settlementResults;
+  }
+
+  const soInvoice: any = await models.SalesOrderInvoice.findByPk(invoiceId, { transaction });
+  const customerLedgerAccount: any = soInvoice
+    ? await ledgerAccountRepository.getLedgerAccountByFilter(
+        {
+          referenceId: soInvoice.customerId,
+          referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+        },
+        transaction
+      )
+    : null;
+
+  let ledgerAccountForCustomerAdvances: any = null;
+  if (soInvoice?.clientId) {
+    ledgerAccountForCustomerAdvances =
+      await ledgerAccountService.getCustomerAdvancesLedgerAccount(
+        soInvoice.clientId,
+        transaction
+      );
+
+    if (!ledgerAccountForCustomerAdvances) {
+      ledgerAccountForCustomerAdvances =
+        await ledgerAccountService.createCustomerAdvancesLedgerAccount(
+          soInvoice.clientId,
+          transaction
+        );
+    }
+  }
+
   for (const deposit of deposits) {
     if (remainingInvoiceBalance.lte(0)) break;
 
@@ -814,6 +885,36 @@ export async function autoSettleAdvancedDeposits(
       },
       { transaction }
     );
+
+    if (customerLedgerAccount && ledgerAccountForCustomerAdvances) {
+      await journalEntryRepository.create(
+        {
+          amount: settleAmount.toNumber(),
+          ledgerId: ledgerAccountForCustomerAdvances.id,
+          type: JOURNAL_ENTRY_TYPE.DR,
+          referenceId: deposit.id,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
+          locationId: deposit.locationId || soInvoice.locationId,
+          partyLedgerAccountId: customerLedgerAccount.id,
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
+        },
+        transaction
+      );
+
+      await journalEntryRepository.create(
+        {
+          amount: settleAmount.toNumber(),
+          ledgerId: customerLedgerAccount.id,
+          type: JOURNAL_ENTRY_TYPE.CR,
+          referenceId: deposit.id,
+          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
+          locationId: deposit.locationId || soInvoice.locationId,
+          partyLedgerAccountId: ledgerAccountForCustomerAdvances.id,
+          processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
+        },
+        transaction
+      );
+    }
 
     settlementResults.push({
       depositId: deposit.id,

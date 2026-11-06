@@ -4,6 +4,8 @@ import SalesOrder from "../models/salesOrder.model";
 import Payment from "../models/payment.model";
 import PaymentBill from "../models/paymentBills.model";
 import * as journalEntryRepository from '../repositories/journalEntry.repository'
+import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
+import * as ledgerAccountService from './ledgerAccount.service'
 import { PAYMENT_BILL_REFERENCE_TYPES, PAYMENT_TYPE, PAYEE_TYPE, JOURNAL_ENTRY_TYPE, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, LEDGER_ACCOUNT_REFERENCE_TYPES, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
 import * as advancedDepositRepository from '../repositories/advancedDeposit.repository'
 import * as paymentBillsRepository from '../repositories/paymentBills.repository'
@@ -151,6 +153,20 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
             { transaction }
         );
 
+        let ledgerAccountForCustomerAdvances: any =
+            await ledgerAccountService.getCustomerAdvancesLedgerAccount(
+                salesOrder.clientId,
+                transaction
+            );
+
+        if (!ledgerAccountForCustomerAdvances) {
+            ledgerAccountForCustomerAdvances =
+                await ledgerAccountService.createCustomerAdvancesLedgerAccount(
+                    salesOrder.clientId,
+                    transaction
+                );
+        }
+
         const customerJournalEntry = await journalEntryRepository.create(
             {
                 amount: data.amount,
@@ -161,7 +177,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
                 referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
 
                 locationId,
-                partyLedgerAccountId: salesOrder.customer.ledgerAccount.id,
+                partyLedgerAccountId: ledgerAccountForCustomerAdvances.id,
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
             },
@@ -171,7 +187,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         const accountJournalEntry = await journalEntryRepository.create(
             {
                 amount: data.amount,
-                ledgerId: salesOrder.customer.ledgerAccount.id,
+                ledgerId: ledgerAccountForCustomerAdvances.id,
                 type: JOURNAL_ENTRY_TYPE.CR,
 
                 referenceId: advancedDeposit.id,
@@ -334,6 +350,61 @@ export const settleAdvancedDeposit = async (
                 },
                 { transaction }
             );
+
+            // Reclassify settled advance from Customer Advances (Liability) to Customer Receivable (AR)
+            let ledgerAccountForCustomerAdvances: any =
+                await ledgerAccountService.getCustomerAdvancesLedgerAccount(
+                    advancedDeposit.clientId,
+                    transaction
+                );
+
+            if (!ledgerAccountForCustomerAdvances) {
+                ledgerAccountForCustomerAdvances =
+                    await ledgerAccountService.createCustomerAdvancesLedgerAccount(
+                        advancedDeposit.clientId,
+                        transaction
+                    );
+            }
+
+            const customerLedgerAccount: any =
+                await ledgerAccountRepository.getLedgerAccountByFilter(
+                    {
+                        referenceId: soInvoice.customerId,
+                        referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+                    },
+                    transaction
+                );
+
+            if (customerLedgerAccount && ledgerAccountForCustomerAdvances) {
+                await journalEntryRepository.create(
+                    {
+                        amount: settlementAmount.toNumber(),
+                        ledgerId: ledgerAccountForCustomerAdvances.id,
+                        type: JOURNAL_ENTRY_TYPE.DR,
+                        referenceId: advancedDepositId,
+                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
+                        locationId: advancedDeposit.locationId || soInvoice.locationId,
+                        partyLedgerAccountId: customerLedgerAccount.id,
+                        processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
+                    },
+                    transaction
+                );
+
+                await journalEntryRepository.create(
+                    {
+                        amount: settlementAmount.toNumber(),
+                        ledgerId: customerLedgerAccount.id,
+                        type: JOURNAL_ENTRY_TYPE.CR,
+                        referenceId: advancedDepositId,
+                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.ADVANCE_DEPOSIT,
+                        locationId: advancedDeposit.locationId || soInvoice.locationId,
+                        partyLedgerAccountId: ledgerAccountForCustomerAdvances.id,
+                        processType: JOURNAL_ENTRY_PROCESS_TYPE.ADVANCE_DEPOSIT,
+                    },
+                    transaction
+                );
+            }
+
             createdSettlements.push(createdSettlement);
         }
 

@@ -7,7 +7,6 @@ import * as models from "./index";
 import { AppError } from "../helper/appError";
 import SalesOrder from "./salesOrder.model";
 import * as decimal from '../helper/decimal'
-import { scoped } from "../utils/scoped";
 import { getNextSequenceNumber } from "../services/sequence.service";
 import { SEQUENCE_MODEL } from "../constants/sequenceTypes";
 
@@ -58,9 +57,10 @@ const SalesOrderInvoice = sequelize.define(
       type: DataTypes.VIRTUAL,
       get() {
         const amount = Number(this.get('amount')) || 0;
+        const discountAmount = Number(this.get('discountAmount')) || 0;
         const taxValue = Number(this.get('taxValue')) || 0;
         const serviceCharges = Number(this.get('totalServiceCharges')) || 0;
-        return decimal.decimalAdd(decimal.decimalAdd(amount, taxValue), serviceCharges);
+        return decimal.decimalAdd(decimal.decimalAdd(decimal.decimalSubtract(amount, discountAmount), taxValue), serviceCharges);
       }
     },
     soInvoiceNumber: {

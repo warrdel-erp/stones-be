@@ -1,28 +1,22 @@
+import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
-import * as returnRepository from "../repositories/return.repository";
+import { INVENTORY_ITEM_STATUS } from "../constants";
+import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { ACTIVITY_REFERENCE_TYPE, ACTIVITY_TYPE, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { getPercentageValue } from "../helper";
 import { AppError } from "../helper/appError";
 import { RETURN_STATUS } from "../models/return.model";
-import SalesOrderInvoice from "../models/salesOrderInvoice.model";
-import Return from "../models/return.model";
-import { ReturnProduct, SalesOrderProduct, Slab } from "../models";
-import { Op } from "sequelize";
-import * as slabRepository from "../repositories/slab.repository";
-import * as genericProductRepository from "../repositories/genericProduct.repository";
-import { Transaction } from "sequelize";
-import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
-import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
-import { getTotalPackagingListAmount, getTotalPlAmount } from "./packagingList.service";
-import * as journalEntryRepository from '../repositories/journalEntry.repository'
-import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository'
-import { JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE } from "../constants/tableTypes";
-import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
-import { getPercentageValue } from "../helper";
-import * as activityService from "../services/activity.service";
-import { requestContext } from "../utils/requestContext";
-import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
-import * as tradeServiceService from '../services/tradeService.service';
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
-import * as journalEntryServices from '../services/journalEntry.service'
+import * as inventoryProductRepository from "../repositories/inventoryProduct.repository";
+import * as journalEntryRepository from '../repositories/journalEntry.repository';
+import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository';
+import * as returnRepository from "../repositories/return.repository";
+import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as activityService from "../services/activity.service";
+import * as journalEntryServices from '../services/journalEntry.service';
+import * as ledgerAccountService from '../services/ledgerAccount.service';
+import * as tradeServiceService from '../services/tradeService.service';
+import { requestContext } from "../utils/requestContext";
 
 interface InvoiceWithProducts {
     packagingList: {
@@ -103,12 +97,12 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
         await returnRepository.createReturnProducts(returnProducts, transaction);
 
         await activityService.logActivity({
-          clientId: clientId || requestContext.getStore()?.clientId || 0,
-          activityType: ACTIVITY_TYPE.RETURN_INITIATION,
-          referenceId: returnRecord.id,
-          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
-          title: "Return Initiated",
-          description: `Return initiated for Sales Invoice #${invoiceId}.`,
+            clientId: clientId || requestContext.getStore()?.clientId || 0,
+            activityType: ACTIVITY_TYPE.RETURN_INITIATION,
+            referenceId: returnRecord.id,
+            referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+            title: "Return Initiated",
+            description: `Return initiated for Sales Invoice #${invoiceId}.`,
         }, transaction);
 
         await transaction.commit();
@@ -122,16 +116,22 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
 export const getReturnById = async (returnId: number, transaction?: Transaction) => {
     const returnRecord: any = (await returnRepository.getReturnWithProducts(returnId, transaction))?.get({ plain: true });
 
-    const salesTax = (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).tax;
+    const salesOrder = returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder;
+    const salesTax = salesOrder?.tax;
 
     if (!salesTax) {
         throw new AppError('Error in getting tax value', 400);
     }
 
     const salesOrderProducts = returnRecord.returnProducts.map((e: any) => e.salesOrderProduct);
+    const discountPercentage = returnRecord.soInvoice?.discountPercentage ?? salesOrder?.discountPercentage;
 
     // Calculate total pl amount added in return.
-    returnRecord.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrderProducts, returnRecord.salesOrder?.discountPercentage, returnRecord.salesOrder?.tax?.value || salesOrderProducts[0]?.taxPercentage || 0);
+    returnRecord.amounts = salesOrderProductRepository.getTotalsOfSalesOrderProducts(
+        salesOrderProducts,
+        discountPercentage,
+        salesTax?.value || salesOrderProducts[0]?.taxPercentage || 0
+    );
 
     return returnRecord;
 }
@@ -164,16 +164,25 @@ export const confirmReturn = async (returnId: number, locationId: number, client
             referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
         });
 
-        // Get ledger account for goods sold.
-        const ledgerAccountForGoodsSold: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
-            clientId,
-        });
+        // Get or create ledger account for Sales Returns & Allowances (Contra-Revenue).
+        let ledgerAccountForSalesReturns: any =
+            await ledgerAccountService.getSalesReturnsAndAllowancesLedgerAccount(
+                clientId,
+                transaction
+            );
+
+        if (!ledgerAccountForSalesReturns) {
+            ledgerAccountForSalesReturns =
+                await ledgerAccountService.createSalesReturnsAndAllowancesLedgerAccount(
+                    clientId,
+                    transaction
+                );
+        }
 
         // Journal entries for services attached with return. 
         await journalEntryServices.createJournalEntriesForTradeServicesOfReturns(returnRecord, locationId, transaction)
         // #1
-        // Journal Entry for with tax.
+        // Journal Entry for Customer Receivable reversal (with tax).
         await journalEntryRepository.create(
             {
                 amount: returnAmounts.final.total,
@@ -189,17 +198,17 @@ export const confirmReturn = async (returnId: number, locationId: number, client
 
                 processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
                 locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                partyLedgerAccountId: ledgerAccountForGoodsSold.id,
+                partyLedgerAccountId: ledgerAccountForSalesReturns.id,
             },
             transaction
         );
 
         // #2
-        // Journal Entry for without tax.
+        // Journal Entry for Sales Returns & Allowances (without tax).
         await journalEntryRepository.create(
             {
-                amount: returnAmounts.final.total,
-                ledgerId: ledgerAccountForGoodsSold.id,
+                amount: returnAmounts.final.taxable,
+                ledgerId: ledgerAccountForSalesReturns.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
 
                 // reference
@@ -365,13 +374,13 @@ export const confirmReturn = async (returnId: number, locationId: number, client
         );
 
         await activityService.logActivity({
-          clientId,
-          activityType: ACTIVITY_TYPE.RETURN_CONFIRMATION,
-          referenceId: returnId,
-          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
-          title: "Return Confirmed",
-          description: `Return #${returnId} has been confirmed.`,
-          locationId
+            clientId,
+            activityType: ACTIVITY_TYPE.RETURN_CONFIRMATION,
+            referenceId: returnId,
+            referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+            title: "Return Confirmed",
+            description: `Return #${returnId} has been confirmed.`,
+            locationId
         }, transaction);
 
         if (shouldCommit) {
@@ -410,12 +419,12 @@ export const cancelReturn = async (returnId: number) => {
         );
 
         await activityService.logActivity({
-          clientId: requestContext.getStore()?.clientId || returnRecord.clientId || 0,
-          activityType: ACTIVITY_TYPE.RETURN_REJECTION,
-          referenceId: returnId,
-          referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
-          title: "Return Cancelled",
-          description: `Return #${returnId} has been cancelled/rejected.`,
+            clientId: requestContext.getStore()?.clientId || returnRecord.clientId || 0,
+            activityType: ACTIVITY_TYPE.RETURN_REJECTION,
+            referenceId: returnId,
+            referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+            title: "Return Cancelled",
+            description: `Return #${returnId} has been cancelled/rejected.`,
         }, transaction);
 
         await transaction.commit();

@@ -295,6 +295,50 @@ module.exports = {
           code: 513001,
           openingDate: new Date(),
         },
+        {
+          id: 26,
+          openingBalance: 0,
+          name: "Sales Discounts",
+          key: "sales_discounts",
+          clientId: 1,
+          subHeaderId: 68,
+          type: "dr",
+          code: 431001,
+          openingDate: new Date(),
+        },
+        {
+          id: 27,
+          openingBalance: 0,
+          name: "Sales Returns & Allowances",
+          key: "sales_returns_and_allowances",
+          clientId: 1,
+          subHeaderId: 68,
+          type: "dr",
+          code: 431002,
+          openingDate: new Date(),
+        },
+        {
+          id: 28,
+          openingBalance: 0,
+          name: "Customer Advances",
+          key: "customer_advances",
+          clientId: 1,
+          subHeaderId: 38,
+          type: "cr",
+          code: 223001,
+          openingDate: new Date(),
+        },
+        {
+          id: 29,
+          openingBalance: 0,
+          name: "Delivery Charges Revenue",
+          key: "delivery_charges_revenue",
+          clientId: 1,
+          subHeaderId: 65,
+          type: "cr",
+          code: 412001,
+          openingDate: new Date(),
+        },
       ],
       {}
     );
@@ -303,7 +347,7 @@ module.exports = {
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete("ledger_accounts", {
       id: {
-        [Sequelize.Op.in]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+        [Sequelize.Op.in]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
       },
     });
   },

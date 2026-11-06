@@ -1,4 +1,5 @@
-import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
+import { Op, Transaction } from "sequelize";
+import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, DEFAULT_LEDGER_ACCOUNT_KEYS, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as journalEntriesRepository from "../repositories/journalEntry.repository";
 
@@ -122,6 +123,122 @@ export const getDefaultLedgerAccountsForProduct = async (clientId: number) => {
     cogsAccount,
     goodsSoldAccount
   };
+};
+
+export const getSalesDiscountsLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+return await ledgerAccountRepository.getLedgerAccountByFilter(
+  {
+    clientId,
+    [Op.or]: [
+      { key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_DISCOUNTS },
+      { name: "Sales Discounts" },
+    ],
+  },
+  transaction
+);
+};
+
+export const createSalesDiscountsLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "variable_consideration")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Sales Discounts",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_DISCOUNTS,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getSalesReturnsAndAllowancesLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_RETURNS_AND_ALLOWANCES },
+        { name: "Sales Returns & Allowances" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createSalesReturnsAndAllowancesLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "variable_consideration")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Sales Returns & Allowances",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_RETURNS_AND_ALLOWANCES,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getCustomerAdvancesLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_ADVANCES },
+        { name: "Customer Advances" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createCustomerAdvancesLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "deferred_income_refund_liabilities")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Customer Advances",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_ADVANCES,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getDeliveryChargesRevenueLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE },
+        { name: "Delivery Charges Revenue" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createDeliveryChargesRevenueLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "services_4_1")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Delivery Charges Revenue",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
 };
 
 // export const updateLedgerAccount = async (id: number, data: any) => {

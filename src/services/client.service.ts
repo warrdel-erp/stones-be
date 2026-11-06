@@ -1,26 +1,25 @@
-import { AppError } from "../helper/appError";
-import { LedgerAccount } from "../models/ledgerAccount.model";
+import { Transaction } from "sequelize";
+import { sequelize } from "../config/database";
 import {
   COA_SUB_HEADERS,
   DEFAULT_LEDGER_ACCOUNT_KEYS,
   FREIGHT_BILL_ACCOUNT_KEYS,
   LEDGER_ACCOUNT_TYPES,
 } from "../constants/coa";
-import bcrypt from "bcryptjs";
-import { Transaction } from "sequelize";
-import { sequelize } from "../config/database";
+import { AppError } from "../helper/appError";
 import { requestContext } from "../utils/requestContext";
 
+import { PERMISSIONS } from "../constants/permissions";
+import * as accountRepository from "../repositories/account.repository";
+import * as accountPermissionRepository from "../repositories/accountPermission.repository";
 import * as clientRepository from "../repositories/client.repository";
 import * as companyRepository from "../repositories/company.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
-import * as userRepository from '../repositories/user.repository';
 import * as locationRepository from "../repositories/location.repository";
+import * as serviceRepository from "../repositories/service.repository";
+import * as serviceCategoryRepository from "../repositories/serviceCategory.repository";
 import * as warehouseRepository from "../repositories/warehouse.repository";
 import * as accountService from "./account.service";
-import * as accountRepository from "../repositories/account.repository";
-import * as accountPermissionRepository from "../repositories/accountPermission.repository";
-import { PERMISSIONS } from "../constants/permissions";
 
 type ClientRegistrationData = {
   primary: {
@@ -119,7 +118,10 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
       await client.update({ defaultLocationId: createdLocation.getDataValue('id') }, { transaction });
 
       // Create default ledger accounts for the client within transaction
-      await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+      const createdLedgerAccounts = await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+
+      // Create default service categories and services (including Delivery Services linked to Delivery Charges Revenue)
+      await createDefaultServicesForClient(client.getDataValue('id'), createdLedgerAccounts, transaction);
 
       // If everything is successful, commit the transaction
       await transaction.commit();
@@ -270,6 +272,42 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
       openingBalance: 0,
       openingDate: new Date(),
     },
+    {
+      name: "Sales Discounts",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_DISCOUNTS,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "variable_consideration")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Sales Returns & Allowances",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_RETURNS_AND_ALLOWANCES,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "variable_consideration")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Customer Advances",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_ADVANCES,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "deferred_income_refund_liabilities")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
+      name: "Delivery Charges Revenue",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "services_4_1")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
   ];
 
   const createdAccounts: any[] = [];
@@ -279,6 +317,121 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
   }
 
   return createdAccounts;
+};
+
+const createDefaultServicesForClient = async (
+  clientId: number,
+  createdLedgerAccounts: any[],
+  transaction: Transaction
+) => {
+  const findLedgerIdByKey = (key: string) => {
+    const acc = createdLedgerAccounts.find(
+      (a: any) => (a.get ? a.get("key") : a.key) === key
+    );
+    return acc ? (acc.get ? acc.get("id") : acc.id) : null;
+  };
+
+  const deliveryChargesRevenueId = findLedgerIdByKey(
+    DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE
+  );
+  const freightInId = findLedgerIdByKey(FREIGHT_BILL_ACCOUNT_KEYS.FREIGHT_IN);
+  const defaultServiceAccountId = findLedgerIdByKey(
+    DEFAULT_LEDGER_ACCOUNT_KEYS.DEFAULT_SERVICE_ACCOUNT
+  );
+
+  if (!deliveryChargesRevenueId) return;
+
+  const deliveryCategory: any = await serviceCategoryRepository.createServiceCategory(
+    {
+      name: "Delivery Services",
+      type: "sale",
+      clientId,
+    },
+    transaction
+  );
+
+  const deliveryCategoryId = deliveryCategory.get
+    ? deliveryCategory.get("id")
+    : deliveryCategory.id;
+
+  const defaultDeliveryServices = [
+    {
+      name: "Home Delivery",
+      uomId: 14,
+      basePrice: 100.0,
+      ledgerAccountId: deliveryChargesRevenueId,
+      description: "Home delivery service for customer orders",
+      serviceCategoryId: deliveryCategoryId,
+      clientId,
+    },
+    {
+      name: "Express Delivery",
+      uomId: 14,
+      basePrice: 200.0,
+      ledgerAccountId: deliveryChargesRevenueId,
+      description: "Express delivery service with same-day or next-day delivery",
+      serviceCategoryId: deliveryCategoryId,
+      clientId,
+    },
+  ];
+
+  for (const serviceData of defaultDeliveryServices) {
+    await serviceRepository.createService(serviceData, transaction);
+  }
+
+  if (freightInId) {
+    const freightCategory: any = await serviceCategoryRepository.createServiceCategory(
+      {
+        name: "Freight Services",
+        type: "purchase",
+        clientId,
+      },
+      transaction
+    );
+    const freightCategoryId = freightCategory.get
+      ? freightCategory.get("id")
+      : freightCategory.id;
+
+    await serviceRepository.createService(
+      {
+        name: "Local Freight",
+        uomId: 14,
+        basePrice: 150.0,
+        ledgerAccountId: freightInId,
+        description: "Local freight service for transportation within city limits",
+        serviceCategoryId: freightCategoryId,
+        clientId,
+      },
+      transaction
+    );
+  }
+
+  if (defaultServiceAccountId) {
+    const installationCategory: any = await serviceCategoryRepository.createServiceCategory(
+      {
+        name: "Installation Services",
+        type: "sale",
+        clientId,
+      },
+      transaction
+    );
+    const installationCategoryId = installationCategory.get
+      ? installationCategory.get("id")
+      : installationCategory.id;
+
+    await serviceRepository.createService(
+      {
+        name: "Standard Installation",
+        uomId: 1,
+        basePrice: 25.0,
+        ledgerAccountId: defaultServiceAccountId,
+        description: "Standard installation service per square foot",
+        serviceCategoryId: installationCategoryId,
+        clientId,
+      },
+      transaction
+    );
+  }
 };
 
 /**
@@ -399,17 +552,17 @@ export const updateCompanyProfileData = async (clientId: number, updateData: any
   const transaction = await sequelize.transaction();
   try {
     const { s3FileId, ...companyData } = updateData;
-    
+
     let updatedCompany = await clientRepository.updateCompanyProfile(clientId, companyData, transaction);
-    
+
     if (s3FileId !== undefined) {
       await clientRepository.updateClient(clientId, { s3FileId }, transaction);
     }
-    
+
     await transaction.commit();
-    
+
     if (!updatedCompany) throw new AppError("Company not found or update failed", 400);
-    
+
     return updatedCompany;
   } catch (error) {
     await transaction.rollback();
