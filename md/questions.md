@@ -147,8 +147,12 @@
 
 ---
 
-1. what is `1) show accounts 2) logs 3) Void SIPL` in SIPL details page.
-
-2. in SIPL why would we show because SIPL itself is BILL and we should do it in supplier detail page.
-   1. Supplier bills
-   2. Other Bills (freight, other vendors will be here).
+1.  what is `1) show accounts 2) logs 3) Void SIPL` in SIPL details page.
+2.  in SIPL why would we show because SIPL itself is BILL and we should do it in supplier detail page.
+    1. Supplier bills
+    2. Other Bills (freight, other vendors will be here).
+3.  Vendor Advances DEBIT -> but we don't have vendor advance option in software.
+4.  Goods Received Not Invoiced (GRNI) CREDIT -> journal entries are not stored because SIPL/Bill always precedes Receive Inventory in software.
+5.  Landed Cost Clearing DEBIT -> journal entries are not stored because Freight Bills directly debit and clear `Freight-In` / `Brokerage Charges` into `Finished Goods` on Receive Inventory.
+6.  Outward Freight Expense DEBIT -> journal entries are not stored because Vendor Bills (`Bill`) only exist for inbound `SIPL`s and customer deliveries use internal company trucks without a vendor bill flow.
+7.  Payment Clearing DEBIT -> automated clearing journal entries are not stored because customer/vendor payments (`processPayment` / `createAdvancedDeposit`) are immediately marked `completed` and posted directly to the selected `Cash / Bank` account without a two-step bank deposit/settlement reconciliation flow.

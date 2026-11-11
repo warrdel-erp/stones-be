@@ -1274,3 +1274,4 @@ Univ
 questions---
 
 1. what is delivery charge.
+2. when would we decide to add customer write off's journal entry?

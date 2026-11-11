@@ -1296,6 +1296,14 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   SALES_RETURNS_AND_ALLOWANCES: "sales_returns_and_allowances",
   CUSTOMER_ADVANCES: "customer_advances",
   DELIVERY_CHARGES_REVENUE: "delivery_charges_revenue",
+  BAD_DEBT_EXPENSE: "bad_debt_expense",
+  GOODS_RECEIVED_NOT_INVOICED: "goods_received_not_invoiced",
+  ACCOUNTS_PAYABLE_WRITE_OFF_INCOME: "accounts_payable_write_off_income",
+  INVENTORY_ADJUSTMENT_GAIN: "inventory_adjustment_gain",
+  INVENTORY_ADJUSTMENT_LOSS: "inventory_adjustment_loss",
+  LANDED_COST_CLEARING: "landed_cost_clearing",
+  OUTWARD_FREIGHT_EXPENSE: "outward_freight_expense",
+  PAYMENT_CLEARING: "payment_clearing",
 } as const;
 
 export const FREIGHT_BILL_ACCOUNT_KEYS = {

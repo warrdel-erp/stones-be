@@ -77,3 +77,23 @@ export const bulkUploadVendors = catchAsync(async (req: AuthRequest, res: Respon
 
   SuccessResponse(res, 201, "Vendors uploaded successfully", result);
 });
+
+export const writeOffVendorPayable = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { referenceId, referenceType, amount } = req.body;
+  const clientId = Number(req.user?.clientId);
+  const locationId = Number(req.user?.defaultLocationId);
+
+  if (!referenceId || !referenceType) {
+    throw new AppError("referenceId and referenceType ('sipl' or 'bill') are required.", 400);
+  }
+
+  const result = await vendorService.writeOffVendorPayable(
+    Number(referenceId),
+    referenceType,
+    clientId,
+    locationId,
+    amount !== undefined ? Number(amount) : undefined
+  );
+
+  SuccessResponse(res, 200, "Vendor payable balance written off to Accounts Payable Write-off Income successfully.", result);
+});

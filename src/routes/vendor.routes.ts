@@ -23,6 +23,9 @@ router.get("/sipl/:siplId", authenticateUser, vendorController.vendorAccordingTo
 // Route to get all clients
 router.get("/:vendorId/paymentBills", authenticateUser, vendorController.getAllBillsForVendor);
 
+// Write off unpaid vendor payable (SIPL or Bill) to Accounts Payable Write-off Income
+router.post("/paymentBills/writeOff", authenticateUser, vendorController.writeOffVendorPayable);
+
 // Get vendor by ID.
 router.get("/:id", authenticateUser, vendorController.getVendorById); // Get vendor by ID
 

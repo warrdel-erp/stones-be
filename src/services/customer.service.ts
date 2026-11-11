@@ -234,27 +234,44 @@ export const getInvoicesByCustomerId = async (customerId: number) => {
 
   const finalData = await Promise.all(
     invoices.map(async (soInvoice: any) => {
-      const paidAmount = await paymentBillRepository.getTotalPaidAmountOfBill(
-        soInvoice.id,
-        PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE
-      );
-
+      const finalAmount = soInvoice.finalAmount;
       soInvoice = soInvoice.get({ plain: true });
 
-      const settledWithAdvancedDeposits = soInvoice.advancedDepositSettlements.map((e: any) => e.advancedDeposit.code).join(" | ")
+      const settlementBreakdown = await paymentBillRepository.getInvoiceSettlementBreakdown(
+        soInvoice.id,
+        finalAmount
+      );
+
+      const settledWithAdvancedDeposits =
+        settlementBreakdown.settlementSummary ||
+        soInvoice.advancedDepositSettlements
+          ?.map((e: any) => e.advancedDeposit?.code)
+          .filter(Boolean)
+          .join(" | ") ||
+        "";
+
+      const dueAmount = decimalSubtract(finalAmount, settlementBreakdown.totalSettled);
 
       return {
         id: soInvoice.id,
+        salesOrderId: soInvoice.salesOrderId,
+        salesOrder: soInvoice.packagingList?.salesOrder || soInvoice.loadingOrder?.salesOrder || null,
         dueDate: soInvoice.packagingList?.expDeliveryDate || null,
-        amount: soInvoice.finalAmount,
-        paidAmount,
-        dueAmount: decimalSubtract(soInvoice.finalAmount, paidAmount),
+        amount: finalAmount,
+        finalAmount,
+        paidAmount: settlementBreakdown.totalSettled,
+        dueAmount,
+        balanceAmount: dueAmount,
+        status: settlementBreakdown.status,
         creationDate: soInvoice.createdAt,
         code: soInvoice.invoiceCode,
+        invoiceCode: soInvoice.invoiceCode,
         loNumber: soInvoice.packagingList?.clientPlNumber || soInvoice.loadingOrder?.code || null,
         plDate: soInvoice.packagingList?.plDate || soInvoice.loadingOrder?.createdAt || null,
         settledWithAdvancedDeposits,
-        type: "invoice"
+        settlementSummary: settlementBreakdown.settlementSummary,
+        settlementBreakdown,
+        type: "invoice",
       };
     })
   );
@@ -741,6 +758,8 @@ export const getCustomerARInvoices = async (
       totalAmount: inv.finalAmount,
       paidAmount: inv.paidAmount,
       balanceAmount: inv.balanceAmount,
+      settlementSummary: inv.settlementSummary || "",
+      settlementBreakdown: inv.settlementBreakdown || null,
       isExternal: false,
     });
   }

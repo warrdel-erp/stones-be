@@ -34,6 +34,62 @@ module.exports = {
         subHeaderCode: 412000,
         type: 'cr',
       },
+      {
+        name: 'Bad Debt Expense',
+        key: 'bad_debt_expense',
+        subHeaderId: 77, // 5.2.3 Uncollectible Accounts Expense (Reversal) (Expenses > Credit Losses)
+        subHeaderCode: 523000,
+        type: 'dr',
+      },
+      {
+        name: 'Goods Received Not Invoiced (GRNI)',
+        key: 'goods_received_not_invoiced',
+        subHeaderId: 35, // 2.1.6 Other Accounts Payable and Accrued Liabilities (Liabilities > Payables > GRNI)
+        subHeaderCode: 216000,
+        type: 'cr',
+      },
+      {
+        name: 'Accounts Payable Write-off Income',
+        key: 'accounts_payable_write_off_income',
+        subHeaderId: 80, // 6.1.1 Other Revenue (Other Income > Liability Write-offs)
+        subHeaderCode: 611000,
+        type: 'cr',
+      },
+      {
+        name: 'Inventory Adjustment Gain',
+        key: 'inventory_adjustment_gain',
+        subHeaderId: 82, // 6.2.1 Inventory Gain and Loss (Other Income > Inventory Adjustments)
+        subHeaderCode: 621000,
+        type: 'cr',
+      },
+      {
+        name: 'Inventory Adjustment Loss',
+        key: 'inventory_adjustment_loss',
+        subHeaderId: 82, // 6.2.1 Inventory Gain and Loss (Expenses > Inventory Adjustments)
+        subHeaderCode: 621000,
+        type: 'dr',
+      },
+      {
+        name: 'Landed Cost Clearing',
+        key: 'landed_cost_clearing',
+        subHeaderId: 14, // 1.4.4 Additional Assets (Assets > Current Assets > Landed Cost Clearing)
+        subHeaderCode: 144000,
+        type: 'dr',
+      },
+      {
+        name: 'Outward Freight Expense',
+        key: 'outward_freight_expense',
+        subHeaderId: 76, // 5.2.2 Selling, General and Administrative Expense (Expenses > Selling & Distribution > Delivery Expense)
+        subHeaderCode: 522000,
+        type: 'dr',
+      },
+      {
+        name: 'Payment Clearing',
+        key: 'payment_clearing',
+        subHeaderId: 1, // 1.1.1 Cash and Cash Equivalents (Assets > Current Assets > Payment Clearing)
+        subHeaderCode: 111000,
+        type: 'dr',
+      },
     ];
 
     for (const client of clients) {
@@ -93,6 +149,14 @@ module.exports = {
         'sales_returns_and_allowances',
         'customer_advances',
         'delivery_charges_revenue',
+        'bad_debt_expense',
+        'goods_received_not_invoiced',
+        'accounts_payable_write_off_income',
+        'inventory_adjustment_gain',
+        'inventory_adjustment_loss',
+        'landed_cost_clearing',
+        'outward_freight_expense',
+        'payment_clearing',
       ],
     });
   },

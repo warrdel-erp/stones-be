@@ -14,6 +14,7 @@ import JournalEntryModel from "../models/journalEntry.model";
 
 import * as journalEntryRepository from "../repositories/journalEntry.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as ledgerAccountService from "./ledgerAccount.service";
 import * as purchaseOrderRepository from "../repositories/purchaseOrder.repository";
 import * as siplRepository from "../repositories/sipl.repository";
 import * as slabService from "../services/slab.service";
@@ -329,11 +330,13 @@ export const createJournalEntriesForSlabSplit = async (
   }, transaction);
 
   // Create DR entries for each new slab
+  const newSlabAmounts: number[] = [];
   for (const newSlab of newSlabs) {
     // Convert to plain object if it's a Sequelize instance
     const slabData = newSlab.get ? newSlab.get({ plain: true }) : newSlab;
     const inventoryProduct = newSlab.inventoryProduct || slabData.inventoryProduct;
     const newAmount = inventoryProduct ? inventoryProduct.assetValue : decimal.decimalMultiply((slabData.receivingLength * slabData.receivingWidth) / 144, originalInventoryProduct.landedUnitCost);
+    newSlabAmounts.push(Number(newAmount || 0));
 
     await journalEntryRepository.create({
       amount: newAmount,
@@ -347,6 +350,43 @@ export const createJournalEntriesForSlabSplit = async (
       entryFor: siplId ? JOURNAL_ENTRY_FOR_TYPES.SIPL : undefined,
       entryForId: siplId || undefined,
       locationId,
+    }, transaction);
+  }
+
+  // If total value of split pieces is less than the original slab value (breakage/damage loss),
+  // record the difference as DR Inventory Adjustment Loss
+  const totalNewSlabsAmount = decimal.decimalSum(newSlabAmounts);
+  const breakageLossAmount = decimal.decimalSubtract(Number(originalAmount || 0), totalNewSlabsAmount);
+
+  if (Number(breakageLossAmount) > 0) {
+    let adjustmentLossAccount: any = await ledgerAccountService.getInventoryAdjustmentLossLedgerAccount(
+      clientId,
+      transaction
+    );
+    if (!adjustmentLossAccount) {
+      adjustmentLossAccount = await ledgerAccountService.createInventoryAdjustmentLossLedgerAccount(
+        clientId,
+        transaction
+      );
+    }
+
+    const adjustmentLossAccountObj = adjustmentLossAccount.get
+      ? adjustmentLossAccount.get({ plain: true })
+      : adjustmentLossAccount;
+
+    await journalEntryRepository.create({
+      amount: Number(breakageLossAmount),
+      ledgerId: adjustmentLossAccountObj.id,
+      type: JOURNAL_ENTRY_TYPE.DR,
+      processType: JOURNAL_ENTRY_PROCESS_TYPE.SLAB_SPLIT,
+      subReferenceId: originalSlab.id,
+      subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+      referenceId: siplId || undefined,
+      referenceType: siplId ? JOURNAL_ENTRY_REFERENCE_TYPES.SIPL : undefined,
+      entryFor: siplId ? JOURNAL_ENTRY_FOR_TYPES.SIPL : undefined,
+      entryForId: siplId || undefined,
+      locationId,
+      partyLedgerAccountId: ledgerAccountForSlabs.id,
     }, transaction);
   }
 };
@@ -392,23 +432,46 @@ export async function balanceInventoryVarianceForSIPL(
 
   // If there's a difference, create a balancing entry
   if (difference != 0) {
-    // Get inventory variance ledger account
-    const inventoryVarianceLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
-      clientId,
-    }, transaction);
+    // Determine the type of balancing entry needed
+    // If debit > credit (positive stock difference: Finished Goods received > billed cost), credit Inventory Adjustment Gain
+    // If credit > debit (negative stock difference), debit the variance account to balance
+    const isPositiveStockDifference = Number(difference) > 0;
+    const balancingType = isPositiveStockDifference ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
+    const balancingAmount = Math.abs(Number(difference));
 
-    if (!inventoryVarianceLedgerAccount) {
-      throw new AppError("Inventory variance ledger account not found", 404);
+    let balancingLedgerAccount: any;
+
+    if (isPositiveStockDifference) {
+      balancingLedgerAccount = await ledgerAccountService.getInventoryAdjustmentGainLedgerAccount(
+        clientId,
+        transaction
+      );
+      if (!balancingLedgerAccount) {
+        balancingLedgerAccount = await ledgerAccountService.createInventoryAdjustmentGainLedgerAccount(
+          clientId,
+          transaction
+        );
+      }
+    } else {
+      balancingLedgerAccount = await ledgerAccountService.getInventoryAdjustmentLossLedgerAccount(
+        clientId,
+        transaction
+      );
+      if (!balancingLedgerAccount) {
+        balancingLedgerAccount = await ledgerAccountService.createInventoryAdjustmentLossLedgerAccount(
+          clientId,
+          transaction
+        );
+      }
     }
 
-    const inventoryVarianceLedgerAccountObj = inventoryVarianceLedgerAccount.get({ plain: true });
+    if (!balancingLedgerAccount) {
+      throw new AppError("Inventory adjustment ledger account not found", 404);
+    }
 
-    // Determine the type of balancing entry needed
-    // If debit > credit, we need a credit entry to balance
-    // If credit > debit, we need a debit entry to balance
-    const balancingType = Number(difference) > 0 ? JOURNAL_ENTRY_TYPE.CR : JOURNAL_ENTRY_TYPE.DR;
-    const balancingAmount = Math.abs(Number(difference));
+    const balancingLedgerAccountObj = balancingLedgerAccount.get
+      ? balancingLedgerAccount.get({ plain: true })
+      : balancingLedgerAccount;
 
     // Get finished goods ledger account for party ledger account
     const finishedGoodsLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
@@ -420,10 +483,14 @@ export async function balanceInventoryVarianceForSIPL(
       throw new AppError("Finished goods ledger account not found", 404);
     }
 
+    const finishedGoodsLedgerObj = finishedGoodsLedgerAccount.get
+      ? finishedGoodsLedgerAccount.get({ plain: true })
+      : finishedGoodsLedgerAccount;
+
     // Create the balancing journal entry
     await journalEntryRepository.create({
       amount: balancingAmount,
-      ledgerId: inventoryVarianceLedgerAccountObj.id,
+      ledgerId: balancingLedgerAccountObj.id,
       type: balancingType,
       processType: JOURNAL_ENTRY_PROCESS_TYPE.RECEIVE_INVENTORY,
       referenceId: siplId,
@@ -431,6 +498,7 @@ export async function balanceInventoryVarianceForSIPL(
       entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
       entryForId: siplId,
       locationId,
+      partyLedgerAccountId: finishedGoodsLedgerObj.id,
     }, transaction);
   }
 }

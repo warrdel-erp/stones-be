@@ -22,4 +22,7 @@ router.get("/:id", authenticateUser, soInvoiceController.getInvoiceById);
 // get sales order products without returns for a specific invoice
 router.get("/:id/productsWithoutReturns", authenticateUser, soInvoiceController.getSalesOrderProductsWithoutReturns);
 
+// write off unpaid customer invoice balance to Bad Debt Expense
+router.post("/:id/writeOff", authenticateUser, soInvoiceController.writeOffInvoice);
+
 export default router; 

@@ -82,3 +82,19 @@ export const getOverdueInvoices = catchAsync(async (req: AuthRequest, res: Respo
 
     SuccessResponse(res, 200, "Overdue invoices fetched successfully", result);
 });
+
+export const writeOffInvoice = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const { amount } = req.body;
+    const clientId = Number(req.user?.clientId);
+    const locationId = Number(req.user?.defaultLocationId);
+
+    const result = await salesOrderInvoiceService.writeOffCustomerInvoice(
+        Number(id),
+        clientId,
+        locationId,
+        amount !== undefined ? Number(amount) : undefined
+    );
+
+    SuccessResponse(res, 200, "Invoice balance written off to Bad Debt Expense successfully.", result);
+});

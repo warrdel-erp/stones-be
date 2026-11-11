@@ -212,28 +212,115 @@ export const createCustomerAdvancesLedgerAccount = async (clientId: number, tran
   );
 };
 
-export const getDeliveryChargesRevenueLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+export const getBadDebtExpenseLedgerAccount = async (clientId: number, transaction?: Transaction) => {
   return await ledgerAccountRepository.getLedgerAccountByFilter(
     {
       clientId,
       [Op.or]: [
-        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE },
-        { name: "Delivery Charges Revenue" },
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.BAD_DEBT_EXPENSE },
+        { name: "Bad Debt Expense" },
       ],
     },
     transaction
   );
 };
 
-export const createDeliveryChargesRevenueLedgerAccount = async (clientId: number, transaction?: Transaction) => {
-  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "services_4_1")?.id!;
+export const createBadDebtExpenseLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "uncollectible_accounts_expense_reversal")?.id!;
   return await ledgerAccountRepository.createLedgerAccount(
     {
-      name: "Delivery Charges Revenue",
+      name: "Bad Debt Expense",
       clientId,
-      key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.BAD_DEBT_EXPENSE,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getAccountsPayableWriteOffIncomeLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.ACCOUNTS_PAYABLE_WRITE_OFF_INCOME },
+        { name: "Accounts Payable Write-off Income" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createAccountsPayableWriteOffIncomeLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "other_revenue")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Accounts Payable Write-off Income",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.ACCOUNTS_PAYABLE_WRITE_OFF_INCOME,
       subHeaderId,
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getInventoryAdjustmentGainLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_GAIN },
+        { name: "Inventory Adjustment Gain" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createInventoryAdjustmentGainLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "inventory_gain_and_loss")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Inventory Adjustment Gain",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_GAIN,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getInventoryAdjustmentLossLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_LOSS },
+        { name: "Inventory Adjustment Loss" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createInventoryAdjustmentLossLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "inventory_gain_and_loss")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Inventory Adjustment Loss",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_LOSS,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.DEBIT,
       openingBalance: 0,
       openingDate: new Date(),
     },

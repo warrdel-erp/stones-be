@@ -7,17 +7,23 @@ import { vendorBulkUploadSchema } from "../validators/vendor.validator";
 import * as vendorRepository from "../repositories/vendor.repository";
 import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repository";
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
+import * as journalEntryRepository from "../repositories/journalEntry.repository";
+import * as ledgerAccountService from "../services/ledgerAccount.service";
 import * as billService from "../services/bill.service";
 import * as siplService from "../services/sipl.service";
 import { type LedgerAccount } from "../models/ledgerAccount.model";
 import { COA_HEADERS, COA_SUB_HEADERS, COA_TYPES, LEDGER_ACCOUNT_TYPES } from "../constants/coa";
 import {
   BILL_REFERENCE_TYPES,
+  JOURNAL_ENTRY_FOR_TYPES,
+  JOURNAL_ENTRY_PROCESS_TYPE,
+  JOURNAL_ENTRY_REFERENCE_TYPES,
+  JOURNAL_ENTRY_TYPE,
   LEDGER_ACCOUNT_REFERENCE_TYPES,
   PAYMENT_BILL_REFERENCE_TYPES,
   CREDIT_NOTE_REFERENCE_TYPES,
 } from "../constants/tableTypes";
-import { decimalSum } from "../helper/decimal";
+import { decimalGreaterThan, decimalSubtract, decimalSum } from "../helper/decimal";
 import { sequelize } from "../config/database";
 import { WhereOptions } from "sequelize";
 import { PAYMENT_TERMS, SCOP } from "../constants";
@@ -697,5 +703,144 @@ export const bulkUploadVendors = async (fileBuffer: Buffer, userId: number, clie
   });
 
   return result;
+};
+
+/**
+ * Vendor Write-Off (Extinguishment of Accounts Payable):
+ * Writes off an unpaid balance on a Supplier Invoice (SIPL) or Vendor/Freight Bill (BILL)
+ * by debiting the Vendor's Accounts Payable ledger (DR) and crediting
+ * Accounts Payable Write-off Income (CR).
+ */
+export const writeOffVendorPayable = async (
+  referenceId: number,
+  referenceType: "sipl" | "bill",
+  clientId: number,
+  locationId: number,
+  amount?: number
+) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    let vendorId: number;
+    let totalPayableAmount: number;
+    let entryForId: number;
+    let journalRefType: (typeof JOURNAL_ENTRY_REFERENCE_TYPES)[keyof typeof JOURNAL_ENTRY_REFERENCE_TYPES];
+    let processType: (typeof JOURNAL_ENTRY_PROCESS_TYPE)[keyof typeof JOURNAL_ENTRY_PROCESS_TYPE];
+
+    if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.SIPL) {
+      const sipl: any = await siplService.getSIPLById(referenceId);
+      if (!sipl) {
+        throw new AppError("SIPL not found.", 404);
+      }
+      vendorId = Number(sipl.purchaseOrder?.supplierId);
+      totalPayableAmount = Number(sipl.totalAmount || 0);
+      entryForId = sipl.id;
+      journalRefType = JOURNAL_ENTRY_REFERENCE_TYPES.SIPL;
+      processType = JOURNAL_ENTRY_PROCESS_TYPE.SIPL_PAYMENT;
+    } else if (referenceType === PAYMENT_BILL_REFERENCE_TYPES.BILL) {
+      const billInstance: any = await billService.getOneBill(referenceId);
+      if (!billInstance) {
+        throw new AppError("Bill not found.", 404);
+      }
+      const bill = billInstance.get ? billInstance.get({ plain: true }) : billInstance;
+      vendorId = Number(bill.vendorId);
+      totalPayableAmount = (bill.billItems || []).reduce(
+        (sum: number, item: any) => sum + Number(item.amount || 0),
+        0
+      );
+      entryForId = Number(bill.referenceId);
+      journalRefType = JOURNAL_ENTRY_REFERENCE_TYPES.BILL;
+      processType = JOURNAL_ENTRY_PROCESS_TYPE.BILL_PAYMENT;
+    } else {
+      throw new AppError("Invalid referenceType. Expected 'sipl' or 'bill'.", 400);
+    }
+
+    const alreadySettled =
+      (await paymentBillRepository.getTotalPaidAmountOfBill(referenceId, referenceType)) || 0;
+
+    const remainingBalance = decimalSubtract(totalPayableAmount, alreadySettled);
+    if (remainingBalance <= 0) {
+      throw new AppError("Payable has no remaining unpaid balance to write off.", 400);
+    }
+
+    const writeOffAmount = amount !== undefined ? Number(amount) : remainingBalance;
+    if (writeOffAmount <= 0 || decimalGreaterThan(writeOffAmount, remainingBalance)) {
+      throw new AppError(
+        `Invalid write-off amount (${writeOffAmount.toFixed(2)}). Remaining unpaid balance is ${remainingBalance.toFixed(2)}.`,
+        400
+      );
+    }
+
+    const vendorLedgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter(
+      {
+        referenceId: vendorId,
+        referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.VENDOR,
+      },
+      transaction
+    );
+
+    if (!vendorLedgerAccount) {
+      throw new AppError("Vendor ledger account not found.", 404);
+    }
+
+    let apWriteOffLedgerAccount: any =
+      await ledgerAccountService.getAccountsPayableWriteOffIncomeLedgerAccount(
+        clientId,
+        transaction
+      );
+
+    if (!apWriteOffLedgerAccount) {
+      apWriteOffLedgerAccount =
+        await ledgerAccountService.createAccountsPayableWriteOffIncomeLedgerAccount(
+          clientId,
+          transaction
+        );
+    }
+
+    // 1. DR Vendor Account (Accounts Payable) — extinguishes the AP liability
+    await journalEntryRepository.create(
+      {
+        amount: writeOffAmount,
+        ledgerId: vendorLedgerAccount.id,
+        type: JOURNAL_ENTRY_TYPE.DR,
+        referenceType: journalRefType,
+        referenceId,
+        entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+        entryForId,
+        processType,
+        locationId,
+        partyLedgerAccountId: apWriteOffLedgerAccount.id,
+      },
+      transaction
+    );
+
+    // 2. CR Accounts Payable Write-off Income (Other Income)
+    await journalEntryRepository.create(
+      {
+        amount: writeOffAmount,
+        ledgerId: apWriteOffLedgerAccount.id,
+        type: JOURNAL_ENTRY_TYPE.CR,
+        referenceType: journalRefType,
+        referenceId,
+        entryFor: JOURNAL_ENTRY_FOR_TYPES.SIPL,
+        entryForId,
+        processType,
+        locationId,
+        partyLedgerAccountId: vendorLedgerAccount.id,
+      },
+      transaction
+    );
+
+    await transaction.commit();
+    return {
+      referenceId,
+      referenceType,
+      writtenOffAmount: writeOffAmount,
+      remainingBalance: decimalSubtract(remainingBalance, writeOffAmount),
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
