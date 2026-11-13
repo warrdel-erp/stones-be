@@ -161,6 +161,7 @@ export const SALE_ORDER_PRODUCT_STAGES = {
 } as const;
 
 export const SALES_ORDER_STATUS = {
+  DRAFT: "draft",
   OPEN: "open",
   COMPLETED: "completed",
   CANCELLED: "cancelled",

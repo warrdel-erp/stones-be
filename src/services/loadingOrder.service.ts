@@ -13,6 +13,7 @@ import * as journalEntryRepository from "../repositories/journalEntry.repository
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
+import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
@@ -22,6 +23,7 @@ import * as ledgerAccountService from "../services/ledgerAccount.service";
 import * as packagingListService from "../services/packagingList.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import { scoped } from '../utils/scoped';
+import { isSalesOrderDraft } from "../utils/salesOrder.util";
 
 // Create new PL
 export const createLoadingOrder = async (data: any) => {
@@ -34,6 +36,14 @@ export const createLoadingOrder = async (data: any) => {
 
     if (!data?.salesOrderId) {
       throw new AppError("Sales order ID is required.", 400);
+    }
+
+    const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(data.salesOrderId, transaction);
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+    if (isSalesOrderDraft(salesOrder)) {
+      throw new AppError("Cannot create a Loading Order for an unconfirmed Sales Order. Please confirm the Sales Order first.", 400);
     }
 
     // Determine the distinct packaging lists involved.
@@ -188,6 +198,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     }
 
     const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
+    if (isSalesOrderDraft(actualSalesOrder)) {
+      throw new AppError("Cannot invoice a Loading Order for an unconfirmed Sales Order.", 400);
+    }
 
     // Fetch terms and conditions
     const termsRecord: any = await termsConditionRepository.getTermsConditionByFilter({ clientId }, transaction);
@@ -379,7 +392,11 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
       await salesOrderProductRepository.updateSalesOrderProduct(
         salesOrderProduct.id,
-        { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED, picked: true },
+        {
+          stage: SALE_ORDER_PRODUCT_STAGES.INVOICED,
+          picked: true,
+          soDiscountPercentage: Number((salesOrderProduct as any).soDiscountPercentage ?? actualSalesOrder?.discountPercentage) || 0,
+        },
         transaction
       );
 

@@ -5,7 +5,7 @@ import * as salesOrderProductController from "../controllers/salesOrderProduct.c
 import { authenticateUser } from "../middleware/authMiddleware";
 
 import { validateRequest } from "../middleware/validationMiddleware";
-import { createSalesOrderSchema } from "../validators/salesOrder.validator";
+import { createSalesOrderSchema, updateSalesOrderDiscountSchema } from "../validators/salesOrder.validator";
 
 const router = Router();
 
@@ -36,6 +36,17 @@ router.get("/:id/forCreateActualLO", authenticateUser, salesOrderController.getS
 
 // Update Sales Order Tax
 router.put("/:id/tax", authenticateUser, salesOrderController.updateSalesOrderTax);
+
+// Update Sales Order Discount
+router.put(
+  "/:id/discount",
+  authenticateUser,
+  validateRequest(updateSalesOrderDiscountSchema),
+  salesOrderController.updateSalesOrderDiscount
+);
+
+// Publish Sales Order
+router.put("/:id/publish", authenticateUser, salesOrderController.publishSalesOrder);
 
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);

@@ -1254,22 +1254,21 @@ Univ
 16. stone -> testing multiple hit failure.
 17. problem with duplicate number generation.
 18. unique Subject code constraint.
-19. University roles change bug.
-20. University -> unique Email Ids
+19. University -> unique Email Ids
     1. remove students without users.
     2. remove deleted_at not null students and users with duplicate emails.
     3. applied constraint for non duplicacy.
-21. new client creation roles and permissions error.
-22. API tracking system.
-23. University auto logout issue.
-24. if we create LO from PL partially then PL's services will not be applied.
-25. token discussion in university.
-26. stone KT to Ajay.
-27. learning about testing and code quality.
-28. Deployment automation for dev. [ongoing]
-29. remove is_teacher from university.
-30. university deployment automation.
-31. new accounts in stone.
+20. new client creation roles and permissions error.
+21. API tracking system.
+22. University auto logout issue.
+23. if we create LO from PL partially then PL's services will not be applied.
+24. token discussion in university.
+25. stone KT to Ajay.
+26. learning about testing and code quality.
+27. Deployment automation for dev.
+28. remove is_teacher from university.
+29. university deployment automation.
+30. new accounts in stone.
 
 questions---
 

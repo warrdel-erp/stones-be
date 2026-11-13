@@ -16,6 +16,7 @@ import { sumDecimal } from "../helper";
 import Decimal from "decimal.js";
 import { scoped } from "../utils/scoped";
 import { Op } from "sequelize";
+import { isSalesOrderDraft } from "../utils/salesOrder.util";
 interface CreateAdvancedDepositDTO {
     amount: number;
     salesOrderId: number;
@@ -82,7 +83,7 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
         // Validate sales order exists and get client info
         const salesOrder: any = await SalesOrder.findByPk(data.salesOrderId, {
             transaction,
-            attributes: ['id', 'clientId'],
+            attributes: ['id', 'clientId', 'status'],
             include: [
                 {
                     association: 'customer',
@@ -101,6 +102,10 @@ export const createAdvancedDeposit = async (data: CreateAdvancedDepositDTO, loca
 
         if (!salesOrder.clientId) {
             throw new Error("Sales order must be associated with a client");
+        }
+
+        if (isSalesOrderDraft(salesOrder)) {
+            throw new AppError("Cannot add advance deposit to an unconfirmed Sales Order. Please confirm the Sales Order first.", 400);
         }
 
         // Validate that the deposit amount does not exceed the uninvoiced SO product total (including tax)

@@ -101,33 +101,50 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
     quantities: { receiving: 0, packagingList: 0, loadingOrder: 0, final: 0 }
   };
 
+  const soDiscountBuckets = new Map<number, number>();
+  const plDiscountBuckets = new Map<number, number>();
+  const loDiscountBuckets = new Map<number, number>();
+
   for (const salesOrderProduct of salesOrderProducts) {
     const pInlineDiscount = Number(salesOrderProduct.discountPercentage) || 0;
     const pLineDiscount = Number(salesOrderProduct.lineDiscountPercentage) || 0;
+    const pSoDiscount =
+      salesOrderProduct.soDiscountPercentage !== undefined && salesOrderProduct.soDiscountPercentage !== null
+        ? Number(salesOrderProduct.soDiscountPercentage) || 0
+        : Number(discountPercentage) || 0;
 
     // Order of discounts: product (inline) discount -> requirement line discount -> SO discount.
-    const addProductDiscounts = (stage: { inlineDiscountAmount: number; productDiscountAmount: number; lineDiscountAmount: number }, baseAmount: number) => {
+    const addProductDiscounts = (
+      stage: { inlineDiscountAmount: number; productDiscountAmount: number; lineDiscountAmount: number },
+      baseAmount: number,
+      buckets: Map<number, number>
+    ) => {
       const productDiscount = decimals.decimalValueByPercentage(baseAmount, pInlineDiscount, 2);
       const afterProduct = decimals.decimalSubtractDP(baseAmount, productDiscount, 2);
       const lineDiscount = decimals.decimalValueByPercentage(afterProduct, pLineDiscount, 2);
+      const inlineTotal = decimals.decimalAddDP(productDiscount, lineDiscount, 2);
+      const afterInline = decimals.decimalSubtractDP(baseAmount, inlineTotal, 2);
       stage.productDiscountAmount = decimals.decimalAddDP(stage.productDiscountAmount, productDiscount, 2);
       stage.lineDiscountAmount = decimals.decimalAddDP(stage.lineDiscountAmount, lineDiscount, 2);
-      stage.inlineDiscountAmount = decimals.decimalAddDP(stage.inlineDiscountAmount, decimals.decimalAddDP(productDiscount, lineDiscount, 2), 2);
+      stage.inlineDiscountAmount = decimals.decimalAddDP(stage.inlineDiscountAmount, inlineTotal, 2);
+      if (pSoDiscount > 0 && afterInline > 0) {
+        buckets.set(pSoDiscount, decimals.decimalAddDP(buckets.get(pSoDiscount) || 0, afterInline, 2));
+      }
     };
 
     const amt = Number(salesOrderProduct.amount) || 0;
     calcs.soReceiving.subTotal = decimals.decimalAddDP(calcs.soReceiving.subTotal, amt, 2);
-    addProductDiscounts(calcs.soReceiving, amt);
+    addProductDiscounts(calcs.soReceiving, amt, soDiscountBuckets);
 
     calcs.receiving.total = decimals.decimalAddDP(calcs.receiving.total, Number(salesOrderProduct.inventoryProduct?.assetValue) || 0, 2);
 
     const plAmt = Number(salesOrderProduct.plAmount) || 0;
     calcs.packagingList.subTotal = decimals.decimalAddDP(calcs.packagingList.subTotal, plAmt, 2);
-    addProductDiscounts(calcs.packagingList, plAmt);
+    addProductDiscounts(calcs.packagingList, plAmt, plDiscountBuckets);
 
     const loAmt = Number(salesOrderProduct.loAmount) || 0;
     calcs.loadingOrder.subTotal = decimals.decimalAddDP(calcs.loadingOrder.subTotal, loAmt, 2);
-    addProductDiscounts(calcs.loadingOrder, loAmt);
+    addProductDiscounts(calcs.loadingOrder, loAmt, loDiscountBuckets);
 
     if (salesOrderProduct.isSlabType) {
       calcs.quantities.receiving = decimals.decimalAddDP(calcs.quantities.receiving, Number(salesOrderProduct.receivingAreaSqFt) || 0, 2);
@@ -145,20 +162,18 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
   }
 
   // --- Calculate Discounts ---
-  if (discountPercentage > 0) {
-    const soAfterInline = decimals.decimalSubtractDP(calcs.soReceiving.subTotal, calcs.soReceiving.inlineDiscountAmount, 2);
-    calcs.soReceiving.discountAmount = decimals.decimalValueByPercentage(soAfterInline, discountPercentage, 2);
+  const sumBucketDiscounts = (buckets: Map<number, number>) => {
+    let totalDiscount = 0;
+    for (const [discPct, afterInlineSum] of buckets.entries()) {
+      const discAmt = decimals.decimalValueByPercentage(afterInlineSum, discPct, 2);
+      totalDiscount = decimals.decimalAddDP(totalDiscount, discAmt, 2);
+    }
+    return totalDiscount;
+  };
 
-    const plAfterInline = decimals.decimalSubtractDP(calcs.packagingList.subTotal, calcs.packagingList.inlineDiscountAmount, 2);
-    calcs.packagingList.discountAmount = decimals.decimalValueByPercentage(plAfterInline, discountPercentage, 2);
-
-    const loAfterInline = decimals.decimalSubtractDP(calcs.loadingOrder.subTotal, calcs.loadingOrder.inlineDiscountAmount, 2);
-    calcs.loadingOrder.discountAmount = decimals.decimalValueByPercentage(loAfterInline, discountPercentage, 2);
-  } else {
-    calcs.soReceiving.discountAmount = 0;
-    calcs.packagingList.discountAmount = 0;
-    calcs.loadingOrder.discountAmount = 0;
-  }
+  calcs.soReceiving.discountAmount = sumBucketDiscounts(soDiscountBuckets);
+  calcs.packagingList.discountAmount = sumBucketDiscounts(plDiscountBuckets);
+  calcs.loadingOrder.discountAmount = sumBucketDiscounts(loDiscountBuckets);
 
   // --- Calculate Taxes ---
   let soAmountAfterDiscount = decimals.decimalSubtractDP(decimals.decimalSubtractDP(calcs.soReceiving.subTotal, calcs.soReceiving.inlineDiscountAmount, 2), calcs.soReceiving.discountAmount, 2);

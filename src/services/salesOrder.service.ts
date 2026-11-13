@@ -1,32 +1,33 @@
 import _ from "lodash";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { SALES_TAX } from "../constants";
-import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE, HOLD_STAGES } from "../constants/tableTypes";
-import * as activityService from "../services/activity.service";
-import { getPercentageValueFromValue, removeDuplicatesWithUnitPrice } from "../helper";
+import { ACTIVITY_REFERENCE_TYPE, ACTIVITY_TYPE, HOLD_STAGES, SALES_ORDER_STATUS, SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { getPercentageValueFromValue } from "../helper";
+import { AppError } from "../helper/appError";
+import { decimalAdd } from "../helper/decimal";
+import * as models from "../models";
+import * as clientRepository from "../repositories/client.repository";
 import * as customerRepository from "../repositories/customer.repository";
+import * as holdRepository from "../repositories/hold.repository";
 import * as notesRepository from "../repositories/notes.repository";
 import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as activityService from "../services/activity.service";
 import * as cartItemService from "../services/cartItem.service";
-import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as packagingListService from "../services/packagingList.service";
-import * as holdRepository from "../repositories/hold.repository";
-import * as clientRepository from "../repositories/client.repository";
-import { AppError } from "../helper/appError";
-import * as models from "../models";
-import { decimalAdd } from "../helper/decimal";
+import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import { isHoldClosed } from "../utils/hold.util";
+import { isSalesOrderClosed, isSalesOrderDraft } from "../utils/salesOrder.util";
+import { scoped } from "../utils/scoped";
 
 
 import * as opportunityRepository from "../repositories/opportunity.repository";
 
 export const createSalesOrder = async (data: any, externalTransaction?: any) => {
-  console.log("hit 2")
 
   const transaction = externalTransaction || await sequelize.transaction();
-  console.log("hit 3")
+
   try {
     // Fetch customer to get taxId and paymentTermId
     if (data.customerId) {
@@ -177,6 +178,8 @@ export const getAllSalesOrders = async (
     data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { ...cleanFilter, status: SALES_ORDER_STATUS.OPEN }, search);
   } else if (filter.tab == "CLOSED") {
     data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { ...cleanFilter, status: SALES_ORDER_STATUS.CLOSED }, search);
+  } else if (filter.tab == "DRAFT") {
+    data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, { ...cleanFilter, status: SALES_ORDER_STATUS.DRAFT }, search);
   } else {
     data = await salesOrderRepository.getAllSalesOrders(page, limit, clientId, cleanFilter, search);
   }
@@ -440,4 +443,131 @@ export const updateSalesOrderTax = async (id: number, taxId: number, clientId: n
     await transaction.rollback();
     throw error;
   }
+};
+
+export const updateSalesOrderDiscount = async (
+  id: number,
+  discountPercentage: number,
+  clientId: number
+) => {
+  return await sequelize.transaction(async (transaction) => {
+    const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(id, transaction);
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+    if (salesOrder.clientId !== clientId) {
+      throw new AppError("Unauthorized access to this Sales Order", 403);
+    }
+    if (isSalesOrderClosed(salesOrder)) {
+      throw new AppError("Cannot update discount on a closed Sales Order.", 400);
+    }
+
+    await salesOrder.update({ discountPercentage }, { transaction });
+
+    const editableStages = [
+      SALE_ORDER_PRODUCT_STAGES.SALES_ORDER,
+      SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST,
+      SALE_ORDER_PRODUCT_STAGES.LOADING_ORDER,
+    ];
+
+    const [updatedCount] = await scoped(models.SalesOrderProduct).update(
+      { soDiscountPercentage: discountPercentage },
+      {
+        where: {
+          salesOrderId: id,
+          clientId,
+          stage: {
+            [Op.in]: editableStages,
+          },
+        },
+        transaction,
+      }
+    );
+
+    const frozenCount = await scoped(models.SalesOrderProduct).count({
+      where: {
+        salesOrderId: id,
+        clientId,
+        stage: {
+          [Op.notIn]: editableStages,
+        },
+      },
+      transaction,
+    });
+
+    await activityService.logActivity(
+      {
+        clientId: salesOrder.clientId,
+        activityType: ACTIVITY_TYPE.SALES_ORDER_CREATION,
+        referenceId: salesOrder.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_ORDER,
+        title: "Sales Order Discount Updated",
+        description: `Sales Order #${salesOrder.clientSoNumber} discount was updated to ${discountPercentage}%.`,
+        locationId: salesOrder.locationId,
+      },
+      transaction
+    );
+
+    return {
+      id,
+      discountPercentage,
+      updatedCount,
+      frozenCount,
+    };
+  });
+};
+
+export const publishSalesOrder = async (
+  id: number,
+  clientId: number,
+  _accountId?: number
+) => {
+  return await sequelize.transaction(async (transaction) => {
+    const salesOrder: any = await scoped(models.SalesOrder).findOne({
+      where: { id, clientId },
+      transaction,
+    });
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+
+    if (salesOrder.status === SALES_ORDER_STATUS.OPEN) {
+      throw new AppError("Sales Order is already confirmed.", 400);
+    }
+
+    if (isSalesOrderClosed(salesOrder)) {
+      throw new AppError(`Cannot confirm a ${salesOrder.status} Sales Order.`, 400);
+    }
+
+    if (!isSalesOrderDraft(salesOrder)) {
+      throw new AppError("Only DRAFT Sales Orders can be confirmed.", 400);
+    }
+
+    // Validate that at least one product has been added
+    const productCount = await scoped(models.SalesOrderProduct).count({
+      where: { salesOrderId: id, clientId },
+      transaction,
+    });
+
+    if (productCount === 0) {
+      throw new AppError("Cannot confirm Sales Order without adding at least one product.", 400);
+    }
+
+    await salesOrder.update({ status: SALES_ORDER_STATUS.OPEN }, { transaction });
+
+    await activityService.logActivity(
+      {
+        clientId: salesOrder.clientId,
+        activityType: ACTIVITY_TYPE.SALES_ORDER_CREATION,
+        referenceId: salesOrder.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_ORDER,
+        title: "Sales Order Confirmed",
+        description: `Sales Order #${salesOrder.clientSoNumber || salesOrder.id} was confirmed successfully.`,
+        locationId: salesOrder.locationId,
+      },
+      transaction
+    );
+
+    return await getSalesOrderById(id);
+  });
 };

@@ -8,6 +8,7 @@ import { DELIVERY_STATUS, TRUCK_STATUS, ACTIVITY_TYPE, ACTIVITY_REFERENCE_TYPE }
 import * as activityService from '../services/activity.service';
 import { requestContext } from '../utils/requestContext';
 import { AppError } from '../helper/appError';
+import { isSalesOrderDraft } from '../utils/salesOrder.util';
 
 type DeliveryReference = { id: number; referenceType: 'packagingList' | 'loadingOrder'; salesOrderProductIds?: number[] };
 
@@ -51,6 +52,9 @@ export const initiateDelivery = async (
             if (ref.referenceType === 'packagingList') {
                 const pl: any = await packagingListRepository.getPackagingListById(ref.id);
                 if (!pl) throw new AppError(`Packaging List ${ref.id} not found`, 404);
+                if (isSalesOrderDraft(pl.salesOrder)) {
+                    throw new AppError("Cannot initiate delivery for an unconfirmed Sales Order.", 400);
+                }
                 soLocation = pl.salesOrder?.soLocation;
                 shippingAddress = pl.shippingAddress;
                 salesOrderProducts = pl.salesOrderProducts || [];
@@ -58,6 +62,10 @@ export const initiateDelivery = async (
                 // loadingOrder
                 const lo: any = (await loadingOrderRepository.getLoadingOrderById(ref.id));
                 if (!lo) throw new AppError(`Loading Order ${ref.id} not found`, 404);
+                const so = lo.salesOrder || lo.packagingList?.salesOrder;
+                if (isSalesOrderDraft(so)) {
+                    throw new AppError("Cannot initiate delivery for an unconfirmed Sales Order.", 400);
+                }
                 // soLocation from LO's own salesOrder or its PL's salesOrder
                 soLocation = lo.salesOrder?.soLocation || lo.packagingList?.salesOrder?.soLocation;
                 // shipping address: prefer PL's shippingAddress, then salesOrder shippingAddress

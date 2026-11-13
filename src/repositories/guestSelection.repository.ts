@@ -55,19 +55,72 @@ export const findInventoryProductByQrCode = async (qrCode: string) => {
       {
         association: "product",
         include: [
-          { association: "images" },
-                  { association: "group" },
-                  { association: "baseColor" },
-                  { association: "finish" },
+          { association: "images", include: [{ association: "s3File" }] },
+          { association: "group" },
+          { association: "baseColor" },
+          { association: "finish" },
+          { association: "subCategory" },
         ],
       },
       { association: "slab" },
       { association: "genericProduct" },
       { association: "location" },
-      { association: "images" },
+      { association: "images", include: [{ association: "s3File" }] },
     ],
   });
 };
+
+/**
+ * Find single product by ID for guest scan
+ */
+export const findProductByIdForGuest = async (productId: number, clientId?: number) => {
+  const where: any = {
+    id: productId,
+    status: "active",
+  };
+  if (clientId) {
+    where.clientId = clientId;
+  }
+
+  return await models.Product.findOne({
+    where,
+    include: [
+      { association: "images", include: [{ association: "s3File" }] },
+      { association: "group" },
+      { association: "baseColor" },
+      { association: "finish" },
+      { association: "subCategory" },
+    ],
+  });
+};
+
+/**
+ * Find active products by IDs for a client
+ */
+export const findProductsByIdsForGuest = async (productIds: number[], clientId: number) => {
+  return await models.Product.findAll({
+    where: {
+      id: {
+        [Op.in]: productIds,
+      },
+      clientId,
+      status: "active",
+    },
+    include: [
+      { association: "images", include: [{ association: "s3File" }] },
+      { association: "group" },
+      { association: "baseColor" },
+      { association: "finish" },
+      { association: "subCategory" },
+    ],
+  });
+};
+
+export interface GuestSelectionItemInput {
+  inventoryProductId?: number | null;
+  productId?: number | null;
+  quantity?: number;
+}
 
 /**
  * Create GuestSelection with items in a transaction
@@ -80,16 +133,28 @@ export const createGuestSelection = async (
     guestEmail: string;
     choiceDescription?: string;
   },
-  inventoryProductIds: number[],
+  itemsData: Array<number | GuestSelectionItemInput>,
   transaction?: Transaction
 ) => {
   const selection: any = await models.GuestSelection.create(selectionData, { transaction });
 
-  if (inventoryProductIds.length > 0) {
-    const items = inventoryProductIds.map((inventoryProductId) => ({
-      guestSelectionId: selection.id,
-      inventoryProductId,
-    }));
+  if (itemsData.length > 0) {
+    const items = itemsData.map((item) => {
+      if (typeof item === "number") {
+        return {
+          guestSelectionId: selection.id,
+          inventoryProductId: item,
+          productId: null,
+          quantity: 1,
+        };
+      }
+      return {
+        guestSelectionId: selection.id,
+        inventoryProductId: item.inventoryProductId ?? null,
+        productId: item.productId ?? null,
+        quantity: item.quantity ?? 1,
+      };
+    });
 
     await models.GuestSelectionItem.bulkCreate(items, { transaction });
   }
@@ -135,11 +200,22 @@ export const getGuestSelectionsByClient = async (
                   { association: "group" },
                   { association: "baseColor" },
                   { association: "finish" },
+                  { association: "subCategory" },
                 ],
               },
               { association: "slab" },
               { association: "genericProduct" },
-              { association: "images" },
+              { association: "images", include: [{ association: "s3File" }] },
+            ],
+          },
+          {
+            association: "product",
+            include: [
+              { association: "group" },
+              { association: "baseColor" },
+              { association: "finish" },
+              { association: "subCategory" },
+              { association: "images", include: [{ association: "s3File" }] },
             ],
           },
         ],
@@ -158,7 +234,7 @@ export const getGuestSelectionsByClient = async (
  * Fetch single guest selection details by ID and clientId
  */
 export const getGuestSelectionById = async (id: number, clientId: number) => {
-  return await models.GuestSelection.findOne({
+  return await scoped(models.GuestSelection).findOne({
     where: { id, clientId },
     include: [
       {
@@ -170,16 +246,27 @@ export const getGuestSelectionById = async (id: number, clientId: number) => {
               {
                 association: "product",
                 include: [
-                  { association: "images" },
+                  { association: "images", include: [{ association: "s3File" }] },
                   { association: "group" },
                   { association: "baseColor" },
                   { association: "finish" },
+                  { association: "subCategory" },
                 ],
               },
               { association: "slab" },
               { association: "genericProduct" },
               { association: "location" },
-              { association: "images" },
+              { association: "images", include: [{ association: "s3File" }] },
+            ],
+          },
+          {
+            association: "product",
+            include: [
+              { association: "images", include: [{ association: "s3File" }] },
+              { association: "group" },
+              { association: "baseColor" },
+              { association: "finish" },
+              { association: "subCategory" },
             ],
           },
         ],
@@ -192,7 +279,7 @@ export const getGuestSelectionById = async (id: number, clientId: number) => {
  * Delete guest selection by ID
  */
 export const deleteGuestSelection = async (id: number, clientId: number, transaction?: Transaction) => {
-  return await models.GuestSelection.destroy({
+  return await scoped(models.GuestSelection).destroy({
     where: { id, clientId },
     transaction,
   });
@@ -206,7 +293,7 @@ export const updateGuestSelectionStatus = async (
   clientId: number,
   status: "pending" | "reviewed" | "converted" | "cancelled"
 ) => {
-  const [updatedCount] = await models.GuestSelection.update(
+  const [updatedCount] = await scoped(models.GuestSelection).update(
     { status },
     { where: { id, clientId } }
   );

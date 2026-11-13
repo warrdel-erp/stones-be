@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import GuestSelection from "./guestSelection.model";
 import InventoryProduct from "./inventoryProduct.model";
+import Product from "./product.model";
 
 const GuestSelectionItem = sequelize.define(
   "GuestSelectionItem",
@@ -23,13 +24,28 @@ const GuestSelectionItem = sequelize.define(
     },
     inventoryProductId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: InventoryProduct,
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
+    },
+    productId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Product,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
     },
   },
   {

@@ -14,12 +14,14 @@ import * as journalEntryRepository from "../repositories/journalEntry.repository
 import * as ledgerAccountRepository from "../repositories/ledgerAccount.repository";
 import * as loadingOrderRepository from "../repositories/loadingOrder.repository";
 import * as packagingListRepository from "../repositories/packagingList.repository";
+import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as packagingListService from "../services/packagingList.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
 import * as tradeServiceService from '../services/tradeService.service';
+import { isSalesOrderDraft } from "../utils/salesOrder.util";
 
 import Decimal from "decimal.js";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
@@ -52,6 +54,14 @@ export const createPackagingList = async (data: any) => {
   try {
 
     const { salesOrderId } = await salesOrderProductService.validateSalesOrderProducts(data.soProducts);
+
+    const salesOrder: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+    if (isSalesOrderDraft(salesOrder)) {
+      throw new AppError("Cannot create a Pick List for an unconfirmed Sales Order. Please confirm the Sales Order first.", 400);
+    }
 
     let packagingList: any = await packagingListRepository.createPackagingList({ ...data, salesOrderId }, transaction);
 
@@ -422,6 +432,10 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       throw new AppError("Cannot invoice Packaging List as it is already invoiced.", 400);
     }
 
+    if (isSalesOrderDraft(packagingList.salesOrder)) {
+      throw new AppError("Cannot invoice a Packaging List for an unconfirmed Sales Order.", 400);
+    }
+
     // Filter products that are not assigned to a loading order.
     const allProducts = packagingList.salesOrderProducts || [];
     const productsToInvoice = allProducts.filter((p: any) => p.loadingOrderId === null);
@@ -709,10 +723,14 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
         transaction
       );
 
-      // Update stage to INVOICED in Sales Order Product.
+      // Update stage to INVOICED in Sales Order Product and freeze soDiscountPercentage.
       await salesOrderProductRepository.updateSalesOrderProduct(
         salesOrderProduct.id,
-        { stage: SALE_ORDER_PRODUCT_STAGES.INVOICED, picked: true },
+        {
+          stage: SALE_ORDER_PRODUCT_STAGES.INVOICED,
+          picked: true,
+          soDiscountPercentage: Number(salesOrderProduct.soDiscountPercentage ?? packagingList.salesOrder?.discountPercentage) || 0,
+        },
         transaction
       );
 

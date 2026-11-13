@@ -27,3 +27,13 @@ export const createSalesOrderSchema = z.object({
 });
 
 export type CreateSalesOrderInput = z.infer<typeof createSalesOrderSchema>;
+
+export const updateSalesOrderDiscountSchema = z.object({
+  discountPercentage: z.coerce
+    .number({ required_error: "Discount percentage is required" })
+    .min(0, "Discount percentage cannot be negative")
+    .max(100, "Discount percentage cannot exceed 100")
+    .transform((v) => Math.round(v * 100) / 100),
+});
+
+export type UpdateSalesOrderDiscountInput = z.infer<typeof updateSalesOrderDiscountSchema>;

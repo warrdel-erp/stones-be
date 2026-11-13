@@ -66,6 +66,7 @@ export const createSalesOrderProducts = async (products: any[], salesOrderId: nu
           salesOrderId,
           isSlabType: inventoryProduct.isSlabType,
           taxPercentage: SALES_TAX.find((e) => e.id == salesOrder?.taxId)?.value || 0,
+          soDiscountPercentage: Number(salesOrder?.discountPercentage) || 0,
           receivingAreaSqFt,
         },
         transaction

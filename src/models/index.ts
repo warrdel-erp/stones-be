@@ -883,6 +883,9 @@ GuestSelectionItem.belongsTo(GuestSelection, { foreignKey: "guestSelectionId", a
 GuestSelectionItem.belongsTo(InventoryProduct, { foreignKey: "inventoryProductId", as: "inventoryProduct" });
 InventoryProduct.hasMany(GuestSelectionItem, { foreignKey: "inventoryProductId", as: "guestSelectionItems" });
 
+GuestSelectionItem.belongsTo(Product, { foreignKey: "productId", as: "product" });
+Product.hasMany(GuestSelectionItem, { foreignKey: "productId", as: "guestSelectionItems" });
+
 PackagingList.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } })
 TradeService.belongsTo(PackagingList, { foreignKey: "referenceId", as: "packagingList", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST } });
 

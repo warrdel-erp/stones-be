@@ -7,6 +7,7 @@ const router = express.Router();
 // Public routes (for Guest User on Mobile / Web)
 router.get("/public/client/:qrCode", guestSelectionController.getClientByQrHandler);
 router.get("/public/inventory-product/:qrCode", guestSelectionController.getInventoryProductByQrHandler);
+router.get("/public/product/:productId", guestSelectionController.getProductByQrHandler);
 router.post("/public/submit", guestSelectionController.submitGuestSelectionHandler);
 
 // Authenticated CRM routes (for Client users in CRM)

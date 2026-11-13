@@ -221,6 +221,15 @@ const SalesOrderProduct = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    /**
+     * Snapshot of the Sales Order discount taken at allocation / update time.
+     * Kept per product so already invoiced products stay frozen when the SO discount is changed.
+     */
+    soDiscountPercentage: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
     requirementLineId: {
       type: DataTypes.INTEGER,
       allowNull: true,

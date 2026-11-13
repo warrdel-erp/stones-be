@@ -11,6 +11,7 @@ import * as models from "../models";
 import { scoped } from "../utils/scoped";
 import { SALES_TAX, INVENTORY_ITEM_STATUS } from "../constants";
 import { SALE_ORDER_PRODUCT_STAGES, SALES_ORDER_STATUS } from "../constants/tableTypes";
+import { isSalesOrderClosed } from "../utils/salesOrder.util";
 
 export const addRequirementLine = async (
   salesOrderId: number,
@@ -32,7 +33,7 @@ export const addRequirementLine = async (
     const so: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
     if (!so) throw new AppError("Sales Order not found", 404);
     if (so.clientId !== clientId) throw new AppError("Unauthorized access to Sales Order", 403);
-    if (so.status !== SALES_ORDER_STATUS.OPEN) {
+    if (isSalesOrderClosed(so)) {
       throw new AppError("Cannot add requirements to a closed Sales Order.", 400);
     }
 
@@ -99,6 +100,7 @@ export const addRequirementLine = async (
           inventoryProductId: inv.id,
           unitPrice: payload.unitPrice,
           lineDiscountPercentage: payload.lineDiscountPercentage || 0,
+          soDiscountPercentage: Number(so.discountPercentage) || 0,
           taxPercentage,
           isSlabType: inventoryProduct.isSlabType,
           receivingAreaSqFt,
@@ -178,7 +180,7 @@ export const updateRequirementAllocations = async (
     const so: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
     if (!so) throw new AppError("Sales Order not found", 404);
     if (so.clientId !== clientId) throw new AppError("Unauthorized access to Sales Order", 403);
-    if (so.status !== SALES_ORDER_STATUS.OPEN) {
+    if (isSalesOrderClosed(so)) {
       throw new AppError("Cannot update allocations of a closed Sales Order.", 400);
     }
 
@@ -276,6 +278,7 @@ export const updateRequirementAllocations = async (
             inventoryProductId: invId,
             unitPrice: requirement.unitPrice,
             lineDiscountPercentage: requirement.lineDiscountPercentage || 0,
+            soDiscountPercentage: Number(so.discountPercentage) || 0,
             taxPercentage,
             isSlabType: inventoryProduct.isSlabType,
             receivingAreaSqFt,
@@ -329,7 +332,7 @@ export const removeRequirementLine = async (salesOrderId: number, requirementId:
     const so: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
     if (!so) throw new AppError("Sales Order not found", 404);
     if (so.clientId !== clientId) throw new AppError("Unauthorized access to Sales Order", 403);
-    if (so.status !== SALES_ORDER_STATUS.OPEN) {
+    if (isSalesOrderClosed(so)) {
       throw new AppError("Cannot remove requirement from a closed Sales Order.", 400);
     }
 
@@ -393,7 +396,7 @@ export const updateRequirementLineDiscount = async (
     const so: any = await salesOrderRepository.getSimpleSalesOrder(salesOrderId, transaction);
     if (!so) throw new AppError("Sales Order not found", 404);
     if (so.clientId !== clientId) throw new AppError("Unauthorized access to Sales Order", 403);
-    if (so.status !== SALES_ORDER_STATUS.OPEN) {
+    if (isSalesOrderClosed(so)) {
       throw new AppError("Cannot update discount on a closed Sales Order.", 400);
     }
 

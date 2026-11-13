@@ -59,9 +59,14 @@ export const getInvoiceById = async (id: number) => {
     relevantProducts = (soInvoice.packagingList?.salesOrderProducts || []).filter((p: any) => p.loadingOrderId === null);
   }
 
-  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(relevantProducts, soInvoice.discountPercentage || soInvoice.salesOrder?.discountPercentage);
+  const effectiveInvoiceDiscount =
+    soInvoice.discountPercentage !== null && soInvoice.discountPercentage !== undefined
+      ? Number(soInvoice.discountPercentage)
+      : Number(soInvoice.salesOrder?.discountPercentage || 0);
 
-  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(relevantProducts, soInvoice.discountPercentage || soInvoice.salesOrder?.discountPercentage, relevantProducts[0]?.salesOrder?.tax?.value || relevantProducts[0]?.taxPercentage || 0);
+  soInvoice.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(relevantProducts, effectiveInvoiceDiscount);
+
+  const calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(relevantProducts, effectiveInvoiceDiscount, relevantProducts[0]?.salesOrder?.tax?.value || relevantProducts[0]?.taxPercentage || 0);
 
   const settlementBreakdown = await paymentBillRepository.getInvoiceSettlementBreakdown(
     soInvoice.id,

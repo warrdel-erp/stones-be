@@ -23,6 +23,19 @@ export const getInventoryProductByQrHandler = catchAsync(async (req: Request, re
 });
 
 /**
+ * Public Handler: Get Product details by QR ID
+ */
+export const getProductByQrHandler = catchAsync(async (req: Request, res: Response) => {
+  const { productId } = req.params;
+  const { clientQr } = req.query;
+  const product = await guestSelectionService.getProductDetailsByQrId(
+    productId,
+    clientQr ? String(clientQr) : undefined
+  );
+  SuccessResponse(res, 200, "Product details retrieved successfully", product);
+});
+
+/**
  * Public Handler: Submit Guest Selection List
  */
 export const submitGuestSelectionHandler = catchAsync(async (req: Request, res: Response) => {

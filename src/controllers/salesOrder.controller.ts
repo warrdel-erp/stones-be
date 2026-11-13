@@ -110,3 +110,32 @@ export const updateSalesOrderTax = catchAsync(async (req: AuthRequest, res: Resp
   const salesOrder = await salesOrderService.updateSalesOrderTax(Number(id), Number(taxId), Number(clientId!));
   SuccessResponse(res, 200, "Sales Order tax updated successfully", salesOrder);
 });
+
+// Update sales order discount
+export const updateSalesOrderDiscount = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { discountPercentage } = req.body;
+  const clientId = Number(req.user?.clientId);
+
+  const data = await salesOrderService.updateSalesOrderDiscount(
+    Number(id),
+    Number(discountPercentage),
+    clientId
+  );
+
+  const message = data.frozenCount
+    ? `SO discount updated for ${data.updatedCount} product(s). ${data.frozenCount} invoiced product(s) were not changed.`
+    : "Sales Order discount updated successfully";
+
+  return SuccessResponse(res, 200, message, data);
+});
+
+// Publish Sales Order
+export const publishSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = Number(req.user?.clientId);
+  const accountId = Number(req.user?.accountId);
+
+  const salesOrder = await salesOrderService.publishSalesOrder(Number(id), clientId, accountId);
+  return SuccessResponse(res, 200, "Sales Order published successfully", salesOrder);
+});
