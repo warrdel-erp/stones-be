@@ -212,6 +212,43 @@ export const createCustomerAdvancesLedgerAccount = async (clientId: number, tran
   );
 };
 
+export const getCustomerRefundPayableLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  return await ledgerAccountRepository.getLedgerAccountByFilter(
+    {
+      clientId,
+      [Op.or]: [
+        { key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_REFUND_PAYABLE },
+        { name: "Customer Refund Payable" },
+      ],
+    },
+    transaction
+  );
+};
+
+export const createCustomerRefundPayableLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  const subHeaderId = COA_SUB_HEADERS.find((e) => e.key === "deferred_income_refund_liabilities")?.id!;
+  return await ledgerAccountRepository.createLedgerAccount(
+    {
+      name: "Customer Refund Payable",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_REFUND_PAYABLE,
+      subHeaderId,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    transaction
+  );
+};
+
+export const getOrCreateCustomerRefundPayableLedgerAccount = async (clientId: number, transaction?: Transaction) => {
+  let account = await getCustomerRefundPayableLedgerAccount(clientId, transaction);
+  if (!account) {
+    account = await createCustomerRefundPayableLedgerAccount(clientId, transaction);
+  }
+  return account;
+};
+
 export const getBadDebtExpenseLedgerAccount = async (clientId: number, transaction?: Transaction) => {
   return await ledgerAccountRepository.getLedgerAccountByFilter(
     {

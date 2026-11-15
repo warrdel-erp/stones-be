@@ -2,8 +2,9 @@ import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import { INVENTORY_ITEM_STATUS } from "../constants";
 import { DEFAULT_LEDGER_ACCOUNT_KEYS } from "../constants/coa";
-import { ACTIVITY_REFERENCE_TYPE, ACTIVITY_TYPE, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
+import { ACTIVITY_REFERENCE_TYPE, ACTIVITY_TYPE, CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES, CREDIT_DEBIT_NOTE_TYPES, CREDIT_NOTE_REFERENCE_TYPES, JOURNAL_ENTRY_FOR_TYPES, JOURNAL_ENTRY_PROCESS_TYPE, JOURNAL_ENTRY_REFERENCE_TYPES, JOURNAL_ENTRY_SUB_REFERENCE_TYPES, JOURNAL_ENTRY_TYPE, LEDGER_ACCOUNT_REFERENCE_TYPES } from "../constants/tableTypes";
 import { getPercentageValue } from "../helper";
+import * as decimal from "../helper/decimal";
 import { AppError } from "../helper/appError";
 import { RETURN_STATUS } from "../models/return.model";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
@@ -12,6 +13,8 @@ import * as journalEntryRepository from '../repositories/journalEntry.repository
 import * as ledgerAccountRepository from '../repositories/ledgerAccount.repository';
 import * as returnRepository from "../repositories/return.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
+import * as paymentBillRepository from "../repositories/paymentBills.repository";
+import * as creditDebitNoteRepository from "../repositories/creditDebitNote.repository";
 import * as activityService from "../services/activity.service";
 import * as journalEntryServices from '../services/journalEntry.service';
 import * as ledgerAccountService from '../services/ledgerAccount.service';
@@ -19,7 +22,12 @@ import * as tradeServiceService from '../services/tradeService.service';
 import { requestContext } from "../utils/requestContext";
 
 interface InvoiceWithProducts {
-    packagingList: {
+    packagingList?: {
+        salesOrderProducts: Array<{
+            id: number;
+        }>;
+    };
+    loadingOrder?: {
         salesOrderProducts: Array<{
             id: number;
         }>;
@@ -49,9 +57,13 @@ export const createReturn = async (invoiceId: number, productIds: number[], user
             }
         }
 
-        // Get all sales order product IDs from the invoice's packaging list
-        const validSalesOrderProductIds = invoiceData.packagingList.salesOrderProducts.map(
-            (sop) => sop.id
+        // Get all sales order product IDs from the invoice's packaging list or loading order
+        const validSalesOrderProducts =
+            invoiceData.packagingList?.salesOrderProducts ||
+            invoiceData.loadingOrder?.salesOrderProducts ||
+            [];
+        const validSalesOrderProductIds = validSalesOrderProducts.map(
+            (sop: any) => sop.id
         );
 
         // Check if all provided product IDs belong to this invoice
@@ -158,56 +170,85 @@ export const confirmReturn = async (returnId: number, locationId: number, client
             throw new AppError("Return is already confirmed", 400);
         }
 
-        // Ledger Account for Customer
-        const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            referenceId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).customerId,
-            referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
-        });
+        const salesOrder = returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder;
+        const customerId = salesOrder?.customerId;
+        const soLocationId = salesOrder?.locationId || locationId;
+        const invoiceId = returnRecord.invoiceId;
+        const invoiceFinalAmount = Number(returnRecord.soInvoice?.finalAmount || 0);
+        const returnTotal = Number(returnAmounts.final.total || 0);
+        const returnTaxable = Number(returnAmounts.final.taxable || 0);
 
-        // Get or create ledger account for Sales Returns & Allowances (Contra-Revenue).
-        let ledgerAccountForSalesReturns: any =
-            await ledgerAccountService.getSalesReturnsAndAllowancesLedgerAccount(
-                clientId,
-                transaction
-            );
+        // Check invoice settlement breakdown to determine if customer has paid (Scenario 2E) or unpaid (Scenario 2D)
+        const settlementBreakdown = await paymentBillRepository.getInvoiceSettlementBreakdown(
+            invoiceId,
+            invoiceFinalAmount
+        );
 
-        if (!ledgerAccountForSalesReturns) {
-            ledgerAccountForSalesReturns =
-                await ledgerAccountService.createSalesReturnsAndAllowancesLedgerAccount(
-                    clientId,
-                    transaction
-                );
+        // Remaining unpaid balance on invoice before this return
+        const remainingUnpaidBalance = Math.max(
+            0,
+            Number(decimal.decimalSubtract(invoiceFinalAmount, settlementBreakdown.totalSettled))
+        );
+
+        let arPortion = 0;
+        let refundPortion = 0;
+
+        if (remainingUnpaidBalance >= returnTotal) {
+            // Scenario 2D: Entire return offsets unpaid invoice AR balance
+            arPortion = returnTotal;
+            refundPortion = 0;
+        } else if (remainingUnpaidBalance > 0) {
+            // Partial: Unpaid portion offsets AR, remainder was already paid -> refund liability
+            arPortion = remainingUnpaidBalance;
+            refundPortion = Number(decimal.decimalSubtract(returnTotal, remainingUnpaidBalance));
+        } else {
+            // Scenario 2E: Invoice already fully settled/paid -> entire return is refund liability
+            arPortion = 0;
+            refundPortion = returnTotal;
         }
 
-        // Journal entries for services attached with return. 
-        await journalEntryServices.createJournalEntriesForTradeServicesOfReturns(returnRecord, locationId, transaction)
-        // #1
-        // Journal Entry for Customer Receivable reversal (with tax).
-        await journalEntryRepository.create(
-            {
-                amount: returnAmounts.final.total,
-                ledgerId: ledgerAccount.id,
-                type: JOURNAL_ENTRY_TYPE.CR,
+        // Ledger Account for Customer AR
+        const ledgerAccount: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+            referenceId: customerId,
+            referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+    }, transaction);
 
-                // reference
-                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                referenceId: returnRecord.id,
+    // Customer Refund Payable ledger account (for paid portion / Scenario 2E)
+    let ledgerAccountForRefundPayable: any = null;
+    if (refundPortion > 0) {
+        ledgerAccountForRefundPayable = await ledgerAccountService.getOrCreateCustomerRefundPayableLedgerAccount(
+            clientId,
+            transaction
+        );
+    }
 
-                entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                entryForId: returnRecord.id,
-
-                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                partyLedgerAccountId: ledgerAccountForSalesReturns.id,
-            },
+    // Get or create ledger account for Sales Returns & Allowances (Contra-Revenue).
+    let ledgerAccountForSalesReturns: any =
+        await ledgerAccountService.getSalesReturnsAndAllowancesLedgerAccount(
+            clientId,
             transaction
         );
 
-        // #2
-        // Journal Entry for Sales Returns & Allowances (without tax).
+    if (!ledgerAccountForSalesReturns) {
+        ledgerAccountForSalesReturns =
+            await ledgerAccountService.createSalesReturnsAndAllowancesLedgerAccount(
+                clientId,
+                transaction
+            );
+    }
+
+    // Primary credit account for partyLedgerAccountId on debit entries
+    const primaryCreditLedgerId = arPortion > 0 ? ledgerAccount.id : ledgerAccountForRefundPayable.id;
+
+    // Journal entries for services attached with return. 
+    await journalEntryServices.createJournalEntriesForTradeServicesOfReturns(returnRecord, locationId, transaction);
+
+    // #1
+            // Journal Entry for Sales Returns & Allowances (Contra-Revenue, taxable amount without tax).
+            if(returnTaxable > 0) {
         await journalEntryRepository.create(
             {
-                amount: returnAmounts.final.taxable,
+                amount: returnTaxable,
                 ledgerId: ledgerAccountForSalesReturns.id,
                 type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -218,181 +259,280 @@ export const confirmReturn = async (returnId: number, locationId: number, client
                 entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
                 entryForId: returnRecord.id,
 
-                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                partyLedgerAccountId: ledgerAccount.id,
-            },
-            transaction
-        );
-
-        // Get ledger account for State tax.
-        const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
-            clientId,
-        });
-
-        // Get ledger account for State tax.
-        const ledgerAccountForCountyTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            key: DEFAULT_LEDGER_ACCOUNT_KEYS.COUNTY_TAX,
-            clientId,
-        });
-
-        const customerTax = (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).tax;
-
-        // #3
-        // Journal Entry for state tax.
-        await journalEntryRepository.create(
-            {
-                amount: getPercentageValue(returnAmounts.final.taxable, customerTax?.stateTax || 0),
-                ledgerId: ledgerAccountForStateTax.id,
-                type: JOURNAL_ENTRY_TYPE.DR,
-
-                // reference
-                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                referenceId: returnRecord.id,
-
-                entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                entryForId: returnRecord.id,
-
-                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                partyLedgerAccountId: ledgerAccount.id,
-            },
-            transaction
-        );
-
-        // Calculate county tax.
-        const countyTax = customerTax?.value ? customerTax?.value - customerTax?.stateTax! : 0;
-
-        // #4
-        // Journal Entry for state tax.
-        await journalEntryRepository.create(
-            {
-                amount: getPercentageValue(returnAmounts.final.taxable, countyTax),
-                ledgerId: ledgerAccountForCountyTax.id,
-                type: JOURNAL_ENTRY_TYPE.DR,
-
-                // reference
-                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                referenceId: returnRecord.id,
-
-                entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                entryForId: returnRecord.id,
-
-                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-                locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                partyLedgerAccountId: ledgerAccount.id,
-            },
-            transaction
-        );
-
-        // Get ledger account for finished goods.
-        const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
-            clientId,
-        });
-
-
-        // Get ledger account for finished cogs.
-        const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
-            key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
-            clientId,
-        });
-
-        // Update status of all products to IN_INVENTORY
-        for (const returnProduct of returnRecord.returnProducts) {
-            // Check if it's a slab or generic product
-            const isSlabType = returnProduct.salesOrderProduct.inventoryProduct.isSlabType;
-
-            // Update inventory product status to IN_INVENTORY
-            await inventoryProductRepository.updateInventoryProductStatusById(
-                returnProduct.salesOrderProduct.inventoryProductId,
-                INVENTORY_ITEM_STATUS.IN_INVENTORY,
-                transaction
+        processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+            locationId: soLocationId,
+                partyLedgerAccountId: primaryCreditLedgerId,
+                },
+    transaction
             );
-
-            // Create journal entries (only for slabs as they have landed unit cost)
-            if (isSlabType) {
-                const slabData = returnProduct.salesOrderProduct.inventoryProduct.slab;
-                const inventoryProduct = returnProduct.salesOrderProduct.inventoryProduct;
-
-                // #5
-                await journalEntryRepository.create(
-                    {
-                        amount: inventoryProduct.assetValue,
-                        ledgerId: ledgerAccountForFinishedGoods.id,
-                        type: JOURNAL_ENTRY_TYPE.DR,
-
-                        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-                        subReferenceId: slabData.id,
-
-                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                        referenceId: returnRecord.id,
-
-                        processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-
-                        entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                        entryForId: returnRecord.id,
-
-                        locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                        partyLedgerAccountId: ledgerAccountForCogs.id,
-                    },
-                    transaction
-                );
-
-                // #6
-                await journalEntryRepository.create(
-                    {
-                        amount: inventoryProduct.assetValue,
-                        ledgerId: ledgerAccountForCogs.id,
-                        type: JOURNAL_ENTRY_TYPE.CR,
-
-                        subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
-                        subReferenceId: slabData.id,
-
-                        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-                        referenceId: returnRecord.id,
-
-                        processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
-
-                        entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
-                        entryForId: returnRecord.id,
-
-                        locationId: (returnRecord.soInvoice.packagingList?.salesOrder || returnRecord.soInvoice.loadingOrder?.salesOrder).locationId,
-                        partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
-                    },
-                    transaction
-                );
-            }
         }
 
-        // Update return status to COMPLETE
-        await returnRepository.updateReturn(
-            returnId,
-            { status: RETURN_STATUS.COMPLETE },
-            transaction
-        );
-
-        await activityService.logActivity({
-            clientId,
-            activityType: ACTIVITY_TYPE.RETURN_CONFIRMATION,
-            referenceId: returnId,
-            referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
-            title: "Return Confirmed",
-            description: `Return #${returnId} has been confirmed.`,
-            locationId
+// Get ledger account for State tax.
+const ledgerAccountForStateTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
+    clientId,
         }, transaction);
 
-        if (shouldCommit) {
-            await transaction.commit();
+// Get ledger account for County tax.
+const ledgerAccountForCountyTax: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.COUNTY_TAX,
+    clientId,
+        }, transaction);
+
+const customerTax = salesOrder?.tax;
+const stateTaxAmount = customerTax?.stateTax ? getPercentageValue(returnTaxable, customerTax.stateTax) : 0;
+
+// #2
+// Journal Entry for state tax.
+        if(stateTaxAmount > 0) {
+    await journalEntryRepository.create(
+        {
+            amount: stateTaxAmount,
+            ledgerId: ledgerAccountForStateTax.id,
+            type: JOURNAL_ENTRY_TYPE.DR,
+
+            // reference
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+            entryForId: returnRecord.id,
+
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+        locationId: soLocationId,
+            partyLedgerAccountId: primaryCreditLedgerId,
+                },
+transaction
+            );
         }
-        return returnRecord;
-    } catch (error) {
-        if (shouldCommit) {
-            await transaction.rollback();
+
+// Calculate county tax.
+const countyTax = customerTax?.value ? customerTax.value - (customerTax.stateTax || 0) : 0;
+const countyTaxAmount = countyTax > 0 ? getPercentageValue(returnTaxable, countyTax) : 0;
+
+// #3
+// Journal Entry for county tax.
+if (countyTaxAmount > 0) {
+    await journalEntryRepository.create(
+        {
+            amount: countyTaxAmount,
+            ledgerId: ledgerAccountForCountyTax.id,
+            type: JOURNAL_ENTRY_TYPE.DR,
+
+            // reference
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+            entryForId: returnRecord.id,
+
+            processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+            locationId: soLocationId,
+            partyLedgerAccountId: primaryCreditLedgerId,
+        },
+        transaction
+    );
+}
+
+// Ensure total tax debits equal return tax if tax was non-zero but neither state nor county rate was split
+const totalTaxAmount = Number(returnAmounts.final.tax || 0);
+const calculatedTax = Number(decimal.decimalAdd(stateTaxAmount, countyTaxAmount));
+const unallocatedTax = Number(decimal.decimalSubtract(totalTaxAmount, calculatedTax));
+if (unallocatedTax > 0) {
+    await journalEntryRepository.create(
+        {
+            amount: unallocatedTax,
+            ledgerId: ledgerAccountForStateTax.id,
+            type: JOURNAL_ENTRY_TYPE.DR,
+
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+            entryForId: returnRecord.id,
+
+            processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+            locationId: soLocationId,
+            partyLedgerAccountId: primaryCreditLedgerId,
+        },
+        transaction
+    );
+}
+
+// #4
+        // Scenario 2D: Credit Customer Accounts Receivable (AR) for unpaid portion
+        if(arPortion > 0) {
+    await journalEntryRepository.create(
+        {
+            amount: arPortion,
+            ledgerId: ledgerAccount.id,
+            type: JOURNAL_ENTRY_TYPE.CR,
+
+            // reference
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+            entryForId: returnRecord.id,
+
+    processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+        locationId: soLocationId,
+            partyLedgerAccountId: ledgerAccountForSalesReturns.id,
+                },
+transaction
+            );
         }
-        throw error;
+
+// #5
+// Scenario 2E: Credit Customer Refund Payable for paid portion (liability until cash/bank refunded)
+if (refundPortion > 0) {
+    await journalEntryRepository.create(
+        {
+            amount: refundPortion,
+            ledgerId: ledgerAccountForRefundPayable.id,
+            type: JOURNAL_ENTRY_TYPE.CR,
+
+            // reference
+            referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+
+            entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+            entryForId: returnRecord.id,
+
+            processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+            locationId: soLocationId,
+            partyLedgerAccountId: ledgerAccountForSalesReturns.id,
+        },
+        transaction
+    );
+
+    // Auto-create Credit Note for the customer for the paid portion
+    const invoiceCode = returnRecord.soInvoice?.invoiceCode || returnRecord.soInvoice?.id;
+    const returnCode = returnRecord.code || returnRecord.id;
+    await creditDebitNoteRepository.createCreditDebitNote(
+        {
+            amount: refundPortion,
+            type: CREDIT_DEBIT_NOTE_TYPES.CREDIT,
+            entryFor: CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES.CUSTOMER,
+            entryIdFor: customerId,
+            referenceType: CREDIT_NOTE_REFERENCE_TYPES.RETURN,
+            referenceId: returnRecord.id,
+            creditNoteDate: new Date().toISOString().split("T")[0],
+            reasonType: "sales_return",
+            remarks: `Credit Note for Return #${returnCode} on Invoice #${invoiceCode}`,
+            clientId,
+            status: "active",
+        },
+        transaction
+    );
+}
+
+// Get ledger account for finished goods.
+const ledgerAccountForFinishedGoods: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
+    clientId,
+        }, transaction);
+
+// Get ledger account for finished cogs.
+const ledgerAccountForCogs: any = await ledgerAccountRepository.getLedgerAccountByFilter({
+    key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
+    clientId,
+        }, transaction);
+
+// Update status of all products to IN_INVENTORY and post inventory restocking entries
+for (const returnProduct of returnRecord.returnProducts) {
+    // Check if it's a slab or generic product
+    const isSlabType = returnProduct.salesOrderProduct.inventoryProduct.isSlabType;
+
+    // Update inventory product status to IN_INVENTORY
+    await inventoryProductRepository.updateInventoryProductStatusById(
+        returnProduct.salesOrderProduct.inventoryProductId,
+        INVENTORY_ITEM_STATUS.IN_INVENTORY,
+        transaction
+    );
+
+    // Create journal entries (only for slabs as they have landed unit cost)
+    if (isSlabType) {
+        const slabData = returnProduct.salesOrderProduct.inventoryProduct.slab;
+        const inventoryProduct = returnProduct.salesOrderProduct.inventoryProduct;
+
+        // Restock inventory (DR Finished Goods / Merchandise Inventory)
+        await journalEntryRepository.create(
+            {
+                amount: inventoryProduct.assetValue,
+                ledgerId: ledgerAccountForFinishedGoods.id,
+                type: JOURNAL_ENTRY_TYPE.DR,
+
+                subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+                subReferenceId: slabData.id,
+
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+                referenceId: returnRecord.id,
+
+                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+
+                entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+                entryForId: returnRecord.id,
+
+                locationId: soLocationId,
+                partyLedgerAccountId: ledgerAccountForCogs.id,
+            },
+            transaction
+        );
+
+        // Reverse Cost of Goods Sold (CR COGS)
+        await journalEntryRepository.create(
+            {
+                amount: inventoryProduct.assetValue,
+                ledgerId: ledgerAccountForCogs.id,
+                type: JOURNAL_ENTRY_TYPE.CR,
+
+                subReferenceType: JOURNAL_ENTRY_SUB_REFERENCE_TYPES.SLAB,
+                subReferenceId: slabData.id,
+
+                referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+                referenceId: returnRecord.id,
+
+                processType: JOURNAL_ENTRY_PROCESS_TYPE.CONFIRM_RETURN,
+
+                entryFor: JOURNAL_ENTRY_FOR_TYPES.RETURN,
+                entryForId: returnRecord.id,
+
+                locationId: soLocationId,
+                partyLedgerAccountId: ledgerAccountForFinishedGoods.id,
+            },
+            transaction
+        );
     }
+}
+
+// Update return status to COMPLETE
+await returnRepository.updateReturn(
+    returnId,
+    { status: RETURN_STATUS.COMPLETE },
+    transaction
+);
+
+await activityService.logActivity({
+    clientId,
+    activityType: ACTIVITY_TYPE.RETURN_CONFIRMATION,
+    referenceId: returnId,
+    referenceType: ACTIVITY_REFERENCE_TYPE.RETURN,
+    title: "Return Confirmed",
+    description: `Return #${returnId} has been confirmed.`,
+    locationId
+}, transaction);
+
+if (shouldCommit) {
+    await transaction.commit();
+}
+return returnRecord;
+    } catch (error) {
+    if (shouldCommit) {
+        await transaction.rollback();
+    }
+    throw error;
+}
 };
 
 export const cancelReturn = async (returnId: number) => {
@@ -497,9 +637,13 @@ async function validateProductsBelongsToGivenInvoice(returnRecord: any, transact
         }
     }
 
-    // Get all sales order product IDs from the invoice's packaging list
-    const validSalesOrderProductIds = invoiceData.packagingList.salesOrderProducts.map(
-        (sop) => sop.id
+    // Get all sales order product IDs from the invoice's packaging list or loading order
+    const validSalesOrderProducts =
+        invoiceData.packagingList?.salesOrderProducts ||
+        invoiceData.loadingOrder?.salesOrderProducts ||
+        [];
+    const validSalesOrderProductIds = validSalesOrderProducts.map(
+        (sop: any) => sop.id
     );
 
     // Check if all provided product IDs belong to this invoice

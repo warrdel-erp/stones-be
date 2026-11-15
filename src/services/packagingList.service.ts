@@ -40,7 +40,7 @@ import {
   SALE_ORDER_PRODUCT_STAGES
 } from "../constants/tableTypes";
 import { getPercentageValue, removeDuplicatesWithUnitPrice } from "../helper";
-import { Return } from "../models";
+import { Return, SalesOrderInvoice, LoadingOrder, PackagingList } from "../models";
 import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as activityService from "../services/activity.service";
 import { scoped } from "../utils/scoped";
@@ -162,6 +162,76 @@ export const getPackagingListById = async (id: number) => {
   packagingList.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(packagingList.salesOrderProducts, packagingList.salesOrder?.discountPercentage);
 
   return packagingList;
+};
+
+// Get packaging list / loading order document with sales order products for initiating a return
+export const getPackagingListForInitiateReturn = async (
+  id: number,
+  options: { isInvoice?: boolean; isLo?: boolean } = {}
+) => {
+  let isLo = options.isLo;
+  let targetId = id;
+  let invoiceInstance: any = null;
+
+  if (options.isInvoice) {
+    invoiceInstance = await SalesOrderInvoice.findByPk(id);
+    if (!invoiceInstance) {
+      throw new AppError("Invoice not found.", 404);
+    }
+    if (invoiceInstance.loadingOrderId) {
+      isLo = true;
+      targetId = invoiceInstance.loadingOrderId;
+    } else if (invoiceInstance.packagingListId) {
+      isLo = false;
+      targetId = invoiceInstance.packagingListId;
+    } else {
+      throw new AppError("Invoice has no associated Packaging List or Loading Order.", 400);
+    }
+  } else if (isLo === undefined) {
+    const possibleInvoice: any = await SalesOrderInvoice.findByPk(id);
+    if (possibleInvoice && (possibleInvoice.loadingOrderId || possibleInvoice.packagingListId)) {
+      invoiceInstance = possibleInvoice;
+      if (possibleInvoice.loadingOrderId) {
+        isLo = true;
+        targetId = possibleInvoice.loadingOrderId;
+      } else {
+        isLo = false;
+        targetId = possibleInvoice.packagingListId;
+      }
+    } else {
+      const possiblePl = await PackagingList.findByPk(id);
+      if (possiblePl) {
+        isLo = false;
+        targetId = id;
+      } else {
+        isLo = true;
+        targetId = id;
+      }
+    }
+  }
+
+  const doc = await packagingListRepository.getDocForInitiateReturn(targetId, isLo);
+
+  if (!doc) {
+    throw new AppError(`${isLo ? "Loading Order" : "Packaging List"} does not exist.`, 404);
+  }
+
+  if (!doc.salesOrderInvoice && invoiceInstance) {
+    doc.salesOrderInvoice = invoiceInstance.get({ plain: true });
+  }
+
+  doc.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(
+    doc.salesOrderProducts || [],
+    doc.salesOrder?.discountPercentage,
+    doc.salesOrderProducts?.[0]?.salesOrder?.tax?.value || doc.salesOrderProducts?.[0]?.taxPercentage || 0
+  );
+
+  doc.products = getNestedSalesOrderProductAccordingToIdAndUnitPrice(
+    doc.salesOrderProducts || [],
+    doc.salesOrder?.discountPercentage
+  );
+
+  return doc;
 };
 
 // Get packaging list with salesOrderProducts, which are available for return as per returnId.

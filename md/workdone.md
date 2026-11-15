@@ -1274,3 +1274,8 @@ questions---
 
 1. what is delivery charge.
 2. when would we decide to add customer write off's journal entry?
+
+---
+
+1. return error resolved.
+2. return of paid invoice will create a credit note automatically.

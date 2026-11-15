@@ -26,241 +26,248 @@ export const createPaymentBills = async (data: any[], transaction?: Transaction)
  * - Confirmed Sales Returns (Return -> Customer Receivable credit)
  */
 export const getInvoiceSettlementBreakdown = async (
-    invoiceId: number,
-    finalAmount?: number
-  ) => {
-    // 1. Direct Payments
-    const paymentBills: any[] = await models.PaymentBill.findAll({
+  invoiceId: number,
+  finalAmount?: number
+) => {
+  // 1. Direct Payments
+  const paymentBills: any[] = await models.PaymentBill.findAll({
+    where: {
+      referenceId: invoiceId,
+      referenceType: PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE,
+    },
+    include: [
+      {
+        model: models.Payment,
+        as: "payment",
+        attributes: [
+          "id",
+          "transactionCode",
+          "clientTransactionNo",
+          "paymentMethod",
+          "referenceNo",
+          "referenceDate",
+          "remark",
+          "createdAt",
+        ],
+      },
+    ],
+  });
+
+  const paymentRecords = paymentBills.map((pb: any) => {
+    const plain = pb.get ? pb.get({ plain: true }) : pb;
+    return {
+      id: plain.id,
+      paymentId: plain.paymentId,
+      amount: Number(plain.amount || 0),
+      paymentMethod: plain.payment?.paymentMethod || null,
+      transactionCode:
+        plain.payment?.transactionCode ||
+        (plain.payment?.clientTransactionNo
+          ? `TXN-${plain.payment.clientTransactionNo}`
+          : null),
+      referenceNo: plain.payment?.referenceNo || null,
+      date: plain.payment?.referenceDate || plain.payment?.createdAt || plain.createdAt,
+    };
+  });
+  const paymentAmount = sumDecimal(paymentRecords, "amount");
+
+  // 2. Advanced Deposit Settlements
+  const depositSettlements: any[] = await models.AdvancedDepositSettlement.findAll({
+    where: { soInvoiceId: invoiceId },
+    include: [
+      {
+        model: models.AdvancedDeposit,
+        as: "advancedDeposit",
+        attributes: ["id", "code", "createdAt"],
+        include: [
+          {
+            model: models.Payment,
+            as: "payment",
+            attributes: ["id", "paymentMethod"],
+          },
+        ],
+      },
+    ],
+  });
+
+  const advancedDepositRecords = depositSettlements.map((ds: any) => {
+    const plain = ds.get ? ds.get({ plain: true }) : ds;
+    return {
+      id: plain.id,
+      advancedDepositId: plain.advancedDepositId,
+      code: plain.advancedDeposit?.code || `AD-${plain.advancedDepositId}`,
+      amount: Number(plain.amount || 0),
+      paymentMethod: plain.advancedDeposit?.payment?.paymentMethod || null,
+      date: plain.createdAt || plain.advancedDeposit?.createdAt,
+    };
+  });
+  const advancedDepositAmount = sumDecimal(advancedDepositRecords, "amount");
+
+  // 3. Bad Debt Write-Offs
+  const writeOffEntries: any[] = await models.JournalEntry.findAll({
+    attributes: ["id", "amount", "createdAt"],
+    where: {
+      referenceId: invoiceId,
+      referenceType: {
+        [Op.in]: [
+          JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE,
+          JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
+        ],
+      },
+      type: JOURNAL_ENTRY_TYPE.DR,
+    },
+    include: [
+      {
+        model: models.LedgerAccount,
+        as: "ledgerAccount",
+        attributes: [],
+        where: {
+          key: DEFAULT_LEDGER_ACCOUNT_KEYS.BAD_DEBT_EXPENSE,
+        },
+        required: true,
+      },
+    ],
+    raw: true,
+  });
+
+  const writeOffRecords = writeOffEntries.map((entry: any) => ({
+    id: entry.id,
+    amount: Number(entry.amount || 0),
+    date: entry.createdAt,
+  }));
+  const writeOffAmount = sumDecimal(writeOffRecords, "amount");
+
+  // 4. Confirmed Sales Returns
+  const completedReturns: any[] = await models.Return.findAll({
+    attributes: ["id", "code", "createdAt"],
+    where: {
+      invoiceId,
+      status: "complete",
+    },
+    raw: true,
+  });
+
+  let returnRecords: any[] = [];
+  let returnAmount = 0;
+
+  if (completedReturns.length > 0) {
+    const returnIds = completedReturns.map((r: any) => r.id);
+    const returnCreditEntries: any[] = await models.JournalEntry.findAll({
+      attributes: ["referenceId", "amount", "createdAt"],
       where: {
-        referenceId: invoiceId,
-        referenceType: PAYMENT_BILL_REFERENCE_TYPES.SO_INVOICE,
+        referenceId: { [Op.in]: returnIds },
+        referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
+        type: JOURNAL_ENTRY_TYPE.CR,
       },
       include: [
         {
-          model: models.Payment,
-          as: "payment",
-          attributes: [
-            "id",
-            "transactionCode",
-            "clientTransactionNo",
-            "paymentMethod",
-            "referenceNo",
-            "referenceDate",
-            "remark",
-            "createdAt",
-          ],
+          model: models.LedgerAccount,
+          as: "ledgerAccount",
+          attributes: [],
+          where: {
+            referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+          },
+          required: true,
         },
       ],
+      raw: true,
     });
 
-      const paymentRecords = paymentBills.map((pb: any) => {
-        const plain = pb.get ? pb.get({ plain: true }) : pb;
-        return {
-          id: plain.id,
-          paymentId: plain.paymentId,
-          amount: Number(plain.amount || 0),
-          paymentMethod: plain.payment?.paymentMethod || null,
-          transactionCode:
-            plain.payment?.transactionCode ||
-            (plain.payment?.clientTransactionNo
-              ? `TXN-${plain.payment.clientTransactionNo}`
-              : null),
-          referenceNo: plain.payment?.referenceNo || null,
-          date: plain.payment?.referenceDate || plain.payment?.createdAt || plain.createdAt,
-        };
-      });
-      const paymentAmount = sumDecimal(paymentRecords, "amount");
-
-            // 2. Advanced Deposit Settlements
-            const depositSettlements: any[] = await models.AdvancedDepositSettlement.findAll({
-              where: { soInvoiceId: invoiceId },
-              include: [
-                {
-                  model: models.AdvancedDeposit,
-                  as: "advancedDeposit",
-                  attributes: ["id", "code", "paymentMethod", "createdAt"],
-                },
-              ],
-            });
-
-            const advancedDepositRecords = depositSettlements.map((ds: any) => {
-              const plain = ds.get ? ds.get({ plain: true }) : ds;
-              return {
-                id: plain.id,
-                advancedDepositId: plain.advancedDepositId,
-                code: plain.advancedDeposit?.code || `AD-${plain.advancedDepositId}`,
-                amount: Number(plain.amount || 0),
-                paymentMethod: plain.advancedDeposit?.paymentMethod || null,
-                date: plain.createdAt || plain.advancedDeposit?.createdAt,
-              };
-            });
-            const advancedDepositAmount = sumDecimal(advancedDepositRecords, "amount");
-
-            // 3. Bad Debt Write-Offs
-            const writeOffEntries: any[] = await models.JournalEntry.findAll({
-              attributes: ["id", "amount", "createdAt"],
-              where: {
-                referenceId: invoiceId,
-                referenceType: {
-                  [Op.in]: [
-                    JOURNAL_ENTRY_REFERENCE_TYPES.PACKAGING_LIST_INVOICE,
-                    JOURNAL_ENTRY_REFERENCE_TYPES.LOADING_ORDER_INVOICE,
-                  ],
-                },
-                type: JOURNAL_ENTRY_TYPE.DR,
-              },
-              include: [
-                {
-                  model: models.LedgerAccount,
-                  as: "ledgerAccount",
-                  attributes: [],
-                  where: {
-                    key: DEFAULT_LEDGER_ACCOUNT_KEYS.BAD_DEBT_EXPENSE,
-                  },
-                  required: true,
-                },
-              ],
-              raw: true,
-            });
-
-            const writeOffRecords = writeOffEntries.map((entry: any) => ({
-              id: entry.id,
-              amount: Number(entry.amount || 0),
-              date: entry.createdAt,
-            }));
-            const writeOffAmount = sumDecimal(writeOffRecords, "amount");
-
-            // 4. Confirmed Sales Returns
-            const completedReturns: any[] = await models.Return.findAll({
-              attributes: ["id", "code", "createdAt"],
-              where: {
-                invoiceId,
-                status: "complete",
-              },
-              raw: true,
-            });
-
-            let returnRecords: any[] = [];
-            let returnAmount = 0;
-
-            if(completedReturns.length > 0) {
-              const returnIds = completedReturns.map((r: any) => r.id);
-      const returnCreditEntries: any[] = await models.JournalEntry.findAll({
-        attributes: ["referenceId", "amount", "createdAt"],
-        where: {
-          referenceId: { [Op.in]: returnIds },
-          referenceType: JOURNAL_ENTRY_REFERENCE_TYPES.RETURN,
-          type: JOURNAL_ENTRY_TYPE.CR,
-        },
-        include: [
-          {
-            model: models.LedgerAccount,
-            as: "ledgerAccount",
-            attributes: [],
-            where: {
-              referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
-            },
-            required: true,
-          },
-        ],
-        raw: true,
-      });
-
-      returnRecords = completedReturns.map((ret: any) => {
-        const entriesForReturn = returnCreditEntries.filter(
-          (e: any) => Number(e.referenceId) === Number(ret.id)
-        );
-        const amt = sumDecimal(entriesForReturn, "amount");
-        return {
-          id: ret.id,
-          code: ret.code || `RO-${ret.id}`,
-          amount: Number(amt || 0),
-          date: ret.createdAt,
-        };
-      });
-      returnAmount = sumDecimal(returnRecords, "amount");
-    }
-
-    const totalSettled = sumDecimal([
-      paymentAmount,
-      advancedDepositAmount,
-      writeOffAmount,
-      returnAmount,
-    ]);
-
-    // Build concise human-readable summary parts
-    const summaryParts: string[] = [];
-    if (paymentAmount > 0) {
-      summaryParts.push(`Payment: $${Number(paymentAmount).toFixed(2)}`);
-    }
-    if (advancedDepositAmount > 0) {
-      const codes = Array.from(
-        new Set(advancedDepositRecords.map((r) => r.code).filter(Boolean))
-      ).join(", ");
-      summaryParts.push(
-        `Adv. Deposit${codes ? ` (${codes})` : ""}: $${Number(advancedDepositAmount).toFixed(2)}`
+    returnRecords = completedReturns.map((ret: any) => {
+      const entriesForReturn = returnCreditEntries.filter(
+        (e: any) => Number(e.referenceId) === Number(ret.id)
       );
-    }
-    if (writeOffAmount > 0) {
-      summaryParts.push(`Write-Off: $${Number(writeOffAmount).toFixed(2)}`);
-    }
-    if (returnAmount > 0) {
-      const roCodes = Array.from(
-        new Set(returnRecords.map((r) => r.code).filter(Boolean))
-      ).join(", ");
-      summaryParts.push(
-        `Return${roCodes ? ` (${roCodes})` : ""}: $${Number(returnAmount).toFixed(2)}`
-      );
-    }
+      const amt = sumDecimal(entriesForReturn, "amount");
+      return {
+        id: ret.id,
+        code: ret.code || `RO-${ret.id}`,
+        amount: Number(amt || 0),
+        date: ret.createdAt,
+      };
+    });
+    returnAmount = sumDecimal(returnRecords, "amount");
+  }
 
-    const invoiceTotal = finalAmount !== undefined ? Number(finalAmount || 0) : undefined;
-    const dueAmount =
-      invoiceTotal !== undefined
-        ? Math.max(0, Number(decimalSubtract(invoiceTotal, totalSettled)))
-        : undefined;
+  const totalSettled = sumDecimal([
+    paymentAmount,
+    advancedDepositAmount,
+    writeOffAmount,
+    returnAmount,
+  ]);
 
-    let status = "Unpaid";
-    if (totalSettled > 0) {
-      if (dueAmount !== undefined && dueAmount <= 0) {
-        if (
-          writeOffAmount > 0 &&
-          paymentAmount === 0 &&
-          advancedDepositAmount === 0 &&
-          returnAmount === 0
-        ) {
-          status = "Written Off";
-        } else if (
-          returnAmount > 0 &&
-          paymentAmount === 0 &&
-          advancedDepositAmount === 0 &&
-          writeOffAmount === 0
-        ) {
-          status = "Returned";
-        } else if (writeOffAmount > 0 || returnAmount > 0) {
-          status = "Settled";
-        } else {
-          status = "Paid";
-        }
+  // Build concise human-readable summary parts
+  const summaryParts: string[] = [];
+  if (paymentAmount > 0) {
+    summaryParts.push(`Payment: $${Number(paymentAmount).toFixed(2)}`);
+  }
+  if (advancedDepositAmount > 0) {
+    const codes = Array.from(
+      new Set(advancedDepositRecords.map((r) => r.code).filter(Boolean))
+    ).join(", ");
+    summaryParts.push(
+      `Adv. Deposit${codes ? ` (${codes})` : ""}: $${Number(advancedDepositAmount).toFixed(2)}`
+    );
+  }
+  if (writeOffAmount > 0) {
+    summaryParts.push(`Write-Off: $${Number(writeOffAmount).toFixed(2)}`);
+  }
+  if (returnAmount > 0) {
+    const roCodes = Array.from(
+      new Set(returnRecords.map((r) => r.code).filter(Boolean))
+    ).join(", ");
+    summaryParts.push(
+      `Return${roCodes ? ` (${roCodes})` : ""}: $${Number(returnAmount).toFixed(2)}`
+    );
+  }
+
+  const invoiceTotal = finalAmount !== undefined ? Number(finalAmount || 0) : undefined;
+  const dueAmount =
+    invoiceTotal !== undefined
+      ? Math.max(0, Number(decimalSubtract(invoiceTotal, totalSettled)))
+      : undefined;
+
+  let status = "Unpaid";
+  if (totalSettled > 0) {
+    if (dueAmount !== undefined && dueAmount <= 0) {
+      if (
+        writeOffAmount > 0 &&
+        paymentAmount === 0 &&
+        advancedDepositAmount === 0 &&
+        returnAmount === 0
+      ) {
+        status = "Written Off";
+      } else if (
+        returnAmount > 0 &&
+        paymentAmount === 0 &&
+        advancedDepositAmount === 0 &&
+        writeOffAmount === 0
+      ) {
+        status = "Returned";
+      } else if (writeOffAmount > 0 || returnAmount > 0) {
+        status = "Settled";
       } else {
-        status = "Partially Settled";
+        status = "Paid";
       }
+    } else {
+      status = "Partially Settled";
     }
+  }
 
-    return {
-      paymentAmount: Number(paymentAmount || 0),
-      payments: paymentRecords,
-      advancedDepositAmount: Number(advancedDepositAmount || 0),
-      advancedDeposits: advancedDepositRecords,
-      writeOffAmount: Number(writeOffAmount || 0),
-      writeOffs: writeOffRecords,
-      returnAmount: Number(returnAmount || 0),
-      returns: returnRecords,
-      totalSettled: Number(totalSettled || 0),
-      dueAmount,
-      status,
-      settlementSummary: summaryParts.join(" | "),
-    };
+  return {
+    paymentAmount: Number(paymentAmount || 0),
+    payments: paymentRecords,
+    advancedDepositAmount: Number(advancedDepositAmount || 0),
+    advancedDeposits: advancedDepositRecords,
+    writeOffAmount: Number(writeOffAmount || 0),
+    writeOffs: writeOffRecords,
+    returnAmount: Number(returnAmount || 0),
+    returns: returnRecords,
+    totalSettled: Number(totalSettled || 0),
+    dueAmount,
+    status,
+    settlementSummary: summaryParts.join(" | "),
   };
+};
 
 // Get total paid amount of a bill
 export const getTotalPaidAmountOfBill = async (

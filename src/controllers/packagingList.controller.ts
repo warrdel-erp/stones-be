@@ -40,6 +40,19 @@ export const getPackagingListById = catchAsync(async (req: Request, res: Respons
   SuccessResponse(res, 200, "Packaging List retrieved successfully", packagingList);
 });
 
+// Get packaging list / loading order document for initiating a return
+export const getPackagingListForInitiateReturn = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isInvoice, isLo } = req.query;
+
+  const data = await packagingListService.getPackagingListForInitiateReturn(Number(id), {
+    isInvoice: isInvoice === "true",
+    isLo: isLo === "true",
+  });
+
+  SuccessResponse(res, 200, "Initiate return data retrieved successfully", data);
+});
+
 // Get packaging list by Id
 export const getPackagingListAsPerReturn = catchAsync(async (req: Request, res: Response) => {
   const { returnId } = req.params;

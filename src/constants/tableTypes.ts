@@ -210,6 +210,7 @@ export const DELIVERY_STATUS = {
 export const CREDIT_NOTE_REFERENCE_TYPES = {
   PAYMENT: "payment",
   SIPL: "sipl",
+  RETURN: "return",
 } as const;
 
 export const CREDIT_DEBIT_NOTE_ENTRY_FOR_TYPES = {

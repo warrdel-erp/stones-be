@@ -803,6 +803,30 @@ CreditDebitNote.belongsTo(Payment, {
   as: "payment",
 });
 
+Return.hasOne(CreditDebitNote, {
+  foreignKey: "referenceId",
+  constraints: false,
+  scope: { referenceType: "return" },
+  as: "creditDebitNote",
+});
+CreditDebitNote.belongsTo(Return, {
+  foreignKey: "referenceId",
+  constraints: false,
+  as: "return",
+});
+
+Customer.hasMany(CreditDebitNote, {
+  foreignKey: "entryIdFor",
+  constraints: false,
+  scope: { entryFor: "customer" },
+  as: "creditDebitNotes",
+});
+CreditDebitNote.belongsTo(Customer, {
+  foreignKey: "entryIdFor",
+  constraints: false,
+  as: "customer",
+});
+
 
 // SoProductSwapHistory associations
 SoProductSwapHistory.belongsTo(SalesOrderProduct, { foreignKey: "salesProductId", as: "salesOrderProduct" });

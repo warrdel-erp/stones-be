@@ -156,3 +156,7 @@
 5.  Landed Cost Clearing DEBIT -> journal entries are not stored because Freight Bills directly debit and clear `Freight-In` / `Brokerage Charges` into `Finished Goods` on Receive Inventory.
 6.  Outward Freight Expense DEBIT -> journal entries are not stored because Vendor Bills (`Bill`) only exist for inbound `SIPL`s and customer deliveries use internal company trucks without a vendor bill flow.
 7.  Payment Clearing DEBIT -> automated clearing journal entries are not stored because customer/vendor payments (`processPayment` / `createAdvancedDeposit`) are immediately marked `completed` and posted directly to the selected `Cash / Bank` account without a two-step bank deposit/settlement reconciliation flow.
+
+---
+
+1. where to add customer advances. what is current liabilities.

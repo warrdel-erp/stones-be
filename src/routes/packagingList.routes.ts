@@ -40,6 +40,9 @@ router.put("/:id/createInvoice", authenticateUser, packagingListController.invoi
 // Cancel packaging list.
 router.put("/:id/cancel", authenticateUser, packagingListController.cancelPackagingList);
 
+// Get packaging list / loading order document for initiating a return
+router.get("/forInitiateReturn/:id", authenticateUser, packagingListController.getPackagingListForInitiateReturn);
+
 // Get packaging list by Id
 router.get("/:id", authenticateUser, packagingListController.getPackagingListById);
 

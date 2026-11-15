@@ -279,6 +279,115 @@ export const getPackagingListById = async (id: number) => {
   return packagingList?.get({ plain: true });
 };
 
+// Get packaging list / loading order document for initiating a return
+export const getDocForInitiateReturn = async (
+  targetId: number,
+  isLo: boolean = false
+) => {
+  const modelToQuery = isLo ? models.LoadingOrder : models.PackagingList;
+  const includeConfig: any[] = [
+    {
+      association: "salesOrder",
+      include: [
+        {
+          association: "customer",
+          include: [
+            {
+              association: "addresses",
+            },
+          ],
+        },
+        {
+          association: "shippingAddress",
+        },
+        {
+          association: "soLocation",
+          attributes: ["id", "locationName", "lat", "long", "address"],
+        },
+      ],
+    },
+    {
+      association: "salesOrderProducts",
+      include: [
+        {
+          association: "inventoryProduct",
+          include: [
+            {
+              association: "product",
+              attributes: ["id", "name", "isSlabType"],
+            },
+            {
+              association: "bin",
+              attributes: ["id", "name"],
+            },
+            {
+              association: "slab",
+            },
+            {
+              association: "genericProduct",
+              include: [
+                {
+                  association: "product",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          association: "loadingOrder",
+          attributes: ["id", "code"],
+        },
+        {
+          association: "packagingList",
+          attributes: ["id", "code"],
+        },
+        {
+          association: "returnProducts",
+          attributes: ["id"],
+          required: false,
+          include: [
+            {
+              association: "return",
+              attributes: ["id", "status"],
+              required: false,
+              where: {
+                status: {
+                  [Op.in]: [RETURN_STATUS.COMPLETE, RETURN_STATUS.INITIATED],
+                },
+              },
+            },
+          ],
+        },
+        {
+          association: "swapHistories",
+          attributes: ["id"],
+        },
+      ],
+    },
+    {
+      association: "salesOrderInvoice",
+    },
+  ];
+
+  if (!isLo) {
+    includeConfig.push({
+      association: "tradeServices",
+      include: [
+        {
+          association: "service",
+          attributes: ["id", "name", "ledgerAccountId"],
+        },
+      ],
+    });
+  }
+
+  const doc = await modelToQuery.findByPk(targetId, {
+    include: includeConfig,
+  });
+
+  return doc?.get({ plain: true });
+};
+
 // Get packaging list by Id
 export const getPackagingListAsPerReturn = async (id: number, returnId: number, isLo: boolean = false) => {
   const modelToQuery = isLo ? models.LoadingOrder : models.PackagingList;

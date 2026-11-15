@@ -1,5 +1,5 @@
 import { Op, Transaction } from "sequelize";
-import { PackagingList, Return, ReturnProduct, SalesOrderInvoice, SalesOrderProduct } from "../models";
+import { LoadingOrder, PackagingList, Return, ReturnProduct, SalesOrderInvoice, SalesOrderProduct } from "../models";
 import { RETURN_STATUS } from "../models/return.model";
 import { scoped } from "../utils/scoped";
 
@@ -18,6 +18,16 @@ export const getInvoiceWithProducts = async (invoiceId: number, transaction: Tra
             {
                 model: PackagingList,
                 as: "packagingList",
+                include: [
+                    {
+                        model: SalesOrderProduct,
+                        as: "salesOrderProducts",
+                    },
+                ],
+            },
+            {
+                model: LoadingOrder,
+                as: "loadingOrder",
                 include: [
                     {
                         model: SalesOrderProduct,
@@ -67,7 +77,7 @@ export const getReturnWithProducts = async (returnId: number, transaction?: Tran
                         association: 'packagingList',
                         include: [
                             {
-                                association: 'loadingOrder'
+                                association: 'loadingOrders'
                             },
                             {
                                 association: 'salesOrder',
@@ -93,6 +103,9 @@ export const getReturnWithProducts = async (returnId: number, transaction?: Tran
                         ]
                     }
                 ]
+            },
+            {
+                association: 'creditDebitNote',
             }
         ]
     });
@@ -144,10 +157,14 @@ export const getAllReturnsPaginated = async (page: number, limit: number, client
                         attributes: ['id', 'code'],
                         include: [
                             {
-                                association: 'loadingOrder',
+                                association: 'loadingOrders',
                                 attributes: ['id', 'code'],
                             }
                         ]
+                    },
+                    {
+                        association: 'loadingOrder',
+                        attributes: ['id', 'code'],
                     },
                     {
                         association: "customer",

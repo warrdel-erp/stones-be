@@ -300,6 +300,15 @@ const createDefaultLedgerAccountsForClient = async (clientId: number, transactio
       openingDate: new Date(),
     },
     {
+      name: "Customer Refund Payable",
+      clientId,
+      key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_REFUND_PAYABLE,
+      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "deferred_income_refund_liabilities")?.id!,
+      type: LEDGER_ACCOUNT_TYPES.CREDIT,
+      openingBalance: 0,
+      openingDate: new Date(),
+    },
+    {
       name: "Delivery Charges Revenue",
       clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE,

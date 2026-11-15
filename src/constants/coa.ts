@@ -1295,6 +1295,7 @@ export const DEFAULT_LEDGER_ACCOUNT_KEYS = {
   SALES_DISCOUNTS: "sales_discounts",
   SALES_RETURNS_AND_ALLOWANCES: "sales_returns_and_allowances",
   CUSTOMER_ADVANCES: "customer_advances",
+  CUSTOMER_REFUND_PAYABLE: "customer_refund_payable",
   DELIVERY_CHARGES_REVENUE: "delivery_charges_revenue",
   BAD_DEBT_EXPENSE: "bad_debt_expense",
   GOODS_RECEIVED_NOT_INVOICED: "goods_received_not_invoiced",

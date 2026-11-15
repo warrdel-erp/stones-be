@@ -97,7 +97,7 @@ module.exports = {
 
       for (const account of accountsToEnsure) {
         const [existing] = await queryInterface.sequelize.query(
-          'SELECT id FROM ledger_accounts WHERE client_id = :clientId AND ("key" = :key OR LOWER(name) = LOWER(:name)) LIMIT 1',
+          'SELECT id FROM ledger_accounts WHERE clientId = :clientId AND (`key` = :key OR LOWER(name) = LOWER(:name)) LIMIT 1',
           {
             replacements: {
               clientId,
@@ -109,7 +109,7 @@ module.exports = {
 
         if (existing.length === 0) {
           const [lastRows] = await queryInterface.sequelize.query(
-            'SELECT code FROM ledger_accounts WHERE client_id = :clientId AND sub_header_id = :subHeaderId ORDER BY id DESC LIMIT 1',
+            'SELECT code FROM ledger_accounts WHERE clientId = :clientId AND subHeaderId = :subHeaderId ORDER BY id DESC LIMIT 1',
             {
               replacements: {
                 clientId,
@@ -127,14 +127,12 @@ module.exports = {
             {
               name: account.name,
               key: account.key,
-              sub_header_id: account.subHeaderId,
+              subHeaderId: account.subHeaderId,
               type: account.type,
-              opening_balance: 0,
-              opening_date: now,
+              openingBalance: 0,
+              openingDate: now,
               code: nextCode,
-              client_id: clientId,
-              created_at: now,
-              updated_at: now,
+              clientId: clientId,
             },
           ]);
         }
