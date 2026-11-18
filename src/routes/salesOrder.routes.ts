@@ -5,7 +5,7 @@ import * as salesOrderProductController from "../controllers/salesOrderProduct.c
 import { authenticateUser } from "../middleware/authMiddleware";
 
 import { validateRequest } from "../middleware/validationMiddleware";
-import { createSalesOrderSchema, updateSalesOrderDiscountSchema } from "../validators/salesOrder.validator";
+import { createSalesOrderSchema, updateSalesOrderDiscountSchema, updateSalesOrderSchema } from "../validators/salesOrder.validator";
 
 const router = Router();
 
@@ -47,6 +47,14 @@ router.put(
 
 // Publish Sales Order
 router.put("/:id/publish", authenticateUser, salesOrderController.publishSalesOrder);
+
+// Update Sales Order
+router.put(
+  "/:id",
+  authenticateUser,
+  validateRequest(updateSalesOrderSchema),
+  salesOrderController.updateSalesOrder
+);
 
 // Get SO by Id
 router.get("/:id", authenticateUser, salesOrderController.getSalesOrderById);

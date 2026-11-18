@@ -808,7 +808,6 @@ Email notification.
 ---
 
 1. in inventoryProduct we can give discount but can not change it's price directly. in all sales Process. and when we add material then we'll show separate box for separate priced inventoryProduct groups.
-
 2. Show same workflow in SO as in opportunity.
 3. Product customer history in quotation part.
 4. Discount on inventoryProduct.
@@ -861,3 +860,17 @@ Email notification.
 
 14. Advanced Deposit is not being saved.
 15. Due is incorrect in SO if we create credit note.
+
+---
+
+1. Use kabab menu on approx each page.
+2. Tax edit option.
+3. Show “Back to List” button in SO in left side.
+4. Tax on services.
+5. Billing is not showing invoices in SO.
+6. Service charge as per SO.
+7. Invoice from two LO.
+8. Remove amount from invoice if returned any product.
+9. Custom credit note
+10. Show status of stages in SO.
+11. double entry of classes for archana on prod.

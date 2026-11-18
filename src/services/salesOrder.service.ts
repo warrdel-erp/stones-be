@@ -192,6 +192,9 @@ export const getAllSalesOrders = async (
     salesOrder.calculations = salesOrderProductRepository.getTotalsOfSalesOrderProducts(salesOrder.salesOrderProducts, salesOrder.discountPercentage, salesOrder?.tax?.value || salesOrder.salesOrderProducts[0]?.taxPercentage || 0);
     salesOrder.fulFilled = getPercentageValueFromValue(salesOrder.salesOrderProducts.length, salesOrder.salesOrderProducts.filter((e: any) => e.stage === SALE_ORDER_PRODUCT_STAGES.INVOICED).length)
 
+    const internalNote = salesOrder.notes?.find((n: any) => n.type === "internal");
+    salesOrder.internalNotes = internalNote?.description || "";
+
     return salesOrder;
   }) as any;
 
@@ -272,6 +275,9 @@ export const getSalesOrderById = async (id: number) => {
 
   // delete salesOrder.salesOrderProducts because it is in products;
   delete salesOrder.salesOrderProducts;
+
+  const internalNote = salesOrder.notes?.find((n: any) => n.type === "internal");
+  salesOrder.internalNotes = internalNote?.description || "";
 
   return salesOrder;
 };
@@ -571,3 +577,91 @@ export const publishSalesOrder = async (
     return await getSalesOrderById(id);
   });
 };
+
+export const updateSalesOrder = async (
+  id: number,
+  data: {
+    deliveryType?: string;
+    shippingAddressId?: number | null;
+    customerPo?: string | null;
+    customerPoDate?: string | null;
+    expDeliveryDate?: string | null;
+    paymentTermId?: number | null;
+    deliveryNotes?: string | null;
+    internalNotes?: string | null;
+    internalNote?: string | null;
+  },
+  clientId: number
+) => {
+  return await sequelize.transaction(async (transaction) => {
+    const salesOrder: any = await scoped(models.SalesOrder).findOne({
+      where: { id, clientId },
+      transaction,
+    });
+
+    if (!salesOrder) {
+      throw new AppError("Sales Order not found", 404);
+    }
+
+    if (isSalesOrderClosed(salesOrder)) {
+      throw new AppError("Sales Order is closed or cancelled and cannot be edited.", 400);
+    }
+
+    const updateFields: any = {};
+    if (data.deliveryType !== undefined) updateFields.deliveryType = data.deliveryType;
+    if (data.shippingAddressId !== undefined) updateFields.shippingAddressId = data.shippingAddressId;
+    if (data.customerPo !== undefined) updateFields.customerPo = data.customerPo;
+    if (data.customerPoDate !== undefined) updateFields.customerPoDate = data.customerPoDate;
+    if (data.expDeliveryDate !== undefined) updateFields.expDeliveryDate = data.expDeliveryDate;
+    if (data.paymentTermId !== undefined) updateFields.paymentTermId = data.paymentTermId;
+    if (data.deliveryNotes !== undefined) updateFields.deliveryNotes = data.deliveryNotes;
+
+    if (Object.keys(updateFields).length > 0) {
+      await salesOrder.update(updateFields, { transaction });
+    }
+
+    const internalNoteText = data.internalNotes !== undefined ? data.internalNotes : data.internalNote;
+    if (internalNoteText !== undefined) {
+      const existingInternalNote: any = await notesRepository.findNoteByReference(
+        id,
+        "sales_order",
+        "internal",
+        transaction
+      );
+      if (existingInternalNote) {
+        if (internalNoteText) {
+          await notesRepository.updateNote(existingInternalNote.id, { description: internalNoteText }, transaction);
+        } else {
+          await notesRepository.deleteNote(existingInternalNote.id, transaction);
+        }
+      } else if (internalNoteText) {
+        await notesRepository.createNote(
+          {
+            description: internalNoteText,
+            type: "internal",
+            referenceType: "sales_order",
+            referenceId: id,
+            clientId,
+          },
+          transaction
+        );
+      }
+    }
+
+    await activityService.logActivity(
+      {
+        clientId: salesOrder.clientId,
+        activityType: ACTIVITY_TYPE.SALES_ORDER_CREATION,
+        referenceId: salesOrder.id,
+        referenceType: ACTIVITY_REFERENCE_TYPE.SALES_ORDER,
+        title: "Sales Order Updated",
+        description: `Sales Order #${salesOrder.clientSoNumber || salesOrder.id} details were updated.`,
+        locationId: salesOrder.locationId,
+      },
+      transaction
+    );
+
+    return await getSalesOrderById(id);
+  });
+};
+

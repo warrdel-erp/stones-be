@@ -37,3 +37,18 @@ export const updateSalesOrderDiscountSchema = z.object({
 });
 
 export type UpdateSalesOrderDiscountInput = z.infer<typeof updateSalesOrderDiscountSchema>;
+
+export const updateSalesOrderSchema = z.object({
+  deliveryType: z.enum(Object.values(DELIVERY_TYPES) as [string, ...string[]]).optional(),
+  shippingAddressId: z.number().int().optional().nullable(),
+  customerPo: z.string().optional().nullable(),
+  customerPoDate: z.string().optional().nullable(),
+  expDeliveryDate: z.string().optional().nullable(),
+  paymentTermId: z.number().int().optional().nullable(),
+  deliveryNotes: z.string().optional().nullable(),
+  internalNotes: z.string().optional().nullable(),
+  internalNote: z.string().optional().nullable(),
+});
+
+export type UpdateSalesOrderInput = z.infer<typeof updateSalesOrderSchema>;
+

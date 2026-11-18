@@ -139,3 +139,13 @@ export const publishSalesOrder = catchAsync(async (req: AuthRequest, res: Respon
   const salesOrder = await salesOrderService.publishSalesOrder(Number(id), clientId, accountId);
   return SuccessResponse(res, 200, "Sales Order published successfully", salesOrder);
 });
+
+// Update Sales Order
+export const updateSalesOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const clientId = Number(req.user?.clientId);
+
+  const updatedSalesOrder = await salesOrderService.updateSalesOrder(Number(id), req.body, clientId);
+  return SuccessResponse(res, 200, "Sales Order updated successfully", updatedSalesOrder);
+});
+

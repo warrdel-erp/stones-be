@@ -1277,5 +1277,16 @@ questions---
 
 ---
 
-1. return error resolved.
-2. return of paid invoice will create a credit note automatically.
+1. Auto selected customer address in SO creation.
+2. Give option of discount inside SO.
+3. return error resolved.
+4. return of paid invoice will create a credit note automatically.
+5. Give edit button in SO.
+6. Give print option in SO.
+7. First SO should be published then its other feature will be activated.
+8. FINAL UNIT PRICE -> selling price in discount.
+9. Total Inline Discount: -> Slab adjustment
+10. Show discounts in line of SO. (Inline and slab wise)
+11. Remove “Address line 2” 2 from here in Organisation.
+12. On header of SO -> contact person name, mobile, email, delivery address.
+13. Change PL/LO creation as per new design.
