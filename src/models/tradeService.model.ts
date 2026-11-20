@@ -10,6 +10,7 @@ export const TRADE_SERVICE_REFERENCE_TYPES = {
     LOADING_ORDER: "loadingOrder",
     SIPL: "sipl",
     RETURN: "return",
+    SALES_ORDER: "salesOrder",
 } as const;
 
 const TradeService = sequelize.define(
@@ -45,6 +46,20 @@ const TradeService = sequelize.define(
                 return result;
             },
         },
+        taxPercentage: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            defaultValue: 0,
+        },
+        taxAmount: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                const total = Number(this.get("total")) || 0;
+                const percentage = Number(this.get("taxPercentage")) || 0;
+                const multiplied = decimal.decimalMultiply(total, percentage);
+                return decimal.decimalDivide(multiplied, 100);
+            },
+        },
         referenceType: {
             type: DataTypes.ENUM(...Object.values(TRADE_SERVICE_REFERENCE_TYPES)),
             allowNull: false,
@@ -75,6 +90,14 @@ const TradeService = sequelize.define(
         },
         applyToCustomer: {
             type: DataTypes.BOOLEAN,
+            allowNull: true,
+        },
+        appliedTo: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+        },
+        rateUnit: {
+            type: DataTypes.STRING(50),
             allowNull: true,
         },
     },

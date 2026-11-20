@@ -1163,7 +1163,9 @@ export const getCustomerMasterReport = async (
         city = parsed.city || '-';
         state = parsed.state || '-';
         zip = parsed.zipCode || parsed.zip || '-';
-      } catch (e) {}
+      } catch (e) {
+        // ignore parse error
+      }
     }
 
     return {
@@ -1258,7 +1260,9 @@ export const getFabricatorMasterReport = async (
         city = parsed.city || '-';
         state = parsed.state || '-';
         zip = parsed.zipCode || parsed.zip || '-';
-      } catch (e) {}
+      } catch (e) {
+        // ignore parse error
+      }
     }
 
     return {

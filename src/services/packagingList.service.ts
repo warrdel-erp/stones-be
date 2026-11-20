@@ -20,6 +20,7 @@ import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
 import * as packagingListService from "../services/packagingList.service";
 import * as salesOrderProductService from "../services/salesOrderProduct.service";
+import * as tradeServiceRepository from "../repositories/tradeService.repository";
 import * as tradeServiceService from '../services/tradeService.service';
 import { isSalesOrderDraft } from "../utils/salesOrder.util";
 
@@ -78,6 +79,36 @@ export const createPackagingList = async (data: any) => {
         "sale",
         transaction
       );
+    } else {
+      const soServices: any[] = await scoped(models.TradeService).findAll({
+        where: {
+          referenceType: TRADE_SERVICE_REFERENCE_TYPES.SALES_ORDER,
+          referenceId: salesOrderId,
+        },
+        transaction,
+      });
+
+      const applicableSoServices = soServices.filter(
+        (s: any) => !s.appliedTo || s.appliedTo === 'packagingList' || s.appliedTo === 'all'
+      );
+
+      for (const soService of applicableSoServices) {
+        const quantity = soService.chargeType === 'variable' ? (data.soProducts?.length || 1) : 1;
+        await tradeServiceRepository.createTradeService(
+          {
+            referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST,
+            referenceId: packagingList.id,
+            serviceId: soService.serviceId,
+            chargeType: soService.chargeType,
+            price: soService.price,
+            quantity,
+            rateUnit: soService.rateUnit,
+            taxPercentage: salesOrder.taxId ? (SALES_TAX.find((e) => e.id == salesOrder.taxId)?.value || 0) : 0,
+            clientId: data.clientId || salesOrder.clientId,
+          },
+          transaction
+        );
+      }
     }
 
     // -------------------- 
@@ -526,11 +557,16 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
     const invoiceAmountObj = packagingList.calculations.packagingList;
 
     let serviceTotals = 0;
+    let serviceTax = 0;
 
     // If partial LO was created from this PL, PL's services are not applicable during invoice from PL
     if (!isPartialLO && packagingList?.tradeServices?.length) {
       serviceTotals = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.total));
+      serviceTax = decimal.decimalSum(packagingList.tradeServices.map((e: any) => e.taxAmount || 0));
     }
+
+    const totalTaxable = decimal.decimalAdd(invoiceAmountObj.taxable, serviceTotals);
+    const totalTax = decimal.decimalAdd(invoiceAmountObj.tax, serviceTax);
 
     // Fetch terms and conditions
     const termsRecord: any = await termsConditionRepository.getTermsConditionByFilter({ clientId }, transaction);
@@ -545,8 +581,8 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
         customerId: packagingList.salesOrder.customerId,
         packagingListId: packagingList.id,
         amount: invoiceAmountObj.subTotal - (invoiceAmountObj.inlineDiscountAmount || 0),
-        taxableAmount: invoiceAmountObj.taxable,
-        taxValue: invoiceAmountObj.tax,
+        taxableAmount: totalTaxable,
+        taxValue: totalTax,
         totalServiceCharges: serviceTotals,
         salesOrderId: packagingList.salesOrder.id,
         discountPercentage: packagingList.salesOrder.discountPercentage,
@@ -568,7 +604,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       clientId,
     });
 
-    const customerTax = packagingList.salesOrder.tax || 0;
+    const customerTax = packagingList.salesOrder?.tax || (packagingList.salesOrder?.taxId ? SALES_TAX.find((e: any) => e.id === packagingList.salesOrder.taxId) : null) || 0;
 
     // -------- Journal entry for Services ------------
     const tradeServices = packagingList.tradeServices;
@@ -629,10 +665,10 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
 
     // }
 
-    // Journal Entry for with tax.
+    // Journal Entry for with tax (Goods total + service tax).
     await journalEntryRepository.create(
       {
-        amount: invoiceAmountObj.total,
+        amount: decimal.decimalAdd(invoiceAmountObj.total, serviceTax),
         ledgerId: ledgerAccount.id,
         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -678,7 +714,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
     );
 
     if (totalDiscountAmount > 0) {
-          let ledgerAccountForSalesDiscounts: any =
+      let ledgerAccountForSalesDiscounts: any =
         await ledgerAccountService.getSalesDiscountsLedgerAccount(
           clientId,
           transaction
@@ -725,10 +761,14 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       clientId,
     });
 
+    const stateTaxRate = customerTax?.stateTax || 0;
+    const stateTaxAmount = getPercentageValue(totalTaxable, stateTaxRate);
+    const countyTaxAmount = decimal.decimalSubtract(totalTax, stateTaxAmount);
+
     // Journal Entry for state tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmountObj.taxable, customerTax?.stateTax || 0),
+        amount: stateTaxAmount,
         ledgerId: ledgerAccountForStateTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -746,13 +786,10 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       transaction
     );
 
-    // Calculate county tax.
-    const countyTax = customerTax ? customerTax.value - customerTax?.stateTax : 0;
-
     // Journal Entry for county tax.
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmountObj.taxable, countyTax),
+        amount: countyTaxAmount,
         ledgerId: ledgerAccountForCountyTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -925,12 +962,12 @@ export async function autoSettleAdvancedDeposits(
   const soInvoice: any = await models.SalesOrderInvoice.findByPk(invoiceId, { transaction });
   const customerLedgerAccount: any = soInvoice
     ? await ledgerAccountRepository.getLedgerAccountByFilter(
-        {
-          referenceId: soInvoice.customerId,
-          referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
-        },
-        transaction
-      )
+      {
+        referenceId: soInvoice.customerId,
+        referenceType: LEDGER_ACCOUNT_REFERENCE_TYPES.CUSTOMER,
+      },
+      transaction
+    )
     : null;
 
   let ledgerAccountForCustomerAdvances: any = null;

@@ -396,6 +396,15 @@ export const getSalesOrderById = async (id: number) => {
       },
 
       { association: 'advancedDeposits' },
+      {
+        association: 'tradeServices',
+        include: [
+          {
+            association: 'service',
+            include: ['serviceCategory']
+          }
+        ]
+      },
       { association: "createdBy", include: ["user"] },
       { association: "shippingAddress" },
       { association: "notes" },
@@ -540,9 +549,9 @@ export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
       { association: "soLocation" },
       {
         association: "salesOrderProducts",
-        where: { 
+        where: {
           stage: { [Op.in]: [SALE_ORDER_PRODUCT_STAGES.PACKAGING_LIST] },
-          loadingOrderId: null 
+          loadingOrderId: null
         },
         required: false,
         include: [

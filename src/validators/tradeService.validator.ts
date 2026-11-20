@@ -23,6 +23,9 @@ export const createTradeServiceSchema = z.object({
         invalid_type_error: "Service ID must be a number",
     }).int("Service ID must be an integer").positive("Service ID must be positive"),
     applyToCustomer: z.boolean().optional(),
+    taxPercentage: z.number().min(0).optional(),
+    appliedTo: z.string().optional(),
+    rateUnit: z.string().optional(),
 });
 
 export const updateTradeServiceSchema = z.object({
@@ -34,6 +37,9 @@ export const updateTradeServiceSchema = z.object({
     }).positive("Price must be positive").optional(),
     chargeType: z.enum(["fixed", "variable"]).optional(),
     applyToCustomer: z.boolean().optional(),
+    taxPercentage: z.number().min(0).optional(),
+    appliedTo: z.string().optional(),
+    rateUnit: z.string().optional(),
 });
 
 export type CreateTradeServiceInput = z.infer<typeof createTradeServiceSchema>;

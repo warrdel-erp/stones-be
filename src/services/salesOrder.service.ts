@@ -20,6 +20,7 @@ import * as salesOrderProductService from "../services/salesOrderProduct.service
 import { isHoldClosed } from "../utils/hold.util";
 import { isSalesOrderClosed, isSalesOrderDraft } from "../utils/salesOrder.util";
 import { scoped } from "../utils/scoped";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 
 
 import * as opportunityRepository from "../repositories/opportunity.repository";
@@ -426,6 +427,47 @@ export const updateSalesOrderTax = async (id: number, taxId: number, clientId: n
         transaction,
       }
     );
+
+    // Update taxPercentage on all TradeServices belonging to this SO's PLs and LOs
+    const pls: any[] = await scoped(models.PackagingList).findAll({
+      where: { salesOrderId: id },
+      attributes: ["id"],
+      transaction,
+    });
+    const plIds = pls.map((pl: any) => pl.id);
+
+    const los: any[] = await scoped(models.LoadingOrder).findAll({
+      where: { salesOrderId: id },
+      attributes: ["id"],
+      transaction,
+    });
+    const loIds = los.map((lo: any) => lo.id);
+
+    const tradeServiceConditions: any[] = [];
+    if (plIds.length > 0) {
+      tradeServiceConditions.push({
+        referenceType: TRADE_SERVICE_REFERENCE_TYPES.PACKAGING_LIST,
+        referenceId: { [Op.in]: plIds },
+      });
+    }
+    if (loIds.length > 0) {
+      tradeServiceConditions.push({
+        referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+        referenceId: { [Op.in]: loIds },
+      });
+    }
+
+    if (tradeServiceConditions.length > 0) {
+      await scoped(models.TradeService).update(
+        { taxPercentage: taxMatch.value },
+        {
+          where: {
+            [Op.or]: tradeServiceConditions,
+          },
+          transaction,
+        }
+      );
+    }
 
     await activityService.logActivity(
       {

@@ -863,14 +863,8 @@ Email notification.
 
 ---
 
-1. Use kabab menu on approx each page.
-2. Tax edit option.
-3. Show “Back to List” button in SO in left side.
-4. Tax on services.
-5. Billing is not showing invoices in SO.
-6. Service charge as per SO.
-7. Invoice from two LO.
-8. Remove amount from invoice if returned any product.
-9. Custom credit note
-10. Show status of stages in SO.
-11. double entry of classes for archana on prod.
+1. Service charge as per SO. ✅
+2. Invoice from two LO.
+3. show return line on payment page. (If we are showing return for an invoice separate line then can user do payment of full invoice)
+4. Custom credit note
+5. Show status of stages in SO.

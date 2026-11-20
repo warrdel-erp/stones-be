@@ -17,6 +17,9 @@ import * as salesOrderRepository from "../repositories/salesOrder.repository";
 import * as salesOrderProductRepository from "../repositories/salesOrderProduct.repository";
 import * as soInvoiceRepository from "../repositories/soInvoice.repository";
 import * as termsConditionRepository from "../repositories/termsCondition.repository";
+import * as tradeServiceRepository from "../repositories/tradeService.repository";
+import * as tradeServiceService from "../services/tradeService.service";
+import { TRADE_SERVICE_REFERENCE_TYPES } from "../models/tradeService.model";
 import * as activityService from "../services/activity.service";
 import * as journalEntryService from "../services/journalEntry.service";
 import * as ledgerAccountService from "../services/ledgerAccount.service";
@@ -81,6 +84,48 @@ export const createLoadingOrder = async (data: any) => {
       transaction
     );
     loadingOrder = loadingOrder.get({ plain: true });
+
+    // Create trade services for loading order (passed directly or copied from SO default services)
+    if (Array.isArray(data.services) && data.services.length) {
+      await tradeServiceService.createMultipleTradeServices(
+        data.services,
+        TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+        loadingOrder.id,
+        data.clientId || salesOrder.clientId,
+        "sale",
+        transaction
+      );
+    } else {
+      const soServices: any[] = await scoped(models.TradeService).findAll({
+        where: {
+          referenceType: TRADE_SERVICE_REFERENCE_TYPES.SALES_ORDER,
+          referenceId: data.salesOrderId,
+        },
+        transaction,
+      });
+
+      const applicableSoServices = soServices.filter(
+        (s: any) => !s.appliedTo || s.appliedTo === 'loadingOrder' || s.appliedTo === 'all'
+      );
+
+      for (const soService of applicableSoServices) {
+        const quantity = soService.chargeType === 'variable' ? (data.soProducts?.length || 1) : 1;
+        await tradeServiceRepository.createTradeService(
+          {
+            referenceType: TRADE_SERVICE_REFERENCE_TYPES.LOADING_ORDER,
+            referenceId: loadingOrder.id,
+            serviceId: soService.serviceId,
+            chargeType: soService.chargeType,
+            price: soService.price,
+            quantity,
+            rateUnit: soService.rateUnit,
+            taxPercentage: salesOrder.taxId ? (SALES_TAX.find((e) => e.id == salesOrder.taxId)?.value || 0) : 0,
+            clientId: data.clientId || salesOrder.clientId,
+          },
+          transaction
+        );
+      }
+    }
 
     const productsToUpdate = data.soProducts.map((e: any) => ({
       ...e,
@@ -193,9 +238,14 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
 
     const invoiceAmountObj = loadingOrder.calculations.loadingOrder;
     let serviceTotals = 0;
+    let serviceTax = 0;
     if (loadingOrder.tradeServices?.length) {
       serviceTotals = decimal.decimalSum(loadingOrder.tradeServices.map((e: any) => e.total));
+      serviceTax = decimal.decimalSum(loadingOrder.tradeServices.map((e: any) => e.taxAmount || 0));
     }
+
+    const totalTaxable = decimal.decimalAdd(invoiceAmountObj.taxable, serviceTotals);
+    const totalTax = decimal.decimalAdd(invoiceAmountObj.tax, serviceTax);
 
     const actualSalesOrder = loadingOrder.packagingList?.salesOrder || loadingOrder.salesOrder;
     if (isSalesOrderDraft(actualSalesOrder)) {
@@ -215,8 +265,8 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
         customerId: actualSalesOrder.customerId,
         loadingOrderId: loadingOrder.id,
         amount: invoiceAmountObj.subTotal - (invoiceAmountObj.inlineDiscountAmount || 0),
-        taxableAmount: invoiceAmountObj.taxable,
-        taxValue: invoiceAmountObj.tax,
+        taxableAmount: totalTaxable,
+        taxValue: totalTax,
         totalServiceCharges: serviceTotals,
         salesOrderId: loadingOrder.salesOrderId,
         discountPercentage: actualSalesOrder.discountPercentage,
@@ -237,12 +287,12 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
-    const customerTax = actualSalesOrder.tax || 0;
+    const customerTax = actualSalesOrder?.tax || (actualSalesOrder?.taxId ? SALES_TAX.find((e: any) => e.id === actualSalesOrder.taxId) : null) || 0;
 
-    // Journal Entry for with tax.
+    // Journal Entry for with tax (Goods total + service tax).
     await journalEntryRepository.create(
       {
-        amount: invoiceAmountObj.total,
+        amount: decimal.decimalAdd(invoiceAmountObj.total, serviceTax),
         ledgerId: ledgerAccount.id,
         type: JOURNAL_ENTRY_TYPE.DR,
 
@@ -286,7 +336,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
     );
 
     if (totalDiscountAmount > 0) {
-          let ledgerAccountForSalesDiscounts: any =
+      let ledgerAccountForSalesDiscounts: any =
         await ledgerAccountService.getSalesDiscountsLedgerAccount(
           clientId,
           transaction
@@ -330,9 +380,13 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       clientId,
     });
 
+    const stateTaxRate = customerTax?.stateTax || 0;
+    const stateTaxAmount = getPercentageValue(totalTaxable, stateTaxRate);
+    const countyTaxAmount = decimal.decimalSubtract(totalTax, stateTaxAmount);
+
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmountObj.taxable, customerTax?.stateTax || 0),
+        amount: stateTaxAmount,
         ledgerId: ledgerAccountForStateTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 
@@ -349,10 +403,9 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       transaction
     );
 
-    const countyTax = customerTax ? customerTax.value - customerTax?.stateTax : 0;
     await journalEntryRepository.create(
       {
-        amount: getPercentageValue(invoiceAmountObj.taxable, countyTax),
+        amount: countyTaxAmount,
         ledgerId: ledgerAccountForCountyTax.id,
         type: JOURNAL_ENTRY_TYPE.CR,
 

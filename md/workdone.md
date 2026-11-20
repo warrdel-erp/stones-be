@@ -1290,3 +1290,9 @@ questions---
 11. Remove “Address line 2” 2 from here in Organisation.
 12. On header of SO -> contact person name, mobile, email, delivery address.
 13. Change PL/LO creation as per new design.
+14. Use kebab menu on approx each page.
+15. Tax edit option in new SO UI.
+16. Show “Back to List” button in SO on left side in footer.
+17. Tax on trade services in LO and PL (matching sales order products tax behavior).
+18. Billing is not showing invoices in SO.
+19. Default trade service charges at SO level copied automatically to LO and PL.

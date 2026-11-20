@@ -919,6 +919,9 @@ TradeService.belongsTo(LoadingOrder, { foreignKey: "referenceId", as: "loadingOr
 SIPL.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } })
 TradeService.belongsTo(SIPL, { foreignKey: "referenceId", as: "sipl", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SIPL } });
 
+SalesOrder.hasMany(TradeService, { foreignKey: "referenceId", as: "tradeServices", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SALES_ORDER } });
+TradeService.belongsTo(SalesOrder, { foreignKey: "referenceId", as: "salesOrder", constraints: false, scope: { referenceType: TRADE_SERVICE_REFERENCE_TYPES.SALES_ORDER } });
+
 // Client-TermsCondition relation (one-to-one: one Client has one TermsCondition)
 Client.hasOne(TermsCondition, { foreignKey: "clientId", as: "termsCondition" });
 TermsCondition.belongsTo(Client, { foreignKey: "clientId", as: "client" });

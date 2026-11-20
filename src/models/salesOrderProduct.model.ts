@@ -1,15 +1,15 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
+import { convertSqrInchToFt } from "../helper";
+import Client from "./client.model";
+import * as models from "./index";
 import InventoryProduct from "./inventoryProduct.model";
 import LoadingOrder from "./loadingOrder.model";
 import PackagingList from "./packagingList.model";
 import SalesOrder from "./salesOrder.model";
-import Client from "./client.model";
-import * as models from "./index";
-import { SALE_ORDER_PRODUCT_STAGES } from "../constants/tableTypes";
-import { convertSqrInchToFt, getPercentageValue } from "../helper";
 
-import * as decimals from '../helper/decimal'
+import * as decimals from '../helper/decimal';
 
 const SalesOrderProduct = sequelize.define(
   "sales_order_products",
