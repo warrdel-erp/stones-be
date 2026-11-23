@@ -446,6 +446,7 @@ export const invoiceLoadingOrder = async (id: number, clientId: number, location
       await salesOrderProductRepository.updateSalesOrderProduct(
         salesOrderProduct.id,
         {
+          salesOrderInvoiceId: invoice.id,
           stage: SALE_ORDER_PRODUCT_STAGES.INVOICED,
           picked: true,
           soDiscountPercentage: Number((salesOrderProduct as any).soDiscountPercentage ?? actualSalesOrder?.discountPercentage) || 0,

@@ -582,6 +582,57 @@ export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
   });
 };
 
+export const getSalesOrderByIdForCreateInvoice = async (id: number) => {
+  return await scoped(models.SalesOrder).findOne({
+    where: { id },
+    include: [
+      {
+        association: "customer",
+        include: [{ association: 'addresses' }]
+      },
+      { association: "shippingAddress" },
+      { association: "notes" },
+      { association: "soLocation" },
+      {
+        association: "salesOrderProducts",
+        where: {
+          salesOrderInvoiceId: null,
+          stage: { [Op.ne]: SALE_ORDER_PRODUCT_STAGES.INVOICED },
+          [Op.or]: [
+            { packagingListId: { [Op.ne]: null } },
+            { loadingOrderId: { [Op.ne]: null } },
+          ],
+        },
+        required: false,
+        include: [
+          { association: 'packagingList', attributes: ['id', 'code'] },
+          { association: 'loadingOrder', attributes: ['id', 'code'] },
+          { association: 'deliveryItems', include: [{ association: 'delivery' }] },
+          {
+            association: "inventoryProduct",
+            include: [
+              { association: "product" },
+              {
+                association: "bin",
+                attributes: ["id", "name"],
+                include: [
+                  {
+                    association: "warehouse",
+                    include: [{ association: "location", attributes: ["id", "locationName"] }]
+                  }
+                ]
+              },
+              { association: "slab" },
+              { association: "genericProduct" },
+              { association: "metaData" },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+};
+
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
   return await scoped(models.SalesOrder).findOne({
     where: { id },

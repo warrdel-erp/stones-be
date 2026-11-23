@@ -1274,6 +1274,10 @@ questions---
 
 1. what is delivery charge.
 2. when would we decide to add customer write off's journal entry?
+3. if we'r creating invoice from multiple LO then their deliveries will be separate but invoice will be combined.
+4. what was delivery services changes.
+5. how would we show invoice button and show invoice button as it can't belong to one PL/LO now.
+6. what exact notification should we send? because there is not other user in here.
 
 ---
 
@@ -1296,3 +1300,4 @@ questions---
 17. Tax on trade services in LO and PL (matching sales order products tax behavior).
 18. Billing is not showing invoices in SO.
 19. Default trade service charges at SO level copied automatically to LO and PL.
+20. Service charge as per SO.

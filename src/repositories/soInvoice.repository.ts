@@ -114,6 +114,15 @@ export const getAllInvoicesList = async (
             as: "salesOrderProducts",
           }
         ]
+      },
+      {
+        model: models.SalesOrderProduct,
+        as: "salesOrderProducts",
+      },
+      {
+        model: models.SalesOrder,
+        as: "salesOrder",
+        include: ['soLocation', 'shippingAddress']
       }
     ],
     transaction,
@@ -305,6 +314,26 @@ export const getInvoiceDetailsById = async (id: number, transaction?: Transactio
             include: ['customer', 'shippingAddress', 'soLocation']
           }
         ]
+      },
+      {
+        association: "salesOrder",
+        include: ['customer', 'shippingAddress', 'soLocation', 'tradeServices']
+      },
+      {
+        association: "salesOrderProducts",
+        include: [
+          {
+            association: "inventoryProduct",
+            include: [
+              { association: "product" },
+              { association: "slab" },
+              { association: "genericProduct" },
+              { association: "bin" },
+            ],
+          },
+          { association: "packagingList", attributes: ["id", "code"] },
+          { association: "loadingOrder", attributes: ["id", "code"] },
+        ],
       }
     ],
     transaction,
@@ -323,7 +352,10 @@ export const getSalesOrderProductsWithoutReturns = async (
   const allProducts = await scoped(models.SalesOrderProduct).findAll({
     where: {
       ...filter,
-      '$packagingList.salesOrderInvoice.id$': soInvoiceId
+      [Op.or]: [
+        { salesOrderInvoiceId: soInvoiceId },
+        { '$packagingList.salesOrderInvoice.id$': soInvoiceId }
+      ]
     },
     include: [
       {

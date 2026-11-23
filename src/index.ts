@@ -125,6 +125,7 @@ app.use("/api/productGroup", productGroupRoutes);
 app.use("/api/productBaseColor", productBaseColorRoutes);
 app.use("/api/productFinish", productFinishRoutes);
 app.use("/api/soInvoice", soInvoiceRoutes);
+app.use("/api/salesOrderInvoice", soInvoiceRoutes);
 app.use("/api/advancedDeposit", advancedDepositRoutes);
 app.use("/api/return", returnRoutes);
 app.use("/api/delivery", deliveryRoutes);

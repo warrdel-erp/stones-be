@@ -15,6 +15,7 @@ export type SoInvoice = {
   packagingListId?: number;
   loadingOrderId?: number;
   clientId: number;
+  locationId?: number;
   amount: number;
   salesOrderId: number;
   taxableAmount: number;

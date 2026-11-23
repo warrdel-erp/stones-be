@@ -104,6 +104,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
   const soDiscountBuckets = new Map<number, number>();
   const plDiscountBuckets = new Map<number, number>();
   const loDiscountBuckets = new Map<number, number>();
+  const finalDiscountBuckets = new Map<number, number>();
 
   for (const salesOrderProduct of salesOrderProducts) {
     const pInlineDiscount = Number(salesOrderProduct.discountPercentage) || 0;
@@ -146,10 +147,26 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
     calcs.loadingOrder.subTotal = decimals.decimalAddDP(calcs.loadingOrder.subTotal, loAmt, 2);
     addProductDiscounts(calcs.loadingOrder, loAmt, loDiscountBuckets);
 
+    // Active stage amount for final composite (prefers LO if assigned, otherwise PL, otherwise SO receiving)
+    let activeAmt = 0;
+    if (salesOrderProduct.loadingOrderId && loAmt > 0) {
+      activeAmt = loAmt;
+    } else if (plAmt > 0) {
+      activeAmt = plAmt;
+    } else {
+      activeAmt = amt;
+    }
+    calcs.final.subTotal = decimals.decimalAddDP(calcs.final.subTotal, activeAmt, 2);
+    addProductDiscounts(calcs.final, activeAmt, finalDiscountBuckets);
+
     if (salesOrderProduct.isSlabType) {
       calcs.quantities.receiving = decimals.decimalAddDP(calcs.quantities.receiving, Number(salesOrderProduct.receivingAreaSqFt) || 0, 2);
       calcs.quantities.packagingList = decimals.decimalAddDP(calcs.quantities.packagingList, Number(salesOrderProduct.plSqrFt) || 0, 2);
       calcs.quantities.loadingOrder = decimals.decimalAddDP(calcs.quantities.loadingOrder, Number(salesOrderProduct.loSqrFt) || 0, 2);
+      const activeQty = (salesOrderProduct.loadingOrderId && Number(salesOrderProduct.loSqrFt) > 0)
+        ? Number(salesOrderProduct.loSqrFt) || 0
+        : (Number(salesOrderProduct.plSqrFt) || Number(salesOrderProduct.receivingAreaSqFt) || 0);
+      calcs.quantities.final = decimals.decimalAddDP(calcs.quantities.final, activeQty, 2);
     } else {
       calcs.quantities.receiving = decimals.decimalAddDP(calcs.quantities.receiving, 1, 2);
       if (salesOrderProduct.loAmount) {
@@ -158,6 +175,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
       if (salesOrderProduct.plAmount) {
         calcs.quantities.packagingList = decimals.decimalAddDP(calcs.quantities.packagingList, 1, 2);
       }
+      calcs.quantities.final = decimals.decimalAddDP(calcs.quantities.final, 1, 2);
     }
   }
 
@@ -174,6 +192,7 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
   calcs.soReceiving.discountAmount = sumBucketDiscounts(soDiscountBuckets);
   calcs.packagingList.discountAmount = sumBucketDiscounts(plDiscountBuckets);
   calcs.loadingOrder.discountAmount = sumBucketDiscounts(loDiscountBuckets);
+  calcs.final.discountAmount = sumBucketDiscounts(finalDiscountBuckets);
 
   // --- Calculate Taxes ---
   let soAmountAfterDiscount = decimals.decimalSubtractDP(decimals.decimalSubtractDP(calcs.soReceiving.subTotal, calcs.soReceiving.inlineDiscountAmount, 2), calcs.soReceiving.discountAmount, 2);
@@ -188,25 +207,18 @@ export const getTotalsOfSalesOrderProducts = (salesOrderProducts: any[], discoun
   calcs.loadingOrder.taxable = loAmountAfterDiscount;
   calcs.loadingOrder.tax = decimals.decimalValueByPercentage(loAmountAfterDiscount, taxPercentage, 2);
 
+  let finalAmountAfterDiscount = decimals.decimalSubtractDP(decimals.decimalSubtractDP(calcs.final.subTotal, calcs.final.inlineDiscountAmount, 2), calcs.final.discountAmount, 2);
+  calcs.final.taxable = finalAmountAfterDiscount;
+  calcs.final.tax = decimals.decimalValueByPercentage(finalAmountAfterDiscount, taxPercentage, 2);
+
   // --- Calculate Totals ---
   calcs.soReceiving.total = decimals.decimalAddDP(soAmountAfterDiscount, calcs.soReceiving.tax, 2);
   calcs.packagingList.total = decimals.decimalAddDP(plAmountAfterDiscount, calcs.packagingList.tax, 2);
   calcs.loadingOrder.total = decimals.decimalAddDP(loAmountAfterDiscount, calcs.loadingOrder.tax, 2);
+  calcs.final.total = decimals.decimalAddDP(finalAmountAfterDiscount, calcs.final.tax, 2);
 
-  // Determine final quantities and final totals based on availability
-  if (calcs.loadingOrder.subTotal > 0) {
-    calcs.final = { ...calcs.loadingOrder };
-    calcs.quantities.final = calcs.quantities.loadingOrder;
-  } else if (calcs.packagingList.subTotal > 0) {
-    calcs.final = { ...calcs.packagingList };
-    calcs.quantities.final = calcs.quantities.packagingList;
-  } else {
-    calcs.final = { ...calcs.soReceiving };
-    calcs.quantities.final = calcs.quantities.receiving;
-  }
-
-  // As per original code, if there is no SO amounts in LO/PL, final.total inherits receiving.total as fallback
-  if (calcs.loadingOrder.subTotal === 0 && calcs.packagingList.subTotal === 0 && calcs.soReceiving.subTotal === 0) {
+  // Fallback if no products had amounts
+  if (calcs.final.subTotal === 0 && calcs.final.total === 0) {
     calcs.final.total = calcs.receiving.total;
   }
 

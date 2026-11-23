@@ -4,6 +4,9 @@ import * as soInvoiceController from '../controllers/soInvoice.controller'
 
 const router = Router();
 
+// create so invoice from selected products.
+router.post("/", authenticateUser, soInvoiceController.createInvoice);
+
 // get all so invoice.
 router.get("/", authenticateUser, soInvoiceController.getAllSoInvoiceList);
 

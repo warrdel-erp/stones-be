@@ -834,6 +834,7 @@ export const invoicePackagingList = async (id: number, clientId: number, locatio
       await salesOrderProductRepository.updateSalesOrderProduct(
         salesOrderProduct.id,
         {
+          salesOrderInvoiceId: invoice.id,
           stage: SALE_ORDER_PRODUCT_STAGES.INVOICED,
           picked: true,
           soDiscountPercentage: Number(salesOrderProduct.soDiscountPercentage ?? packagingList.salesOrder?.discountPercentage) || 0,

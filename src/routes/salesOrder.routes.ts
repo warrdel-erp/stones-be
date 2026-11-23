@@ -33,6 +33,7 @@ router.get("/:id/summary", authenticateUser, salesOrderController.getSalesOrderS
 // Get SO by Id for Create LO
 router.get("/:id/forCreateLO", authenticateUser, salesOrderController.getSalesOrderByIdForCreateLO);
 router.get("/:id/forCreateActualLO", authenticateUser, salesOrderController.getSalesOrderByIdForCreateActualLO);
+router.get("/:id/forCreateInvoice", authenticateUser, salesOrderController.getSalesOrderByIdForCreateInvoice);
 
 // Update Sales Order Tax
 router.put("/:id/tax", authenticateUser, salesOrderController.updateSalesOrderTax);

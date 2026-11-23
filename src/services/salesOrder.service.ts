@@ -295,6 +295,16 @@ export const getSalesOrderByIdForCreateActualLO = async (id: number) => {
   return salesOrder;
 };
 
+export const getSalesOrderByIdForCreateInvoice = async (id: number) => {
+  const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateInvoice(id))?.get({ plain: true });
+
+  if (salesOrder?.salesOrderProducts) {
+    salesOrder.products = packagingListService.getNestedSalesOrderProductAccordingToIdAndUnitPrice(salesOrder.salesOrderProducts, salesOrder.discountPercentage);
+    delete salesOrder.salesOrderProducts;
+  }
+  return salesOrder;
+};
+
 export const getSalesOrderByIdForCreateLO = async (id: number) => {
   const salesOrder: any = (await salesOrderRepository.getSalesOrderByIdForCreateLO(id))?.get({ plain: true });
 

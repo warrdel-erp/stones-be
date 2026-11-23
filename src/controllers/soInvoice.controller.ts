@@ -5,6 +5,22 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import * as salesOrderInvoiceService from "../services/salesOrderInvoice.service"
 import { AppError } from "../helper/appError";
 
+// Create SO invoice from selected products.
+export const createInvoice = catchAsync(async (req: AuthRequest, res: Response) => {
+    const clientId = req.user?.clientId;
+    const locationId = req.user?.defaultLocationId;
+    const createdById = req.user?.id;
+
+    const result = await salesOrderInvoiceService.createSalesOrderInvoice(
+        req.body,
+        Number(clientId),
+        Number(locationId),
+        Number(createdById)
+    );
+
+    SuccessResponse(res, 201, "Sales Invoice created successfully.", result);
+});
+
 // Get all po with pagination.
 export const getAllSoInvoiceList = catchAsync(async (req: AuthRequest, res: Response) => {
     const { page = 1, limit = 10, ...filter }: any = req.query;

@@ -625,6 +625,10 @@ LoadingOrder.hasOne(SalesOrderInvoice, { foreignKey: "loadingOrderId", as: "sale
 SalesOrderInvoice.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(SalesOrderInvoice, { foreignKey: "clientId", as: "salesOrderInvoices" });
 
+// SalesOrderInvoice has many SalesOrderProduct
+SalesOrderInvoice.hasMany(SalesOrderProduct, { foreignKey: "salesOrderInvoiceId", as: "salesOrderProducts" });
+SalesOrderProduct.belongsTo(SalesOrderInvoice, { foreignKey: "salesOrderInvoiceId", as: "salesOrderInvoice" });
+
 // Truck belongs to One Client (One Client can have many Trucks)
 Truck.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 Client.hasMany(Truck, { foreignKey: "clientId", as: "trucks" });

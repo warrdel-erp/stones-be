@@ -863,8 +863,7 @@ Email notification.
 
 ---
 
-1. Service charge as per SO. ✅
-2. Invoice from two LO.
-3. show return line on payment page. (If we are showing return for an invoice separate line then can user do payment of full invoice)
-4. Custom credit note
-5. Show status of stages in SO.
+1. Invoice from two LO.
+2. show return line on payment page. (If we are showing return for an invoice separate line then can user do payment of full invoice)
+3. Custom credit note
+4. Show status of stages in SO.

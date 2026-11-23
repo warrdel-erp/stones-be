@@ -8,6 +8,7 @@ import InventoryProduct from "./inventoryProduct.model";
 import LoadingOrder from "./loadingOrder.model";
 import PackagingList from "./packagingList.model";
 import SalesOrder from "./salesOrder.model";
+import SalesOrderInvoice from "./salesOrderInvoice.model";
 
 import * as decimals from '../helper/decimal';
 
@@ -96,6 +97,16 @@ const SalesOrderProduct = sequelize.define(
       allowNull: true,
       references: {
         model: LoadingOrder,
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    salesOrderInvoiceId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: SalesOrderInvoice,
         key: "id",
       },
       onUpdate: "CASCADE",
