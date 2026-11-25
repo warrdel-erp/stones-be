@@ -10,6 +10,10 @@ type UserAttributes = {
   phone: string;
   clientId: number;
   accountId: number;
+  companyId?: number;
+  roleId?: number;
+  locationScope?: "location" | "company";
+  defaultLocationId?: number;
 };
 
 // Create a new user
@@ -120,6 +124,50 @@ export const findUserById = async (userId: number) => {
         model: models.Account,
         as: "account",
         attributes: ['email']
+      },
+      {
+        model: models.Role,
+        as: "userRole",
+        include: [
+          {
+            model: models.RolePermission,
+            as: "permissions"
+          }
+        ]
+      }
+    ]
+  });
+};
+
+export const findUserByAccountId = async (accountId: number) => {
+  return await models.User.findOne({
+    where: { accountId },
+    attributes: { exclude: ["password"] },
+    include: [
+      {
+        model: models.Client,
+        as: "client",
+        include: [
+          {
+            model: models.Company,
+            as: "company"
+          }
+        ]
+      },
+      {
+        model: models.Account,
+        as: "account",
+        attributes: ['email']
+      },
+      {
+        model: models.Role,
+        as: "userRole",
+        include: [
+          {
+            model: models.RolePermission,
+            as: "permissions"
+          }
+        ]
       }
     ]
   });
@@ -160,7 +208,20 @@ export const getUsersByClientId = async (clientId: number) => {
     include: [
       { model: models.Account, attributes: ['email'], as: "account" },
       { model: models.Location, as: "locations", attributes: ['id', 'locationName'] },
+      { 
+        model: models.Role, 
+        as: "userRole",
+        include: [
+          { model: models.RolePermission, as: "permissions" }
+        ]
+      },
     ]
+  });
+};
+
+export const countUsersByRoleId = async (roleId: number) => {
+  return await models.User.count({
+    where: { roleId },
   });
 };
 

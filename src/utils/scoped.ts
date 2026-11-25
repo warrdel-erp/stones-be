@@ -4,6 +4,7 @@ import { AppError } from "../helper/appError";
 
 export interface ScopeConfig {
   client?: boolean;
+  company?: boolean;
   location?: boolean;
 }
 
@@ -12,18 +13,27 @@ export const buildScope = (model: Model<any, any>) => {
   const config = (model as any).scopeConfig || {};
   const store = requestContext.getStore();
 
-  if (config.client) {
-    if (!store?.clientId) {
-      throw new AppError(`Error in client scope ${(model as any).name}`, 400);
+  if (config.client || config.company) {
+    const tenantId = store?.companyId || store?.clientId;
+    if (!tenantId) {
+      throw new AppError(`Error in tenant scope ${(model as any).name}`, 400);
     }
-    where.clientId = store.clientId;
+    if ((model as any).rawAttributes?.companyId) {
+      where.companyId = tenantId;
+    } else {
+      where.clientId = tenantId;
+    }
   }
 
   if (config.location) {
-    if (!store?.locationId) {
-      throw new AppError('Error in location scope', 400);
+    // If user has 'company' locationScope, they are allowed access across all company locations.
+    // If user has 'location' scope, enforce filtering by their active locationId.
+    if (store?.locationScope !== "company") {
+      if (!store?.locationId) {
+        throw new AppError("Error in location scope", 400);
+      }
+      where.locationId = store.locationId;
     }
-    where.locationId = store.locationId;
   }
 
   return where;
@@ -36,67 +46,70 @@ export const scoped = (model: any) => {
     findAll: (options: any = {}) =>
       model.findAll({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     findOne: (options: any = {}) =>
       model.findOne({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     findByPk: (id: number | string, options: any = {}) =>
       model.findOne({
         ...options,
-        where: { ...baseWhere, ...options.where, id }
+        where: { ...baseWhere, ...options.where, id },
       }),
 
     findAndCountAll: (options: any = {}) =>
       model.findAndCountAll({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     update: (data: any, options: any = {}) =>
       model.update(data, {
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     delete: (options: any = {}) =>
       model.destroy({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     count: (options: any = {}) =>
       model.count({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     destroy: (options: any = {}) =>
       model.destroy({
         ...options,
-        where: { ...baseWhere, ...options.where }
+        where: { ...baseWhere, ...options.where },
       }),
 
     create: (data: any, options: any = {}) =>
-      model.create({
-        ...data,
-        ...(baseWhere || {})
-      }, options),
+      model.create(
+        {
+          ...data,
+          ...(baseWhere || {}),
+        },
+        options
+      ),
 
     bulkCreate: (rows: any[], options = {}) =>
       model.bulkCreate(
-        rows.map(row => ({
+        rows.map((row) => ({
           ...row,
-          ...(baseWhere || {})
+          ...(baseWhere || {}),
         })),
         {
           validate: true,
-          ...options
+          ...options,
         }
-      )
+      ),
   };
 };

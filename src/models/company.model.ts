@@ -73,6 +73,40 @@ const Company = sequelize.define(
             type: DataTypes.FLOAT,
             allowNull: true,
         },
+        qrCode: {
+            type: DataTypes.STRING(36),
+            allowNull: true,
+        },
+        s3FileId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: "s3_files",
+                key: "id",
+            },
+        },
+        userCount: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 10,
+        },
+        defaultPaymentTerms: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        defaultQuotationValidity: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 30,
+        },
+        defaultLocationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: "locations",
+                key: "id",
+            },
+        },
         clientId: {
             type: DataTypes.INTEGER,
             allowNull: false,

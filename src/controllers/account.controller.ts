@@ -8,19 +8,17 @@ import * as clientService from "../services/client.service";
 import * as accountService from "../services/account.service";
 import * as locationService from "../services/location.service";
 
-// Get locations based on account type (user or client)
+// Get locations based on account / user location scope
 export const getAccountLocations = catchAsync(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
         throw new AppError("User not authenticated", 401);
     }
 
     let locations;
-    if (req.user.accountType === "user") {
-        locations = await userService.userLocations(req.user.id);
-    } else if (req.user.accountType === "client") {
+    if (req.user.locationScope === "company" || req.user.accountType === "client") {
         locations = await clientService.getClientLocations(req.user.clientId);
     } else {
-        throw new AppError("Invalid account type", 400);
+        locations = await userService.userLocations(req.user.id);
     }
 
     const withCounts = await locationService.attachInventoryCounts(locations);

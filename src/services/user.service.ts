@@ -26,6 +26,8 @@ type CreateUserByAccountData = {
   clientId: number;
   defaultLocationId?: number;
   role?: string;
+  roleId?: number;
+  locationScope?: "location" | "company";
 };
 
 // Register User
@@ -154,10 +156,13 @@ export const createUserByAccount = async (
         userid: userData.userid,
         phone: userData.phone,
         clientId: userData.clientId,
+        companyId: userData.clientId,
         accountId: account.getDataValue("id"),
         defaultLocationId: userData.defaultLocationId,
         createdById: createdByAccountId,
         role: userData.role || "admin",
+        roleId: userData.roleId || (userData.role === "driver" ? 2 : 1),
+        locationScope: userData.locationScope || (userData.role === "driver" ? "location" : "company"),
       } as any,
       transaction
     );
@@ -365,9 +370,9 @@ export const fetchUserById = async (userId: number) => {
 
 // Check if user has access to given location.
 export const checkUserLocationAccess = async (locationId: number, user: any) => {
-  if (user.accountType === "client") {
+  if (user.locationScope === "company" || user.accountType === "client") {
     const location = await locationRepository.getLocationById(locationId, user.clientId);
-    if (!location) throw new AppError("Location does not belong to this client", 400);
+    if (!location) throw new AppError("Location does not belong to this company", 400);
   } else {
     const userHasLocation = await userRepository.doesUserHaveLocation(Number(locationId), user.id);
     if (!userHasLocation) throw new AppError("User does not have access to given location", 400);

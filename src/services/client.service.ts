@@ -19,6 +19,7 @@ import * as locationRepository from "../repositories/location.repository";
 import * as serviceRepository from "../repositories/service.repository";
 import * as serviceCategoryRepository from "../repositories/serviceCategory.repository";
 import * as warehouseRepository from "../repositories/warehouse.repository";
+import * as userRepository from "../repositories/user.repository";
 import * as accountService from "./account.service";
 
 type ClientRegistrationData = {
@@ -116,6 +117,28 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
 
       // Update client defaultLocationId
       await client.update({ defaultLocationId: createdLocation.getDataValue('id') }, { transaction });
+
+      // Create primary admin User for the company
+      const primaryUser: any = await userRepository.createUser(
+        {
+          username: `${clientDetails.firstName} ${clientDetails.lastName}`,
+          userid: clientDetails.phone || `admin_${client.getDataValue("id")}`,
+          phone: clientDetails.phone,
+          clientId: client.getDataValue("id"),
+          companyId: client.getDataValue("id"),
+          accountId: account.getDataValue("id"),
+          defaultLocationId: createdLocation.getDataValue("id"),
+          roleId: 1, // System Company Admin Role
+          locationScope: "company",
+          role: "admin",
+        } as any,
+        transaction
+      );
+
+      // Assign location to primary user
+      if (primaryUser?.id) {
+        await userRepository.addUserLocation(primaryUser.id, createdLocation.getDataValue('id'));
+      }
 
       // Create default ledger accounts for the client within transaction
       const createdLedgerAccounts = await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);

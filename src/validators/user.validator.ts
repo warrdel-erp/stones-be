@@ -29,6 +29,20 @@ export const createUserByAccountSchema = z.object({
     defaultLocationId: z.number({
         invalid_type_error: 'Default Location ID must be a number',
     }).int('Default Location ID must be an integer').positive('Default Location ID must be positive').optional(),
+
+    roleId: z.number().int().positive().optional(),
+    role: z.string().optional(),
+    locationScope: z.enum(['location', 'company']).optional(),
+});
+
+export const updateUserSchema = z.object({
+    username: z.string().trim().min(1, 'Username cannot be empty').optional(),
+    userid: z.string().trim().min(1, 'User ID cannot be empty').optional(),
+    phone: z.string().trim().min(1, 'Phone cannot be empty').optional(),
+    roleId: z.number().int().positive().optional(),
+    role: z.string().optional(),
+    locationScope: z.enum(['location', 'company']).optional(),
+    defaultLocationId: z.number().int().positive().optional(),
 });
 
 export type CreateUserByAccountInput = z.infer<typeof createUserByAccountSchema>;

@@ -65,6 +65,8 @@ import GuestSelection from "./guestSelection.model";
 import GuestSelectionItem from "./guestSelectionItem.model";
 import TempAiExtractedSiplItem from "./tempAiExtractedSiplItem.model";
 import AccountPermission from "./AccountPermission.model";
+import Role from "./role.model";
+import RolePermission from "./rolePermission.model";
 import TermsCondition from "./termsCondition.model";
 import VendorContact from "./vendorContact.model";
 import WiringInstruction from "./wiringInstruction.model";
@@ -119,6 +121,19 @@ User.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 // User-AccountPermission relation
 Account.hasMany(AccountPermission, { foreignKey: "accountId", as: "permissions" });
 AccountPermission.belongsTo(Account, { foreignKey: "accountId", as: "account" });
+
+// Role & RolePermission associations
+Role.hasMany(RolePermission, { foreignKey: "roleId", as: "permissions" });
+RolePermission.belongsTo(Role, { foreignKey: "roleId", as: "role" });
+
+// User-Role association
+User.belongsTo(Role, { foreignKey: "roleId", as: "userRole" });
+Role.hasMany(User, { foreignKey: "roleId", as: "users" });
+
+// Company associations
+Company.belongsTo(Location, { foreignKey: "defaultLocationId", as: "defaultLocation" });
+Company.belongsTo(S3File, { foreignKey: "s3FileId", as: "logo" });
+Company.hasMany(User, { foreignKey: "companyId", as: "companyUsers" });
 
 // Define associations
 User.belongsTo(Account, { foreignKey: 'accountId', as: 'account' });
@@ -1217,4 +1232,6 @@ export {
   SalesOrderRequirementLine,
   ModelSequence,
   DocumentNumberingConfig,
+  Role,
+  RolePermission,
 };

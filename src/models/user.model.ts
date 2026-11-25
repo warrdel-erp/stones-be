@@ -72,8 +72,27 @@ const User = sequelize.define(
     },
     role: {
       type: DataTypes.ENUM(...Object.values(USER_ROLES)),
-      allowNull: false,
+      allowNull: true,
       defaultValue: USER_ROLES.ADMIN,
+    },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "roles",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    locationScope: {
+      type: DataTypes.ENUM("location", "company"),
+      allowNull: false,
+      defaultValue: "location",
+    },
+    companyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
