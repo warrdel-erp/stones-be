@@ -105,6 +105,16 @@ export const registerClientSchema = z.object({
       invalid_type_error: "Email must be a string",
     }).email("Please provide a valid email address"),
   }),
+  ledgerAccounts: z.array(z.object({
+    key: z.string(),
+    name: z.string().optional(),
+    openingBalance: z.union([z.number(), z.string()]).optional().transform((val) => {
+      if (val === undefined || val === null || val === "") return 0;
+      const num = Number(val);
+      return isNaN(num) ? 0 : num;
+    }),
+    openingDate: z.union([z.string(), z.date()]).optional(),
+  })).optional(),
 });
 
 export type RegisterClientInput = z.infer<typeof registerClientSchema>;

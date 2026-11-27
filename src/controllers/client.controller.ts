@@ -8,6 +8,11 @@ export const registerClientHandler = catchAsync(async (req: Request, res: Respon
   SuccessResponse(res, 201, "Client registered successfully", client);
 });
 
+export const getDefaultLedgerAccountsTemplateHandler = catchAsync(async (_req: Request, res: Response) => {
+  const accounts = clientService.getDefaultLedgerAccountsTemplate();
+  SuccessResponse(res, 200, "Default ledger accounts retrieved successfully", accounts);
+});
+
 /**
  * Controller to get all clients with pagination.
  * Supports optional search filtering.

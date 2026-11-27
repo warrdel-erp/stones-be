@@ -1,6 +1,7 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../config/database";
 import {
+  COA_HEADERS,
   COA_SUB_HEADERS,
   DEFAULT_LEDGER_ACCOUNT_KEYS,
   FREIGHT_BILL_ACCOUNT_KEYS,
@@ -53,6 +54,12 @@ type ClientRegistrationData = {
     contactMobile: string;
     email: string;
   };
+  ledgerAccounts?: Array<{
+    key: string;
+    name?: string;
+    openingBalance?: number;
+    openingDate?: Date | string;
+  }>;
 };
 
 /**
@@ -141,7 +148,11 @@ export const registerClient = async (clientData: ClientRegistrationData) => {
       }
 
       // Create default ledger accounts for the client within transaction
-      const createdLedgerAccounts = await createDefaultLedgerAccountsForClient(client.getDataValue('id'), transaction);
+      const createdLedgerAccounts = await createDefaultLedgerAccountsForClient(
+        client.getDataValue('id'),
+        clientData.ledgerAccounts,
+        transaction
+      );
 
       // Create default service categories and services (including Delivery Services linked to Delivery Charges Revenue)
       await createDefaultServicesForClient(client.getDataValue('id'), createdLedgerAccounts, transaction);
@@ -185,238 +196,212 @@ export const getClientById = async (id: number) => {
   return client;
 };
 
-const createDefaultLedgerAccountsForClient = async (clientId: number, transaction: Transaction) => {
-  const data = [
+export const getDefaultLedgerAccountsTemplate = () => {
+  const definitions = [
     {
       name: "Freight-In",
-      clientId,
       key: FREIGHT_BILL_ACCOUNT_KEYS.FREIGHT_IN,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "freight_expense")?.id!,
+      subHeaderKey: "freight_expense",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Brokerage Charges",
-      clientId,
       key: FREIGHT_BILL_ACCOUNT_KEYS.BROKERAGE_CHARGES,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "customs_fees_and_duty")?.id!,
+      subHeaderKey: "customs_fees_and_duty",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
-      name: "Inventory Int Transit",
-      clientId,
+      name: "Inventory In Transit",
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_IN_TRANSIT,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "in_transit")?.id!,
+      subHeaderKey: "in_transit",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Finished Goods",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.FINISHED_GOODS,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "merchandise")?.id!,
+      subHeaderKey: "merchandise",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Cash Bank",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.CASH_BANK,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "cash_and_cash_equivalents")?.id!,
+      subHeaderKey: "cash_and_cash_equivalents",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "COGS",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.COGS,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "cost_of_goods_and_services_sold")?.id!,
+      subHeaderKey: "cost_of_goods_and_services_sold",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Goods Sold",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_SOLD,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "goods")?.id!,
+      subHeaderKey: "goods",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "State Tax",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.STATE_TAX,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "tax_payables")?.id!,
+      subHeaderKey: "tax_payables",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "County Tax",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.COUNTY_TAX,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "tax_payables")?.id!,
+      subHeaderKey: "tax_payables",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Default Service Account",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.DEFAULT_SERVICE_ACCOUNT,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "services_5_1")?.id!,
+      subHeaderKey: "services_5_1",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Account Receivable",
-      clientId,
       key: "account_receivable",
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "accounts_notes_loans_receivable")?.id!,
+      subHeaderKey: "accounts_notes_loans_receivable",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Account Payables",
-      clientId,
       key: "account_payables",
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "trade_payables")?.id!,
+      subHeaderKey: "trade_payables",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Sales Discounts",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_DISCOUNTS,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "variable_consideration")?.id!,
+      subHeaderKey: "variable_consideration",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Sales Returns & Allowances",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.SALES_RETURNS_AND_ALLOWANCES,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "variable_consideration")?.id!,
+      subHeaderKey: "variable_consideration",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Customer Advances",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_ADVANCES,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "deferred_income_refund_liabilities")?.id!,
+      subHeaderKey: "deferred_income_refund_liabilities",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Customer Refund Payable",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.CUSTOMER_REFUND_PAYABLE,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "deferred_income_refund_liabilities")?.id!,
+      subHeaderKey: "deferred_income_refund_liabilities",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Delivery Charges Revenue",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.DELIVERY_CHARGES_REVENUE,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "services_4_1")?.id!,
+      subHeaderKey: "services_4_1",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Bad Debt Expense",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.BAD_DEBT_EXPENSE,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "uncollectible_accounts_expense_reversal")?.id!,
+      subHeaderKey: "uncollectible_accounts_expense_reversal",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Goods Received Not Invoiced (GRNI)",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.GOODS_RECEIVED_NOT_INVOICED,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "other_accounts_payable_accrued_liabilities")?.id!,
+      subHeaderKey: "other_accounts_payable_accrued_liabilities",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Accounts Payable Write-off Income",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.ACCOUNTS_PAYABLE_WRITE_OFF_INCOME,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "other_revenue")?.id!,
+      subHeaderKey: "other_revenue",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Inventory Adjustment Gain",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_GAIN,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "inventory_gain_and_loss")?.id!,
+      subHeaderKey: "inventory_gain_and_loss",
       type: LEDGER_ACCOUNT_TYPES.CREDIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Inventory Adjustment Loss",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.INVENTORY_ADJUSTMENT_LOSS,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "inventory_gain_and_loss")?.id!,
+      subHeaderKey: "inventory_gain_and_loss",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Landed Cost Clearing",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.LANDED_COST_CLEARING,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "additional_assets")?.id!,
+      subHeaderKey: "additional_assets",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Outward Freight Expense",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.OUTWARD_FREIGHT_EXPENSE,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "selling_general_administrative_expense")?.id!,
+      subHeaderKey: "selling_general_administrative_expense",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
     {
       name: "Payment Clearing",
-      clientId,
       key: DEFAULT_LEDGER_ACCOUNT_KEYS.PAYMENT_CLEARING,
-      subHeaderId: COA_SUB_HEADERS.find((e) => e.key == "cash_and_cash_equivalents")?.id!,
+      subHeaderKey: "cash_and_cash_equivalents",
       type: LEDGER_ACCOUNT_TYPES.DEBIT,
-      openingBalance: 0,
-      openingDate: new Date(),
     },
   ];
 
+  return definitions.map((item) => {
+    const subHeader = COA_SUB_HEADERS.find((e) => e.key === item.subHeaderKey);
+    const header = subHeader ? COA_HEADERS.find((h) => h.id === Number(subHeader.parent_id)) : null;
+    return {
+      key: item.key,
+      name: item.name,
+      subHeaderId: subHeader?.id,
+      subHeaderName: subHeader?.name || "",
+      headerName: header?.name || "",
+      type: item.type,
+      defaultOpeningBalance: 0,
+    };
+  });
+};
+
+const createDefaultLedgerAccountsForClient = async (
+  clientId: number,
+  clientAccounts: Array<{ key: string; name?: string; openingBalance?: number; openingDate?: Date | string }> = [],
+  transaction: Transaction
+) => {
+  const accountOpeningMap = new Map<string, { openingBalance?: number; openingDate?: Date | string; name?: string }>();
+  if (Array.isArray(clientAccounts)) {
+    for (const acc of clientAccounts) {
+      if (acc && acc.key) {
+        accountOpeningMap.set(acc.key, acc);
+      }
+    }
+  }
+
+  const template = getDefaultLedgerAccountsTemplate();
   const createdAccounts: any[] = [];
-  for (const account of data) {
-    const createdAccount = await ledgerAccountRepository.createLedgerAccount(account, transaction);
+
+  for (const item of template) {
+    const custom = accountOpeningMap.get(item.key);
+    const openingBalance =
+      custom?.openingBalance !== undefined && custom?.openingBalance !== null
+        ? Number(custom.openingBalance)
+        : 0;
+    const openingDate = custom?.openingDate ? new Date(custom.openingDate) : new Date();
+    const name = custom?.name && custom.name.trim() ? custom.name.trim() : item.name;
+
+    const accountData = {
+      name,
+      clientId,
+      key: item.key,
+      subHeaderId: item.subHeaderId!,
+      type: item.type,
+      openingBalance: isNaN(openingBalance) ? 0 : openingBalance,
+      openingDate: isNaN(openingDate.getTime()) ? new Date() : openingDate,
+    };
+
+    const createdAccount = await ledgerAccountRepository.createLedgerAccount(accountData, transaction);
     createdAccounts.push(createdAccount);
   }
 

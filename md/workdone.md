@@ -1301,3 +1301,4 @@ questions---
 18. Billing is not showing invoices in SO.
 19. Default trade service charges at SO level copied automatically to LO and PL.
 20. Service charge as per SO.
+21. New design

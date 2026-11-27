@@ -9,6 +9,9 @@ const router = Router();
 // Route to register a new client
 router.post("/register", validateRequest(registerClientSchema), clientController.registerClientHandler);
 
+// Public route to get default ledger accounts template
+router.get("/default-ledger-accounts", clientController.getDefaultLedgerAccountsTemplateHandler);
+
 // Get all clients with pagination and optional search filtering
 router.get("/", clientController.getClients);
 
